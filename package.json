@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "description": "NexTech Systems Enterprise E-Commerce Platform",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
-    "build": "node -e \"const { execSync } = require('child_process'), fs = require('fs'); if (fs.existsSync('frontend')) { execSync('npm --prefix frontend run build', { stdio: 'inherit' }); } else { execSync('npx next build', { stdio: 'inherit' }); }\"",
-    "start": "node -e \"const { execSync } = require('child_process'), fs = require('fs'); if (fs.existsSync('frontend')) { execSync('npm --prefix frontend start', { stdio: 'inherit' }); } else { execSync('npx next start', { stdio: 'inherit' }); }\"",
-    "dev": "node -e \"const { execSync } = require('child_process'), fs = require('fs'); if (fs.existsSync('frontend')) { execSync('npm --prefix frontend run dev', { stdio: 'inherit' }); } else { execSync('npx next dev', { stdio: 'inherit' }); }\"",
-    "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npm run build",
-    "test:backend": "cd backend && npm test"
+    "dev": "npm --workspace=frontend run dev",
+    "build": "npm --workspace=frontend run build",
+    "start": "npm --workspace=frontend run start",
+    "lint": "npm --workspace=frontend run lint"
+  },
+  "engines": {
+    "node": ">=18.18.0"
   }
 }
