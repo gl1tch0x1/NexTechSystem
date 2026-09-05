@@ -1,0 +1,16 @@
+{
+  "name": "nextech-systems",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NexTech Systems Enterprise E-Commerce Platform",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test:backend": "cd backend && npm test",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start"
+  }
+}

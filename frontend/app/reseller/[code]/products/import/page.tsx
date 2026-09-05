@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { ApiClient } from '@/lib/api-client';
+import { ApiClient, getApiUrl } from '@/lib/api-client';
 import { ProductImportPreviewResponse, ProductImportRow } from '@/types';
 import {
   FileSpreadsheet,
@@ -92,7 +92,7 @@ export default function ResellerProductImportPage() {
   };
 
   const handleDownloadTemplate = () => {
-    window.open('http://localhost:5000/api/reseller/template/download', '_blank');
+    window.open(getApiUrl('/reseller/template/download'), '_blank');
   };
 
   return (

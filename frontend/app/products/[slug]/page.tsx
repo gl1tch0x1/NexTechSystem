@@ -6,6 +6,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { ProductDetailClient } from './ProductDetailClient';
 import { ShieldCheck, Truck, RotateCcw, Cpu, CheckCircle2, Store, Star } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { getApiUrl } from '@/lib/api-client';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -17,7 +18,7 @@ async function getProductData(slug: string): Promise<{
   relatedProducts: Product[];
 }> {
   try {
-    const res = await fetch(`http://localhost:5000/api/products/${slug}`, { cache: 'no-store' });
+    const res = await fetch(getApiUrl(`/products/${slug}`), { cache: 'no-store' });
     if (!res.ok) return { product: null, reviews: [], relatedProducts: [] };
     const json = await res.json();
     return json.data || { product: null, reviews: [], relatedProducts: [] };

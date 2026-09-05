@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Product, Category, Brand } from '@/types';
 import { Filter, SlidersHorizontal, ArrowUpDown, Search, RotateCcw } from 'lucide-react';
+import { getApiUrl } from '@/lib/api-client';
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -25,13 +26,13 @@ async function getProductsData(params: Record<string, any>) {
       if (v) qs.append(k, v);
     }
 
-    const res = await fetch(`http://localhost:5000/api/products?${qs.toString()}`, { cache: 'no-store' });
+    const res = await fetch(getApiUrl(`/products?${qs.toString()}`), { cache: 'no-store' });
     const json = await res.json();
 
-    const catRes = await fetch('http://localhost:5000/api/products/categories', { next: { revalidate: 60 } });
+    const catRes = await fetch(getApiUrl('/products/categories'), { next: { revalidate: 60 } });
     const catJson = await catRes.json();
 
-    const brandRes = await fetch('http://localhost:5000/api/products/brands', { next: { revalidate: 60 } });
+    const brandRes = await fetch(getApiUrl('/products/brands'), { next: { revalidate: 60 } });
     const brandJson = await brandRes.json();
 
     return {

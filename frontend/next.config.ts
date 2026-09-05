@@ -18,6 +18,18 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb'
     }
   },
+  async rewrites() {
+    const proxyTarget = process.env.API_PROXY_TARGET;
+    if (proxyTarget) {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${proxyTarget.replace(/\/$/, '')}/api/:path*`,
+        },
+      ];
+    }
+    return [];
+  },
   async headers() {
     return [
       {

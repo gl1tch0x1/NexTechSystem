@@ -1,5 +1,6 @@
 import { Product } from '@/types';
 import { formatPrice } from './utils';
+import { getApiUrl } from './api-client';
 
 export interface ChatMessage {
   id: string;
@@ -13,7 +14,7 @@ let liveCatalogCache: Product[] = [];
 
 export async function fetchLiveCatalog(): Promise<Product[]> {
   try {
-    const res = await fetch('http://localhost:5000/api/products?limit=100', { cache: 'no-store' });
+    const res = await fetch(getApiUrl('/products?limit=100'), { cache: 'no-store' });
     const data = await res.json();
     if (data && Array.isArray(data.data)) {
       liveCatalogCache = data.data;

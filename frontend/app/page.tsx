@@ -10,6 +10,7 @@ import { LiveStatsAndBenchmarks } from '@/components/home/LiveStatsAndBenchmarks
 import { EnterpriseBentoGrid } from '@/components/home/EnterpriseBentoGrid';
 import { TaxonomyExplorer } from '@/components/home/TaxonomyExplorer';
 import { ClientTestimonials } from '@/components/home/ClientTestimonials';
+import { getApiUrl } from '@/lib/api-client';
 
 async function getHomeData(): Promise<{
   products: Product[];
@@ -19,10 +20,10 @@ async function getHomeData(): Promise<{
 }> {
   try {
     const [resProd, resCat, resBrand, resContent] = await Promise.allSettled([
-      fetch('http://localhost:5000/api/products?limit=50', { cache: 'no-store' }),
-      fetch('http://localhost:5000/api/products/categories', { cache: 'no-store' }),
-      fetch('http://localhost:5000/api/products/brands', { cache: 'no-store' }),
-      fetch('http://localhost:5000/api/content/homepage', { cache: 'no-store' })
+      fetch(getApiUrl('/products?limit=50'), { cache: 'no-store' }),
+      fetch(getApiUrl('/products/categories'), { cache: 'no-store' }),
+      fetch(getApiUrl('/products/brands'), { cache: 'no-store' }),
+      fetch(getApiUrl('/content/homepage'), { cache: 'no-store' })
     ]);
 
     let products: Product[] = [];
