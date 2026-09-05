@@ -73,12 +73,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(res.token);
       setUser(res.user);
 
-      // 2. Synchronize Cloud Firebase Authentication session
-      try {
-        await signInWithEmailAndPassword(firebaseAuth, email, password);
-      } catch (fbErr: any) {
-        if (fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') {
-          await createUserWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
+      // 2. Synchronize Cloud Firebase Authentication session (if configured)
+      if (firebaseAuth && firebaseAuth.app) {
+        try {
+          await signInWithEmailAndPassword(firebaseAuth, email, password);
+        } catch (fbErr: any) {
+          if (fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') {
+            await createUserWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
+          }
         }
       }
 
@@ -105,12 +107,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(res.token);
       setUser(res.user);
 
-      // 2. Register in Cloud Firebase Authentication
-      try {
-        await createUserWithEmailAndPassword(firebaseAuth, email, password);
-      } catch (fbErr: any) {
-        if (fbErr.code === 'auth/email-already-in-use') {
-          await signInWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
+      // 2. Register in Cloud Firebase Authentication (if configured)
+      if (firebaseAuth && firebaseAuth.app) {
+        try {
+          await createUserWithEmailAndPassword(firebaseAuth, email, password);
+        } catch (fbErr: any) {
+          if (fbErr.code === 'auth/email-already-in-use') {
+            await signInWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
+          }
         }
       }
 
@@ -124,6 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async (): Promise<{ user: User; reseller: Reseller | null }> => {
     setIsLoading(true);
     try {
+      if (!firebaseAuth || !firebaseAuth.app) {
+        throw new Error('Google Sign-In requires active Firebase configuration.');
+      }
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       const fbResult = await signInWithPopup(firebaseAuth, provider);
@@ -153,7 +160,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
     setReseller(null);
-    firebaseSignOut(firebaseAuth).catch(() => {});
+    if (firebaseAuth && firebaseAuth.app) {
+      firebaseSignOut(firebaseAuth).catch(() => {});
+    }
   };
 
   const refreshUser = async () => {
