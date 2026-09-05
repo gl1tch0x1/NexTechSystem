@@ -4,12 +4,18 @@
   "private": true,
   "description": "NexTech Systems Enterprise E-Commerce Platform",
   "workspaces": [
-    "frontend"
+    "frontend",
+    "backend"
   ],
   "scripts": {
     "dev": "npm --workspace=frontend run dev",
+    "dev:frontend": "npm --workspace=frontend run dev",
+    "dev:backend": "npm --workspace=backend run dev",
     "build": "npm --workspace=frontend run build",
+    "build:frontend": "npm --workspace=frontend run build",
+    "build:backend": "npm --workspace=backend run build",
     "start": "npm --workspace=frontend run start",
+    "test:backend": "npm --workspace=backend test",
     "lint": "npm --workspace=frontend run lint"
   },
   "engines": {
