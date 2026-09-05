@@ -1,0 +1,26 @@
+[
+  {
+    "id": "banner_hero_1",
+    "title": "Power Your Enterprise Next Move",
+    "subtitle": "High-Performance Workstations, Rack Servers & Next-Gen RTX 4090 Systems engineered for extreme compute.",
+    "linkUrl": "/products?category=components",
+    "buttonText": "Explore Hardware",
+    "imageUrl": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80",
+    "badge": "Enterprise Grade Hardware",
+    "position": "HERO",
+    "order": 1,
+    "isActive": true
+  },
+  {
+    "id": "banner_promo_builder",
+    "title": "Custom PC Builder Matrix",
+    "subtitle": "Real-time CPU socket, DDR memory & PSU wattage validation. Design your dream rig with 100% verified compatibility.",
+    "linkUrl": "/pc-builder",
+    "buttonText": "Launch PC Builder",
+    "imageUrl": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1200&q=80",
+    "badge": "Real-Time Hardware Verification",
+    "position": "PROMO_SECTION",
+    "order": 2,
+    "isActive": true
+  }
+]

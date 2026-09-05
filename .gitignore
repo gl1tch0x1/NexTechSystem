@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Next.js & TypeScript build outputs
+.next/
+*/.next/
+out/
+build/
+dist/
+*/dist/
+*.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+
+# Environment and secrets (Never commit secrets)
+.env
+.env.*
+!.env.example
+*.env
+*.env.local
+.env.local
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+!frontend/.env.example
+backend/.env
+backend/.env.local
+backend/.env.*.local
+!backend/.env.example
+
+# Logs and debug files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor and OS files
+.vscode/
+*/.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch and temporary testing artifacts
+scratch/
+coverage/

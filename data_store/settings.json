@@ -1,0 +1,17 @@
+[
+  {
+    "id": "global_settings",
+    "storeName": "NexTech Systems",
+    "supportEmail": "support@nextechsystems.ae",
+    "supportPhone": "+971 4 800 6398",
+    "defaultCurrency": "AED",
+    "currencySymbol": "AED",
+    "taxRate": 5,
+    "standardShippingFee": 25,
+    "freeShippingThreshold": 500,
+    "address": "NexTech Systems Tower, Silicon Oasis Tech Park, Dubai, UAE",
+    "taxRegistrationNumber": "TRN-100294819200003",
+    "announcementText": "GCC EXPRESS DISPATCH: Free Insured Shipping on Workstations, CPUs & Servers over AED 500",
+    "isAnnouncementActive": true
+  }
+]

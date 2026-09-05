@@ -1,0 +1,64 @@
+[
+  {
+    "id": "feat_logistics",
+    "title": "Insured Regional Express Dispatch & Real-Time Tracking",
+    "subtitle": "Insured GCC Freight",
+    "description": "Complimentary insured delivery on all hardware orders exceeding AED 500. Same-day dispatch across Dubai & Abu Dhabi, with guaranteed 24-48 hour regional express transit to Riyadh, Doha, Kuwait, Muscat, and Manama.",
+    "tag": "⚡ GCC EXPRESS LOGISTICS",
+    "iconName": "Truck",
+    "gridSpan": 7,
+    "stats": [
+      {
+        "label": "Zero-Loss Protection",
+        "value": "100% Insured"
+      },
+      {
+        "label": "UAE Direct Hubs",
+        "value": "Same-Day"
+      },
+      {
+        "label": "GPS Route Tracking",
+        "value": "Real-Time"
+      }
+    ],
+    "order": 1,
+    "isActive": true
+  },
+  {
+    "id": "feat_credit",
+    "title": "Net-30 Enterprise Credit & Digital Wallet Settlement",
+    "subtitle": "Corporate Billing",
+    "description": "Streamlined procurement for system integrators with automated Zakat/VAT compliant invoices, escrow settlement, and instant wallet balance margin top-ups.",
+    "tag": "💼 RESELLER TERMS",
+    "iconName": "CreditCard",
+    "gridSpan": 5,
+    "ctaText": "Apply for Enterprise Terms",
+    "ctaLink": "/auth",
+    "order": 2,
+    "isActive": true
+  },
+  {
+    "id": "feat_stress_test",
+    "title": "24-Hour Prime95 & FurMark Thermal Burn-In",
+    "subtitle": "Quality Assurance",
+    "description": "Every assembled workstation and rack server node undergoes sustained load testing to verify VRM thermal efficiency and eliminate hardware defects before handover.",
+    "tag": "🔥 24H TORTURE TEST",
+    "iconName": "Flame",
+    "gridSpan": 5,
+    "statusBadge": "Certified Stable (0.02% Failure Rate)",
+    "order": 3,
+    "isActive": true
+  },
+  {
+    "id": "feat_ai_specialist",
+    "title": "Enterprise AI Hardware Specialist & Live Technical Support",
+    "subtitle": "AI Engineering",
+    "description": "Calculate PCIe lane distribution, check cooler clearances, or verify DDR5 ECC memory timings instantly with our datasheet-trained assistant and senior hardware engineering staff.",
+    "tag": "🤖 24/7 AI SPECIALIST",
+    "iconName": "Bot",
+    "gridSpan": 7,
+    "statusBadge": "Sub-second Datasheet Lookup • AI Engine Online",
+    "order": 4,
+    "isActive": true
+  }
+]

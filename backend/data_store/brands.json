@@ -1,0 +1,74 @@
+[
+  {
+    "id": "brand_asus",
+    "name": "ASUS",
+    "slug": "asus",
+    "logo": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 6
+  },
+  {
+    "id": "brand_intel",
+    "name": "Intel",
+    "slug": "intel",
+    "logo": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_amd",
+    "name": "AMD",
+    "slug": "amd",
+    "logo": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_nvidia",
+    "name": "NVIDIA",
+    "slug": "nvidia",
+    "logo": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "brand_dell",
+    "name": "Dell Technologies",
+    "slug": "dell",
+    "logo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_corsair",
+    "name": "Corsair",
+    "slug": "corsair",
+    "logo": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_samsung",
+    "name": "Samsung Semiconductor",
+    "slug": "samsung",
+    "logo": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "brand_cisco",
+    "name": "Cisco Systems",
+    "slug": "cisco",
+    "logo": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "brand_lenovo",
+    "name": "Lenovo",
+    "slug": "lenovo",
+    "logo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 3
+  }
+]

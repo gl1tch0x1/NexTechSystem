@@ -1,0 +1,27 @@
+[
+  {
+    "id": "user_admin_1",
+    "email": "admin@nextech.com",
+    "role": "ADMIN",
+    "name": "Chief Systems Architect",
+    "username": "admin",
+    "phone": "+971 50 111 2222",
+    "addresses": [
+      {
+        "id": "addr_adm_1",
+        "fullName": "NexTech Admin HQ",
+        "phone": "+971 50 111 2222",
+        "addressLine1": "Silicon Oasis Tech Tower, Suite 400",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "00000",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T15:49:40.808Z",
+    "updatedAt": "2026-09-04T15:49:40.809Z"
+  }
+]

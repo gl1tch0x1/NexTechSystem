@@ -1,0 +1,631 @@
+[
+  {
+    "id": "user_admin_1",
+    "email": "admin@nextech.com",
+    "role": "ADMIN",
+    "name": "Chief Systems Architect",
+    "username": "admin",
+    "phone": "+971 50 111 2222",
+    "addresses": [
+      {
+        "id": "addr_adm_1",
+        "fullName": "NexTech Admin HQ",
+        "phone": "+971 50 111 2222",
+        "addressLine1": "Silicon Oasis Tech Tower, Suite 400",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "00000",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-02T09:00:43.065Z",
+    "updatedAt": "2026-09-05T09:02:57.233Z",
+    "lastLoginAt": "2026-09-05T09:02:57.232Z"
+  },
+  {
+    "id": "user_reseller_1",
+    "email": "reseller@comnet.com",
+    "role": "RESELLER",
+    "name": "ComNet Solutions Dubai",
+    "username": "comnet101",
+    "phone": "+971 55 987 6543",
+    "resellerId": "reseller_comnet_101",
+    "addresses": [
+      {
+        "id": "addr_res_1",
+        "fullName": "ComNet Distribution Center",
+        "phone": "+971 55 987 6543",
+        "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "11223",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-02T09:00:43.066Z",
+    "updatedAt": "2026-09-05T09:02:57.452Z",
+    "lastLoginAt": "2026-09-05T09:02:57.452Z"
+  },
+  {
+    "id": "user_customer_1",
+    "email": "alex.morgan@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "id": "addr_cust_1",
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-02T09:00:43.066Z",
+    "updatedAt": "2026-09-05T06:41:43.821Z",
+    "lastLoginAt": "2026-09-03T12:59:30.446Z"
+  },
+  {
+    "id": "user_6c0127d6-56ff-44e7-9d91-ccf7075ee74e",
+    "email": "alex.morgan_699448@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_699448",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_1d9b7c8a-39cf-46e7-a291-175f3d28aec6",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T14:04:59.459Z",
+    "updatedAt": "2026-09-04T14:04:59.459Z"
+  },
+  {
+    "id": "user_1d699bc8-6a5e-4ba8-a598-5f885daaaf50",
+    "email": "alex.morgan_876343@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_876343",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_9ca79907-fb4c-46b1-a7f5-4a210c92deba",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T14:07:56.355Z",
+    "updatedAt": "2026-09-04T14:07:56.355Z"
+  },
+  {
+    "id": "user_dd7c0f8b-2eac-4bbe-b7ed-b74df179d7b3",
+    "email": "alex.morgan_961881@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_961881",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_db07b6ff-ec37-4922-84e3-e3319f7e5628",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T14:09:21.896Z",
+    "updatedAt": "2026-09-04T14:09:21.896Z"
+  },
+  {
+    "id": "user_7f4c9cb5-5b22-4b0a-805a-777293d2a074",
+    "email": "alex.morgan_472102@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_472102",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_b62f2fd7-9c7e-4aa0-a95e-390eceecd2f4",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T14:17:52.118Z",
+    "updatedAt": "2026-09-04T14:17:52.118Z"
+  },
+  {
+    "id": "user_a3ea73ed-194b-4594-ab19-5d7c62538a75",
+    "email": "alex.morgan_651918@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_651918",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_438cfef5-2754-4f8e-80a5-e7a72f1324a7",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T14:37:32.022Z",
+    "updatedAt": "2026-09-04T14:37:32.022Z"
+  },
+  {
+    "id": "user_b64bbace-b0f8-418f-bf0f-59cd65d48822",
+    "email": "alex.morgan_324420@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_324420",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_1332e061-b6ca-49dc-aa61-1f376a3ede6b",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T14:48:44.477Z",
+    "updatedAt": "2026-09-04T14:48:44.477Z"
+  },
+  {
+    "id": "user_84c83c57-c1f9-4f8d-b996-33818be82e14",
+    "email": "alex.morgan_841626@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_841626",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_04b1ccde-1268-42ec-9c73-f6bc7d73ac35",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T15:14:01.723Z",
+    "updatedAt": "2026-09-04T15:14:01.723Z"
+  },
+  {
+    "id": "user_77eaa955-e42d-413c-8ea9-9c8a4af8728e",
+    "email": "alex.morgan_314766@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_314766",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_20cb9bc6-aa49-483c-8b45-49d9a01f878d",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T15:38:34.820Z",
+    "updatedAt": "2026-09-04T15:38:34.820Z"
+  },
+  {
+    "id": "user_e1151215-6ec8-4c56-b7cf-18496248a8eb",
+    "email": "alex.morgan_546474@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_546474",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_2eca8891-3258-427c-8e87-2ede7bd15cb9",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T15:59:06.499Z",
+    "updatedAt": "2026-09-04T15:59:06.499Z"
+  },
+  {
+    "id": "user_7dd5f1b9-ae93-499b-aff3-f3258b38de0c",
+    "email": "alex.morgan_567076@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_567076",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_d9b45af2-1a84-4470-b352-42a64d552a29",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T15:59:27.085Z",
+    "updatedAt": "2026-09-04T15:59:27.085Z"
+  },
+  {
+    "id": "user_df57cd25-6890-434e-99d5-6cb1967de8e3",
+    "email": "alex.morgan_590468@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_590468",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_a7ebebc5-6b2d-4256-8836-9b495917aacb",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T15:59:50.507Z",
+    "updatedAt": "2026-09-04T15:59:50.507Z"
+  },
+  {
+    "id": "user_58bcedf4-5578-475f-a28d-fdc647711426",
+    "email": "alex.morgan_899628@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_899628",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_c6ba30d0-8c50-4a54-a1fa-c9f9eaaaef2a",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T16:04:59.649Z",
+    "updatedAt": "2026-09-04T16:04:59.649Z"
+  },
+  {
+    "id": "user_d9c317ba-17b0-4bc7-b04a-54a8bac6619c",
+    "email": "alex.morgan_113441@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_113441",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_d051ea6c-0a19-4729-807f-54df4baa4b1b",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T16:25:13.467Z",
+    "updatedAt": "2026-09-04T16:25:13.467Z"
+  },
+  {
+    "id": "user_65a69757-364f-4b38-b3ea-b526e5222398",
+    "email": "alex.morgan_131757@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_131757",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_8957b565-ad18-4ae0-936b-412416b6d13d",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T16:25:31.762Z",
+    "updatedAt": "2026-09-04T16:25:31.762Z"
+  },
+  {
+    "id": "user_b6ceb68a-8dcb-4354-bc70-ad07efb986b2",
+    "email": "alex.morgan_275796@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_275796",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_34d83975-9e35-4a3d-935b-66acd0c5629d",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T16:44:35.967Z",
+    "updatedAt": "2026-09-04T16:44:35.967Z"
+  },
+  {
+    "id": "user_e581bb91-6705-4489-a7d9-bf5fffd92b08",
+    "email": "alex.morgan_312734@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_312734",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_c5a4ce48-d849-4331-ab48-32b7f89d5a55",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T16:45:12.936Z",
+    "updatedAt": "2026-09-04T16:45:12.936Z"
+  },
+  {
+    "id": "user_35106ac8-a91f-4f9d-8ad2-20c6cbbbb461",
+    "email": "alex.morgan_485603@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_485603",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_e52005f3-e87b-42a8-be6b-8daf49f2c2aa",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T17:21:25.658Z",
+    "updatedAt": "2026-09-04T17:21:25.658Z"
+  },
+  {
+    "id": "user_5e30c771-820a-4bf4-9d87-0a82a5cf4e37",
+    "email": "alex.morgan_412613@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_412613",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_49290570-8414-49e9-bd98-1fd4cffa1a4d",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T17:53:32.675Z",
+    "updatedAt": "2026-09-04T17:53:32.676Z"
+  },
+  {
+    "id": "user_fda7ed06-8a9b-45d0-b5c1-d8478c471998",
+    "email": "alex.morgan_706581@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_706581",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_7f23bbb9-f824-4ee4-b023-783362915c35",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T17:58:27.002Z",
+    "updatedAt": "2026-09-04T17:58:27.002Z"
+  },
+  {
+    "id": "user_0cedcb2d-337c-41e3-af26-2a981f138200",
+    "email": "alex.morgan_978793@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_978793",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_ebea5915-4aea-4a8e-abea-9a0c9e5d92ed",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-04T18:02:58.869Z",
+    "updatedAt": "2026-09-04T18:02:58.869Z"
+  },
+  {
+    "id": "user_3f1d7909-72af-462b-ae61-e4b04d374091",
+    "email": "alex.morgan_325758@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_325758",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_45acbd04-d9dc-43a3-a050-e230263fb210",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-05T06:38:45.811Z",
+    "updatedAt": "2026-09-05T06:38:45.811Z"
+  },
+  {
+    "id": "user_f59167d9-83a0-4845-bb0f-0ac22ad75eff",
+    "email": "alex.morgan_977371@enterprise.com",
+    "role": "CUSTOMER",
+    "name": "Alex Morgan",
+    "username": "alexm_977371",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Alex Morgan",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_f16deb2c-e2cd-4667-86df-db72eebdf57d",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-05T09:02:57.418Z",
+    "updatedAt": "2026-09-05T09:02:57.418Z"
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "test_1",
+    "name": "Tariq Al-Mansoor",
+    "initials": "TA",
+    "role": "Head of Infrastructure",
+    "company": "Dubai Silicon Oasis AI Hub",
+    "rating": 5,
+    "workload": "8x RTX 4090 Deep Learning Node",
+    "text": "NexTech delivered our AI training workstations within 24 hours to our Silicon Oasis facility. The pre-tested thermal burn-in saved us days of QA, and their live socket validator is the best tool in the GCC.",
+    "badge": "Verified Enterprise Client",
+    "avatarColor": "from-blue-600 to-cyan-500",
+    "order": 1,
+    "isActive": true
+  },
+  {
+    "id": "test_2",
+    "name": "Dr. Faisal Al-Husseini",
+    "initials": "FH",
+    "role": "Principal Systems Architect",
+    "company": "Riyadh Cloud & Data Center",
+    "rating": 5,
+    "workload": "Dell PowerEdge R760 2U Dual Xeon Cluster",
+    "text": "Procuring high-density rack servers used to take 6 weeks through traditional distributors. NexTech provided transparent pricing, automated VAT invoices, and insured logistics directly to Riyadh.",
+    "badge": "Tier-1 Reseller Partner",
+    "avatarColor": "from-purple-600 to-indigo-500",
+    "order": 2,
+    "isActive": true
+  },
+  {
+    "id": "test_3",
+    "name": "Elena Rostova",
+    "initials": "ER",
+    "role": "Lead Unreal Engine Developer",
+    "company": "Abu Dhabi Hub71 VFX Studio",
+    "rating": 5,
+    "workload": "Intel i9-14900K 64GB DDR5 CAD Rigs",
+    "text": "The PC Builder studio made configuring 12 animation workstations effortless. Every component fit perfectly with zero clearance or power supply issues. Customer service is top-notch.",
+    "badge": "Verified Commercial Buyer",
+    "avatarColor": "from-emerald-600 to-teal-500",
+    "order": 3,
+    "isActive": true
+  }
+]

@@ -1,0 +1,3506 @@
+[
+  {
+    "id": "audit_9cd5d3db-8b67-4163-9064-9665c246fadb",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_ddb100e5-cdb6-4a25-a7cc-ddd141d92c33",
+    "details": {
+      "orderNumber": "ORD-2026-933963",
+      "total": 11780.8,
+      "itemCount": 3
+    },
+    "createdAt": "2026-09-02T09:00:43.118Z"
+  },
+  {
+    "id": "audit_b5e7124b-369a-44be-baf8-34e2ee623c27",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_6bf0d63d-9ba7-400a-b21e-71e10352bdc2",
+    "details": {
+      "orderNumber": "ORD-2026-345129",
+      "total": 6873.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-02T13:10:31.564Z"
+  },
+  {
+    "id": "audit_c53d5b4f-8adc-4727-bf7e-d1c9e44748cb",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "RESELLER_STATUS_SUSPENDED",
+    "resource": "resellers",
+    "resourceId": "reseller_comnet_101",
+    "details": {
+      "status": "SUSPENDED"
+    },
+    "createdAt": "2026-09-02T13:11:31.567Z"
+  },
+  {
+    "id": "audit_e75ff466-8d93-4e4c-9db4-bb05a0c34079",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "RESELLER_STATUS_ACTIVE",
+    "resource": "resellers",
+    "resourceId": "reseller_comnet_101",
+    "details": {
+      "status": "ACTIVE"
+    },
+    "createdAt": "2026-09-02T13:11:35.104Z"
+  },
+  {
+    "id": "audit_e11e1e1d-7623-4814-9dfa-14113a2654ab",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_64e995a5-3d26-4dac-ad51-51b5b37a28eb",
+    "details": {
+      "orderNumber": "ORD-2026-402883",
+      "total": 7373.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-02T13:19:11.046Z"
+  },
+  {
+    "id": "audit_69813110-deb0-4df3-8472-7b09ca147644",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_b5294ee4-0bc5-4ca4-878a-1f895eeefe31",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-02T13:19:11.181Z"
+  },
+  {
+    "id": "audit_5e44b11d-7fe2-48a1-876d-458b2c711d2b",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_64e995a5-3d26-4dac-ad51-51b5b37a28eb",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-02T13:19:11.190Z"
+  },
+  {
+    "id": "audit_97f539a0-1bf1-4d24-a084-70f7e643cef5",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_3e36ceab-b014-4322-8541-39ab6c17e658",
+    "details": {
+      "orderNumber": "ORD-2026-777952",
+      "total": 7373.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-02T13:19:52.481Z"
+  },
+  {
+    "id": "audit_a8dedab5-499e-4b01-ad05-e8616b6f1710",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_0aadda12-5c31-4f93-8d27-fb71b1d35f72",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-02T13:19:52.584Z"
+  },
+  {
+    "id": "audit_e1a0121e-236e-4180-a777-7e5017ef7ff6",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_3e36ceab-b014-4322-8541-39ab6c17e658",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-02T13:19:52.600Z"
+  },
+  {
+    "id": "audit_2dc21dcb-fad2-44a4-8fdb-fc20779846fe",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_e4eb8631-fa1b-44e3-a347-dedfb4c8c996",
+    "details": {
+      "orderNumber": "ORD-2026-502602",
+      "total": 7373.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-02T13:20:09.542Z"
+  },
+  {
+    "id": "audit_ebca9451-d0b3-4500-b4d0-57d3e54521cf",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_b15ff565-a391-4e28-97ac-9bbd579e8d94",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-02T13:20:09.676Z"
+  },
+  {
+    "id": "audit_3d714a74-0b96-4b20-8c6c-fbfeb7cf955e",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_e4eb8631-fa1b-44e3-a347-dedfb4c8c996",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-02T13:20:09.690Z"
+  },
+  {
+    "id": "audit_284fd78a-c7fa-47ef-9598-68a28cd18335",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_41d90675-0514-4ecd-af53-f992809f87c6",
+    "details": {
+      "orderNumber": "ORD-2026-812045",
+      "total": 6848.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-02T13:21:25.366Z"
+  },
+  {
+    "id": "audit_162af0de-efb4-45b1-a2bd-34bdff6fd2c4",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_fd59c89d-a301-4b8e-80e9-14cb6ff0145b",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-02T13:21:25.471Z"
+  },
+  {
+    "id": "audit_427c42b6-c854-4236-947c-31daf89a5c19",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_41d90675-0514-4ecd-af53-f992809f87c6",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-02T13:21:25.477Z"
+  },
+  {
+    "id": "audit_3c876acd-2c8c-4a14-b92b-6ca3090b72b5",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_a438e5de-70c1-4d8c-acbd-ff285248035b",
+    "details": {
+      "orderNumber": "ORD-2026-238146",
+      "total": 6848.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-02T13:43:51.558Z"
+  },
+  {
+    "id": "audit_e9ee101e-d7a9-455f-ba6f-6192379f23dc",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_bf274598-b001-49ee-8630-00336e5ac13c",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-02T13:43:51.777Z"
+  },
+  {
+    "id": "audit_771d0cdb-5b77-45be-9dff-00737d32a1e0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_a438e5de-70c1-4d8c-acbd-ff285248035b",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-02T13:43:51.795Z"
+  },
+  {
+    "id": "audit_6036ca16-4752-410e-bf75-3e4c64a976a6",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-02T13:43:51.954Z"
+  },
+  {
+    "id": "audit_e3578b05-c785-48f9-9d24-f9d66c3ae831",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_4e15e3f2-b3cc-4f37-b3ec-c75034181611",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-02T13:43:51.995Z"
+  },
+  {
+    "id": "audit_e5285b3f-b48b-42d6-927d-0fb420b7e475",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_8628a6bf-f70f-4e6e-8806-114608df2200",
+    "details": {
+      "orderNumber": "ORD-2026-545487",
+      "total": 34125,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-02T16:26:37.271Z"
+  },
+  {
+    "id": "audit_759f0284-ba73-4afe-8080-cec68ad35dac",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_72988b83-e971-435f-9641-bcc0d36e74f8",
+    "details": {
+      "orderNumber": "ORD-2026-637898",
+      "total": 6848.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-03T07:57:52.199Z"
+  },
+  {
+    "id": "audit_fb343ced-c624-4483-8c64-6393e4029a76",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_aa9f3ce9-a7cd-4110-96dd-deba85a6733a",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-03T07:57:52.306Z"
+  },
+  {
+    "id": "audit_7ad80be6-215a-4477-887c-580c33e5aca3",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_72988b83-e971-435f-9641-bcc0d36e74f8",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T07:57:52.325Z"
+  },
+  {
+    "id": "audit_815e05c2-3544-41dd-809e-7aaa1a8992d8",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-03T07:57:52.427Z"
+  },
+  {
+    "id": "audit_c8d1de92-8741-42b5-bc19-34dff9310741",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_567f398c-a314-4fb3-872f-aeb982e14a2c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-03T07:57:52.475Z"
+  },
+  {
+    "id": "audit_9ac72cea-ac88-4912-9b70-696c90b876b5",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_9151b419-40cd-4f43-b09d-1acec685cff5",
+    "details": {
+      "orderNumber": "ORD-2026-937971",
+      "total": 6848.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-03T08:30:32.797Z"
+  },
+  {
+    "id": "audit_cc61a32a-8392-4831-84c4-2275254fbc02",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_d9ce1bc8-f40b-486b-88a6-f9322ab011ed",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-03T08:30:32.938Z"
+  },
+  {
+    "id": "audit_cfbb9586-5de4-4e9e-b058-5ad7e3c37eef",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_9151b419-40cd-4f43-b09d-1acec685cff5",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T08:30:32.955Z"
+  },
+  {
+    "id": "audit_8837ac1b-4c7b-4c5a-ae3e-731b027b4b23",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-03T08:30:33.047Z"
+  },
+  {
+    "id": "audit_9ac04114-d78a-4e82-b465-2867cb562870",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_f8d4aa15-093c-40f9-bd22-9c54ed4b608f",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-03T08:30:33.080Z"
+  },
+  {
+    "id": "audit_1527e5a5-50b7-4ede-9da1-a7543613b9dc",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_44566903-7cec-4272-a4e2-8f28b4e83292",
+    "details": {
+      "orderNumber": "ORD-2026-753525",
+      "total": 6848.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-03T08:33:53.799Z"
+  },
+  {
+    "id": "audit_9197c7e9-4f32-42bc-8bc5-d11c0d6804e1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_8a14c393-5521-4e2d-a79a-2ecf24390eb9",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-03T08:33:53.906Z"
+  },
+  {
+    "id": "audit_e004e8a7-2956-48b2-96b0-316126736268",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_44566903-7cec-4272-a4e2-8f28b4e83292",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T08:33:53.913Z"
+  },
+  {
+    "id": "audit_59097f12-0f01-4e77-8015-de063fa8b92f",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-03T08:33:53.997Z"
+  },
+  {
+    "id": "audit_af3bee18-b7dd-4342-9ebe-b2053f6da351",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_e6236879-57e7-4f30-9727-396609c5df70",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-03T08:33:54.045Z"
+  },
+  {
+    "id": "audit_8cbaa19f-73f0-44d9-b642-7488b0350187",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_cf6fad07-7366-436d-b4cb-554794dcd91c",
+    "details": {
+      "orderNumber": "ORD-2026-850135",
+      "total": 6848.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-03T09:06:55.186Z"
+  },
+  {
+    "id": "audit_2ee2d4af-a0d1-4c8b-8263-c6b6df14022f",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_0c8855e3-ef8e-4f62-9648-bc4410d8b53c",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-03T09:06:55.317Z"
+  },
+  {
+    "id": "audit_7c24cbfc-0307-47f7-9c12-8d54d1f62ab7",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_cf6fad07-7366-436d-b4cb-554794dcd91c",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T09:06:55.335Z"
+  },
+  {
+    "id": "audit_d5da5a25-5250-4f03-a5ee-7366b5213763",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-03T09:06:55.423Z"
+  },
+  {
+    "id": "audit_b3b0a670-54d3-4a24-9752-da709f8a84d7",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_c95168be-374a-4423-9612-f5524c5e2767",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-03T09:06:55.473Z"
+  },
+  {
+    "id": "audit_5aed551d-1fca-4e9c-b531-cb4377ba016e",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_c589c6a7-f831-4dac-9dbb-9b7c9bb17ba9",
+    "details": {
+      "orderNumber": "ORD-2026-924651",
+      "total": 6848.95,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-03T09:16:33.112Z"
+  },
+  {
+    "id": "audit_7bf795d4-3d5e-42d3-b149-e966e92e7700",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_c0863e7c-0fa2-4a59-85dd-4fd0787885f6",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-03T09:16:33.266Z"
+  },
+  {
+    "id": "audit_c569941d-ee63-4802-aef9-c85d954a81de",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_c589c6a7-f831-4dac-9dbb-9b7c9bb17ba9",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T09:16:33.285Z"
+  },
+  {
+    "id": "audit_174342b5-6e73-41d8-92ab-34cba52bda08",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-03T09:16:33.388Z"
+  },
+  {
+    "id": "audit_d3e2930f-534c-456c-8555-cab15c03d6f6",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_70fbcc05-e115-4312-9f90-8542cb4f52bd",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-03T09:16:33.438Z"
+  },
+  {
+    "id": "audit_31a43d6f-37fe-4be4-ac8b-a2a85eef2221",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_2d884ec3-a05e-4957-af04-afdbdaae329a",
+    "details": {
+      "orderNumber": "ORD-2026-256431",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-03T10:06:29.720Z"
+  },
+  {
+    "id": "audit_5732355c-3a3a-404a-826f-248324c5c09c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_4707609b-5c13-4f9c-9c9f-5198d4caa658",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-03T10:06:29.860Z"
+  },
+  {
+    "id": "audit_e08dc493-b34c-443f-bf18-bacfc5ce4a0f",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_4707609b-5c13-4f9c-9c9f-5198d4caa658",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-03T10:06:29.863Z"
+  },
+  {
+    "id": "audit_d6d9b072-b4c7-4d4c-b643-7949d031d109",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_2d884ec3-a05e-4957-af04-afdbdaae329a",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T10:06:29.879Z"
+  },
+  {
+    "id": "audit_b2c69269-8523-4528-9d43-c24e04e61d35",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_2d884ec3-a05e-4957-af04-afdbdaae329a",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T10:06:29.883Z"
+  },
+  {
+    "id": "audit_655f2bee-0bbd-44f8-b2e2-a2aa4e035112",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-03T10:06:29.993Z"
+  },
+  {
+    "id": "audit_2553d08b-e30f-4628-bb48-d64d1f9b29b7",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_ca98606d-aaec-48f4-9cf8-fe35b943afab",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-03T10:06:30.028Z"
+  },
+  {
+    "id": "audit_d9864722-5e36-474f-a1e1-e17c03af51d0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_ca98606d-aaec-48f4-9cf8-fe35b943afab",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-03T10:06:30.030Z"
+  },
+  {
+    "id": "audit_caae3270-990e-4e6f-a430-e9f76a8cc4a7",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_5154c002-aaf2-4026-91b2-12b8cbcd067d",
+    "details": {
+      "orderNumber": "ORD-2026-584905",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-03T12:59:30.696Z"
+  },
+  {
+    "id": "audit_7dff46e4-e622-47bb-81ce-e19aca3815c0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_a5da5807-0518-4e53-8996-2f45e87f7162",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-03T12:59:30.839Z"
+  },
+  {
+    "id": "audit_137fb5e0-08f9-4e54-9908-ad0fc49556c8",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_a5da5807-0518-4e53-8996-2f45e87f7162",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-03T12:59:30.842Z"
+  },
+  {
+    "id": "audit_6e5a8c44-9f7b-47e4-9992-a81adf22ea84",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_5154c002-aaf2-4026-91b2-12b8cbcd067d",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T12:59:30.859Z"
+  },
+  {
+    "id": "audit_ef404954-f9af-4e3f-96ab-75b35e9a857b",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_5154c002-aaf2-4026-91b2-12b8cbcd067d",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-03T12:59:30.863Z"
+  },
+  {
+    "id": "audit_fd618ab3-db67-46c4-8db8-be512bb879cc",
+    "userId": "user_customer_1",
+    "userEmail": "alex.morgan@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-03T12:59:30.955Z"
+  },
+  {
+    "id": "audit_728ea3e3-3d58-4731-9a88-da57cf920e07",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_98c11ea0-033f-4cff-a548-a7284eeaaa90",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-03T12:59:31.001Z"
+  },
+  {
+    "id": "audit_1fef521f-708d-4e97-b4bf-8e2f6195f623",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_98c11ea0-033f-4cff-a548-a7284eeaaa90",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-03T12:59:31.003Z"
+  },
+  {
+    "id": "audit_baf57bef-2eef-46cd-a15b-55a0a70dacd8",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_5154c002-aaf2-4026-91b2-12b8cbcd067d",
+    "details": {
+      "previousStatus": "SHIPPED",
+      "newStatus": "SHIPPED",
+      "note": "Status transitioned to SHIPPED by Admin"
+    },
+    "createdAt": "2026-09-03T13:03:53.098Z"
+  },
+  {
+    "id": "audit_7abca520-26a6-4e6e-ab67-b292be9eac81",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_5154c002-aaf2-4026-91b2-12b8cbcd067d",
+    "details": {
+      "newStatus": "SHIPPED",
+      "note": "Status transitioned to SHIPPED by Admin"
+    },
+    "createdAt": "2026-09-03T13:03:53.116Z"
+  },
+  {
+    "id": "audit_064cf46a-794d-4562-850e-7ac9d85ca861",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "RESELLER_STATUS_SUSPENDED",
+    "resource": "resellers",
+    "resourceId": "reseller_comnet_101",
+    "details": {
+      "status": "SUSPENDED"
+    },
+    "createdAt": "2026-09-03T18:06:07.989Z"
+  },
+  {
+    "id": "audit_fe4455f7-5ec4-4e7b-bf66-dec53256738b",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "RESELLER_STATUS_ACTIVE",
+    "resource": "resellers",
+    "resourceId": "reseller_comnet_101",
+    "details": {
+      "status": "ACTIVE"
+    },
+    "createdAt": "2026-09-03T18:06:21.080Z"
+  },
+  {
+    "id": "audit_8b6ff52a-15c5-4efa-8ec0-ad78818c1453",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_e66c4b43-74c4-4a6a-80ac-8c8ce80a9cda",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T14:03:05.347Z"
+  },
+  {
+    "id": "audit_5b72d06c-612c-4cba-9bcc-685f839fd506",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_e66c4b43-74c4-4a6a-80ac-8c8ce80a9cda",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T14:03:05.356Z"
+  },
+  {
+    "id": "audit_30eff4bc-77a7-4879-aea6-fb58d9465acc",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_5d6c94de-f920-4ea4-9112-1338523dc755",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T14:03:05.498Z"
+  },
+  {
+    "id": "audit_8785e51b-d3cb-47ef-bb00-f2d5092308a6",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_5d6c94de-f920-4ea4-9112-1338523dc755",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T14:03:05.500Z"
+  },
+  {
+    "id": "audit_701c4cb5-cf99-483e-8eea-2fdc74670c62",
+    "userId": "user_6c0127d6-56ff-44e7-9d91-ccf7075ee74e",
+    "userEmail": "alex.morgan_699448@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_8cb792df-392e-4473-a078-ee05b6fb0185",
+    "details": {
+      "orderNumber": "ORD-2026-784250",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T14:04:59.855Z"
+  },
+  {
+    "id": "audit_8e68aefe-d18d-4e27-8fd8-c37b0c6dc9c5",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_52132518-fa18-4d14-9937-dc079b46a7d5",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T14:05:00.152Z"
+  },
+  {
+    "id": "audit_45ec7422-14c7-464c-9767-80bb9c8b0ad1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_52132518-fa18-4d14-9937-dc079b46a7d5",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T14:05:00.178Z"
+  },
+  {
+    "id": "audit_1cda4dc7-0ef9-4ff8-b321-fba386b22d35",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_8cb792df-392e-4473-a078-ee05b6fb0185",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:05:00.190Z"
+  },
+  {
+    "id": "audit_b8ddd395-1af0-4dd9-b7bc-19539d7d59e1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_8cb792df-392e-4473-a078-ee05b6fb0185",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:05:00.193Z"
+  },
+  {
+    "id": "audit_6665a5a5-d14c-448c-ac36-72fa558c8297",
+    "userId": "user_6c0127d6-56ff-44e7-9d91-ccf7075ee74e",
+    "userEmail": "alex.morgan_699448@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T14:05:00.415Z"
+  },
+  {
+    "id": "audit_345d269a-0c56-4cbe-af9b-61dc16e93b23",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_3fe93bba-f3cf-4c2c-bbfc-d7040c13a9e0",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T14:05:00.722Z"
+  },
+  {
+    "id": "audit_f0c40dba-5fcc-4246-99e0-c75f9e6c6089",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_3fe93bba-f3cf-4c2c-bbfc-d7040c13a9e0",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T14:05:00.723Z"
+  },
+  {
+    "id": "audit_296929a7-eee6-4efd-bd05-3cce24ccee31",
+    "userId": "user_1d699bc8-6a5e-4ba8-a598-5f885daaaf50",
+    "userEmail": "alex.morgan_876343@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_ffedad8c-f916-4455-aa5c-59efc55f7c76",
+    "details": {
+      "orderNumber": "ORD-2026-803908",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T14:07:56.548Z"
+  },
+  {
+    "id": "audit_5129a9a5-4e32-4b2f-b2b8-123fed1973ec",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_34aa7001-890e-4a9c-a115-ab582d5553ac",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T14:07:56.660Z"
+  },
+  {
+    "id": "audit_0da1de44-5e4b-4247-807b-6e90d8085a8a",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_34aa7001-890e-4a9c-a115-ab582d5553ac",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T14:07:56.669Z"
+  },
+  {
+    "id": "audit_b54c8016-5b06-4074-94c6-1804f330b4da",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_ffedad8c-f916-4455-aa5c-59efc55f7c76",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:07:56.679Z"
+  },
+  {
+    "id": "audit_0fe62b39-d87d-474c-8fae-a0c1db34b3e5",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_ffedad8c-f916-4455-aa5c-59efc55f7c76",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:07:56.683Z"
+  },
+  {
+    "id": "audit_bb244634-7c43-4102-bf52-4d87b7ac82df",
+    "userId": "user_1d699bc8-6a5e-4ba8-a598-5f885daaaf50",
+    "userEmail": "alex.morgan_876343@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T14:07:56.747Z"
+  },
+  {
+    "id": "audit_7997deba-e797-4494-ad69-5be1af018d29",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_ac60b540-0ccf-4014-b915-df0954cfef3c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T14:07:56.789Z"
+  },
+  {
+    "id": "audit_66160ce6-104b-435a-b439-37139581cb2f",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_ac60b540-0ccf-4014-b915-df0954cfef3c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T14:07:56.800Z"
+  },
+  {
+    "id": "audit_9a4abe60-3869-4b22-8a23-d75ff89a7bb0",
+    "userId": "user_dd7c0f8b-2eac-4bbe-b7ed-b74df179d7b3",
+    "userEmail": "alex.morgan_961881@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_6ed568c0-3b98-4eb5-bb7f-5aee55d6eac4",
+    "details": {
+      "orderNumber": "ORD-2026-931009",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T14:09:22.128Z"
+  },
+  {
+    "id": "audit_9986c2d9-a3b7-4035-a0c6-cd3b60196f14",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_1acaec44-459a-4825-8af9-e7f367e8132d",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T14:09:22.246Z"
+  },
+  {
+    "id": "audit_c0318a12-daa2-436e-aa31-31a2cfd5171a",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_1acaec44-459a-4825-8af9-e7f367e8132d",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T14:09:22.249Z"
+  },
+  {
+    "id": "audit_f5a48a78-4ce1-4406-a6ec-b2afc52715ed",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_6ed568c0-3b98-4eb5-bb7f-5aee55d6eac4",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:09:22.279Z"
+  },
+  {
+    "id": "audit_5800b94a-21f1-40e6-965e-468070ede6e6",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_6ed568c0-3b98-4eb5-bb7f-5aee55d6eac4",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:09:22.281Z"
+  },
+  {
+    "id": "audit_aaa79d0c-b604-4900-b3e5-a0413731f2e6",
+    "userId": "user_dd7c0f8b-2eac-4bbe-b7ed-b74df179d7b3",
+    "userEmail": "alex.morgan_961881@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T14:09:22.363Z"
+  },
+  {
+    "id": "audit_ee0c1096-114f-41de-8a4b-777f8b6e2003",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_08896aeb-33fa-4f2f-b3ea-6aa2d3caff00",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T14:09:22.416Z"
+  },
+  {
+    "id": "audit_a063c648-f8ed-4d30-a19a-401fa6dfb803",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_08896aeb-33fa-4f2f-b3ea-6aa2d3caff00",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T14:09:22.419Z"
+  },
+  {
+    "id": "audit_62174687-2ff1-462c-905b-781f3d51b696",
+    "userId": "user_7f4c9cb5-5b22-4b0a-805a-777293d2a074",
+    "userEmail": "alex.morgan_472102@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_424a0475-7a78-4ba8-aa89-005ed2a30e11",
+    "details": {
+      "orderNumber": "ORD-2026-434136",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T14:17:52.761Z"
+  },
+  {
+    "id": "audit_2d4d2da6-4a72-40ef-8480-21da44a323ee",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_9377fe4c-c7e3-40c9-82f3-4819594503bf",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T14:17:52.883Z"
+  },
+  {
+    "id": "audit_42a7a078-0a94-4d2a-a3eb-5d452cbb6251",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_9377fe4c-c7e3-40c9-82f3-4819594503bf",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T14:17:52.886Z"
+  },
+  {
+    "id": "audit_01a4fff7-8c6c-4dda-9e4a-f049c88449f9",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_424a0475-7a78-4ba8-aa89-005ed2a30e11",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:17:52.899Z"
+  },
+  {
+    "id": "audit_dc894156-fb7d-4d0d-a4cf-b9dd5de35a33",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_424a0475-7a78-4ba8-aa89-005ed2a30e11",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:17:52.900Z"
+  },
+  {
+    "id": "audit_32624492-9a8a-4132-af28-2fe3113826d3",
+    "userId": "user_7f4c9cb5-5b22-4b0a-805a-777293d2a074",
+    "userEmail": "alex.morgan_472102@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T14:17:53.019Z"
+  },
+  {
+    "id": "audit_880d34cd-d770-4b72-8622-4e87ad9cd379",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_b70b35ea-e80e-4e29-aed0-ac93f456544c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T14:17:53.053Z"
+  },
+  {
+    "id": "audit_cc771c66-6e62-428f-8305-07a938211ba9",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_b70b35ea-e80e-4e29-aed0-ac93f456544c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T14:17:53.057Z"
+  },
+  {
+    "id": "audit_86550972-d66d-4f1d-9d9d-2a241fd37035",
+    "userId": "user_a3ea73ed-194b-4594-ab19-5d7c62538a75",
+    "userEmail": "alex.morgan_651918@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_6676b72f-2fc3-4039-a6b9-9c4eb29388c5",
+    "details": {
+      "orderNumber": "ORD-2026-638455",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T14:37:32.455Z"
+  },
+  {
+    "id": "audit_58c2a3bc-e749-4503-8330-eddf7cba9b49",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_1303e117-dffe-404c-bb6b-bd33fa505bb1",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T14:37:32.826Z"
+  },
+  {
+    "id": "audit_d6581f4b-548a-481b-8f76-56704fe5fab1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_1303e117-dffe-404c-bb6b-bd33fa505bb1",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T14:37:32.832Z"
+  },
+  {
+    "id": "audit_0f0b4798-1579-4eb0-a9b3-cfacb1ef3f71",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_6676b72f-2fc3-4039-a6b9-9c4eb29388c5",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:37:32.904Z"
+  },
+  {
+    "id": "audit_979428dc-a4f1-495d-81b4-954fb9c2525d",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_6676b72f-2fc3-4039-a6b9-9c4eb29388c5",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:37:32.914Z"
+  },
+  {
+    "id": "audit_0efd3db1-3a60-456d-aaa9-cf12d416af44",
+    "userId": "user_a3ea73ed-194b-4594-ab19-5d7c62538a75",
+    "userEmail": "alex.morgan_651918@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T14:37:33.046Z"
+  },
+  {
+    "id": "audit_8d7e51b8-0a1c-40fb-bf83-b329d786d244",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_534e84af-00eb-445b-9575-904eb7bd6495",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T14:37:33.097Z"
+  },
+  {
+    "id": "audit_3c28c686-b0c1-4b71-9ae8-b279056bcb29",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_534e84af-00eb-445b-9575-904eb7bd6495",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T14:37:33.106Z"
+  },
+  {
+    "id": "audit_77f6dec6-6716-445a-ba5e-03ffa2f1b0f3",
+    "userId": "user_b64bbace-b0f8-418f-bf0f-59cd65d48822",
+    "userEmail": "alex.morgan_324420@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_652159c4-f5c8-4717-8b9b-05078b0ee565",
+    "details": {
+      "orderNumber": "ORD-2026-192954",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T14:48:44.667Z"
+  },
+  {
+    "id": "audit_e1782b35-6016-442c-a542-5f5d09b6c2b4",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_4d66f95d-4297-45d9-b3e4-c2c0c5dbc3e8",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T14:48:44.788Z"
+  },
+  {
+    "id": "audit_720974f5-3975-4eaf-84af-3bb504f26ee4",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_4d66f95d-4297-45d9-b3e4-c2c0c5dbc3e8",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T14:48:44.791Z"
+  },
+  {
+    "id": "audit_31ffeadb-0647-47d2-a08a-c0f63662afbc",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_652159c4-f5c8-4717-8b9b-05078b0ee565",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:48:44.827Z"
+  },
+  {
+    "id": "audit_e8d3d38c-5694-4c41-a3dd-8294d9eff9ba",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_652159c4-f5c8-4717-8b9b-05078b0ee565",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T14:48:44.829Z"
+  },
+  {
+    "id": "audit_2b27b6ac-88dd-4342-8768-e7a29227ff65",
+    "userId": "user_b64bbace-b0f8-418f-bf0f-59cd65d48822",
+    "userEmail": "alex.morgan_324420@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T14:48:44.943Z"
+  },
+  {
+    "id": "audit_c619964c-0f0e-4d07-af0f-341960444849",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_dcdf14e0-0eef-40b8-90b2-57af4adeb511",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T14:48:44.991Z"
+  },
+  {
+    "id": "audit_0c759cbe-b5f0-42cb-8d09-b1cd13c674dc",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_dcdf14e0-0eef-40b8-90b2-57af4adeb511",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T14:48:44.994Z"
+  },
+  {
+    "id": "audit_d09417d0-1206-4c59-99be-6f377efe1104",
+    "userId": "user_84c83c57-c1f9-4f8d-b996-33818be82e14",
+    "userEmail": "alex.morgan_841626@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_f0f3007f-2cf3-4520-b992-c5facb427fa1",
+    "details": {
+      "orderNumber": "ORD-2026-565761",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T15:14:02.101Z"
+  },
+  {
+    "id": "audit_2d897ec8-7c4d-4ff5-8aae-e88594540148",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_e5715673-211d-44d3-99df-fdc0f038adfe",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T15:14:02.346Z"
+  },
+  {
+    "id": "audit_f25b66f3-e7c0-4e33-b99f-05d90e4a1581",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_e5715673-211d-44d3-99df-fdc0f038adfe",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T15:14:02.350Z"
+  },
+  {
+    "id": "audit_065e803b-3844-4302-975f-f3f05f8c3b3d",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_f0f3007f-2cf3-4520-b992-c5facb427fa1",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:14:02.377Z"
+  },
+  {
+    "id": "audit_8dec626d-c6b4-4b56-8509-43c46d83c79c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_f0f3007f-2cf3-4520-b992-c5facb427fa1",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:14:02.380Z"
+  },
+  {
+    "id": "audit_9d8457ee-5c4b-4910-82b2-31b08269bcba",
+    "userId": "user_84c83c57-c1f9-4f8d-b996-33818be82e14",
+    "userEmail": "alex.morgan_841626@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T15:14:02.496Z"
+  },
+  {
+    "id": "audit_919ab500-847b-4c1b-ab76-48a90f953999",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_4ee9b52f-5255-4a33-92b1-bd7ff6d82c2d",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T15:14:02.544Z"
+  },
+  {
+    "id": "audit_43067a02-90f1-4a1e-bdf0-39f4d49eae97",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_4ee9b52f-5255-4a33-92b1-bd7ff6d82c2d",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T15:14:02.547Z"
+  },
+  {
+    "id": "audit_2f59c6dd-e422-4ba4-a1f5-6bd01a426946",
+    "userId": "user_77eaa955-e42d-413c-8ea9-9c8a4af8728e",
+    "userEmail": "alex.morgan_314766@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_78a285ba-5015-42d1-8d93-67e2e3786894",
+    "details": {
+      "orderNumber": "ORD-2026-714337",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T15:38:35.178Z"
+  },
+  {
+    "id": "audit_ef62f687-1312-4f19-a4b3-27a8105b749c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_05857e40-4eef-460d-8656-9d79e9ac1589",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T15:38:35.350Z"
+  },
+  {
+    "id": "audit_a7808f48-3d19-4f71-80ee-56038763bd38",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_05857e40-4eef-460d-8656-9d79e9ac1589",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T15:38:35.362Z"
+  },
+  {
+    "id": "audit_f2bde114-3724-4825-a551-ead21516517c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_78a285ba-5015-42d1-8d93-67e2e3786894",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:38:35.380Z"
+  },
+  {
+    "id": "audit_a5d3d9da-5126-43d6-8d2b-3565f7659eb8",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_78a285ba-5015-42d1-8d93-67e2e3786894",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:38:35.383Z"
+  },
+  {
+    "id": "audit_79297c9c-e965-4970-b236-a7863cf5a5c6",
+    "userId": "user_77eaa955-e42d-413c-8ea9-9c8a4af8728e",
+    "userEmail": "alex.morgan_314766@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T15:38:35.500Z"
+  },
+  {
+    "id": "audit_82b22bfc-05fc-45f3-91ce-c59eb2052fd8",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_338a503e-d638-4843-9a0b-854de48741a9",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T15:38:35.549Z"
+  },
+  {
+    "id": "audit_5827f1ad-b1ce-4c41-be46-b6b29514fb83",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_338a503e-d638-4843-9a0b-854de48741a9",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T15:38:35.550Z"
+  },
+  {
+    "id": "audit_bb17deb6-e184-4175-aa89-e867060ac61a",
+    "userId": "user_e1151215-6ec8-4c56-b7cf-18496248a8eb",
+    "userEmail": "alex.morgan_546474@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_b99bffbb-a604-427e-bd99-86735b76bd12",
+    "details": {
+      "orderNumber": "ORD-2026-901254",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T15:59:06.676Z"
+  },
+  {
+    "id": "audit_55ab3663-d97b-457a-9c4f-640b8b36cf84",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_a2431f1c-f47d-46ad-8994-a4b40bdb9987",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T15:59:06.807Z"
+  },
+  {
+    "id": "audit_3288c1ae-91b5-44af-9e95-424bde0dd784",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_a2431f1c-f47d-46ad-8994-a4b40bdb9987",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T15:59:06.808Z"
+  },
+  {
+    "id": "audit_ef86c4a6-c371-477e-bc76-6ac4bbe819fb",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_b99bffbb-a604-427e-bd99-86735b76bd12",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:59:06.821Z"
+  },
+  {
+    "id": "audit_0d0c7c65-ad29-4287-844c-f272be16cd3c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_b99bffbb-a604-427e-bd99-86735b76bd12",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:59:06.823Z"
+  },
+  {
+    "id": "audit_42b7423c-8f1d-4a04-a62f-e23612808a04",
+    "userId": "user_e1151215-6ec8-4c56-b7cf-18496248a8eb",
+    "userEmail": "alex.morgan_546474@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T15:59:06.909Z"
+  },
+  {
+    "id": "audit_25a114aa-b4c3-4b25-94e3-d9ef2bca5e4c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_e65d0ed1-51d8-4461-95a0-577b8c90d501",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T15:59:06.959Z"
+  },
+  {
+    "id": "audit_3e8b39be-750b-4ddf-bba0-e93d8784a00b",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_e65d0ed1-51d8-4461-95a0-577b8c90d501",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T15:59:06.960Z"
+  },
+  {
+    "id": "audit_ea81ba56-3b12-412e-9b99-d7848309c26e",
+    "userId": "user_7dd5f1b9-ae93-499b-aff3-f3258b38de0c",
+    "userEmail": "alex.morgan_567076@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_caf4d1a6-8b15-4d55-98c1-75049ba1aa05",
+    "details": {
+      "orderNumber": "ORD-2026-731410",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T15:59:27.270Z"
+  },
+  {
+    "id": "audit_8e55fc3b-de99-4706-a325-cf892ffcee83",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_056dae98-8aae-48f6-8ce7-8231986f176b",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T15:59:27.363Z"
+  },
+  {
+    "id": "audit_e282cac5-165e-4ac7-9c59-25e68d98c2b0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_056dae98-8aae-48f6-8ce7-8231986f176b",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T15:59:27.365Z"
+  },
+  {
+    "id": "audit_267cd40a-a917-43e0-b69f-edc00ffceab0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_caf4d1a6-8b15-4d55-98c1-75049ba1aa05",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:59:27.378Z"
+  },
+  {
+    "id": "audit_94525bef-0861-4cd2-8866-b7be537066a0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_caf4d1a6-8b15-4d55-98c1-75049ba1aa05",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:59:27.380Z"
+  },
+  {
+    "id": "audit_25a26a57-789a-4ba9-976e-ff3633541fe7",
+    "userId": "user_7dd5f1b9-ae93-499b-aff3-f3258b38de0c",
+    "userEmail": "alex.morgan_567076@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T15:59:27.468Z"
+  },
+  {
+    "id": "audit_4d6343e9-501f-425b-b06a-6d58be60fd90",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_eaf765e2-d465-4e50-a899-fe52da3c777d",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T15:59:27.503Z"
+  },
+  {
+    "id": "audit_31d29c13-db23-40da-b106-5c498d033345",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_eaf765e2-d465-4e50-a899-fe52da3c777d",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T15:59:27.505Z"
+  },
+  {
+    "id": "audit_cf5d31e9-7dc0-4783-a6e5-48c5cad3d770",
+    "userId": "user_df57cd25-6890-434e-99d5-6cb1967de8e3",
+    "userEmail": "alex.morgan_590468@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_b7995ec9-2316-4454-859d-c4a2afdd488c",
+    "details": {
+      "orderNumber": "ORD-2026-654766",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T15:59:50.756Z"
+  },
+  {
+    "id": "audit_63d35de7-8320-4f04-ba64-06016d9daab3",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_e1fa9fc7-8998-4154-b5e0-56bdc9df5aef",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T15:59:50.905Z"
+  },
+  {
+    "id": "audit_08dbd156-b4f6-4c48-91f5-2a98a8ca4781",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_e1fa9fc7-8998-4154-b5e0-56bdc9df5aef",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T15:59:50.908Z"
+  },
+  {
+    "id": "audit_05c3ad6a-ff2c-42b0-bd54-e3040f1c8225",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_b7995ec9-2316-4454-859d-c4a2afdd488c",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:59:50.922Z"
+  },
+  {
+    "id": "audit_6ca62dee-d29d-46ae-88a3-44f5bd7f5bf2",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_b7995ec9-2316-4454-859d-c4a2afdd488c",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T15:59:50.925Z"
+  },
+  {
+    "id": "audit_8db0cca6-5bd1-4625-b19b-627fb85013b7",
+    "userId": "user_df57cd25-6890-434e-99d5-6cb1967de8e3",
+    "userEmail": "alex.morgan_590468@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T15:59:51.024Z"
+  },
+  {
+    "id": "audit_79fd690c-0c3d-4831-9c85-3ea88f962eed",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_0a1f3320-80fb-4261-ac46-09d2e6fad7f5",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T15:59:51.073Z"
+  },
+  {
+    "id": "audit_61352a89-9f48-42bd-a46a-8523f7861bc2",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_0a1f3320-80fb-4261-ac46-09d2e6fad7f5",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T15:59:51.076Z"
+  },
+  {
+    "id": "audit_6e82c09e-42f0-4313-89fc-0f1805ba6049",
+    "userId": "user_58bcedf4-5578-475f-a28d-fdc647711426",
+    "userEmail": "alex.morgan_899628@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_0222c415-0f7b-497c-99c3-c57229cb511c",
+    "details": {
+      "orderNumber": "ORD-2026-417670",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T16:04:59.857Z"
+  },
+  {
+    "id": "audit_8d712d74-06c3-4995-a777-a511e4788537",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_022b5adb-760b-4004-8499-89d51aba71a8",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T16:04:59.957Z"
+  },
+  {
+    "id": "audit_0d1f750e-ad00-4323-abf9-c97d0e8629bd",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_022b5adb-760b-4004-8499-89d51aba71a8",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T16:04:59.959Z"
+  },
+  {
+    "id": "audit_bc2bdee9-4c6c-496c-b778-306a87ab088c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_0222c415-0f7b-497c-99c3-c57229cb511c",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:04:59.982Z"
+  },
+  {
+    "id": "audit_bd11239c-c7fc-49f6-9731-3e8e2c2bc4f2",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_0222c415-0f7b-497c-99c3-c57229cb511c",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:04:59.984Z"
+  },
+  {
+    "id": "audit_8bfd4641-4640-4e75-88bd-187ce0ce1ab6",
+    "userId": "user_58bcedf4-5578-475f-a28d-fdc647711426",
+    "userEmail": "alex.morgan_899628@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T16:05:00.088Z"
+  },
+  {
+    "id": "audit_842549cc-4bc6-419f-b0eb-4fed3ae25910",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_727ae144-7887-4671-9952-9432b694cc3c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T16:05:00.137Z"
+  },
+  {
+    "id": "audit_a88c760d-27ab-4b1c-afa5-0d824decee5c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_727ae144-7887-4671-9952-9432b694cc3c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T16:05:00.139Z"
+  },
+  {
+    "id": "audit_659dea24-e730-4ae9-969c-eee86dbf8893",
+    "userId": "user_d9c317ba-17b0-4bc7-b04a-54a8bac6619c",
+    "userEmail": "alex.morgan_113441@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_7e240c5b-e473-47e2-bbe1-7b872e1e3ba3",
+    "details": {
+      "orderNumber": "ORD-2026-968681",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T16:25:13.669Z"
+  },
+  {
+    "id": "audit_aaad0bc6-9016-4a66-bccd-f9b530df1f0d",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_33b08ec0-e687-4530-b2d5-da3e8cb8694c",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T16:25:13.788Z"
+  },
+  {
+    "id": "audit_fcc79531-cc19-4312-9588-5a80e0dee1a0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_33b08ec0-e687-4530-b2d5-da3e8cb8694c",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T16:25:13.790Z"
+  },
+  {
+    "id": "audit_e91399cb-cbff-4b9d-b7b5-218e258b411b",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_7e240c5b-e473-47e2-bbe1-7b872e1e3ba3",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:25:13.802Z"
+  },
+  {
+    "id": "audit_e8e70049-03e6-4857-849d-2b61d1dc7711",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_7e240c5b-e473-47e2-bbe1-7b872e1e3ba3",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:25:13.805Z"
+  },
+  {
+    "id": "audit_0f5baf87-baad-4d3a-9b11-448f58919a51",
+    "userId": "user_d9c317ba-17b0-4bc7-b04a-54a8bac6619c",
+    "userEmail": "alex.morgan_113441@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T16:25:13.907Z"
+  },
+  {
+    "id": "audit_ab4a8b2d-6665-4698-9f8c-9d025a171cc0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_2e625edf-c9f2-4b84-aeeb-47aadb0e405c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T16:25:13.956Z"
+  },
+  {
+    "id": "audit_6cef614b-d3f6-477c-b184-ea1b99df3c64",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_2e625edf-c9f2-4b84-aeeb-47aadb0e405c",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T16:25:13.958Z"
+  },
+  {
+    "id": "audit_c24b0350-abbb-489e-8fdc-107fa649f561",
+    "userId": "user_65a69757-364f-4b38-b3ea-b526e5222398",
+    "userEmail": "alex.morgan_131757@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_baf039fd-1b61-4aa9-8f51-f804e390e2b0",
+    "details": {
+      "orderNumber": "ORD-2026-748398",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T16:25:31.900Z"
+  },
+  {
+    "id": "audit_104af126-4d45-4eb7-9560-ec97a8e3c925",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_3eab47e9-3407-4da8-8ef5-5d86a20ccc98",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T16:25:31.991Z"
+  },
+  {
+    "id": "audit_d121c1e2-3f0d-474b-a8ce-5888d1ef15fa",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_3eab47e9-3407-4da8-8ef5-5d86a20ccc98",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T16:25:31.993Z"
+  },
+  {
+    "id": "audit_bcd8089b-587b-411b-9b71-e0063f759ea1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_baf039fd-1b61-4aa9-8f51-f804e390e2b0",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:25:32.006Z"
+  },
+  {
+    "id": "audit_d6ce5d9e-05ae-41af-9348-7bfc1adb0f71",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_baf039fd-1b61-4aa9-8f51-f804e390e2b0",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:25:32.007Z"
+  },
+  {
+    "id": "audit_5f4239f2-54db-417b-8191-cdc24da9cd24",
+    "userId": "user_65a69757-364f-4b38-b3ea-b526e5222398",
+    "userEmail": "alex.morgan_131757@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T16:25:32.111Z"
+  },
+  {
+    "id": "audit_16729b14-e2f1-4825-b447-78e5ec9d204d",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_707a31e0-27f7-49f6-a6ce-5528bb4c1206",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T16:25:32.158Z"
+  },
+  {
+    "id": "audit_ba5c9ee9-b7c1-4b1e-84d8-4a610e01c506",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_707a31e0-27f7-49f6-a6ce-5528bb4c1206",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T16:25:32.160Z"
+  },
+  {
+    "id": "audit_a051a41f-9f9f-4764-90d3-41bab5f4a31f",
+    "userId": "user_b6ceb68a-8dcb-4354-bc70-ad07efb986b2",
+    "userEmail": "alex.morgan_275796@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_7e313183-921a-44d9-b334-e2df5ab1ae92",
+    "details": {
+      "orderNumber": "ORD-2026-946607",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T16:44:36.244Z"
+  },
+  {
+    "id": "audit_24e25d37-0665-4416-b26d-c2a1f44d2385",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_178a7081-735d-4052-ab22-abad21c1bf73",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T16:44:36.488Z"
+  },
+  {
+    "id": "audit_b01db92b-ad49-4689-a11e-78fdd1a5cf52",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_178a7081-735d-4052-ab22-abad21c1bf73",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T16:44:36.493Z"
+  },
+  {
+    "id": "audit_199d6775-ba7c-465a-957a-8cb1a8472791",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_7e313183-921a-44d9-b334-e2df5ab1ae92",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:44:36.533Z"
+  },
+  {
+    "id": "audit_531af81e-504d-4acb-a1d4-c1250988e671",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_7e313183-921a-44d9-b334-e2df5ab1ae92",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:44:36.537Z"
+  },
+  {
+    "id": "audit_c42431cd-edb6-47fd-abae-a54fe0a91999",
+    "userId": "user_b6ceb68a-8dcb-4354-bc70-ad07efb986b2",
+    "userEmail": "alex.morgan_275796@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T16:44:36.659Z"
+  },
+  {
+    "id": "audit_a8b0b2ff-c495-4901-92a9-bc7124a5b8e1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_acc8db5e-a555-404e-a112-48735890a06f",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T16:44:36.712Z"
+  },
+  {
+    "id": "audit_7a69dba8-1063-4862-b5fc-ea76b2b1c87d",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_acc8db5e-a555-404e-a112-48735890a06f",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T16:44:36.714Z"
+  },
+  {
+    "id": "audit_7ae78c73-ba51-4c09-9058-45e45f46badf",
+    "userId": "user_e581bb91-6705-4489-a7d9-bf5fffd92b08",
+    "userEmail": "alex.morgan_312734@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_27d5fb43-9186-4d22-9a36-71f28c0005bb",
+    "details": {
+      "orderNumber": "ORD-2026-446143",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T16:45:13.418Z"
+  },
+  {
+    "id": "audit_1a87cb71-6860-4ae0-b10f-f10830fa6b09",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_dee07556-7086-4bbc-9011-b87a7f31f057",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T16:45:13.686Z"
+  },
+  {
+    "id": "audit_38994fe0-861a-481d-8871-a11f4f1fce7b",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_dee07556-7086-4bbc-9011-b87a7f31f057",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T16:45:13.688Z"
+  },
+  {
+    "id": "audit_3e4a940c-b7d4-499f-bb6b-35d2c8eadd77",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_27d5fb43-9186-4d22-9a36-71f28c0005bb",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:45:13.716Z"
+  },
+  {
+    "id": "audit_f692e669-0b50-4409-840a-e9731552586a",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_27d5fb43-9186-4d22-9a36-71f28c0005bb",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T16:45:13.720Z"
+  },
+  {
+    "id": "audit_4170f1af-4ffc-44de-aaeb-20935d8dcadb",
+    "userId": "user_e581bb91-6705-4489-a7d9-bf5fffd92b08",
+    "userEmail": "alex.morgan_312734@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T16:45:13.853Z"
+  },
+  {
+    "id": "audit_f342ef68-42c9-4211-b235-0fc59193553a",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_ac4e78a1-4b1e-4983-a082-a3be59ce0b64",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T16:45:13.905Z"
+  },
+  {
+    "id": "audit_1f0a2491-b2bd-4ed0-8cc2-a5677d92b013",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_ac4e78a1-4b1e-4983-a082-a3be59ce0b64",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T16:45:13.916Z"
+  },
+  {
+    "id": "audit_e98c7212-afcf-4c91-98ab-2c29513e1290",
+    "userId": "user_35106ac8-a91f-4f9d-8ad2-20c6cbbbb461",
+    "userEmail": "alex.morgan_485603@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_57a1f145-f79c-4b71-9451-bfd58789c0b1",
+    "details": {
+      "orderNumber": "ORD-2026-245914",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T17:21:25.961Z"
+  },
+  {
+    "id": "audit_5f77be90-2e03-42f9-8e3d-fa0b2a80d9bf",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_5d3a3d02-7b5a-4810-8b98-f23ee43c81ef",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T17:21:26.180Z"
+  },
+  {
+    "id": "audit_d342adef-94d7-48b9-8b78-5a394ff75727",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_5d3a3d02-7b5a-4810-8b98-f23ee43c81ef",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T17:21:26.182Z"
+  },
+  {
+    "id": "audit_7937657e-6f24-4c48-959f-31ff84e6fb66",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_57a1f145-f79c-4b71-9451-bfd58789c0b1",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T17:21:26.215Z"
+  },
+  {
+    "id": "audit_dd51a3d5-a1a7-4d34-b224-954e1c181a49",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_57a1f145-f79c-4b71-9451-bfd58789c0b1",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T17:21:26.216Z"
+  },
+  {
+    "id": "audit_13cdf275-17de-4b28-971e-fd90197b3f07",
+    "userId": "user_35106ac8-a91f-4f9d-8ad2-20c6cbbbb461",
+    "userEmail": "alex.morgan_485603@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T17:21:26.361Z"
+  },
+  {
+    "id": "audit_b0c6fd94-00c1-475e-b162-96f97bf3cab1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_7a17451a-397a-40e6-b53c-27e94e2b94e7",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T17:21:26.409Z"
+  },
+  {
+    "id": "audit_a719c680-5a1f-4fb3-b97e-8f0e10bcf44d",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_7a17451a-397a-40e6-b53c-27e94e2b94e7",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T17:21:26.424Z"
+  },
+  {
+    "id": "audit_208520fc-17d0-4d6a-bf6b-0dfec57ef1ea",
+    "userId": "user_5e30c771-820a-4bf4-9d87-0a82a5cf4e37",
+    "userEmail": "alex.morgan_412613@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_b0c79987-cb38-4c68-95d6-60cb0a2cba43",
+    "details": {
+      "orderNumber": "ORD-2026-706471",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T17:53:33.004Z"
+  },
+  {
+    "id": "audit_7e8892fb-b3d3-4f56-98e5-dfe711fed784",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_42eb5302-fa18-4054-b009-a2846657a4b6",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T17:53:33.233Z"
+  },
+  {
+    "id": "audit_2622ffb4-df99-4aee-8a02-762e180c4b39",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_42eb5302-fa18-4054-b009-a2846657a4b6",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T17:53:33.236Z"
+  },
+  {
+    "id": "audit_eb11da99-bd92-4ca7-8504-88772edaefd9",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_b0c79987-cb38-4c68-95d6-60cb0a2cba43",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T17:53:33.270Z"
+  },
+  {
+    "id": "audit_91bf383d-0d7d-43ba-a73b-6e2587654b31",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_b0c79987-cb38-4c68-95d6-60cb0a2cba43",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T17:53:33.278Z"
+  },
+  {
+    "id": "audit_773168c5-df37-449b-bfe3-dc5256de1f2f",
+    "userId": "user_5e30c771-820a-4bf4-9d87-0a82a5cf4e37",
+    "userEmail": "alex.morgan_412613@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T17:53:33.430Z"
+  },
+  {
+    "id": "audit_c2f00802-a7aa-4c84-8916-8a9ab3c3baaa",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_354cc6a9-68d2-464d-9150-6150817f4cae",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T17:53:33.493Z"
+  },
+  {
+    "id": "audit_150f3f1a-a862-422b-a318-6409cda6ddb1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_354cc6a9-68d2-464d-9150-6150817f4cae",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T17:53:33.496Z"
+  },
+  {
+    "id": "audit_e29729d1-8bc4-408d-a2bb-ce2f79966b0d",
+    "userId": "user_fda7ed06-8a9b-45d0-b5c1-d8478c471998",
+    "userEmail": "alex.morgan_706581@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_2e8c0d59-7363-4bd4-9ddf-b04811ac2418",
+    "details": {
+      "orderNumber": "ORD-2026-656150",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T17:58:27.250Z"
+  },
+  {
+    "id": "audit_54f44f5d-91a6-4ecd-bba4-00dfbe7199e4",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_ed8cb433-fd0c-49a0-beee-d1440220b6ec",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T17:58:27.412Z"
+  },
+  {
+    "id": "audit_b61d68d6-f3e4-4709-a317-44725548787c",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_ed8cb433-fd0c-49a0-beee-d1440220b6ec",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T17:58:27.415Z"
+  },
+  {
+    "id": "audit_ed66a578-ef16-4a94-9a13-05e01cf76ac0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_2e8c0d59-7363-4bd4-9ddf-b04811ac2418",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T17:58:27.444Z"
+  },
+  {
+    "id": "audit_4cdeff22-6240-45b7-85c9-6616f64ecf8e",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_2e8c0d59-7363-4bd4-9ddf-b04811ac2418",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T17:58:27.449Z"
+  },
+  {
+    "id": "audit_442b1a9e-ffe9-453d-867d-7ba82a934065",
+    "userId": "user_fda7ed06-8a9b-45d0-b5c1-d8478c471998",
+    "userEmail": "alex.morgan_706581@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T17:58:27.591Z"
+  },
+  {
+    "id": "audit_4dca6193-6770-4e2d-abde-87961f87ba35",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_1faff2a0-f2fa-45ed-bee2-ec60b34248df",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T17:58:27.642Z"
+  },
+  {
+    "id": "audit_7bdacb7b-72ff-4887-92c9-a23af68e96fc",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_1faff2a0-f2fa-45ed-bee2-ec60b34248df",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T17:58:27.645Z"
+  },
+  {
+    "id": "audit_4d6e9ee1-6c40-4931-a4df-4d8385e046f0",
+    "userId": "user_0cedcb2d-337c-41e3-af26-2a981f138200",
+    "userEmail": "alex.morgan_978793@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_29010e24-66ef-473b-822a-72528eaf06c4",
+    "details": {
+      "orderNumber": "ORD-2026-461994",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-04T18:02:59.237Z"
+  },
+  {
+    "id": "audit_3611ac03-26fa-4363-971a-463ebfd99ad6",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_15aca48c-213e-4327-9584-6c58ee56b846",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-04T18:02:59.450Z"
+  },
+  {
+    "id": "audit_e86db380-4164-435d-a99a-8730b2a30cef",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_15aca48c-213e-4327-9584-6c58ee56b846",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-04T18:02:59.453Z"
+  },
+  {
+    "id": "audit_45835747-4aef-43aa-9d91-57dbb8a849bf",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_29010e24-66ef-473b-822a-72528eaf06c4",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T18:02:59.473Z"
+  },
+  {
+    "id": "audit_34804cfa-e842-4fb2-8bdd-f1f7b7623bce",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_29010e24-66ef-473b-822a-72528eaf06c4",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-04T18:02:59.480Z"
+  },
+  {
+    "id": "audit_d1280f80-042a-46fa-a37f-03561ecd2261",
+    "userId": "user_0cedcb2d-337c-41e3-af26-2a981f138200",
+    "userEmail": "alex.morgan_978793@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-04T18:02:59.639Z"
+  },
+  {
+    "id": "audit_ecdd9a37-8736-440d-aacb-100f740fb4ee",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_fa8b95dc-8c31-477d-b2c2-521d83770586",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-04T18:02:59.702Z"
+  },
+  {
+    "id": "audit_a771843d-973e-437a-8703-29dcec12e4da",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_fa8b95dc-8c31-477d-b2c2-521d83770586",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-04T18:02:59.704Z"
+  },
+  {
+    "id": "audit_7d36be1f-9428-4d12-bdf9-baa213dbc63b",
+    "userId": "user_3f1d7909-72af-462b-ae61-e4b04d374091",
+    "userEmail": "alex.morgan_325758@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_f00e6511-9791-42b4-9af5-ef80f106a496",
+    "details": {
+      "orderNumber": "ORD-2026-376577",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-05T06:38:46.038Z"
+  },
+  {
+    "id": "audit_8e38e987-1969-437a-83bf-d172400bd6a1",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_261a4f2c-ab53-4f3b-962d-7d76d1c47341",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-05T06:38:46.165Z"
+  },
+  {
+    "id": "audit_088e6a42-e970-4652-ad3f-99064ffb7ef3",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_261a4f2c-ab53-4f3b-962d-7d76d1c47341",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-05T06:38:46.166Z"
+  },
+  {
+    "id": "audit_4cc44e84-c6f1-46ea-a35b-37549b3acc55",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_f00e6511-9791-42b4-9af5-ef80f106a496",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-05T06:38:46.188Z"
+  },
+  {
+    "id": "audit_6e3493a5-ed7a-4e22-b8bf-64699c8fd90e",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_f00e6511-9791-42b4-9af5-ef80f106a496",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-05T06:38:46.190Z"
+  },
+  {
+    "id": "audit_2b95b95c-67b2-4b13-ab70-1eab932a8328",
+    "userId": "user_3f1d7909-72af-462b-ae61-e4b04d374091",
+    "userEmail": "alex.morgan_325758@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-05T06:38:46.299Z"
+  },
+  {
+    "id": "audit_ca3595b9-6ce9-4266-a580-228340745183",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_25b54b0d-129e-402c-a069-a9e684a7ea8a",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-05T06:38:46.363Z"
+  },
+  {
+    "id": "audit_1fdc6a44-c7ac-4e34-a4c2-dd168bfa288a",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_25b54b0d-129e-402c-a069-a9e684a7ea8a",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-05T06:38:46.368Z"
+  },
+  {
+    "id": "audit_b39df524-5253-424c-97aa-8c3c28b1e202",
+    "userId": "user_f59167d9-83a0-4845-bb0f-0ac22ad75eff",
+    "userEmail": "alex.morgan_977371@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "ORDER_CREATED",
+    "resource": "orders",
+    "resourceId": "order_852beb91-179c-4fd7-9c7d-0cfdd56ecc69",
+    "details": {
+      "orderNumber": "ORD-2026-182096",
+      "total": 491.31,
+      "itemCount": 1
+    },
+    "createdAt": "2026-09-05T09:02:57.871Z"
+  },
+  {
+    "id": "audit_15db6f1e-74c5-466a-8e53-3312555e2143",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_APPROVED",
+    "resource": "products",
+    "resourceId": "prod_eceda31e-ae52-452a-818d-cacd8fb4d447",
+    "details": {
+      "status": "APPROVED",
+      "productName": "Enterprise Ultra NVMe 4TB SSD Module"
+    },
+    "createdAt": "2026-09-05T09:02:58.094Z"
+  },
+  {
+    "id": "audit_d667a7ad-459e-41fb-9597-342d830618c3",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_APPROVED",
+    "resource": "product",
+    "resourceId": "prod_eceda31e-ae52-452a-818d-cacd8fb4d447",
+    "details": {
+      "status": "APPROVED"
+    },
+    "createdAt": "2026-09-05T09:02:58.096Z"
+  },
+  {
+    "id": "audit_fc0d8293-436e-4c28-9d5e-ce1db3953605",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ORDER_STATUS_SHIPPED",
+    "resource": "orders",
+    "resourceId": "order_852beb91-179c-4fd7-9c7d-0cfdd56ecc69",
+    "details": {
+      "previousStatus": "CONFIRMED",
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-05T09:02:58.130Z"
+  },
+  {
+    "id": "audit_f243156d-37e5-45e7-af2c-d575387315c0",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_ORDER_STATUS_UPDATED",
+    "resource": "order",
+    "resourceId": "order_852beb91-179c-4fd7-9c7d-0cfdd56ecc69",
+    "details": {
+      "newStatus": "SHIPPED"
+    },
+    "createdAt": "2026-09-05T09:02:58.134Z"
+  },
+  {
+    "id": "audit_2e75f475-e0e9-4035-ad65-8e1b4120ee41",
+    "userId": "user_f59167d9-83a0-4845-bb0f-0ac22ad75eff",
+    "userEmail": "alex.morgan_977371@enterprise.com",
+    "userRole": "CUSTOMER",
+    "action": "UNAUTHORIZED_ROLE_ACCESS_ATTEMPT",
+    "resource": "/api/admin/audit-logs",
+    "details": {
+      "requiredRoles": [
+        "ADMIN"
+      ],
+      "currentRole": "CUSTOMER"
+    },
+    "createdAt": "2026-09-05T09:02:58.291Z"
+  },
+  {
+    "id": "audit_3f56c953-1f64-48a5-a25e-b0de2fecdebd",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "PRODUCT_STATUS_REJECTED",
+    "resource": "products",
+    "resourceId": "prod_e4abe64a-6b42-4678-86e3-63ccb089afd4",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications",
+      "productName": "Rejected Sample Product"
+    },
+    "createdAt": "2026-09-05T09:02:58.340Z"
+  },
+  {
+    "id": "audit_368b0ae1-cf7b-4814-a06b-487be2b75749",
+    "userId": "user_admin_1",
+    "userEmail": "admin@nextech.com",
+    "userRole": "ADMIN",
+    "action": "ADMIN_PRODUCT_REJECTED",
+    "resource": "product",
+    "resourceId": "prod_e4abe64a-6b42-4678-86e3-63ccb089afd4",
+    "details": {
+      "status": "REJECTED",
+      "rejectionReason": "Incomplete warranty and technical specifications"
+    },
+    "createdAt": "2026-09-05T09:02:58.343Z"
+  }
+]

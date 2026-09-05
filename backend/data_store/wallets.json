@@ -1,0 +1,194 @@
+[
+  {
+    "id": "wallet_user_customer_1",
+    "userId": "user_customer_1",
+    "balance": 54000,
+    "currency": "AED",
+    "createdAt": "2026-09-02T09:00:43.104Z",
+    "updatedAt": "2026-09-03T12:59:30.674Z"
+  },
+  {
+    "id": "wallet_user_reseller_1",
+    "userId": "user_reseller_1",
+    "balance": 3000,
+    "currency": "AED",
+    "createdAt": "2026-09-02T13:07:25.283Z",
+    "updatedAt": "2026-09-02T13:09:08.299Z"
+  },
+  {
+    "id": "wallet_user_6c0127d6-56ff-44e7-9d91-ccf7075ee74e",
+    "userId": "user_6c0127d6-56ff-44e7-9d91-ccf7075ee74e",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T14:04:59.464Z",
+    "updatedAt": "2026-09-04T14:04:59.789Z"
+  },
+  {
+    "id": "wallet_user_1d699bc8-6a5e-4ba8-a598-5f885daaaf50",
+    "userId": "user_1d699bc8-6a5e-4ba8-a598-5f885daaaf50",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T14:07:56.358Z",
+    "updatedAt": "2026-09-04T14:07:56.529Z"
+  },
+  {
+    "id": "wallet_user_dd7c0f8b-2eac-4bbe-b7ed-b74df179d7b3",
+    "userId": "user_dd7c0f8b-2eac-4bbe-b7ed-b74df179d7b3",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T14:09:21.899Z",
+    "updatedAt": "2026-09-04T14:09:22.100Z"
+  },
+  {
+    "id": "wallet_user_7f4c9cb5-5b22-4b0a-805a-777293d2a074",
+    "userId": "user_7f4c9cb5-5b22-4b0a-805a-777293d2a074",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T14:17:52.122Z",
+    "updatedAt": "2026-09-04T14:17:52.739Z"
+  },
+  {
+    "id": "wallet_user_a3ea73ed-194b-4594-ab19-5d7c62538a75",
+    "userId": "user_a3ea73ed-194b-4594-ab19-5d7c62538a75",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T14:37:32.034Z",
+    "updatedAt": "2026-09-04T14:37:32.379Z"
+  },
+  {
+    "id": "wallet_user_b64bbace-b0f8-418f-bf0f-59cd65d48822",
+    "userId": "user_b64bbace-b0f8-418f-bf0f-59cd65d48822",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T14:48:44.479Z",
+    "updatedAt": "2026-09-04T14:48:44.649Z"
+  },
+  {
+    "id": "wallet_user_84c83c57-c1f9-4f8d-b996-33818be82e14",
+    "userId": "user_84c83c57-c1f9-4f8d-b996-33818be82e14",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T15:14:01.730Z",
+    "updatedAt": "2026-09-04T15:14:02.048Z"
+  },
+  {
+    "id": "wallet_user_77eaa955-e42d-413c-8ea9-9c8a4af8728e",
+    "userId": "user_77eaa955-e42d-413c-8ea9-9c8a4af8728e",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T15:38:34.828Z",
+    "updatedAt": "2026-09-04T15:38:35.108Z"
+  },
+  {
+    "id": "wallet_user_e1151215-6ec8-4c56-b7cf-18496248a8eb",
+    "userId": "user_e1151215-6ec8-4c56-b7cf-18496248a8eb",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T15:59:06.502Z",
+    "updatedAt": "2026-09-04T15:59:06.659Z"
+  },
+  {
+    "id": "wallet_user_7dd5f1b9-ae93-499b-aff3-f3258b38de0c",
+    "userId": "user_7dd5f1b9-ae93-499b-aff3-f3258b38de0c",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T15:59:27.087Z",
+    "updatedAt": "2026-09-04T15:59:27.258Z"
+  },
+  {
+    "id": "wallet_user_df57cd25-6890-434e-99d5-6cb1967de8e3",
+    "userId": "user_df57cd25-6890-434e-99d5-6cb1967de8e3",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T15:59:50.510Z",
+    "updatedAt": "2026-09-04T15:59:50.740Z"
+  },
+  {
+    "id": "wallet_user_58bcedf4-5578-475f-a28d-fdc647711426",
+    "userId": "user_58bcedf4-5578-475f-a28d-fdc647711426",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T16:04:59.652Z",
+    "updatedAt": "2026-09-04T16:04:59.844Z"
+  },
+  {
+    "id": "wallet_user_d9c317ba-17b0-4bc7-b04a-54a8bac6619c",
+    "userId": "user_d9c317ba-17b0-4bc7-b04a-54a8bac6619c",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T16:25:13.470Z",
+    "updatedAt": "2026-09-04T16:25:13.654Z"
+  },
+  {
+    "id": "wallet_user_65a69757-364f-4b38-b3ea-b526e5222398",
+    "userId": "user_65a69757-364f-4b38-b3ea-b526e5222398",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T16:25:31.765Z",
+    "updatedAt": "2026-09-04T16:25:31.888Z"
+  },
+  {
+    "id": "wallet_user_b6ceb68a-8dcb-4354-bc70-ad07efb986b2",
+    "userId": "user_b6ceb68a-8dcb-4354-bc70-ad07efb986b2",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T16:44:35.978Z",
+    "updatedAt": "2026-09-04T16:44:36.200Z"
+  },
+  {
+    "id": "wallet_user_e581bb91-6705-4489-a7d9-bf5fffd92b08",
+    "userId": "user_e581bb91-6705-4489-a7d9-bf5fffd92b08",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T16:45:12.945Z",
+    "updatedAt": "2026-09-04T16:45:13.368Z"
+  },
+  {
+    "id": "wallet_user_35106ac8-a91f-4f9d-8ad2-20c6cbbbb461",
+    "userId": "user_35106ac8-a91f-4f9d-8ad2-20c6cbbbb461",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T17:21:25.666Z",
+    "updatedAt": "2026-09-04T17:21:25.923Z"
+  },
+  {
+    "id": "wallet_user_5e30c771-820a-4bf4-9d87-0a82a5cf4e37",
+    "userId": "user_5e30c771-820a-4bf4-9d87-0a82a5cf4e37",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T17:53:32.685Z",
+    "updatedAt": "2026-09-04T17:53:32.956Z"
+  },
+  {
+    "id": "wallet_user_fda7ed06-8a9b-45d0-b5c1-d8478c471998",
+    "userId": "user_fda7ed06-8a9b-45d0-b5c1-d8478c471998",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T17:58:27.014Z",
+    "updatedAt": "2026-09-04T17:58:27.201Z"
+  },
+  {
+    "id": "wallet_user_0cedcb2d-337c-41e3-af26-2a981f138200",
+    "userId": "user_0cedcb2d-337c-41e3-af26-2a981f138200",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-04T18:02:58.883Z",
+    "updatedAt": "2026-09-04T18:02:59.195Z"
+  },
+  {
+    "id": "wallet_user_3f1d7909-72af-462b-ae61-e4b04d374091",
+    "userId": "user_3f1d7909-72af-462b-ae61-e4b04d374091",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-05T06:38:45.816Z",
+    "updatedAt": "2026-09-05T06:38:46.019Z"
+  },
+  {
+    "id": "wallet_user_f59167d9-83a0-4845-bb0f-0ac22ad75eff",
+    "userId": "user_f59167d9-83a0-4845-bb0f-0ac22ad75eff",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-05T09:02:57.426Z",
+    "updatedAt": "2026-09-05T09:02:57.831Z"
+  }
+]

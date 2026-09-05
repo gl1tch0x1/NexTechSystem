@@ -1,0 +1,42 @@
+[
+  {
+    "id": "reseller_comnet_101",
+    "userId": "user_reseller_1",
+    "resellerCode": "comnet101",
+    "username": "comnet101",
+    "email": "reseller@comnet.com",
+    "businessName": "ComNet IT Distribution LLC",
+    "displayName": "ComNet Hardware Store",
+    "phone": "+971 55 987 6543",
+    "logo": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=300&q=80",
+    "subdomain": "comnet101",
+    "address": {
+      "id": "addr_res_1",
+      "fullName": "ComNet Distribution Center",
+      "phone": "+971 55 987 6543",
+      "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "postalCode": "11223",
+      "isDefaultShipping": true,
+      "isDefaultBilling": true
+    },
+    "businessInformation": {
+      "taxNumber": "TRN-100492819200003",
+      "tradeLicense": "DED-849201",
+      "description": "Authorized Tier-1 Distributor for Enterprise Networking and High-End Gaming Hardware in the GCC region.",
+      "website": "https://comnet.ae"
+    },
+    "status": "ACTIVE",
+    "productCount": 8,
+    "salesStats": {
+      "totalRevenue": 171438,
+      "totalOrders": 27,
+      "unitsSold": 35
+    },
+    "commissionRate": 8,
+    "createdAt": "2026-09-02T09:00:43.066Z",
+    "updatedAt": "2026-09-03T18:06:21.071Z"
+  }
+]

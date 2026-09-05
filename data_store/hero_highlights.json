@@ -1,0 +1,156 @@
+[
+  {
+    "id": "hero_gpu",
+    "tabLabel": "GPU",
+    "name": "ASUS ROG Strix RTX 4090 OC 24GB",
+    "brand": "ASUS ROG",
+    "category": "Graphics Processing Unit (GPU)",
+    "badge": "AI & Render Flagship",
+    "iconName": "Zap",
+    "specs": [
+      {
+        "label": "Architecture",
+        "value": "Ada Lovelace 4nm"
+      },
+      {
+        "label": "VRAM",
+        "value": "24GB GDDR6X 384-bit"
+      },
+      {
+        "label": "CUDA Cores",
+        "value": "16,384 Cores"
+      },
+      {
+        "label": "TDP Power",
+        "value": "450W (1000W Req)"
+      }
+    ],
+    "matchQueries": [
+      "rtx 4090",
+      "4090",
+      "rtx-4090",
+      "geforce"
+    ],
+    "defaultImage": "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80",
+    "defaultPrice": 7499,
+    "tagline": "World-leading graphics compute for 4K ray tracing & LLM inference.",
+    "powerRating": "450W TDP",
+    "order": 1,
+    "isActive": true
+  },
+  {
+    "id": "hero_cpu",
+    "tabLabel": "CPU",
+    "name": "Intel Core i9-14900K 24-Core Desktop CPU",
+    "brand": "Intel",
+    "category": "Processor (CPU)",
+    "badge": "Compute Benchmark King",
+    "iconName": "Cpu",
+    "specs": [
+      {
+        "label": "Cores / Threads",
+        "value": "24C (8P+16E) / 32T"
+      },
+      {
+        "label": "Max Frequency",
+        "value": "Up to 6.0 GHz"
+      },
+      {
+        "label": "Socket Type",
+        "value": "LGA1700 (Z790)"
+      },
+      {
+        "label": "Memory Support",
+        "value": "DDR5 5600 / DDR4"
+      }
+    ],
+    "matchQueries": [
+      "14900k",
+      "i9-14900k",
+      "intel core i9"
+    ],
+    "defaultImage": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80",
+    "defaultPrice": 2099,
+    "tagline": "Extreme single-thread frequency and 32-thread multi-tasking power.",
+    "powerRating": "253W Max",
+    "order": 2,
+    "isActive": true
+  },
+  {
+    "id": "hero_server",
+    "tabLabel": "SERVER",
+    "name": "Dell PowerEdge R760 2U Rackmount Server",
+    "brand": "Dell Technologies",
+    "category": "Enterprise Server Node",
+    "badge": "Mission-Critical Node",
+    "iconName": "Server",
+    "specs": [
+      {
+        "label": "Dual Socket",
+        "value": "Intel Xeon Scalable 4th Gen"
+      },
+      {
+        "label": "Memory",
+        "value": "Up to 8TB DDR5 ECC Reg"
+      },
+      {
+        "label": "Form Factor",
+        "value": "2U Rack with iDRAC9"
+      },
+      {
+        "label": "Redundancy",
+        "value": "Dual 1400W Titanium"
+      }
+    ],
+    "matchQueries": [
+      "poweredge",
+      "r760",
+      "rack server",
+      "dell poweredge"
+    ],
+    "defaultImage": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
+    "defaultPrice": 18499,
+    "tagline": "Redundant high-density virtualization and enterprise database compute.",
+    "powerRating": "Dual 1400W",
+    "order": 3,
+    "isActive": true
+  },
+  {
+    "id": "hero_ssd",
+    "tabLabel": "SSD",
+    "name": "Samsung 990 PRO 4TB PCIe 4.0 NVMe SSD",
+    "brand": "Samsung Semiconductor",
+    "category": "High-Throughput Storage",
+    "badge": "Gen4 Speed Benchmark",
+    "iconName": "HardDrive",
+    "specs": [
+      {
+        "label": "Seq. Read Speed",
+        "value": "Up to 7,450 MB/s"
+      },
+      {
+        "label": "Seq. Write Speed",
+        "value": "Up to 6,900 MB/s"
+      },
+      {
+        "label": "Controller",
+        "value": "Samsung Pascal Controller"
+      },
+      {
+        "label": "Durability",
+        "value": "2,400 TBW 5-Year"
+      }
+    ],
+    "matchQueries": [
+      "990 pro",
+      "samsung 990",
+      "990-pro"
+    ],
+    "defaultImage": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80",
+    "defaultPrice": 1699,
+    "tagline": "Instant boot times, sub-second 4K video asset scrubbing, and gaming speed.",
+    "powerRating": "7.8W Max",
+    "order": 4,
+    "isActive": true
+  }
+]

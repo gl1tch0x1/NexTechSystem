@@ -1,0 +1,72 @@
+[
+  {
+    "id": "cat_laptops",
+    "name": "Laptops",
+    "slug": "laptops",
+    "description": "Ultrabooks, gaming laptops, and mobile workstations",
+    "icon": "Laptop",
+    "order": 1,
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "cat_desktops",
+    "name": "Desktop Computers",
+    "slug": "desktops",
+    "description": "Pre-built gaming rigs and enterprise workstations",
+    "icon": "Monitor",
+    "order": 2,
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "cat_components",
+    "name": "PC Components",
+    "slug": "components",
+    "description": "CPUs, GPUs, Motherboards, RAM, and Power Supplies",
+    "icon": "Cpu",
+    "order": 3,
+    "isActive": true,
+    "productCount": 10
+  },
+  {
+    "id": "cat_servers",
+    "name": "Servers & Enterprise",
+    "slug": "servers",
+    "description": "Rack servers, Xeon/EPYC hardware, and NAS storage",
+    "icon": "Server",
+    "order": 4,
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "cat_networking",
+    "name": "Networking Devices",
+    "slug": "networking",
+    "description": "Routers, managed switches, access points, and firewalls",
+    "icon": "Network",
+    "order": 5,
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "cat_storage",
+    "name": "Storage & Drives",
+    "slug": "storage",
+    "description": "High-speed PCIe Gen5 NVMe SSDs, Enterprise HDDs",
+    "icon": "HardDrive",
+    "order": 6,
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "cat_accessories",
+    "name": "Accessories & Peripherals",
+    "slug": "accessories",
+    "description": "Mechanical keyboards, 4K monitors, and headsets",
+    "icon": "Keyboard",
+    "order": 7,
+    "isActive": true,
+    "productCount": 4
+  }
+]

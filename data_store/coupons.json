@@ -1,0 +1,29 @@
+[
+  {
+    "id": "coupon_tech10",
+    "code": "TECH10",
+    "discountType": "PERCENTAGE",
+    "discountValue": 10,
+    "minOrderAmount": 1000,
+    "maxDiscountAmount": 500,
+    "usageLimit": 1000,
+    "usageCount": 42,
+    "perUserLimit": 2,
+    "startDate": "2026-01-01T00:00:00Z",
+    "endDate": "2026-12-31T23:59:59Z",
+    "isActive": true
+  },
+  {
+    "id": "coupon_summer50",
+    "code": "SUMMER50",
+    "discountType": "FIXED",
+    "discountValue": 50,
+    "minOrderAmount": 500,
+    "usageLimit": 500,
+    "usageCount": 18,
+    "perUserLimit": 1,
+    "startDate": "2026-01-01T00:00:00Z",
+    "endDate": "2026-12-31T23:59:59Z",
+    "isActive": true
+  }
+]

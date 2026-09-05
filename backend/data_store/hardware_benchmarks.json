@@ -1,0 +1,104 @@
+[
+  {
+    "id": "bench_cpu",
+    "label": "CPU Multithread Compute",
+    "iconName": "Cpu",
+    "title": "Cinebench 2024 Multi-Core Rendering Benchmark",
+    "metric": "Points (Higher is Better)",
+    "benchmarks": [
+      {
+        "name": "Intel Core i9-14900K (24C/32T 6.0GHz)",
+        "score": 2280,
+        "maxScore": 2400,
+        "isTop": true,
+        "badge": "Flagship"
+      },
+      {
+        "name": "AMD Ryzen 9 7950X (16C/32T 5.7GHz)",
+        "score": 2160,
+        "maxScore": 2400
+      },
+      {
+        "name": "Intel Core i7-14700K (20C/28T 5.6GHz)",
+        "score": 1940,
+        "maxScore": 2400
+      },
+      {
+        "name": "Intel Core i9-13900K (24C/32T 5.8GHz)",
+        "score": 2190,
+        "maxScore": 2400
+      }
+    ],
+    "note": "Tested on Z790 motherboard with 64GB DDR5-6000MHz memory and 360mm liquid AIO.",
+    "order": 1,
+    "isActive": true
+  },
+  {
+    "id": "bench_gpu",
+    "label": "GPU AI & 3D Rendering",
+    "iconName": "Zap",
+    "title": "3DMark TimeSpy Extreme Graphics Score",
+    "metric": "Graphics Points (Higher is Better)",
+    "benchmarks": [
+      {
+        "name": "NVIDIA GeForce RTX 4090 24GB GDDR6X",
+        "score": 19850,
+        "maxScore": 21000,
+        "isTop": true,
+        "badge": "1st in Class"
+      },
+      {
+        "name": "NVIDIA GeForce RTX 4080 Super 16GB",
+        "score": 14200,
+        "maxScore": 21000
+      },
+      {
+        "name": "NVIDIA GeForce RTX 4070 Ti Super 16GB",
+        "score": 11950,
+        "maxScore": 21000
+      },
+      {
+        "name": "NVIDIA GeForce RTX 3090 24GB (Previous Gen)",
+        "score": 10400,
+        "maxScore": 21000
+      }
+    ],
+    "note": "Direct 4K rasterization and ray-tracing performance tested with DLSS 3.5 frame gen.",
+    "order": 2,
+    "isActive": true
+  },
+  {
+    "id": "bench_storage",
+    "label": "NVMe Gen4/Gen5 Throughput",
+    "iconName": "HardDrive",
+    "title": "Sequential Read Speed Benchmark (CrystalDiskMark)",
+    "metric": "MB/s (Higher is Better)",
+    "benchmarks": [
+      {
+        "name": "Samsung 990 PRO 2TB PCIe 4.0 NVMe",
+        "score": 7450,
+        "maxScore": 8000,
+        "isTop": true,
+        "badge": "7,450 MB/s"
+      },
+      {
+        "name": "Crucial T500 2TB PCIe 4.0 NVMe",
+        "score": 7300,
+        "maxScore": 8000
+      },
+      {
+        "name": "Samsung 980 PRO 1TB PCIe 4.0 NVMe",
+        "score": 7000,
+        "maxScore": 8000
+      },
+      {
+        "name": "Standard SATA 2.5\" SSD",
+        "score": 550,
+        "maxScore": 8000
+      }
+    ],
+    "note": "Direct PCIe Gen 4.0 x4 M.2 slot test on aluminum thermal heatsink.",
+    "order": 3,
+    "isActive": true
+  }
+]
