@@ -29,14 +29,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const applyTheme = (t: Theme) => {
     const root = document.documentElement;
-    let effective: 'light' | 'dark' = 'dark';
+    const effective: 'light' | 'dark' =
+      t === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : t;
 
-    if (t === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      effective = prefersDark ? 'dark' : 'light';
-    } else {
-      effective = t;
-    }
 
     setResolvedTheme(effective);
 

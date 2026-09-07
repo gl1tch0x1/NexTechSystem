@@ -98,7 +98,10 @@ export function cloudflareSecurityMiddleware(req: Request, res: Response, next: 
     if (isMalicious) {
       securityTelemetry.blockedAttacks++;
       securityTelemetry.lastAttackTimestamp = new Date().toISOString();
-      console.warn('🛡️ [Cloudflare DDoS Shield] Blocked exploit probe from IP: %s | Agent: %s', clientIp, userAgent);
+      const sanitizedIp = String(clientIp).replace(/[\r\n]/g, '');
+      const sanitizedAgent = String(userAgent).replace(/[\r\n]/g, '').slice(0, 150);
+      console.warn('🛡️ [Cloudflare DDoS Shield] Blocked exploit probe from IP: %s | Agent: %s', sanitizedIp, sanitizedAgent);
+
       res.status(403).json({
         success: false,
         error: {
@@ -113,6 +116,7 @@ export function cloudflareSecurityMiddleware(req: Request, res: Response, next: 
   }
 
   // 3. Sliding Window Anti-DDoS Rate Limiter
+
   const now = Date.now();
   const windowMs = Number(process.env.DDOS_RATE_LIMIT_WINDOW_MS) || 60000; // 1 minute
   const maxRequests = Number(process.env.DDOS_RATE_LIMIT_MAX_REQUESTS) || 120; // 120 req/min per IP

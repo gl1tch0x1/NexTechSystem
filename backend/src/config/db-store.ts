@@ -132,7 +132,10 @@ export class DbStore {
     } catch (err: any) {
       // Non-blocking background log for Firestore sync
       if (process.env.DEBUG_FIRESTORE) {
-        console.warn('[Firestore Sync Notice] %s/%s: %s', collection, id, err?.message || err);
+        const cleanCol = String(collection).replace(/[\r\n]/g, '');
+        const cleanId = String(id).replace(/[\r\n]/g, '');
+        const cleanErr = String(err?.message || err).replace(/[\r\n]/g, '');
+        console.warn('[Firestore Sync Notice] %s/%s: %s', cleanCol, cleanId, cleanErr);
       }
     }
   }
@@ -146,10 +149,14 @@ export class DbStore {
       }
     } catch (err: any) {
       if (process.env.DEBUG_FIRESTORE) {
-        console.warn('[Firestore Delete Notice] %s/%s: %s', collection, id, err?.message || err);
+        const cleanCol = String(collection).replace(/[\r\n]/g, '');
+        const cleanId = String(id).replace(/[\r\n]/g, '');
+        const cleanErr = String(err?.message || err).replace(/[\r\n]/g, '');
+        console.warn('[Firestore Delete Notice] %s/%s: %s', cleanCol, cleanId, cleanErr);
       }
     }
   }
+
 
   // --- Core CRUD Operations with Dual Cloud Sync ---
 
