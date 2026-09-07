@@ -1,0 +1,79 @@
+name: Continuous Integration & Quality Guard
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: Secret & Hygiene Leak Check
+  security-leak-check:
+    name: 🔒 Secret Leak & Hygiene Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check for Committed .env or Secret Files
+        run: |
+          echo "Scanning tracked git files for unauthorized .env files..."
+          if git ls-files | grep -E '(\.env$|\.env\.local$|\.pem$|\.key$|service-account.*\.json)'; then
+            echo "❌ ERROR: Detected sensitive files tracked by git!"
+            exit 1
+          else
+            echo "✅ Secret hygiene check passed: No live secrets or .env files tracked."
+          fi
+
+  # Job 2: Backend Lint & Typecheck
+  backend-quality:
+    name: ⚙️ Backend Test & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Backend Typecheck & Lint
+        working-directory: ./backend
+        run: npm run lint
+
+  # Job 3: Frontend Build & Typecheck
+  frontend-quality:
+    name: 🌐 Frontend Build & Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Frontend Build (Next.js SSR & Static Analysis)
+        working-directory: ./frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
+          NEXT_PUBLIC_CLOUDFLARE_PROTECTION_ENABLED: "true"

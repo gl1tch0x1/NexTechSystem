@@ -1,0 +1,74 @@
+version: 2
+updates:
+  # 1. Root Monorepo Dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "root"
+      - "automated-pr"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # 2. Backend Service Dependencies
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:15"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    groups:
+      backend-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "backend"
+      - "security"
+      - "automated-pr"
+    commit-message:
+      prefix: "chore(deps-backend)"
+
+  # 3. Frontend Next.js Web App Dependencies
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:30"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    groups:
+      frontend-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "security"
+      - "automated-pr"
+    commit-message:
+      prefix: "chore(deps-frontend)"
+
+  # 4. GitHub Actions Workflow Updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "ci/cd"
+      - "github-actions"
+    commit-message:
+      prefix: "ci(actions)"
