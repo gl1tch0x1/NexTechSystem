@@ -36,26 +36,28 @@ export class ExcelImportService {
    * Intelligently detect headers and map to internal canonical schema
    */
   public detectColumnMappings(headers: string[]): Record<string, string> {
-    const mappings: Record<string, string> = {};
+    const mappingsMap = new Map<string, string>();
+    const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
     for (const rawHeader of headers) {
+      if (typeof rawHeader !== 'string' || FORBIDDEN_KEYS.has(rawHeader.trim())) continue;
       const cleanHeader = rawHeader.toLowerCase().trim();
       let matched = false;
 
       for (const [canonicalKey, synonyms] of Object.entries(CANONICAL_FIELD_MAPPINGS)) {
         if (synonyms.some(s => cleanHeader === s || cleanHeader.includes(s))) {
-          mappings[rawHeader] = canonicalKey;
+          mappingsMap.set(rawHeader, canonicalKey);
           matched = true;
           break;
         }
       }
 
       if (!matched) {
-        mappings[rawHeader] = cleanHeader.replace(/[^a-z0-9]/g, '_');
+        mappingsMap.set(rawHeader, cleanHeader.replace(/[^a-z0-9]/g, '_'));
       }
     }
 
-    return mappings;
+    return Object.fromEntries(mappingsMap);
   }
 
   /**
@@ -105,21 +107,27 @@ export class ExcelImportService {
       const rowNumber = index + 2; // Excel 1-indexed plus header row
       const missingRequiredFields: string[] = [];
       const invalidFields: { field: string; message: string }[] = [];
-      const normalizedSpecs: Record<string, string> = {};
+      const normalizedSpecsMap = new Map<string, string>();
+      const mappedDataMap = new Map<string, string>();
+      const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
-      const mappedData: Record<string, any> = {};
-
-      // Map raw headers to canonical fields
+      // Map raw headers to canonical fields safely via Map
       for (const [header, val] of Object.entries(rawRow)) {
+        if (FORBIDDEN_KEYS.has(header)) continue;
         const canonicalKey = mappings[header] || header;
+        if (FORBIDDEN_KEYS.has(canonicalKey)) continue;
         const strVal = String(val).trim();
-        mappedData[canonicalKey] = strVal;
+        mappedDataMap.set(canonicalKey, strVal);
 
         // Collect tech specs
         if (['processor', 'ram', 'storage', 'gpu', 'socket', 'formFactor', 'wattage'].includes(canonicalKey) && strVal) {
-          normalizedSpecs[canonicalKey] = strVal;
+          normalizedSpecsMap.set(canonicalKey, strVal);
         }
       }
+
+      const mappedData: Record<string, any> = Object.fromEntries(mappedDataMap);
+      const normalizedSpecs: Record<string, string> = Object.fromEntries(normalizedSpecsMap);
+
 
       // Mandatory validation checks
       if (!mappedData.name) missingRequiredFields.push('Product Name');

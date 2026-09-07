@@ -24,13 +24,22 @@ export class ProductController {
       ...otherParams
     } = req.query;
 
-    // Collect custom specs
-    const specifications: Record<string, string> = {};
+    // Collect and sanitize custom specs safely via Map to prevent prototype pollution / remote property injection
+    const FORBIDDEN_PROPERTIES = new Set(['__proto__', 'constructor', 'prototype', 'resellerId', 'status']);
+    const SPEC_KEY_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
+
+    const specMap = new Map<string, string>();
     for (const [k, v] of Object.entries(otherParams)) {
-      if (typeof v === 'string' && !['resellerId', 'status'].includes(k)) {
-        specifications[k] = v;
+      if (
+        typeof v === 'string' &&
+        !FORBIDDEN_PROPERTIES.has(k) &&
+        SPEC_KEY_REGEX.test(k)
+      ) {
+        specMap.set(k, v);
       }
     }
+    const specifications: Record<string, string> = Object.fromEntries(specMap);
+
 
     const result = await productService.getProducts({
       categoryId: category as string,
