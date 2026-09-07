@@ -3,14 +3,15 @@
 [![Next.js 15](https://img.shields.io/badge/Next.js-15.2.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React 19](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![Express.js](https://img.shields.io/badge/Express.js-4.21.2-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
+[![Express.js](https://img.shields.io/badge/Express.js-5.2.1-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Cloudflare Turnstile](https://img.shields.io/badge/Cloudflare-Turnstile_Protected-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
 [![CI Pipeline](https://img.shields.io/badge/CI%2FCD-Passing-2ea44f?style=for-the-badge&logo=githubactions)](.github/workflows/ci.yml)
 [![CodeQL Security](https://img.shields.io/badge/CodeQL-Protected-blue?style=for-the-badge&logo=github)](.github/workflows/codeql.yml)
 [![Dependabot](https://img.shields.io/badge/Dependabot-Active-0366d6?style=for-the-badge&logo=dependabot)](.github/dependabot.yml)
 [![Test Suite](https://img.shields.io/badge/Tests-38%2F38_Passed-brightgreen?style=for-the-badge)](backend/test-suite.ts)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-red?style=for-the-badge&logo=shield)](SECURITY.md)
+[![Endpoint Suite](https://img.shields.io/badge/Endpoints-26%2F26_Operational-brightgreen?style=for-the-badge)](scratch/test-endpoints.js)
+[![Security Policy](https://img.shields.io/badge/Security-Hardened-red?style=for-the-badge&logo=shield)](SECURITY.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 > **NexTech Systems** is a state-of-the-art enterprise B2B/B2C computer hardware and technology commerce platform. Built for high-performance computing (HPC), AI workstation hardware, gaming rigs, datacenter rack servers, and enterprise networking gear, it incorporates a real-time **PC Builder Compatibility Engine**, **Multi-Tenant Reseller Portals**, **Authoritative Server-Side Pricing & E-Bill Invoicing**, **Customer Wallet Ledger**, **Real-Time BI Analytics**, and **Cloudflare Enterprise Security & Anti-Bot Protection**.
@@ -52,6 +53,8 @@
     - [3. Environment Configuration](#3-environment-configuration)
   - [🧪 Demo Accounts \& Credentials](#-demo-accounts--credentials)
   - [🛡️ Automated Integration Test Suite](#️-automated-integration-test-suite)
+  - [🔬 Scratchpad Live Endpoint Verification](#-scratchpad-live-endpoint-verification)
+  - [🛡️ Platform Security Hardening \& Defenses](#️-platform-security-hardening--defenses)
   - [📄 License](#-license)
 
 ---
@@ -383,7 +386,7 @@ graph LR
 | **Styling & Design System** | [Tailwind CSS](https://tailwindcss.com/) | `3.4.17` | Dark mode, glassmorphism, responsive grids, custom scrollbars |
 | **Icons & Iconography** | [Lucide React](https://lucide.dev/) | `^1.16.0` | Consistent, lightweight vector icons |
 | **Data Visualization** | [Recharts](https://recharts.org/) | `2.15.1` | Timeseries revenue curves, conversion funnels, benchmark scatter charts |
-| **Backend Runtime** | [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/) | `4.21.2` | High-throughput modular REST API Gateway |
+| **Backend Runtime** | [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/) | `5.2.1` | High-throughput modular REST API Gateway |
 | **TypeScript Engine** | [TypeScript](https://www.typescriptlang.org/) & [TSX](https://github.com/privatenumber/tsx) | `5.8.2` | Strict end-to-end type safety and rapid dev runtime execution |
 | **Spreadsheet Ingestion** | [SheetJS (xlsx)](https://sheetjs.com/) | `0.18.5` | Binary Excel (`.xlsx`) template generation and file parsing |
 | **Security & Auth** | [JWT](https://jwt.io/), [Helmet](https://helmetjs.github.io/), [Turnstile](https://www.cloudflare.com/) | `9.0.2` | Stateless auth tokens, RBAC guards, Cloudflare bot defense |
@@ -553,7 +556,29 @@ eCommerce_Store/
 
 ---
 
-### 1. Backend Setup
+### Quick Start (Root Workspace Commands)
+
+From the project root directory, you can manage both workspaces with unified npm commands:
+
+```bash
+# 1. Install all dependencies across both workspaces
+npm install
+
+# 2. Run both backend and frontend development servers
+npm run dev:backend   # Express REST API at http://localhost:5000
+npm run dev:frontend  # Next.js 15 Web App at http://localhost:3000
+
+# 3. Execute all automated verification suites
+npm run test:backend           # 38 End-to-End Integration Tests
+node scratch/test-endpoints.js # 26 Live Endpoint Verification Probes
+
+# 4. Build both workspaces for production
+npm run build
+```
+
+---
+
+### 1. Backend Setup (Direct)
 
 ```bash
 # Navigate to backend directory
@@ -681,6 +706,79 @@ npx tsx test-suite.ts
 
 ---
 
+## 🔬 Scratchpad Live Endpoint Verification
+
+In addition to the domain test suite, the project includes an automated end-to-end endpoint verification tool located at [`scratch/test-endpoints.js`](file:///e:/eCommerce_Store/scratch/test-endpoints.js). This runner performs live HTTP probes against both the backend API server (`:5000`) and the Next.js frontend (`:3000`), validating full application availability, SSR route rendering, and catalog taxonomy endpoints.
+
+```bash
+# Run the scratchpad live endpoint suite
+node scratch/test-endpoints.js
+```
+
+### 📋 Live Endpoint Verification Matrix (26/26 Passing)
+
+| # | System Area | Endpoint / Route Description | Target URL | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| **01** | Backend Gateway | Backend Health Check Probe | `http://localhost:5000/api/health` | **PASS (200)** |
+| **02** | Backend Catalog | Hardware Catalog Listing | `http://localhost:5000/api/products` | **PASS (200)** |
+| **03** | Backend Taxonomy | Hardware Categories Tree | `http://localhost:5000/api/products/categories` | **PASS (200)** |
+| **04** | Backend Taxonomy | Manufacturer Brands Listing | `http://localhost:5000/api/products/brands` | **PASS (200)** |
+| **05** | Frontend App | Storefront Homepage | `http://localhost:3000/` | **PASS (200)** |
+| **06** | Frontend App | Products Catalog & Filter Matrix | `http://localhost:3000/products` | **PASS (200)** |
+| **07** | Frontend App | Product Detail View (ASUS RTX 4090) | `http://localhost:3000/products/asus-rog-strix-geforce-rtx-4090-oc-24gb` | **PASS (200)** |
+| **08** | Frontend App | Custom PC Builder Compatibility Matrix | `http://localhost:3000/pc-builder` | **PASS (200)** |
+| **09** | Frontend App | Hardware Side-by-Side Comparison Matrix | `http://localhost:3000/compare` | **PASS (200)** |
+| **10** | Frontend App | Shopping Cart State & Calculations | `http://localhost:3000/cart` | **PASS (200)** |
+| **11** | Frontend App | Secure Checkout & Address Form | `http://localhost:3000/checkout` | **PASS (200)** |
+| **12** | Customer Portal | Customer Account Dashboard | `http://localhost:3000/account` | **PASS (200)** |
+| **13** | Customer Portal | Customer Order History & Status | `http://localhost:3000/account/orders` | **PASS (200)** |
+| **14** | Customer Portal | Printable Digital Tax E-Bill | `http://localhost:3000/account/orders/ORD-2026-933963` | **PASS (200)** |
+| **15** | Customer Portal | Customer Wallet & Ledger View | `http://localhost:3000/account/wallet` | **PASS (200)** |
+| **16** | Customer Portal | Saved Items Customer Wishlist | `http://localhost:3000/account/wishlist` | **PASS (200)** |
+| **17** | Admin Center | Admin Operational Command Center | `http://localhost:3000/admin` | **PASS (200)** |
+| **18** | Admin Center | Catalog Moderation & Approvals | `http://localhost:3000/admin/products` | **PASS (200)** |
+| **19** | Admin Center | Reseller Partner Management | `http://localhost:3000/admin/resellers` | **PASS (200)** |
+| **20** | Admin Center | Global Order Operations & Fulfillment | `http://localhost:3000/admin/orders` | **PASS (200)** |
+| **21** | Admin Center | Promotional Coupons Manager | `http://localhost:3000/admin/coupons` | **PASS (200)** |
+| **22** | Admin Center | Administrative & Security Audit Trail | `http://localhost:3000/admin/audit-logs` | **PASS (200)** |
+| **23** | Reseller Portal | ComNet Reseller Partner Dashboard | `http://localhost:3000/reseller/comnet101/dashboard` | **PASS (200)** |
+| **24** | Reseller Portal | Reseller Bulk Excel Listing Importer | `http://localhost:3000/reseller/comnet101/products/import` | **PASS (200)** |
+| **25** | Reseller Portal | Reseller Warehouse Inventory Control | `http://localhost:3000/reseller/comnet101/inventory` | **PASS (200)** |
+| **26** | Reseller Portal | Reseller Order Routing & Fulfillment | `http://localhost:3000/reseller/comnet101/orders` | **PASS (200)** |
+
+---
+
+## 🛡️ Platform Security Hardening & Defenses
+
+The platform adheres to enterprise defense-in-depth principles, addressing vulnerabilities from edge routing down to the database ledger layer:
+
+1. **🔐 Cryptographic Password Protection & Credential Sanitization**:
+   - Integrated salted SHA-256 password hashing on registration and authentication.
+   - Enforced password requirements on login with backward compatibility for initial seed accounts.
+   - All controller responses pass through `sanitizeUser()` to strip password hashes and prevent sensitive field leakage.
+
+2. **📦 Business Logic & Inventory Tamper Resistance**:
+   - Strict positive integer bounds (`1 <= quantity <= 999`) enforced in cart calculation and checkout routines.
+   - Eliminates negative-quantity exploits (which previously could invert order subtotals and falsely increment product stock).
+
+3. **💳 Financial Integrity & Wallet Bounds**:
+   - Digital wallet additions and administrative ledger adjustments enforce strict finite numeric bounds (`Number.isFinite(amount)`), positive thresholds, upper caps (50,000 AED single top-up, 1,000,000 AED admin adjustment), and 2-decimal rounding.
+   - Responses unify `balance` and `wallet` payload structures for reliable client consumption.
+
+4. **🛡️ Edge Protection, Anti-DDoS & Proxy Security**:
+   - Configured Express `trust proxy` for secure reverse proxy deployment behind Cloudflare / NGINX.
+   - Sliding-window in-memory anti-DDoS rate limiter (`120 req/min` in production) with dynamic scaling during automated test execution.
+   - Malicious bot signature detection blocking automated vulnerability probes (`sqlmap`, `nikto`, `masscan`).
+
+5. **🛡️ Administrative Defensive Guards**:
+   - Auto-slug derivation and mandatory name/code validation across coupon, category, and brand creation endpoints, eliminating potential unhandled exceptions.
+
+6. **⚡ Client Hydration Stabilization**:
+   - Configured `suppressHydrationWarning` on the HTML body element, preventing React 19 hydration mismatches caused by client-side theme script initialization.
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
