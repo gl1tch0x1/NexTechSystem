@@ -5,8 +5,8 @@ import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, isSupported, Analytics } from 'firebase/analytics';
 
 const rawApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-// Valid Google API keys always start with AIza
-const isLiveKey = !!rawApiKey && rawApiKey.startsWith('AIza') && rawApiKey.length > 20;
+// Valid Google API keys always start with AIza and are not demo placeholders
+export const isLiveKey = !!rawApiKey && rawApiKey.startsWith('AIza') && rawApiKey.length > 20 && !rawApiKey.includes('DemoStore');
 
 export const firebaseConfig = {
   apiKey: isLiveKey ? rawApiKey : 'AIzaSyDemoStoreSSRSafeKey2026NexTechEnterprise',

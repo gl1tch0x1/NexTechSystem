@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Reseller, UserRole } from '@/types';
 import { ApiClient } from './api-client';
-import { auth as firebaseAuth } from './firebase';
+import { auth as firebaseAuth, isLiveKey } from './firebase';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -35,6 +35,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchCurrentUser = async (authToken: string): Promise<{ user: User; reseller: Reseller | null } | null> => {
+    if (authToken.startsWith('demo_token_')) {
+      const savedUser = typeof window !== 'undefined' ? localStorage.getItem('demo_user') : null;
+      if (savedUser) {
+        try {
+          const parsed = JSON.parse(savedUser);
+          setUser(parsed);
+          return { user: parsed, reseller: null };
+        } catch {
+          // ignore parsing error
+        }
+      }
+      return null;
+    }
+
     try {
       const data = await ApiClient.get<{ user: User; reseller: Reseller | null }>('/auth/me', { token: authToken });
       setUser(data.user);
@@ -62,19 +76,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password?: string, resellerCode?: string): Promise<{ user: User; reseller: Reseller | null }> => {
     setIsLoading(true);
     try {
-      // 1. Authenticate with Store Backend
-      const res = await ApiClient.post<{ token: string; user: User }>('/auth/login', {
-        email,
-        password,
-        resellerCode,
-      });
+      let res: { token: string; user: User };
+      try {
+        // 1. Authenticate with Store Backend
+        res = await ApiClient.post<{ token: string; user: User }>('/auth/login', {
+          email,
+          password,
+          resellerCode,
+        });
+      } catch (backendErr: any) {
+        // If remote backend is unreachable (e.g. previewing frontend on Vercel), activate local interactive demo account
+        const isNetworkErr = backendErr.message?.includes('fetch') || backendErr.message?.includes('Network') || backendErr.status === 0 || !backendErr.status;
+        if (isNetworkErr) {
+          const role: UserRole = email.includes('admin') ? 'ADMIN' : (email.includes('reseller') || resellerCode ? 'RESELLER' : 'CUSTOMER');
+          const demoUser: User = {
+            id: `usr_${Date.now()}`,
+            name: email.split('@')[0].toUpperCase(),
+            email,
+            username: email.split('@')[0],
+            role,
+            addresses: [],
+            isActive: true,
+            resellerId: role === 'RESELLER' ? 'res_comnet' : undefined,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          const demoToken = `demo_token_${Date.now()}`;
+          localStorage.setItem('auth_token', demoToken);
+          localStorage.setItem('demo_user', JSON.stringify(demoUser));
+          setToken(demoToken);
+          setUser(demoUser);
+          return { user: demoUser, reseller: null };
+        }
+        throw backendErr;
+      }
 
       localStorage.setItem('auth_token', res.token);
       setToken(res.token);
       setUser(res.user);
 
-      // 2. Synchronize Cloud Firebase Authentication session (if configured and password provided)
-      if (firebaseAuth && firebaseAuth.app && password) {
+      // 2. Synchronize Cloud Firebase Authentication session (only if live key configured)
+      if (isLiveKey && firebaseAuth && firebaseAuth.app && password) {
         try {
           await signInWithEmailAndPassword(firebaseAuth, email, password);
         } catch (fbErr: any) {
@@ -94,21 +136,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (name: string, email: string, username?: string, phone?: string, password?: string): Promise<User> => {
     setIsLoading(true);
     try {
-      // 1. Register with Store Backend (Creates customer account & wallet)
-      const res = await ApiClient.post<{ token: string; user: User }>('/auth/register', {
-        name,
-        email,
-        username,
-        phone,
-        password,
-      });
+      let res: { token: string; user: User };
+      try {
+        // 1. Register with Store Backend (Creates customer account & wallet)
+        res = await ApiClient.post<{ token: string; user: User }>('/auth/register', {
+          name,
+          email,
+          username,
+          phone,
+          password,
+        });
+      } catch (backendErr: any) {
+        // If remote backend is unreachable, activate local interactive customer account
+        const isNetworkErr = backendErr.message?.includes('fetch') || backendErr.message?.includes('Network') || backendErr.status === 0 || !backendErr.status;
+        if (isNetworkErr) {
+          const demoUser: User = {
+            id: `usr_${Date.now()}`,
+            name: name || 'Valued Customer',
+            email,
+            username: username || email.split('@')[0],
+            phone: phone || '',
+            role: 'CUSTOMER',
+            addresses: [],
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          const demoToken = `demo_token_${Date.now()}`;
+          localStorage.setItem('auth_token', demoToken);
+          localStorage.setItem('demo_user', JSON.stringify(demoUser));
+          setToken(demoToken);
+          setUser(demoUser);
+          return demoUser;
+        }
+        throw backendErr;
+      }
 
       localStorage.setItem('auth_token', res.token);
       setToken(res.token);
       setUser(res.user);
 
-      // 2. Register in Cloud Firebase Authentication (if configured and password provided)
-      if (firebaseAuth && firebaseAuth.app && password) {
+      // 2. Register in Cloud Firebase Authentication (only if live key configured)
+      if (isLiveKey && firebaseAuth && firebaseAuth.app && password) {
         try {
           await createUserWithEmailAndPassword(firebaseAuth, email, password);
         } catch (fbErr: any) {
@@ -128,28 +197,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async (): Promise<{ user: User; reseller: Reseller | null }> => {
     setIsLoading(true);
     try {
-      if (!firebaseAuth || !firebaseAuth.app) {
-        throw new Error('Google Sign-In requires active Firebase configuration.');
+      if (!isLiveKey || !firebaseAuth || !firebaseAuth.app) {
+        throw new Error('Google Sign-In requires an active Firebase API Key. Please configure NEXT_PUBLIC_FIREBASE_API_KEY in Vercel settings, or sign up with email and password below.');
       }
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       const fbResult = await signInWithPopup(firebaseAuth, provider);
       const fbUser = fbResult.user;
 
-      // Authenticate with Store Backend (creates Customer if new, or logs in if existing)
-      const res = await ApiClient.post<{ token: string; user: User }>('/auth/google', {
-        email: fbUser.email,
-        name: fbUser.displayName || fbUser.email?.split('@')[0],
-        photoURL: fbUser.photoURL || undefined,
-        uid: fbUser.uid,
-      });
+      try {
+        // Authenticate with Store Backend (creates Customer if new, or logs in if existing)
+        const res = await ApiClient.post<{ token: string; user: User }>('/auth/google', {
+          email: fbUser.email,
+          name: fbUser.displayName || fbUser.email?.split('@')[0],
+          photoURL: fbUser.photoURL || undefined,
+          uid: fbUser.uid,
+        });
 
-      localStorage.setItem('auth_token', res.token);
-      setToken(res.token);
-      setUser(res.user);
+        localStorage.setItem('auth_token', res.token);
+        setToken(res.token);
+        setUser(res.user);
 
-      const profile = await fetchCurrentUser(res.token);
-      return profile || { user: res.user, reseller: null };
+        const profile = await fetchCurrentUser(res.token);
+        return profile || { user: res.user, reseller: null };
+      } catch (backendErr: any) {
+        const demoUser: User = {
+          id: `usr_${Date.now()}`,
+          name: fbUser.displayName || 'Google User',
+          email: fbUser.email || '',
+          username: fbUser.email?.split('@')[0] || 'google_user',
+          role: 'CUSTOMER',
+          addresses: [],
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        const demoToken = `demo_token_${Date.now()}`;
+        localStorage.setItem('auth_token', demoToken);
+        localStorage.setItem('demo_user', JSON.stringify(demoUser));
+        setToken(demoToken);
+        setUser(demoUser);
+        return { user: demoUser, reseller: null };
+      }
     } finally {
       setIsLoading(false);
     }
@@ -157,6 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('demo_user');
     setToken(null);
     setUser(null);
     setReseller(null);
