@@ -778,6 +778,32 @@ The platform adheres to enterprise defense-in-depth principles, addressing vulne
 
 ---
 
+## 🚀 Cloud Deployment & CI/CD
+
+The platform is architected for zero-downtime deployment on modern edge and container infrastructures:
+
+### Vercel Deployment (Frontend)
+1. **Framework Preset**: Next.js
+2. **Root Directory**: `.` (Monorepo root) or `./frontend`
+3. **Build Command**: `npm --workspace=frontend run build` (or automatic `npm run build`)
+4. **Output Directory**: Automatically detected by Next.js preset
+5. **Environment Variables**:
+   - `NEXT_PUBLIC_API_URL`: URL of the deployed Express backend (e.g., `https://api.nextechsystems.com` or Render / Railway URL)
+   - `NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY`: Turnstile public key
+   - `NEXT_PUBLIC_ENABLE_TURNSTILE`: `true` (or `false` in development)
+
+### Node.js / Docker Deployment (Backend)
+1. **Runtime**: Node.js 18+ LTS
+2. **Build Command**: `npm --workspace=backend run build`
+3. **Start Command**: `npm --workspace=backend run start`
+4. **Environment Variables**:
+   - `PORT`: `5000`
+   - `JWT_SECRET`: Secure cryptographic key
+   - `CORS_ORIGIN`: Deployed Vercel URL (e.g., `https://nextechsystem.vercel.app`)
+   - `RATE_LIMIT_MAX`: `120`
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
