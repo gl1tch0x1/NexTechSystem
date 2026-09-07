@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import routes from './routes/index.js';
 import { errorHandler } from './middleware/error.js';
 import { cloudflareSecurityMiddleware } from './middlewares/cloudflare-security.middleware.js';
+import { apiLimiter } from './middlewares/rate-limiter.middleware.js';
 import { initializeFirebase } from './config/firebase.js';
 import { runSeed } from './seed/seed.js';
 import { productRepository } from './repositories/product.repository.js';
@@ -23,8 +24,9 @@ export function createApp(): Express {
   app.use(express.json({ limit: '15mb' }));
   app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-  // 3. Mount Master REST API Routes
-  app.use('/api', routes);
+  // 3. Mount Master REST API Routes with standard Rate Limiting
+  app.use('/api', apiLimiter, routes);
+
 
   // 4. Centralized Error Handling
   app.use(errorHandler);

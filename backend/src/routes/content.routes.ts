@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { contentController } from '../controllers/content.controller.js';
+import { apiLimiter } from '../middlewares/rate-limiter.middleware.js';
 
 const router = Router();
+
+// Apply rate limiter
+router.use(apiLimiter);
 
 // Public dynamic content endpoints
 router.get('/homepage', contentController.getHomePageContent);
@@ -14,3 +18,4 @@ router.get('/features', contentController.getFeatures);
 router.get('/builder-presets', contentController.getBuilderPresets);
 
 export default router;
+

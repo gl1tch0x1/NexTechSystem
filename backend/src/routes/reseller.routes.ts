@@ -3,6 +3,7 @@ import multer from 'multer';
 import { resellerController } from '../controllers/reseller.controller.js';
 import { authenticate } from '../middleware/auth.js';
 import { requireRole, requireResellerTenant } from '../middleware/rbac.js';
+import { resellerLimiter } from '../middlewares/rate-limiter.middleware.js';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -11,11 +12,15 @@ const upload = multer({
 
 const router = Router();
 
+// Apply reseller rate limiter
+router.use(resellerLimiter);
+
 // Publicly downloadable listing template
 router.get('/template/download', (req, res, next) => resellerController.downloadTemplate(req, res).catch(next));
 
 // Reseller routes require authentication and RESELLER role (or ADMIN)
 router.use(authenticate, requireRole('RESELLER', 'ADMIN'), requireResellerTenant);
+
 
 // Dashboard & Profile
 router.get('/dashboard', (req, res, next) => resellerController.getDashboard(req, res).catch(next));

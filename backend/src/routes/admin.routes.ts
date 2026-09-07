@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { adminController } from '../controllers/admin.controller.js';
 import { authenticate } from '../middleware/auth.js';
 import { requireRole } from '../middleware/rbac.js';
+import { adminLimiter } from '../middlewares/rate-limiter.middleware.js';
 
 const router = Router();
 
-// Require ADMIN role for all routes in this router
-router.use(authenticate, requireRole('ADMIN'));
+// Apply dedicated admin rate limiter and RBAC
+router.use(adminLimiter, authenticate, requireRole('ADMIN'));
+
 
 // 1. Dashboard & Real-Time Analytics
 router.get('/dashboard', (req, res, next) => adminController.getDashboard(req, res).catch(next));

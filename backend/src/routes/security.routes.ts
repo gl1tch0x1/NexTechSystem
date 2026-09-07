@@ -4,14 +4,18 @@ import {
   securityTelemetry,
   getClientIp,
 } from '../middlewares/cloudflare-security.middleware.js';
+import { securityLimiter } from '../middlewares/rate-limiter.middleware.js';
 
 const router = Router();
+
+// Apply dedicated security rate limiter to all security routes
+router.use(securityLimiter);
 
 /**
  * @route POST /api/security/verify-turnstile
  * @desc Verify Cloudflare Turnstile bot check challenge token
  */
-router.post('/verify-turnstile', async (req: Request, res: Response) => {
+router.post('/verify-turnstile', securityLimiter, async (req: Request, res: Response) => {
   const { token } = req.body;
   const clientIp = getClientIp(req);
 
