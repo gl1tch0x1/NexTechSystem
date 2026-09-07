@@ -9,7 +9,7 @@ on:
     - cron: '30 1 * * 0' # Every Sunday at 01:30 UTC
 
 concurrency:
-  group: codeql-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

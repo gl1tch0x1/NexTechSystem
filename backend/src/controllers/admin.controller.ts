@@ -213,23 +213,25 @@ export class AdminController {
       return;
     }
 
-    if (!amount || amount <= 0) {
-      res.status(400).json({ success: false, error: { code: 'INVALID_AMOUNT', message: 'Amount must be greater than 0.' } });
+    const num = parseFloat(amount);
+    if (!Number.isFinite(num) || num <= 0 || num > 1000000) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_AMOUNT', message: 'Amount must be a positive number up to 1,000,000 AED.' } });
       return;
     }
+    const cleanAmount = Math.round(num * 100) / 100;
 
     let result;
     if (type === 'DEBIT') {
       result = await walletService.debitWallet({
         userId: id,
-        amount: Number(amount),
+        amount: cleanAmount,
         reason: reason || 'Administrative Debit Adjustment',
         referenceId: `admin_adj_${uuidv4().substring(0, 8)}`,
       });
     } else {
       result = await walletService.creditWallet({
         userId: id,
-        amount: Number(amount),
+        amount: cleanAmount,
         reason: reason || 'Administrative Credit Adjustment',
         referenceId: `admin_adj_${uuidv4().substring(0, 8)}`,
         type: 'CREDIT',
@@ -282,8 +284,18 @@ export class AdminController {
   }
 
   async createCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { name } = req.body;
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Category name is required.' } });
+      return;
+    }
+    const cleanName = name.trim();
+    const slug = req.body.slug || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
     const cat = await categoryRepository.create({
       ...req.body,
+      name: cleanName,
+      slug,
       id: req.body.id || `cat_${uuidv4()}`,
       productCount: 0,
       isActive: true,
@@ -314,8 +326,18 @@ export class AdminController {
   }
 
   async createBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { name } = req.body;
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Brand name is required.' } });
+      return;
+    }
+    const cleanName = name.trim();
+    const slug = req.body.slug || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
     const brand = await brandRepository.create({
       ...req.body,
+      name: cleanName,
+      slug,
       id: req.body.id || `brand_${uuidv4()}`,
       productCount: 0,
       isActive: true,
@@ -346,12 +368,21 @@ export class AdminController {
   }
 
   async createCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { code, discountType, discountValue } = req.body;
+    if (!code || typeof code !== 'string' || !code.trim()) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Coupon code is required.' } });
+      return;
+    }
+
+    const cleanCode = code.trim().toUpperCase();
     const coupon = await couponRepository.create({
       ...req.body,
       id: `coupon_${uuidv4()}`,
-      code: req.body.code.toUpperCase(),
+      code: cleanCode,
+      discountType: discountType || 'PERCENTAGE',
+      discountValue: discountValue != null ? Number(discountValue) : 10,
       usageCount: 0,
-      isActive: true,
+      isActive: req.body.isActive !== false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });

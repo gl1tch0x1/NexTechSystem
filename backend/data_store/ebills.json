@@ -2405,5 +2405,131 @@
     "paymentMethod": "WALLET",
     "paymentStatus": "PAID",
     "createdAt": "2026-09-05T09:02:57.847Z"
+  },
+  {
+    "id": "ebill_c1b52e80-3bc9-44b3-8591-c07c6a32b489",
+    "orderId": "order_923b1c48-09a7-4c14-b9fa-089deba75d93",
+    "orderNumber": "ORD-2026-676492",
+    "invoiceNumber": "INV-2026-682594",
+    "issuedDate": "2026-09-07T14:57:15.500Z",
+    "dueDate": "2026-09-07T14:57:15.500Z",
+    "sellerInfo": {
+      "name": "NexTech Systems",
+      "taxNumber": "TRN-100294819200003",
+      "address": "NexTech Systems Tower, Silicon Oasis Tech Park, Dubai, UAE",
+      "phone": "+971 4 800 6398",
+      "email": "support@nextechsystems.ae"
+    },
+    "customerInfo": {
+      "name": "Alex Morgan",
+      "email": "alex.morgan_035356@enterprise.com",
+      "phone": "",
+      "address": {
+        "fullName": "Alex Morgan",
+        "company": "Enterprise Solutions LLC",
+        "street": "Sheikh Zayed Road, Building 4",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "zipCode": "00000",
+        "phone": "+971 50 123 4567"
+      }
+    },
+    "items": [
+      {
+        "productId": "prod_ram_64gb",
+        "productName": "Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 6000MHz CL30",
+        "sku": "CMP64GX5M2B6000C30",
+        "slug": "corsair-dominator-titanium-rgb-64gb-ddr5-6000mhz",
+        "thumbnail": "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80",
+        "quantity": 1,
+        "unitPrice": 1049,
+        "discount": 150,
+        "subtotal": 1049,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "ramType": "DDR5",
+          "capacity": "64GB (2x32GB)",
+          "speed": "6000 MHz",
+          "timings": "CL30-36-36-76",
+          "voltage": "1.40V",
+          "profile": "Intel XMP 3.0 & AMD EXPO"
+        }
+      }
+    ],
+    "subtotal": 1049,
+    "discount": 104.9,
+    "couponCode": "TECH10",
+    "tax": 47.21,
+    "shipping": 0,
+    "walletDeduction": 500,
+    "total": 491.31,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "createdAt": "2026-09-07T14:57:15.500Z"
+  },
+  {
+    "id": "ebill_c15a94fe-34dc-4405-8cf4-4e6c78ecf499",
+    "orderId": "order_8234afb0-2f0a-495a-95bc-3f64ab8ec174",
+    "orderNumber": "ORD-2026-793749",
+    "invoiceNumber": "INV-2026-894446",
+    "issuedDate": "2026-09-07T15:16:35.155Z",
+    "dueDate": "2026-09-07T15:16:35.155Z",
+    "sellerInfo": {
+      "name": "NexTech Systems",
+      "taxNumber": "TRN-100294819200003",
+      "address": "NexTech Systems Tower, Silicon Oasis Tech Park, Dubai, UAE",
+      "phone": "+971 4 800 6398",
+      "email": "support@nextechsystems.ae"
+    },
+    "customerInfo": {
+      "name": "Alex Morgan",
+      "email": "alex.morgan_195012@enterprise.com",
+      "phone": "",
+      "address": {
+        "fullName": "Alex Morgan",
+        "company": "Enterprise Solutions LLC",
+        "street": "Sheikh Zayed Road, Building 4",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "zipCode": "00000",
+        "phone": "+971 50 123 4567"
+      }
+    },
+    "items": [
+      {
+        "productId": "prod_ram_64gb",
+        "productName": "Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 6000MHz CL30",
+        "sku": "CMP64GX5M2B6000C30",
+        "slug": "corsair-dominator-titanium-rgb-64gb-ddr5-6000mhz",
+        "thumbnail": "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80",
+        "quantity": 1,
+        "unitPrice": 1049,
+        "discount": 150,
+        "subtotal": 1049,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "ramType": "DDR5",
+          "capacity": "64GB (2x32GB)",
+          "speed": "6000 MHz",
+          "timings": "CL30-36-36-76",
+          "voltage": "1.40V",
+          "profile": "Intel XMP 3.0 & AMD EXPO"
+        }
+      }
+    ],
+    "subtotal": 1049,
+    "discount": 104.9,
+    "couponCode": "TECH10",
+    "tax": 47.21,
+    "shipping": 0,
+    "walletDeduction": 500,
+    "total": 491.31,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "createdAt": "2026-09-07T15:16:35.155Z"
   }
 ]

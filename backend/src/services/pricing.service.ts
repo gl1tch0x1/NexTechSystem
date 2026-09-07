@@ -30,6 +30,16 @@ export class PricingService {
     let subtotal = 0;
 
     for (const reqItem of params.items) {
+      if (!reqItem || typeof reqItem.productId !== 'string' || !reqItem.productId.trim()) {
+        throw new Error('Invalid cart item: productId is required');
+      }
+
+      const qty = Number(reqItem.quantity);
+      if (!Number.isInteger(qty) || qty <= 0 || qty > 999) {
+        throw new Error(`Invalid item quantity for product ${reqItem.productId}. Must be a positive integer between 1 and 999.`);
+      }
+      reqItem.quantity = qty;
+
       const product = params.productsMap.get(reqItem.productId);
       if (!product) {
         throw new Error(`Product not found: ${reqItem.productId}`);

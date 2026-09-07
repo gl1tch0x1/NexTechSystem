@@ -28,6 +28,19 @@ export class CartController {
       return;
     }
 
+    for (const it of items) {
+      if (!it || typeof it.productId !== 'string' || !it.productId.trim()) {
+        res.status(400).json({ success: false, error: { code: 'INVALID_ITEM', message: 'Item productId is required.' } });
+        return;
+      }
+      const q = Number(it.quantity);
+      if (!Number.isInteger(q) || q <= 0 || q > 999) {
+        res.status(400).json({ success: false, error: { code: 'INVALID_QUANTITY', message: 'Item quantity must be a positive integer between 1 and 999.' } });
+        return;
+      }
+      it.quantity = q;
+    }
+
     const productIds = items.map((it: any) => it.productId);
     const productsMap = new Map<string, any>();
 

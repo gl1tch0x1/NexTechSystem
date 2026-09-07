@@ -30,6 +30,17 @@ export class OrderService {
       throw new Error('Order must contain at least one item');
     }
 
+    for (const item of dto.items) {
+      if (!item || !item.productId || typeof item.productId !== 'string') {
+        throw new Error('Invalid order item: productId is required');
+      }
+      const qty = Number(item.quantity);
+      if (!Number.isInteger(qty) || qty <= 0 || qty > 999) {
+        throw new Error(`Invalid quantity for item "${item.productId}". Must be a positive integer between 1 and 999.`);
+      }
+      item.quantity = qty;
+    }
+
     // 1. Fetch products map from authoritative DB
     const productIds = dto.items.map(it => it.productId);
     const productsMap = new Map<string, any>();

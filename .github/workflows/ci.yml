@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -21,17 +21,17 @@ jobs:
 
       - name: Check for Committed .env or Secret Files
         run: |
-          echo "Scanning tracked git files for unauthorized .env files..."
-          if git ls-files | grep -E '(\.env$|\.env\.local$|\.pem$|\.key$|service-account.*\.json)'; then
+          echo "Scanning tracked git files for unauthorized .env and secret files..."
+          if git ls-files | grep -E '(\.env($|\.(local|production|development|test|staging))|\.pem$|\.key$|service-account.*\.json)'; then
             echo "❌ ERROR: Detected sensitive files tracked by git!"
             exit 1
           else
             echo "✅ Secret hygiene check passed: No live secrets or .env files tracked."
           fi
 
-  # Job 2: Backend Lint & Typecheck
+  # Job 2: Backend Lint, Typecheck & Build
   backend-quality:
-    name: ⚙️ Backend Test & Typecheck
+    name: ⚙️ Backend Test, Lint & Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -52,6 +52,10 @@ jobs:
         working-directory: ./backend
         run: npm run lint
 
+      - name: Backend Build Compilation
+        working-directory: ./backend
+        run: npm run build
+
   # Job 3: Frontend Build & Typecheck
   frontend-quality:
     name: 🌐 Frontend Build & Validation
@@ -70,6 +74,10 @@ jobs:
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: npm ci
+
+      - name: Frontend Static Typecheck
+        working-directory: ./frontend
+        run: npm run lint
 
       - name: Frontend Build (Next.js SSR & Static Analysis)
         working-directory: ./frontend

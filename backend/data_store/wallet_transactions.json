@@ -801,5 +801,49 @@
     "reason": "Payment for Order #Alex Morgan",
     "referenceId": "pending_order",
     "createdAt": "2026-09-05T09:02:57.834Z"
+  },
+  {
+    "id": "wtx_eb5b5ff0-5608-47b5-ab46-8d92ff825d69",
+    "userId": "user_8e3ede45-15fc-4671-81be-aa4ed757a667",
+    "type": "CREDIT",
+    "amount": 5000,
+    "balanceBefore": 0,
+    "balanceAfter": 5000,
+    "reason": "Direct Customer Wallet Top-up (Demo Sandbox)",
+    "referenceId": "topup_card",
+    "createdAt": "2026-09-07T14:57:15.478Z"
+  },
+  {
+    "id": "wtx_a6f5923a-0553-4470-8897-e151dbb15880",
+    "userId": "user_8e3ede45-15fc-4671-81be-aa4ed757a667",
+    "type": "DEBIT",
+    "amount": 500,
+    "balanceBefore": 5000,
+    "balanceAfter": 4500,
+    "reason": "Payment for Order #Alex Morgan",
+    "referenceId": "pending_order",
+    "createdAt": "2026-09-07T14:57:15.495Z"
+  },
+  {
+    "id": "wtx_be3b8ff2-8f6b-4ba6-980d-cc0a8b7725e8",
+    "userId": "user_096d3aac-ed06-4345-a1bf-28df5a053b0c",
+    "type": "CREDIT",
+    "amount": 5000,
+    "balanceBefore": 0,
+    "balanceAfter": 5000,
+    "reason": "Direct Customer Wallet Top-up (Demo Sandbox)",
+    "referenceId": "topup_card",
+    "createdAt": "2026-09-07T15:16:35.137Z"
+  },
+  {
+    "id": "wtx_cd700fd6-389b-4379-bd85-c159790283ca",
+    "userId": "user_096d3aac-ed06-4345-a1bf-28df5a053b0c",
+    "type": "DEBIT",
+    "amount": 500,
+    "balanceBefore": 5000,
+    "balanceAfter": 4500,
+    "reason": "Payment for Order #Alex Morgan",
+    "referenceId": "pending_order",
+    "createdAt": "2026-09-07T15:16:35.152Z"
   }
 ]

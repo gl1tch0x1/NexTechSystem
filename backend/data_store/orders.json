@@ -2951,5 +2951,161 @@
     "createdAt": "2026-09-05T09:02:57.838Z",
     "updatedAt": "2026-09-05T09:02:58.127Z",
     "eBillId": "ebill_770df23c-fb2b-4ef9-8cae-28a7fe6ea279"
+  },
+  {
+    "id": "order_923b1c48-09a7-4c14-b9fa-089deba75d93",
+    "orderNumber": "ORD-2026-676492",
+    "userId": "user_8e3ede45-15fc-4671-81be-aa4ed757a667",
+    "customerName": "Alex Morgan",
+    "customerEmail": "alex.morgan_035356@enterprise.com",
+    "customerPhone": "",
+    "items": [
+      {
+        "productId": "prod_ram_64gb",
+        "productName": "Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 6000MHz CL30",
+        "sku": "CMP64GX5M2B6000C30",
+        "slug": "corsair-dominator-titanium-rgb-64gb-ddr5-6000mhz",
+        "thumbnail": "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80",
+        "quantity": 1,
+        "unitPrice": 1049,
+        "discount": 150,
+        "subtotal": 1049,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "ramType": "DDR5",
+          "capacity": "64GB (2x32GB)",
+          "speed": "6000 MHz",
+          "timings": "CL30-36-36-76",
+          "voltage": "1.40V",
+          "profile": "Intel XMP 3.0 & AMD EXPO"
+        }
+      }
+    ],
+    "subtotal": 1049,
+    "discount": 104.9,
+    "couponCode": "TECH10",
+    "walletAmountUsed": 500,
+    "tax": 47.21,
+    "taxRate": 5,
+    "shippingFee": 0,
+    "total": 491.31,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "orderStatus": "SHIPPED",
+    "shippingAddress": {
+      "fullName": "Alex Morgan",
+      "company": "Enterprise Solutions LLC",
+      "street": "Sheikh Zayed Road, Building 4",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "zipCode": "00000",
+      "phone": "+971 50 123 4567"
+    },
+    "billingAddress": {
+      "fullName": "Alex Morgan",
+      "company": "Enterprise Solutions LLC",
+      "street": "Sheikh Zayed Road, Building 4",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "zipCode": "00000",
+      "phone": "+971 50 123 4567"
+    },
+    "statusHistory": [
+      {
+        "status": "CONFIRMED",
+        "note": "Order placed successfully and inventory allocated.",
+        "timestamp": "2026-09-07T14:57:15.497Z"
+      },
+      {
+        "status": "SHIPPED",
+        "note": "Status updated to SHIPPED",
+        "timestamp": "2026-09-07T14:57:15.570Z",
+        "updatedBy": "user_admin_1"
+      }
+    ],
+    "createdAt": "2026-09-07T14:57:15.497Z",
+    "updatedAt": "2026-09-07T14:57:15.570Z",
+    "eBillId": "ebill_c1b52e80-3bc9-44b3-8591-c07c6a32b489"
+  },
+  {
+    "id": "order_8234afb0-2f0a-495a-95bc-3f64ab8ec174",
+    "orderNumber": "ORD-2026-793749",
+    "userId": "user_096d3aac-ed06-4345-a1bf-28df5a053b0c",
+    "customerName": "Alex Morgan",
+    "customerEmail": "alex.morgan_195012@enterprise.com",
+    "customerPhone": "",
+    "items": [
+      {
+        "productId": "prod_ram_64gb",
+        "productName": "Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 6000MHz CL30",
+        "sku": "CMP64GX5M2B6000C30",
+        "slug": "corsair-dominator-titanium-rgb-64gb-ddr5-6000mhz",
+        "thumbnail": "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80",
+        "quantity": 1,
+        "unitPrice": 1049,
+        "discount": 150,
+        "subtotal": 1049,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "ramType": "DDR5",
+          "capacity": "64GB (2x32GB)",
+          "speed": "6000 MHz",
+          "timings": "CL30-36-36-76",
+          "voltage": "1.40V",
+          "profile": "Intel XMP 3.0 & AMD EXPO"
+        }
+      }
+    ],
+    "subtotal": 1049,
+    "discount": 104.9,
+    "couponCode": "TECH10",
+    "walletAmountUsed": 500,
+    "tax": 47.21,
+    "taxRate": 5,
+    "shippingFee": 0,
+    "total": 491.31,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "orderStatus": "SHIPPED",
+    "shippingAddress": {
+      "fullName": "Alex Morgan",
+      "company": "Enterprise Solutions LLC",
+      "street": "Sheikh Zayed Road, Building 4",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "zipCode": "00000",
+      "phone": "+971 50 123 4567"
+    },
+    "billingAddress": {
+      "fullName": "Alex Morgan",
+      "company": "Enterprise Solutions LLC",
+      "street": "Sheikh Zayed Road, Building 4",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "zipCode": "00000",
+      "phone": "+971 50 123 4567"
+    },
+    "statusHistory": [
+      {
+        "status": "CONFIRMED",
+        "note": "Order placed successfully and inventory allocated.",
+        "timestamp": "2026-09-07T15:16:35.153Z"
+      },
+      {
+        "status": "SHIPPED",
+        "note": "Status updated to SHIPPED",
+        "timestamp": "2026-09-07T15:16:35.229Z",
+        "updatedBy": "user_admin_1"
+      }
+    ],
+    "createdAt": "2026-09-07T15:16:35.153Z",
+    "updatedAt": "2026-09-07T15:16:35.229Z",
+    "eBillId": "ebill_c15a94fe-34dc-4405-8cf4-4e6c78ecf499"
   }
 ]

@@ -190,5 +190,29 @@
     "currency": "AED",
     "createdAt": "2026-09-05T09:02:57.426Z",
     "updatedAt": "2026-09-05T09:02:57.831Z"
+  },
+  {
+    "id": "wallet_user_8e3ede45-15fc-4671-81be-aa4ed757a667",
+    "userId": "user_8e3ede45-15fc-4671-81be-aa4ed757a667",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-07T14:57:15.385Z",
+    "updatedAt": "2026-09-07T14:57:15.494Z"
+  },
+  {
+    "id": "wallet_user_admin_1",
+    "userId": "user_admin_1",
+    "balance": 0,
+    "currency": "AED",
+    "createdAt": "2026-09-07T15:10:26.204Z",
+    "updatedAt": "2026-09-07T15:10:26.204Z"
+  },
+  {
+    "id": "wallet_user_096d3aac-ed06-4345-a1bf-28df5a053b0c",
+    "userId": "user_096d3aac-ed06-4345-a1bf-28df5a053b0c",
+    "balance": 4500,
+    "currency": "AED",
+    "createdAt": "2026-09-07T15:16:35.027Z",
+    "updatedAt": "2026-09-07T15:16:35.151Z"
   }
 ]

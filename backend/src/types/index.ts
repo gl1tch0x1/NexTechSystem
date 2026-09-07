@@ -24,6 +24,7 @@ export interface User {
   avatar?: string;
   addresses: Address[];
   resellerId?: string; // If role is RESELLER
+  passwordHash?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

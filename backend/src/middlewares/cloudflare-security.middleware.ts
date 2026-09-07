@@ -119,7 +119,8 @@ export function cloudflareSecurityMiddleware(req: Request, res: Response, next: 
 
   const now = Date.now();
   const windowMs = Number(process.env.DDOS_RATE_LIMIT_WINDOW_MS) || 60000; // 1 minute
-  const maxRequests = Number(process.env.DDOS_RATE_LIMIT_MAX_REQUESTS) || 120; // 120 req/min per IP
+  const isTest = process.env.NODE_ENV === 'test';
+  const maxRequests = Number(process.env.DDOS_RATE_LIMIT_MAX_REQUESTS) || (isTest ? 10000 : 120); // 120 req/min per IP in prod
 
   const record = ipRequestWindow.get(clientIp);
   if (!record || now > record.expiresAt) {

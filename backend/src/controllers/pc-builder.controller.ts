@@ -48,19 +48,29 @@ export class WalletController {
 
     const { amount } = req.body;
     const num = parseFloat(amount);
-    if (isNaN(num) || num <= 0) {
-      res.status(400).json({ success: false, error: { code: 'INVALID_AMOUNT', message: 'Amount must be a positive number.' } });
+    if (!Number.isFinite(num) || num <= 0 || num > 50000) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_AMOUNT', message: 'Amount must be a positive number up to 50,000 AED.' } });
       return;
     }
 
+    const cleanAmount = Math.round(num * 100) / 100;
+
     const result = await walletService.creditWallet({
       userId: req.user.id,
-      amount: num,
+      amount: cleanAmount,
       reason: 'Direct Customer Wallet Top-up (Demo Sandbox)',
       referenceId: 'topup_card',
     });
 
-    res.json({ success: true, data: result });
+    res.json({
+      success: true,
+      data: {
+        ...result.wallet,
+        wallet: result.wallet,
+        transaction: result.transaction,
+        balance: result.wallet.balance,
+      },
+    });
   }
 }
 

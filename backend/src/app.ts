@@ -15,6 +15,9 @@ import { ENV } from './config/env.js';
 export function createApp(): Express {
   const app = express();
 
+  // Trust first proxy hop (Cloudflare / NGINX reverse proxy)
+  app.set('trust proxy', 1);
+
   // 1. Initialize Firebase / Cloud components
   initializeFirebase();
 
