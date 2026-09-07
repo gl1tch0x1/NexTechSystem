@@ -6,7 +6,11 @@
 [![Express.js](https://img.shields.io/badge/Express.js-4.21.2-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Cloudflare Turnstile](https://img.shields.io/badge/Cloudflare-Turnstile_Protected-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
+[![CI Pipeline](https://img.shields.io/badge/CI%2FCD-Passing-2ea44f?style=for-the-badge&logo=githubactions)](.github/workflows/ci.yml)
+[![CodeQL Security](https://img.shields.io/badge/CodeQL-Protected-blue?style=for-the-badge&logo=github)](.github/workflows/codeql.yml)
+[![Dependabot](https://img.shields.io/badge/Dependabot-Active-0366d6?style=for-the-badge&logo=dependabot)](.github/dependabot.yml)
 [![Test Suite](https://img.shields.io/badge/Tests-38%2F38_Passed-brightgreen?style=for-the-badge)](backend/test-suite.ts)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-red?style=for-the-badge&logo=shield)](SECURITY.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 > **NexTech Systems** is a state-of-the-art enterprise B2B/B2C computer hardware and technology commerce platform. Built for high-performance computing (HPC), AI workstation hardware, gaming rigs, datacenter rack servers, and enterprise networking gear, it incorporates a real-time **PC Builder Compatibility Engine**, **Multi-Tenant Reseller Portals**, **Authoritative Server-Side Pricing & E-Bill Invoicing**, **Customer Wallet Ledger**, **Real-Time BI Analytics**, and **Cloudflare Enterprise Security & Anti-Bot Protection**.

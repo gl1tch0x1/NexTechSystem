@@ -1,0 +1,65 @@
+name: 🐛 Bug Report
+description: Report a reproducible bug or defect in NexTech Systems
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem! Please fill out the sections below.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Bug Summary
+      description: A clear and concise description of the defect.
+      placeholder: e.g. PC Builder allows incompatible CPU socket selection under specific filters
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Select the module where the issue occurs.
+      options:
+        - Storefront & Product Catalog
+        - PC Builder Compatibility Matrix
+        - Cart & Authoritative Pricing
+        - Checkout & E-Bill Invoicing
+        - Customer Wallet & Account
+        - Reseller Vendor Portal & Excel Importer
+        - Admin Command Center & Analytics
+        - Cloudflare Edge & Turnstile Security
+        - Backend API Gateway
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '/pc-builder'
+        2. Select 'Intel Core i9-14900K'
+        3. Switch motherboard filters...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Info
+      description: OS, Browser, Node.js version, etc.
+      value: |
+        - OS: Windows / macOS / Linux
+        - Browser: Chrome / Firefox / Safari / Edge
+        - Node Version: 20.x

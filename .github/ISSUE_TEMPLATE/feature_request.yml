@@ -1,0 +1,40 @@
+name: 💡 Feature Request
+description: Suggest a new feature, hardware component category, or enhancement
+labels: ["enhancement", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make **NexTech Systems** even better? We'd love to hear it!
+
+  - type: input
+    id: title
+    attributes:
+      label: Feature Title
+      description: Brief summary of the proposed feature.
+      placeholder: e.g. Add Liquid Cooling Loop Configurator to PC Builder
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Motivation
+      description: Is your feature request related to a specific problem or user need?
+      placeholder: Describe why this feature would be valuable...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Design
+      description: Describe the solution you'd like to see implemented.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds considered.
