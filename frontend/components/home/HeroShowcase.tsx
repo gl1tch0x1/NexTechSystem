@@ -207,7 +207,7 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.06]">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.08] sm:leading-[1.06]">
               Mission-Critical <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-tech-blue via-indigo-500 to-tech-cyan">
                 Compute Infrastructure.
@@ -215,22 +215,22 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl font-normal leading-relaxed">
+            <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl font-normal leading-relaxed">
               Equip your enterprise with factory-authorized Intel Core i9-14900K CPUs, NVIDIA RTX 4090 24GB GPUs, 2U Dell PowerEdge Xeon Servers, and 100GbE Cisco Infrastructure. Insured GCC same-day dispatch with 5-year ProSupport.
             </p>
 
             {/* Primary Action CTAs */}
-            <div className="flex flex-wrap items-center gap-3.5 pt-1">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
               <Link
                 href="/products"
-                className="px-6 py-3.5 rounded-xl bg-tech-blue text-white text-sm font-extrabold hover:bg-blue-600 shadow-lg shadow-tech-blue/25 hover:shadow-tech-glow flex items-center gap-2 transition-all group"
+                className="px-6 py-3.5 rounded-xl bg-tech-blue text-white text-xs sm:text-sm font-extrabold hover:bg-blue-600 shadow-lg shadow-tech-blue/25 hover:shadow-tech-glow flex items-center justify-center gap-2 transition-all group text-center"
               >
                 <span>Browse Hardware Catalog</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/pc-builder"
-                className="px-6 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm font-bold border border-slate-200 dark:border-slate-700 hover:border-tech-blue dark:hover:border-tech-cyan hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-2 shadow-xs"
+                className="px-6 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 text-slate-900 dark:text-white text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-700 hover:border-tech-blue dark:hover:border-tech-cyan hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-xs text-center"
               >
                 <Cpu className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
                 <span>Launch PC Builder Studio</span>
@@ -238,45 +238,45 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
             </div>
 
             {/* Ant Design Statistics / Live Telemetry Row */}
-            <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-200/80 dark:border-slate-800/80">
-              <div className="space-y-0.5">
-                <div className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-1 font-mono">
+            <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 border-t border-slate-200/80 dark:border-slate-800/80">
+              <div className="space-y-0.5 min-w-0">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-1 font-mono">
                   <span>100%</span>
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                 </div>
-                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">OEM Direct Supply</div>
+                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">OEM Direct Supply</div>
               </div>
 
-              <div className="space-y-0.5">
-                <div className="text-lg font-black text-slate-900 dark:text-white font-mono">
+              <div className="space-y-0.5 min-w-0">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
                   5-Year
                 </div>
-                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">ProSupport Available</div>
+                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">ProSupport Included</div>
               </div>
 
-              <div className="space-y-0.5">
-                <div className="text-lg font-black text-slate-900 dark:text-white font-mono">
+              <div className="space-y-0.5 min-w-0">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
                   0-Defect
                 </div>
-                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">24h Burn-in Tested</div>
+                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">24h Burn-in Tested</div>
               </div>
 
-              <div className="space-y-0.5">
-                <div className="text-lg font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-mono">
-                  <Clock className="w-4 h-4" />
+              <div className="space-y-0.5 min-w-0">
+                <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-mono">
+                  <Clock className="w-4 h-4 shrink-0" />
                   <span>12-Hour</span>
                 </div>
-                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">GCC Express Dispatch</div>
+                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">GCC Express Dispatch</div>
               </div>
             </div>
           </div>
 
           {/* Right Column: Unified Sleek Hardware Showcase Terminal */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-3xl p-6 sm:p-7 bg-white dark:bg-[#0B101D] border border-slate-200/90 dark:border-slate-800 shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all space-y-5">
+            <div className="relative rounded-3xl p-4 sm:p-7 bg-white dark:bg-[#0B101D] border border-slate-200/90 dark:border-slate-800 shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all space-y-4 sm:space-y-5">
               {/* Top Navigation Bar: Minimalist Pill Tab Switcher */}
-              <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/80">
-                <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800/80">
+                <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar max-w-full">
                   {activeHighlights.map(item => {
                     const ItemIcon = ICON_MAP[item.iconName] || Zap;
                     const isActive = item.id === selectedTabId;
@@ -284,7 +284,7 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
                       <button
                         key={item.id}
                         onClick={() => setSelectedTabId(item.id)}
-                        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shrink-0 ${
                           isActive
                             ? 'bg-tech-blue text-white shadow-md'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800'
@@ -297,7 +297,7 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
                   })}
                 </div>
 
-                <div className="shrink-0 flex items-center gap-1.5">
+                <div className="shrink-0 flex items-center gap-1.5 ml-auto">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     In Stock ({stockCount})
@@ -335,22 +335,22 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
 
               {/* Hardware Title, Brand & Price Header */}
               <div className="space-y-1">
-                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                  <span className="font-mono font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider">
+                <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="font-mono font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider truncate max-w-[220px]">
                     {currentHighlight.brand} • {currentHighlight.category}
                   </span>
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                    Official UAE Distributor
+                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+                    Official GCC Stock
                   </span>
                 </div>
 
-                <div className="flex items-start justify-between gap-4 pt-1">
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white line-clamp-1 tracking-tight">
+                <div className="flex items-start justify-between gap-3 pt-1">
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white line-clamp-1 tracking-tight min-w-0 flex-1">
                     {displayName}
                   </h3>
 
                   <div className="text-right shrink-0">
-                    <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                    <div className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                       {formatPrice(currentPrice, matchedProduct?.currency || 'AED')}
                     </div>
                     {originalPrice && originalPrice > currentPrice && (
@@ -367,16 +367,16 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
                 {currentHighlight.specs?.map((spec, i) => (
                   <div
                     key={i}
-                    className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-xs flex flex-col justify-center"
+                    className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-xs flex flex-col justify-center min-w-0 overflow-hidden"
                   >
-                    <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400">{spec.label}</span>
+                    <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400 truncate">{spec.label}</span>
                     <span className="font-black text-slate-900 dark:text-slate-200 truncate mt-0.5 text-[11px] font-mono">{spec.value}</span>
                   </div>
                 ))}
               </div>
 
               {/* Action Buttons Bar */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 <button
                   onClick={handleAddToCart}
                   className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm ${

@@ -7,8 +7,8 @@ export function Footer() {
   return (
     <footer className="bg-slate-100 dark:bg-[#050811] text-slate-600 dark:text-slate-400 text-xs border-t border-slate-200 dark:border-slate-800 transition-colors duration-200">
       {/* Trust Highlights Section (Ant Design / Shadcn inspired 4-column trust strip) */}
-      <div className="border-b border-slate-200 dark:border-slate-800/80 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="border-b border-slate-200 dark:border-slate-800/80 py-6 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-tech-blue/10 border border-tech-blue/20 flex items-center justify-center text-tech-blue dark:text-tech-cyan shrink-0">
               <Shield className="w-5 h-5" />
@@ -52,7 +52,7 @@ export function Footer() {
       </div>
 
       {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto py-10 sm:py-12 px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
         <div className="col-span-2 space-y-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-tech-blue to-tech-cyan flex items-center justify-center text-white shadow-sm">

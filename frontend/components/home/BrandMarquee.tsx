@@ -44,12 +44,12 @@ export function BrandMarquee({ brands }: BrandMarqueeProps) {
         </div>
 
         {/* Brand Badges Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 pt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3 pt-4">
           {DEFAULT_OEM_PARTNERS.map((partner, idx) => (
             <Link
               key={idx}
               href={`/products?search=${encodeURIComponent(partner.name.split(' ')[0])}`}
-              className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue dark:hover:border-tech-cyan hover:shadow-md transition-all flex flex-col items-center justify-center text-center group"
+              className="p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue dark:hover:border-tech-cyan hover:shadow-md transition-all flex flex-col items-center justify-center text-center group min-w-0"
             >
               <div className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-200 group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors truncate w-full">
                 {partner.name.split(' ')[0]}

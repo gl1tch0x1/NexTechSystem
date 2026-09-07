@@ -132,22 +132,22 @@ export function EnterpriseBentoGrid({ features = [] }: EnterpriseBentoGridProps)
           return (
             <div
               key={feat.id}
-              className={`group relative ${colSpanClass} rounded-3xl p-7 sm:p-8 bg-gradient-to-br from-blue-600/5 via-slate-50 to-white dark:from-blue-900/15 dark:via-[#0E1527] dark:to-slate-900 border border-slate-200/90 dark:border-slate-800 ${colors.borderCol} flex flex-col justify-between hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1`}
+              className={`group relative ${colSpanClass} rounded-3xl p-5 sm:p-8 bg-gradient-to-br from-blue-600/5 via-slate-50 to-white dark:from-blue-900/15 dark:via-[#0E1527] dark:to-slate-900 border border-slate-200/90 dark:border-slate-800 ${colors.borderCol} flex flex-col justify-between hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1`}
             >
               <div className={`absolute -top-16 -right-16 w-48 h-48 ${colors.bgGlow} rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity pointer-events-none`} />
 
               <div className="relative z-10 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className={`w-13 h-13 rounded-2xl ${colors.iconBg} flex items-center justify-center group-hover:scale-110 transition-all shadow-sm`}>
-                    <Icon className="w-6 h-6" />
+                <div className="flex items-center justify-between gap-2">
+                  <div className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl ${colors.iconBg} flex items-center justify-center group-hover:scale-110 transition-all shadow-sm shrink-0`}>
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
-                  <span className={`px-3 py-1 rounded-full bg-tech-blue/10 ${colors.textCol} border border-tech-blue/30 text-[10px] font-mono font-bold uppercase tracking-wider`}>
+                  <span className={`px-2.5 sm:px-3 py-1 rounded-full bg-tech-blue/10 ${colors.textCol} border border-tech-blue/30 text-[10px] font-mono font-bold uppercase tracking-wider truncate max-w-[200px]`}>
                     {feat.subtitle}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                  <h3 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {feat.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed max-w-xl font-normal">
@@ -158,7 +158,7 @@ export function EnterpriseBentoGrid({ features = [] }: EnterpriseBentoGridProps)
 
               {/* Bottom section conditional rendering */}
               {feat.stats && feat.stats.length > 0 && (
-                <div className="relative z-10 pt-6 mt-4 grid grid-cols-3 gap-3 border-t border-slate-200/80 dark:border-slate-800 text-xs">
+                <div className="relative z-10 pt-5 sm:pt-6 mt-4 grid grid-cols-1 xs:grid-cols-3 gap-2 sm:gap-3 border-t border-slate-200/80 dark:border-slate-800 text-xs">
                   {feat.stats.map((s, sIdx) => (
                     <div key={sIdx} className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80">
                       <div className="font-mono font-black text-slate-900 dark:text-white text-sm">{s.value}</div>

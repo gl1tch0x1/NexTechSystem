@@ -108,7 +108,7 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
       {/* Main Container */}
       <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
         {/* Category Switcher Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 max-w-full">
           {activeBenchmarks.map(b => {
             const Icon = ICON_MAP[b.iconName?.toLowerCase() || ''] || ICON_MAP[b.id?.toLowerCase() || ''] || Cpu;
             const isActive = b.id === activeCategory;
@@ -116,7 +116,7 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
               <button
                 key={b.id}
                 onClick={() => setActiveCategory(b.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   isActive
                     ? 'bg-tech-blue text-white shadow-md'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -131,7 +131,7 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
 
         {/* Benchmark Visualizer Bars */}
         <div className="space-y-4 pt-2">
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
             <h3 className="font-black text-slate-900 dark:text-white">{current.title}</h3>
             <span className="font-mono text-slate-400 text-[11px]">{current.metric}</span>
           </div>
@@ -141,16 +141,16 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
               const percent = Math.round((item.score / item.maxScore) * 100);
               return (
                 <div key={idx} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-800 dark:text-slate-200">{item.name}</span>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{item.name}</span>
                       {item.isTop && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-tech-blue/10 text-tech-blue dark:text-tech-cyan border border-tech-blue/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-tech-blue/10 text-tech-blue dark:text-tech-cyan border border-tech-blue/30 shrink-0">
                           {item.badge || 'Leader'}
                         </span>
                       )}
                     </div>
-                    <span className="font-mono font-black text-slate-900 dark:text-white">
+                    <span className="font-mono font-black text-slate-900 dark:text-white shrink-0 ml-2">
                       {item.score.toLocaleString()}
                     </span>
                   </div>

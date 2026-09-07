@@ -48,15 +48,18 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0A0E1A]/95 backdrop-blur-xl border-b border-slate-200/90 dark:border-slate-800/90 transition-colors duration-200 shadow-sm">
       {/* 1. TOP ANNOUNCEMENT BAR (Centered GCC Dispatch Highlight) */}
-      <div className="bg-slate-900 dark:bg-slate-950 text-slate-300 text-xs py-2 px-4 border-b border-slate-800/80">
+      <div className="bg-slate-900 dark:bg-slate-950 text-slate-300 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto flex items-center justify-center text-center">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide">
-            <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
-            <span className="font-extrabold text-amber-400 tracking-wider">
-              GCC EXPRESS DISPATCH:
+          <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 font-medium tracking-wide">
+            <div className="flex items-center gap-1.5 font-extrabold text-amber-400">
+              <Flame className="w-3.5 h-3.5 animate-pulse shrink-0" />
+              <span>GCC EXPRESS DISPATCH:</span>
+            </div>
+            <span className="text-slate-200 hidden xs:inline">
+              Free Insured Shipping on Orders over AED 500
             </span>
-            <span className="text-slate-200">
-              Free Insured Shipping on Workstations, CPUs & Servers over AED 500
+            <span className="text-slate-200 xs:hidden">
+              Free GCC Shipping &gt; AED 500
             </span>
           </div>
         </div>
@@ -284,70 +287,153 @@ export function Navbar() {
       {/* 3. SUB-NAVIGATION CATEGORIES BAR */}
       <nav className="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-900/50 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
-          <div className="flex items-center space-x-6 py-2.5 overflow-x-auto">
+          <div className="flex items-center space-x-6 py-2.5 overflow-x-auto no-scrollbar scroll-smooth">
             <Link
               href="/products"
-              className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-bold text-slate-900 dark:text-white"
+              className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-bold text-slate-900 dark:text-white shrink-0"
             >
               <Layers className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400" />
               <span>All Products</span>
             </Link>
-            <Link href="/products?category=cat_components" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">
+            <Link href="/products?category=cat_components" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Processors & GPUs
             </Link>
-            <Link href="/products?category=cat_storage" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">
+            <Link href="/products?category=cat_storage" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Storage & NVMe SSDs
             </Link>
-            <Link href="/products?category=cat_servers" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">
+            <Link href="/products?category=cat_servers" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Servers & Enterprise
             </Link>
-            <Link href="/products?category=cat_networking" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">
+            <Link href="/products?category=cat_networking" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Networking & PoE
             </Link>
             <Link
               href="/pc-builder"
-              className="text-tech-blue dark:text-cyan-400 hover:underline font-bold flex items-center gap-1.5"
+              className="text-tech-blue dark:text-cyan-400 hover:underline font-bold flex items-center gap-1.5 shrink-0"
             >
               <Cpu className="w-3.5 h-3.5" />
               <span>Custom PC Builder</span>
             </Link>
-            <Link href="/compare" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">
+            <Link href="/compare" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Hardware Compare
             </Link>
           </div>
 
           <Link
             href="/products?featured=true"
-            className="text-amber-600 dark:text-amber-400 font-bold hover:underline flex items-center gap-1.5 text-[11px]"
+            className="text-amber-600 dark:text-amber-400 font-bold hover:underline flex items-center gap-1.5 text-[11px] shrink-0 ml-4"
           >
             <Flame className="w-3.5 h-3.5 animate-pulse" />
-            <span>Deals & Enterprise Bundles</span>
+            <span>Deals & Bundles</span>
           </Link>
         </div>
       </nav>
 
       {/* 4. MOBILE DRAWER */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-3 animate-fadeIn">
+        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-4 animate-fadeIn shadow-xl max-h-[80vh] overflow-y-auto">
           <form onSubmit={handleSearch}>
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search hardware catalog..."
+                placeholder="Search CPUs, GPUs, servers, SSDs..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-2xl text-xs border border-slate-200 dark:border-slate-700"
+                className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-2xl text-xs border border-slate-200 dark:border-slate-700 pr-20 focus:outline-none focus:border-tech-blue"
               />
               <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs bg-tech-blue text-white px-3 py-1.5 rounded-xl font-bold">
                 Search
               </button>
             </div>
           </form>
+
+          {/* Quick Primary Access Links */}
           <div className="grid grid-cols-2 gap-2 text-xs font-bold">
-            <Link href="/products" className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">All Catalog</Link>
-            <Link href="/pc-builder" className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 text-tech-blue dark:text-cyan-400 border border-slate-200 dark:border-slate-700">PC Builder</Link>
-            <Link href="/products?featured=true" className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 text-amber-500 border border-slate-200 dark:border-slate-700">Deals & Promos</Link>
-            <Link href="/account" className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">My Account</Link>
+            <Link
+              href="/products"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
+            >
+              <Layers className="w-4 h-4 text-tech-blue" />
+              <span>All Catalog</span>
+            </Link>
+            <Link
+              href="/pc-builder"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 text-tech-blue dark:text-cyan-400 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
+            >
+              <Cpu className="w-4 h-4 text-tech-blue dark:text-cyan-400" />
+              <span>PC Builder</span>
+            </Link>
+            <Link
+              href="/compare"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <span>Compare</span>
+            </Link>
+            <Link
+              href="/products?featured=true"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 text-amber-500 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
+            >
+              <Flame className="w-4 h-4 text-amber-500" />
+              <span>Deals & Offers</span>
+            </Link>
+          </div>
+
+          {/* Categories Quick List */}
+          <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 px-1">Hardware Categories</div>
+            <Link
+              href="/products?category=cat_components"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
+            >
+              Processors & GPUs
+            </Link>
+            <Link
+              href="/products?category=cat_storage"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
+            >
+              Storage & NVMe SSDs
+            </Link>
+            <Link
+              href="/products?category=cat_servers"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
+            >
+              Servers & Enterprise
+            </Link>
+            <Link
+              href="/products?category=cat_networking"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
+            >
+              Networking & PoE
+            </Link>
+          </div>
+
+          {/* Account Tools */}
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+            <Link
+              href={user ? '/account' : '/login'}
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-xl bg-tech-blue text-white font-bold text-center flex-1 mr-2"
+            >
+              {user ? 'My Account' : 'Sign In / Register'}
+            </Link>
+            {user?.role === 'ADMIN' && (
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-xl bg-indigo-600 text-white font-bold text-center"
+              >
+                Admin Panel
+              </Link>
+            )}
           </div>
         </div>
       )}

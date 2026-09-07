@@ -104,14 +104,14 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
       </div>
 
       {/* Control Bar: Ant Design Segmented Tabs + Search + Sort */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 p-2 sm:p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
         {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 overflow-x-auto p-1 max-w-full">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-1 max-w-full">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 activeTab === id
                   ? 'bg-tech-blue text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800'
@@ -124,16 +124,16 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
         </div>
 
         {/* Search & Sort Widgets */}
-        <div className="flex items-center gap-2.5 shrink-0 px-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto shrink-0 px-1">
           {/* Quick Search Input */}
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-initial">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Search components..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 w-44 sm:w-56 text-xs rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue dark:focus:border-tech-cyan"
+              className="pl-8 pr-3 py-1.5 w-full sm:w-52 text-xs rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue dark:focus:border-tech-cyan"
             />
           </div>
 
@@ -141,7 +141,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="py-1.5 px-3 text-xs rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none font-medium cursor-pointer"
+            className="py-1.5 px-3 text-xs rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none font-medium cursor-pointer w-full sm:w-auto"
           >
             <option value="FEATURED">Featured First</option>
             <option value="PRICE_ASC">Price: Low to High</option>

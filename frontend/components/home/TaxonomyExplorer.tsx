@@ -57,18 +57,18 @@ export function TaxonomyExplorer({ categories }: TaxonomyExplorerProps) {
       </div>
 
       {/* Grid of Taxonomy Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {TAXONOMY_TILES.map(tile => {
           const Icon = tile.icon;
           return (
             <Link
               key={tile.id}
               href={tile.href}
-              className="group relative p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/50 dark:hover:border-tech-cyan/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4 hover:-translate-y-1 overflow-hidden"
+              className="group relative p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/50 dark:hover:border-tech-cyan/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-3 sm:space-y-4 hover:-translate-y-1 overflow-hidden"
             >
               <div className="flex items-center justify-between">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tile.color} flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
-                  <Icon className="w-6 h-6" />
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br ${tile.color} flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-tech-blue group-hover:text-white flex items-center justify-center transition-colors">
                   <ChevronRight className="w-4 h-4" />
@@ -76,10 +76,10 @@ export function TaxonomyExplorer({ categories }: TaxonomyExplorerProps) {
               </div>
 
               <div>
-                <h3 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
+                <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
                   {tile.name}
                 </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 font-mono">
+                <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 font-mono">
                   {tile.count}
                 </p>
               </div>
