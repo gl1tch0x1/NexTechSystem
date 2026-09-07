@@ -18,14 +18,14 @@ export function initializeFirebase(): admin.app.App | null {
         storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
       });
       firebaseInitialized = true;
-      console.log(`[Firebase] Admin SDK initialized with service account for [${ENV.FIREBASE_PROJECT_ID}].`);
+      console.log('[Firebase] Admin SDK initialized with service account for [%s].', ENV.FIREBASE_PROJECT_ID);
     } else if (ENV.FIREBASE_PROJECT_ID) {
       admin.initializeApp({
         projectId: ENV.FIREBASE_PROJECT_ID,
         storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
       });
       firebaseInitialized = true;
-      console.log(`[Firebase] Admin SDK initialized with Project ID [${ENV.FIREBASE_PROJECT_ID}].`);
+      console.log('[Firebase] Admin SDK initialized with Project ID [%s].', ENV.FIREBASE_PROJECT_ID);
     }
     
     if (admin.apps.length > 0) {

@@ -90,7 +90,7 @@ export class DbStore {
       const items = Array.from(map.values());
       fs.writeFileSync(this.getFilePath(collectionName), JSON.stringify(items, null, 2), 'utf-8');
     } catch (err) {
-      console.error(`[DbStore] Error persisting ${collectionName}:`, err);
+      console.error('[DbStore] Error persisting %s:', collectionName, err);
     }
   }
 
@@ -132,7 +132,7 @@ export class DbStore {
     } catch (err: any) {
       // Non-blocking background log for Firestore sync
       if (process.env.DEBUG_FIRESTORE) {
-        console.warn(`[Firestore Sync Notice] ${collection}/${id}:`, err.message);
+        console.warn('[Firestore Sync Notice] %s/%s: %s', collection, id, err?.message || err);
       }
     }
   }
@@ -146,7 +146,7 @@ export class DbStore {
       }
     } catch (err: any) {
       if (process.env.DEBUG_FIRESTORE) {
-        console.warn(`[Firestore Delete Notice] ${collection}/${id}:`, err.message);
+        console.warn('[Firestore Delete Notice] %s/%s: %s', collection, id, err?.message || err);
       }
     }
   }

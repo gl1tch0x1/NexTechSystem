@@ -98,7 +98,7 @@ export function cloudflareSecurityMiddleware(req: Request, res: Response, next: 
     if (isMalicious) {
       securityTelemetry.blockedAttacks++;
       securityTelemetry.lastAttackTimestamp = new Date().toISOString();
-      console.warn(`🛡️ [Cloudflare DDoS Shield] Blocked exploit probe from IP: ${clientIp} | Agent: ${userAgent}`);
+      console.warn('🛡️ [Cloudflare DDoS Shield] Blocked exploit probe from IP: %s | Agent: %s', clientIp, userAgent);
       res.status(403).json({
         success: false,
         error: {
