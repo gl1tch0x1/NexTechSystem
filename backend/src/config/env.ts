@@ -26,10 +26,23 @@ if (!jwtSecret && nodeEnv === 'production') {
   console.warn('⚠️ [Security Warning] JWT_SECRET is not set in environment. Using development fallback. Please define JWT_SECRET in .env.');
 }
 
+const rawAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+const defaultAllowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+];
+
 export const ENV = {
   PORT: parseInt(process.env.PORT || '5000', 10),
   NODE_ENV: nodeEnv,
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
+  ALLOWED_ORIGINS: rawAllowedOrigins.length > 0 ? rawAllowedOrigins : defaultAllowedOrigins,
   JWT_SECRET: jwtSecret || 'dev_insecure_local_jwt_secret_change_in_env',
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
@@ -46,3 +59,4 @@ export const ENV = {
   GA_PROPERTY_ID: process.env.GA_PROPERTY_ID || '',
   GA_API_SECRET: process.env.GA_API_SECRET || '',
 };
+
