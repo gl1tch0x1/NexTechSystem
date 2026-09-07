@@ -2,29 +2,47 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 
-// Try loading .env.local first, then .env
-const envLocal = path.resolve(process.cwd(), '.env.local');
-const envDefault = path.resolve(process.cwd(), '.env');
-const frontendEnvLocal = path.resolve(process.cwd(), '../frontend/.env.local');
+// Try loading environment files in order of precedence: .env.local, .env, root .env, and frontend envs
+const candidateEnvPaths = [
+  path.resolve(process.cwd(), '.env.local'),
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), '../.env'),
+  path.resolve(process.cwd(), '../frontend/.env.local'),
+  path.resolve(process.cwd(), '../frontend/.env'),
+];
 
-if (fs.existsSync(envLocal)) {
-  dotenv.config({ path: envLocal });
-} else if (fs.existsSync(envDefault)) {
-  dotenv.config({ path: envDefault });
+for (const envPath of candidateEnvPaths) {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+  }
 }
 
-if (fs.existsSync(frontendEnvLocal)) {
-  dotenv.config({ path: frontendEnvLocal });
+const nodeEnv = process.env.NODE_ENV || 'development';
+const jwtSecret = process.env.JWT_SECRET;
+
+if (!jwtSecret && nodeEnv === 'production') {
+  throw new Error('FATAL SECURITY ERROR: JWT_SECRET environment variable must be set in production mode.');
+} else if (!jwtSecret) {
+  console.warn('⚠️ [Security Warning] JWT_SECRET is not set in environment. Using development fallback. Please define JWT_SECRET in .env.');
 }
 
 export const ENV = {
   PORT: parseInt(process.env.PORT || '5000', 10),
-  NODE_ENV: process.env.NODE_ENV || 'development',
+  NODE_ENV: nodeEnv,
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
-  JWT_SECRET: process.env.JWT_SECRET || 'nextech_super_secret_jwt_key_2026_enterprise',
-  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nextechsystems-65aaa',
+  JWT_SECRET: jwtSecret || 'dev_insecure_local_jwt_secret_change_in_env',
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
   FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY || '',
-  FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'nextechsystems-65aaa.firebasestorage.app',
+  FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
   ENABLE_FIRESTORE_SYNC: process.env.ENABLE_FIRESTORE_SYNC !== 'false',
+  // Cloudflare Edge & Bot Security
+  CLOUDFLARE_TURNSTILE_SECRET_KEY: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '',
+  CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN || '',
+  CLOUDFLARE_ZONE_ID: process.env.CLOUDFLARE_ZONE_ID || '',
+  CLOUDFLARE_SECURITY_ENABLED: process.env.CLOUDFLARE_SECURITY_ENABLED !== 'false',
+  // Google Analytics 4 Secrets
+  GA_MEASUREMENT_ID: process.env.GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '',
+  GA_PROPERTY_ID: process.env.GA_PROPERTY_ID || '',
+  GA_API_SECRET: process.env.GA_API_SECRET || '',
 };

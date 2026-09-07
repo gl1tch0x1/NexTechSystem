@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, password = 'password123', resellerCode?: string): Promise<{ user: User; reseller: Reseller | null }> => {
+  const login = async (email: string, password?: string, resellerCode?: string): Promise<{ user: User; reseller: Reseller | null }> => {
     setIsLoading(true);
     try {
       // 1. Authenticate with Store Backend
@@ -73,8 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(res.token);
       setUser(res.user);
 
-      // 2. Synchronize Cloud Firebase Authentication session (if configured)
-      if (firebaseAuth && firebaseAuth.app) {
+      // 2. Synchronize Cloud Firebase Authentication session (if configured and password provided)
+      if (firebaseAuth && firebaseAuth.app && password) {
         try {
           await signInWithEmailAndPassword(firebaseAuth, email, password);
         } catch (fbErr: any) {
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, username?: string, phone?: string, password = 'password123'): Promise<User> => {
+  const register = async (name: string, email: string, username?: string, phone?: string, password?: string): Promise<User> => {
     setIsLoading(true);
     try {
       // 1. Register with Store Backend (Creates customer account & wallet)
@@ -107,8 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(res.token);
       setUser(res.user);
 
-      // 2. Register in Cloud Firebase Authentication (if configured)
-      if (firebaseAuth && firebaseAuth.app) {
+      // 2. Register in Cloud Firebase Authentication (if configured and password provided)
+      if (firebaseAuth && firebaseAuth.app && password) {
         try {
           await createUserWithEmailAndPassword(firebaseAuth, email, password);
         } catch (fbErr: any) {

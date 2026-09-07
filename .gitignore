@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 */node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
 
 # Next.js & TypeScript build outputs
 .next/
@@ -11,22 +14,36 @@ dist/
 */dist/
 *.tsbuildinfo
 frontend/tsconfig.tsbuildinfo
+next-env.d.ts
 
-# Environment and secrets (Never commit secrets)
+# Environment and secrets (NEVER commit secrets or credentials)
 .env
 .env.*
-!.env.example
 *.env
 *.env.local
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
-!frontend/.env.example
 backend/.env
 backend/.env.local
 backend/.env.*.local
+!*.env.example
+!.env.example
+!frontend/.env.example
 !backend/.env.example
+
+# Service Account & Certificate Private Keys
+*.pem
+*.key
+*.crt
+*.cert
+*service-account*.json
+*firebase-adminsdk*.json
+secrets/
 
 # Logs and debug files
 *.log
@@ -35,7 +52,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Editor and OS files
+# Editor, OS and temporary files
 .vscode/
 */.vscode/
 .idea/
@@ -45,3 +62,4 @@ Thumbs.db
 # Scratch and temporary testing artifacts
 scratch/
 coverage/
+.vercel
