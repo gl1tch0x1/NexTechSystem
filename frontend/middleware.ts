@@ -13,6 +13,11 @@ export function middleware(request: NextRequest) {
     if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== '127') {
       subdomain = parts[0];
     }
+  } else if (hostname.endsWith('.vercel.app') || hostname.includes('vercel.app')) {
+    // Vercel deployment URLs (e.g. project-branch-user.vercel.app) - do not treat Vercel project name as tenant
+    if (parts.length >= 4 && parts[0] !== 'www') {
+      subdomain = parts[0];
+    }
   } else if (parts.length >= 3) {
     // e.g. comnet101.nextech.com
     if (parts[0] !== 'www' && parts[0] !== 'admin' && parts[0] !== 'api') {
