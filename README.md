@@ -93,57 +93,57 @@
 ### 1. High-Level Architectural Topology
 
 ```mermaid
-graph TD
-    subgraph Client_Layer["Client Presentation Layer (Browsers & Mobile)"]
-        B2C["Public Storefront & Hardware Catalog"]
-        PCB["PC Builder Configurator Matrix"]
-        CMP["Hardware Comparison Engine"]
-        CUST["Customer Dashboard & Wallet Ledger"]
-        ADM["Admin Command Center & Analytics"]
+graph LR
+    subgraph Client_Layer["1. Client Presentation Layer"]
+        B2C["Storefront Catalog"]
+        PCB["PC Builder Matrix"]
+        CMP["Hardware Compare"]
+        CUST["Customer Dashboard"]
+        ADM["Admin Command Center"]
         RES["Reseller Vendor Portal"]
     end
 
-    subgraph Frontend_App["Next.js 15 App Router & SSR Engine (Port 3000)"]
-        MW["Next.js Edge Middleware (Tenant & Subdomain Rewriter)"]
-        AUTH_CTX["Auth Context & Token Manager"]
-        CART_CTX["Cart & Wishlist State Provider"]
-        PAGES["App Router Pages & Server Components"]
-        API_CLIENT["Type-Safe REST ApiClient"]
+    subgraph Edge_Layer["2. Edge & Security"]
+        CF_CDN["Cloudflare Global CDN"]
+        CF_WAF["WAF & Anti-DDoS"]
+        CF_BOT["Turnstile Bot Shield"]
+        MW["Next.js Edge Middleware"]
     end
 
-    subgraph Edge_Security["Edge Security & Traffic Shield"]
-        CF_CDN["Cloudflare CDN & Edge Caching"]
-        CF_WAF["WAF & Anti-DDoS Rate Limiter"]
-        CF_BOT["Cloudflare Turnstile Bot Challenge"]
+    subgraph Frontend_App["3. Next.js 15 Web App"]
+        AUTH_CTX["Auth Context"]
+        CART_CTX["Cart State Provider"]
+        PAGES["App Router & SSR"]
+        API_CLIENT["Type-Safe ApiClient"]
     end
 
-    subgraph API_Gateway["Express API Gateway (Port 5000)"]
-        SEC["Helmet, CORS & Cloudflare Security Middlewares"]
-        ROUTER["REST Master Router (/api)"]
-        AUTH_MW["JWT Auth & Role Guard Middleware"]
-        RBAC["RBAC & Tenant Isolation Verifier"]
+    subgraph API_Gateway["4. Express API Gateway"]
+        SEC["Helmet & CORS Security"]
+        ROUTER["REST Master Router"]
+        AUTH_MW["JWT Auth Guard"]
+        RBAC["RBAC & Tenant Guard"]
     end
 
-    subgraph Services_Layer["Core Domain Services"]
-        SVC_PRICE["Pricing & VAT Calculation Engine"]
-        SVC_PCB["PC Compatibility & Wattage Evaluator"]
-        SVC_ORD["Order Processing & Inventory Reservation"]
-        SVC_EBILL["Electronic Tax Invoice (E-Bill) Service"]
-        SVC_IMP["Excel Ingestion & Validation Service (XLSX)"]
-        SVC_ANALYTICS["BI Financial & Traffic Analytics Service"]
-        SVC_WALLET["Customer Wallet & Balance Ledger"]
-        SVC_CMS["Dynamic CMS & Content Service"]
-        SVC_AUDIT["Audit & Security Logging Service"]
+    subgraph Services_Layer["5. Core Domain Services"]
+        SVC_PRICE["Pricing & VAT Engine"]
+        SVC_PCB["PC Compatibility Engine"]
+        SVC_ORD["Order & Inventory Service"]
+        SVC_EBILL["E-Bill Invoicing Service"]
+        SVC_IMP["Excel Ingestion Service"]
+        SVC_ANALYTICS["BI Analytics Service"]
+        SVC_WALLET["Customer Wallet Ledger"]
+        SVC_CMS["Dynamic CMS Service"]
+        SVC_AUDIT["Audit & Security Logging"]
     end
 
-    subgraph Persistence_Layer["Data & Persistence Layer"]
-        REPO["Modular Repository Pattern (BaseRepository)"]
-        DB_STORE["DbStore (JSON File Persistence / Firebase Cloud Engine)"]
-        DATA_STORE[("Data Collections (Products, Orders, Users, Resellers, etc.)")]
+    subgraph Persistence_Layer["6. Persistence Layer"]
+        REPO["Repository Pattern"]
+        DB_STORE["DbStore Engine"]
+        DATA_STORE[("Data Collections")]
     end
 
-    Client_Layer --> Edge_Security
-    Edge_Security --> Frontend_App
+    Client_Layer --> Edge_Layer
+    Edge_Layer --> Frontend_App
     Frontend_App --> API_Gateway
     API_Gateway --> Services_Layer
     Services_Layer --> Persistence_Layer
@@ -187,21 +187,21 @@ graph LR
 ### 3. Edge Security & Anti-DDoS Architecture
 
 ```mermaid
-graph TD
-    CLIENT["Client Browser / Automated Agent"] --> CF_EDGE["Cloudflare Edge Network (DXB PoP)"]
+graph LR
+    CLIENT["Client / Automated Agent"] --> CF_EDGE["Cloudflare Edge (DXB PoP)"]
     
     subgraph Cloudflare_Defense["Cloudflare Edge Defenses"]
-        CF_EDGE --> WAF_CHECK{"WAF & Layer 7 Rate Limit"}
-        WAF_CHECK -- "Exceeds 300 req/min" --> BLOCK["429 Rate Limited"]
-        WAF_CHECK -- "Normal Traffic" --> BOT_CHECK{"Turnstile Bot Challenge"}
-        BOT_CHECK -- "Bot Detected" --> CHALLENGE["Managed Challenge Modal"]
-        BOT_CHECK -- "Valid Human Token" --> PASS["Forward Request to Origin"]
+        CF_EDGE --> WAF_CHECK{"WAF Rate Limiter"}
+        WAF_CHECK -- "> 120 req/min" --> BLOCK["429 Rate Limited"]
+        WAF_CHECK -- "Normal Burst" --> BOT_CHECK{"Turnstile Bot Shield"}
+        BOT_CHECK -- "Bot Signature" --> CHALLENGE["Managed Challenge"]
+        BOT_CHECK -- "Human Verified" --> PASS["Forward to Origin"]
     end
 
     subgraph Origin_Server["NexTech Origin Server"]
-        PASS --> HELMET["Helmet Security Headers"]
-        HELMET --> CF_MIDDLEWARE["Cloudflare Telemetry & IP Extractor"]
-        CF_MIDDLEWARE --> JWT_GUARD["JWT Role-Based Auth (RBAC)"]
+        PASS --> HELMET["Helmet Headers"]
+        HELMET --> CF_MIDDLEWARE["Cloudflare Telemetry"]
+        CF_MIDDLEWARE --> JWT_GUARD["JWT Role RBAC Guard"]
         JWT_GUARD --> API_LOGIC["Execute Business Logic"]
     end
 ```
@@ -344,42 +344,28 @@ sequenceDiagram
 ### 5. Role-Based Access Control (RBAC) Lifecycle
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Guest: Unauthenticated Session
+graph LR
+    UNAUTH["Unauthenticated Guest"] --> AUTH_GATE{"Unified Auth Gate"}
     
-    Guest --> Customer: Login (alex.morgan@enterprise.com)
-    Guest --> Reseller: Login (reseller@comnet.com + Code)
-    Guest --> Admin: Login (admin@nextech.com)
+    AUTH_GATE -->|"Customer Login"| CUST["Customer Portal"]
+    AUTH_GATE -->|"Reseller Login + Code"| RES["Reseller Portal"]
+    AUTH_GATE -->|"Admin Master Login"| ADM["Admin Command Center"]
 
-    state Customer {
-        [*] --> BrowseHardware
-        BrowseHardware --> ConfigurePC
-        ConfigurePC --> AddToCart
-        AddToCart --> CheckoutOrder
-        CheckoutOrder --> ViewWalletLedger
-        ViewWalletLedger --> DownloadTaxInvoice
-    }
+    subgraph Customer_Flow["Customer Persona Lifecycle"]
+        CUST --> C1["Browse Catalog"] --> C2["Configure PC"] --> C3["Checkout & Pay"] --> C4["Wallet & E-Bills"]
+    end
 
-    state Reseller {
-        [*] --> ResellerDashboard
-        ResellerDashboard --> UploadExcelCatalog
-        UploadExcelCatalog --> ManageInventoryStock
-        ManageInventoryStock --> ViewVendorOrders
-        ViewVendorOrders --> TrackCommissions
-    }
+    subgraph Reseller_Flow["Reseller Partner Lifecycle"]
+        RES --> R1["Vendor Dashboard"] --> R2["Excel Batch Import"] --> R3["Manage Inventory"] --> R4["Track Margin"]
+    end
 
-    state Admin {
-        [*] --> MasterCommandCenter
-        MasterCommandCenter --> RealTimeAnalytics
-        RealTimeAnalytics --> ModerateVendorProducts
-        ModerateVendorProducts --> ManageTaxAndCoupons
-        ManageTaxAndCoupons --> ProvisionResellers
-        ProvisionResellers --> InspectSecurityAuditTrail
-    }
+    subgraph Admin_Flow["Administrator Lifecycle"]
+        ADM --> A1["Command Center"] --> A2["BI Analytics"] --> A3["Moderate Listings"] --> A4["Audit Trail"]
+    end
 
-    Customer --> Guest: Logout / Token Expiry
-    Reseller --> Guest: Logout / Token Expiry
-    Admin --> Guest: Logout / Token Expiry
+    Customer_Flow -->|"Logout / Expire"| UNAUTH
+    Reseller_Flow -->|"Logout / Expire"| UNAUTH
+    Admin_Flow -->|"Logout / Expire"| UNAUTH
 ```
 
 ---
