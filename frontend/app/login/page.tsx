@@ -22,7 +22,7 @@ function CountryFlag({ code, size = 24 }: { code: string; size?: number }) {
       height={Math.round(size * 0.67)}
       alt={code}
       className="rounded-sm object-cover inline-block shrink-0"
-      style={{ imageRendering: 'auto' }}
+      style={{ imageRendering: 'auto', width: `${size}px`, height: `${Math.round(size * 0.67)}px` }}
       loading="lazy"
       onError={(e) => {
         // Fallback to emoji flag if image fails to load
@@ -233,28 +233,28 @@ function AuthContent() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12 space-y-6">
+    <div className="max-w-md md:max-w-2xl mx-auto px-4 py-8 md:py-12 space-y-6 w-full">
       {/* Brand Header */}
       <div className="text-center space-y-2">
         <div className="w-12 h-12 rounded-2xl bg-tech-blue flex items-center justify-center text-white mx-auto shadow-tech-glow">
           <Cpu className="w-7 h-7" />
         </div>
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
           NexTech Systems Portal
         </h1>
-        <p className="text-xs text-slate-500">
+        <p className="text-[11px] md:text-xs text-slate-500">
           Unified authentication for Enterprise Clients, Verified Resellers &amp; Administrators
         </p>
       </div>
 
       {/* Main Authentication Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-tech-card border border-slate-200 dark:border-tech-slate space-y-5 shadow-tech">
+      <div className="p-4 md:p-6 rounded-3xl bg-white dark:bg-tech-card border border-slate-200 dark:border-tech-slate space-y-5 shadow-tech">
         {/* Mode Switcher Tabs */}
-        <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+        <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 gap-1">
           <button
             type="button"
             onClick={() => { setTab('signin'); setError(''); }}
-            className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${
               tab === 'signin'
                 ? 'bg-tech-blue text-white shadow-tech'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -265,7 +265,7 @@ function AuthContent() {
           <button
             type="button"
             onClick={() => { setTab('register'); setError(''); }}
-            className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${
               tab === 'register'
                 ? 'bg-tech-blue text-white shadow-tech'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -277,8 +277,8 @@ function AuthContent() {
 
         {/* Error Alert */}
         {error && (
-          <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-semibold flex items-center gap-2 border border-red-200 dark:border-red-900/50">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-2.5 md:p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-[11px] md:text-xs font-semibold flex items-center gap-2 border border-red-200 dark:border-red-900/50">
+            <AlertCircle className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -288,9 +288,9 @@ function AuthContent() {
           type="button"
           onClick={handleGoogleAuth}
           disabled={googleLoading || isLoading}
-          className="w-full py-3 px-4 bg-slate-50 dark:bg-tech-slate hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 shadow-sm"
+          className="w-full py-2.5 md:py-3 px-3 md:px-4 bg-slate-50 dark:bg-tech-slate hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-white rounded-xl text-[11px] md:text-xs font-bold flex items-center justify-center gap-2 md:gap-3 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 shadow-sm"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 md:w-4 md:h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
@@ -313,7 +313,7 @@ function AuthContent() {
         {tab === 'signin' && (
           <form onSubmit={handleSignInSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Email or Username</label>
+              <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Email or Username</label>
               <div className="relative">
                 <input
                   type="text"
@@ -321,16 +321,16 @@ function AuthContent() {
                   placeholder="Enter your email or username"
                   value={loginEmail}
                   onChange={e => setLoginEmail(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-slate-400">Password</label>
-                <span className="text-[11px] text-tech-cyan">Secure 256-Bit SSL</span>
+                <label className="text-[11px] md:text-xs font-bold text-slate-400">Password</label>
+                <span className="text-[10px] md:text-[11px] text-tech-cyan">Secure 256-Bit SSL</span>
               </div>
               <div className="relative">
                 <input
@@ -339,23 +339,23 @@ function AuthContent() {
                   placeholder="••••••••"
                   value={loginPassword}
                   onChange={e => setLoginPassword(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-tech-glow transition-all disabled:opacity-50"
+              className="w-full py-3 md:py-3.5 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-[11px] md:text-xs font-extrabold flex items-center justify-center gap-2 shadow-tech-glow transition-all disabled:opacity-50"
             >
               {isLoading ? (
                 <span>Authenticating...</span>
               ) : (
                 <>
                   <span>Sign In to Account</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </>
               )}
             </button>
@@ -365,10 +365,10 @@ function AuthContent() {
         {/* 2. CREATE CUSTOMER ACCOUNT TAB */}
         {tab === 'register' && (
           <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {/* Full Name */}
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Full Name / Organization</label>
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Full Name / Organization</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -376,15 +376,15 @@ function AuthContent() {
                     placeholder="e.g. Jordan Smith"
                     value={regName}
                     onChange={e => setRegName(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                    className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                   />
-                  <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <UserIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
               {/* Business Email */}
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Business Email Address</label>
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Business Email Address</label>
                 <div className="relative">
                   <input
                     type="email"
@@ -392,30 +392,30 @@ function AuthContent() {
                     placeholder="name@company.com"
                     value={regEmail}
                     onChange={e => setRegEmail(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                    className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                   />
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
               {/* Username */}
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Username (Optional)</label>
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Username (Optional)</label>
                 <input
                   type="text"
                   placeholder="username"
                   value={regUsername}
                   onChange={e => setRegUsername(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
               </div>
 
               {/* ── Phone Number Field ── */}
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2">Phone Number (Optional)</label>
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-2">Phone Number (Optional)</label>
 
               {/* Input row: [FLAG+CODE button] [phone input] [phone icon] */}
-              <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors overflow-visible">
+              <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors overflow-visible w-full">
 
                 {/* Country selector trigger */}
                 <div ref={countryDropdownRef} className="relative shrink-0">
@@ -426,19 +426,19 @@ function AuthContent() {
                       setIsCountryDropdownOpen(prev => !prev);
                       setCountrySearch('');
                     }}
-                    className="h-full flex items-center gap-2 pl-3 pr-2.5 py-3 rounded-l-xl hover:bg-slate-200/70 dark:hover:bg-slate-700/60 border-r border-slate-200 dark:border-slate-700 transition-colors group"
+                    className="h-full flex items-center gap-1.5 md:gap-2 pl-2.5 md:pl-3 pr-2 md:pr-2.5 py-2.5 md:py-3 rounded-l-xl hover:bg-slate-200/70 dark:hover:bg-slate-700/60 border-r border-slate-200 dark:border-slate-700 transition-colors group min-w-fit"
                     title={`${selectedCountry.name} (${selectedCountry.dialCode})`}
                     aria-label="Select country dialling code"
                   >
                     {/* Real flag image */}
-                    <CountryFlag code={selectedCountry.code} size={22} />
+                    <CountryFlag code={selectedCountry.code} size={18} />
                     {/* Dial code */}
-                    <span className="font-mono text-slate-800 dark:text-slate-100 text-[12px] font-bold tracking-tight">
+                    <span className="font-mono text-slate-800 dark:text-slate-100 text-[11px] md:text-[12px] font-bold tracking-tight">
                       {selectedCountry.dialCode}
                     </span>
                     {/* Chevron */}
                     <ChevronDown
-                      className={`w-3.5 h-3.5 transition-all ${
+                      className={`w-3 h-3 md:w-3.5 md:h-3.5 transition-all ${
                         isCountryDropdownOpen
                           ? 'rotate-180 text-tech-blue'
                           : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
@@ -448,7 +448,7 @@ function AuthContent() {
 
                   {/* ── Country Dropdown Popover ── */}
                   {isCountryDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-2 w-72 rounded-2xl bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-slate-800 shadow-2xl z-[200] flex flex-col overflow-hidden">
+                    <div className="absolute left-0 top-full mt-2 w-64 md:w-72 rounded-2xl bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-slate-800 shadow-2xl z-[200] flex flex-col overflow-hidden">
                       {/* Search bar */}
                       <div className="p-2 border-b border-slate-100 dark:border-slate-800">
                         <div className="relative">
@@ -511,16 +511,16 @@ function AuthContent() {
                 </div>
 
                 {/* Phone number text input */}
-                <div className="flex items-center flex-1 gap-2 pr-3">
+                <div className="flex items-center flex-1 gap-2 pr-2.5 md:pr-3">
                   <input
                     type="tel"
                     id="phone-number-input"
                     placeholder="50 123 4567"
                     value={regPhone}
                     onChange={e => setRegPhone(e.target.value)}
-                    className="flex-1 bg-transparent pl-3 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none min-w-0"
+                    className="flex-1 bg-transparent pl-2.5 md:pl-3 py-2.5 md:py-3 text-[11px] md:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none min-w-0"
                   />
-                  <Phone className="w-4 h-4 text-slate-400 shrink-0" />
+                  <Phone className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 shrink-0" />
                 </div>
               </div>
 
@@ -532,7 +532,7 @@ function AuthContent() {
 
             {/* Password field (full width) */}
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Password</label>
+              <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Password</label>
               <div className="relative">
                 <input
                   type="password"
@@ -540,23 +540,23 @@ function AuthContent() {
                   placeholder="••••••••"
                   value={regPassword}
                   onChange={e => setRegPassword(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-tech-glow transition-all disabled:opacity-50"
+              className="w-full py-3 md:py-3.5 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-[11px] md:text-xs font-extrabold flex items-center justify-center gap-2 shadow-tech-glow transition-all disabled:opacity-50"
             >
               {isLoading ? (
                 <span>Creating Customer Account...</span>
               ) : (
                 <>
                   <span>Create Customer Account</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </>
               )}
             </button>
@@ -565,12 +565,12 @@ function AuthContent() {
       </div>
 
       {/* Role Notice Card */}
-      <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400 space-y-1">
+      <div className="p-3 md:p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-[11px] md:text-xs text-slate-400 space-y-1">
         <div className="font-bold text-slate-300 flex items-center justify-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
           <span>Role Policy Notice</span>
         </div>
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[10px] md:text-[11px] text-slate-500">
           Customer self-registration creates standard client accounts. Reseller partner storefront accounts are provisioned exclusively by NexTech Systems Administration.
         </p>
       </div>
