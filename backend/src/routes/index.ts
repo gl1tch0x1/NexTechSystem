@@ -9,6 +9,9 @@ import adminRoutes from './admin.routes.js';
 import resellerRoutes from './reseller.routes.js';
 import contentRoutes from './content.routes.js';
 import securityRoutes from './security.routes.js';
+import specificationRoutes from './specification.routes.js';
+import currencyRoutes from './currency.routes.js';
+import vatRoutes from './vat.routes.js';
 
 const router = Router();
 
@@ -22,6 +25,9 @@ router.use('/admin', adminRoutes);
 router.use('/reseller', resellerRoutes);
 router.use('/content', contentRoutes);
 router.use('/security', securityRoutes);
+router.use('/specifications', specificationRoutes);
+router.use('/currencies', currencyRoutes);
+router.use('/vat', vatRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {

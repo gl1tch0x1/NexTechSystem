@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
-import { formatPrice } from '@/lib/utils';
+import { useCurrency } from '@/lib/currency-context';
 import {
   Trash2,
   Minus,
@@ -29,6 +29,7 @@ export default function CartPage() {
     couponCode,
     isCalculating,
   } = useCart();
+  const { formatPrice } = useCurrency();
 
   const [inputCoupon, setInputCoupon] = useState('');
   const [couponError, setCouponError] = useState('');

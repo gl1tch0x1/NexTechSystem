@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
+import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice } from '@/lib/utils';
 import { Order, PaymentMethod, Address, Wallet } from '@/types';
 import {
   ShieldCheck,
@@ -24,6 +24,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user, isAuthenticated, token } = useAuth();
   const { cart, cartItems, cartCount, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
 
   const [shippingAddress, setShippingAddress] = useState<Address>({
     id: 'addr_temp',

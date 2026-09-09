@@ -25,6 +25,7 @@ export interface User {
   addresses: Address[];
   resellerId?: string; // If role is RESELLER
   passwordHash?: string;
+  adminPinHash?: string; // Secondary Admin Security PIN (PBKDF2 120,000 iterations)
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -80,6 +81,14 @@ export interface SEOData {
   keywords?: string[];
 }
 
+export interface WarehouseLocationStock {
+  locationId: string;
+  locationName: string;
+  city: string;
+  quantity: number;
+  reserved?: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -105,6 +114,7 @@ export interface Product {
   stock: number;
   reservedStock: number;
   lowStockThreshold: number;
+  locations?: WarehouseLocationStock[];
   images: string[];
   thumbnail: string;
   specifications: Record<string, string>; // normalized key-values e.g. { socket: "LGA1700", ramType: "DDR5", wattage: "125W" }

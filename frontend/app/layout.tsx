@@ -3,6 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/lib/theme-context';
 import { AuthProvider } from '@/lib/auth-context';
 import { CartProvider } from '@/lib/cart-context';
+import { CurrencyProvider } from '@/lib/currency-context';
 import { StoreShell } from '@/components/layout/StoreShell';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 
@@ -47,9 +48,11 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <CartProvider>
-              <StoreShell>
-                {children}
-              </StoreShell>
+              <CurrencyProvider>
+                <StoreShell>
+                  {children}
+                </StoreShell>
+              </CurrencyProvider>
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>

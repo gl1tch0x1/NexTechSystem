@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Product, PCBuilderCompatibilityResult, CompatibilityIssue } from '@/types';
 import { useCart } from '@/lib/cart-context';
+import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice } from '@/lib/utils';
 import {
   Cpu,
   CheckCircle2,
@@ -49,6 +49,7 @@ const SLOT_CONFIG: Array<{ key: keyof ComponentSlots; label: string; icon: any; 
 
 export default function PCBuilderPage() {
   const { addBundleToCart } = useCart();
+  const { formatPrice } = useCurrency();
   const [componentsCatalog, setComponentsCatalog] = useState<Record<string, Product[]>>({});
   const [slots, setSlots] = useState<ComponentSlots>({
     cpu: null,

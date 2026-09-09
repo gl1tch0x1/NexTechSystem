@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { Wallet, WalletTransaction } from '@/types';
 import {
   Wallet as WalletIcon,
@@ -14,17 +15,27 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
-  Clock
+  Clock,
+  KeyRound,
+  AlertCircle,
+  X
 } from 'lucide-react';
 
 export default function CustomerWalletPage() {
   const { token, isAuthenticated } = useAuth();
+  const { formatPrice, currentCurrency } = useCurrency();
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [topupAmount, setTopupAmount] = useState<number>(500);
   const [topupLoading, setTopupLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Secondary Security PIN Challenge state (Ported from Quickbook Two-Tier Control)
+  const [pinModalOpen, setPinModalOpen] = useState(false);
+  const [pendingAmount, setPendingAmount] = useState<number>(0);
+  const [adminPin, setAdminPin] = useState('');
+  const [pinError, setPinError] = useState('');
 
   const fetchWallet = async () => {
     if (!token) {
@@ -46,17 +57,35 @@ export default function CustomerWalletPage() {
     fetchWallet();
   }, [token]);
 
-  const handleTopup = async (amount: number) => {
+  const initiateTopup = (amount: number) => {
+    if (amount > 2500) {
+      setPendingAmount(amount);
+      setAdminPin('');
+      setPinError('');
+      setPinModalOpen(true);
+    } else {
+      executeTopup(amount);
+    }
+  };
+
+  const executeTopup = async (amount: number, pin?: string) => {
     if (!token) return;
     setTopupLoading(true);
     setSuccessMessage('');
+    setPinError('');
     try {
-      await ApiClient.post('/wallet/add-funds', { amount }, { token });
+      await ApiClient.post('/wallet/add-funds', { amount, adminPin: pin }, { token });
       await fetchWallet();
-      setSuccessMessage(`Successfully added ${formatPrice(amount)} to your wallet balance!`);
-      setTimeout(() => setSuccessMessage(''), 4000);
+      setPinModalOpen(false);
+      setSuccessMessage(`Successfully credited ${formatPrice(amount)} to your wallet ledger!`);
+      setTimeout(() => setSuccessMessage(''), 4500);
     } catch (err: any) {
       console.error(err);
+      if (err.message && err.message.includes('PIN')) {
+        setPinError(err.message);
+      } else {
+        setPinError('Transaction rejected by security gateway.');
+      }
     } finally {
       setTopupLoading(false);
     }
@@ -122,27 +151,36 @@ export default function CustomerWalletPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 disabled={topupLoading}
-                onClick={() => handleTopup(500)}
+                onClick={() => initiateTopup(500)}
                 className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors"
               >
                 +AED 500
               </button>
               <button
                 disabled={topupLoading}
-                onClick={() => handleTopup(1000)}
+                onClick={() => initiateTopup(1000)}
                 className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors"
               >
                 +AED 1,000
               </button>
               <button
                 disabled={topupLoading}
-                onClick={() => handleTopup(2500)}
+                onClick={() => initiateTopup(2500)}
                 className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors"
               >
                 +AED 2,500
+              </button>
+              <button
+                disabled={topupLoading}
+                onClick={() => initiateTopup(5000)}
+                className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-700/50 hover:border-cyan-400 text-cyan-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                title="High-Value Authorization (Requires Admin PIN)"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>+AED 5,000</span>
               </button>
             </div>
           </div>
@@ -209,6 +247,91 @@ export default function CustomerWalletPage() {
           </div>
         </div>
       </div>
+
+      {/* Secondary Security PIN Authorization Modal */}
+      {pinModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative">
+            <button
+              onClick={() => setPinModalOpen(false)}
+              className="absolute top-5 right-5 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-cyan-400 shadow-inner">
+                <KeyRound className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white">Secondary Security PIN</h3>
+                <p className="text-xs text-slate-400">Two-Tier Administrative Financial Authorization</p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs space-y-1.5">
+              <div className="flex justify-between text-slate-400">
+                <span>Operation</span>
+                <span className="font-bold text-white">High-Value Wallet Injection</span>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>Credit Amount</span>
+                <span className="font-bold text-cyan-400 font-mono text-sm">{formatPrice(pendingAmount)}</span>
+              </div>
+            </div>
+
+            {pinError && (
+              <div className="p-3.5 rounded-xl bg-red-950/50 border border-red-800 text-red-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{pinError}</span>
+              </div>
+            )}
+
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                executeTopup(pendingAmount, adminPin);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  Enter 6-Digit Admin PIN
+                </label>
+                <input
+                  type="password"
+                  maxLength={12}
+                  autoFocus
+                  placeholder="Default PIN: 888888"
+                  value={adminPin}
+                  onChange={e => setAdminPin(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-xl px-4 py-3 text-white text-center font-mono text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                />
+                <div className="text-[11px] text-slate-500 mt-1 text-center">
+                  Protected with PBKDF2 120,000 iterations & timingSafeEqual
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPinModalOpen(false)}
+                  className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={topupLoading || !adminPin}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 disabled:opacity-50 text-white text-xs font-black transition-all shadow-md shadow-blue-500/20"
+                >
+                  {topupLoading ? 'Verifying PIN...' : 'Authorize Credit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

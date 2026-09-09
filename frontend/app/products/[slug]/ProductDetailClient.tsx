@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Product } from '@/types';
 import { useCart } from '@/lib/cart-context';
-import { formatPrice } from '@/lib/utils';
+import { useCurrency } from '@/lib/currency-context';
 import {
   ShoppingCart,
   Heart,
@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 export function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { formatPrice } = useCurrency();
   const [selectedImage, setSelectedImage] = useState<string>(
     product.images?.[0] || product.thumbnail || ''
   );
@@ -120,11 +121,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
             <div>
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-black text-white">
-                  {formatPrice(price, product.currency)}
+                  {formatPrice(price)}
                 </span>
                 {originalPrice && (
                   <span className="text-sm text-slate-400 line-through">
-                    {formatPrice(originalPrice, product.currency)}
+                    {formatPrice(originalPrice)}
                   </span>
                 )}
               </div>

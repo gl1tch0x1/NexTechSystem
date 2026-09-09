@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { useCart } from '@/lib/cart-context';
-import { formatPrice } from '@/lib/utils';
+import { useCurrency } from '@/lib/currency-context';
 import {
   ShoppingCart,
   Heart,
@@ -24,6 +24,7 @@ import {
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { formatPrice } = useCurrency();
   const [justAdded, setJustAdded] = useState(false);
   const inWishlist = isInWishlist(product.id);
 
@@ -175,11 +176,11 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="pt-3.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
           <div>
             <div className="text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight">
-              {formatPrice(price, product.currency)}
+              {formatPrice(price)}
             </div>
             {originalPrice && originalPrice > price && (
               <div className="text-xs text-slate-400 line-through font-mono">
-                {formatPrice(originalPrice, product.currency)}
+                {formatPrice(originalPrice)}
               </div>
             )}
           </div>

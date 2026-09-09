@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Product, HeroHighlight } from '@/types';
 import { useCart } from '@/lib/cart-context';
-import { formatPrice } from '@/lib/utils';
+import { useCurrency } from '@/lib/currency-context';
 import {
   Cpu,
   Zap,
@@ -133,6 +133,7 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
   const [selectedTabId, setSelectedTabId] = useState<string>(activeHighlights[0]?.id || 'hero_gpu');
   const [justAdded, setJustAdded] = useState(false);
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
 
   const currentHighlight = activeHighlights.find(h => h.id === selectedTabId) || activeHighlights[0];
 
@@ -351,11 +352,11 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
 
                   <div className="text-right shrink-0">
                     <div className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
-                      {formatPrice(currentPrice, matchedProduct?.currency || 'AED')}
+                      {formatPrice(currentPrice)}
                     </div>
                     {originalPrice && originalPrice > currentPrice && (
                       <div className="text-[11px] text-slate-400 line-through font-mono">
-                        {formatPrice(originalPrice, matchedProduct?.currency || 'AED')}
+                        {formatPrice(originalPrice)}
                       </div>
                     )}
                   </div>
@@ -393,7 +394,7 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
                   ) : (
                     <>
                       <ShoppingCart className="w-4 h-4" />
-                      <span>Add to Order ({formatPrice(currentPrice, 'AED')})</span>
+                      <span>Add to Order ({formatPrice(currentPrice)})</span>
                     </>
                   )}
                 </button>

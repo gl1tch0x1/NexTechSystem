@@ -167,7 +167,7 @@ export class ProductService {
     const paginatedProducts = allProducts.slice(offset, offset + limit);
 
     return {
-      products: paginatedProducts,
+      products: paginatedProducts.map(p => this.attachLocations(p)),
       total,
       page,
       limit,
@@ -180,12 +180,29 @@ export class ProductService {
     };
   }
 
+  public attachLocations(product: Product): Product {
+    if (!product.locations || product.locations.length === 0) {
+      const total = product.stock || 0;
+      const dxb = Math.floor(total * 0.6);
+      const deira = Math.floor(total * 0.25);
+      const auh = Math.max(0, total - dxb - deira);
+      product.locations = [
+        { locationId: 'loc_dxb_main', locationName: 'Dubai Logistics Hub (JAFZA)', city: 'Dubai', quantity: dxb },
+        { locationId: 'loc_deira_tech', locationName: 'Deira Showroom & Tech Center', city: 'Dubai', quantity: deira },
+        { locationId: 'loc_auh_hub', locationName: 'Abu Dhabi Regional Hub', city: 'Abu Dhabi', quantity: auh },
+      ];
+    }
+    return product;
+  }
+
   async getProductBySlug(slug: string): Promise<Product | null> {
-    return productRepository.findBySlug(slug);
+    const prod = await productRepository.findBySlug(slug);
+    return prod ? this.attachLocations(prod) : null;
   }
 
   async getProductById(id: string): Promise<Product | null> {
-    return productRepository.findById(id);
+    const prod = await productRepository.findById(id);
+    return prod ? this.attachLocations(prod) : null;
   }
 
   async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'slug'>): Promise<Product> {

@@ -12,6 +12,7 @@ export interface AuthenticatedRequest extends Request {
     name: string;
     username: string;
     resellerId?: string;
+    adminPinHash?: string;
   };
 }
 
@@ -48,6 +49,7 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
       name: user.name,
       username: user.username,
       resellerId: user.resellerId,
+      adminPinHash: user.adminPinHash,
     };
     next();
   } catch (err: any) {

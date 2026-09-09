@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { Product, Review } from '@/types';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductDetailClient } from './ProductDetailClient';
-import { ShieldCheck, Truck, RotateCcw, Cpu, CheckCircle2, Store, Star } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, Cpu, CheckCircle2, Store, Star, Building, MapPin, Boxes } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { getApiUrl } from '@/lib/api-client';
 
@@ -55,6 +55,57 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
       {/* Main Product Hero Grid */}
       <ProductDetailClient product={product} />
+
+      {/* Multi-Warehouse Inventory & Regional Logistics Availability */}
+      {product.locations && product.locations.length > 0 && (
+        <section className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-4">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-cyan-400">
+                <Boxes className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                  <span>Warehouse Real-Time Inventory</span>
+                  <span className="text-[10px] uppercase tracking-wider bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-full font-bold">
+                    Live Stock
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">Physical stock allocated across UAE logistics centers for immediate dispatch or collection</p>
+              </div>
+            </div>
+            <div className="text-right hidden sm:block">
+              <div className="text-xs text-slate-400 font-medium">Total Regional Pool</div>
+              <div className="text-sm font-black text-emerald-400">{product.stock} Units</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+            {product.locations.map(loc => (
+              <div
+                key={loc.locationId}
+                className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3 group hover:border-slate-700 transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-300 group-hover:text-cyan-400 transition-colors shrink-0 mt-0.5">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white leading-tight">{loc.locationName}</div>
+                    <div className="text-[11px] text-slate-400 font-medium">{loc.city}, UAE</div>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className={`text-xs font-black ${loc.quantity > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                    {loc.quantity > 0 ? `${loc.quantity} in stock` : 'Awaiting Stock'}
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-mono">Instant Dispatch</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Technical Specifications Matrix */}
       <section className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-6">

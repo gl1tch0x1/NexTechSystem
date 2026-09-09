@@ -66,6 +66,14 @@ export interface Reseller {
 export type SellerType = 'ADMIN' | 'RESELLER';
 export type ProductApprovalStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
 
+export interface WarehouseLocationStock {
+  locationId: string;
+  locationName: string;
+  city: string;
+  quantity: number;
+  reserved?: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -94,6 +102,7 @@ export interface Product {
   stock: number;
   reservedStock?: number;
   lowStockThreshold: number;
+  locations?: WarehouseLocationStock[];
   images: string[];
   thumbnail: string;
   primaryImage?: string;

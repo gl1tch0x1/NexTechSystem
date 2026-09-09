@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
+import { useCurrency } from '@/lib/currency-context';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   Search,
@@ -27,15 +28,16 @@ import {
   LogOut,
   PackageCheck
 } from 'lucide-react';
-import { formatPrice } from '@/lib/utils';
 
 export function Navbar() {
   const router = useRouter();
   const { user, role, reseller, logout } = useAuth();
   const { cartCount, wishlistCount, cart } = useCart();
+  const { currentCurrency, availableCurrencies, setCurrency, formatPrice } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +116,68 @@ export function Navbar() {
         </form>
 
         {/* Right Navigation Actions (Sleek Modern Segment) */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Multi-Currency FX Selector (Enterprise Switcher) */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
+              className="flex items-center gap-1.5 px-2.5 py-2 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700/80 text-xs font-bold transition-all shadow-xs"
+              title="Change Display Currency"
+              aria-label="Currency Selector"
+            >
+              <span className="text-sm leading-none">{currentCurrency.flag}</span>
+              <span className="font-mono text-[11px] font-extrabold">{currentCurrency.code}</span>
+              <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${currencyDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {currencyDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setCurrencyDropdownOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95">
+                  <div className="px-3 py-1.5 text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span>Regional Currency</span>
+                    <span className="text-[9px] text-tech-blue">GCC / Global</span>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto py-1">
+                    {availableCurrencies.map(cur => {
+                      const isSelected = cur.code === currentCurrency.code;
+                      return (
+                        <button
+                          key={cur.code}
+                          type="button"
+                          onClick={() => {
+                            setCurrency(cur.code);
+                            setCurrencyDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${
+                            isSelected
+                              ? 'text-tech-blue dark:text-cyan-400 bg-blue-50/70 dark:bg-cyan-950/30 font-bold'
+                              : 'text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-base leading-none">{cur.flag}</span>
+                            <div className="text-left">
+                              <div className="font-bold">{cur.code}</div>
+                              <div className="text-[10px] text-slate-400 font-normal">{cur.name}</div>
+                            </div>
+                          </div>
+                          <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
+                            {cur.symbol}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
           {/* Theme Toggle Button */}
           <ThemeToggle className="rounded-2xl" />
 
