@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { Cpu, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, ShieldCheck, ChevronDown, Search } from 'lucide-react';
+import { Cpu, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, ShieldCheck, ChevronDown, Search, Phone } from 'lucide-react';
 
 interface CountryCode {
   code: string;
@@ -13,29 +13,79 @@ interface CountryCode {
 }
 
 const COUNTRY_CODES: CountryCode[] = [
+  // Gulf & Middle East
   { code: 'AE', name: 'United Arab Emirates', dialCode: '+971', flag: '🇦🇪' },
   { code: 'SA', name: 'Saudi Arabia', dialCode: '+966', flag: '🇸🇦' },
   { code: 'QA', name: 'Qatar', dialCode: '+974', flag: '🇶🇦' },
   { code: 'KW', name: 'Kuwait', dialCode: '+965', flag: '🇰🇼' },
   { code: 'OM', name: 'Oman', dialCode: '+968', flag: '🇴🇲' },
   { code: 'BH', name: 'Bahrain', dialCode: '+973', flag: '🇧🇭' },
-  { code: 'US', name: 'United States', dialCode: '+1', flag: '🇺🇸' },
-  { code: 'GB', name: 'United Kingdom', dialCode: '+44', flag: '🇬🇧' },
-  { code: 'IN', name: 'India', dialCode: '+91', flag: '🇮🇳' },
-  { code: 'PK', name: 'Pakistan', dialCode: '+92', flag: '🇵🇰' },
-  { code: 'EG', name: 'Egypt', dialCode: '+20', flag: '🇪🇬' },
-  { code: 'CA', name: 'Canada', dialCode: '+1', flag: '🇨🇦' },
-  { code: 'DE', name: 'Germany', dialCode: '+49', flag: '🇩🇪' },
-  { code: 'FR', name: 'France', dialCode: '+33', flag: '🇫🇷' },
-  { code: 'AU', name: 'Australia', dialCode: '+61', flag: '🇦🇺' },
-  { code: 'SG', name: 'Singapore', dialCode: '+65', flag: '🇸🇬' },
-  { code: 'MY', name: 'Malaysia', dialCode: '+60', flag: '🇲🇾' },
-  { code: 'CN', name: 'China', dialCode: '+86', flag: '🇨🇳' },
-  { code: 'JP', name: 'Japan', dialCode: '+81', flag: '🇯🇵' },
-  { code: 'TR', name: 'Turkey', dialCode: '+90', flag: '🇹🇷' },
-  { code: 'NL', name: 'Netherlands', dialCode: '+31', flag: '🇳🇱' },
   { code: 'JO', name: 'Jordan', dialCode: '+962', flag: '🇯🇴' },
   { code: 'LB', name: 'Lebanon', dialCode: '+961', flag: '🇱🇧' },
+  { code: 'IQ', name: 'Iraq', dialCode: '+964', flag: '🇮🇶' },
+  { code: 'SY', name: 'Syria', dialCode: '+963', flag: '🇸🇾' },
+  { code: 'YE', name: 'Yemen', dialCode: '+967', flag: '🇾🇪' },
+  { code: 'EG', name: 'Egypt', dialCode: '+20', flag: '🇪🇬' },
+  { code: 'IL', name: 'Israel', dialCode: '+972', flag: '🇮🇱' },
+  // North America
+  { code: 'US', name: 'United States', dialCode: '+1', flag: '🇺🇸' },
+  { code: 'CA', name: 'Canada', dialCode: '+1', flag: '🇨🇦' },
+  { code: 'MX', name: 'Mexico', dialCode: '+52', flag: '🇲🇽' },
+  // Europe
+  { code: 'GB', name: 'United Kingdom', dialCode: '+44', flag: '🇬🇧' },
+  { code: 'DE', name: 'Germany', dialCode: '+49', flag: '🇩🇪' },
+  { code: 'FR', name: 'France', dialCode: '+33', flag: '🇫🇷' },
+  { code: 'IT', name: 'Italy', dialCode: '+39', flag: '🇮🇹' },
+  { code: 'ES', name: 'Spain', dialCode: '+34', flag: '🇪🇸' },
+  { code: 'NL', name: 'Netherlands', dialCode: '+31', flag: '🇳🇱' },
+  { code: 'BE', name: 'Belgium', dialCode: '+32', flag: '🇧🇪' },
+  { code: 'CH', name: 'Switzerland', dialCode: '+41', flag: '🇨🇭' },
+  { code: 'SE', name: 'Sweden', dialCode: '+46', flag: '🇸🇪' },
+  { code: 'NO', name: 'Norway', dialCode: '+47', flag: '🇳🇴' },
+  { code: 'DK', name: 'Denmark', dialCode: '+45', flag: '🇩🇰' },
+  { code: 'FI', name: 'Finland', dialCode: '+358', flag: '🇫🇮' },
+  { code: 'PL', name: 'Poland', dialCode: '+48', flag: '🇵🇱' },
+  { code: 'PT', name: 'Portugal', dialCode: '+351', flag: '🇵🇹' },
+  { code: 'AT', name: 'Austria', dialCode: '+43', flag: '🇦🇹' },
+  { code: 'GR', name: 'Greece', dialCode: '+30', flag: '🇬🇷' },
+  { code: 'TR', name: 'Turkey', dialCode: '+90', flag: '🇹🇷' },
+  { code: 'RU', name: 'Russia', dialCode: '+7', flag: '🇷🇺' },
+  { code: 'UA', name: 'Ukraine', dialCode: '+380', flag: '🇺🇦' },
+  // South Asia
+  { code: 'IN', name: 'India', dialCode: '+91', flag: '🇮🇳' },
+  { code: 'PK', name: 'Pakistan', dialCode: '+92', flag: '🇵🇰' },
+  { code: 'BD', name: 'Bangladesh', dialCode: '+880', flag: '🇧🇩' },
+  { code: 'LK', name: 'Sri Lanka', dialCode: '+94', flag: '🇱🇰' },
+  { code: 'NP', name: 'Nepal', dialCode: '+977', flag: '🇳🇵' },
+  // East & Southeast Asia
+  { code: 'CN', name: 'China', dialCode: '+86', flag: '🇨🇳' },
+  { code: 'JP', name: 'Japan', dialCode: '+81', flag: '🇯🇵' },
+  { code: 'KR', name: 'South Korea', dialCode: '+82', flag: '🇰🇷' },
+  { code: 'SG', name: 'Singapore', dialCode: '+65', flag: '🇸🇬' },
+  { code: 'MY', name: 'Malaysia', dialCode: '+60', flag: '🇲🇾' },
+  { code: 'ID', name: 'Indonesia', dialCode: '+62', flag: '🇮🇩' },
+  { code: 'TH', name: 'Thailand', dialCode: '+66', flag: '🇹🇭' },
+  { code: 'VN', name: 'Vietnam', dialCode: '+84', flag: '🇻🇳' },
+  { code: 'PH', name: 'Philippines', dialCode: '+63', flag: '🇵🇭' },
+  { code: 'HK', name: 'Hong Kong', dialCode: '+852', flag: '🇭🇰' },
+  { code: 'TW', name: 'Taiwan', dialCode: '+886', flag: '🇹🇼' },
+  // Oceania
+  { code: 'AU', name: 'Australia', dialCode: '+61', flag: '🇦🇺' },
+  { code: 'NZ', name: 'New Zealand', dialCode: '+64', flag: '🇳🇿' },
+  // Africa
+  { code: 'ZA', name: 'South Africa', dialCode: '+27', flag: '🇿🇦' },
+  { code: 'NG', name: 'Nigeria', dialCode: '+234', flag: '🇳🇬' },
+  { code: 'KE', name: 'Kenya', dialCode: '+254', flag: '🇰🇪' },
+  { code: 'GH', name: 'Ghana', dialCode: '+233', flag: '🇬🇭' },
+  { code: 'ET', name: 'Ethiopia', dialCode: '+251', flag: '🇪🇹' },
+  { code: 'MA', name: 'Morocco', dialCode: '+212', flag: '🇲🇦' },
+  { code: 'TN', name: 'Tunisia', dialCode: '+216', flag: '🇹🇳' },
+  { code: 'DZ', name: 'Algeria', dialCode: '+213', flag: '🇩🇿' },
+  // South America
+  { code: 'BR', name: 'Brazil', dialCode: '+55', flag: '🇧🇷' },
+  { code: 'AR', name: 'Argentina', dialCode: '+54', flag: '🇦🇷' },
+  { code: 'CL', name: 'Chile', dialCode: '+56', flag: '🇨🇱' },
+  { code: 'CO', name: 'Colombia', dialCode: '+57', flag: '🇨🇴' },
 ];
 
 function AuthContent() {
@@ -327,39 +377,56 @@ function AuthContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Phone (Optional)</label>
-              <div className="relative flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue">
-                {/* Flag + Dial Code Selector Trigger */}
-                <div ref={countryDropdownRef} className="relative">
+              <label className="block text-xs font-bold text-slate-400 mb-1.5">Phone Number (Optional)</label>
+
+              {/* Selected country preview badge */}
+              <div className="flex items-center gap-2 mb-1.5 px-1">
+                <span className="text-lg leading-none">{selectedCountry.flag}</span>
+                <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">{selectedCountry.name}</span>
+                <span className="text-[11px] font-mono text-tech-blue font-bold">{selectedCountry.dialCode}</span>
+              </div>
+
+              <div className="relative flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors overflow-visible">
+                {/* Country Code Selector Trigger */}
+                <div ref={countryDropdownRef} className="relative shrink-0">
                   <button
                     type="button"
                     onClick={() => {
                       setIsCountryDropdownOpen(prev => !prev);
                       setCountrySearch('');
                     }}
-                    className="h-full flex items-center gap-1.5 px-3 py-2.5 rounded-l-xl hover:bg-slate-200/60 dark:hover:bg-slate-700/60 border-r border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 shrink-0 transition-colors"
+                    className="h-full flex items-center gap-2 pl-3 pr-3 py-3 rounded-l-xl hover:bg-slate-200/70 dark:hover:bg-slate-700/70 border-r border-slate-200 dark:border-slate-700 shrink-0 transition-colors group"
                     title={`${selectedCountry.name} (${selectedCountry.dialCode})`}
+                    aria-label="Select country code"
                   >
-                    <span className="text-base leading-none select-none">{selectedCountry.flag}</span>
-                    <span className="font-mono text-slate-700 dark:text-slate-300 text-[11px] font-bold">{selectedCountry.dialCode}</span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+                    {/* Large flag */}
+                    <span className="text-xl leading-none select-none">{selectedCountry.flag}</span>
+                    {/* Dial code */}
+                    <span className="font-mono text-slate-700 dark:text-slate-200 text-[12px] font-bold tracking-tight">{selectedCountry.dialCode}</span>
+                    {/* Chevron */}
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-all ${isCountryDropdownOpen ? 'rotate-180 text-tech-blue' : ''}`} />
                   </button>
 
                   {/* Country Dropdown Popover */}
                   {isCountryDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-1.5 w-64 max-h-60 overflow-hidden rounded-2xl bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-2 space-y-1.5 animate-in fade-in zoom-in-95 duration-100">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Search country or code..."
-                          value={countrySearch}
-                          onChange={e => setCountrySearch(e.target.value)}
-                          className="w-full bg-slate-100 dark:bg-slate-800/90 pl-7 pr-2.5 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue placeholder:text-slate-400"
-                          autoFocus
-                        />
-                        <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                    <div className="absolute left-0 top-full mt-2 w-72 max-h-72 overflow-hidden rounded-2xl bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-slate-800 shadow-2xl z-[100] flex flex-col">
+                      {/* Search */}
+                      <div className="p-2 border-b border-slate-100 dark:border-slate-800">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Search country, name or +code..."
+                            value={countrySearch}
+                            onChange={e => setCountrySearch(e.target.value)}
+                            className="w-full bg-slate-100 dark:bg-slate-800 pl-8 pr-3 py-2 rounded-lg text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue placeholder:text-slate-400"
+                            autoFocus
+                          />
+                          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                        </div>
                       </div>
-                      <div className="max-h-40 overflow-y-auto space-y-0.5 custom-scrollbar pr-1">
+
+                      {/* Country List */}
+                      <div className="overflow-y-auto flex-1 p-1.5 space-y-0.5" style={{ maxHeight: '220px' }}>
                         {filteredCountries.map(c => (
                           <button
                             key={c.code}
@@ -369,24 +436,29 @@ function AuthContent() {
                               setIsCountryDropdownOpen(false);
                               setCountrySearch('');
                             }}
-                            className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl text-xs text-left transition-colors ${
+                            className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs text-left transition-colors ${
                               selectedCountry.code === c.code
                                 ? 'bg-tech-blue text-white font-bold'
                                 : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                             }`}
                           >
-                            <div className="flex items-center gap-2 truncate pr-2">
-                              <span className="text-base leading-none">{c.flag}</span>
-                              <span className="truncate">{c.name}</span>
-                            </div>
-                            <span className={`font-mono text-[11px] shrink-0 ${selectedCountry.code === c.code ? 'text-white' : 'text-slate-400'}`}>
+                            {/* Flag */}
+                            <span className="text-lg leading-none w-7 text-center">{c.flag}</span>
+                            {/* Country name */}
+                            <span className="flex-1 truncate text-[11px]">{c.name}</span>
+                            {/* Dial code badge */}
+                            <span className={`font-mono text-[11px] shrink-0 px-1.5 py-0.5 rounded-md ${
+                              selectedCountry.code === c.code
+                                ? 'bg-white/20 text-white'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                            }`}>
                               {c.dialCode}
                             </span>
                           </button>
                         ))}
                         {filteredCountries.length === 0 && (
-                          <div className="text-center py-3 text-xs text-slate-400">
-                            No country matched
+                          <div className="text-center py-6 text-xs text-slate-400">
+                            No countries matched
                           </div>
                         )}
                       </div>
@@ -394,15 +466,21 @@ function AuthContent() {
                   )}
                 </div>
 
-                {/* Local Phone Number Input */}
-                <input
-                  type="tel"
-                  placeholder="50 123 4567"
-                  value={regPhone}
-                  onChange={e => setRegPhone(e.target.value)}
-                  className="w-full bg-transparent p-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
-                />
+                {/* Phone Number Input */}
+                <div className="flex items-center flex-1 gap-2 pr-3">
+                  <input
+                    type="tel"
+                    placeholder="50 123 4567"
+                    value={regPhone}
+                    onChange={e => setRegPhone(e.target.value)}
+                    className="flex-1 bg-transparent pl-3 py-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none min-w-0"
+                  />
+                  <Phone className="w-4 h-4 text-slate-400 shrink-0" />
+                </div>
               </div>
+              <p className="mt-1.5 text-[10px] text-slate-400 leading-relaxed">
+                Select your country flag to set the dial code, then enter your local number.
+              </p>
             </div>
 
             <div>
