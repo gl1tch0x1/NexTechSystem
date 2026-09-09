@@ -323,7 +323,7 @@ sequenceDiagram
     Admin->>AdminUI: Reviews Moderation Queue
     AdminUI->>Admin: Displays Technical Specifications and Vendor Identity
     Admin->>AdminUI: Approves Hardware Submission
-    AdminUI->>Storefront: Status Set to APPROVED; Listing Activates on Public Storefront
+    AdminUI->>Storefront: Status set to APPROVED and listing activates on storefront
 ```
 
 ---
