@@ -7,6 +7,8 @@ import { inventoryService } from './inventory.service.js';
 import { walletService } from './wallet.service.js';
 import { ebillService } from './ebill.service.js';
 import { auditService } from './audit.service.js';
+import { userRepository } from '../repositories/user.repository.js';
+import { ENV } from '../config/env.js';
 import { Order, OrderStatus, PaymentMethod, PaymentStatus, Address, OrderItem } from '../types/index.js';
 import { dbStore } from '../config/db-store.js';
 
@@ -225,9 +227,10 @@ export class OrderService {
     });
 
     if (adminUserId) {
+      const actingAdmin = await userRepository.findById(adminUserId);
       await auditService.log({
         userId: adminUserId,
-        userEmail: 'admin@nextech.com',
+        userEmail: actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL,
         userRole: 'ADMIN',
         action: `ORDER_STATUS_${status}`,
         resource: 'orders',

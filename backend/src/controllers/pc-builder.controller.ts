@@ -63,7 +63,7 @@ export class WalletController {
           success: false,
           error: {
             code: 'INVALID_ADMIN_PIN',
-            message: 'Secondary Security PIN verification failed. Please enter the valid authorization PIN (default: 888888).',
+            message: 'Secondary Security PIN verification failed. Please enter the valid authorization PIN.',
           },
         });
         return;

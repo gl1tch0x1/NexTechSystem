@@ -17,9 +17,11 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 
+import { DEFAULT_CATEGORIES } from '@/lib/default-taxonomy';
+
 export default function AdminCategoriesPage() {
   const { token } = useAuth();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -41,12 +43,15 @@ export default function AdminCategoriesPage() {
   });
 
   const fetchCategories = async () => {
-    if (!token) return;
     try {
-      const data = await ApiClient.get<Category[]>('/admin/categories', { token });
-      setCategories(data || []);
+      const fetchOpts = token ? { token } : {};
+      const data = await ApiClient.get<Category[]>('/admin/categories', fetchOpts)
+        .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => []));
+      if (data && Array.isArray(data) && data.length > 0) {
+        setCategories(data);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch categories:', err);
     } finally {
       setLoading(false);
     }

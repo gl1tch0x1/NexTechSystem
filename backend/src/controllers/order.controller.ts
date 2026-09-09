@@ -85,7 +85,33 @@ export class OrderController {
   }
 
   async getEBill(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } });
+      return;
+    }
+
     const orderId = req.params.orderId as string;
+    const order = await orderService.getOrderById(orderId);
+
+    if (!order) {
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Order not found.' } });
+      return;
+    }
+
+    // Role check: customer can only view own e-bill; reseller can view if contains their items; admin can view all
+    if (req.user.role === 'CUSTOMER' && order.userId !== req.user.id) {
+      res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
+      return;
+    }
+
+    if (req.user.role === 'RESELLER') {
+      const hasResellerItem = order.items.some(i => i.resellerId === req.user?.resellerId);
+      if (!hasResellerItem) {
+        res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
+        return;
+      }
+    }
+
     const ebill = await ebillService.getEBillByOrderId(orderId);
 
     if (!ebill) {

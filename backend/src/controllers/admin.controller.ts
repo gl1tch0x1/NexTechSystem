@@ -12,6 +12,7 @@ import { brandRepository } from '../repositories/brand.repository.js';
 import { bannerRepository } from '../repositories/banner.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { auditService } from '../services/audit.service.js';
+import { ENV } from '../config/env.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class AdminController {
@@ -52,7 +53,7 @@ export class AdminController {
     });
     await auditService.log({
       userId: req.user?.id || 'admin',
-      userEmail: req.user?.email || 'admin@nextech.com',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
       userRole: 'ADMIN',
       action: 'ADMIN_PRODUCT_CREATED',
       resource: 'product',
@@ -67,7 +68,7 @@ export class AdminController {
     const updated = await productService.updateProduct(id, req.body);
     await auditService.log({
       userId: req.user?.id || 'admin',
-      userEmail: req.user?.email || 'admin@nextech.com',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
       userRole: 'ADMIN',
       action: 'ADMIN_PRODUCT_UPDATED',
       resource: 'product',
@@ -82,7 +83,7 @@ export class AdminController {
     await productService.deleteProduct(id);
     await auditService.log({
       userId: req.user?.id || 'admin',
-      userEmail: req.user?.email || 'admin@nextech.com',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
       userRole: 'ADMIN',
       action: 'ADMIN_PRODUCT_DELETED',
       resource: 'product',
@@ -97,7 +98,7 @@ export class AdminController {
     const updated = await productService.setApprovalStatus(id, status, rejectionReason, req.user?.id);
     await auditService.log({
       userId: req.user?.id || 'admin',
-      userEmail: req.user?.email || 'admin@nextech.com',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
       userRole: 'ADMIN',
       action: `ADMIN_PRODUCT_${status}`,
       resource: 'product',
@@ -139,7 +140,7 @@ export class AdminController {
       const result = await resellerService.createReseller(req.body, req.user?.id || 'admin');
       await auditService.log({
         userId: req.user?.id || 'admin',
-        userEmail: req.user?.email || 'admin@nextech.com',
+        userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
         userRole: 'ADMIN',
         action: 'ADMIN_RESELLER_PROVISIONED',
         resource: 'reseller',
@@ -240,7 +241,7 @@ export class AdminController {
 
     await auditService.log({
       userId: req.user?.id || 'admin',
-      userEmail: req.user?.email || 'admin@nextech.com',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
       userRole: 'ADMIN',
       action: 'ADMIN_WALLET_ADJUSTED',
       resource: 'wallet',
@@ -265,7 +266,7 @@ export class AdminController {
     const updated = await orderService.updateOrderStatus(id, status, note, req.user?.id);
     await auditService.log({
       userId: req.user?.id || 'admin',
-      userEmail: req.user?.email || 'admin@nextech.com',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
       userRole: 'ADMIN',
       action: 'ADMIN_ORDER_STATUS_UPDATED',
       resource: 'order',

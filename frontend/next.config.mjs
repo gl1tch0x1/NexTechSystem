@@ -31,12 +31,13 @@ const nextConfig = {
     }
   },
   async rewrites() {
-    const proxyTarget = process.env.API_PROXY_TARGET;
+    const proxyTarget = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
     if (proxyTarget) {
+      const cleanTarget = proxyTarget.replace(/\/$/, '').replace(/\/api$/, '');
       return [
         {
           source: '/api/:path*',
-          destination: `${proxyTarget.replace(/\/$/, '')}/api/:path*`,
+          destination: `${cleanTarget}/api/:path*`,
         },
       ];
     }

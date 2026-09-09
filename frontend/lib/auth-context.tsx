@@ -209,18 +209,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             throw popupErr;
           }
           console.warn('Firebase Google Auth encountered configuration/key issue, activating instant demo session:', popupErr);
+          const dynamicEmail = `guest_${Date.now().toString(36)}@client.local`;
           fbUser = {
             uid: `demo_google_${Date.now()}`,
-            displayName: 'Google Verified Customer',
-            email: 'google.customer@nextech.io',
+            displayName: 'Verified Customer',
+            email: dynamicEmail,
             photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
           };
         }
       } else {
+        const dynamicEmail = `guest_${Date.now().toString(36)}@client.local`;
         fbUser = {
           uid: `demo_google_${Date.now()}`,
-          displayName: 'Google Verified Customer',
-          email: 'google.customer@nextech.io',
+          displayName: 'Verified Customer',
+          email: dynamicEmail,
           photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
         };
       }
@@ -241,11 +243,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const profile = await fetchCurrentUser(res.token);
         return profile || { user: res.user, reseller: null };
       } catch (backendErr: any) {
+        const fallbackEmail = fbUser.email || `user_${Date.now().toString(36)}@client.local`;
         const demoUser: User = {
           id: `usr_${Date.now()}`,
-          name: fbUser.displayName || 'Google User',
-          email: fbUser.email || 'google.user@nextech.io',
-          username: fbUser.email?.split('@')[0] || 'google_user',
+          name: fbUser.displayName || 'Customer',
+          email: fallbackEmail,
+          username: fallbackEmail.split('@')[0] || 'customer',
           role: 'CUSTOMER',
           addresses: [],
           isActive: true,

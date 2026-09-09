@@ -4,6 +4,7 @@ import { userRepository } from '../repositories/user.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { Reseller, User, ResellerStatus } from '../types/index.js';
 import { auditService } from './audit.service.js';
+import { ENV } from '../config/env.js';
 
 export interface CreateResellerDTO {
   username: string;
@@ -116,9 +117,10 @@ export class ResellerService {
     const createdReseller = await resellerRepository.create(newReseller);
 
     // Audit log
+    const actingAdmin = adminUserId ? await userRepository.findById(adminUserId) : null;
     await auditService.log({
       userId: adminUserId,
-      userEmail: 'admin@nextech.com',
+      userEmail: actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL,
       userRole: 'ADMIN',
       action: 'RESELLER_CREATED',
       resource: 'resellers',
@@ -154,9 +156,10 @@ export class ResellerService {
   async updateResellerStatus(id: string, status: ResellerStatus, adminUserId: string): Promise<Reseller | null> {
     const updated = await resellerRepository.update(id, { status });
     if (updated) {
+      const actingAdmin = adminUserId ? await userRepository.findById(adminUserId) : null;
       await auditService.log({
         userId: adminUserId,
-        userEmail: 'admin@nextech.com',
+        userEmail: actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL,
         userRole: 'ADMIN',
         action: `RESELLER_STATUS_${status}`,
         resource: 'resellers',

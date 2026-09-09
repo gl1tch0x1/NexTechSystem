@@ -1,13 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { VatService } from '../services/vat.service.js';
+import { authenticate } from '../middleware/auth.js';
+import { requireRole } from '../middleware/rbac.js';
 
 const router = Router();
 
 /**
  * GET /api/vat/summary
- * Returns UAE FTA VAT 201 periodic audit summary
+ * Returns UAE FTA VAT 201 periodic audit summary (Requires ADMIN authorization)
  */
-router.get('/summary', async (req: Request, res: Response) => {
+router.get('/summary', authenticate, requireRole('ADMIN'), async (req: Request, res: Response) => {
   try {
     const { periodStart, periodEnd } = req.query;
     const summary = await VatService.getVatReturnSummary(

@@ -158,7 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <div className="hidden xl:block text-left">
               <div className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[110px]">{user?.name || 'Chief Admin'}</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400">{user?.email || 'admin@nextech.com'}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">{user?.email || (user?.username ? `@${user.username}` : 'Administrator')}</div>
             </div>
             <button
               onClick={() => logout()}

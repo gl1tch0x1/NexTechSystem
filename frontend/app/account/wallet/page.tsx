@@ -302,7 +302,7 @@ export default function CustomerWalletPage() {
                   type="password"
                   maxLength={12}
                   autoFocus
-                  placeholder="Default PIN: 888888"
+                  placeholder="••••••"
                   value={adminPin}
                   onChange={e => setAdminPin(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-xl px-4 py-3 text-white text-center font-mono text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-500/20"

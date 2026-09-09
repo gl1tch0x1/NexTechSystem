@@ -10,7 +10,7 @@ import { ENV } from '../config/env.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { User } from '../types/index.js';
 
-const PBKDF2_SALT = 'nextech_enterprise_salt_v2_2026';
+const PBKDF2_SALT = ENV.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026';
 const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_KEYLEN = 64;
 const PBKDF2_DIGEST = 'sha512';
@@ -29,8 +29,13 @@ export class AuthController {
   async register(req: Request, res: Response): Promise<void> {
     const { name, email, username, phone, address, password } = req.body;
 
-    if (!email || !name) {
-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Email and Name are required.' } });
+    if (!email || !name || !password) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Name, Email, and Password are required.' } });
+      return;
+    }
+
+    if (password.length < 6) {
+      res.status(400).json({ success: false, error: { code: 'WEAK_PASSWORD', message: 'Password must be at least 6 characters long.' } });
       return;
     }
 
@@ -42,7 +47,7 @@ export class AuthController {
 
     const userId = `user_${uuidv4()}`;
     const cleanUsername = username ? username.toLowerCase().replace(/[^a-z0-9_]/g, '') : email.split('@')[0];
-    const passwordHash = password ? hashPassword(password) : hashPassword('password123');
+    const passwordHash = hashPassword(password);
 
     const newUser: User = {
       id: userId,

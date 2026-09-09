@@ -238,7 +238,7 @@ function AuthContent() {
                 <input
                   type="text"
                   required
-                  placeholder="admin@nextech.com or username"
+                  placeholder="Enter your email or username"
                   value={loginEmail}
                   onChange={e => setLoginEmail(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"

@@ -43,5 +43,5 @@ export function verifyAdminPin(pin: string, storedHash: string): boolean {
   }
 }
 
-// System-wide fallback secondary PIN hash for admin/financial approvals (Default: "888888")
-export const DEFAULT_SYSTEM_ADMIN_PIN_HASH = hashAdminPin('888888');
+// System-wide fallback secondary PIN hash for admin/financial approvals (Configurable via ADMIN_SECURITY_PIN)
+export const DEFAULT_SYSTEM_ADMIN_PIN_HASH = hashAdminPin(process.env.ADMIN_SECURITY_PIN || '888888');

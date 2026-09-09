@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Product, ProductApprovalStatus, Category, Brand } from '@/types';
+import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 import {
   Package,
   CheckCircle2,
@@ -30,8 +31,8 @@ import {
 export default function AdminProductsPage() {
   const { token } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,18 +71,28 @@ export default function AdminProductsPage() {
   });
 
   const fetchData = async () => {
-    if (!token) return;
     try {
+      const fetchOpts = token ? { token } : {};
       const [prodRes, catRes, brandRes] = await Promise.all([
-        ApiClient.get<Product[]>('/admin/products?limit=100', { token }),
-        ApiClient.get<Category[]>('/admin/categories', { token }).catch(() => []),
-        ApiClient.get<Brand[]>('/admin/brands', { token }).catch(() => []),
+        token
+          ? ApiClient.get<Product[]>('/admin/products?limit=100', { token }).catch(() => [])
+          : Promise.resolve([]),
+        ApiClient.get<Category[]>('/admin/categories', fetchOpts)
+          .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => [])),
+        ApiClient.get<Brand[]>('/admin/brands', fetchOpts)
+          .catch(() => ApiClient.get<Brand[]>('/products/brands').catch(() => [])),
       ]);
-      setProducts(prodRes || []);
-      setCategories(catRes || []);
-      setBrands(brandRes || []);
+      if (prodRes && Array.isArray(prodRes) && prodRes.length > 0) {
+        setProducts(prodRes);
+      }
+      if (catRes && Array.isArray(catRes) && catRes.length > 0) {
+        setCategories(catRes);
+      }
+      if (brandRes && Array.isArray(brandRes) && brandRes.length > 0) {
+        setBrands(brandRes);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to load admin products or taxonomy:', err);
     } finally {
       setLoading(false);
     }
@@ -95,6 +106,11 @@ export default function AdminProductsPage() {
     setIsEditing(false);
     setSelectedProduct(null);
     setFormError('');
+    const activeCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+    const activeBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
+    const initialCat = activeCats[0];
+    const initialBrand = activeBrands[0];
+
     setFormData({
       title: '',
       slug: '',
@@ -105,10 +121,10 @@ export default function AdminProductsPage() {
       originalPrice: 1199,
       discountPercentage: 10,
       stock: 25,
-      categoryId: categories[0]?.id || 'cat_components',
-      categoryName: categories[0]?.name || 'Components & Hardware',
-      brandId: brands[0]?.id || 'brand_intel',
-      brandName: brands[0]?.name || 'Intel',
+      categoryId: initialCat?.id || 'cat_components',
+      categoryName: initialCat?.name || 'PC Components',
+      brandId: initialBrand?.id || 'brand_asus',
+      brandName: initialBrand?.name || 'ASUS',
       primaryImage: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=600&q=80',
       socket: 'LGA1700',
       tdp: 125,
@@ -166,9 +182,9 @@ export default function AdminProductsPage() {
         discountPercentage: Number(formData.discountPercentage || 0),
         stock: Number(formData.stock),
         categoryId: formData.categoryId,
-        categoryName: categories.find(c => c.id === formData.categoryId)?.name || formData.categoryName,
+        categoryName: (categories.length > 0 ? categories : DEFAULT_CATEGORIES).find(c => c.id === formData.categoryId)?.name || formData.categoryName,
         brandId: formData.brandId,
-        brandName: brands.find(b => b.id === formData.brandId)?.name || formData.brandName,
+        brandName: (brands.length > 0 ? brands : DEFAULT_BRANDS).find(b => b.id === formData.brandId)?.name || formData.brandName,
         primaryImage: formData.primaryImage,
         images: [formData.primaryImage],
         specs: {
@@ -503,12 +519,13 @@ export default function AdminProductsPage() {
                   <select
                     value={formData.categoryId}
                     onChange={e => {
-                      const sel = categories.find(c => c.id === e.target.value);
+                      const availableCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+                      const sel = availableCats.find(c => c.id === e.target.value);
                       setFormData({ ...formData, categoryId: e.target.value, categoryName: sel?.name || '' });
                     }}
                     className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
                   >
-                    {categories.map(c => (
+                    {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
@@ -519,12 +536,13 @@ export default function AdminProductsPage() {
                   <select
                     value={formData.brandId}
                     onChange={e => {
-                      const sel = brands.find(b => b.id === e.target.value);
+                      const availableBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
+                      const sel = availableBrands.find(b => b.id === e.target.value);
                       setFormData({ ...formData, brandId: e.target.value, brandName: sel?.name || '' });
                     }}
                     className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
                   >
-                    {brands.map(b => (
+                    {(brands.length > 0 ? brands : DEFAULT_BRANDS).map(b => (
                       <option key={b.id} value={b.id}>{b.name}</option>
                     ))}
                   </select>

@@ -29,11 +29,13 @@ async function runTestSuite() {
 
   // 2. Auth Tests: Admin Login, Customer Registration, Admin Reseller Provisioning
   let adminToken = '';
-  await test('Admin Login (admin@nextech.com)', async () => {
+  const testAdminEmail = process.env.ADMIN_EMAIL || 'admin@nextech.com';
+  const testAdminPassword = process.env.ADMIN_PASSWORD || 'password123';
+  await test(`Admin Login (${testAdminEmail})`, async () => {
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'admin@nextech.com', password: 'password123' })
+      body: JSON.stringify({ email: testAdminEmail, password: testAdminPassword })
     });
     const json = await res.json();
     if (!json.success || !json.data?.token) throw new Error('Admin login failed');

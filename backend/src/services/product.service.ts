@@ -4,6 +4,8 @@ import { categoryRepository } from '../repositories/category.repository.js';
 import { brandRepository } from '../repositories/brand.repository.js';
 import { Product, ProductApprovalStatus, SellerType } from '../types/index.js';
 import { auditService } from './audit.service.js';
+import { userRepository } from '../repositories/user.repository.js';
+import { ENV } from '../config/env.js';
 
 export interface ProductFilterQuery {
   categoryId?: string;
@@ -253,9 +255,10 @@ export class ProductService {
     });
 
     if (adminUserId) {
+      const actingAdmin = await userRepository.findById(adminUserId);
       await auditService.log({
         userId: adminUserId,
-        userEmail: 'admin@nextech.com',
+        userEmail: actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL,
         userRole: 'ADMIN',
         action: `PRODUCT_STATUS_${status}`,
         resource: 'products',

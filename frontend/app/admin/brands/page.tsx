@@ -16,9 +16,11 @@ import {
   Sparkles
 } from 'lucide-react';
 
+import { DEFAULT_BRANDS } from '@/lib/default-taxonomy';
+
 export default function AdminBrandsPage() {
   const { token } = useAuth();
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -41,12 +43,15 @@ export default function AdminBrandsPage() {
   });
 
   const fetchBrands = async () => {
-    if (!token) return;
     try {
-      const data = await ApiClient.get<Brand[]>('/admin/brands', { token });
-      setBrands(data || []);
+      const fetchOpts = token ? { token } : {};
+      const data = await ApiClient.get<Brand[]>('/admin/brands', fetchOpts)
+        .catch(() => ApiClient.get<Brand[]>('/products/brands').catch(() => []));
+      if (data && Array.isArray(data) && data.length > 0) {
+        setBrands(data);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch brands:', err);
     } finally {
       setLoading(false);
     }

@@ -41,7 +41,7 @@ export const SEED_BRANDS: Brand[] = [
 export const SEED_USERS: User[] = [
   {
     id: 'user_admin_1',
-    email: 'admin@nextech.com',
+    email: process.env.ADMIN_EMAIL || 'admin@enterprise.local',
     role: 'ADMIN',
     name: 'Chief Systems Architect',
     username: 'admin',

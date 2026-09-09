@@ -1,11 +1,26 @@
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window === 'undefined' && process.env.API_URL) ||
-  'http://localhost:5000/api';
+export const getBaseApiUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    const isLocalhost =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.endsWith('.local');
+    // In production browsers (Vercel deployment, HTTPS), use relative /api to avoid Mixed Content errors
+    if (!isLocalhost) {
+      return '/api';
+    }
+  }
+  return process.env.API_URL || 'http://localhost:5000/api';
+};
+
+export const API_BASE_URL = getBaseApiUrl();
 
 export function getApiUrl(path: string): string {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${API_BASE_URL}${cleanPath}`;
+  const base = getBaseApiUrl();
+  return `${base}${cleanPath}`;
 }
 
 interface ApiOptions extends RequestInit {
@@ -20,7 +35,9 @@ export class ApiClient {
   }
 
   static async request<T = any>(endpoint: string, options: ApiOptions = {}): Promise<T> {
-    const fullPath = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const baseUrl = getBaseApiUrl();
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const fullPath = `${baseUrl}${cleanEndpoint}`;
     const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5000';
     const url = new URL(fullPath, base);
 
