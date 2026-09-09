@@ -11,21 +11,47 @@ interface CountryCode {
   dialCode: string;
 }
 
-/** Render a real country flag image from flagcdn.com using the ISO 3166-1 alpha-2 code */
+/** Render a real country flag image from flagpedia.net using the ISO 3166-1 alpha-2 code */
 function CountryFlag({ code, size = 24 }: { code: string; size?: number }) {
   const lower = code.toLowerCase();
   return (
     <img
-      src={`https://flagcdn.com/w${size * 2}/${lower}.png`}
-      srcSet={`https://flagcdn.com/w${size * 2}/${lower}.png 2x`}
+      src={`https://flagpedia.net/data/flags/w580/${lower}.png`}
+      srcSet={`https://flagpedia.net/data/flags/w580/${lower}.png 2x`}
       width={size}
       height={Math.round(size * 0.67)}
       alt={code}
       className="rounded-sm object-cover inline-block shrink-0"
       style={{ imageRendering: 'auto' }}
       loading="lazy"
+      onError={(e) => {
+        // Fallback to emoji flag if image fails to load
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        const parent = target.parentElement;
+        if (parent) {
+          const emoji = getFlagEmoji(code);
+          if (emoji && !parent.querySelector('.flag-emoji-fallback')) {
+            const span = document.createElement('span');
+            span.className = 'flag-emoji-fallback';
+            span.textContent = emoji;
+            span.style.fontSize = `${size}px`;
+            span.style.lineHeight = '1';
+            parent.appendChild(span);
+          }
+        }
+      }}
     />
   );
+}
+
+/** Get emoji flag from country code */
+function getFlagEmoji(code: string): string {
+  const codePoints = code
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
 }
 
 const COUNTRY_CODES: CountryCode[] = [
@@ -383,17 +409,6 @@ function AuthContent() {
             {/* ── Phone Number Field ── */}
             <div>
               <label className="block text-xs font-bold text-slate-400 mb-2">Phone Number (Optional)</label>
-
-              {/* Selected country preview badge */}
-              <div className="flex items-center gap-2 mb-2 px-0.5">
-                <CountryFlag code={selectedCountry.code} size={20} />
-                <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate">
-                  {selectedCountry.name}
-                </span>
-                <span className="ml-auto text-[11px] font-mono text-tech-blue font-bold shrink-0">
-                  {selectedCountry.dialCode}
-                </span>
-              </div>
 
               {/* Input row: [FLAG+CODE button] [phone input] [phone icon] */}
               <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors overflow-visible">
