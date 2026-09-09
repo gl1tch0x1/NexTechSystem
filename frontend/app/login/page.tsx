@@ -233,7 +233,7 @@ function AuthContent() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 py-12 space-y-6">
       {/* Brand Header */}
       <div className="text-center space-y-2">
         <div className="w-12 h-12 rounded-2xl bg-tech-blue flex items-center justify-center text-white mx-auto shadow-tech-glow">
@@ -365,50 +365,54 @@ function AuthContent() {
         {/* 2. CREATE CUSTOMER ACCOUNT TAB */}
         {tab === 'register' && (
           <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Full Name / Organization</label>
-              <div className="relative">
+            <div className="grid grid-cols-2 gap-3">
+              {/* Full Name */}
+              <div>
+                <label className="block text-xs font-bold text-slate-400 mb-1">Full Name / Organization</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Jordan Smith"
+                    value={regName}
+                    onChange={e => setRegName(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  />
+                  <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              {/* Business Email */}
+              <div>
+                <label className="block text-xs font-bold text-slate-400 mb-1">Business Email Address</label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@company.com"
+                    value={regEmail}
+                    onChange={e => setRegEmail(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              {/* Username */}
+              <div>
+                <label className="block text-xs font-bold text-slate-400 mb-1">Username (Optional)</label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Jordan Smith"
-                  value={regName}
-                  onChange={e => setRegName(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  placeholder="username"
+                  value={regUsername}
+                  onChange={e => setRegUsername(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
-                <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Business Email Address</label>
-              <div className="relative">
-                <input
-                  type="email"
-                  required
-                  placeholder="name@company.com"
-                  value={regEmail}
-                  onChange={e => setRegEmail(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 pl-10 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
-                />
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">Username (Optional)</label>
-              <input
-                type="text"
-                placeholder="username"
-                value={regUsername}
-                onChange={e => setRegUsername(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-tech-slate p-3 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
-              />
-            </div>
-
-            {/* ── Phone Number Field ── */}
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-2">Phone Number (Optional)</label>
+              {/* ── Phone Number Field ── */}
+              <div>
+                <label className="block text-xs font-bold text-slate-400 mb-2">Phone Number (Optional)</label>
 
               {/* Input row: [FLAG+CODE button] [phone input] [phone icon] */}
               <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors overflow-visible">
@@ -520,11 +524,13 @@ function AuthContent() {
                 </div>
               </div>
 
-              <p className="mt-1.5 text-[10px] text-slate-400 leading-relaxed">
-                Click the flag to change country, then enter your local number without the dial code.
-              </p>
+                <p className="mt-1.5 text-[10px] text-slate-400 leading-relaxed">
+                  Click the flag to change country, then enter your local number without the dial code.
+                </p>
+              </div>
             </div>
 
+            {/* Password field (full width) */}
             <div>
               <label className="block text-xs font-bold text-slate-400 mb-1">Password</label>
               <div className="relative">
