@@ -27,7 +27,10 @@ export default function CustomerWalletPage() {
   const [successMessage, setSuccessMessage] = useState('');
 
   const fetchWallet = async () => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await ApiClient.get<{ wallet: Wallet; transactions: WalletTransaction[] }>('/wallet', { token });
       setWallet(res.wallet);

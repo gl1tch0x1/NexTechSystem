@@ -35,6 +35,8 @@ export default function OrderDetailPage() {
         })
         .catch(err => console.error(err))
         .finally(() => setLoading(false));
+    } else if (!token) {
+      setLoading(false);
     }
   }, [token, orderId]);
 

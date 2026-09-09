@@ -42,6 +42,21 @@ export default function CheckoutPage() {
   const [orderNotes, setOrderNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  // Pre-fill delivery details when user profile becomes available
+  useEffect(() => {
+    if (user) {
+      setShippingAddress(prev => ({
+        ...prev,
+        fullName: prev.fullName || user.name || '',
+        phone: prev.phone || user.phone || '',
+        addressLine1: prev.addressLine1 || user.addresses?.[0]?.addressLine1 || '',
+        city: prev.city || user.addresses?.[0]?.city || 'Dubai',
+        state: prev.state || user.addresses?.[0]?.state || 'Dubai',
+        country: prev.country || user.addresses?.[0]?.country || 'United Arab Emirates',
+        postalCode: prev.postalCode || user.addresses?.[0]?.postalCode || '',
+      }));
+    }
+  }, [user]);
 
   // Fetch customer wallet balance
   useEffect(() => {

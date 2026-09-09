@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { Cpu, Shield, Truck, RefreshCw, Headphones, Lock, Sparkles } from 'lucide-react';
-import CloudflareShieldBadge from '@/components/security/CloudflareShieldBadge';
 
 export function Footer() {
   return (
@@ -107,15 +106,6 @@ export function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-slate-200 dark:border-slate-800/80 py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
         <div>© 2026 NexTech Systems Enterprise FZCO. All rights reserved.</div>
-        <div className="flex flex-wrap items-center gap-3">
-          <CloudflareShieldBadge compact />
-          <span>•</span>
-          <span>PCI-DSS Certified</span>
-          <span>•</span>
-          <span>ISO 27001</span>
-          <span>•</span>
-          <span>GCC VAT Compliant</span>
-        </div>
       </div>
     </footer>
   );

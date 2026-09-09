@@ -80,6 +80,9 @@ export class OrderService {
     }
 
     return dbStore.runTransaction(async () => {
+      const orderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+      const orderId = `order_${uuidv4()}`;
+
       // 5. Decrement inventory
       await inventoryService.deductStock(dto.items);
 
@@ -88,8 +91,8 @@ export class OrderService {
         await walletService.debitWallet({
           userId: dto.userId,
           amount: pricing.walletAmountUsed,
-          reason: `Payment for Order #${dto.customerName}`,
-          referenceId: 'pending_order',
+          reason: `Payment for Order #${orderNumber}`,
+          referenceId: orderId,
         });
       }
 
@@ -112,9 +115,6 @@ export class OrderService {
           specifications: prod?.specifications,
         };
       });
-
-      const orderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-      const orderId = `order_${uuidv4()}`;
 
       // 8. Construct Order
       const newOrder: Order = {

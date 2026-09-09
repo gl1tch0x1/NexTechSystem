@@ -399,7 +399,7 @@ export function HeroShowcase({ products, highlights }: HeroShowcaseProps) {
                 </button>
 
                 <Link
-                  href={`/products/${matchedProduct?.slug || 'products'}`}
+                  href={matchedProduct?.slug ? `/products/${matchedProduct.slug}` : '/products'}
                   className="py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0"
                 >
                   <span>Datasheet</span>

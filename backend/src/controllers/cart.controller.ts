@@ -51,6 +51,28 @@ export class CartController {
       }
     }
 
+    // Filter out items for products that no longer exist in the catalog
+    const validItems = items.filter((it: any) => productsMap.has(it.productId));
+
+    if (validItems.length === 0) {
+      res.json({
+        success: true,
+        data: {
+          items: [],
+          subtotal: 0,
+          discount: 0,
+          couponDiscount: 0,
+          tax: 0,
+          taxRate: 5,
+          shippingFee: 0,
+          walletAmountUsed: 0,
+          total: 0,
+          currency: 'AED',
+        },
+      });
+      return;
+    }
+
     let userWalletBalance = 0;
     if (req.user?.id) {
       userWalletBalance = await walletService.getBalance(req.user.id);
@@ -58,7 +80,7 @@ export class CartController {
 
     try {
       const result = await pricingService.calculateOrderTotals({
-        items,
+        items: validItems,
         productsMap,
         couponCode,
         requestedWalletDeduction: requestedWalletDeduction ? parseFloat(requestedWalletDeduction) : undefined,

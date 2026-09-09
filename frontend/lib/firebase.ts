@@ -2,7 +2,6 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
-import { getAnalytics, isSupported, Analytics } from 'firebase/analytics';
 
 const rawApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 // Valid Google API keys always start with AIza and are not demo placeholders
@@ -50,17 +49,8 @@ try {
   storage = {} as FirebaseStorage;
 }
 
-// Safe Analytics initialization (Client-side browser only)
-let analytics: Analytics | null = null;
-if (typeof window !== 'undefined' && isLiveKey && firebaseConfig.measurementId) {
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
-    }
-  }).catch((err) => {
-    console.warn('Firebase Analytics initialization skipped:', err);
-  });
-}
+// Analytics: Google Analytics 4 (GA4) is safely handled via gtag in GoogleAnalytics.tsx
+const analytics = null;
 
 export { app, auth, db, storage, analytics };
 export default app;

@@ -20,7 +20,9 @@ export class ApiClient {
   }
 
   static async request<T = any>(endpoint: string, options: ApiOptions = {}): Promise<T> {
-    const url = new URL(`${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`);
+    const fullPath = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5000';
+    const url = new URL(fullPath, base);
 
     if (options.params) {
       Object.entries(options.params).forEach(([key, value]) => {

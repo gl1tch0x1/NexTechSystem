@@ -1,6 +1,33 @@
 import { Product, PCBuilderCompatibilityResult, CompatibilityIssue, PCBuilderCategorySlots } from '../types/index.js';
 import { productRepository } from '../repositories/product.repository.js';
 
+function parseWattage(wattageInput: any, fallback: number): number {
+  if (!wattageInput) return fallback;
+  const str = String(wattageInput);
+  const nonReqMatches = [...str.matchAll(/(\d{2,4})\s*W(?:att)?(?!\s*(?:req|psu|system|minimum|recom))/gi)]
+    .map(m => parseInt(m[1], 10))
+    .filter(n => !isNaN(n) && n > 0 && n < 1500);
+
+  if (nonReqMatches.length > 0) {
+    return Math.max(...nonReqMatches);
+  }
+
+  const anyWattMatches = [...str.matchAll(/(\d{2,4})\s*W(?:att)?/gi)]
+    .map(m => parseInt(m[1], 10))
+    .filter(n => !isNaN(n) && n > 0 && n < 1500);
+
+  if (anyWattMatches.length > 0) {
+    return anyWattMatches[0];
+  }
+
+  const cleanNum = parseInt(str.replace(/[^0-9]/g, ''), 10);
+  if (!isNaN(cleanNum) && cleanNum > 0 && cleanNum < 1500) {
+    return cleanNum;
+  }
+
+  return fallback;
+}
+
 export class PCBuilderService {
   async evaluateCompatibility(slots: PCBuilderCategorySlots): Promise<PCBuilderCompatibilityResult> {
     const issues: CompatibilityIssue[] = [];
@@ -21,9 +48,7 @@ export class PCBuilderService {
     let cpuTdp = 65;
     if (cpu) {
       cpuSocket = cpu.specifications?.socket || null;
-      const wattageStr = cpu.specifications?.wattage || '125';
-      const parsedW = parseInt(wattageStr.replace(/[^0-9]/g, ''), 10);
-      if (!isNaN(parsedW)) cpuTdp = parsedW;
+      cpuTdp = parseWattage(cpu.specifications?.wattage, 125);
       estimatedWattage += cpuTdp;
     }
 
@@ -72,9 +97,8 @@ export class PCBuilderService {
     // 4. GPU Wattage & Case Clearance
     let gpuWattage = 0;
     if (gpu) {
-      const wattageStr = gpu.specifications?.wattage || (gpu.name.includes('4090') ? '450' : gpu.name.includes('4080') ? '320' : gpu.name.includes('4070') ? '220' : '200');
-      const parsedW = parseInt(String(wattageStr).replace(/[^0-9]/g, ''), 10);
-      if (!isNaN(parsedW)) gpuWattage = parsedW;
+      const defaultGpuW = gpu.name.includes('4090') ? 450 : gpu.name.includes('4080') ? 320 : gpu.name.includes('4070') ? 220 : 200;
+      gpuWattage = parseWattage(gpu.specifications?.wattage, defaultGpuW);
       estimatedWattage += gpuWattage;
     }
 
