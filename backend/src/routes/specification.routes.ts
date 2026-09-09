@@ -17,4 +17,26 @@ router.get('/', (_req: Request, res: Response) => {
   });
 });
 
+/**
+ * GET /api/specifications/presets
+ * Returns only the specification preset dictionary
+ */
+router.get('/presets', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    data: SPECIFICATION_PRESETS,
+  });
+});
+
+/**
+ * GET /api/specifications/fields
+ * Returns all allowed specification field keys
+ */
+router.get('/fields', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    data: SPECIFICATION_FIELDS,
+  });
+});
+
 export default router;

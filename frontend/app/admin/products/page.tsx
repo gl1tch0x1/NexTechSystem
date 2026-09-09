@@ -4,8 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { Product, ProductApprovalStatus, Category, Brand } from '@/types';
+import { Product, ProductApprovalStatus, Category, Brand, SellerType } from '@/types';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
+import {
+  SPECIFICATION_FIELDS,
+  SPECIFICATION_PRESETS,
+  SPECIFICATION_GROUPS,
+} from '@/lib/specification-presets';
 import {
   Package,
   CheckCircle2,
@@ -25,8 +30,37 @@ import {
   Cpu,
   Zap,
   Sliders,
-  Sparkles
+  Sparkles,
+  Database,
+  HardDrive,
+  Monitor,
+  Layers,
+  Settings
 } from 'lucide-react';
+
+interface ProductFormData {
+  title: string;
+  slug: string;
+  sku: string;
+  shortDescription: string;
+  description: string;
+  price: number;
+  originalPrice: number;
+  discountPercentage: number;
+  stock: number;
+  categoryId: string;
+  categoryName: string;
+  brandId: string;
+  brandName: string;
+  primaryImage: string;
+  socket: string;
+  tdp: number;
+  formFactor: string;
+  warrantyYears: number;
+  sellerType: SellerType;
+  specifications: Record<string, string>;
+  customSpecs: { key: string; value: string }[];
+}
 
 export default function AdminProductsPage() {
   const { token } = useAuth();
@@ -46,9 +80,10 @@ export default function AdminProductsPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [activeSpecTab, setActiveSpecTab] = useState<string>('core');
 
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormData>({
     title: '',
     slug: '',
     sku: '',
@@ -58,16 +93,18 @@ export default function AdminProductsPage() {
     originalPrice: 0,
     discountPercentage: 0,
     stock: 10,
-    categoryId: 'cat_components',
-    categoryName: 'Components & Hardware',
+    categoryId: 'cat_processors',
+    categoryName: 'Processors (CPUs)',
     brandId: 'brand_intel',
     brandName: 'Intel',
     primaryImage: '',
-    socket: '',
+    socket: 'LGA1700',
     tdp: 125,
     formFactor: 'ATX',
     warrantyYears: 3,
     sellerType: 'ADMIN',
+    specifications: {},
+    customSpecs: [],
   });
 
   const fetchData = async () => {
@@ -106,6 +143,7 @@ export default function AdminProductsPage() {
     setIsEditing(false);
     setSelectedProduct(null);
     setFormError('');
+    setActiveSpecTab('core');
     const activeCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
     const activeBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
     const initialCat = activeCats[0];
@@ -121,8 +159,8 @@ export default function AdminProductsPage() {
       originalPrice: 1199,
       discountPercentage: 10,
       stock: 25,
-      categoryId: initialCat?.id || 'cat_components',
-      categoryName: initialCat?.name || 'PC Components',
+      categoryId: initialCat?.id || 'cat_processors',
+      categoryName: initialCat?.name || 'Processors (CPUs)',
       brandId: initialBrand?.id || 'brand_asus',
       brandName: initialBrand?.name || 'ASUS',
       primaryImage: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=600&q=80',
@@ -131,6 +169,15 @@ export default function AdminProductsPage() {
       formFactor: 'ATX',
       warrantyYears: 3,
       sellerType: 'ADMIN',
+      specifications: {
+        Condition: 'Brand New (Factory Sealed)',
+        'Product Category': initialCat?.name || 'Processors (CPUs)',
+        'Processor Brand': 'Intel',
+        'Socket Type': 'LGA1700',
+        'Form Factor': 'ATX',
+        Warranty: '3 Years Official Manufacturer Warranty',
+      },
+      customSpecs: [],
     });
     setIsModalOpen(true);
   };
@@ -139,6 +186,21 @@ export default function AdminProductsPage() {
     setIsEditing(true);
     setSelectedProduct(prod);
     setFormError('');
+    setActiveSpecTab('core');
+
+    const loadedSpecs: Record<string, string> = { ...(prod.specifications || {}) };
+    if (prod.specs?.socket && !loadedSpecs['Socket Type']) loadedSpecs['Socket Type'] = prod.specs.socket;
+    if (prod.specs?.formFactor && !loadedSpecs['Form Factor']) loadedSpecs['Form Factor'] = prod.specs.formFactor;
+    if (prod.specs?.warrantyYears && !loadedSpecs['Warranty']) loadedSpecs['Warranty'] = `${prod.specs.warrantyYears} Years Official Manufacturer Warranty`;
+
+    const standardKeys = new Set<string>(SPECIFICATION_FIELDS);
+    const customSpecsList: { key: string; value: string }[] = [];
+    Object.entries(loadedSpecs).forEach(([k, v]) => {
+      if (!standardKeys.has(k)) {
+        customSpecsList.push({ key: k, value: String(v) });
+      }
+    });
+
     setFormData({
       title: prod.title || prod.name || '',
       slug: prod.slug,
@@ -154,13 +216,56 @@ export default function AdminProductsPage() {
       brandId: prod.brandId,
       brandName: prod.brandName,
       primaryImage: prod.primaryImage || prod.thumbnail || (prod.images && prod.images[0]) || '',
-      socket: prod.specs?.socket || '',
-      tdp: prod.specs?.tdp || 125,
-      formFactor: prod.specs?.formFactor || 'ATX',
+      socket: prod.specs?.socket || loadedSpecs['Socket Type'] || '',
+      tdp: prod.specs?.tdp || (loadedSpecs['Power Supply Wattage'] ? parseInt(loadedSpecs['Power Supply Wattage'], 10) || 125 : 125),
+      formFactor: prod.specs?.formFactor || loadedSpecs['Form Factor'] || 'ATX',
       warrantyYears: prod.specs?.warrantyYears || 3,
       sellerType: prod.sellerType,
+      specifications: loadedSpecs,
+      customSpecs: customSpecsList,
     });
     setIsModalOpen(true);
+  };
+
+  const handleSpecChange = (key: string, value: string) => {
+    const updatedSpecs = { ...formData.specifications, [key]: value };
+    const updates: Partial<ProductFormData> = { specifications: updatedSpecs };
+
+    if (key === 'Socket Type') {
+      updates.socket = value;
+    } else if (key === 'Form Factor') {
+      updates.formFactor = value;
+    } else if (key === 'Power Supply Wattage') {
+      const match = value.match(/\d+/);
+      if (match) updates.tdp = parseInt(match[0], 10);
+    } else if (key === 'Warranty') {
+      const match = value.match(/(\d+)\s*Year/i);
+      if (match) updates.warrantyYears = parseInt(match[1], 10);
+    }
+
+    setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleAddCustomSpec = () => {
+    setFormData(prev => ({
+      ...prev,
+      customSpecs: [...prev.customSpecs, { key: '', value: '' }],
+    }));
+  };
+
+  const handleCustomSpecChange = (index: number, field: 'key' | 'value', val: string) => {
+    setFormData(prev => {
+      const next = [...prev.customSpecs];
+      next[index] = { ...next[index], [field]: val };
+      return { ...prev, customSpecs: next };
+    });
+  };
+
+  const handleRemoveCustomSpec = (index: number) => {
+    setFormData(prev => {
+      const next = prev.customSpecs.filter((_, i) => i !== index);
+      return { ...prev, customSpecs: next };
+    });
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -170,6 +275,25 @@ export default function AdminProductsPage() {
     setFormError('');
 
     try {
+      const finalSpecs: Record<string, string> = { ...formData.specifications };
+      formData.customSpecs.forEach(cs => {
+        if (cs.key.trim() && cs.value.trim()) {
+          finalSpecs[cs.key.trim()] = cs.value.trim();
+        }
+      });
+
+      if (formData.socket && !finalSpecs['Socket Type']) {
+        finalSpecs['Socket Type'] = formData.socket;
+      }
+      if (formData.formFactor && !finalSpecs['Form Factor']) {
+        finalSpecs['Form Factor'] = formData.formFactor;
+      }
+
+      const activeCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+      const activeBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
+      const matchedCat = activeCats.find(c => c.id === formData.categoryId);
+      const matchedBrand = activeBrands.find(b => b.id === formData.brandId);
+
       const payload = {
         title: formData.title,
         name: formData.title,
@@ -182,17 +306,20 @@ export default function AdminProductsPage() {
         discountPercentage: Number(formData.discountPercentage || 0),
         stock: Number(formData.stock),
         categoryId: formData.categoryId,
-        categoryName: (categories.length > 0 ? categories : DEFAULT_CATEGORIES).find(c => c.id === formData.categoryId)?.name || formData.categoryName,
+        categoryName: matchedCat?.name || formData.categoryName,
         brandId: formData.brandId,
-        brandName: (brands.length > 0 ? brands : DEFAULT_BRANDS).find(b => b.id === formData.brandId)?.name || formData.brandName,
+        brandName: matchedBrand?.name || formData.brandName,
         primaryImage: formData.primaryImage,
         images: [formData.primaryImage],
+        specifications: finalSpecs,
         specs: {
-          socket: formData.socket || undefined,
+          socket: formData.socket || finalSpecs['Socket Type'] || undefined,
           tdp: formData.tdp ? Number(formData.tdp) : undefined,
-          formFactor: formData.formFactor || undefined,
+          formFactor: formData.formFactor || finalSpecs['Form Factor'] || undefined,
           warrantyYears: Number(formData.warrantyYears || 3),
+          ...finalSpecs,
         },
+        warranty: finalSpecs['Warranty'] || `${formData.warrantyYears} Years Manufacturer Warranty`,
       };
 
       if (isEditing && selectedProduct) {
@@ -241,65 +368,75 @@ export default function AdminProductsPage() {
       title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
       brand.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || p.approvalStatus === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    if (!matchesSearch) return false;
+
+    if (statusFilter === 'ALL') return true;
+    if (statusFilter === 'APPROVED') return p.approvalStatus === 'APPROVED';
+    if (statusFilter === 'PENDING') return p.approvalStatus === 'PENDING_APPROVAL';
+    if (statusFilter === 'REJECTED') return p.approvalStatus === 'REJECTED';
+    if (statusFilter === 'LOW_STOCK') return p.stock <= (p.lowStockThreshold || 5);
+    return true;
   });
 
-  const pendingCount = products.filter(p => p.approvalStatus === 'PENDING_APPROVAL').length;
+  const configuredSpecsCount =
+    Object.keys(formData.specifications).filter(k => !!formData.specifications[k]).length +
+    formData.customSpecs.filter(c => !!c.key && !!c.value).length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto transition-colors duration-200">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+    <div className="space-y-6">
+      {/* Top Header & Overview */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="text-xs text-purple-600 dark:text-purple-400 font-mono uppercase font-bold tracking-wider mb-1">
-            Global Hardware Directory & Approvals
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Hardware Products & Catalog Control
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+            <span>Hardware Catalog & Inventory</span>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-mono font-bold border border-purple-200 dark:border-purple-800">
+              {products.length} SKUs
+            </span>
           </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-            End-to-end CRUD for CPUs, GPUs, enterprise servers, pricing models, and vendor approvals.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Standardized technical taxonomy, multi-category inventory, and vendor moderation
           </p>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-purple-600/20 transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+          className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-purple-600/20 transition-all cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>Add New Product</span>
+          <span>Add New Hardware SKU</span>
         </button>
       </div>
 
-      {/* Filter and Search */}
-      <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-        <div className="relative flex-1 w-full">
+      {/* Filter and Search Bar */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-3 items-center justify-between shadow-sm">
+        <div className="relative w-full md:w-80">
           <input
             type="text"
-            placeholder="Search catalog by title, SKU, brand, or specifications..."
+            placeholder="Search by Title, SKU, or Brand..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+            className="w-full bg-slate-50 dark:bg-slate-950 pl-9 pr-4 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
 
-        {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs w-full md:w-auto overflow-x-auto">
+        {/* Status Filters */}
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
           {[
-            { id: 'ALL', label: 'All Listings' },
-            { id: 'APPROVED', label: 'Approved' },
-            { id: 'PENDING_APPROVAL', label: `Pending (${pendingCount})` },
+            { id: 'ALL', label: 'All Catalog' },
+            { id: 'APPROVED', label: 'Live Active' },
+            { id: 'PENDING', label: 'Pending Review' },
             { id: 'REJECTED', label: 'Rejected' },
+            { id: 'LOW_STOCK', label: 'Low Stock' },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setStatusFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 statusFilter === tab.id
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               {tab.label}
@@ -308,25 +445,32 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Products Data Table (Ant Design / Shadcn Style) */}
-      <div className="rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full min-w-[900px] text-left text-xs text-slate-700 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-              <tr>
-                <th className="py-3.5 px-4 font-bold min-w-[260px]">Hardware Item & SKU</th>
-                <th className="py-3.5 px-4 font-bold min-w-[140px]">Category & Brand</th>
-                <th className="py-3.5 px-4 font-bold min-w-[130px] whitespace-nowrap">Price & Discount</th>
-                <th className="py-3.5 px-4 font-bold min-w-[90px] whitespace-nowrap">Stock</th>
-                <th className="py-3.5 px-4 font-bold min-w-[100px] whitespace-nowrap">Seller Type</th>
-                <th className="py-3.5 px-4 font-bold min-w-[130px] whitespace-nowrap">Approval Status</th>
-                <th className="py-3.5 px-4 font-bold text-right min-w-[120px] whitespace-nowrap">Actions</th>
+      {/* Catalog Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                <th className="py-3 px-4">Hardware Item & Specs</th>
+                <th className="py-3 px-4">Brand & Category</th>
+                <th className="py-3 px-4">Price</th>
+                <th className="py-3 px-4">Inventory</th>
+                <th className="py-3 px-4">Origin Channel</th>
+                <th className="py-3 px-4">Catalog Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-              {filteredProducts.length > 0 ? (
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-500">
+                    Loading enterprise catalog products...
+                  </td>
+                </tr>
+              ) : filteredProducts.length > 0 ? (
                 filteredProducts.map(prod => {
-                  const title = prod.title || prod.name;
+                  const title = prod.title || prod.name || 'Untitled SKU';
+                  const specs = prod.specifications || {};
                   return (
                     <tr key={prod.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                       {/* Product Thumbnail & Title */}
@@ -340,6 +484,29 @@ export default function AdminProductsPage() {
                           <div>
                             <div className="font-bold text-slate-900 dark:text-white max-w-[220px] truncate">{title}</div>
                             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">SKU: {prod.sku}</div>
+                            {/* Quick Specs Badges */}
+                            <div className="flex flex-wrap items-center gap-1 mt-1">
+                              {specs['Condition'] && (
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium">
+                                  {specs['Condition'].split('(')[0].trim()}
+                                </span>
+                              )}
+                              {(specs['Socket Type'] || prod.specs?.socket) && (
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-mono">
+                                  {specs['Socket Type'] || prod.specs?.socket}
+                                </span>
+                              )}
+                              {specs['RAM Capacity'] && (
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-mono">
+                                  {specs['RAM Capacity']}
+                                </span>
+                              )}
+                              {specs['Storage Capacity'] && (
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 font-mono">
+                                  {specs['Storage Capacity']}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -404,7 +571,6 @@ export default function AdminProductsPage() {
                       {/* Action Buttons */}
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* Moderation Actions for Pending Products */}
                           {prod.approvalStatus === 'PENDING_APPROVAL' && (
                             <>
                               <button
@@ -456,25 +622,31 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* CREATE / EDIT PRODUCT MODAL (Ant Design / Shadcn Style Drawer) */}
+      {/* CREATE / EDIT PRODUCT MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 space-y-6 shadow-2xl my-8 text-slate-900 dark:text-white">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl p-6 sm:p-8 space-y-6 shadow-2xl my-8 text-slate-900 dark:text-white max-h-[92vh] overflow-y-auto">
+            {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-purple-600/10 dark:bg-purple-600/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                  <Package className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-purple-600/10 dark:bg-purple-600/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                  <Package className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-black text-slate-900 dark:text-white">
-                    {isEditing ? 'Edit Hardware Product' : 'Add New Hardware SKU'}
+                  <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>{isEditing ? 'Edit Hardware Product' : 'Add New Hardware SKU'}</span>
+                    <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                      {configuredSpecsCount} Specs Configured
+                    </span>
                   </h2>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Configure catalog specifications and inventory stock</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Configure catalog taxonomy, price, stock, and complete technical specifications matrix
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -486,161 +658,348 @@ export default function AdminProductsPage() {
               </div>
             )}
 
-            <form onSubmit={handleSaveProduct} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSaveProduct} className="space-y-6">
+              {/* Core Information Section */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Product Title *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Intel Core i9-14900K Flagship 24-Core Desktop Processor"
+                      value={formData.title}
+                      onChange={e => setFormData({ ...formData, title: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">SKU Number *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. SKU-CPU-14900K"
+                      value={formData.sku}
+                      onChange={e => setFormData({ ...formData, sku: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-semibold"
+                    />
+                  </div>
+                </div>
+
+                {/* Category & Brand Dropdowns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+                      Hardware Category *
+                    </label>
+                    <select
+                      value={formData.categoryId}
+                      onChange={e => {
+                        const availableCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+                        const sel = availableCats.find(c => c.id === e.target.value);
+                        setFormData(prev => ({
+                          ...prev,
+                          categoryId: e.target.value,
+                          categoryName: sel?.name || '',
+                          specifications: {
+                            ...prev.specifications,
+                            'Product Category': sel?.name || prev.specifications['Product Category'] || '',
+                          },
+                        }));
+                      }}
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-semibold"
+                    >
+                      {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+                      Brand / Manufacturer *
+                    </label>
+                    <select
+                      value={formData.brandId}
+                      onChange={e => {
+                        const availableBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
+                        const sel = availableBrands.find(b => b.id === e.target.value);
+                        setFormData(prev => ({
+                          ...prev,
+                          brandId: e.target.value,
+                          brandName: sel?.name || '',
+                          specifications: {
+                            ...prev.specifications,
+                            Brand: sel?.name || prev.specifications['Brand'] || '',
+                          },
+                        }));
+                      }}
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-semibold"
+                    >
+                      {(brands.length > 0 ? brands : DEFAULT_BRANDS).map(b => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Pricing and Stock */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Price (د.إ) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={formData.price}
+                      onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Orig. Price (د.إ)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.originalPrice}
+                      onChange={e => setFormData({ ...formData, originalPrice: Number(e.target.value) })}
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Stock Count *</label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.stock}
+                      onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-semibold"
+                    />
+                  </div>
+                </div>
+
+                {/* Primary Image */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Product Title *</label>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Primary Image URL</label>
                   <input
-                    type="text"
-                    required
-                    placeholder="e.g. NVIDIA RTX 4090 OC 24GB"
-                    value={formData.title}
-                    onChange={e => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                    type="url"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={formData.primaryImage}
+                    onChange={e => setFormData({ ...formData, primaryImage: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-mono"
                   />
                 </div>
 
+                {/* Short Description */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">SKU Number *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. SKU-GPU-4090"
-                    value={formData.sku}
-                    onChange={e => setFormData({ ...formData, sku: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Short Description</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Brief highlights e.g. Flagship 24-core processor with up to 6.0 GHz Turbo and PCIe Gen 5 support..."
+                    value={formData.shortDescription}
+                    onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Category</label>
-                  <select
-                    value={formData.categoryId}
-                    onChange={e => {
-                      const availableCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
-                      const sel = availableCats.find(c => c.id === e.target.value);
-                      setFormData({ ...formData, categoryId: e.target.value, categoryName: sel?.name || '' });
-                    }}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+              {/* HARDWARE SPECIFICATIONS MATRIX SECTION */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                      <Sliders className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>Technical Specifications Matrix</span>
+                        <span className="text-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full font-mono font-bold">
+                          {configuredSpecsCount} Active
+                        </span>
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Choose standardized architecture presets or type custom hardware metrics
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Specification Category Tabs */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-100 dark:border-slate-800">
+                  {SPECIFICATION_GROUPS.map(grp => (
+                    <button
+                      key={grp.id}
+                      type="button"
+                      onClick={() => setActiveSpecTab(grp.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                        activeSpecTab === grp.id
+                          ? 'bg-purple-600 text-white shadow-sm'
+                          : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {grp.id === 'core' && <Cpu className="w-3.5 h-3.5" />}
+                      {grp.id === 'memory_storage' && <Database className="w-3.5 h-3.5" />}
+                      {grp.id === 'graphics_power' && <Zap className="w-3.5 h-3.5" />}
+                      {grp.id === 'display_system' && <Monitor className="w-3.5 h-3.5" />}
+                      <span>{grp.name}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setActiveSpecTab('custom')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                      activeSpecTab === 'custom'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
                   >
-                    {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Custom Specifications ({formData.customSpecs.length})</span>
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Brand / Manufacturer</label>
-                  <select
-                    value={formData.brandId}
-                    onChange={e => {
-                      const availableBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
-                      const sel = availableBrands.find(b => b.id === e.target.value);
-                      setFormData({ ...formData, brandId: e.target.value, brandName: sel?.name || '' });
-                    }}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                  >
-                    {(brands.length > 0 ? brands : DEFAULT_BRANDS).map(b => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
-                    ))}
-                  </select>
-                </div>
+                {/* Active Tab Fields Rendering */}
+                {SPECIFICATION_GROUPS.map(grp => {
+                  if (activeSpecTab !== grp.id) return null;
+                  return (
+                    <div key={grp.id} className="space-y-3 animate-fadeIn">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+                        {grp.description}
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        {grp.fields.map(f => {
+                          const presets = f.presetKey ? SPECIFICATION_PRESETS[f.presetKey] : undefined;
+                          const currentValue = formData.specifications[f.key] || '';
+                          return (
+                            <div key={f.key} className="p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                  {f.label}
+                                </label>
+                                {currentValue && (
+                                  <span className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                                    Set
+                                  </span>
+                                )}
+                              </div>
+
+                              {presets && presets.length > 0 ? (
+                                <div className="space-y-1.5">
+                                  {/* Presets Select Dropdown */}
+                                  <select
+                                    value={presets.includes(currentValue) ? currentValue : ''}
+                                    onChange={e => {
+                                      if (e.target.value) {
+                                        handleSpecChange(f.key, e.target.value);
+                                      }
+                                    }}
+                                    className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                                  >
+                                    <option value="">-- Choose {f.label} Preset --</option>
+                                    {presets.map(opt => (
+                                      <option key={opt} value={opt}>
+                                        {opt}
+                                      </option>
+                                    ))}
+                                  </select>
+
+                                  {/* Custom Value / Input With Datalist for Direct Editing */}
+                                  <div className="relative">
+                                    <input
+                                      type="text"
+                                      list={`datalist-${f.key.replace(/\s+/g, '-')}`}
+                                      placeholder={f.placeholder}
+                                      value={currentValue}
+                                      onChange={e => handleSpecChange(f.key, e.target.value)}
+                                      className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
+                                    />
+                                    <datalist id={`datalist-${f.key.replace(/\s+/g, '-')}`}>
+                                      {presets.map(opt => (
+                                        <option key={opt} value={opt} />
+                                      ))}
+                                    </datalist>
+                                  </div>
+                                </div>
+                              ) : (
+                                <input
+                                  type="text"
+                                  placeholder={f.placeholder}
+                                  value={currentValue}
+                                  onChange={e => handleSpecChange(f.key, e.target.value)}
+                                  className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Custom Specifications Tab */}
+                {activeSpecTab === 'custom' && (
+                  <div className="space-y-4 animate-fadeIn">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Add any specific enterprise technical keys (e.g. Cache Size, PCIe Lane Count, Interface, Max Temp)
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleAddCustomSpec}
+                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Parameter</span>
+                      </button>
+                    </div>
+
+                    {formData.customSpecs.length === 0 ? (
+                      <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-dashed border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">
+                        No custom specification parameters configured. Click &quot;Add Parameter&quot; to insert custom attributes.
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {formData.customSpecs.map((cs, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              placeholder="Parameter Name (e.g. L3 Cache)"
+                              value={cs.key}
+                              onChange={e => handleCustomSpecChange(idx, 'key', e.target.value)}
+                              className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Parameter Value (e.g. 36 MB Intel Smart Cache)"
+                              value={cs.value}
+                              onChange={e => handleCustomSpecChange(idx, 'value', e.target.value)}
+                              className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-mono"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCustomSpec(idx)}
+                              className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer transition-colors"
+                              title="Delete parameter"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Price (د.إ) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={formData.price}
-                    onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Orig. Price (د.إ)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.originalPrice}
-                    onChange={e => setFormData({ ...formData, originalPrice: Number(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Stock Count *</label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.stock}
-                    onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Image URL</label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formData.primaryImage}
-                  onChange={e => setFormData({ ...formData, primaryImage: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Socket / Type</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. LGA1700, AM5"
-                    value={formData.socket}
-                    onChange={e => setFormData({ ...formData, socket: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">TDP (Watts)</label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 125, 450"
-                    value={formData.tdp}
-                    onChange={e => setFormData({ ...formData, tdp: Number(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Warranty (Years)</label>
-                  <input
-                    type="number"
-                    value={formData.warrantyYears}
-                    onChange={e => setFormData({ ...formData, warrantyYears: Number(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Short Description</label>
-                <textarea
-                  rows={2}
-                  placeholder="Flagship 24-core processor with up to 6.0 GHz Turbo..."
-                  value={formData.shortDescription}
-                  onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                />
-              </div>
-
+              {/* Modal Action Buttons */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
@@ -662,35 +1021,31 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* REJECTION REASON MODAL */}
+      {/* REJECT MODAL */}
       {rejectingProduct && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              Reject Product Listing
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Provide a clear reason for rejecting <strong className="text-slate-900 dark:text-white">{rejectingProduct.title || rejectingProduct.name}</strong>.
+            <h3 className="text-sm font-black text-slate-900 dark:text-white">Reject Vendor SKU Listing</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Provide specific feedback to the vendor regarding why this listing cannot be approved:
             </p>
             <textarea
               rows={3}
-              required
-              placeholder="e.g. Incomplete specifications, pricing mismatch..."
+              placeholder="e.g. Inaccurate pricing or missing manufacturer datasheet specifications..."
               value={rejectionReason}
               onChange={e => setRejectionReason(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+              className="w-full bg-slate-50 dark:bg-slate-950 p-3 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-red-500"
             />
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setRejectingProduct(null)}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer"
+                className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleSetApproval(rejectingProduct.id, 'REJECTED', rejectionReason)}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer transition-colors shadow-sm"
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white shadow-lg shadow-red-600/20"
               >
                 Confirm Rejection
               </button>
@@ -699,29 +1054,31 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION DIALOG */}
+      {/* DELETE CONFIRMATION MODAL */}
       {isDeleting && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Trash2 className="w-4 h-4 text-red-500" />
-              Delete Product Confirmation
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Are you sure you want to permanently delete this product from the global catalog?
-            </p>
-            <div className="flex items-center justify-end gap-2">
+        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
+            <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">Delete Product Listing?</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                This will permanently delete this hardware listing and remove it from all customer catalogs.
+              </p>
+            </div>
+            <div className="flex justify-center gap-2 pt-2">
               <button
                 onClick={() => setIsDeleting(null)}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteProduct(isDeleting)}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer transition-colors shadow-sm"
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white shadow-lg shadow-red-600/20"
               >
-                Confirm Delete
+                Delete Permanently
               </button>
             </div>
           </div>
