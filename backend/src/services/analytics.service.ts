@@ -46,11 +46,14 @@ export class AnalyticsService {
       outOfStock: number;
       lowStock: number;
       totalInventoryValue: number;
+      byCategory: Record<string, number>;
+      lowStockItems: Array<{ id: string; name: string; sku: string; stock: number; price: number; categoryName: string }>;
     };
     topProducts: Array<{ id: string; name: string; price: number; unitsSold: number; revenue: number; stock: number }>;
     categoryPerformance: Array<{ id: string; name: string; revenue: number; productCount: number }>;
     brandPerformance: Array<{ id: string; name: string; revenue: number; productCount: number }>;
     salesChart: Array<{ date: string; revenue: number; orders: number }>;
+    recentOrders: Array<{ id: string; orderNumber: string; customerName: string; total: number; itemsCount: number; orderStatus: string; paymentStatus: string; createdAt: string }>;
   }> {
     const orders = await orderRepository.find();
     const products = await productRepository.find();
@@ -176,15 +179,20 @@ export class AnalyticsService {
     let outOfStockProds = 0;
     let lowStockProds = 0;
     let totalInvValue = 0;
+    const byCategory: Record<string, number> = {};
 
     for (const p of products) {
       totalInvValue += (p.salePrice || p.price) * p.stock;
       if (p.stock === 0) outOfStockProds++;
-      else if (p.stock <= p.lowStockThreshold) lowStockProds++;
+      else if (p.stock <= (p.lowStockThreshold || 5)) lowStockProds++;
 
       if (p.approvalStatus === 'APPROVED' && p.isActive) activeProds++;
       else if (p.approvalStatus === 'DRAFT') draftProds++;
       else if (p.approvalStatus === 'PENDING_APPROVAL') pendingApprovalProds++;
+
+      const cat = categories.find(c => c.id === p.categoryId);
+      const catName = cat ? cat.name : (p.categoryName || 'PC Components');
+      byCategory[catName] = (byCategory[catName] || 0) + 1;
     }
 
     // Top Products
@@ -197,8 +205,22 @@ export class AnalyticsService {
         revenue: productSalesMap[p.id]?.revenue || 0,
         stock: p.stock,
       }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
+      .sort((a, b) => b.revenue - a.revenue || b.unitsSold - a.unitsSold)
+      .slice(0, 8);
+
+    // Low stock items for operational emergency alerts
+    const lowStockItems = products
+      .filter(p => p.stock <= (p.lowStockThreshold || 5))
+      .sort((a, b) => a.stock - b.stock)
+      .slice(0, 6)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku,
+        stock: p.stock,
+        price: p.salePrice || p.price,
+        categoryName: p.categoryName || 'Hardware Component',
+      }));
 
     // Top Resellers
     const topResellers = resellers
@@ -234,6 +256,25 @@ export class AnalyticsService {
       orders: data.orders,
     }));
 
+    // Dynamic recent orders feed
+    const recentOrders = orders
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 6)
+      .map(o => ({
+        id: o.id,
+        orderNumber: o.orderNumber,
+        customerName: o.shippingAddress?.fullName || 'Client User',
+        total: o.total,
+        itemsCount: o.items.reduce((sum, it) => sum + it.quantity, 0),
+        orderStatus: o.orderStatus,
+        paymentStatus: o.paymentStatus,
+        createdAt: o.createdAt,
+      }));
+
+    const dynamicGrowth = monthRevenue > 0 && totalRevenue > monthRevenue
+      ? Math.round(((monthRevenue / (totalRevenue - monthRevenue)) * 100) * 10) / 10
+      : 0;
+
     return {
       revenue: {
         total: Math.round(totalRevenue * 100) / 100,
@@ -241,7 +282,7 @@ export class AnalyticsService {
         thisWeek: Math.round(weekRevenue * 100) / 100,
         thisMonth: Math.round(monthRevenue * 100) / 100,
         thisYear: Math.round(yearRevenue * 100) / 100,
-        growthPercentage: 14.8,
+        growthPercentage: dynamicGrowth,
         averageOrderValue: aov,
       },
       orders: {
@@ -274,11 +315,14 @@ export class AnalyticsService {
         outOfStock: outOfStockProds,
         lowStock: lowStockProds,
         totalInventoryValue: Math.round(totalInvValue * 100) / 100,
+        byCategory,
+        lowStockItems,
       },
       topProducts,
       categoryPerformance,
       brandPerformance,
       salesChart,
+      recentOrders,
     };
   }
 

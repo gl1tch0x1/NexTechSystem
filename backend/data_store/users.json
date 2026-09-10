@@ -1,7 +1,7 @@
 [
   {
     "id": "user_admin_1",
-    "email": "admin@nextech.com",
+    "email": "admin@enterprise.local",
     "role": "ADMIN",
     "name": "Chief Systems Architect",
     "username": "admin",
@@ -21,10 +21,10 @@
       }
     ],
     "isActive": true,
-    "createdAt": "2026-09-02T09:00:43.065Z",
-    "updatedAt": "2026-09-09T09:41:39.393Z",
-    "lastLoginAt": "2026-09-09T09:41:39.393Z",
-    "passwordHash": "7d36fc5c98c5722048d5e0ff0f3e96a3da58491dd4ca8bf91b2c63f6101d622944dae41db5a4970b1440b028a4b3346175b2c55794d4624e2b25f4591e0996e7"
+    "createdAt": "2026-09-10T08:53:57.856Z",
+    "updatedAt": "2026-09-10T09:02:15.506Z",
+    "passwordHash": "7555f6354569d89094c7127066611cc0154c41af78f248e35b40a625648022a16c622574899b4b22493cc0f0580b6702ee15c27830d7b027bc11cf8eacfc2e99",
+    "lastLoginAt": "2026-09-10T09:02:15.506Z"
   },
   {
     "id": "user_reseller_1",

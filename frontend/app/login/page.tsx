@@ -11,47 +11,40 @@ interface CountryCode {
   dialCode: string;
 }
 
-/** Render a real country flag image from flagpedia.net using the ISO 3166-1 alpha-2 code */
-function CountryFlag({ code, size = 24 }: { code: string; size?: number }) {
+/** Render a real country flag SVG image from flagcdn with clean fallback */
+function CountryFlag({ code, size = 20 }: { code: string; size?: number }) {
+  const [hasError, setHasError] = useState(false);
   const lower = code.toLowerCase();
-  return (
-    <img
-      src={`https://flagpedia.net/data/flags/w580/${lower}.png`}
-      srcSet={`https://flagpedia.net/data/flags/w580/${lower}.png 2x`}
-      width={size}
-      height={Math.round(size * 0.67)}
-      alt={code}
-      className="rounded-sm object-cover inline-block shrink-0"
-      style={{ imageRendering: 'auto', width: `${size}px`, height: `${Math.round(size * 0.67)}px` }}
-      loading="lazy"
-      onError={(e) => {
-        // Fallback to emoji flag if image fails to load
-        const target = e.target as HTMLImageElement;
-        target.style.display = 'none';
-        const parent = target.parentElement;
-        if (parent) {
-          const emoji = getFlagEmoji(code);
-          if (emoji && !parent.querySelector('.flag-emoji-fallback')) {
-            const span = document.createElement('span');
-            span.className = 'flag-emoji-fallback';
-            span.textContent = emoji;
-            span.style.fontSize = `${size}px`;
-            span.style.lineHeight = '1';
-            parent.appendChild(span);
-          }
-        }
-      }}
-    />
-  );
-}
+  const height = Math.round(size * 0.7);
 
-/** Get emoji flag from country code */
-function getFlagEmoji(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
+  if (hasError) {
+    return (
+      <span
+        className="inline-flex items-center justify-center rounded-[2px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[9px] font-mono font-bold leading-none shrink-0"
+        style={{ width: `${size}px`, height: `${height}px` }}
+      >
+        {code}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-[2px] overflow-hidden border border-slate-300/60 dark:border-slate-600/60 shrink-0 shadow-xs"
+      style={{ width: `${size}px`, height: `${height}px` }}
+    >
+      <img
+        src={`https://flagcdn.com/${lower}.svg`}
+        width={size}
+        height={height}
+        alt=""
+        aria-hidden="true"
+        className="w-full h-full object-cover"
+        loading="lazy"
+        onError={() => setHasError(true)}
+      />
+    </span>
+  );
 }
 
 const COUNTRY_CODES: CountryCode[] = [
@@ -364,19 +357,22 @@ function AuthContent() {
 
         {/* 2. CREATE CUSTOMER ACCOUNT TAB */}
         {tab === 'register' && (
-          <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <form onSubmit={handleRegisterSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {/* Full Name */}
               <div>
-                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Full Name / Organization</label>
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">
+                  Full Name / Organization
+                </label>
                 <div className="relative">
                   <input
                     type="text"
                     required
+                    autoComplete="name"
                     placeholder="e.g. Jordan Smith"
                     value={regName}
                     onChange={e => setRegName(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                    className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue transition-colors"
                   />
                   <UserIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
@@ -384,15 +380,18 @@ function AuthContent() {
 
               {/* Business Email */}
               <div>
-                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Business Email Address</label>
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">
+                  Business Email Address
+                </label>
                 <div className="relative">
                   <input
                     type="email"
                     required
+                    autoComplete="email"
                     placeholder="name@company.com"
                     value={regEmail}
                     onChange={e => setRegEmail(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                    className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue transition-colors"
                   />
                   <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
@@ -400,147 +399,148 @@ function AuthContent() {
 
               {/* Username */}
               <div>
-                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Username (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="username"
-                  value={regUsername}
-                  onChange={e => setRegUsername(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
-                />
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">
+                  Username <span className="font-normal text-slate-500">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    autoComplete="username"
+                    placeholder="Choose a username"
+                    value={regUsername}
+                    onChange={e => setRegUsername(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue transition-colors"
+                  />
+                  <UserIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
               </div>
 
-              {/* ── Phone Number Field ── */}
+              {/* Phone Number Field */}
               <div>
-                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-2">Phone Number (Optional)</label>
+                <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">
+                  Phone Number <span className="font-normal text-slate-500">(Optional)</span>
+                </label>
 
-              {/* Input row: [FLAG+CODE button] [phone input] [phone icon] */}
-              <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors overflow-visible w-full">
+                {/* Unified Flag + Dial Code + Input Row */}
+                <div className="relative flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors">
+                  {/* Country Selector Trigger */}
+                  <div ref={countryDropdownRef} className="relative shrink-0">
+                    <button
+                      type="button"
+                      id="phone-country-selector"
+                      onClick={() => {
+                        setIsCountryDropdownOpen(prev => !prev);
+                        setCountrySearch('');
+                      }}
+                      className="h-full flex items-center gap-1.5 pl-2.5 md:pl-3 pr-2 py-2.5 md:py-3 rounded-l-xl hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors group"
+                      title={`${selectedCountry.name} (${selectedCountry.dialCode})`}
+                      aria-label="Select country code"
+                    >
+                      {/* Flag together with dial code */}
+                      <CountryFlag code={selectedCountry.code} size={20} />
+                      <span className="font-mono text-slate-800 dark:text-slate-100 text-[11px] md:text-xs font-bold">
+                        {selectedCountry.dialCode}
+                      </span>
+                      <ChevronDown
+                        className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform ${
+                          isCountryDropdownOpen ? 'rotate-180 text-tech-blue' : ''
+                        }`}
+                      />
+                    </button>
 
-                {/* Country selector trigger */}
-                <div ref={countryDropdownRef} className="relative shrink-0">
-                  <button
-                    type="button"
-                    id="phone-country-selector"
-                    onClick={() => {
-                      setIsCountryDropdownOpen(prev => !prev);
-                      setCountrySearch('');
-                    }}
-                    className="h-full flex items-center gap-1.5 md:gap-2 pl-2.5 md:pl-3 pr-2 md:pr-2.5 py-2.5 md:py-3 rounded-l-xl hover:bg-slate-200/70 dark:hover:bg-slate-700/60 border-r border-slate-200 dark:border-slate-700 transition-colors group min-w-fit"
-                    title={`${selectedCountry.name} (${selectedCountry.dialCode})`}
-                    aria-label="Select country dialling code"
-                  >
-                    {/* Real flag image */}
-                    <CountryFlag code={selectedCountry.code} size={18} />
-                    {/* Dial code */}
-                    <span className="font-mono text-slate-800 dark:text-slate-100 text-[11px] md:text-[12px] font-bold tracking-tight">
-                      {selectedCountry.dialCode}
-                    </span>
-                    {/* Chevron */}
-                    <ChevronDown
-                      className={`w-3 h-3 md:w-3.5 md:h-3.5 transition-all ${
-                        isCountryDropdownOpen
-                          ? 'rotate-180 text-tech-blue'
-                          : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
-                      }`}
-                    />
-                  </button>
-
-                  {/* ── Country Dropdown Popover ── */}
-                  {isCountryDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-2 w-64 md:w-72 rounded-2xl bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-slate-800 shadow-2xl z-[200] flex flex-col overflow-hidden">
-                      {/* Search bar */}
-                      <div className="p-2 border-b border-slate-100 dark:border-slate-800">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder="Search country or +code..."
-                            value={countrySearch}
-                            onChange={e => setCountrySearch(e.target.value)}
-                            className="w-full bg-slate-100 dark:bg-slate-800 pl-8 pr-3 py-2 rounded-lg text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue placeholder:text-slate-400"
-                            autoFocus
-                          />
-                          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    {/* Country Dropdown Popover */}
+                    {isCountryDropdownOpen && (
+                      <div className="absolute left-0 top-full mt-2 w-72 rounded-2xl bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-slate-800 shadow-2xl z-[200] flex flex-col overflow-hidden">
+                        {/* Search bar */}
+                        <div className="p-2 border-b border-slate-100 dark:border-slate-800">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              placeholder="Search country or code..."
+                              value={countrySearch}
+                              onChange={e => setCountrySearch(e.target.value)}
+                              className="w-full bg-slate-100 dark:bg-slate-800 pl-8 pr-3 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue placeholder:text-slate-400"
+                              autoFocus
+                            />
+                            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Country list */}
-                      <div className="overflow-y-auto p-1.5 space-y-0.5" style={{ maxHeight: '224px' }}>
-                        {filteredCountries.map(c => {
-                          const isSelected = selectedCountry.code === c.code;
-                          return (
-                            <button
-                              key={c.code}
-                              type="button"
-                              onClick={() => {
-                                setSelectedCountry(c);
-                                setIsCountryDropdownOpen(false);
-                                setCountrySearch('');
-                              }}
-                              className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs text-left transition-colors ${
-                                isSelected
-                                  ? 'bg-tech-blue text-white font-bold'
-                                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
-                              }`}
-                            >
-                              {/* Real flag image */}
-                              <CountryFlag code={c.code} size={20} />
-                              {/* Country name */}
-                              <span className="flex-1 truncate text-[11px]">{c.name}</span>
-                              {/* Dial code badge */}
-                              <span
-                                className={`font-mono text-[11px] shrink-0 px-1.5 py-0.5 rounded-md ${
+                        {/* Country list */}
+                        <div className="overflow-y-auto p-1.5 space-y-0.5" style={{ maxHeight: '220px' }}>
+                          {filteredCountries.map(c => {
+                            const isSelected = selectedCountry.code === c.code;
+                            return (
+                              <button
+                                key={c.code}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCountry(c);
+                                  setIsCountryDropdownOpen(false);
+                                  setCountrySearch('');
+                                }}
+                                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs text-left transition-colors ${
                                   isSelected
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                                    ? 'bg-tech-blue text-white font-bold'
+                                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                                 }`}
                               >
-                                {c.dialCode}
-                              </span>
-                            </button>
-                          );
-                        })}
-                        {filteredCountries.length === 0 && (
-                          <div className="text-center py-6 text-xs text-slate-400">
-                            No countries matched
-                          </div>
-                        )}
+                                <CountryFlag code={c.code} size={20} />
+                                <span className="flex-1 truncate text-[11px]">{c.name}</span>
+                                <span
+                                  className={`font-mono text-[11px] shrink-0 px-1.5 py-0.5 rounded-md ${
+                                    isSelected
+                                      ? 'bg-white/20 text-white'
+                                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                                  }`}
+                                >
+                                  {c.dialCode}
+                                </span>
+                              </button>
+                            );
+                          })}
+                          {filteredCountries.length === 0 && (
+                            <div className="text-center py-6 text-xs text-slate-400">
+                              No countries found
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                {/* Phone number text input */}
-                <div className="flex items-center flex-1 gap-2 pr-2.5 md:pr-3">
+                  {/* Vertical separator */}
+                  <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
+
+                  {/* Phone input */}
                   <input
                     type="tel"
                     id="phone-number-input"
+                    autoComplete="tel"
                     placeholder="50 123 4567"
                     value={regPhone}
                     onChange={e => setRegPhone(e.target.value)}
-                    className="flex-1 bg-transparent pl-2.5 md:pl-3 py-2.5 md:py-3 text-[11px] md:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none min-w-0"
+                    className="flex-1 bg-transparent px-3 py-2.5 md:py-3 text-[11px] md:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none min-w-0"
                   />
-                  <Phone className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 shrink-0" />
+                  <Phone className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 shrink-0 mr-3" />
                 </div>
-              </div>
-
-                <p className="mt-1.5 text-[10px] text-slate-400 leading-relaxed">
-                  Click the flag to change country, then enter your local number without the dial code.
-                </p>
               </div>
             </div>
 
             {/* Password field (full width) */}
             <div>
-              <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Password</label>
+              <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">
+                Password
+              </label>
               <div className="relative">
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   placeholder="••••••••"
                   value={regPassword}
                   onChange={e => setRegPassword(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue transition-colors"
                 />
                 <Lock className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
               </div>

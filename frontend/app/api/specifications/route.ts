@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { SPECIFICATION_FIELDS, SPECIFICATION_PRESETS } from '@/lib/specification-presets';
 
 export async function GET() {
-  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
+  const backendUrl =
+    process.env.API_PROXY_TARGET ||
+    process.env.BACKEND_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:5000';
+
   if (backendUrl) {
     try {
       const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
@@ -16,7 +21,7 @@ export async function GET() {
         }
       }
     } catch {
-      // Fallback to local specification presets
+      // Fall through
     }
   }
 

@@ -15,7 +15,7 @@
     "compareAtPrice": 2499,
     "costPrice": 1850,
     "currency": "AED",
-    "stock": 44,
+    "stock": 45,
     "reservedStock": 2,
     "lowStockThreshold": 5,
     "images": [
@@ -49,8 +49,8 @@
     "isFeatured": true,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.066Z",
-    "updatedAt": "2026-09-02T09:00:43.109Z"
+    "createdAt": "2026-09-10T08:53:57.856Z",
+    "updatedAt": "2026-09-10T08:53:57.856Z"
   },
   {
     "id": "prod_cpu_7950x",
@@ -102,8 +102,8 @@
     "isFeatured": true,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.066Z",
-    "updatedAt": "2026-09-02T09:00:43.066Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_mb_z790",
@@ -154,8 +154,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.066Z",
-    "updatedAt": "2026-09-02T09:00:43.066Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_mb_x670e",
@@ -205,8 +205,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.066Z",
-    "updatedAt": "2026-09-02T09:00:43.066Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_gpu_4090",
@@ -218,22 +218,19 @@
     "brandName": "ASUS",
     "categoryId": "cat_components",
     "categoryName": "PC Components",
-    "sellerType": "RESELLER",
-    "resellerId": "reseller_comnet_101",
-    "resellerCode": "comnet101",
-    "resellerName": "ComNet Hardware Store",
+    "sellerType": "ADMIN",
     "price": 7899,
     "salePrice": 7499,
     "compareAtPrice": 8299,
     "costPrice": 6900,
     "currency": "AED",
-    "stock": 0,
+    "stock": 12,
     "reservedStock": 1,
     "lowStockThreshold": 3,
     "images": [
-      "/images/hero_rtx4090.jpg"
+      "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80"
     ],
-    "thumbnail": "/images/hero_rtx4090.jpg",
+    "thumbnail": "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80",
     "specifications": {
       "gpu": "NVIDIA GeForce RTX 4090",
       "vram": "24GB GDDR6X",
@@ -261,9 +258,9 @@
     "reviewCount": 42,
     "isFeatured": true,
     "isActive": true,
-    "approvalStatus": "OUT_OF_STOCK",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-03T09:16:33.082Z"
+    "approvalStatus": "APPROVED",
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_ram_64gb",
@@ -280,7 +277,7 @@
     "compareAtPrice": 1299,
     "costPrice": 850,
     "currency": "AED",
-    "stock": 9,
+    "stock": 35,
     "reservedStock": 0,
     "lowStockThreshold": 5,
     "images": [
@@ -313,8 +310,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-07T15:16:35.148Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_ssd_990pro_4tb",
@@ -332,7 +329,7 @@
     "compareAtPrice": 1599,
     "costPrice": 1100,
     "currency": "AED",
-    "stock": 38,
+    "stock": 40,
     "reservedStock": 2,
     "lowStockThreshold": 5,
     "images": [
@@ -366,8 +363,8 @@
     "isFeatured": true,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-02T09:00:43.110Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_psu_1000w",
@@ -417,8 +414,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-02T09:00:43.067Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_case_h9",
@@ -466,8 +463,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-02T09:00:43.067Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_cooler_kraken360",
@@ -517,8 +514,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-02T09:00:43.067Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_laptop_zephyrus16",
@@ -569,8 +566,8 @@
     "isFeatured": true,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-02T09:00:43.067Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_server_r760",
@@ -590,7 +587,7 @@
     "compareAtPrice": 36999,
     "costPrice": 28500,
     "currency": "AED",
-    "stock": 4,
+    "stock": 5,
     "reservedStock": 0,
     "lowStockThreshold": 2,
     "images": [
@@ -625,8 +622,8 @@
     "isFeatured": true,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-02T16:26:37.220Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "id": "prod_net_c9300",
@@ -677,8 +674,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-09-02T09:00:43.067Z",
-    "updatedAt": "2026-09-02T09:00:43.067Z"
+    "createdAt": "2026-09-10T08:53:57.857Z",
+    "updatedAt": "2026-09-10T08:53:57.857Z"
   },
   {
     "name": "Enterprise Ultra NVMe 4TB SSD Module",

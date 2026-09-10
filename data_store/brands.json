@@ -5,7 +5,7 @@
     "slug": "asus",
     "logo": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 6
+    "productCount": 8
   },
   {
     "id": "brand_intel",
@@ -13,7 +13,7 @@
     "slug": "intel",
     "logo": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 4
+    "productCount": 6
   },
   {
     "id": "brand_amd",
@@ -21,7 +21,7 @@
     "slug": "amd",
     "logo": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 4
+    "productCount": 6
   },
   {
     "id": "brand_nvidia",
@@ -29,7 +29,7 @@
     "slug": "nvidia",
     "logo": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 3
+    "productCount": 5
   },
   {
     "id": "brand_dell",
@@ -37,7 +37,7 @@
     "slug": "dell",
     "logo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 4
+    "productCount": 5
   },
   {
     "id": "brand_corsair",
@@ -45,7 +45,7 @@
     "slug": "corsair",
     "logo": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 4
+    "productCount": 5
   },
   {
     "id": "brand_samsung",
@@ -53,7 +53,7 @@
     "slug": "samsung",
     "logo": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 3
+    "productCount": 5
   },
   {
     "id": "brand_cisco",
@@ -61,7 +61,7 @@
     "slug": "cisco",
     "logo": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
-    "productCount": 3
+    "productCount": 4
   },
   {
     "id": "brand_lenovo",
@@ -69,6 +69,86 @@
     "slug": "lenovo",
     "logo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=200&q=80",
     "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_msi",
+    "name": "MSI",
+    "slug": "msi",
+    "logo": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_gigabyte",
+    "name": "Gigabyte",
+    "slug": "gigabyte",
+    "logo": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_acer",
+    "name": "Acer",
+    "slug": "acer",
+    "logo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
     "productCount": 3
+  },
+  {
+    "id": "brand_apple",
+    "name": "Apple",
+    "slug": "apple",
+    "logo": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_evga",
+    "name": "EVGA",
+    "slug": "evga",
+    "logo": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "brand_hp",
+    "name": "HP Enterprise",
+    "slug": "hp-enterprise",
+    "logo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_kingston",
+    "name": "Kingston",
+    "slug": "kingston",
+    "logo": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_microsoft",
+    "name": "Microsoft",
+    "slug": "microsoft",
+    "logo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 3
+  },
+  {
+    "id": "brand_seagate",
+    "name": "Seagate",
+    "slug": "seagate",
+    "logo": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "brand_wd",
+    "name": "Western Digital",
+    "slug": "western-digital",
+    "logo": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=200&q=80",
+    "isActive": true,
+    "productCount": 4
   }
 ]
