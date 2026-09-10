@@ -63,3 +63,10 @@ Thumbs.db
 scratch/
 coverage/
 .vercel
+
+# Database stores & runtime caches (store data in Cloud Firestore/database, not codebase)
+data_store/
+backend/data_store/
+*/data_store/
+data_store
+backend/data_store

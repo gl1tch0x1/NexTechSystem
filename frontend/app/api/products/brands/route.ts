@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 export async function GET() {
   const backendUrl =
@@ -21,33 +19,9 @@ export async function GET() {
           return NextResponse.json(json);
         }
       }
-    } catch {
-      // Fall through to database file
+    } catch (err) {
+      console.warn('Backend brands endpoint fetch failed:', err);
     }
-  }
-
-  // Fallback: Read directly from database file store
-  try {
-    const candidates = [
-      path.resolve(process.cwd(), 'data_store', 'brands.json'),
-      path.resolve(process.cwd(), 'backend', 'data_store', 'brands.json'),
-      path.resolve(process.cwd(), '..', 'data_store', 'brands.json'),
-    ];
-    for (const p of candidates) {
-      if (fs.existsSync(p)) {
-        const content = fs.readFileSync(p, 'utf-8');
-        const data = JSON.parse(content || '[]');
-        if (Array.isArray(data) && data.length > 0) {
-          return NextResponse.json({
-            success: true,
-            data,
-            meta: { total: data.length },
-          });
-        }
-      }
-    }
-  } catch (err) {
-    console.error('Error reading brands database store:', err);
   }
 
   return NextResponse.json({

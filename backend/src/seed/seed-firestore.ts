@@ -22,8 +22,7 @@ for (const f of envFiles) {
   }
 }
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, initializeFirebase } from '../config/firebase.js';
 import {
   SEED_CATEGORIES,
   SEED_BRANDS,
@@ -39,107 +38,96 @@ import {
   SEED_STORE_SETTINGS
 } from './seed-data.js';
 
-const config = {
-  apiKey: process.env.FIREBASE_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nextechsystems-store',
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID || process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID || process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
-};
-
 export async function seedCloudFirestore() {
-  if (!config.apiKey || config.apiKey.includes('your_')) {
-    console.warn('⚠️ [Firebase Seed Notice] No live Firebase API key detected in environment. Please configure .env before running Firestore seed.');
+  initializeFirebase();
+  const db = getFirestore();
+
+  if (!db) {
+    console.warn('⚠️ [Firebase Seed Notice] Firestore instance could not be initialized. Please verify FIREBASE_PROJECT_ID in backend/.env.');
     return;
   }
 
   console.log('====================================================');
   console.log('🔥 STARTING CLOUD FIRESTORE CLEAN SEED & MIGRATION');
-  console.log('Target Project:', config.projectId);
   console.log('====================================================\n');
-
-  const app = initializeApp(config);
-  const db = getFirestore(app);
 
   try {
     // Clean up old dummy users & resellers from Firestore
     console.log('🧹 Cleaning up old mock accounts from Firestore...');
-    await deleteDoc(doc(db, 'users', 'user_reseller_1')).catch(() => {});
-    await deleteDoc(doc(db, 'users', 'user_customer_1')).catch(() => {});
-    await deleteDoc(doc(db, 'resellers', 'reseller_comnet_101')).catch(() => {});
+    await db.collection('users').doc('user_reseller_1').delete().catch(() => {});
+    await db.collection('users').doc('user_customer_1').delete().catch(() => {});
+    await db.collection('resellers').doc('reseller_comnet_101').delete().catch(() => {});
     console.log('✅ Cleaned up old mock accounts.');
 
     // 1. Settings
     console.log('⏳ Uploading Store Settings to Firestore...');
-    await setDoc(doc(db, 'settings', 'global_settings'), SEED_STORE_SETTINGS);
+    await db.collection('settings').doc('global_settings').set(SEED_STORE_SETTINGS);
     console.log('✅ Seeded store settings.');
 
     // 2. Categories
     console.log(`⏳ Uploading ${SEED_CATEGORIES.length} categories to Firestore...`);
     for (const cat of SEED_CATEGORIES) {
-      await setDoc(doc(db, 'categories', cat.id), cat);
+      await db.collection('categories').doc(cat.id).set(cat);
     }
     console.log(`✅ Seeded ${SEED_CATEGORIES.length} categories.`);
 
     // 3. Brands
     console.log(`⏳ Uploading ${SEED_BRANDS.length} brands to Firestore...`);
     for (const brand of SEED_BRANDS) {
-      await setDoc(doc(db, 'brands', brand.id), brand);
+      await db.collection('brands').doc(brand.id).set(brand);
     }
     console.log(`✅ Seeded ${SEED_BRANDS.length} brands.`);
 
     // 4. Products
     console.log(`⏳ Uploading ${SEED_PRODUCTS.length} hardware products & spec matrices...`);
     for (const prod of SEED_PRODUCTS) {
-      await setDoc(doc(db, 'products', prod.id), prod);
+      await db.collection('products').doc(prod.id).set(prod);
     }
     console.log(`✅ Seeded ${SEED_PRODUCTS.length} products.`);
 
     // 5. Single Master Admin User
     console.log(`⏳ Uploading 1 Master Admin account (${SEED_USERS[0].email})...`);
     for (const user of SEED_USERS) {
-      await setDoc(doc(db, 'users', user.id), user);
+      await db.collection('users').doc(user.id).set(user);
     }
     console.log(`✅ Seeded single master admin account (${SEED_USERS[0].email}) to Firestore.`);
 
     // 6. Coupons
     console.log(`⏳ Uploading ${SEED_COUPONS.length} active coupons...`);
     for (const c of SEED_COUPONS) {
-      await setDoc(doc(db, 'coupons', c.id), c);
+      await db.collection('coupons').doc(c.id).set(c);
     }
     console.log(`✅ Seeded ${SEED_COUPONS.length} discount coupons.`);
 
     // 7. Dynamic CMS Entities
     console.log(`⏳ Uploading ${SEED_HERO_HIGHLIGHTS.length} hero highlights...`);
     for (const h of SEED_HERO_HIGHLIGHTS) {
-      await setDoc(doc(db, 'hero_highlights', h.id), h);
+      await db.collection('hero_highlights').doc(h.id).set(h);
     }
 
     console.log(`⏳ Uploading ${SEED_ENTERPRISE_SOLUTIONS.length} enterprise solutions...`);
     for (const s of SEED_ENTERPRISE_SOLUTIONS) {
-      await setDoc(doc(db, 'enterprise_solutions', s.id), s);
+      await db.collection('enterprise_solutions').doc(s.id).set(s);
     }
 
     console.log(`⏳ Uploading ${SEED_HARDWARE_BENCHMARKS.length} hardware benchmarks...`);
     for (const b of SEED_HARDWARE_BENCHMARKS) {
-      await setDoc(doc(db, 'hardware_benchmarks', b.id), b);
+      await db.collection('hardware_benchmarks').doc(b.id).set(b);
     }
 
     console.log(`⏳ Uploading ${SEED_TESTIMONIALS.length} client testimonials...`);
     for (const t of SEED_TESTIMONIALS) {
-      await setDoc(doc(db, 'testimonials', t.id), t);
+      await db.collection('testimonials').doc(t.id).set(t);
     }
 
     console.log(`⏳ Uploading ${SEED_BENTO_FEATURES.length} bento features...`);
     for (const f of SEED_BENTO_FEATURES) {
-      await setDoc(doc(db, 'bento_features', f.id), f);
+      await db.collection('bento_features').doc(f.id).set(f);
     }
 
     console.log(`⏳ Uploading ${SEED_BUILDER_PRESETS.length} builder presets...`);
     for (const p of SEED_BUILDER_PRESETS) {
-      await setDoc(doc(db, 'builder_presets', p.id), p);
+      await db.collection('builder_presets').doc(p.id).set(p);
     }
 
     console.log('\n====================================================');
