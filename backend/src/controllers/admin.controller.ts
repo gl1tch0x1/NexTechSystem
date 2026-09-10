@@ -45,11 +45,12 @@ export class AdminController {
   }
 
   async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const sellerType = req.body.sellerType || (req.body.resellerId ? 'RESELLER' : 'ADMIN');
     const prod = await productService.createProduct({
       ...req.body,
-      sellerType: 'ADMIN',
-      approvalStatus: 'APPROVED',
-      isActive: true,
+      sellerType,
+      approvalStatus: req.body.approvalStatus || 'APPROVED',
+      isActive: req.body.isActive !== false,
     });
     await auditService.log({
       userId: req.user?.id || 'admin',

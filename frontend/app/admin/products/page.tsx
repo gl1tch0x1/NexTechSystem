@@ -35,29 +35,92 @@ import {
   HardDrive,
   Monitor,
   Layers,
-  Settings
+  Settings,
+  Building2,
+  MapPin,
+  RefreshCw,
+  Percent,
+  Barcode,
+  Image as ImageIcon,
+  ChevronRight,
+  ChevronLeft,
+  ArrowRight,
+  Tag,
+  DollarSign
 } from 'lucide-react';
+import { Reseller } from '@/types';
+
+// Standard Enterprise Partner Stores Pre-configurations
+const DEFAULT_PARTNER_STORES = [
+  { id: 'reseller_comnet_101', businessName: 'ComNet Solutions LLC', displayName: 'ComNet Enterprise Systems', resellerCode: 'comnet101', city: 'Dubai', commissionRate: 8 },
+  { id: 'reseller_alfalasi', businessName: 'Al-Falasi Technology Systems', displayName: 'Al-Falasi Tech Partner', resellerCode: 'alfalasi', city: 'Abu Dhabi', commissionRate: 7.5 },
+  { id: 'reseller_apex', businessName: 'Apex Silicon Hardware', displayName: 'Apex Systems Hub', resellerCode: 'apexsilicon', city: 'Dubai', commissionRate: 8.5 },
+  { id: 'reseller_hypertech', businessName: 'HyperTech Middle East', displayName: 'HyperTech Commercial', resellerCode: 'hypertech', city: 'Sharjah', commissionRate: 9 },
+];
+
+// Logistics and Fulfillment Warehousing Nodes
+const WAREHOUSE_LOCATIONS = [
+  { id: 'loc_dxb_main', name: 'Dubai Logistics Hub (JAFZA)', city: 'Dubai', code: 'DXB-01' },
+  { id: 'loc_deira_tech', name: 'Deira Showroom & Technical Center', city: 'Dubai', code: 'DXB-02' },
+  { id: 'loc_auh_hub', name: 'Abu Dhabi Regional Distribution Hub', city: 'Abu Dhabi', code: 'AUH-01' },
+  { id: 'loc_shj_depot', name: 'Sharjah Industrial Logistics Depot', city: 'Sharjah', code: 'SHJ-01' },
+  { id: 'loc_partner_direct', name: 'Partner Store Direct Inventory Depot', city: 'Partner Local', code: 'PTR-01' },
+];
+
+// Quick Component Visual Presets
+const HARDWARE_IMAGE_PRESETS = [
+  { label: 'Intel Core i9 CPU', category: 'CPUs', url: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80' },
+  { label: 'ASUS ROG RTX 4090', category: 'GPUs', url: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80' },
+  { label: 'ROG Gaming Motherboard', category: 'Motherboards', url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Corsair DDR5 Memory Kit', category: 'RAM', url: 'https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Samsung 990 Pro NVMe SSD', category: 'Storage', url: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Corsair 1000W Platinum PSU', category: 'PSUs', url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80' },
+];
+
+const CONDITION_OPTIONS = [
+  'Brand New (Factory Sealed)',
+  'Enterprise Refurbished (Grade A)',
+  'Open Box (Certified Tested)',
+];
+
+const WARRANTY_OPTIONS = [
+  '1 Year Standard Warranty',
+  '2 Years Commercial Warranty',
+  '3 Years Official Manufacturer Warranty',
+  '5 Years Enterprise Gold Warranty',
+  'Lifetime Limited Warranty',
+];
 
 interface ProductFormData {
   title: string;
   slug: string;
   sku: string;
+  barcode: string;
   shortDescription: string;
   description: string;
+  condition: string;
+  warrantyYears: number;
+  warranty: string;
   price: number;
   originalPrice: number;
+  costPrice: number;
   discountPercentage: number;
   stock: number;
+  lowStockThreshold: number;
+  warehouseLocation: string;
   categoryId: string;
   categoryName: string;
   brandId: string;
   brandName: string;
   primaryImage: string;
+  sellerType: SellerType;
+  resellerId: string;
+  resellerName: string;
+  resellerCode: string;
+  partnerSkuRef: string;
   socket: string;
   tdp: number;
   formFactor: string;
-  warrantyYears: number;
-  sellerType: SellerType;
   specifications: Record<string, string>;
   customSpecs: { key: string; value: string }[];
 }
@@ -67,6 +130,7 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
+  const [resellers, setResellers] = useState<Reseller[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +144,7 @@ export default function AdminProductsPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [activeModalStep, setActiveModalStep] = useState<'general' | 'partner' | 'media' | 'specs'>('general');
   const [activeSpecTab, setActiveSpecTab] = useState<string>('core');
 
   // Form State
@@ -87,22 +152,32 @@ export default function AdminProductsPage() {
     title: '',
     slug: '',
     sku: '',
+    barcode: '',
     shortDescription: '',
     description: '',
-    price: 0,
-    originalPrice: 0,
-    discountPercentage: 0,
-    stock: 10,
+    condition: 'Brand New (Factory Sealed)',
+    warrantyYears: 3,
+    warranty: '3 Years Official Manufacturer Warranty',
+    price: 999,
+    originalPrice: 1199,
+    costPrice: 799,
+    discountPercentage: 16.7,
+    stock: 25,
+    lowStockThreshold: 5,
+    warehouseLocation: 'loc_dxb_main',
     categoryId: 'cat_processors',
     categoryName: 'Processors (CPUs)',
-    brandId: 'brand_intel',
-    brandName: 'Intel',
-    primaryImage: '',
+    brandId: 'brand_asus',
+    brandName: 'ASUS',
+    primaryImage: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
+    sellerType: 'ADMIN',
+    resellerId: '',
+    resellerName: '',
+    resellerCode: '',
+    partnerSkuRef: '',
     socket: 'LGA1700',
     tdp: 125,
     formFactor: 'ATX',
-    warrantyYears: 3,
-    sellerType: 'ADMIN',
     specifications: {},
     customSpecs: [],
   });
@@ -110,7 +185,7 @@ export default function AdminProductsPage() {
   const fetchData = async () => {
     try {
       const fetchOpts = token ? { token } : {};
-      const [prodRes, catRes, brandRes] = await Promise.all([
+      const [prodRes, catRes, brandRes, resellerRes] = await Promise.all([
         token
           ? ApiClient.get<Product[]>('/admin/products?limit=100', { token }).catch(() => [])
           : Promise.resolve([]),
@@ -118,6 +193,9 @@ export default function AdminProductsPage() {
           .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => [])),
         ApiClient.get<Brand[]>('/admin/brands', fetchOpts)
           .catch(() => ApiClient.get<Brand[]>('/products/brands').catch(() => [])),
+        token
+          ? ApiClient.get<Reseller[]>('/admin/resellers', { token }).catch(() => [])
+          : Promise.resolve([]),
       ]);
       if (prodRes && Array.isArray(prodRes) && prodRes.length > 0) {
         setProducts(prodRes);
@@ -127,6 +205,9 @@ export default function AdminProductsPage() {
       }
       if (brandRes && Array.isArray(brandRes) && brandRes.length > 0) {
         setBrands(brandRes);
+      }
+      if (resellerRes && Array.isArray(resellerRes) && resellerRes.length > 0) {
+        setResellers(resellerRes);
       }
     } catch (err) {
       console.error('Failed to load admin products or taxonomy:', err);
@@ -139,36 +220,70 @@ export default function AdminProductsPage() {
     fetchData();
   }, [token]);
 
+  const generateRandomSku = (catId?: string) => {
+    const prefixMap: Record<string, string> = {
+      cat_processors: 'CPU',
+      cat_gpus: 'GPU',
+      cat_motherboards: 'MBD',
+      cat_ram: 'RAM',
+      cat_storage: 'SSD',
+      cat_psus: 'PSU',
+      cat_servers: 'SRV',
+      cat_laptops: 'LPT',
+      cat_networking: 'NET',
+      cat_monitors: 'MON',
+    };
+    const code = prefixMap[catId || formData.categoryId] || 'SKU';
+    const rand = Math.floor(100000 + Math.random() * 900000);
+    return `NX-${code}-${rand}`;
+  };
+
+  const generateRandomBarcode = () => {
+    return `729${Math.floor(100000000 + Math.random() * 900000000)}`;
+  };
+
   const openCreateModal = () => {
     setIsEditing(false);
     setSelectedProduct(null);
     setFormError('');
+    setActiveModalStep('general');
     setActiveSpecTab('core');
     const activeCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
     const activeBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
     const initialCat = activeCats[0];
     const initialBrand = activeBrands[0];
+    const initialSku = generateRandomSku(initialCat?.id);
 
     setFormData({
       title: '',
       slug: '',
-      sku: `SKU-${Date.now().toString().slice(-6)}`,
+      sku: initialSku,
+      barcode: generateRandomBarcode(),
       shortDescription: '',
       description: '',
+      condition: 'Brand New (Factory Sealed)',
+      warrantyYears: 3,
+      warranty: '3 Years Official Manufacturer Warranty',
       price: 999,
       originalPrice: 1199,
-      discountPercentage: 10,
+      costPrice: 799,
+      discountPercentage: 16.7,
       stock: 25,
+      lowStockThreshold: 5,
+      warehouseLocation: 'loc_dxb_main',
       categoryId: initialCat?.id || 'cat_processors',
       categoryName: initialCat?.name || 'Processors (CPUs)',
       brandId: initialBrand?.id || 'brand_asus',
       brandName: initialBrand?.name || 'ASUS',
-      primaryImage: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=600&q=80',
+      primaryImage: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
+      sellerType: 'ADMIN',
+      resellerId: '',
+      resellerName: '',
+      resellerCode: '',
+      partnerSkuRef: '',
       socket: 'LGA1700',
       tdp: 125,
       formFactor: 'ATX',
-      warrantyYears: 3,
-      sellerType: 'ADMIN',
       specifications: {
         Condition: 'Brand New (Factory Sealed)',
         'Product Category': initialCat?.name || 'Processors (CPUs)',
@@ -186,6 +301,7 @@ export default function AdminProductsPage() {
     setIsEditing(true);
     setSelectedProduct(prod);
     setFormError('');
+    setActiveModalStep('general');
     setActiveSpecTab('core');
 
     const loadedSpecs: Record<string, string> = { ...(prod.specifications || {}) };
@@ -201,26 +317,39 @@ export default function AdminProductsPage() {
       }
     });
 
+    const origP = prod.originalPrice || prod.compareAtPrice || prod.price;
+    const computedDiscount = origP > prod.price ? Math.round(((origP - prod.price) / origP) * 100) : 0;
+
     setFormData({
       title: prod.title || prod.name || '',
       slug: prod.slug,
       sku: prod.sku,
+      barcode: prod.barcode || '',
       shortDescription: prod.shortDescription || '',
       description: prod.description || '',
+      condition: loadedSpecs['Condition'] || 'Brand New (Factory Sealed)',
+      warrantyYears: prod.specs?.warrantyYears || 3,
+      warranty: prod.warranty || loadedSpecs['Warranty'] || '3 Years Official Manufacturer Warranty',
       price: prod.price,
-      originalPrice: prod.originalPrice || prod.compareAtPrice || prod.price,
-      discountPercentage: prod.discountPercentage || 0,
+      originalPrice: origP,
+      costPrice: prod.costPrice || Math.round(prod.price * 0.8),
+      discountPercentage: prod.discountPercentage || computedDiscount,
       stock: prod.stock,
+      lowStockThreshold: prod.lowStockThreshold || 5,
+      warehouseLocation: prod.locations?.[0]?.locationId || 'loc_dxb_main',
       categoryId: prod.categoryId,
       categoryName: prod.categoryName,
       brandId: prod.brandId,
       brandName: prod.brandName,
       primaryImage: prod.primaryImage || prod.thumbnail || (prod.images && prod.images[0]) || '',
+      sellerType: prod.sellerType || 'ADMIN',
+      resellerId: prod.resellerId || '',
+      resellerName: prod.resellerName || '',
+      resellerCode: prod.resellerCode || '',
+      partnerSkuRef: '',
       socket: prod.specs?.socket || loadedSpecs['Socket Type'] || '',
       tdp: prod.specs?.tdp || (loadedSpecs['Power Supply Wattage'] ? parseInt(loadedSpecs['Power Supply Wattage'], 10) || 125 : 125),
       formFactor: prod.specs?.formFactor || loadedSpecs['Form Factor'] || 'ATX',
-      warrantyYears: prod.specs?.warrantyYears || 3,
-      sellerType: prod.sellerType,
       specifications: loadedSpecs,
       customSpecs: customSpecsList,
     });
@@ -282,6 +411,8 @@ export default function AdminProductsPage() {
         }
       });
 
+      if (formData.condition) finalSpecs['Condition'] = formData.condition;
+      if (formData.warranty) finalSpecs['Warranty'] = formData.warranty;
       if (formData.socket && !finalSpecs['Socket Type']) {
         finalSpecs['Socket Type'] = formData.socket;
       }
@@ -294,32 +425,60 @@ export default function AdminProductsPage() {
       const matchedCat = activeCats.find(c => c.id === formData.categoryId);
       const matchedBrand = activeBrands.find(b => b.id === formData.brandId);
 
+      const isPartner = formData.sellerType === 'RESELLER';
+      const availableStores = resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES;
+      const matchedPartner = isPartner ? availableStores.find(r => r.id === formData.resellerId) : null;
+      const selectedHub = WAREHOUSE_LOCATIONS.find(w => w.id === formData.warehouseLocation) || WAREHOUSE_LOCATIONS[0];
+      const stockVal = Number(formData.stock) || 1;
+
+      const origP = Number(formData.originalPrice || formData.price);
+      const computedDiscount = origP > Number(formData.price)
+        ? Math.round(((origP - Number(formData.price)) / origP) * 100)
+        : 0;
+
       const payload = {
         title: formData.title,
         name: formData.title,
-        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
         sku: formData.sku,
+        barcode: formData.barcode || undefined,
         shortDescription: formData.shortDescription,
         description: formData.description,
         price: Number(formData.price),
-        originalPrice: Number(formData.originalPrice || formData.price),
-        discountPercentage: Number(formData.discountPercentage || 0),
-        stock: Number(formData.stock),
+        originalPrice: origP,
+        costPrice: Number(formData.costPrice || (formData.price * 0.8)),
+        discountPercentage: computedDiscount,
+        stock: stockVal,
+        lowStockThreshold: Number(formData.lowStockThreshold || 5),
         categoryId: formData.categoryId,
         categoryName: matchedCat?.name || formData.categoryName,
         brandId: formData.brandId,
         brandName: matchedBrand?.name || formData.brandName,
         primaryImage: formData.primaryImage,
         images: [formData.primaryImage],
+        thumbnail: formData.primaryImage,
+        sellerType: formData.sellerType,
+        resellerId: isPartner ? (matchedPartner?.id || formData.resellerId || undefined) : undefined,
+        resellerName: isPartner ? (matchedPartner?.displayName || matchedPartner?.businessName || formData.resellerName || undefined) : undefined,
+        resellerCode: isPartner ? (matchedPartner?.resellerCode || formData.resellerCode || undefined) : undefined,
+        locations: [
+          {
+            locationId: selectedHub.id,
+            locationName: selectedHub.name,
+            city: selectedHub.city,
+            quantity: stockVal,
+          }
+        ],
         specifications: finalSpecs,
         specs: {
           socket: formData.socket || finalSpecs['Socket Type'] || undefined,
           tdp: formData.tdp ? Number(formData.tdp) : undefined,
           formFactor: formData.formFactor || finalSpecs['Form Factor'] || undefined,
           warrantyYears: Number(formData.warrantyYears || 3),
+          condition: formData.condition,
           ...finalSpecs,
         },
-        warranty: finalSpecs['Warranty'] || `${formData.warrantyYears} Years Manufacturer Warranty`,
+        warranty: formData.warranty || finalSpecs['Warranty'] || `${formData.warrantyYears} Years Manufacturer Warranty`,
       };
 
       if (isEditing && selectedProduct) {
@@ -622,399 +781,988 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* CREATE / EDIT PRODUCT MODAL */}
+      {/* CREATE / EDIT PRODUCT MODAL - REDESIGNED PROFESSIONAL WORKFLOW */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl p-6 sm:p-8 space-y-6 shadow-2xl my-8 text-slate-900 dark:text-white max-h-[92vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-purple-600/10 dark:bg-purple-600/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 rounded-3xl w-full max-w-5xl h-[92vh] max-h-[860px] shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-white">
+            {/* 1. Fixed Modal Top Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-purple-600/20">
                   <Package className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>{isEditing ? 'Edit Hardware Product' : 'Add New Hardware SKU'}</span>
-                    <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+                      {isEditing ? 'Edit Hardware Product' : 'Add New Hardware SKU'}
+                    </h2>
+                    <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
                       {configuredSpecsCount} Specs Configured
                     </span>
-                  </h2>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Configure catalog taxonomy, price, stock, and complete technical specifications matrix
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                      formData.sellerType === 'RESELLER'
+                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                        : 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
+                    }`}>
+                      {formData.sellerType === 'RESELLER' ? 'Partner Store Allocation' : 'Platform Direct Master'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Configure enterprise catalog taxonomy, partner store allocation, commercial pricing, and technical matrix
                   </p>
                 </div>
               </div>
+
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                title="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
+            {/* 2. Fixed Modal Step Navigation Bar */}
+            <div className="flex items-center gap-1 sm:gap-2 px-6 py-2.5 bg-slate-50/90 dark:bg-slate-950/70 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0 overflow-x-auto">
+              <button
+                type="button"
+                onClick={() => setActiveModalStep('general')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  activeModalStep === 'general'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>1. General & Pricing</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveModalStep('partner')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  activeModalStep === 'partner'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
+                }`}
+              >
+                <Store className="w-3.5 h-3.5" />
+                <span>2. Partner Store & Logistics</span>
+                {formData.sellerType === 'RESELLER' && (
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveModalStep('media')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  activeModalStep === 'media'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>3. Media & Visual Assets</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveModalStep('specs')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  activeModalStep === 'specs'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
+                }`}
+              >
+                <Cpu className="w-3.5 h-3.5" />
+                <span>4. Specifications Matrix</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                  activeModalStep === 'specs' ? 'bg-purple-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                }`}>
+                  {configuredSpecsCount}
+                </span>
+              </button>
+            </div>
+
+            {/* Error Banner if validation fails */}
             {formError && (
-              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs font-semibold">
-                {formError}
+              <div className="mx-6 mt-4 p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs font-semibold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{formError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSaveProduct} className="space-y-6">
-              {/* Core Information Section */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Product Title *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Intel Core i9-14900K Flagship 24-Core Desktop Processor"
-                      value={formData.title}
-                      onChange={e => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium"
-                    />
-                  </div>
+            {/* 3. Scrollable Form Content */}
+            <form onSubmit={handleSaveProduct} className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">SKU Number *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. SKU-CPU-14900K"
-                      value={formData.sku}
-                      onChange={e => setFormData({ ...formData, sku: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-semibold"
-                    />
-                  </div>
-                </div>
+                {/* ============================================================== */}
+                {/* TAB 1: GENERAL & COMMERCIAL INFORMATION */}
+                {/* ============================================================== */}
+                {activeModalStep === 'general' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Card 1: Identification */}
+                    <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
+                      <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                        <Tag className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                          Product Identity & SKU Generation
+                        </h3>
+                      </div>
 
-                {/* Category & Brand Dropdowns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      Hardware Category *
-                    </label>
-                    <select
-                      value={formData.categoryId}
-                      onChange={e => {
-                        const availableCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
-                        const sel = availableCats.find(c => c.id === e.target.value);
-                        setFormData(prev => ({
-                          ...prev,
-                          categoryId: e.target.value,
-                          categoryName: sel?.name || '',
-                          specifications: {
-                            ...prev.specifications,
-                            'Product Category': sel?.name || prev.specifications['Product Category'] || '',
-                          },
-                        }));
-                      }}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-semibold"
-                    >
-                      {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Product Title / Commercial Model Name *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Intel Core i9-14900K Flagship 24-Core Desktop Processor"
+                            value={formData.title}
+                            onChange={e => setFormData({ ...formData, title: e.target.value })}
+                            className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                          />
+                        </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      Brand / Manufacturer *
-                    </label>
-                    <select
-                      value={formData.brandId}
-                      onChange={e => {
-                        const availableBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
-                        const sel = availableBrands.find(b => b.id === e.target.value);
-                        setFormData(prev => ({
-                          ...prev,
-                          brandId: e.target.value,
-                          brandName: sel?.name || '',
-                          specifications: {
-                            ...prev.specifications,
-                            Brand: sel?.name || prev.specifications['Brand'] || '',
-                          },
-                        }));
-                      }}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-semibold"
-                    >
-                      {(brands.length > 0 ? brands : DEFAULT_BRANDS).map(b => (
-                        <option key={b.id} value={b.id}>
-                          {b.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                                SKU Number (Stock Keeping Unit) *
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, sku: generateRandomSku() })}
+                                className="text-[10px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                <span>Randomize</span>
+                              </button>
+                            </div>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g. NX-CPU-849201"
+                              value={formData.sku}
+                              onChange={e => setFormData({ ...formData, sku: e.target.value })}
+                              className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono font-bold transition-all"
+                            />
+                          </div>
 
-                {/* Pricing and Stock */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Price (د.إ) *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required
-                      value={formData.price}
-                      onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-bold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Orig. Price (د.إ)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.originalPrice}
-                      onChange={e => setFormData({ ...formData, originalPrice: Number(e.target.value) })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Stock Count *</label>
-                    <input
-                      type="number"
-                      required
-                      value={formData.stock}
-                      onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-semibold"
-                    />
-                  </div>
-                </div>
-
-                {/* Primary Image */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Primary Image URL</label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/photo-..."
-                    value={formData.primaryImage}
-                    onChange={e => setFormData({ ...formData, primaryImage: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-mono"
-                  />
-                </div>
-
-                {/* Short Description */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Short Description</label>
-                  <textarea
-                    rows={2}
-                    placeholder="Brief highlights e.g. Flagship 24-core processor with up to 6.0 GHz Turbo and PCIe Gen 5 support..."
-                    value={formData.shortDescription}
-                    onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* HARDWARE SPECIFICATIONS MATRIX SECTION */}
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                      <Sliders className="w-4 h-4" />
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                                Barcode / EAN-13 / UPC
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, barcode: generateRandomBarcode() })}
+                                className="text-[10px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                <span>Generate</span>
+                              </button>
+                            </div>
+                            <div className="relative">
+                              <input
+                                type="text"
+                                placeholder="e.g. 729183920192"
+                                value={formData.barcode}
+                                onChange={e => setFormData({ ...formData, barcode: e.target.value })}
+                                className="w-full bg-white dark:bg-slate-900 pl-9 pr-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono font-semibold transition-all"
+                              />
+                              <Barcode className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                        <span>Technical Specifications Matrix</span>
-                        <span className="text-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full font-mono font-bold">
-                          {configuredSpecsCount} Active
+
+                    {/* Card 2: Taxonomy & Classification */}
+                    <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
+                      <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                        <Boxes className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                          Hardware Classification & Warranty
+                        </h3>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Hardware Category *
+                          </label>
+                          <select
+                            value={formData.categoryId}
+                            onChange={e => {
+                              const activeCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+                              const sel = activeCats.find(c => c.id === e.target.value);
+                              setFormData(prev => ({
+                                ...prev,
+                                categoryId: e.target.value,
+                                categoryName: sel?.name || '',
+                                sku: generateRandomSku(e.target.value),
+                                specifications: {
+                                  ...prev.specifications,
+                                  'Product Category': sel?.name || prev.specifications['Product Category'] || '',
+                                },
+                              }));
+                            }}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                          >
+                            {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Brand / Manufacturer *
+                          </label>
+                          <select
+                            value={formData.brandId}
+                            onChange={e => {
+                              const activeBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
+                              const sel = activeBrands.find(b => b.id === e.target.value);
+                              setFormData(prev => ({
+                                ...prev,
+                                brandId: e.target.value,
+                                brandName: sel?.name || '',
+                                specifications: {
+                                  ...prev.specifications,
+                                  Brand: sel?.name || prev.specifications['Brand'] || '',
+                                },
+                              }));
+                            }}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                          >
+                            {(brands.length > 0 ? brands : DEFAULT_BRANDS).map(b => (
+                              <option key={b.id} value={b.id}>
+                                {b.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Hardware Condition
+                          </label>
+                          <select
+                            value={formData.condition}
+                            onChange={e => setFormData({ ...formData, condition: e.target.value })}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                          >
+                            {CONDITION_OPTIONS.map(opt => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Warranty Coverage
+                          </label>
+                          <select
+                            value={formData.warranty}
+                            onChange={e => {
+                              const match = e.target.value.match(/(\d+)\s*Year/i);
+                              const yrs = match ? parseInt(match[1], 10) : 3;
+                              setFormData({
+                                ...formData,
+                                warranty: e.target.value,
+                                warrantyYears: yrs,
+                                specifications: {
+                                  ...formData.specifications,
+                                  Warranty: e.target.value,
+                                },
+                              });
+                            }}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                          >
+                            {WARRANTY_OPTIONS.map(w => (
+                              <option key={w} value={w}>
+                                {w}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 3: Pricing & Stock Commercials */}
+                    <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                            Commercial Valuation, Margin & Stock
+                          </h3>
+                        </div>
+
+                        {/* Live Financial Metrics Badges */}
+                        <div className="flex items-center gap-2">
+                          {Number(formData.originalPrice) > Number(formData.price) && (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              -{Math.round(((Number(formData.originalPrice) - Number(formData.price)) / Number(formData.originalPrice)) * 100)}% Discount
+                            </span>
+                          )}
+                          {Number(formData.costPrice) > 0 && Number(formData.price) > Number(formData.costPrice) && (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                              Est. Margin: +{Math.round(((Number(formData.price) - Number(formData.costPrice)) / Number(formData.price)) * 100)}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Selling Price (د.إ AED) *
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            required
+                            value={formData.price}
+                            onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono font-bold"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            List / Orig. Price (د.إ AED)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.originalPrice}
+                            onChange={e => setFormData({ ...formData, originalPrice: Number(e.target.value) })}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Cost Price (Wholesale AED)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.costPrice}
+                            onChange={e => setFormData({ ...formData, costPrice: Number(e.target.value) })}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono text-slate-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Available Stock (Units) *
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            value={formData.stock}
+                            onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono font-bold text-purple-600 dark:text-purple-400"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Low-Stock Alert Trigger Threshold
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="number"
+                            value={formData.lowStockThreshold}
+                            onChange={e => setFormData({ ...formData, lowStockThreshold: Number(e.target.value) })}
+                            className="w-32 bg-white dark:bg-slate-900 px-3.5 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-mono font-semibold"
+                          />
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                            Automatic emergency restock banner will appear on the operations dashboard when units drop to or below this quantity.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 4: Short Description */}
+                    <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-2">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Catalog Highlight / Brief Specification Summary
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="e.g. Flagship 24-core (8P + 16E) desktop computing processor with up to 6.0 GHz Turbo and PCIe Gen 5 support for enthusiast workstations..."
+                        value={formData.shortDescription}
+                        onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* ============================================================== */}
+                {/* TAB 2: PARTNER STORES & LOGISTICS DISTRIBUTION */}
+                {/* ============================================================== */}
+                {activeModalStep === 'partner' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Sales Channel Selection */}
+                    <div className="space-y-3">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Commercial Sales Channel & Attribution *
+                      </label>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Option 1: Platform Master Direct */}
+                        <div
+                          onClick={() => setFormData({ ...formData, sellerType: 'ADMIN', resellerId: '', resellerName: '', resellerCode: '' })}
+                          className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
+                            formData.sellerType === 'ADMIN'
+                              ? 'bg-purple-50/60 dark:bg-purple-950/30 border-purple-600 dark:border-purple-500 shadow-sm'
+                              : 'bg-slate-50/70 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className={`p-2.5 rounded-xl shrink-0 ${
+                            formData.sellerType === 'ADMIN' ? 'bg-purple-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                          }`}>
+                            <Building2 className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-xs font-black text-slate-900 dark:text-white">
+                                NexTech Platform Master (Direct)
+                              </h4>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
+                                0% Commission
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                              Central inventory sold under NexTech Official Store. Dispatched from primary regional platform logistics hubs.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Option 2: Partner Reseller Store */}
+                        <div
+                          onClick={() => {
+                            const stores = resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES;
+                            const defaultStore = stores[0];
+                            setFormData({
+                              ...formData,
+                              sellerType: 'RESELLER',
+                              resellerId: defaultStore.id,
+                              resellerName: defaultStore.displayName || defaultStore.businessName,
+                              resellerCode: defaultStore.resellerCode,
+                            });
+                          }}
+                          className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
+                            formData.sellerType === 'RESELLER'
+                              ? 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-600 dark:border-amber-500 shadow-sm'
+                              : 'bg-slate-50/70 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className={`p-2.5 rounded-xl shrink-0 ${
+                            formData.sellerType === 'RESELLER' ? 'bg-amber-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                          }`}>
+                            <Store className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-xs font-black text-slate-900 dark:text-white">
+                                Authorized Partner Reseller Store
+                              </h4>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300">
+                                Partner Network
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                              Assigned to a verified multi-tenant technology partner store. Tracked through partner portals and vendor settlements.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Partner Store Details (Active if RESELLER selected) */}
+                    {formData.sellerType === 'RESELLER' && (
+                      <div className="p-5 rounded-2xl bg-amber-50/30 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 space-y-4 animate-fadeIn">
+                        <div className="flex items-center justify-between pb-2 border-b border-amber-200/60 dark:border-amber-900/40">
+                          <div className="flex items-center gap-2">
+                            <Store className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200">
+                              Assigned Partner Store Profile
+                            </h3>
+                          </div>
+                          <span className="text-[10px] font-mono font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded">
+                            Multi-Tenant Mode
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                              Select Partner Store Entity *
+                            </label>
+                            <select
+                              value={formData.resellerId}
+                              onChange={e => {
+                                const stores = resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES;
+                                const selected = stores.find(s => s.id === e.target.value);
+                                setFormData({
+                                  ...formData,
+                                  resellerId: e.target.value,
+                                  resellerName: selected?.displayName || selected?.businessName || '',
+                                  resellerCode: selected?.resellerCode || '',
+                                });
+                              }}
+                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-semibold"
+                            >
+                              {(resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES).map((store: any) => (
+                                <option key={store.id} value={store.id}>
+                                  {store.displayName || store.businessName} ({store.resellerCode?.toUpperCase()} - {store.address?.city || store.city || 'UAE'})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                              Partner Internal SKU / Ref Code
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. COMNET-CPU-0199"
+                              value={formData.partnerSkuRef}
+                              onChange={e => setFormData({ ...formData, partnerSkuRef: e.target.value })}
+                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Partner store metadata badge */}
+                        <div className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-amber-200/80 dark:border-amber-900/30 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">
+                              Selected Partner Store: <span className="font-bold text-slate-900 dark:text-white">{formData.resellerName || 'ComNet Solutions LLC'}</span>
+                            </span>
+                          </div>
+                          <span className="font-mono text-[11px] text-amber-700 dark:text-amber-300 font-bold">
+                            Code: {formData.resellerCode || 'comnet101'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Warehousing & Logistics Node */}
+                    <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                            Primary Fulfillment & Storage Node
+                          </h3>
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
+                          Same-Day Dispatch Ready
                         </span>
-                      </h3>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Warehouse Location *
+                        </label>
+                        <select
+                          value={formData.warehouseLocation}
+                          onChange={e => setFormData({ ...formData, warehouseLocation: e.target.value })}
+                          className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                        >
+                          {WAREHOUSE_LOCATIONS.map(wh => (
+                            <option key={wh.id} value={wh.id}>
+                              {wh.name} [{wh.code}] — {wh.city}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          The physical depot where stock for this hardware item is secured and routed for regional orders.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ============================================================== */}
+                {/* TAB 3: MEDIA & VISUAL ASSETS */}
+                {/* ============================================================== */}
+                {activeModalStep === 'media' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
+                      <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                        <ImageIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                          Primary Hardware Image & Live Visual Render
+                        </h3>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                        {/* Image URL Inputs */}
+                        <div className="md:col-span-2 space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                              Primary High-Resolution Image URL *
+                            </label>
+                            <input
+                              type="url"
+                              placeholder="https://images.unsplash.com/photo-..."
+                              value={formData.primaryImage}
+                              onChange={e => setFormData({ ...formData, primaryImage: e.target.value })}
+                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                            />
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                              Ensure direct HTTPS links with clear product backgrounds for catalog clarity.
+                            </p>
+                          </div>
+
+                          {/* Quick Presets Selection */}
+                          <div className="space-y-2">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                              Instant Hardware Photo Presets (1-Click Fill)
+                            </label>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {HARDWARE_IMAGE_PRESETS.map((preset, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, primaryImage: preset.url })}
+                                  className="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-purple-500 text-left text-xs transition-all cursor-pointer group"
+                                >
+                                  <span className="font-bold block text-slate-800 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                                    {preset.label}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 block font-mono">
+                                    {preset.category}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Live Image Card Render */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                            Live Preview Render
+                          </label>
+                          <div className="w-full aspect-square rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden relative flex items-center justify-center shadow-inner group">
+                            {formData.primaryImage ? (
+                              <img
+                                src={formData.primaryImage}
+                                alt="SKU Preview"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e: any) => {
+                                  e.target.onerror = null;
+                                  e.target.src = 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+                                }}
+                              />
+                            ) : (
+                              <div className="text-center p-4">
+                                <ImageIcon className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+                                <span className="text-xs text-slate-400">No Image Specified</span>
+                              </div>
+                            )}
+                            <span className="absolute bottom-2 right-2 text-[9px] font-mono font-bold bg-slate-900/80 text-white px-2 py-0.5 rounded-md backdrop-blur-sm">
+                              HD 800x800
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ============================================================== */}
+                {/* TAB 4: TECHNICAL SPECIFICATIONS MATRIX */}
+                {/* ============================================================== */}
+                {activeModalStep === 'specs' && (
+                  <div className="space-y-4 animate-fadeIn">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                      <div className="flex items-center gap-2">
+                        <Sliders className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                          <span>Technical Specifications Matrix</span>
+                          <span className="text-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full font-mono font-bold">
+                            {configuredSpecsCount} Active
+                          </span>
+                        </h3>
+                      </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">
                         Choose standardized architecture presets or type custom hardware metrics
                       </p>
                     </div>
-                  </div>
-                </div>
 
-                {/* Specification Category Tabs */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-100 dark:border-slate-800">
-                  {SPECIFICATION_GROUPS.map(grp => (
-                    <button
-                      key={grp.id}
-                      type="button"
-                      onClick={() => setActiveSpecTab(grp.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                        activeSpecTab === grp.id
-                          ? 'bg-purple-600 text-white shadow-sm'
-                          : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      {grp.id === 'core' && <Cpu className="w-3.5 h-3.5" />}
-                      {grp.id === 'memory_storage' && <Database className="w-3.5 h-3.5" />}
-                      {grp.id === 'graphics_power' && <Zap className="w-3.5 h-3.5" />}
-                      {grp.id === 'display_system' && <Monitor className="w-3.5 h-3.5" />}
-                      <span>{grp.name}</span>
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setActiveSpecTab('custom')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                      activeSpecTab === 'custom'
-                        ? 'bg-purple-600 text-white shadow-sm'
-                        : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Custom Specifications ({formData.customSpecs.length})</span>
-                  </button>
-                </div>
-
-                {/* Active Tab Fields Rendering */}
-                {SPECIFICATION_GROUPS.map(grp => {
-                  if (activeSpecTab !== grp.id) return null;
-                  return (
-                    <div key={grp.id} className="space-y-3 animate-fadeIn">
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
-                        {grp.description}
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                        {grp.fields.map(f => {
-                          const presets = f.presetKey ? SPECIFICATION_PRESETS[f.presetKey] : undefined;
-                          const currentValue = formData.specifications[f.key] || '';
-                          return (
-                            <div key={f.key} className="p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-1.5">
-                              <div className="flex items-center justify-between">
-                                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                                  {f.label}
-                                </label>
-                                {currentValue && (
-                                  <span className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
-                                    Set
-                                  </span>
-                                )}
-                              </div>
-
-                              {presets && presets.length > 0 ? (
-                                <div className="space-y-1.5">
-                                  {/* Presets Select Dropdown */}
-                                  <select
-                                    value={presets.includes(currentValue) ? currentValue : ''}
-                                    onChange={e => {
-                                      if (e.target.value) {
-                                        handleSpecChange(f.key, e.target.value);
-                                      }
-                                    }}
-                                    className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                                  >
-                                    <option value="">-- Choose {f.label} Preset --</option>
-                                    {presets.map(opt => (
-                                      <option key={opt} value={opt}>
-                                        {opt}
-                                      </option>
-                                    ))}
-                                  </select>
-
-                                  {/* Custom Value / Input With Datalist for Direct Editing */}
-                                  <div className="relative">
-                                    <input
-                                      type="text"
-                                      list={`datalist-${f.key.replace(/\s+/g, '-')}`}
-                                      placeholder={f.placeholder}
-                                      value={currentValue}
-                                      onChange={e => handleSpecChange(f.key, e.target.value)}
-                                      className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                                    />
-                                    <datalist id={`datalist-${f.key.replace(/\s+/g, '-')}`}>
-                                      {presets.map(opt => (
-                                        <option key={opt} value={opt} />
-                                      ))}
-                                    </datalist>
-                                  </div>
-                                </div>
-                              ) : (
-                                <input
-                                  type="text"
-                                  placeholder={f.placeholder}
-                                  value={currentValue}
-                                  onChange={e => handleSpecChange(f.key, e.target.value)}
-                                  className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all"
-                                />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Custom Specifications Tab */}
-                {activeSpecTab === 'custom' && (
-                  <div className="space-y-4 animate-fadeIn">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Add any specific enterprise technical keys (e.g. Cache Size, PCIe Lane Count, Interface, Max Temp)
-                      </p>
+                    {/* Specification Category Sub-tabs */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-100 dark:border-slate-800">
+                      {SPECIFICATION_GROUPS.map(grp => (
+                        <button
+                          key={grp.id}
+                          type="button"
+                          onClick={() => setActiveSpecTab(grp.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                            activeSpecTab === grp.id
+                              ? 'bg-purple-600 text-white shadow-sm'
+                              : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                          }`}
+                        >
+                          {grp.id === 'core' && <Cpu className="w-3.5 h-3.5" />}
+                          {grp.id === 'memory_storage' && <Database className="w-3.5 h-3.5" />}
+                          {grp.id === 'graphics_power' && <Zap className="w-3.5 h-3.5" />}
+                          {grp.id === 'display_system' && <Monitor className="w-3.5 h-3.5" />}
+                          <span>{grp.name}</span>
+                        </button>
+                      ))}
                       <button
                         type="button"
-                        onClick={handleAddCustomSpec}
-                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        onClick={() => setActiveSpecTab('custom')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                          activeSpecTab === 'custom'
+                            ? 'bg-purple-600 text-white shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
                       >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add Parameter</span>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Custom Specifications ({formData.customSpecs.length})</span>
                       </button>
                     </div>
 
-                    {formData.customSpecs.length === 0 ? (
-                      <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-dashed border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">
-                        No custom specification parameters configured. Click &quot;Add Parameter&quot; to insert custom attributes.
-                      </div>
-                    ) : (
-                      <div className="space-y-2.5">
-                        {formData.customSpecs.map((cs, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              placeholder="Parameter Name (e.g. L3 Cache)"
-                              value={cs.key}
-                              onChange={e => handleCustomSpecChange(idx, 'key', e.target.value)}
-                              className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Parameter Value (e.g. 36 MB Intel Smart Cache)"
-                              value={cs.value}
-                              onChange={e => handleCustomSpecChange(idx, 'value', e.target.value)}
-                              className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-mono"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveCustomSpec(idx)}
-                              className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer transition-colors"
-                              title="Delete parameter"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                    {/* Active Subtab Fields Rendering */}
+                    {SPECIFICATION_GROUPS.map(grp => {
+                      if (activeSpecTab !== grp.id) return null;
+                      return (
+                        <div key={grp.id} className="space-y-3 animate-fadeIn">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+                            {grp.description}
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            {grp.fields.map(f => {
+                              const presets = f.presetKey ? SPECIFICATION_PRESETS[f.presetKey] : undefined;
+                              const currentValue = formData.specifications[f.key] || '';
+                              return (
+                                <div key={f.key} className="p-3.5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                      {f.label}
+                                    </label>
+                                    {currentValue && (
+                                      <span className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded font-bold">
+                                        Set
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {presets && presets.length > 0 ? (
+                                    <div className="space-y-1.5">
+                                      <select
+                                        value={presets.includes(currentValue) ? currentValue : ''}
+                                        onChange={e => {
+                                          if (e.target.value) {
+                                            handleSpecChange(f.key, e.target.value);
+                                          }
+                                        }}
+                                        className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold"
+                                      >
+                                        <option value="">-- Choose {f.label} Preset --</option>
+                                        {presets.map(opt => (
+                                          <option key={opt} value={opt}>
+                                            {opt}
+                                          </option>
+                                        ))}
+                                      </select>
+
+                                      <div className="relative">
+                                        <input
+                                          type="text"
+                                          list={`datalist-${f.key.replace(/\s+/g, '-')}`}
+                                          placeholder={f.placeholder}
+                                          value={currentValue}
+                                          onChange={e => handleSpecChange(f.key, e.target.value)}
+                                          className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                                        />
+                                        <datalist id={`datalist-${f.key.replace(/\s+/g, '-')}`}>
+                                          {presets.map(opt => (
+                                            <option key={opt} value={opt} />
+                                          ))}
+                                        </datalist>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <input
+                                      type="text"
+                                      placeholder={f.placeholder}
+                                      value={currentValue}
+                                      onChange={e => handleSpecChange(f.key, e.target.value)}
+                                      className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                                    />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        ))}
+                        </div>
+                      );
+                    })}
+
+                    {/* Custom Specifications Subtab */}
+                    {activeSpecTab === 'custom' && (
+                      <div className="space-y-4 animate-fadeIn">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            Add custom enterprise hardware parameters (e.g. L3 Cache, Interface, PCIe Lanes, Max Temp)
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleAddCustomSpec}
+                            className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Add Parameter</span>
+                          </button>
+                        </div>
+
+                        {formData.customSpecs.length === 0 ? (
+                          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-dashed border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">
+                            No custom specification parameters configured. Click &quot;Add Parameter&quot; to insert custom attributes.
+                          </div>
+                        ) : (
+                          <div className="space-y-2.5">
+                            {formData.customSpecs.map((cs, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Parameter Name (e.g. L3 Cache)"
+                                  value={cs.key}
+                                  onChange={e => handleCustomSpecChange(idx, 'key', e.target.value)}
+                                  className="flex-1 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-medium"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Parameter Value (e.g. 36 MB Intel Smart Cache)"
+                                  value={cs.value}
+                                  onChange={e => handleCustomSpecChange(idx, 'value', e.target.value)}
+                                  className="flex-1 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-mono"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveCustomSpec(idx)}
+                                  className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer transition-colors"
+                                  title="Delete parameter"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
               </div>
 
-              {/* Modal Action Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-lg shadow-purple-600/20 transition-all disabled:opacity-50 cursor-pointer"
-                >
-                  {isSubmitting ? 'Saving...' : isEditing ? 'Update Hardware Product' : 'Create Product Listing'}
-                </button>
+              {/* 4. Fixed Modal Bottom Footer Action Bar */}
+              <div className="px-6 py-4 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+                {/* Left side: Live summary chip */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-300 dark:border-slate-700">
+                    <img
+                      src={formData.primaryImage || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80'}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      onError={(e: any) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+                      }}
+                    />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-[280px]">
+                      {formData.title || 'New Hardware SKU'}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                      <span className="font-mono font-bold text-purple-600 dark:text-purple-400">
+                        {formData.price ? `AED ${formData.price}` : 'AED 0.00'}
+                      </span>
+                      <span>•</span>
+                      <span>{formData.stock} Units</span>
+                      <span>•</span>
+                      <span className={formData.sellerType === 'RESELLER' ? 'text-amber-600 font-semibold' : 'text-indigo-600 font-semibold'}>
+                        {formData.sellerType === 'RESELLER' ? (formData.resellerName || 'Partner Store') : 'Platform Direct'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side: Navigation & Submit */}
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  {/* Step navigation prev/next */}
+                  {activeModalStep !== 'general' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (activeModalStep === 'specs') setActiveModalStep('media');
+                        else if (activeModalStep === 'media') setActiveModalStep('partner');
+                        else if (activeModalStep === 'partner') setActiveModalStep('general');
+                      }}
+                      className="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      <span>Back</span>
+                    </button>
+                  )}
+
+                  {activeModalStep !== 'specs' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (activeModalStep === 'general') setActiveModalStep('partner');
+                        else if (activeModalStep === 'partner') setActiveModalStep('media');
+                        else if (activeModalStep === 'media') setActiveModalStep('specs');
+                      }}
+                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-md shadow-purple-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>Next Section</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-purple-600/25 transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>
+                      {isSubmitting ? 'Saving SKU...' : isEditing ? 'Update Hardware Product' : 'Create Hardware SKU'}
+                    </span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
