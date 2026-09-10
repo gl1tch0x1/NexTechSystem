@@ -5,25 +5,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Category, Brand } from '@/types';
 import { useCurrency } from '@/lib/currency-context';
 import {
-  Filter,
   SlidersHorizontal,
   RotateCcw,
   Search,
-  Check,
   Cpu,
   Zap,
   HardDrive,
   Layers,
   Server,
   Sparkles,
-  ShieldCheck,
-  Store,
-  Star,
-  MapPin,
   ChevronDown,
   ChevronUp,
   X,
-  Boxes
 } from 'lucide-react';
 
 interface AdvancedCatalogFilterProps {
@@ -39,17 +32,13 @@ export function AdvancedCatalogFilter({
 }: AdvancedCatalogFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { currentCurrency, formatPrice } = useCurrency();
+  const { currentCurrency } = useCurrency();
 
-  // Collapsible accordion state for dense enterprise control
+  // Collapsible section state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    quickFilters: true,
     price: true,
     categories: true,
     brands: true,
-    specs: true,
-    logistics: true,
-    ratings: false,
   });
 
   const toggleSection = (section: string) => {
@@ -65,12 +54,6 @@ export function AdvancedCatalogFilter({
   const currentSearch = searchParams.get('search') || '';
   const currentMinPrice = searchParams.get('minPrice') || '';
   const currentMaxPrice = searchParams.get('maxPrice') || '';
-  const inStockOnly = searchParams.get('inStock') === 'true';
-  const onSaleOnly = searchParams.get('onSale') === 'true';
-  const currentSellerType = searchParams.get('sellerType') || '';
-  const currentMinRating = searchParams.get('minRating') || '';
-  const currentLocation = searchParams.get('location') || '';
-  const currentSocket = searchParams.get('socket') || '';
 
   // Local price inputs
   const [minPriceInput, setMinPriceInput] = useState(currentMinPrice);
@@ -108,12 +91,6 @@ export function AdvancedCatalogFilter({
     if (currentBrand) count++;
     if (currentSearch) count++;
     if (currentMinPrice || currentMaxPrice) count++;
-    if (inStockOnly) count++;
-    if (onSaleOnly) count++;
-    if (currentSellerType) count++;
-    if (currentMinRating) count++;
-    if (currentLocation) count++;
-    if (currentSocket) count++;
     return count;
   }, [
     currentCategory,
@@ -121,12 +98,6 @@ export function AdvancedCatalogFilter({
     currentSearch,
     currentMinPrice,
     currentMaxPrice,
-    inStockOnly,
-    onSaleOnly,
-    currentSellerType,
-    currentMinRating,
-    currentLocation,
-    currentSocket,
   ]);
 
   // Filtered brands by local search
@@ -193,47 +164,6 @@ export function AdvancedCatalogFilter({
             <span>Reset</span>
           </button>
         )}
-      </div>
-
-      {/* Quick Telemetry Switches */}
-      <div className="space-y-2 pb-4 border-b border-slate-100 dark:border-slate-800/80">
-        {/* In-Stock Radar Switch */}
-        <button
-          type="button"
-          onClick={() => updateFilters({ inStock: inStockOnly ? null : 'true' })}
-          className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-            inStockOnly
-              ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 shadow-sm'
-              : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            In-Stock UAE Pool
-          </span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-md font-mono ${inStockOnly ? 'bg-emerald-500 text-white font-bold' : 'text-slate-400'}`}>
-            {inStockOnly ? 'ACTIVE' : 'ALL'}
-          </span>
-        </button>
-
-        {/* Deals & Rebates Switch */}
-        <button
-          type="button"
-          onClick={() => updateFilters({ onSale: onSaleOnly ? null : 'true' })}
-          className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-            onSaleOnly
-              ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 shadow-sm'
-              : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <Zap className="w-3.5 h-3.5 text-rose-500 fill-current" />
-            Deals & Rebates Only
-          </span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-md font-mono ${onSaleOnly ? 'bg-rose-500 text-white font-bold' : 'text-slate-400'}`}>
-            {onSaleOnly ? 'ACTIVE' : 'OFF'}
-          </span>
-        </button>
       </div>
 
       {/* Procurement Budget / Price Range */}
@@ -383,7 +313,7 @@ export function AdvancedCatalogFilter({
       </div>
 
       {/* Brands Accordion with Instant Search */}
-      <div className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+      <div className="space-y-3">
         <div
           onClick={() => toggleSection('brands')}
           className="flex items-center justify-between cursor-pointer group select-none"
@@ -422,7 +352,7 @@ export function AdvancedCatalogFilter({
             </div>
 
             {/* Brands List */}
-            <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+            <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
               <button
                 type="button"
                 onClick={() => updateFilters({ brand: null })}
@@ -463,129 +393,6 @@ export function AdvancedCatalogFilter({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Hardware Architecture & Socket Matrix */}
-      <div className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800/80">
-        <div
-          onClick={() => toggleSection('specs')}
-          className="flex items-center justify-between cursor-pointer group select-none"
-        >
-          <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            Platform Socket
-          </h4>
-          {openSections.specs ? (
-            <ChevronUp className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
-          ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
-          )}
-        </div>
-
-        {openSections.specs && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {['LGA1700', 'AM5', 'PCIe 5.0', 'DDR5', 'LGA1851'].map(socket => {
-              const isSelected = currentSocket === socket;
-              return (
-                <button
-                  key={socket}
-                  type="button"
-                  onClick={() => updateFilters({ socket: isSelected ? null : socket })}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-tech-blue text-white shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                  }`}
-                >
-                  {socket}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Verified Supply Chain: OEM Direct vs Partner */}
-      <div className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800/80">
-        <div
-          onClick={() => toggleSection('logistics')}
-          className="flex items-center justify-between cursor-pointer group select-none"
-        >
-          <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            Supply Chain & Origin
-          </h4>
-          {openSections.logistics ? (
-            <ChevronUp className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
-          ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
-          )}
-        </div>
-
-        {openSections.logistics && (
-          <div className="space-y-1.5 pt-1">
-            <button
-              type="button"
-              onClick={() => updateFilters({ sellerType: currentSellerType === 'ADMIN' ? null : 'ADMIN' })}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                currentSellerType === 'ADMIN'
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-700 dark:text-emerald-300'
-                  : 'bg-slate-50/60 dark:bg-slate-950/60 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <span>OEM Direct Only</span>
-              </div>
-              {currentSellerType === 'ADMIN' && <Check className="w-3 h-3 text-emerald-500" />}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => updateFilters({ sellerType: currentSellerType === 'RESELLER' ? null : 'RESELLER' })}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                currentSellerType === 'RESELLER'
-                  ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-700 dark:text-amber-300'
-                  : 'bg-slate-50/60 dark:bg-slate-950/60 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Store className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span>Verified Reseller Partners</span>
-              </div>
-              {currentSellerType === 'RESELLER' && <Check className="w-3 h-3 text-amber-500" />}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* UAE Warehouse Logistics Location */}
-      <div className="space-y-3">
-        <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400" />
-          <span>UAE Logistics Centers</span>
-        </h4>
-        <div className="space-y-1">
-          {[
-            { id: 'Dubai', name: 'Dubai (JAFZA & Deira Hubs)' },
-            { id: 'Abu Dhabi', name: 'Abu Dhabi Regional Center' },
-          ].map(hub => {
-            const isSelected = currentLocation === hub.id;
-            return (
-              <button
-                key={hub.id}
-                type="button"
-                onClick={() => updateFilters({ location: isSelected ? null : hub.id })}
-                className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-tech-blue text-white shadow-sm font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
-                }`}
-              >
-                <span>{hub.name}</span>
-                {isSelected && <Check className="w-3 h-3 text-white" />}
-              </button>
-            );
-          })}
-        </div>
       </div>
     </aside>
   );

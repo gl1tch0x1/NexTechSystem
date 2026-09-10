@@ -108,34 +108,6 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
       : `Price: < AED ${currentMaxPrice}`;
     activePills.push({ label: priceText, removeQuery: q });
   }
-  if (inStockOnly) {
-    const q = { ...resolvedParams };
-    delete q.inStock;
-    activePills.push({ label: 'In-Stock UAE Pool', removeQuery: q });
-  }
-  if (onSaleOnly) {
-    const q = { ...resolvedParams };
-    delete q.onSale;
-    activePills.push({ label: 'Deals & Rebates', removeQuery: q });
-  }
-  if (currentSellerType) {
-    const q = { ...resolvedParams };
-    delete q.sellerType;
-    activePills.push({
-      label: currentSellerType === 'ADMIN' ? 'OEM Direct Only' : 'Verified Partners Only',
-      removeQuery: q
-    });
-  }
-  if (currentLocation) {
-    const q = { ...resolvedParams };
-    delete q.location;
-    activePills.push({ label: `Hub: ${currentLocation}`, removeQuery: q });
-  }
-  if (currentSocket) {
-    const q = { ...resolvedParams };
-    delete q.socket;
-    activePills.push({ label: `Socket: ${currentSocket}`, removeQuery: q });
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 transition-colors duration-200">
