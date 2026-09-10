@@ -1,8 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { ProductCard } from '@/components/product/ProductCard';
+import { AdvancedCatalogFilter } from '@/components/product/AdvancedCatalogFilter';
 import { Product, Category, Brand } from '@/types';
-import { Filter, SlidersHorizontal, ArrowUpDown, Search, RotateCcw } from 'lucide-react';
+import { Filter, SlidersHorizontal, ArrowUpDown, Search, RotateCcw, X, Boxes, ShieldCheck, Zap } from 'lucide-react';
 import { getApiUrl } from '@/lib/api-client';
 
 interface ProductsPageProps {
@@ -13,6 +14,11 @@ interface ProductsPageProps {
     minPrice?: string;
     maxPrice?: string;
     inStock?: string;
+    onSale?: string;
+    sellerType?: string;
+    minRating?: string;
+    location?: string;
+    socket?: string;
     featured?: string;
     sort?: string;
     page?: string;
@@ -63,147 +69,156 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
   const currentSearch = resolvedParams.search;
   const currentSort = resolvedParams.sort || 'newest';
   const inStockOnly = resolvedParams.inStock === 'true';
+  const onSaleOnly = resolvedParams.onSale === 'true';
+  const currentSellerType = resolvedParams.sellerType;
+  const currentLocation = resolvedParams.location;
+  const currentSocket = resolvedParams.socket;
+  const currentMinPrice = resolvedParams.minPrice;
+  const currentMaxPrice = resolvedParams.maxPrice;
+
+  const categoryObj = categories.find(c => c.id === currentCategory || c.slug === currentCategory);
+  const brandObj = brands.find(b => b.id === currentBrand || b.slug === currentBrand);
+
+  // Active filter items for pills
+  const activePills: Array<{ label: string; removeQuery: Record<string, any> }> = [];
+
+  if (categoryObj) {
+    const q = { ...resolvedParams };
+    delete q.category;
+    activePills.push({ label: `Category: ${categoryObj.name}`, removeQuery: q });
+  }
+  if (brandObj) {
+    const q = { ...resolvedParams };
+    delete q.brand;
+    activePills.push({ label: `Brand: ${brandObj.name}`, removeQuery: q });
+  }
+  if (currentSearch) {
+    const q = { ...resolvedParams };
+    delete q.search;
+    activePills.push({ label: `Search: "${currentSearch}"`, removeQuery: q });
+  }
+  if (currentMinPrice || currentMaxPrice) {
+    const q = { ...resolvedParams };
+    delete q.minPrice;
+    delete q.maxPrice;
+    const priceText = currentMinPrice && currentMaxPrice
+      ? `Price: AED ${currentMinPrice} - ${currentMaxPrice}`
+      : currentMinPrice
+      ? `Price: > AED ${currentMinPrice}`
+      : `Price: < AED ${currentMaxPrice}`;
+    activePills.push({ label: priceText, removeQuery: q });
+  }
+  if (inStockOnly) {
+    const q = { ...resolvedParams };
+    delete q.inStock;
+    activePills.push({ label: 'In-Stock UAE Pool', removeQuery: q });
+  }
+  if (onSaleOnly) {
+    const q = { ...resolvedParams };
+    delete q.onSale;
+    activePills.push({ label: 'Deals & Rebates', removeQuery: q });
+  }
+  if (currentSellerType) {
+    const q = { ...resolvedParams };
+    delete q.sellerType;
+    activePills.push({
+      label: currentSellerType === 'ADMIN' ? 'OEM Direct Only' : 'Verified Partners Only',
+      removeQuery: q
+    });
+  }
+  if (currentLocation) {
+    const q = { ...resolvedParams };
+    delete q.location;
+    activePills.push({ label: `Hub: ${currentLocation}`, removeQuery: q });
+  }
+  if (currentSocket) {
+    const q = { ...resolvedParams };
+    delete q.socket;
+    activePills.push({ label: `Socket: ${currentSocket}`, removeQuery: q });
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 transition-colors duration-200">
       {/* Breadcrumb & Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-1">
-            <Link href="/" className="hover:text-tech-blue">Home</Link>
-            <span>/</span>
+          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-1.5 font-medium">
+            <Link href="/" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">Home</Link>
+            <span className="text-slate-300 dark:text-slate-600">/</span>
             <span className="text-slate-900 dark:text-slate-200 font-bold">Catalog</span>
-            {currentCategory && (
+            {categoryObj && (
               <>
-                <span>/</span>
-                <span className="text-tech-blue capitalize">
-                  {categories.find(c => c.id === currentCategory)?.name || currentCategory}
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-tech-blue dark:text-cyan-400 font-bold capitalize">
+                  {categoryObj.name}
                 </span>
               </>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Computer Hardware & Components
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+            <span>Computer Hardware & Components</span>
           </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Enterprise procurement platform with real-time stock allocation across UAE logistics hubs.
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-            {total} {total === 1 ? 'Product Found' : 'Products Available'}
+          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center gap-2">
+            <Boxes className="w-4 h-4 text-tech-blue dark:text-cyan-400" />
+            <span>{total} {total === 1 ? 'Product Verified' : 'Products Verified'}</span>
           </span>
         </div>
       </div>
 
       {/* Main Catalog Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        {/* Left Filter Sidebar */}
-        <aside className="space-y-6 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <Filter className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
-              Filter Catalog
-            </h3>
-            {(currentCategory || currentBrand || currentSearch || inStockOnly) && (
-              <Link
-                href="/products"
-                className="text-[11px] text-red-500 hover:underline flex items-center gap-1 font-semibold"
-              >
-                <RotateCcw className="w-3 h-3" /> Reset
-              </Link>
-            )}
-          </div>
-
-          {/* Categories Filter */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Categories</h4>
-            <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-              <Link
-                href={{ pathname: '/products', query: { ...resolvedParams, category: undefined } }}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                  !currentCategory
-                    ? 'bg-tech-blue text-white shadow-sm'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <span>All Categories</span>
-                <span>{total}</span>
-              </Link>
-              {categories.map(cat => (
-                <Link
-                  key={cat.id}
-                  href={{ pathname: '/products', query: { ...resolvedParams, category: cat.id } }}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                    currentCategory === cat.id
-                      ? 'bg-tech-blue text-white shadow-sm'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <span>{cat.name}</span>
-                  <span className="text-[11px] opacity-75">{cat.productCount}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Brands Filter */}
-          <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Manufacturer Brands</h4>
-            <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-              <Link
-                href={{ pathname: '/products', query: { ...resolvedParams, brand: undefined } }}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                  !currentBrand
-                    ? 'bg-tech-blue text-white shadow-sm'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <span>All Brands</span>
-              </Link>
-              {brands.map(brand => (
-                <Link
-                  key={brand.id}
-                  href={{ pathname: '/products', query: { ...resolvedParams, brand: brand.id } }}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                    currentBrand === brand.id
-                      ? 'bg-tech-blue text-white shadow-sm'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <span>{brand.name}</span>
-                  <span className="text-[11px] opacity-75">{brand.productCount}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Stock Filter Toggle */}
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Link
-              href={{
-                pathname: '/products',
-                query: { ...resolvedParams, inStock: inStockOnly ? undefined : 'true' },
-              }}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                inStockOnly
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
-                  : 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-tech-blue'
-              }`}
-            >
-              <span>In-Stock Hardware Only</span>
-              <span>{inStockOnly ? '✓' : ''}</span>
-            </Link>
-          </div>
-        </aside>
+        {/* Left Filter Matrix */}
+        <div className="lg:col-span-1">
+          <AdvancedCatalogFilter
+            categories={categories}
+            brands={brands}
+            totalResults={total}
+          />
+        </div>
 
         {/* Right Product Grid Area */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Sorting and Active Search Indicator */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="text-xs text-slate-500 dark:text-slate-400">
+        <div className="lg:col-span-3 space-y-5">
+          {/* Active Filter Chips Bar */}
+          {activePills.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5 mr-1">
+                <Filter className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400" />
+                Active:
+              </span>
+              {activePills.map((pill, idx) => (
+                <Link
+                  key={idx}
+                  href={{ pathname: '/products', query: pill.removeQuery }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 dark:bg-slate-800 dark:hover:bg-red-950/40 dark:text-slate-300 dark:hover:text-red-400 border border-slate-200/80 dark:border-slate-700 transition-colors group"
+                >
+                  <span>{pill.label}</span>
+                  <X className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+                </Link>
+              ))}
+
+              <Link
+                href="/products"
+                className="text-[11px] font-bold text-red-500 hover:text-red-600 dark:text-red-400 ml-auto flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Clear All</span>
+              </Link>
+            </div>
+          )}
+
+          {/* Sorting and Results Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-900/90 p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               {currentSearch ? (
                 <span>Search results for &ldquo;<strong className="text-slate-900 dark:text-white">{currentSearch}</strong>&rdquo;</span>
               ) : (
-                <span>Showing official & verified partner listings</span>
+                <span>Displaying <strong className="text-slate-900 dark:text-white">{products.length}</strong> of <strong className="text-slate-900 dark:text-white">{total}</strong> enterprise listings</span>
               )}
             </div>
 
@@ -248,19 +263,19 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 space-y-4 shadow-sm">
-              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-950 flex items-center justify-center text-slate-400 mx-auto border border-slate-200 dark:border-slate-800">
+            <div className="text-center py-20 bg-white dark:bg-slate-900/90 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-8 space-y-4 shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-950 flex items-center justify-center text-slate-400 mx-auto border border-slate-200 dark:border-slate-800">
                 <Search className="w-8 h-8" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">No Matching Products Found</h3>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">No Matching Hardware Components Found</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                Try loosening your filters, checking for spelling errors, or browsing our full category directory.
+                No SKUs matched your current filter criteria. Try clearing some filters or widening your budget range.
               </p>
               <Link
                 href="/products"
-                className="inline-block px-4 py-2 bg-tech-blue text-white rounded-xl text-xs font-bold hover:bg-blue-600 transition-colors shadow-sm"
+                className="inline-block px-5 py-2.5 bg-tech-blue text-white rounded-xl text-xs font-bold hover:bg-blue-600 transition-colors shadow-md shadow-tech-blue/20"
               >
-                Clear All Filters
+                Reset All Filters
               </Link>
             </div>
           )}

@@ -17,6 +17,10 @@ export interface ProductFilterQuery {
   maxPrice?: number;
   inStock?: boolean;
   isFeatured?: boolean;
+  sellerType?: SellerType;
+  minRating?: number;
+  onSale?: boolean;
+  location?: string;
   resellerId?: string;
   approvalStatus?: ProductApprovalStatus;
   sortBy?: 'price_asc' | 'price_desc' | 'newest' | 'rating' | 'name_asc';
@@ -59,9 +63,9 @@ export class ProductService {
     if (filter.categoryId) {
       allProducts = allProducts.filter(p => p.categoryId === filter.categoryId);
     } else if (filter.categorySlug) {
-      const cat = await categoryRepository.findBySlug(filter.categorySlug);
-      if (cat) {
-        allProducts = allProducts.filter(p => p.categoryId === cat.id);
+      const c = await categoryRepository.findBySlug(filter.categorySlug);
+      if (c) {
+        allProducts = allProducts.filter(p => p.categoryId === c.id);
       }
     }
 
@@ -104,6 +108,29 @@ export class ProductService {
     // Featured only
     if (filter.isFeatured) {
       allProducts = allProducts.filter(p => p.isFeatured);
+    }
+
+    // Seller type (OEM Direct vs Verified Reseller)
+    if (filter.sellerType) {
+      allProducts = allProducts.filter(p => p.sellerType === filter.sellerType);
+    }
+
+    // Min customer rating
+    if (filter.minRating != null) {
+      allProducts = allProducts.filter(p => (p.rating || 0) >= filter.minRating!);
+    }
+
+    // On-Sale / Deals filter
+    if (filter.onSale) {
+      allProducts = allProducts.filter(p => (p.salePrice && p.salePrice < p.price) || (p.compareAtPrice && p.compareAtPrice > p.price));
+    }
+
+    // Logistics Hub / UAE Warehouse filter
+    if (filter.location) {
+      const locLower = filter.location.toLowerCase();
+      allProducts = allProducts.filter(p =>
+        p.locations?.some(l => (l.city?.toLowerCase().includes(locLower) || l.locationName?.toLowerCase().includes(locLower)) && l.quantity > 0)
+      );
     }
 
     // Custom specification matching

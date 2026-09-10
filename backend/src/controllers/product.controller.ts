@@ -18,6 +18,10 @@ export class ProductController {
       maxPrice,
       inStock,
       isFeatured,
+      sellerType,
+      minRating,
+      onSale,
+      location,
       sort,
       page,
       limit,
@@ -25,7 +29,7 @@ export class ProductController {
     } = req.query;
 
     // Collect and sanitize custom specs safely via Map to prevent prototype pollution / remote property injection
-    const FORBIDDEN_PROPERTIES = new Set(['__proto__', 'constructor', 'prototype', 'resellerId', 'status']);
+    const FORBIDDEN_PROPERTIES = new Set(['__proto__', 'constructor', 'prototype', 'resellerId', 'status', 'sellerType', 'minRating', 'onSale', 'location']);
     const SPEC_KEY_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
 
     const specMap = new Map<string, string>();
@@ -40,7 +44,6 @@ export class ProductController {
     }
     const specifications: Record<string, string> = Object.fromEntries(specMap);
 
-
     const result = await productService.getProducts({
       categoryId: category as string,
       categorySlug: categorySlug as string,
@@ -51,6 +54,10 @@ export class ProductController {
       maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
       inStock: inStock === 'true',
       isFeatured: isFeatured === 'true',
+      sellerType: sellerType as any,
+      minRating: minRating ? parseFloat(minRating as string) : undefined,
+      onSale: onSale === 'true',
+      location: location as string,
       sortBy: sort as any,
       page: page ? parseInt(page as string, 10) : 1,
       limit: limit ? parseInt(limit as string, 10) : 20,
