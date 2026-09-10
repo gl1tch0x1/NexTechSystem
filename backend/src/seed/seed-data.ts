@@ -105,8 +105,8 @@ export const SEED_PRODUCTS: Product[] = [
     stock: 45,
     reservedStock: 2,
     lowStockThreshold: 5,
-    images: ['https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80'],
-    thumbnail: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
+    images: ['/images/intel_i9_14900k.jpg', 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80'],
+    thumbnail: '/images/intel_i9_14900k.jpg',
     specifications: {
       processor: 'Intel Core i9-14900K',
       socket: 'LGA1700',

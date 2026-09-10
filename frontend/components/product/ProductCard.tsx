@@ -40,6 +40,13 @@ export function ProductCard({ product }: { product: Product }) {
   // Extract key technical spec highlights
   const specEntries = Object.entries(product.specifications || {}).slice(0, 3);
 
+  // Check if product is Intel i9 14900k to ensure authentic Intel hardware render
+  const isIntelI9 = (product.slug?.includes('14900k') || product.name?.toLowerCase().includes('14900k'));
+  const rawImage = product.thumbnail || product.images?.[0] || '';
+  const displayImage = isIntelI9 && (!rawImage || rawImage.includes('photo-1591799264318'))
+    ? '/images/intel_i9_14900k.jpg'
+    : (rawImage || '/images/intel_i9_14900k.jpg');
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isOutOfStock) return;
@@ -49,14 +56,14 @@ export function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-slate-900/90 rounded-3xl border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/60 dark:hover:border-tech-cyan/50 hover:shadow-2xl dark:hover:shadow-tech-glow/20 transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-slate-900/95 rounded-3xl border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/80 dark:hover:border-cyan-400/80 hover:shadow-2xl dark:hover:shadow-[0_12px_36px_rgba(0,212,255,0.12)] transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1.5">
       {/* Visual Accent Glow on Hover */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-tech-blue/10 dark:bg-tech-cyan/10 rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-52 h-52 bg-gradient-to-br from-tech-blue/15 to-cyan-400/10 dark:from-cyan-400/15 dark:to-blue-600/10 rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity duration-500 pointer-events-none" />
 
       {/* Top Image Stage Container */}
-      <div className="relative aspect-[4/3] bg-gradient-to-b from-slate-50 via-slate-100/60 to-slate-50 dark:from-[#0B0F19] dark:via-[#0E1527] dark:to-[#070B14] p-5 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
+      <div className="relative aspect-[4/3] bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 dark:from-[#0B0F19] dark:via-[#0E1527] dark:to-[#070B14] p-5 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         {/* Ambient Spotlight */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-tech-blue/5 dark:from-tech-blue/15 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-tech-blue/8 dark:from-cyan-400/15 via-transparent to-transparent pointer-events-none" />
 
         {/* Top Badges (Left) */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
@@ -84,7 +91,7 @@ export function ProductCard({ product }: { product: Product }) {
           className={`absolute top-3 right-3 z-10 p-2.5 rounded-xl backdrop-blur-md transition-all ${
             inWishlist
               ? 'bg-red-500/20 text-red-500 border border-red-500/40 shadow-sm scale-110'
-              : 'bg-white/80 dark:bg-slate-900/80 text-slate-400 hover:text-red-500 hover:scale-110 border border-slate-200 dark:border-slate-700 shadow-sm'
+              : 'bg-white/90 dark:bg-slate-900/80 text-slate-400 hover:text-red-500 hover:scale-110 border border-slate-200 dark:border-slate-700 shadow-sm'
           }`}
           title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
@@ -94,7 +101,7 @@ export function ProductCard({ product }: { product: Product }) {
         {/* Product Image */}
         <Link href={`/products/${product.slug}`} className="w-full h-full flex items-center justify-center relative z-0">
           <img
-            src={product.thumbnail || product.images?.[0] || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&q=80'}
+            src={displayImage}
             alt={product.name}
             className="max-h-full max-w-full object-contain filter drop-shadow-md group-hover:scale-108 transition-transform duration-500"
           />
@@ -102,11 +109,11 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Details Container */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-white dark:bg-slate-900/90">
-        <div className="space-y-2">
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-white dark:bg-slate-900/95">
+        <div className="space-y-2.5">
           {/* Brand & Seller Attribution */}
           <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-            <span className="font-mono font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider">
+            <span className="font-mono font-bold text-tech-blue dark:text-cyan-400 uppercase tracking-wider">
               {product.brandName}
             </span>
             {product.sellerType === 'RESELLER' ? (
@@ -125,19 +132,20 @@ export function ProductCard({ product }: { product: Product }) {
           {/* Product Name */}
           <Link
             href={`/products/${product.slug}`}
-            className="text-sm font-black text-slate-900 dark:text-white line-clamp-2 hover:text-tech-blue dark:hover:text-tech-cyan transition-colors leading-snug"
+            className="text-sm font-black text-slate-900 dark:text-white line-clamp-2 hover:text-tech-blue dark:hover:text-cyan-400 transition-colors leading-snug"
           >
             {product.name}
           </Link>
 
           {/* Technical Specs Tags (Ant Design Spec Chips) */}
           {specEntries.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
               {specEntries.map(([key, val]) => (
                 <span
                   key={key}
-                  className="text-[10px] font-mono bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-slate-800"
+                  className="text-[10px] font-mono font-medium bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-slate-800"
                 >
+                  <span className="text-slate-400 uppercase text-[9px] mr-1">{key.slice(0, 5)}:</span>
                   {val}
                 </span>
               ))}
@@ -161,12 +169,14 @@ export function ProductCard({ product }: { product: Product }) {
                 Out of Stock
               </span>
             ) : isLowStock ? (
-              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 font-mono bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 font-mono bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-2 py-0.5 rounded flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                 Only {product.stock} Left
               </span>
             ) : (
               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 px-2 py-0.5 rounded">
-                <CheckCircle2 className="w-3 h-3" /> In Stock ({product.stock})
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                In Stock ({product.stock})
               </span>
             )}
           </div>
@@ -178,9 +188,13 @@ export function ProductCard({ product }: { product: Product }) {
             <div className="text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight">
               {formatPrice(price)}
             </div>
-            {originalPrice && originalPrice > price && (
+            {originalPrice && originalPrice > price ? (
               <div className="text-xs text-slate-400 line-through font-mono">
                 {formatPrice(originalPrice)}
+              </div>
+            ) : (
+              <div className="text-[10px] text-slate-400 font-sans">
+                Inc. 5% UAE VAT
               </div>
             )}
           </div>

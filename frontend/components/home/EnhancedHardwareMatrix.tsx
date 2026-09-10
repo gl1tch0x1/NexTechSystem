@@ -88,23 +88,41 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
   return (
     <section className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-slate-200/90 dark:border-slate-800">
         <div>
-          <div className="text-xs font-mono uppercase font-bold tracking-wider text-tech-blue dark:text-tech-cyan flex items-center gap-1.5 mb-1">
-            <Boxes className="w-4 h-4" />
-            <span>Verified Stock Matrix</span>
+          <div className="text-xs font-mono uppercase font-bold tracking-wider text-tech-blue dark:text-cyan-400 flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1.5 bg-tech-blue/10 dark:bg-cyan-500/10 text-tech-blue dark:text-cyan-400 px-2.5 py-1 rounded-full border border-tech-blue/20 dark:border-cyan-500/20">
+              <Boxes className="w-3.5 h-3.5" />
+              Verified Stock Matrix
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 text-[11px] font-sans font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              GCC Logistics Online
+            </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Enterprise Hardware & Component Catalog
           </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xl mt-1 leading-relaxed">
+            Engineered for mission-critical datacenter, high-performance computing (HPC), and workstation architectures with verified local UAE pool availability.
+          </p>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md">
-          Filtered by certified OEM supply chain, real-time GCC warehouse inventory, and spec compatibility.
-        </p>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="text-right">
+            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Catalog Pool</div>
+            <div className="text-sm font-black text-slate-900 dark:text-white font-mono">{products.length} Active SKUs</div>
+          </div>
+          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
+          <div className="text-right">
+            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">GCC Pool</div>
+            <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">100% In-Region</div>
+          </div>
+        </div>
       </div>
 
       {/* Control Bar: Ant Design Segmented Tabs + Search + Sort */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 p-2 sm:p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800/90 shadow-lg shadow-slate-200/30 dark:shadow-2xl">
         {/* Tab Controls */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-1 max-w-full">
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -113,8 +131,8 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
               onClick={() => setActiveTab(id)}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 activeTab === id
-                  ? 'bg-tech-blue text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800'
+                  ? 'bg-tech-blue text-white shadow-md shadow-tech-blue/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <Icon className={`w-3.5 h-3.5 ${activeTab === id ? 'text-white' : 'text-slate-400'}`} />
@@ -133,7 +151,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
               placeholder="Search components..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 w-full sm:w-52 text-xs rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue dark:focus:border-tech-cyan"
+              className="pl-8 pr-3 py-1.5 w-full sm:w-52 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue dark:focus:border-cyan-400 transition-colors"
             />
           </div>
 
@@ -141,7 +159,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="py-1.5 px-3 text-xs rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none font-medium cursor-pointer w-full sm:w-auto"
+            className="py-1.5 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none font-medium cursor-pointer w-full sm:w-auto transition-colors"
           >
             <option value="FEATURED">Featured First</option>
             <option value="PRICE_ASC">Price: Low to High</option>

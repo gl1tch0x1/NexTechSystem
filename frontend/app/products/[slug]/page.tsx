@@ -41,16 +41,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
       {/* Breadcrumb */}
-      <div className="text-xs text-slate-400 flex items-center gap-1.5">
-        <Link href="/" className="hover:text-tech-blue">Home</Link>
-        <span>/</span>
-        <Link href="/products" className="hover:text-tech-blue">Products</Link>
-        <span>/</span>
-        <Link href={`/products?category=${product.categoryId}`} className="hover:text-tech-blue">
+      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium">
+        <Link href="/" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">Home</Link>
+        <span className="text-slate-300 dark:text-slate-600">/</span>
+        <Link href="/products" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">Products</Link>
+        <span className="text-slate-300 dark:text-slate-600">/</span>
+        <Link href={`/products?category=${product.categoryId}`} className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">
           {product.categoryName}
         </Link>
-        <span>/</span>
-        <span className="text-slate-700 dark:text-slate-200 font-bold truncate max-w-xs">{product.name}</span>
+        <span className="text-slate-300 dark:text-slate-600">/</span>
+        <span className="text-slate-900 dark:text-slate-100 font-bold truncate max-w-xs">{product.name}</span>
       </div>
 
       {/* Main Product Hero Grid */}
@@ -58,25 +58,26 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
       {/* Multi-Warehouse Inventory & Regional Logistics Availability */}
       {product.locations && product.locations.length > 0 && (
-        <section className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-4">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-5 transition-all">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-cyan-400">
+              <div className="w-10 h-10 rounded-2xl bg-tech-blue/10 dark:bg-cyan-500/10 flex items-center justify-center text-tech-blue dark:text-cyan-400">
                 <Boxes className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                   <span>Warehouse Real-Time Inventory</span>
-                  <span className="text-[10px] uppercase tracking-wider bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Live Stock
                   </span>
                 </h3>
-                <p className="text-xs text-slate-400">Physical stock allocated across UAE logistics centers for immediate dispatch or collection</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Physical stock allocated across UAE logistics centers for immediate dispatch or collection</p>
               </div>
             </div>
             <div className="text-right hidden sm:block">
               <div className="text-xs text-slate-400 font-medium">Total Regional Pool</div>
-              <div className="text-sm font-black text-emerald-400">{product.stock} Units</div>
+              <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">{product.stock} Units</div>
             </div>
           </div>
 
@@ -84,22 +85,22 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             {product.locations.map(loc => (
               <div
                 key={loc.locationId}
-                className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3 group hover:border-slate-700 transition-colors"
+                className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between gap-3 group hover:border-tech-blue/40 dark:hover:border-cyan-500/40 hover:shadow-md transition-all"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-300 group-hover:text-cyan-400 transition-colors shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 group-hover:text-tech-blue dark:group-hover:text-cyan-400 transition-colors shrink-0 mt-0.5">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white leading-tight">{loc.locationName}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">{loc.city}, UAE</div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">{loc.locationName}</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{loc.city}, UAE</div>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className={`text-xs font-black ${loc.quantity > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                  <div className={`text-xs font-black ${loc.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400 font-mono' : 'text-slate-400'}`}>
                     {loc.quantity > 0 ? `${loc.quantity} in stock` : 'Awaiting Stock'}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono">Instant Dispatch</div>
+                  <div className="text-[10px] text-slate-400 font-mono">Instant Dispatch</div>
                 </div>
               </div>
             ))}
@@ -108,41 +109,41 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       )}
 
       {/* Technical Specifications Matrix */}
-      <section className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-6">
-        <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
-          <div className="w-9 h-9 rounded-xl bg-tech-blue/10 flex items-center justify-center text-tech-cyan">
+      <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-6 transition-all">
+        <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+          <div className="w-10 h-10 rounded-2xl bg-tech-blue/10 dark:bg-cyan-500/10 flex items-center justify-center text-tech-blue dark:text-cyan-400">
             <Cpu className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-black text-white">Technical Specifications Matrix</h3>
-            <p className="text-xs text-slate-400">Verified hardware parameters for system integration & compatibility</p>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white">Technical Specifications Matrix</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Verified hardware parameters for system integration & compatibility</p>
           </div>
         </div>
 
         {specEntries.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {specEntries.map(([key, value]) => (
               <div
                 key={key}
-                className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs"
+                className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 text-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
               >
-                <span className="font-bold text-slate-400 uppercase tracking-wider">{key.replace(/([A-Z])/g, ' $1')}</span>
-                <span className="font-mono font-semibold text-white text-right">{value}</span>
+                <span className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px]">{key.replace(/([A-Z])/g, ' $1')}</span>
+                <span className="font-mono font-semibold text-slate-900 dark:text-white text-right">{value}</span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-slate-400">Standard specifications apply as per manufacturer datasheets.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Standard specifications apply as per manufacturer datasheets.</p>
         )}
 
         {/* Features List */}
         {product.features && product.features.length > 0 && (
-          <div className="pt-4 border-t border-slate-800 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Architectural Features</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Architectural Features</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-300">
               {product.features.map((feat, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                   <span>{feat}</span>
                 </div>
               ))}
@@ -152,18 +153,18 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       </section>
 
       {/* Customer Reviews Section */}
-      <section className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-6 transition-all">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80">
           <div>
-            <h3 className="text-lg font-black text-white">Customer Ratings & Verified Feedback</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white">Customer Ratings & Verified Feedback</h3>
             <div className="flex items-center gap-2 mt-1">
               <div className="flex items-center text-amber-400">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < Math.round(product.rating) ? 'fill-current' : 'text-slate-600'}`} />
+                  <Star key={i} className={`w-4 h-4 ${i < Math.round(product.rating) ? 'fill-current' : 'text-slate-300 dark:text-slate-600'}`} />
                 ))}
               </div>
-              <span className="text-sm font-bold text-white">{product.rating.toFixed(1)} out of 5</span>
-              <span className="text-xs text-slate-400">({product.reviewCount} Reviews)</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{product.rating.toFixed(1)} out of 5</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">({product.reviewCount} Reviews)</span>
             </div>
           </div>
         </div>
@@ -171,12 +172,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         {reviews.length > 0 ? (
           <div className="space-y-4">
             {reviews.map(rev => (
-              <div key={rev.id} className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <div key={rev.id} className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white">{rev.userName}</span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">{rev.userName}</span>
                     {rev.isVerifiedPurchase && (
-                      <span className="text-[10px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/50 px-1.5 py-0.5 rounded font-bold">
+                      <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
                         Verified Purchase
                       </span>
                     )}
@@ -187,13 +188,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                     ))}
                   </div>
                 </div>
-                <div className="text-xs font-bold text-slate-200">{rev.title}</div>
-                <p className="text-xs text-slate-400 leading-relaxed">{rev.comment}</p>
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-200">{rev.title}</div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{rev.comment}</p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-6 text-slate-400 text-xs">
+          <div className="text-center py-6 text-slate-500 dark:text-slate-400 text-xs">
             Be the first verified customer to review the {product.name}.
           </div>
         )}
