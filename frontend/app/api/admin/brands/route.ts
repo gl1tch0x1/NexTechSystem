@@ -35,3 +35,33 @@ export async function GET(request: Request) {
     meta: { total: 0 },
   });
 }
+
+export async function POST(request: Request) {
+  const backendUrl =
+    process.env.API_PROXY_TARGET ||
+    process.env.BACKEND_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:5000';
+
+  try {
+    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
+    const body = await request.json();
+    const authHeader = request.headers.get('authorization');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (authHeader) headers['Authorization'] = authHeader;
+
+    const res = await fetch(`${clean}/api/admin/brands`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    const json = await res.json();
+    return NextResponse.json(json, { status: res.status });
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, error: { message: err.message || 'Failed to create brand' } },
+      { status: 500 }
+    );
+  }
+}

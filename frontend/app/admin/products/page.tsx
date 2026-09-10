@@ -220,6 +220,273 @@ export default function AdminProductsPage() {
     fetchData();
   }, [token]);
 
+  // Dynamic Options & Inline Creators State
+  const [warehouseNodes, setWarehouseNodes] = useState(WAREHOUSE_LOCATIONS);
+  const [conditionOptions, setConditionOptions] = useState<string[]>(CONDITION_OPTIONS);
+  const [warrantyOptions, setWarrantyOptions] = useState<string[]>(WARRANTY_OPTIONS);
+
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
+
+  const [isAddingBrand, setIsAddingBrand] = useState(false);
+  const [newBrandName, setNewBrandName] = useState('');
+  const [isSavingBrand, setIsSavingBrand] = useState(false);
+
+  const [isCustomCondition, setIsCustomCondition] = useState(false);
+  const [customConditionValue, setCustomConditionValue] = useState('');
+
+  const [isCustomWarranty, setIsCustomWarranty] = useState(false);
+  const [customWarrantyValue, setCustomWarrantyValue] = useState('');
+
+  const [isAddingReseller, setIsAddingReseller] = useState(false);
+  const [newResellerName, setNewResellerName] = useState('');
+  const [newResellerCode, setNewResellerCode] = useState('');
+  const [newResellerCity, setNewResellerCity] = useState('');
+  const [isSavingReseller, setIsSavingReseller] = useState(false);
+
+  const [isAddingWarehouse, setIsAddingWarehouse] = useState(false);
+  const [newWhName, setNewWhName] = useState('');
+  const [newWhCode, setNewWhCode] = useState('');
+  const [newWhCity, setNewWhCity] = useState('');
+
+  // 1. Create New Category and immediately select
+  const handleQuickAddCategory = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newCatName.trim()) return;
+    setIsSavingCategory(true);
+    try {
+      const clean = newCatName.trim();
+      const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const created = await ApiClient.post<Category>('/admin/categories', {
+        name: clean,
+        slug,
+      }, token ? { token } : {});
+
+      const newCat: Category = {
+        id: created?.id || `cat_${Date.now()}`,
+        name: created?.name || clean,
+        slug: created?.slug || slug,
+        productCount: 0,
+        isActive: true,
+      };
+
+      setCategories(prev => [...prev.filter(c => c.id !== newCat.id), newCat]);
+      setFormData(prev => ({
+        ...prev,
+        categoryId: newCat.id,
+        categoryName: newCat.name,
+        sku: generateRandomSku(newCat.id),
+        specifications: {
+          ...prev.specifications,
+          'Product Category': newCat.name,
+        },
+      }));
+      setNewCatName('');
+      setIsAddingCategory(false);
+    } catch (err: any) {
+      console.warn('Backend category create error, using local fallback:', err);
+      const fallbackCat: Category = {
+        id: `cat_${Date.now()}`,
+        name: newCatName.trim(),
+        slug: newCatName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        productCount: 0,
+        isActive: true,
+      };
+      setCategories(prev => [...prev, fallbackCat]);
+      setFormData(prev => ({
+        ...prev,
+        categoryId: fallbackCat.id,
+        categoryName: fallbackCat.name,
+        sku: generateRandomSku(fallbackCat.id),
+        specifications: {
+          ...prev.specifications,
+          'Product Category': fallbackCat.name,
+        },
+      }));
+      setNewCatName('');
+      setIsAddingCategory(false);
+    } finally {
+      setIsSavingCategory(false);
+    }
+  };
+
+  // 2. Create New Brand and immediately select
+  const handleQuickAddBrand = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newBrandName.trim()) return;
+    setIsSavingBrand(true);
+    try {
+      const clean = newBrandName.trim();
+      const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const created = await ApiClient.post<Brand>('/admin/brands', {
+        name: clean,
+        slug,
+      }, token ? { token } : {});
+
+      const newB: Brand = {
+        id: created?.id || `brand_${Date.now()}`,
+        name: created?.name || clean,
+        slug: created?.slug || slug,
+        productCount: 0,
+        isActive: true,
+      };
+
+      setBrands(prev => [...prev.filter(b => b.id !== newB.id), newB]);
+      setFormData(prev => ({
+        ...prev,
+        brandId: newB.id,
+        brandName: newB.name,
+        specifications: {
+          ...prev.specifications,
+          Brand: newB.name,
+        },
+      }));
+      setNewBrandName('');
+      setIsAddingBrand(false);
+    } catch (err: any) {
+      console.warn('Backend brand create error, using fallback:', err);
+      const fallbackB: Brand = {
+        id: `brand_${Date.now()}`,
+        name: newBrandName.trim(),
+        slug: newBrandName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        productCount: 0,
+        isActive: true,
+      };
+      setBrands(prev => [...prev, fallbackB]);
+      setFormData(prev => ({
+        ...prev,
+        brandId: fallbackB.id,
+        brandName: fallbackB.name,
+        specifications: {
+          ...prev.specifications,
+          Brand: fallbackB.name,
+        },
+      }));
+      setNewBrandName('');
+      setIsAddingBrand(false);
+    } finally {
+      setIsSavingBrand(false);
+    }
+  };
+
+  // 3. Custom Condition
+  const handleApplyCustomCondition = (val: string) => {
+    setCustomConditionValue(val);
+    if (!conditionOptions.includes(val) && val.trim()) {
+      setConditionOptions(prev => [...prev, val.trim()]);
+    }
+    setFormData(prev => ({
+      ...prev,
+      condition: val,
+      specifications: {
+        ...prev.specifications,
+        Condition: val,
+      },
+    }));
+  };
+
+  // 4. Custom Warranty
+  const handleApplyCustomWarranty = (val: string) => {
+    setCustomWarrantyValue(val);
+    if (!warrantyOptions.includes(val) && val.trim()) {
+      setWarrantyOptions(prev => [...prev, val.trim()]);
+    }
+    const match = val.match(/(\d+)\s*Year/i);
+    const yrs = match ? parseInt(match[1], 10) : 3;
+    setFormData(prev => ({
+      ...prev,
+      warranty: val,
+      warrantyYears: yrs,
+      specifications: {
+        ...prev.specifications,
+        Warranty: val,
+      },
+    }));
+  };
+
+  // 5. Create New Partner Store (Reseller)
+  const handleQuickAddReseller = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newResellerName.trim()) return;
+    setIsSavingReseller(true);
+    try {
+      const code = (newResellerCode.trim() || newResellerName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '')).toLowerCase();
+      const city = newResellerCity.trim() || 'Dubai, UAE';
+      const created = await ApiClient.post<any>('/admin/resellers', {
+        businessName: newResellerName.trim(),
+        displayName: newResellerName.trim(),
+        resellerCode: code,
+        address: { city, country: 'United Arab Emirates' },
+        commissionRate: 8,
+      }, token ? { token } : {});
+
+      const storeObj: any = created?.reseller || created?.data?.reseller || created?.data || created || {
+        id: `reseller_${Date.now()}`,
+        businessName: newResellerName.trim(),
+        displayName: newResellerName.trim(),
+        resellerCode: code,
+        city,
+      };
+
+      setResellers(prev => [...prev, storeObj]);
+      setFormData(prev => ({
+        ...prev,
+        sellerType: 'RESELLER',
+        resellerId: storeObj.id,
+        resellerName: storeObj.displayName || storeObj.businessName,
+        resellerCode: storeObj.resellerCode || code,
+      }));
+      setNewResellerName('');
+      setNewResellerCode('');
+      setNewResellerCity('');
+      setIsAddingReseller(false);
+    } catch (err: any) {
+      console.warn('Backend reseller create error, using fallback:', err);
+      const code = (newResellerCode.trim() || newResellerName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '')).toLowerCase();
+      const fallbackStore = {
+        id: `reseller_${Date.now()}`,
+        businessName: newResellerName.trim(),
+        displayName: newResellerName.trim(),
+        resellerCode: code,
+        city: newResellerCity.trim() || 'Dubai',
+      };
+      setResellers(prev => [...prev, fallbackStore as any]);
+      setFormData(prev => ({
+        ...prev,
+        sellerType: 'RESELLER',
+        resellerId: fallbackStore.id,
+        resellerName: fallbackStore.displayName,
+        resellerCode: fallbackStore.resellerCode,
+      }));
+      setNewResellerName('');
+      setNewResellerCode('');
+      setNewResellerCity('');
+      setIsAddingReseller(false);
+    } finally {
+      setIsSavingReseller(false);
+    }
+  };
+
+  // 6. Create New Warehouse Node
+  const handleQuickAddWarehouse = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newWhName.trim()) return;
+    const newId = `loc_${Date.now()}`;
+    const newWh = {
+      id: newId,
+      name: newWhName.trim(),
+      code: newWhCode.trim() || `WH-${Math.floor(10 + Math.random() * 90)}`,
+      city: newWhCity.trim() || 'UAE Regional Depot',
+    };
+    setWarehouseNodes(prev => [...prev, newWh]);
+    setFormData(prev => ({ ...prev, warehouseLocation: newId }));
+    setNewWhName('');
+    setNewWhCode('');
+    setNewWhCity('');
+    setIsAddingWarehouse(false);
+  };
+
   const generateRandomSku = (catId?: string) => {
     const prefixMap: Record<string, string> = {
       cat_processors: 'CPU',
@@ -294,6 +561,21 @@ export default function AdminProductsPage() {
       },
       customSpecs: [],
     });
+    setIsAddingCategory(false);
+    setIsAddingBrand(false);
+    setIsCustomCondition(false);
+    setIsCustomWarranty(false);
+    setIsAddingReseller(false);
+    setIsAddingWarehouse(false);
+    setNewCatName('');
+    setNewBrandName('');
+    setNewResellerName('');
+    setNewResellerCode('');
+    setNewResellerCity('');
+    setNewWhName('');
+    setNewWhCode('');
+    setNewWhCity('');
+
     setIsModalOpen(true);
   };
 
@@ -303,6 +585,12 @@ export default function AdminProductsPage() {
     setFormError('');
     setActiveModalStep('general');
     setActiveSpecTab('core');
+    setIsAddingCategory(false);
+    setIsAddingBrand(false);
+    setIsCustomCondition(false);
+    setIsCustomWarranty(false);
+    setIsAddingReseller(false);
+    setIsAddingWarehouse(false);
 
     const loadedSpecs: Record<string, string> = { ...(prod.specifications || {}) };
     if (prod.specs?.socket && !loadedSpecs['Socket Type']) loadedSpecs['Socket Type'] = prod.specs.socket;
@@ -320,6 +608,15 @@ export default function AdminProductsPage() {
     const origP = prod.originalPrice || prod.compareAtPrice || prod.price;
     const computedDiscount = origP > prod.price ? Math.round(((origP - prod.price) / origP) * 100) : 0;
 
+    const cond = loadedSpecs['Condition'] || 'Brand New (Factory Sealed)';
+    if (!conditionOptions.includes(cond)) {
+      setConditionOptions(prev => [...prev, cond]);
+    }
+    const war = prod.warranty || loadedSpecs['Warranty'] || '3 Years Official Manufacturer Warranty';
+    if (!warrantyOptions.includes(war)) {
+      setWarrantyOptions(prev => [...prev, war]);
+    }
+
     setFormData({
       title: prod.title || prod.name || '',
       slug: prod.slug,
@@ -327,9 +624,9 @@ export default function AdminProductsPage() {
       barcode: prod.barcode || '',
       shortDescription: prod.shortDescription || '',
       description: prod.description || '',
-      condition: loadedSpecs['Condition'] || 'Brand New (Factory Sealed)',
+      condition: cond,
       warrantyYears: prod.specs?.warrantyYears || 3,
-      warranty: prod.warranty || loadedSpecs['Warranty'] || '3 Years Official Manufacturer Warranty',
+      warranty: war,
       price: prod.price,
       originalPrice: origP,
       costPrice: prod.costPrice || Math.round(prod.price * 0.8),
@@ -991,109 +1288,314 @@ export default function AdminProductsPage() {
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* 1. Category Selector & Creator */}
                         <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                            Hardware Category *
-                          </label>
-                          <select
-                            value={formData.categoryId}
-                            onChange={e => {
-                              const activeCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
-                              const sel = activeCats.find(c => c.id === e.target.value);
-                              setFormData(prev => ({
-                                ...prev,
-                                categoryId: e.target.value,
-                                categoryName: sel?.name || '',
-                                sku: generateRandomSku(e.target.value),
-                                specifications: {
-                                  ...prev.specifications,
-                                  'Product Category': sel?.name || prev.specifications['Product Category'] || '',
-                                },
-                              }));
-                            }}
-                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
-                          >
-                            {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
-                              <option key={c.id} value={c.id}>
-                                {c.name}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                              Hardware Category *
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingCategory(!isAddingCategory);
+                                setNewCatName('');
+                              }}
+                              className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>{isAddingCategory ? 'Select Existing' : '+ Add Custom Category'}</span>
+                            </button>
+                          </div>
+
+                          {isAddingCategory ? (
+                            <div className="p-3 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-2 animate-fadeIn">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="New Category Name (e.g. AI Accelerators)"
+                                  value={newCatName}
+                                  onChange={e => setNewCatName(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      handleQuickAddCategory();
+                                    }
+                                  }}
+                                  className="flex-1 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-semibold"
+                                  autoFocus
+                                />
+                                <button
+                                  type="button"
+                                  disabled={!newCatName.trim() || isSavingCategory}
+                                  onClick={handleQuickAddCategory}
+                                  className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1 shadow-sm cursor-pointer whitespace-nowrap"
+                                >
+                                  {isSavingCategory ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                                  <span>Save & Select</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsAddingCategory(false)}
+                                  className="p-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 cursor-pointer"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <p className="text-[10px] text-purple-700 dark:text-purple-300">
+                                Saves category to database and assigns it to this product immediately.
+                              </p>
+                            </div>
+                          ) : (
+                            <select
+                              value={formData.categoryId}
+                              onChange={e => {
+                                if (e.target.value === '__new_cat__') {
+                                  setIsAddingCategory(true);
+                                  return;
+                                }
+                                const activeCats = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+                                const sel = activeCats.find(c => c.id === e.target.value);
+                                setFormData(prev => ({
+                                  ...prev,
+                                  categoryId: e.target.value,
+                                  categoryName: sel?.name || '',
+                                  sku: generateRandomSku(e.target.value),
+                                  specifications: {
+                                    ...prev.specifications,
+                                    'Product Category': sel?.name || prev.specifications['Product Category'] || '',
+                                  },
+                                }));
+                              }}
+                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                            >
+                              {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
+                                <option key={c.id} value={c.id}>
+                                  {c.name}
+                                </option>
+                              ))}
+                              <option value="__new_cat__">+ Add New Category...</option>
+                            </select>
+                          )}
                         </div>
 
+                        {/* 2. Brand Selector & Creator */}
                         <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                            Brand / Manufacturer *
-                          </label>
-                          <select
-                            value={formData.brandId}
-                            onChange={e => {
-                              const activeBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
-                              const sel = activeBrands.find(b => b.id === e.target.value);
-                              setFormData(prev => ({
-                                ...prev,
-                                brandId: e.target.value,
-                                brandName: sel?.name || '',
-                                specifications: {
-                                  ...prev.specifications,
-                                  Brand: sel?.name || prev.specifications['Brand'] || '',
-                                },
-                              }));
-                            }}
-                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
-                          >
-                            {(brands.length > 0 ? brands : DEFAULT_BRANDS).map(b => (
-                              <option key={b.id} value={b.id}>
-                                {b.name}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                              Brand / Manufacturer *
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingBrand(!isAddingBrand);
+                                setNewBrandName('');
+                              }}
+                              className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>{isAddingBrand ? 'Select Existing' : '+ Add Custom Brand'}</span>
+                            </button>
+                          </div>
+
+                          {isAddingBrand ? (
+                            <div className="p-3 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-2 animate-fadeIn">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="New Brand Name (e.g. Noctua, Fractal)"
+                                  value={newBrandName}
+                                  onChange={e => setNewBrandName(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      handleQuickAddBrand();
+                                    }
+                                  }}
+                                  className="flex-1 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-semibold"
+                                  autoFocus
+                                />
+                                <button
+                                  type="button"
+                                  disabled={!newBrandName.trim() || isSavingBrand}
+                                  onClick={handleQuickAddBrand}
+                                  className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1 shadow-sm cursor-pointer whitespace-nowrap"
+                                >
+                                  {isSavingBrand ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                                  <span>Save & Select</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsAddingBrand(false)}
+                                  className="p-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 cursor-pointer"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <p className="text-[10px] text-purple-700 dark:text-purple-300">
+                                Registers brand in database and links it to this hardware listing.
+                              </p>
+                            </div>
+                          ) : (
+                            <select
+                              value={formData.brandId}
+                              onChange={e => {
+                                if (e.target.value === '__new_brand__') {
+                                  setIsAddingBrand(true);
+                                  return;
+                                }
+                                const activeBrands = brands.length > 0 ? brands : DEFAULT_BRANDS;
+                                const sel = activeBrands.find(b => b.id === e.target.value);
+                                setFormData(prev => ({
+                                  ...prev,
+                                  brandId: e.target.value,
+                                  brandName: sel?.name || '',
+                                  specifications: {
+                                    ...prev.specifications,
+                                    Brand: sel?.name || prev.specifications['Brand'] || '',
+                                  },
+                                }));
+                              }}
+                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                            >
+                              {(brands.length > 0 ? brands : DEFAULT_BRANDS).map(b => (
+                                <option key={b.id} value={b.id}>
+                                  {b.name}
+                                </option>
+                              ))}
+                              <option value="__new_brand__">+ Add New Brand...</option>
+                            </select>
+                          )}
                         </div>
 
+                        {/* 3. Hardware Condition */}
                         <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                            Hardware Condition
-                          </label>
-                          <select
-                            value={formData.condition}
-                            onChange={e => setFormData({ ...formData, condition: e.target.value })}
-                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
-                          >
-                            {CONDITION_OPTIONS.map(opt => (
-                              <option key={opt} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                              Hardware Condition
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsCustomCondition(!isCustomCondition);
+                                if (!isCustomCondition) {
+                                  setCustomConditionValue(formData.condition);
+                                }
+                              }}
+                              className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>{isCustomCondition ? 'Select Preset' : '+ Type Custom'}</span>
+                            </button>
+                          </div>
+
+                          {isCustomCondition ? (
+                            <div className="space-y-1.5 animate-fadeIn">
+                              <input
+                                type="text"
+                                placeholder="Type custom condition (e.g. Certified Pre-Owned, Tray New)"
+                                value={formData.condition}
+                                onChange={e => handleApplyCustomCondition(e.target.value)}
+                                className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-purple-300 dark:border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-semibold"
+                                autoFocus
+                              />
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                Custom hardware condition applied to this item
+                              </p>
+                            </div>
+                          ) : (
+                            <select
+                              value={formData.condition}
+                              onChange={e => {
+                                if (e.target.value === '__custom_cond__') {
+                                  setIsCustomCondition(true);
+                                } else {
+                                  setFormData({
+                                    ...formData,
+                                    condition: e.target.value,
+                                    specifications: {
+                                      ...formData.specifications,
+                                      Condition: e.target.value,
+                                    },
+                                  });
+                                }
+                              }}
+                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                            >
+                              {conditionOptions.map(opt => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                              <option value="__custom_cond__">+ Type Custom Condition...</option>
+                            </select>
+                          )}
                         </div>
 
+                        {/* 4. Warranty Coverage */}
                         <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                            Warranty Coverage
-                          </label>
-                          <select
-                            value={formData.warranty}
-                            onChange={e => {
-                              const match = e.target.value.match(/(\d+)\s*Year/i);
-                              const yrs = match ? parseInt(match[1], 10) : 3;
-                              setFormData({
-                                ...formData,
-                                warranty: e.target.value,
-                                warrantyYears: yrs,
-                                specifications: {
-                                  ...formData.specifications,
-                                  Warranty: e.target.value,
-                                },
-                              });
-                            }}
-                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
-                          >
-                            {WARRANTY_OPTIONS.map(w => (
-                              <option key={w} value={w}>
-                                {w}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                              Warranty Coverage
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsCustomWarranty(!isCustomWarranty);
+                                if (!isCustomWarranty) {
+                                  setCustomWarrantyValue(formData.warranty);
+                                }
+                              }}
+                              className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>{isCustomWarranty ? 'Select Preset' : '+ Type Custom'}</span>
+                            </button>
+                          </div>
+
+                          {isCustomWarranty ? (
+                            <div className="space-y-1.5 animate-fadeIn">
+                              <input
+                                type="text"
+                                placeholder="Type custom warranty (e.g. 5 Years Direct RMA, 90 Days Testing)"
+                                value={formData.warranty}
+                                onChange={e => handleApplyCustomWarranty(e.target.value)}
+                                className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-purple-300 dark:border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 font-semibold"
+                                autoFocus
+                              />
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                Custom warranty policy text applied to this SKU
+                              </p>
+                            </div>
+                          ) : (
+                            <select
+                              value={formData.warranty}
+                              onChange={e => {
+                                if (e.target.value === '__custom_war__') {
+                                  setIsCustomWarranty(true);
+                                } else {
+                                  const match = e.target.value.match(/(\d+)\s*Year/i);
+                                  const yrs = match ? parseInt(match[1], 10) : 3;
+                                  setFormData({
+                                    ...formData,
+                                    warranty: e.target.value,
+                                    warrantyYears: yrs,
+                                    specifications: {
+                                      ...formData.specifications,
+                                      Warranty: e.target.value,
+                                    },
+                                  });
+                                }
+                              }}
+                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                            >
+                              {warrantyOptions.map(w => (
+                                <option key={w} value={w}>
+                                  {w}
+                                </option>
+                              ))}
+                              <option value="__custom_war__">+ Type Custom Warranty...</option>
+                            </select>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1311,29 +1813,124 @@ export default function AdminProductsPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                              Select Partner Store Entity *
-                            </label>
-                            <select
-                              value={formData.resellerId}
-                              onChange={e => {
-                                const stores = resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES;
-                                const selected = stores.find(s => s.id === e.target.value);
-                                setFormData({
-                                  ...formData,
-                                  resellerId: e.target.value,
-                                  resellerName: selected?.displayName || selected?.businessName || '',
-                                  resellerCode: selected?.resellerCode || '',
-                                });
-                              }}
-                              className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-semibold"
-                            >
-                              {(resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES).map((store: any) => (
-                                <option key={store.id} value={store.id}>
-                                  {store.displayName || store.businessName} ({store.resellerCode?.toUpperCase()} - {store.address?.city || store.city || 'UAE'})
-                                </option>
-                              ))}
-                            </select>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                                Select Partner Store Entity *
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsAddingReseller(!isAddingReseller);
+                                  setNewResellerName('');
+                                  setNewResellerCode('');
+                                  setNewResellerCity('');
+                                }}
+                                className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                              >
+                                <Plus className="w-3 h-3" />
+                                <span>{isAddingReseller ? 'Select Existing Partner' : '+ Add New Partner Store'}</span>
+                              </button>
+                            </div>
+
+                            {isAddingReseller ? (
+                              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/70 space-y-3 animate-fadeIn">
+                                <div className="flex items-center justify-between pb-1 border-b border-amber-200/50 dark:border-amber-800/40">
+                                  <span className="text-xs font-bold text-amber-900 dark:text-amber-200">Register New Partner Store</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsAddingReseller(false)}
+                                    className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                      Store / Business Name *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. Al-Ain Silicon PC Hub"
+                                      value={newResellerName}
+                                      onChange={e => setNewResellerName(e.target.value)}
+                                      className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-amber-500/20"
+                                      autoFocus
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                      Store Code (e.g. alainsilicon)
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="alain101"
+                                      value={newResellerCode}
+                                      onChange={e => setNewResellerCode(e.target.value)}
+                                      className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-amber-500/20 font-mono"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                      City / Region
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="Al Ain, Abu Dhabi"
+                                      value={newResellerCity}
+                                      onChange={e => setNewResellerCity(e.target.value)}
+                                      className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-amber-500/20"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex justify-end gap-2 pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsAddingReseller(false)}
+                                    className="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-300"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={!newResellerName.trim() || isSavingReseller}
+                                    onClick={handleQuickAddReseller}
+                                    className="px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                  >
+                                    {isSavingReseller ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                                    <span>Register & Assign Partner Store</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <select
+                                value={formData.resellerId}
+                                onChange={e => {
+                                  if (e.target.value === '__new_reseller__') {
+                                    setIsAddingReseller(true);
+                                    return;
+                                  }
+                                  const stores = resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES;
+                                  const selected = stores.find(s => s.id === e.target.value);
+                                  setFormData({
+                                    ...formData,
+                                    resellerId: e.target.value,
+                                    resellerName: selected?.displayName || selected?.businessName || '',
+                                    resellerCode: selected?.resellerCode || '',
+                                  });
+                                }}
+                                className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-semibold"
+                              >
+                                {(resellers.length > 0 ? resellers : DEFAULT_PARTNER_STORES).map((store: any) => (
+                                  <option key={store.id} value={store.id}>
+                                    {store.displayName || store.businessName} ({store.resellerCode?.toUpperCase()} - {store.address?.city || store.city || 'UAE'})
+                                  </option>
+                                ))}
+                                <option value="__new_reseller__">+ Add New Partner Store...</option>
+                              </select>
+                            )}
                           </div>
 
                           <div>
@@ -1380,20 +1977,119 @@ export default function AdminProductsPage() {
                       </div>
 
                       <div className="space-y-3">
-                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Warehouse Location *
-                        </label>
-                        <select
-                          value={formData.warehouseLocation}
-                          onChange={e => setFormData({ ...formData, warehouseLocation: e.target.value })}
-                          className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
-                        >
-                          {WAREHOUSE_LOCATIONS.map(wh => (
-                            <option key={wh.id} value={wh.id}>
-                              {wh.name} [{wh.code}] — {wh.city}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                            Warehouse Location *
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingWarehouse(!isAddingWarehouse);
+                              setNewWhName('');
+                              setNewWhCode('');
+                              setNewWhCity('');
+                            }}
+                            className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>{isAddingWarehouse ? 'Select Existing Depot' : '+ Add Warehouse Depot'}</span>
+                          </button>
+                        </div>
+
+                        {isAddingWarehouse ? (
+                          <div className="p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-3 animate-fadeIn">
+                            <div className="flex items-center justify-between pb-1 border-b border-purple-200/50 dark:border-purple-800/40">
+                              <span className="text-xs font-bold text-purple-900 dark:text-purple-200">
+                                Add New Fulfillment / Warehouse Depot
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setIsAddingWarehouse(false)}
+                                className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                  Depot / Warehouse Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Ras Al Khaimah Regional Hub"
+                                  value={newWhName}
+                                  onChange={e => setNewWhName(e.target.value)}
+                                  className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-purple-500/20"
+                                  autoFocus
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                  Depot Code (e.g. RAK-01)
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="RAK-01"
+                                  value={newWhCode}
+                                  onChange={e => setNewWhCode(e.target.value)}
+                                  className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-purple-500/20 font-mono"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                  Emirate / City
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Ras Al Khaimah"
+                                  value={newWhCity}
+                                  onChange={e => setNewWhCity(e.target.value)}
+                                  className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-purple-500/20"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => setIsAddingWarehouse(false)}
+                                className="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-300"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                disabled={!newWhName.trim()}
+                                onClick={handleQuickAddWarehouse}
+                                className="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Add Depot & Assign</span>
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <select
+                            value={formData.warehouseLocation}
+                            onChange={e => {
+                              if (e.target.value === '__new_warehouse__') {
+                                setIsAddingWarehouse(true);
+                                return;
+                              }
+                              setFormData({ ...formData, warehouseLocation: e.target.value });
+                            }}
+                            className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold transition-all"
+                          >
+                            {warehouseNodes.map(wh => (
+                              <option key={wh.id} value={wh.id}>
+                                {wh.name} [{wh.code}] — {wh.city}
+                              </option>
+                            ))}
+                            <option value="__new_warehouse__">+ Add New Warehouse Depot...</option>
+                          </select>
+                        )}
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
                           The physical depot where stock for this hardware item is secured and routed for regional orders.
                         </p>

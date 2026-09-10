@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (authHeader) headers['Authorization'] = authHeader;
 
-      const res = await fetch(`${clean}/api/admin/categories`, {
+      const res = await fetch(`${clean}/api/admin/resellers`, {
         headers,
         signal: AbortSignal.timeout(3500),
       });
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
         }
       }
     } catch (err) {
-      console.warn('Backend admin categories endpoint fetch failed:', err);
+      console.warn('Backend admin resellers endpoint fetch failed:', err);
     }
   }
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (authHeader) headers['Authorization'] = authHeader;
 
-    const res = await fetch(`${clean}/api/admin/categories`, {
+    const res = await fetch(`${clean}/api/admin/resellers`, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     return NextResponse.json(json, { status: res.status });
   } catch (err: any) {
     return NextResponse.json(
-      { success: false, error: { message: err.message || 'Failed to create category' } },
+      { success: false, error: { message: err.message || 'Failed to create reseller' } },
       { status: 500 }
     );
   }
