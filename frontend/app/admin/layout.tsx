@@ -68,7 +68,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       title: 'OVERVIEW & CORE',
       items: [
         { href: '/admin', label: 'Command Center', icon: LayoutDashboard },
-        { href: '/admin/analytics', label: 'Real-Time Analytics', icon: BarChart3 },
+        { href: '/admin/analytics', label: 'Sales & Purchase Analytics', icon: BarChart3 },
+      ],
+    },
+    {
+      title: 'SALES & PROCUREMENT',
+      items: [
+        { href: '/admin/orders', label: 'Customer Sales Orders', icon: ShoppingBag },
+        { href: '/admin/purchase-orders', label: 'Supplier Purchase Orders', icon: Server },
+        { href: '/admin/customers', label: 'Customers & Wallets', icon: Users },
+        { href: '/admin/resellers', label: 'Reseller Network', icon: Store },
       ],
     },
     {
@@ -80,18 +89,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       ],
     },
     {
-      title: 'COMMERCE & PARTNERS',
-      items: [
-        { href: '/admin/orders', label: 'Global Orders', icon: ShoppingBag },
-        { href: '/admin/customers', label: 'Customers & Wallets', icon: Users },
-        { href: '/admin/resellers', label: 'Reseller Network', icon: Store },
-      ],
-    },
-    {
-      title: 'MARKETING & PROMO',
+      title: 'MARKETING & CMS',
       items: [
         { href: '/admin/coupons', label: 'Discount Coupons', icon: Tag },
         { href: '/admin/banners', label: 'Storefront Banners', icon: ImageIcon },
+        { href: '/admin/cms', label: 'Storefront CMS & Content', icon: Sliders },
       ],
     },
   ];

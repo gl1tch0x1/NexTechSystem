@@ -6,6 +6,8 @@ import { resellerRepository } from '../repositories/reseller.repository.js';
 import { couponRepository } from '../repositories/coupon.repository.js';
 import { bannerRepository } from '../repositories/banner.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
+import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
+import { orderRepository } from '../repositories/order.repository.js';
 import {
   heroHighlightRepo,
   enterpriseSolutionRepo,
@@ -28,7 +30,9 @@ import {
   SEED_TESTIMONIALS,
   SEED_BENTO_FEATURES,
   SEED_BUILDER_PRESETS,
-  SEED_STORE_SETTINGS
+  SEED_STORE_SETTINGS,
+  SEED_PURCHASE_ORDERS,
+  SEED_ORDERS
 } from './seed-data.js';
 
 export async function runSeed(clean = false) {
@@ -50,6 +54,8 @@ export async function runSeed(clean = false) {
     dbStore.clearCollection('testimonials');
     dbStore.clearCollection('bento_features');
     dbStore.clearCollection('builder_presets');
+    dbStore.clearCollection('purchase_orders');
+    dbStore.clearCollection('orders');
   }
 
   // 1. Settings
@@ -109,7 +115,13 @@ export async function runSeed(clean = false) {
   for (const p of SEED_BUILDER_PRESETS) {
     await builderPresetRepo.create(p);
   }
-  console.log('[Seed] Seeded all dynamic CMS entities.');
+  for (const po of SEED_PURCHASE_ORDERS) {
+    await purchaseOrderRepository.create(po);
+  }
+  for (const ord of SEED_ORDERS) {
+    await orderRepository.create(ord);
+  }
+  console.log(`[Seed] Seeded ${SEED_PURCHASE_ORDERS.length} Purchase Orders and ${SEED_ORDERS.length} Sales Orders.`);
 
   console.log('[Seed] Database seed completed successfully! 🚀');
 }

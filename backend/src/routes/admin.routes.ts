@@ -35,8 +35,9 @@ router.get('/customers', (req, res, next) => adminController.getCustomers(req, r
 router.put('/customers/:id/toggle-status', (req, res, next) => adminController.toggleCustomerStatus(req, res).catch(next));
 router.post('/customers/:id/wallet-adjust', (req, res, next) => adminController.adjustCustomerWallet(req, res).catch(next));
 
-// 5. Orders
+// 5. Orders (Sales Orders)
 router.get('/orders', (req, res, next) => adminController.getOrders(req, res).catch(next));
+router.post('/orders', (req, res, next) => adminController.createOrder(req, res).catch(next));
 router.put('/orders/:id/status', (req, res, next) => adminController.updateOrderStatus(req, res).catch(next));
 
 // 6. Categories CRUD
@@ -63,9 +64,29 @@ router.post('/banners', (req, res, next) => adminController.createBanner(req, re
 router.put('/banners/:id', (req, res, next) => adminController.updateBanner(req, res).catch(next));
 router.delete('/banners/:id', (req, res, next) => adminController.deleteBanner(req, res).catch(next));
 
-// 10. Settings & Audit
+// 10. Settings, Profile & Audit
+router.get('/profile', (req, res, next) => adminController.getAdminProfile(req, res).catch(next));
 router.get('/settings', (req, res, next) => adminController.getSettings(req, res).catch(next));
 router.put('/settings', (req, res, next) => adminController.updateSettings(req, res).catch(next));
 router.get('/audit-logs', (req, res, next) => adminController.getAuditLogs(req, res).catch(next));
+
+// 11. Database Backup & Disaster Recovery
+router.get('/backup', (req, res, next) => adminController.createBackup(req, res).catch(next));
+router.post('/restore', (req, res, next) => adminController.restoreBackup(req, res).catch(next));
+
+// 12. Purchase Orders & Automated Restock
+router.get('/purchase-orders', (req, res, next) => adminController.getPurchaseOrders(req, res).catch(next));
+router.post('/purchase-orders/generate-low-stock', (req, res, next) => adminController.generateLowStockPO(req, res).catch(next));
+router.put('/purchase-orders/:id/status', (req, res, next) => adminController.updatePOStatus(req, res).catch(next));
+
+// 13. Storefront CMS Layout Arranger
+router.get('/cms/layout', (req, res, next) => adminController.getCmsLayout(req, res).catch(next));
+router.put('/cms/layout', (req, res, next) => adminController.updateCmsLayout(req, res).catch(next));
+
+// 14. Bento Trust Features ("Why Tech Teams Trust NexTech")
+router.get('/cms/features', (req, res, next) => adminController.getBentoFeatures(req, res).catch(next));
+router.post('/cms/features', (req, res, next) => adminController.createBentoFeature(req, res).catch(next));
+router.put('/cms/features/:id', (req, res, next) => adminController.updateBentoFeature(req, res).catch(next));
+router.delete('/cms/features/:id', (req, res, next) => adminController.deleteBentoFeature(req, res).catch(next));
 
 export default router;

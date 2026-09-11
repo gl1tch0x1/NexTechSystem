@@ -11,9 +11,15 @@ import { categoryRepository } from '../repositories/category.repository.js';
 import { brandRepository } from '../repositories/brand.repository.js';
 import { bannerRepository } from '../repositories/banner.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
+import { productRepository } from '../repositories/product.repository.js';
+import { orderRepository } from '../repositories/order.repository.js';
+import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
+import { bentoFeatureRepo } from '../repositories/content.repository.js';
+import { dbStore } from '../config/db-store.js';
 import { auditService } from '../services/audit.service.js';
 import { ENV } from '../config/env.js';
 import { v4 as uuidv4 } from 'uuid';
+import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address } from '../types/index.js';
 
 export class AdminController {
   async getDashboard(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -277,6 +283,95 @@ export class AdminController {
     res.json({ success: true, data: updated });
   }
 
+  async createOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const {
+      customerId,
+      customerName,
+      customerEmail,
+      customerPhone,
+      items,
+      shippingAddress,
+      billingAddress,
+      paymentMethod,
+      paymentStatus,
+      orderStatus,
+      couponCode,
+      notes,
+    } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ success: false, error: { message: 'At least one order item is required.' } });
+      return;
+    }
+
+    // Resolve customer details from database or request payload
+    let userId = customerId || req.user?.id || 'guest_admin_order';
+    let resolvedName = customerName || 'Enterprise Direct Client';
+    let resolvedEmail = customerEmail || 'orders@nextechsystems.com';
+    let resolvedPhone = customerPhone || '+971 4 800 TECH';
+
+    if (customerId) {
+      const customer = await userRepository.findById(customerId);
+      if (customer) {
+        resolvedName = customerName || customer.name;
+        resolvedEmail = customerEmail || customer.email;
+        resolvedPhone = customerPhone || customer.phone || resolvedPhone;
+      }
+    }
+
+    const defaultAddress: Address = {
+      id: 'addr_admin_default',
+      fullName: resolvedName,
+      phone: resolvedPhone,
+      addressLine1: shippingAddress?.addressLine1 || 'Sheikh Zayed Road, Business Bay Tower',
+      city: shippingAddress?.city || 'Dubai',
+      state: shippingAddress?.state || 'Dubai',
+      country: shippingAddress?.country || 'AE',
+      postalCode: shippingAddress?.postalCode || '00000',
+      isDefault: false,
+    };
+
+    const order = await orderService.createOrder({
+      userId,
+      customerName: resolvedName,
+      customerEmail: resolvedEmail,
+      customerPhone: resolvedPhone,
+      items,
+      shippingAddress: shippingAddress || defaultAddress,
+      billingAddress: billingAddress || shippingAddress || defaultAddress,
+      paymentMethod: paymentMethod || 'CREDIT_CARD',
+      couponCode,
+      notes: notes || 'Admin Direct Sales Order',
+    });
+
+    // If admin specified a custom payment or fulfillment status upfront, update it
+    if (paymentStatus && paymentStatus !== order.paymentStatus) {
+      await orderRepository.update(order.id, { paymentStatus });
+      order.paymentStatus = paymentStatus;
+    }
+    if (orderStatus && orderStatus !== order.orderStatus) {
+      await orderService.updateOrderStatus(order.id, orderStatus, 'Admin Direct Status Override', req.user?.id);
+      order.orderStatus = orderStatus;
+    }
+
+    await auditService.log({
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      action: 'ADMIN_SALES_ORDER_CREATED',
+      resource: 'order',
+      resourceId: order.id,
+      details: {
+        orderNumber: order.orderNumber,
+        customerName: resolvedName,
+        total: order.total,
+        itemCount: order.items.length,
+      },
+    });
+
+    res.status(201).json({ success: true, data: order });
+  }
+
   // ==========================================
   // 5. CATEGORIES CRUD
   // ==========================================
@@ -453,6 +548,307 @@ export class AdminController {
   async getAuditLogs(req: AuthenticatedRequest, res: Response): Promise<void> {
     const logs = await auditService.getRecentLogs(150);
     res.json({ success: true, data: logs });
+  }
+
+  async getAdminProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const adminUser = req.user?.id ? await userRepository.findById(req.user.id) : null;
+    res.json({
+      success: true,
+      data: {
+        id: adminUser?.id || req.user?.id || 'admin',
+        email: adminUser?.email || req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+        name: adminUser ? adminUser.name : 'System Administrator',
+        role: adminUser?.role || 'ADMIN',
+      },
+    });
+  }
+
+  // ==========================================
+  // 10. DATABASE BACKUP & DISASTER RECOVERY
+  // ==========================================
+  async createBackup(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const snapshot = dbStore.exportAll();
+    await auditService.log({
+      action: 'CREATE',
+      resource: 'DATABASE_BACKUP',
+      resourceId: snapshot.id,
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: {
+        filename: snapshot.filename,
+        collectionCount: snapshot.collectionCount,
+        totalRecords: snapshot.totalRecords,
+        sizeBytes: snapshot.sizeBytes,
+      },
+    });
+    res.json({ success: true, data: snapshot });
+  }
+
+  async restoreBackup(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const snapshotData = req.body;
+    if (!snapshotData) {
+      res.status(400).json({ success: false, error: { message: 'Snapshot payload is required for restoration.' } });
+      return;
+    }
+    const result = await dbStore.importAll(snapshotData);
+    await auditService.log({
+      action: 'UPDATE',
+      resource: 'DATABASE_RESTORE',
+      resourceId: snapshotData.id || 'snapshot_import',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: {
+        restoredCollections: result.restoredCollections,
+        totalRecords: result.totalRecords,
+      },
+    });
+    res.json({ success: true, message: 'Database restored successfully from snapshot.', data: result });
+  }
+
+  // ==========================================
+  // 11. PURCHASE ORDERS & AUTOMATED RESTOCK
+  // ==========================================
+  async getPurchaseOrders(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const orders = await purchaseOrderRepository.findRecent(100);
+    res.json({ success: true, data: orders });
+  }
+
+  async generateLowStockPO(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const allProducts = await productRepository.find();
+    // Filter products whose current stock is at or below their lowStockThreshold
+    const lowStockItems = allProducts.filter(p => {
+      const threshold = p.lowStockThreshold || 5;
+      return p.stock <= threshold;
+    });
+
+    if (lowStockItems.length === 0) {
+      res.json({
+        success: true,
+        message: 'All inventory levels are optimal. No products currently require restock.',
+        data: null,
+      });
+      return;
+    }
+
+    const items: POLineItem[] = lowStockItems.map(p => {
+      const threshold = p.lowStockThreshold || 5;
+      const suggestedQty = Math.max(15, threshold * 3 - p.stock);
+      const cost = p.costPrice || Math.round(p.price * 0.75);
+      return {
+        productId: p.id,
+        sku: p.sku,
+        title: p.name,
+        categoryName: p.categoryName,
+        brandName: p.brandName,
+        currentStock: p.stock,
+        lowStockThreshold: threshold,
+        suggestedReorderQuantity: suggestedQty,
+        orderedQuantity: suggestedQty,
+        unitCost: cost,
+        totalCost: cost * suggestedQty,
+        supplierName: p.sellerType === 'RESELLER' && p.resellerName ? p.resellerName : `${p.brandName || 'Direct'} Authorized Distributor`,
+      };
+    });
+
+    const totalUnits = items.reduce((sum, item) => sum + item.orderedQuantity, 0);
+    const totalEstimatedCost = items.reduce((sum, item) => sum + item.totalCost, 0);
+    const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newPO: PurchaseOrder = {
+      id: `po_${Date.now()}`,
+      poNumber,
+      status: 'DRAFT',
+      items,
+      totalUnits,
+      totalEstimatedCost,
+      currency: 'AED',
+      targetWarehouse: req.body?.targetWarehouse || 'loc_dxb_main',
+      supplierName: req.body?.supplierName || 'GCC Master Hardware Consortium',
+      notes: req.body?.notes || 'Automated low-stock threshold trigger restock batch.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const created = await purchaseOrderRepository.create(newPO);
+
+    await auditService.log({
+      action: 'CREATE',
+      resource: 'PURCHASE_ORDER',
+      resourceId: created.id,
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: {
+        poNumber: created.poNumber,
+        itemCount: items.length,
+        totalUnits,
+        totalEstimatedCost,
+      },
+    });
+
+    res.json({ success: true, data: created });
+  }
+
+  async updatePOStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const { status, receivedNotes } = req.body;
+
+    const existing = await purchaseOrderRepository.findById(id);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { message: 'Purchase Order not found.' } });
+      return;
+    }
+
+    const updates: Partial<PurchaseOrder> = {
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (status === 'ISSUED' && !existing.issuedAt) {
+      updates.issuedAt = new Date().toISOString();
+    }
+
+    if (status === 'RECEIVED' && !existing.receivedAt) {
+      updates.receivedAt = new Date().toISOString();
+      // Automatically increment product stock for all items in the received PO
+      for (const item of existing.items) {
+        try {
+          const prod = await productRepository.findById(item.productId);
+          if (prod) {
+            const newStock = prod.stock + item.orderedQuantity;
+            await productRepository.update(item.productId, { stock: newStock });
+          }
+        } catch (err) {
+          console.error(`Failed to increment stock for product ${item.productId}:`, err);
+        }
+      }
+    }
+
+    const updated = await purchaseOrderRepository.update(id, updates);
+    res.json({ success: true, data: updated });
+  }
+
+  // ==========================================
+  // 12. STOREFRONT CMS LAYOUT ARRANGER
+  // ==========================================
+  async getCmsLayout(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const settings: any = await settingsRepository.getSettings();
+    const defaultSections: StorefrontSectionConfig[] = [
+      { id: 'hero', title: 'Main Hero & Visual Showcase', description: 'Enterprise hardware computing headline & direct CTAs', isVisible: true, order: 1 },
+      { id: 'voucher_banner', title: 'Landing Promotional Discount Banner', description: 'Interactive discount code & margin deduction promo', isVisible: settings?.isLandingDiscountBannerActive !== false, order: 2 },
+      { id: 'enterprise_bento', title: 'Enterprise Solutions Grid (Bento)', description: 'Workstation deployment, AI clusters, and rack units', isVisible: true, order: 3 },
+      { id: 'catalog_matrix', title: 'Hardware Catalog & Live Filters', description: 'Featured component matrix with multi-attribute filtering', isVisible: true, order: 4 },
+      { id: 'benchmarks', title: 'Hardware Benchmark & Performance Ratings', description: 'Cinebench, compute ratings & benchmark metrics', isVisible: true, order: 5 },
+      { id: 'partner_stores', title: 'Authorized GCC Partner Reseller Network', description: 'ComNet, Al-Falasi, and licensed partner store highlights', isVisible: true, order: 6 },
+      { id: 'testimonials', title: 'Enterprise Client Testimonials', description: 'Verified procurement testimonials from IT leaders', isVisible: true, order: 7 },
+    ];
+
+    const sections = settings?.storefrontSections && Array.isArray(settings.storefrontSections) && settings.storefrontSections.length > 0
+      ? settings.storefrontSections
+      : defaultSections;
+
+    res.json({ success: true, data: sections });
+  }
+
+  async updateCmsLayout(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const sections: StorefrontSectionConfig[] = req.body.sections;
+    if (!Array.isArray(sections)) {
+      res.status(400).json({ success: false, error: { message: 'Sections array is required.' } });
+      return;
+    }
+
+    const updated = await settingsRepository.update('global_settings', {
+      storefrontSections: sections,
+    } as any);
+
+    await auditService.log({
+      action: 'UPDATE',
+      resource: 'STOREFRONT_CMS',
+      resourceId: 'global_settings',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: {
+        totalSections: sections.length,
+        visibleCount: sections.filter(s => s.isVisible).length,
+      },
+    });
+
+    res.json({ success: true, data: updated });
+  }
+
+  // ==========================================
+  // 13. BENTO TRUST FEATURES ("Why Tech Teams Trust NexTech")
+  // ==========================================
+  async getBentoFeatures(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const features = await bentoFeatureRepo.find({ orderBy: { field: 'order', direction: 'asc' } });
+    res.json({ success: true, data: features });
+  }
+
+  async createBentoFeature(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const data = req.body;
+    const newFeature: BentoFeature = {
+      id: data.id || `feat_${Date.now()}`,
+      title: data.title || 'Enterprise Guarantee',
+      subtitle: data.subtitle || 'Verified Standard',
+      description: data.description || '',
+      tag: data.tag || 'PROCUREMENT',
+      iconName: data.iconName || 'shield',
+      gridSpan: Number(data.gridSpan) || 5,
+      statusBadge: data.statusBadge || 'Active',
+      stats: data.stats || [],
+      order: Number(data.order) || 1,
+      isActive: data.isActive !== false,
+    };
+
+    const created = await bentoFeatureRepo.create(newFeature);
+    await auditService.log({
+      action: 'CREATE',
+      resource: 'BENTO_FEATURE',
+      resourceId: created.id,
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: { title: created.title },
+    });
+    res.json({ success: true, data: created });
+  }
+
+  async updateBentoFeature(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const updates = req.body;
+    const updated = await bentoFeatureRepo.update(id, updates);
+    if (!updated) {
+      res.status(404).json({ success: false, error: { message: 'Feature not found.' } });
+      return;
+    }
+    await auditService.log({
+      action: 'UPDATE',
+      resource: 'BENTO_FEATURE',
+      resourceId: id,
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: { title: updated.title },
+    });
+    res.json({ success: true, data: updated });
+  }
+
+  async deleteBentoFeature(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    await bentoFeatureRepo.delete(id);
+    await auditService.log({
+      action: 'DELETE',
+      resource: 'BENTO_FEATURE',
+      resourceId: id,
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: { featureId: id },
+    });
+    res.json({ success: true, message: 'Feature deleted successfully.' });
   }
 }
 

@@ -20,8 +20,25 @@ import {
   Tag,
   Eye,
   Sparkles,
-  Check
+  Check,
+  Plus,
+  Trash2,
+  AlertCircle,
+  Building2,
+  PackageCheck,
+  Loader2,
+  Layers
 } from 'lucide-react';
+
+interface OrderItemDraft {
+  productId: string;
+  productName: string;
+  sku: string;
+  price: number;
+  stock: number;
+  thumbnail?: string;
+  quantity: number;
+}
 
 export default function AdminOrdersPage() {
   const { token } = useAuth();
@@ -35,6 +52,36 @@ export default function AdminOrdersPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [statusNote, setStatusNote] = useState('');
 
+  // Create Sales Order modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [availableProducts, setAvailableProducts] = useState<any[]>([]);
+  const [availableCustomers, setAvailableCustomers] = useState<any[]>([]);
+  const [loadingModalData, setLoadingModalData] = useState(false);
+  const [creatingOrder, setCreatingOrder] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [createSuccess, setCreateSuccess] = useState('');
+
+  // Form Fields
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [addressLine1, setAddressLine1] = useState('Business Bay, Tower 4, Suite 1200');
+  const [city, setCity] = useState('Dubai');
+  const [stateRegion, setStateRegion] = useState('Dubai');
+  const [country, setCountry] = useState('AE');
+  const [postalCode, setPostalCode] = useState('00000');
+
+  // Line items
+  const [orderItems, setOrderItems] = useState<OrderItemDraft[]>([]);
+  const [selectedProductIdToAdd, setSelectedProductIdToAdd] = useState('');
+
+  // Payment & status options
+  const [paymentMethod, setPaymentMethod] = useState<'CREDIT_CARD' | 'BANK_TRANSFER' | 'COD' | 'WALLET'>('CREDIT_CARD');
+  const [paymentStatus, setPaymentStatus] = useState<'PAID' | 'PENDING'>('PAID');
+  const [orderStatus, setOrderStatus] = useState<OrderStatus>('PROCESSING');
+  const [orderNotes, setOrderNotes] = useState('Admin Direct Sales Order');
+
   const fetchOrders = () => {
     if (token) {
       ApiClient.get<Order[]>('/admin/orders', { token })
@@ -47,6 +94,176 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     fetchOrders();
   }, [token]);
+
+  const handleOpenCreateModal = async () => {
+    setIsCreateModalOpen(true);
+    setCreateError('');
+    setCreateSuccess('');
+    setLoadingModalData(true);
+
+    try {
+      const [prodsRes, custsRes] = await Promise.all([
+        ApiClient.get<any>('/products?limit=100'),
+        token ? ApiClient.get<any>('/admin/customers', { token }).catch(() => []) : Promise.resolve([] as any[]),
+      ]);
+
+      const prodsList = Array.isArray(prodsRes) ? prodsRes : (prodsRes?.products || prodsRes?.data || []);
+      const custList = Array.isArray(custsRes) ? custsRes : ((custsRes as any)?.data || []);
+
+      setAvailableProducts(prodsList);
+      setAvailableCustomers(custList);
+
+      if (prodsList.length > 0 && !selectedProductIdToAdd) {
+        setSelectedProductIdToAdd(prodsList[0].id);
+      }
+
+      // Default to first customer if available
+      if (custList.length > 0 && !selectedCustomerId) {
+        const firstCust = custList[0];
+        setSelectedCustomerId(firstCust.id);
+        setCustomerName(firstCust.name || firstCust.fullName || '');
+        setCustomerEmail(firstCust.email || '');
+        setCustomerPhone(firstCust.phone || '+971 4 800 TECH');
+      }
+    } catch (err: any) {
+      console.error('Failed to load modal data:', err);
+    } finally {
+      setLoadingModalData(false);
+    }
+  };
+
+  const handleSelectCustomer = (custId: string) => {
+    setSelectedCustomerId(custId);
+    if (!custId) {
+      setCustomerName('');
+      setCustomerEmail('');
+      setCustomerPhone('');
+      return;
+    }
+    const customer = availableCustomers.find(c => c.id === custId);
+    if (customer) {
+      setCustomerName(customer.name || customer.fullName || '');
+      setCustomerEmail(customer.email || '');
+      setCustomerPhone(customer.phone || '+971 4 800 TECH');
+      if (customer.addresses && customer.addresses.length > 0) {
+        const addr = customer.addresses.find((a: any) => a.isDefaultShipping) || customer.addresses[0];
+        setAddressLine1(addr.addressLine1 || addressLine1);
+        setCity(addr.city || city);
+        setStateRegion(addr.state || stateRegion);
+        setCountry(addr.country || country);
+        setPostalCode(addr.postalCode || postalCode);
+      }
+    }
+  };
+
+  const handleAddProduct = () => {
+    if (!selectedProductIdToAdd) return;
+    const prod = availableProducts.find(p => p.id === selectedProductIdToAdd);
+    if (!prod) return;
+
+    const existingIdx = orderItems.findIndex(i => i.productId === prod.id);
+    if (existingIdx > -1) {
+      const updated = [...orderItems];
+      if (updated[existingIdx].quantity < (prod.stock || 99)) {
+        updated[existingIdx].quantity += 1;
+        setOrderItems(updated);
+      }
+    } else {
+      setOrderItems([
+        ...orderItems,
+        {
+          productId: prod.id,
+          productName: prod.name || prod.title,
+          sku: prod.sku || 'SKU-GEN',
+          price: prod.price || 0,
+          stock: prod.stock || 10,
+          thumbnail: prod.thumbnail || prod.primaryImage || (prod.images && prod.images[0]),
+          quantity: 1,
+        }
+      ]);
+    }
+  };
+
+  const handleUpdateQuantity = (productId: string, qty: number) => {
+    setOrderItems(prev =>
+      prev.map(item => {
+        if (item.productId === productId) {
+          const safeQty = Math.max(1, Math.min(item.stock || 999, qty));
+          return { ...item, quantity: safeQty };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleRemoveItem = (productId: string) => {
+    setOrderItems(prev => prev.filter(i => i.productId !== productId));
+  };
+
+  const itemsSubtotal = orderItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
+  const vatTax = itemsSubtotal * 0.05;
+  const shippingFee = itemsSubtotal > 5000 || itemsSubtotal === 0 ? 0 : 50;
+  const orderGrandTotal = itemsSubtotal + vatTax + shippingFee;
+
+  const handleCreateSalesOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+
+    if (orderItems.length === 0) {
+      setCreateError('Please add at least one hardware product line item to the sales order.');
+      return;
+    }
+    if (!customerName.trim() || !customerEmail.trim()) {
+      setCreateError('Customer name and email are required.');
+      return;
+    }
+
+    setCreatingOrder(true);
+    setCreateError('');
+
+    try {
+      const payload = {
+        customerId: selectedCustomerId || undefined,
+        customerName: customerName.trim(),
+        customerEmail: customerEmail.trim(),
+        customerPhone: customerPhone.trim() || '+971 4 800 TECH',
+        shippingAddress: {
+          id: `addr_${Date.now()}`,
+          fullName: customerName.trim(),
+          phone: customerPhone.trim() || '+971 4 800 TECH',
+          addressLine1,
+          city,
+          state: stateRegion,
+          country,
+          postalCode,
+        },
+        items: orderItems.map(it => ({
+          productId: it.productId,
+          quantity: it.quantity,
+        })),
+        paymentMethod,
+        paymentStatus,
+        orderStatus,
+        notes: orderNotes,
+      };
+
+      const res = await ApiClient.post<any>('/admin/orders', payload, { token });
+      setCreateSuccess(`Sales Order ${res.orderNumber || 'Created'} successfully saved to the database! Inventory decremented.`);
+
+      fetchOrders();
+
+      setTimeout(() => {
+        setIsCreateModalOpen(false);
+        setOrderItems([]);
+        setCreateSuccess('');
+      }, 1200);
+    } catch (err: any) {
+      console.error(err);
+      setCreateError(err.message || 'Failed to create sales order.');
+    } finally {
+      setCreatingOrder(false);
+    }
+  };
 
   const handleUpdateStatus = async (orderId: string, nextStatus: OrderStatus, note?: string) => {
     if (!token) return;
@@ -89,6 +306,16 @@ export default function AdminOrdersPage() {
             Track hardware dispatches, multi-seller item allocations, courier updates, and payment settlements.
           </p>
         </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleOpenCreateModal}
+            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-600/25 transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Sales Order</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search */}
@@ -117,10 +344,11 @@ export default function AdminOrdersPage() {
             <button
               key={tab.id}
               onClick={() => setStatusFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-colors whitespace-nowrap cursor-pointer ${statusFilter === tab.id
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors whitespace-nowrap cursor-pointer ${
+                statusFilter === tab.id
                   ? 'bg-purple-600 text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+              }`}
             >
               {tab.label}
             </button>
@@ -169,7 +397,8 @@ export default function AdminOrdersPage() {
 
                     <td className="py-3.5 px-4">
                       <span
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${order.status === 'DELIVERED'
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                          order.status === 'DELIVERED'
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                             : order.status === 'SHIPPED'
                               ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
@@ -178,7 +407,7 @@ export default function AdminOrdersPage() {
                                 : order.status === 'PENDING'
                                   ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse'
                                   : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
-                          }`}
+                        }`}
                       >
                         {order.status}
                       </span>
@@ -217,6 +446,392 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       </div>
+
+      {/* CREATE SALES ORDER MODAL */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl p-6 space-y-6 shadow-2xl my-8">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div>
+                <div className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase font-bold flex items-center gap-1.5">
+                  <PackageCheck className="w-3.5 h-3.5" />
+                  <span>Admin Direct Dispatch & Procurement</span>
+                </div>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                  Create New Customer Sales Order
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Directly dispatch inventory, issue digital e-bills, and persist transaction records into the database.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsCreateModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Notifications */}
+            {createError && (
+              <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{createError}</span>
+              </div>
+            )}
+            {createSuccess && (
+              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 flex items-center gap-2.5 text-xs text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{createSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateSalesOrder} className="space-y-6 text-xs">
+              {/* SECTION 1: CUSTOMER & CONSIGNEE DETAILS */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-800/60 pb-2">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <span>Customer & Consignee Selection</span>
+                  </div>
+                  {availableCustomers.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-slate-500">Pick Database Client:</span>
+                      <select
+                        value={selectedCustomerId}
+                        onChange={e => handleSelectCustomer(e.target.value)}
+                        className="bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      >
+                        <option value="">-- Manual / Guest Consignee --</option>
+                        {availableCustomers.map(c => (
+                          <option key={c.id} value={c.id}>
+                            {c.name || c.email} ({c.email})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                      Customer Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={customerName}
+                      onChange={e => setCustomerName(e.target.value)}
+                      placeholder="e.g. Tariq Al-Mansoor"
+                      className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={customerEmail}
+                      onChange={e => setCustomerEmail(e.target.value)}
+                      placeholder="e.g. procurement@techcorp.ae"
+                      className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      value={customerPhone}
+                      onChange={e => setCustomerPhone(e.target.value)}
+                      placeholder="+971 4 800 1234"
+                      className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                      Shipping Street Address
+                    </label>
+                    <input
+                      type="text"
+                      value={addressLine1}
+                      onChange={e => setAddressLine1(e.target.value)}
+                      placeholder="Street, Building, Unit Number"
+                      className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                      City & Country
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={e => setCity(e.target.value)}
+                        placeholder="Dubai"
+                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      />
+                      <input
+                        type="text"
+                        value={country}
+                        onChange={e => setCountry(e.target.value)}
+                        placeholder="AE"
+                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 uppercase"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: HARDWARE LINE ITEMS */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-2">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <span>Hardware Line Items ({orderItems.length})</span>
+                  </div>
+
+                  {/* Add Product Selector */}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={selectedProductIdToAdd}
+                      onChange={e => setSelectedProductIdToAdd(e.target.value)}
+                      className="bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 max-w-xs truncate"
+                    >
+                      {availableProducts.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} — {formatPrice(p.price)} (Stock: {p.stock})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleAddProduct}
+                      className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                </div>
+
+                {orderItems.length === 0 ? (
+                  <div className="py-6 text-center text-slate-500 dark:text-slate-400 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                    No hardware products added yet. Select a product from the catalog above to add to this sales order.
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                    {orderItems.map(item => (
+                      <div
+                        key={item.productId}
+                        className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={item.thumbnail || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=100&q=80'}
+                            alt=""
+                            className="w-10 h-10 rounded-lg object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-800"
+                          />
+                          <div className="min-w-0">
+                            <div className="font-bold text-slate-900 dark:text-white truncate">{item.productName}</div>
+                            <div className="text-[10px] text-slate-500 font-mono">
+                              SKU: {item.sku} • In Stock: {item.stock} • Unit: {formatPrice(item.price)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                              className="w-6 h-6 rounded flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              min={1}
+                              max={item.stock || 999}
+                              value={item.quantity}
+                              onChange={e => handleUpdateQuantity(item.productId, parseInt(e.target.value) || 1)}
+                              className="w-10 text-center bg-transparent font-bold text-slate-900 dark:text-white text-xs focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                              className="w-6 h-6 rounded flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <div className="font-mono font-bold text-slate-900 dark:text-white min-w-[80px] text-right">
+                            {formatPrice(item.price * item.quantity)}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(item.productId)}
+                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* SECTION 3: PAYMENT, SETTLEMENT & LOGISTICS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 border-b border-slate-200/60 dark:border-slate-800/60 pb-2">
+                    <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Payment & Fulfillment Parameters</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                        Payment Method
+                      </label>
+                      <select
+                        value={paymentMethod}
+                        onChange={e => setPaymentMethod(e.target.value as any)}
+                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      >
+                        <option value="CREDIT_CARD">Credit Card</option>
+                        <option value="BANK_TRANSFER">Direct Bank Transfer</option>
+                        <option value="WALLET">Enterprise Wallet</option>
+                        <option value="COD">Cash On Delivery</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                        Settlement Status
+                      </label>
+                      <select
+                        value={paymentStatus}
+                        onChange={e => setPaymentStatus(e.target.value as any)}
+                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      >
+                        <option value="PAID">PAID (Verified)</option>
+                        <option value="PENDING">PENDING (Awaiting)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                        Initial Order Status
+                      </label>
+                      <select
+                        value={orderStatus}
+                        onChange={e => setOrderStatus(e.target.value as any)}
+                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      >
+                        <option value="PROCESSING">PROCESSING</option>
+                        <option value="CONFIRMED">CONFIRMED</option>
+                        <option value="SHIPPED">SHIPPED</option>
+                        <option value="DELIVERED">DELIVERED</option>
+                        <option value="PENDING">PENDING</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                        Internal Sales Note
+                      </label>
+                      <input
+                        type="text"
+                        value={orderNotes}
+                        onChange={e => setOrderNotes(e.target.value)}
+                        placeholder="e.g. VIP client procurement"
+                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Financial Summary */}
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2 flex flex-col justify-between">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 border-b border-slate-200/60 dark:border-slate-800/60 pb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <span>Real-time Financial Computation</span>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>Subtotal ({orderItems.reduce((acc, i) => acc + i.quantity, 0)} units):</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">{formatPrice(itemsSubtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>UAE VAT (5%):</span>
+                      <span className="font-mono text-slate-700 dark:text-slate-300">{formatPrice(vatTax)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>Dispatch Shipping:</span>
+                      <span className="font-mono text-slate-700 dark:text-slate-300">
+                        {shippingFee === 0 ? 'FREE (Enterprise Tier)' : formatPrice(shippingFee)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm font-black text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-800">
+                      <span>Grand Total:</span>
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 text-base">
+                        {formatPrice(orderGrandTotal)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={creatingOrder || orderItems.length === 0}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-600/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {creatingOrder ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Persisting Order to Database...</span>
+                    </>
+                  ) : (
+                    <>
+                      <PackageCheck className="w-4 h-4" />
+                      <span>Confirm & Generate Sales Order</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ORDER INSPECTION & STATUS MANAGEMENT MODAL */}
       {selectedOrder && (
@@ -301,10 +916,11 @@ export default function AdminOrdersPage() {
                     key={st}
                     disabled={updatingStatus || selectedOrder.status === st}
                     onClick={() => handleUpdateStatus(selectedOrder.id, st, `Status transitioned to ${st} by Admin`)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${selectedOrder.status === st
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedOrder.status === st
                         ? 'bg-purple-600 text-white shadow-sm'
                         : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
+                    }`}
                   >
                     Mark as {st}
                   </button>

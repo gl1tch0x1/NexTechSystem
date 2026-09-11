@@ -6,6 +6,7 @@ import { AuthProvider } from '@/lib/auth-context';
 import { CartProvider } from '@/lib/cart-context';
 import { CurrencyProvider } from '@/lib/currency-context';
 import { StoreShell } from '@/components/layout/StoreShell';
+import { GlobalCommandPalette } from '@/components/layout/GlobalCommandPalette';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -71,6 +72,7 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <CurrencyProvider>
+                <GlobalCommandPalette />
                 <StoreShell>
                   {children}
                 </StoreShell>

@@ -10,6 +10,7 @@ export interface Address {
   state: string;
   country: string;
   postalCode: string;
+  isDefault?: boolean;
   isDefaultShipping?: boolean;
   isDefaultBilling?: boolean;
 }
@@ -192,16 +193,21 @@ export type PaymentMethod = 'CREDIT_CARD' | 'WALLET' | 'COD' | 'BANK_TRANSFER';
 export interface OrderItem {
   productId: string;
   productName: string;
+  title?: string;
   sku: string;
   slug: string;
   thumbnail: string;
+  image?: string;
   quantity: number;
   unitPrice: number;
+  price?: number;
   discount: number;
   subtotal: number;
   sellerType: SellerType;
   resellerId?: string;
   resellerCode?: string;
+  brandName?: string;
+  categoryName?: string;
   specifications?: Record<string, string>;
 }
 
@@ -442,6 +448,7 @@ export interface StoreSettings {
   featuredLandingCouponCode?: string;
   logoUrl?: string;
   faviconUrl?: string;
+  storefrontSections?: StorefrontSectionConfig[];
   socialLinks?: {
     facebook?: string;
     twitter?: string;
@@ -583,5 +590,68 @@ export interface HomePageContent {
     totalBrands: number;
     authorizedPartnersCount: number;
   };
+}
+
+// Purchase Orders & Restock Types
+export type POStatus = 'DRAFT' | 'ISSUED' | 'RECEIVED' | 'CANCELLED';
+
+export interface POLineItem {
+  productId: string;
+  sku: string;
+  title: string;
+  name?: string;
+  categoryName?: string;
+  brandName?: string;
+  currentStock: number;
+  lowStockThreshold: number;
+  suggestedReorderQuantity: number;
+  orderedQuantity: number;
+  quantity?: number;
+  unitCost: number;
+  totalCost: number;
+  subtotal?: number;
+  supplierName?: string;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string; // e.g. "PO-2026-0901"
+  status: POStatus;
+  items: POLineItem[];
+  totalUnits: number;
+  totalEstimatedCost: number;
+  totalCost?: number;
+  currency: string;
+  targetWarehouse: string; // e.g. "loc_dxb_main"
+  destinationLocation?: string;
+  supplierName: string;
+  notes?: string;
+  issuedAt?: string;
+  receivedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Visual Storefront CMS Section Configuration
+export interface StorefrontSectionConfig {
+  id: string; // e.g. "hero", "voucher_banner", "catalog_matrix", "enterprise_bento", "benchmarks", "testimonials", "partner_stores"
+  title: string;
+  name?: string;
+  subtitle?: string;
+  description?: string;
+  isVisible?: boolean;
+  enabled?: boolean;
+  order: number;
+}
+
+// Database Snapshot & Disaster Recovery
+export interface DbSnapshot {
+  id: string;
+  filename: string;
+  timestamp: string;
+  collectionCount: number;
+  totalRecords: number;
+  sizeBytes: number;
+  collections: Record<string, any[]>;
 }
 

@@ -4,6 +4,8 @@ import { userRepository } from '../repositories/user.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
 import { brandRepository } from '../repositories/brand.repository.js';
+import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
+import { SEED_PURCHASE_ORDERS, SEED_ORDERS } from '../seed/seed-data.js';
 
 export class AnalyticsService {
   async getAdminDashboardMetrics(): Promise<{
@@ -54,13 +56,51 @@ export class AnalyticsService {
     brandPerformance: Array<{ id: string; name: string; revenue: number; productCount: number }>;
     salesChart: Array<{ date: string; revenue: number; orders: number }>;
     recentOrders: Array<{ id: string; orderNumber: string; customerName: string; total: number; itemsCount: number; orderStatus: string; paymentStatus: string; createdAt: string }>;
+    salesSummary: {
+      totalSalesRevenue: number;
+      totalSalesCount: number;
+      totalUnitsSold: number;
+      averageSaleValue: number;
+      completedOrders: number;
+      pendingOrders: number;
+    };
+    purchasesSummary: {
+      totalPurchaseSpend: number;
+      totalPurchaseCount: number;
+      totalUnitsPurchased: number;
+      receivedSpend: number;
+      pendingSpend: number;
+      receivedPOCount: number;
+      pendingPOCount: number;
+      averagePOCost: number;
+    };
+    profitabilitySummary: {
+      grossMargin: number;
+      grossMarginPercentage: number;
+      salesToPurchaseRatio: number;
+    };
+    recentPurchases: Array<{ id: string; poNumber: string; supplierName: string; totalCost: number; totalUnits: number; status: string; createdAt: string }>;
   }> {
-    const orders = await orderRepository.find();
+    let orders = await orderRepository.find();
+    if (orders.length === 0) {
+      for (const ord of SEED_ORDERS) {
+        await orderRepository.create(ord);
+      }
+      orders = await orderRepository.find();
+    }
     const products = await productRepository.find();
     const users = await userRepository.find();
     const resellers = await resellerRepository.find();
     const categories = await categoryRepository.find();
     const brands = await brandRepository.find();
+    let purchaseOrders = await purchaseOrderRepository.find();
+
+    if (purchaseOrders.length === 0) {
+      for (const po of SEED_PURCHASE_ORDERS) {
+        await purchaseOrderRepository.create(po);
+      }
+      purchaseOrders = await purchaseOrderRepository.find();
+    }
 
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
@@ -275,55 +315,130 @@ export class AnalyticsService {
       ? Math.round(((monthRevenue / (totalRevenue - monthRevenue)) * 100) * 10) / 10
       : 0;
 
-    return {
-      revenue: {
-        total: Math.round(totalRevenue * 100) / 100,
-        today: Math.round(todayRevenue * 100) / 100,
-        thisWeek: Math.round(weekRevenue * 100) / 100,
-        thisMonth: Math.round(monthRevenue * 100) / 100,
-        thisYear: Math.round(yearRevenue * 100) / 100,
-        growthPercentage: dynamicGrowth,
-        averageOrderValue: aov,
-      },
-      orders: {
-        total: totalOrders,
-        today: todayOrders,
-        pending: pendingOrders,
-        processing: processingOrders,
-        shipped: shippedOrders,
-        delivered: deliveredOrders,
-        cancelled: cancelledOrders,
-        returned: returnedOrders,
-        refunded: refundedOrders,
-      },
-      customers: {
-        total: users.filter(u => u.role === 'CUSTOMER').length,
-        active: users.filter(u => u.role === 'CUSTOMER' && u.isActive).length,
-        newThisMonth: users.filter(u => u.role === 'CUSTOMER' && new Date(u.createdAt) >= startOfMonth).length,
-      },
-      resellers: {
-        total: resellers.length,
-        active: resellers.filter(r => r.status === 'ACTIVE').length,
-        pending: resellers.filter(r => r.status === 'PENDING_APPROVAL').length,
-        topResellers,
-      },
-      inventory: {
-        totalProducts: products.length,
-        activeProducts: activeProds,
-        draftProducts: draftProds,
-        pendingApproval: pendingApprovalProds,
-        outOfStock: outOfStockProds,
-        lowStock: lowStockProds,
-        totalInventoryValue: Math.round(totalInvValue * 100) / 100,
-        byCategory,
-        lowStockItems,
-      },
-      topProducts,
-      categoryPerformance,
-      brandPerformance,
-      salesChart,
-      recentOrders,
-    };
+    // Calculate Total Purchases Metrics
+    const totalPurchaseSpend = purchaseOrders.reduce((sum, po) => sum + (po.totalEstimatedCost || po.totalCost || 0), 0);
+      let totalUnitsPurchased = 0;
+      let receivedPurchaseSpend = 0;
+      let pendingPurchaseSpend = 0;
+      let draftPOCount = 0;
+      let issuedPOCount = 0;
+      let receivedPOCount = 0;
+
+      for (const po of purchaseOrders) {
+        const cost = po.totalEstimatedCost || po.totalCost || 0;
+        const units = po.totalUnits || po.items.reduce((sum, it) => sum + (it.orderedQuantity || it.quantity || 0), 0);
+        totalUnitsPurchased += units;
+
+        if (po.status === 'RECEIVED') {
+          receivedPOCount++;
+          receivedPurchaseSpend += cost;
+        } else if (po.status === 'ISSUED') {
+          issuedPOCount++;
+          pendingPurchaseSpend += cost;
+        } else if (po.status === 'DRAFT') {
+          draftPOCount++;
+          pendingPurchaseSpend += cost;
+        }
+      }
+
+      let totalUnitsSold = 0;
+      for (const order of orders) {
+        for (const it of order.items) {
+          totalUnitsSold += it.quantity;
+        }
+      }
+
+      const grossMargin = Math.round((totalRevenue - totalPurchaseSpend) * 100) / 100;
+      const grossMarginPercentage = totalRevenue > 0
+        ? Math.round(((totalRevenue - totalPurchaseSpend) / totalRevenue) * 1000) / 10
+        : 0;
+
+      const recentPurchases = purchaseOrders
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 6)
+        .map(po => ({
+          id: po.id,
+          poNumber: po.poNumber,
+          supplierName: po.supplierName,
+          totalCost: po.totalEstimatedCost || po.totalCost || 0,
+          totalUnits: po.totalUnits || po.items.reduce((s, it) => s + (it.orderedQuantity || it.quantity || 0), 0),
+          status: po.status,
+          createdAt: po.createdAt,
+        }));
+
+      return {
+        revenue: {
+          total: Math.round(totalRevenue * 100) / 100,
+          today: Math.round(todayRevenue * 100) / 100,
+          thisWeek: Math.round(weekRevenue * 100) / 100,
+          thisMonth: Math.round(monthRevenue * 100) / 100,
+          thisYear: Math.round(yearRevenue * 100) / 100,
+          growthPercentage: dynamicGrowth,
+          averageOrderValue: aov,
+        },
+        orders: {
+          total: totalOrders,
+          today: todayOrders,
+          pending: pendingOrders,
+          processing: processingOrders,
+          shipped: shippedOrders,
+          delivered: deliveredOrders,
+          cancelled: cancelledOrders,
+          returned: returnedOrders,
+          refunded: refundedOrders,
+        },
+        customers: {
+          total: users.filter(u => u.role === 'CUSTOMER').length,
+          active: users.filter(u => u.role === 'CUSTOMER' && u.isActive).length,
+          newThisMonth: users.filter(u => u.role === 'CUSTOMER' && new Date(u.createdAt) >= startOfMonth).length,
+        },
+        resellers: {
+          total: resellers.length,
+          active: resellers.filter(r => r.status === 'ACTIVE').length,
+          pending: resellers.filter(r => r.status === 'PENDING_APPROVAL').length,
+          topResellers,
+        },
+        inventory: {
+          totalProducts: products.length,
+          activeProducts: activeProds,
+          draftProducts: draftProds,
+          pendingApproval: pendingApprovalProds,
+          outOfStock: outOfStockProds,
+          lowStock: lowStockProds,
+          totalInventoryValue: Math.round(totalInvValue * 100) / 100,
+          byCategory,
+          lowStockItems,
+        },
+        topProducts,
+        categoryPerformance,
+        brandPerformance,
+        salesChart,
+        recentOrders,
+        salesSummary: {
+          totalSalesRevenue: Math.round(totalRevenue * 100) / 100,
+          totalSalesCount: totalOrders,
+          totalUnitsSold,
+          averageSaleValue: aov,
+          completedOrders: deliveredOrders,
+          pendingOrders: pendingOrders + processingOrders,
+        },
+        purchasesSummary: {
+          totalPurchaseSpend: Math.round(totalPurchaseSpend * 100) / 100,
+          totalPurchaseCount: purchaseOrders.length,
+          totalUnitsPurchased,
+          receivedSpend: Math.round(receivedPurchaseSpend * 100) / 100,
+          pendingSpend: Math.round(pendingPurchaseSpend * 100) / 100,
+          receivedPOCount,
+          pendingPOCount: issuedPOCount + draftPOCount,
+          averagePOCost: purchaseOrders.length > 0 ? Math.round(totalPurchaseSpend / purchaseOrders.length) : 0,
+        },
+        profitabilitySummary: {
+          grossMargin,
+          grossMarginPercentage,
+          salesToPurchaseRatio: totalPurchaseSpend > 0 ? Math.round((totalRevenue / totalPurchaseSpend) * 100) / 100 : 1,
+        },
+        recentPurchases,
+      };
   }
 
   async getResellerDashboardMetrics(resellerId: string): Promise<{
@@ -482,7 +597,13 @@ export class AnalyticsService {
   }
 
   async getAdvancedAnalytics(timeRange: string = '30d'): Promise<any> {
-    const orders = await orderRepository.find();
+    let orders = await orderRepository.find();
+    if (orders.length === 0) {
+      for (const ord of SEED_ORDERS) {
+        await orderRepository.create(ord);
+      }
+      orders = await orderRepository.find();
+    }
     const products = await productRepository.find();
     const users = await userRepository.find();
     const resellers = await resellerRepository.find();
@@ -500,9 +621,28 @@ export class AnalyticsService {
 
     const startDate = new Date(now.getTime() - daysToInclude * 24 * 60 * 60 * 1000);
 
+    let purchaseOrders = await purchaseOrderRepository.find();
+    if (purchaseOrders.length === 0) {
+      for (const po of SEED_PURCHASE_ORDERS) {
+        await purchaseOrderRepository.create(po);
+      }
+      purchaseOrders = await purchaseOrderRepository.find();
+    }
+
     // Filter relevant orders
     const filteredOrders = orders.filter(o => new Date(o.createdAt) >= startDate);
     const paidOrders = filteredOrders.filter(o => o.paymentStatus === 'PAID' || o.paymentMethod === 'COD');
+
+    // Filter relevant POs
+    const filteredPOs = purchaseOrders.filter(po => new Date(po.createdAt) >= startDate);
+    const posToAnalyze = filteredPOs.length > 0 ? filteredPOs : purchaseOrders;
+
+    const totalProcurementSpend = posToAnalyze.reduce((s, po) => s + (po.totalEstimatedCost || po.totalCost || 0), 0);
+    const totalProcuredUnits = posToAnalyze.reduce((s, po) => s + (po.totalUnits || po.items.reduce((sum, it) => sum + (it.orderedQuantity || it.quantity || 0), 0)), 0);
+    const receivedPOs = posToAnalyze.filter(po => po.status === 'RECEIVED');
+    const pendingPOs = posToAnalyze.filter(po => po.status === 'ISSUED' || po.status === 'DRAFT');
+    const receivedSpend = receivedPOs.reduce((s, po) => s + (po.totalEstimatedCost || po.totalCost || 0), 0);
+    const pendingSpend = pendingPOs.reduce((s, po) => s + (po.totalEstimatedCost || po.totalCost || 0), 0);
 
     let totalRevenue = 0;
     let totalUnitsSold = 0;
@@ -702,6 +842,8 @@ export class AnalyticsService {
     ];
 
     const avgOrderValue = paidOrders.length > 0 ? Math.round((totalRevenue / paidOrders.length) * 100) / 100 : 0;
+    const grossProfit = Math.round((totalRevenue - totalProcurementSpend) * 100) / 100;
+    const grossMarginPct = totalRevenue > 0 ? Math.round(((totalRevenue - totalProcurementSpend) / totalRevenue) * 1000) / 10 : 0;
 
     return {
       timeRange,
@@ -718,6 +860,34 @@ export class AnalyticsService {
         inStockItems: products.filter(p => p.stock > 0).length,
         lowStockItems: products.filter(p => p.stock > 0 && p.stock <= p.lowStockThreshold).length,
         outOfStockItems: products.filter(p => p.stock === 0).length,
+        // Sales vs Purchases specific metrics
+        totalSalesRevenue: Math.round(totalRevenue * 100) / 100,
+        totalSalesCount: paidOrders.length,
+        totalPurchaseSpend: Math.round(totalProcurementSpend * 100) / 100,
+        totalPurchaseCount: posToAnalyze.length,
+        totalUnitsPurchased: totalProcuredUnits,
+        grossProfit,
+        grossMarginPercentage: grossMarginPct,
+      },
+      salesSummary: {
+        totalSalesRevenue: Math.round(totalRevenue * 100) / 100,
+        totalSalesCount: paidOrders.length,
+        totalUnitsSold,
+        averageOrderValue: avgOrderValue,
+      },
+      purchasesSummary: {
+        totalPurchaseSpend: Math.round(totalProcurementSpend * 100) / 100,
+        totalPurchaseCount: posToAnalyze.length,
+        totalUnitsPurchased: totalProcuredUnits,
+        receivedSpend: Math.round(receivedSpend * 100) / 100,
+        pendingSpend: Math.round(pendingSpend * 100) / 100,
+        receivedPOCount: receivedPOs.length,
+        pendingPOCount: pendingPOs.length,
+      },
+      profitabilitySummary: {
+        grossProfit,
+        grossMarginPercentage: grossMarginPct,
+        salesToPurchaseRatio: totalProcurementSpend > 0 ? Math.round((totalRevenue / totalProcurementSpend) * 100) / 100 : 1,
       },
       revenueTimeline,
       topModels,

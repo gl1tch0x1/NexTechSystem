@@ -505,7 +505,7 @@ export interface StoreSettings {
   isLandingDiscountBannerActive?: boolean;
   featuredLandingCouponCode?: string;
   logoUrl?: string;
-  faviconUrl?: string;
+  storefrontSections?: StorefrontSectionConfig[];
   socialLinks?: {
     facebook?: string;
     twitter?: string;
@@ -546,6 +546,69 @@ export interface HomePageContent {
     totalBrands: number;
     authorizedPartnersCount: number;
   };
+}
+
+// Purchase Orders & Restock Types
+export type POStatus = 'DRAFT' | 'ISSUED' | 'RECEIVED' | 'CANCELLED';
+
+export interface POLineItem {
+  productId: string;
+  sku: string;
+  title: string;
+  name?: string;
+  categoryName?: string;
+  brandName?: string;
+  currentStock: number;
+  lowStockThreshold: number;
+  suggestedReorderQuantity: number;
+  orderedQuantity: number;
+  quantity?: number;
+  unitCost: number;
+  totalCost: number;
+  subtotal?: number;
+  supplierName?: string;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string;
+  status: POStatus;
+  items: POLineItem[];
+  totalUnits: number;
+  totalEstimatedCost: number;
+  totalCost?: number;
+  currency: string;
+  targetWarehouse: string;
+  destinationLocation?: string;
+  supplierName: string;
+  notes?: string;
+  issuedAt?: string;
+  receivedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Visual Storefront CMS Section Configuration
+export interface StorefrontSectionConfig {
+  id: string;
+  title: string;
+  name?: string;
+  subtitle?: string;
+  description?: string;
+  isVisible?: boolean;
+  enabled?: boolean;
+  order: number;
+}
+
+// Database Snapshot & Disaster Recovery
+export interface DbSnapshot {
+  id: string;
+  filename: string;
+  timestamp: string;
+  collectionCount: number;
+  totalRecords: number;
+  sizeBytes: number;
+  collections: Record<string, any[]>;
 }
 
 

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { getFirestore, isFirebaseLive } from './firebase.js';
 import { ENV } from './env.js';
+import { DbSnapshot } from '../types/index.js';
 
 export interface QueryFilter<T = any> {
   where?: Array<{
@@ -277,6 +278,90 @@ export class DbStore {
   public clearCollection(collection: string) {
     this.collections.set(collection, new Map());
     this.persistCollection(collection);
+  }
+
+  public exportAll(): DbSnapshot {
+    this.loadFromDisk();
+    const allCollections: Record<string, any[]> = {};
+    let totalRecords = 0;
+
+    // Discover all JSON files in DATA_DIR to ensure completeness
+    try {
+      if (fs.existsSync(DATA_DIR)) {
+        const files = fs.readdirSync(DATA_DIR);
+        for (const file of files) {
+          if (file.endsWith('.json')) {
+            const colName = file.replace(/\.json$/, '');
+            const items = Array.from(this.getCollectionMap(colName).values());
+            allCollections[colName] = items;
+            totalRecords += items.length;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error reading DATA_DIR during backup export:', err);
+    }
+
+    // Include any in-memory collections
+    for (const [colName, map] of this.collections.entries()) {
+      if (!allCollections[colName]) {
+        const items = Array.from(map.values());
+        allCollections[colName] = items;
+        totalRecords += items.length;
+      }
+    }
+
+    const jsonStr = JSON.stringify(allCollections);
+    const sizeBytes = Buffer.byteLength(jsonStr, 'utf8');
+    const timestamp = new Date().toISOString();
+    const id = `snap_${Date.now()}`;
+
+    return {
+      id,
+      filename: `nextech_db_snapshot_${timestamp.replace(/[:.]/g, '-')}.json`,
+      timestamp,
+      collectionCount: Object.keys(allCollections).length,
+      totalRecords,
+      sizeBytes,
+      collections: allCollections,
+    };
+  }
+
+  public async importAll(snapshotData: any): Promise<{ success: boolean; restoredCollections: string[]; totalRecords: number }> {
+    if (!snapshotData || typeof snapshotData !== 'object') {
+      throw new Error('Invalid snapshot format: Must be a JSON object.');
+    }
+
+    const collectionsObj = snapshotData.collections && typeof snapshotData.collections === 'object'
+      ? snapshotData.collections
+      : snapshotData;
+
+    const restoredCollections: string[] = [];
+    let totalRecords = 0;
+
+    for (const [colName, items] of Object.entries(collectionsObj)) {
+      if (Array.isArray(items)) {
+        const map = new Map<string, any>();
+        for (const item of items) {
+          if (item && item.id) {
+            map.set(item.id, item);
+          } else {
+            const fallbackId = `rec_${Math.random().toString(36).substring(2, 9)}`;
+            map.set(fallbackId, { ...item, id: fallbackId });
+          }
+        }
+        this.collections.set(colName, map);
+        this.persistCollection(colName);
+        restoredCollections.push(colName);
+        totalRecords += map.size;
+      }
+    }
+
+    return {
+      success: true,
+      restoredCollections,
+      totalRecords,
+    };
   }
 }
 

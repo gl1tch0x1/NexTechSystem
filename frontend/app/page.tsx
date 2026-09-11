@@ -61,38 +61,63 @@ async function getHomeData(): Promise<{
 export default async function HomePage() {
   const { products, categories, brands, content } = await getHomeData();
 
+  const sections = content?.storeSettings?.storefrontSections;
+  const isEnabled = (id: string) => {
+    if (!sections || sections.length === 0) return true;
+    const s = sections.find(x => x.id === id);
+    return s ? (s.enabled !== false && s.isVisible !== false) : true;
+  };
+  const getSection = (id: string) => sections?.find(s => s.id === id);
+
   return (
     <div className="space-y-16 pb-20 transition-colors duration-200">
       {/* 1. HERO SHOWCASE WITH DYNAMIC HUD PREVIEW & SPEC RADAR */}
-      <HeroShowcase products={products} highlights={content?.heroHighlights} />
+      {isEnabled('hero') && (
+        <HeroShowcase products={products} highlights={content?.heroHighlights} />
+      )}
 
       {/* 2. TIER-1 OEM MANUFACTURERS MARQUEE */}
-      <BrandMarquee brands={brands} />
+      {isEnabled('brand_partners') && (
+        <BrandMarquee brands={brands} />
+      )}
 
       {/* MAIN CONTAINER FOR STRUCTURED SECTIONS */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         {/* 3. PROMOTIONAL VOUCHER BANNER (1-Click Copy TECH10 / Dynamic Coupon) */}
-        {content?.storeSettings?.isLandingDiscountBannerActive !== false && content?.activeCoupon && (
+        {isEnabled('deals_banner') && content?.storeSettings?.isLandingDiscountBannerActive !== false && content?.activeCoupon && (
           <VoucherClaimBanner activeCoupon={content.activeCoupon} />
         )}
 
         {/* 4. VERIFIED HARDWARE MATRIX SHOWCASE (Ant Design Tabs + Search + Sort) */}
-        <EnhancedHardwareMatrix products={products} />
+        {isEnabled('featured_catalog') && (
+          <EnhancedHardwareMatrix products={products} />
+        )}
 
         {/* 5. ENTERPRISE SOLUTIONS (AI Workstations, Rack Servers, 100GbE Switching) */}
         <EnterpriseSolutions solutions={content?.solutions} />
 
         {/* 6. PC BUILDER INTERACTIVE TEASER WITH POWER & SOCKET VALIDATOR */}
-        <CompatibilityTeaser presets={content?.builderPresets} />
+        {isEnabled('pc_builder_cta') && (
+          <CompatibilityTeaser presets={content?.builderPresets} />
+        )}
 
         {/* 7. HARDWARE TAXONOMY EXPLORER */}
-        <TaxonomyExplorer categories={categories} />
+        {isEnabled('categories_grid') && (
+          <TaxonomyExplorer categories={categories} />
+        )}
 
         {/* 8. LIVE BENCHMARKS & HARDWARE TELEMETRY */}
         <LiveStatsAndBenchmarks benchmarks={content?.benchmarks} />
 
         {/* 9. THE NEXTECH ADVANTAGE (Enterprise Bento Grid) */}
-        <EnterpriseBentoGrid features={content?.features} />
+        {isEnabled('trust_features') && (
+          <EnterpriseBentoGrid
+            features={content?.features}
+            title={getSection('trust_features')?.title}
+            subtitle={getSection('trust_features')?.subtitle}
+            description={getSection('trust_features')?.description}
+          />
+        )}
 
         {/* 10. VERIFIED ENTERPRISE CLIENT TESTIMONIALS */}
         <ClientTestimonials testimonials={content?.testimonials} />

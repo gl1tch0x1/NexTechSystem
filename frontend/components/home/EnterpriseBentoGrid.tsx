@@ -98,9 +98,17 @@ const FALLBACK_FEATURES: BentoFeature[] = [
 
 interface EnterpriseBentoGridProps {
   features?: BentoFeature[];
+  title?: string;
+  subtitle?: string;
+  description?: string;
 }
 
-export function EnterpriseBentoGrid({ features = [] }: EnterpriseBentoGridProps) {
+export function EnterpriseBentoGrid({
+  features = [],
+  title = 'Why Enterprise Tech Teams Trust NexTech',
+  subtitle = 'The NexTech Advantage',
+  description = 'Engineered for mission-critical reliability, transparent procurement, and rapid GCC deployment.'
+}: EnterpriseBentoGridProps) {
   const activeFeatures = (features && features.length > 0) ? features : FALLBACK_FEATURES;
 
   return (
@@ -110,14 +118,14 @@ export function EnterpriseBentoGrid({ features = [] }: EnterpriseBentoGridProps)
         <div>
           <div className="text-xs font-mono uppercase font-bold tracking-wider text-tech-blue dark:text-tech-cyan flex items-center gap-1.5 mb-1">
             <Award className="w-4 h-4" />
-            <span>The NexTech Advantage</span>
+            <span>{subtitle}</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Why Enterprise Tech Teams Trust NexTech
+            {title}
           </h2>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md">
-          Engineered for mission-critical reliability, transparent procurement, and rapid GCC deployment.
+          {description}
         </p>
       </div>
 

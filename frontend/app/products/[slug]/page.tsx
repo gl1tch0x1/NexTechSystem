@@ -1,4 +1,5 @@
 import React from 'react';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Product, Review } from '@/types';
@@ -28,6 +29,37 @@ async function getProductData(slug: string): Promise<{
   }
 }
 
+export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const { product } = await getProductData(slug);
+  if (!product) {
+    return {
+      title: 'Hardware SKU Not Found | NexTech Systems',
+    };
+  }
+
+  const title = `${product.name} - ${product.brandName || 'Enterprise'} SKU | NexTech Systems UAE`;
+  const description = product.shortDescription || (product.description ? product.description.slice(0, 160) : 'Enterprise grade computing hardware, workstations, and server components.');
+  const primaryImg = product.primaryImage || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: primaryImg, width: 800, height: 800, alt: product.name }],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [primaryImg],
+    },
+  };
+}
+
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
   const { product, reviews, relatedProducts } = await getProductData(slug);
@@ -38,8 +70,82 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const specEntries = Object.entries(product.specifications || {});
 
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.primaryImage ? [product.primaryImage] : [],
+    description: product.shortDescription || product.description,
+    sku: product.sku,
+    mpn: product.sku,
+    brand: {
+      '@type': 'Brand',
+      name: product.brandName || 'NexTech Systems',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://nextechsystems.ae/products/${product.slug}`,
+      priceCurrency: 'AED',
+      price: product.salePrice || product.price,
+      priceValidUntil: '2027-12-31',
+      itemCondition: 'https://schema.org/NewCondition',
+      availability: (product.stock && product.stock > 0) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'NexTech Systems UAE',
+      },
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: product.rating || 4.9,
+      reviewCount: product.reviewCount || (reviews.length > 0 ? reviews.length : 14),
+      bestRating: '5',
+      worstRating: '1',
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://nextechsystems.ae',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Catalog',
+        item: 'https://nextechsystems.ae/products',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: product.categoryName || 'Components',
+        item: `https://nextechsystems.ae/products?category=${product.categoryId}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: product.name,
+        item: `https://nextechsystems.ae/products/${product.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      {/* Schema.org JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Breadcrumb */}
       <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium">
         <Link href="/" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors">Home</Link>

@@ -62,16 +62,23 @@ export default function CustomerOrdersPage() {
                   </div>
                 </div>
 
-                <div className="text-right flex items-center gap-4">
-                  <div className="text-base font-black text-white">
+                <div className="text-right flex items-center gap-2.5">
+                  <div className="text-base font-black text-white mr-2">
                     {formatPrice(order.total)}
                   </div>
+                  <Link
+                    href={`/orders/${order.id}/invoice`}
+                    className="px-3.5 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 border border-slate-700 shadow-sm"
+                    title="Official UAE FTA VAT-Compliant Tax Invoice"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Tax Invoice</span>
+                  </Link>
                   <Link
                     href={`/account/orders/${order.id}`}
                     className="px-4 py-2 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow"
                   >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>View & Print E-Bill</span>
+                    <span>Details & E-Bill</span>
                   </Link>
                 </div>
               </div>

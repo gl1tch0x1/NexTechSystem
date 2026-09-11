@@ -23,7 +23,11 @@ NexTech Systems is an enterprise B2B and B2C computer hardware and technology co
   - [High-Level Architectural Topology](#high-level-architectural-topology)
   - [Multi-Tenant Reseller Subdomain Architecture](#multi-tenant-reseller-subdomain-architecture)
   - [Edge Security and Anti-DDoS Architecture](#edge-security-and-anti-ddos-architecture)
+  - [Database Architecture and Dynamic API Fetching Model](#database-architecture-and-dynamic-api-fetching-model)
 - [Core Business Workflows](#core-business-workflows)
+  - [Admin Sales Order Creation and Stock Allocation](#admin-sales-order-creation-and-stock-allocation)
+  - [Supplier Procurement and Purchase Order Lifecycle](#supplier-procurement-and-purchase-order-lifecycle)
+  - [Commercial Intelligence: Sales vs. Purchase Analytics Engine](#commercial-intelligence-sales-vs-purchase-analytics-engine)
   - [PC Builder and Compatibility Matrix Flow](#pc-builder-and-compatibility-matrix-flow)
   - [Server-Side Pricing, Checkout and E-Bill Flow](#server-side-pricing-checkout-and-e-bill-flow)
   - [Excel Catalog Ingestion and Vendor Approval Pipeline](#excel-catalog-ingestion-and-vendor-approval-pipeline)
@@ -36,15 +40,16 @@ NexTech Systems is an enterprise B2B and B2C computer hardware and technology co
   - [Products and Catalog](#products-and-catalog)
   - [Currencies and Exchange Rates](#currencies-and-exchange-rates)
   - [Hardware Specifications](#hardware-specifications)
-  - [Dynamic CMS Content](#dynamic-cms-content)
+  - [Dynamic CMS Content and Bento Trust Grid](#dynamic-cms-content-and-bento-trust-grid)
   - [PC Builder Compatibility](#pc-builder-compatibility)
   - [Cart and Pricing Engine](#cart-and-pricing-engine)
   - [Orders and Electronic E-Bills](#orders-and-electronic-e-bills)
+  - [Supplier Purchase Orders and Procurement](#supplier-purchase-orders-and-procurement)
   - [Customer Wallet Ledger](#customer-wallet-ledger)
   - [VAT 201 Reporting](#vat-201-reporting)
   - [Reseller Vendor Portal](#reseller-vendor-portal)
   - [Cloudflare Security and Anti-Bot](#cloudflare-security-and-anti-bot)
-  - [Admin Command Center and Analytics](#admin-command-center-and-analytics)
+  - [Admin Command Center, Backups, and Analytics](#admin-command-center-backups-and-analytics)
 - [Getting Started and Local Development](#getting-started-and-local-development)
   - [Prerequisites](#prerequisites)
   - [Unified Workspace Commands](#unified-workspace-commands)
@@ -97,6 +102,35 @@ NexTech Systems is an enterprise B2B and B2C computer hardware and technology co
    - Built-in Next.js serverless route handlers for taxonomy resolution (`/api/admin/categories`, `/api/admin/brands`, `/api/products/categories`, `/api/products/brands`).
    - Enterprise taxonomy presets ensuring hardware catalog dropdowns and selection modals remain populated regardless of backend cold starts or deployment environments.
    - Reverse proxy rewrites preventing browser Mixed Content blocking across HTTPS deployments.
+
+9. **Admin Direct Sales Order Creation & Stock Allocation**:
+   - Interactive modal workflow on [`/admin/orders`](http://localhost:3000/admin/orders) allowing administrators to dispatch hardware orders directly for enterprise and corporate clients.
+   - Client consignee selector with database customer auto-fill or custom/guest corporate consignee address entry.
+   - Dynamic hardware line item selector with live stock constraints, instant price calculations, UAE VAT (5%), insured shipping fees, and grand total computation.
+   - Authoritative backend order creation (`POST /api/admin/orders`) that verifies catalog stock, decrements inventory, generates order numbers (`ORD-YYYY-XXXXXX`), and records security audit events.
+
+10. **Supplier Purchase Orders & Wholesale Procurement**:
+    - Dedicated wholesale procurement management portal on [`/admin/purchase-orders`](http://localhost:3000/admin/purchase-orders) to issue, monitor, and receive component shipments from hardware manufacturers (Intel, NVIDIA, Corsair, Samsung, Dell, Asus).
+    - Line item tracking with unit cost price, order quantities, warehouse target allocation, and receiving statuses (`DRAFT`, `ISSUED`, `PARTIALLY_RECEIVED`, `RECEIVED`, `CANCELLED`).
+
+11. **Executive Commercial Intelligence (Customer Sales vs. Supplier Procurement)**:
+    - High-level commercial intelligence deck on [`/admin`](http://localhost:3000/admin) and [`/admin/analytics`](http://localhost:3000/admin/analytics) comparing Outgoing Sales Revenue against Inbound Supplier Procurement Spend.
+    - Real-time Merchandise Gross Margin Spread (%) and Sales-to-Purchase Multiplier Ratio tracking capital recovery.
+    - Side-by-side live feeds streaming the latest customer sales transactions alongside recent supplier purchase orders.
+
+12. **Global Command Palette (`Cmd+K` / `Ctrl+K`)**:
+    - Omnipresent keyboard-accessible command bar (`GlobalCommandPalette.tsx`) providing fast keyboard navigation, real-time product search with SKU thumbnails, category jumping, and administrative shortcuts.
+
+13. **Dynamic Visual CMS & Bento Trust Architecture**:
+    - Interactive homepage section arranger (`/admin/cms`) allowing administrators to reorder homepage layout sections, toggle visibility, and configure promotional banners.
+    - Bento Trust Grid ("Why Tech Teams Trust NexTech") featuring customizable hardware assurance cards, SLA guarantees, and enterprise badges with administrative CRUD endpoints.
+
+14. **Database Snapshot Backups & Recovery**:
+    - Administrative backup suite (`/admin/backups`) for generating and tracking full JSON database snapshots with record counts, metadata, and timestamps.
+
+15. **Dynamic Identity & Database Decoupling**:
+    - Eradication of hardcoded admin email strings; all administrative controllers dynamically resolve identities via `req.user?.email || ENV.ADMIN_DEFAULT_EMAIL` with dedicated `/api/admin/profile` introspection.
+    - Clean architectural separation: [`backend/src/seed/seed-data.ts`](backend/src/seed/seed-data.ts) serves solely as a bootstrap fixture for `npm run seed`, while all frontend views query live data from Node.js Express REST APIs backed by database repositories.
 
 ---
 
@@ -220,9 +254,115 @@ graph LR
     end
 ```
 
+### Database Architecture and Dynamic API Fetching Model
+
+```mermaid
+graph TD
+    subgraph Initialization["1. Bootstrap Phase (Build / Reset)"]
+        SEED_DATA["seed-data.ts (Static Fixture Data)"] --> SEED_RUNNER["seed.ts / Firestore Initializer"]
+        SEED_RUNNER --> DB_STORE[("Database Document Store: orders, products, purchase_orders, users")]
+    end
+
+    subgraph Runtime_Execution["2. Active Runtime Phase (Node.js Express Backend)"]
+        DB_STORE <--> REPOSITORIES["Repositories: OrderRepo, PurchaseOrderRepo, ProductRepo"]
+        REPOSITORIES <--> SERVICES["Services: OrderService, AnalyticsService, PricingService"]
+        SERVICES <--> CONTROLLERS["Controllers: AdminController, PurchaseOrderController, ProductController"]
+        CONTROLLERS <--> REST_API["Node.js Express REST API (/api/*)"]
+    end
+
+    subgraph Presentation_Layer["3. Client Presentation Layer (Next.js 15)"]
+        REST_API <--> API_CLIENT["frontend/lib/api-client.ts"]
+        API_CLIENT <--> FRONTEND_VIEWS["Next.js Pages: /admin/orders, /admin/purchase-orders, /admin/analytics, /products"]
+    end
+```
+
+> [!IMPORTANT]
+> **Architectural Separation of Seed Fixtures vs. Dynamic Database Queries:**
+> - **The Role of `seed-data.ts`**: The file [`backend/src/seed/seed-data.ts`](backend/src/seed/seed-data.ts) contains static database fixture definitions. It is **never imported or executed by the frontend**. It is executed strictly by `npm run seed` or when initial database collections are empty to bootstrap test hardware SKUs, users, and transactions.
+> - **Dynamic REST API Queries**: The Next.js frontend **always fetches live data dynamically from the database using Node.js Express REST APIs** via [`ApiClient`](frontend/lib/api-client.ts). When an administrator creates a sales order or supplier PO, it is committed directly to the database collection, decrements or increments stock, and updates all frontend views in real time.
+
 ---
 
 ## Core Business Workflows
+
+### Admin Sales Order Creation and Stock Allocation
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Platform Administrator
+    participant UI as Admin Orders Page (/admin/orders)
+    participant API as Admin Controller (POST /api/admin/orders)
+    participant OrdSvc as Order Service
+    participant PriceSvc as Pricing Engine
+    participant ProdRepo as Product Repository
+    participant OrdRepo as Order Repository
+    participant Audit as Audit Service
+
+    Admin->>UI: Clicks "+ Create Sales Order" & opens modal
+    UI->>UI: Selects client (e.g. Tariq Al-Mansoor) or inputs consignee
+    UI->>UI: Picks hardware SKU (e.g. Intel Core i9-14900K, Qty: 2)
+    UI->>UI: Computes real-time Subtotal, 5% UAE VAT, Shipping, & Grand Total
+    Admin->>UI: Clicks "Confirm & Generate Sales Order"
+    UI->>API: POST /api/admin/orders { customerName, items, paymentMethod, status }
+    API->>PriceSvc: calculateOrderTotals(items)
+    API->>ProdRepo: Verifies stock and decrements inventory
+    API->>OrdRepo: Persists order record (e.g. ORD-2026-479149)
+    API->>Audit: Records ADMIN_SALES_ORDER_CREATED event
+    API-->>UI: 201 Created { success: true, data: Order }
+    UI-->>Admin: Displays success notification & refreshes verified orders table
+```
+
+### Supplier Procurement and Purchase Order Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Procurement as Procurement Officer / Admin
+    participant UI as PO View (/admin/purchase-orders)
+    participant API as Purchase Order Controller (/api/admin/purchase-orders)
+    participant PORepo as Purchase Order Repository
+    participant ProdRepo as Product Repository
+    participant Analytics as Analytics Service
+
+    Procurement->>UI: Clicks "+ Create Purchase Order"
+    UI->>UI: Selects vendor (Intel, NVIDIA, Corsair, Samsung) & adds items
+    UI->>API: POST /api/admin/purchase-orders { vendor, items, targetWarehouse }
+    API->>PORepo: Saves PO with status "ISSUED" (e.g. PO-2026-INTEL-01)
+    API-->>UI: 201 Created
+    Note over UI,API: Warehouse arrives with physical hardware shipments
+    Procurement->>UI: Advances status to "RECEIVED"
+    UI->>API: PUT /api/admin/purchase-orders/:id { status: "RECEIVED" }
+    API->>ProdRepo: Automatically increments warehouse inventory
+    API->>Analytics: Updates wholesale procurement spend metrics
+    API-->>UI: 200 OK (Stock updated)
+```
+
+### Commercial Intelligence: Sales vs. Purchase Analytics Engine
+
+```mermaid
+graph LR
+    subgraph Data_Sources["Raw Database Transactions"]
+        ORDERS[("orders Collection (Sales Revenue)")]
+        POS[("purchase_orders Collection (Procurement Spend)")]
+    end
+
+    subgraph Calculation_Engine["Analytics Engine (analytics.service.ts)"]
+        ORDERS --> SALES_CALC["Sales Summary: Revenue, Units Sold, AOV, Growth %"]
+        POS --> PURCH_CALC["Purchases Summary: Procurement Spend, Units Inbound, Status Breakdown"]
+        SALES_CALC --> PROFIT_CALC["Profitability Summary:<br/>• Net Gross Spread = Sales Rev - Proc Spend<br/>• Gross Margin % = (Spread / Sales Rev) * 100<br/>• Multiplier = Sales Rev / Proc Spend"]
+        PURCH_CALC --> PROFIT_CALC
+    end
+
+    subgraph Consumer_Endpoints["Administrative Intelligence Feeds"]
+        PROFIT_CALC --> DASHBOARD_API["GET /api/admin/dashboard"]
+        PROFIT_CALC --> ANALYTICS_API["GET /api/admin/analytics?range=30d"]
+        DASHBOARD_API --> DASH_VIEW["Admin Dashboard Intelligence Deck (/admin)"]
+        ANALYTICS_API --> ANALYTICS_VIEW["Commercial P&L Comparison (/admin/analytics)"]
+    end
+```
+
+---
 
 ### PC Builder and Compatibility Matrix Flow
 
@@ -391,11 +531,16 @@ stateDiagram-v2
         
         state AdminRole {
             GlobalOperations: Full Storefront Control
+            SalesOrderDispatch: Direct Customer Order Creation & Dispatch
+            SupplierProcurement: Issue & Receive Supplier POs
+            CommercialIntelligence: Sales vs. Purchase P&L Margin Tracking
             ApproveListings: Moderate Reseller Products
             ManageTenants: Provision Reseller Accounts
             WalletAdjustments: Credit / Debit Ledgers
             AuditInspection: View Security Logs
             VatReporting: View FTA VAT 201 Summaries
+            CMSArranger: Dynamic Section Ordering & Bento Trust Grid
+            BackupRecovery: Instant Database Snapshots
         }
     }
 ```
@@ -404,9 +549,9 @@ stateDiagram-v2
 
 ## Technology Stack
 
-| Layer | Technologies | Description |
+| Domain | Technology / Library | Architectural Role |
 | :--- | :--- | :--- |
-| **Frontend Framework** | Next.js 15.2.0 (App Router), React 19.0.0 | Server and client component architecture with dynamic streaming |
+| **Frontend Framework** | Next.js 15.2.0 (App Router), React 19.0.0 | Server-Side Rendering (SSR), Client Components, Dynamic Routing |
 | **Language** | TypeScript 5.8.2 | End-to-end static type enforcement across frontend and backend |
 | **Styling** | Tailwind CSS 3.4.17, Lucide Icons | Responsive enterprise interface with dark/light persistence |
 | **Backend Framework** | Node.js 18+ LTS, Express 5.2.1 | High-throughput REST API gateway with modular routing |
@@ -425,11 +570,15 @@ eCommerce_Store/
 ├── backend/                         # Express REST API application
 │   ├── data_store/                  # Structured JSON collections
 │   │   ├── audit_logs.json          # System security and administrative trail
+│   │   ├── backups.json             # Database backup snapshot metadata
+│   │   ├── bento_features.json      # Dynamic trust grid cards & guarantees
 │   │   ├── brands.json              # Hardware manufacturer entities
 │   │   ├── categories.json          # Product category definitions
+│   │   ├── cms_sections.json        # Dynamic homepage section arrangement
 │   │   ├── ebills.json              # Electronic tax invoices
 │   │   ├── orders.json              # Customer order records
 │   │   ├── products.json            # Hardware product catalog
+│   │   ├── purchase_orders.json     # Supplier procurement purchase orders
 │   │   ├── resellers.json           # Multi-tenant partner profiles
 │   │   └── users.json               # Customer, reseller, and admin accounts
 │   ├── src/
@@ -438,10 +587,10 @@ eCommerce_Store/
 │   │   ├── controllers/             # HTTP route controller implementations
 │   │   ├── middleware/              # Auth, RBAC, and error handlers
 │   │   ├── middlewares/             # Rate limiters and Cloudflare security
-│   │   ├── repositories/            # Data access repository layer
+│   │   ├── repositories/            # Data access repository layer (Order, PO, Product, etc.)
 │   │   ├── routes/                  # API endpoint route declarations
-│   │   ├── seed/                    # Seed generators and enterprise defaults
-│   │   ├── services/                # Domain business logic engines
+│   │   ├── seed/                    # Database bootstrap fixtures (seed-data.ts, seed.ts)
+│   │   ├── services/                # Domain business logic (Order, Analytics, Pricing, etc.)
 │   │   ├── utils/                   # Cryptographic PIN and helper utilities
 │   │   ├── app.ts                   # Express server entry point
 │   │   └── server.ts                # HTTP listener bootstrap
@@ -452,9 +601,19 @@ eCommerce_Store/
 │   ├── app/
 │   │   ├── account/                 # Customer dashboard, orders, and wallet
 │   │   ├── admin/                   # Admin command center and management
+│   │   │   ├── analytics/           # Sales vs. Purchase commercial intelligence & P&L
+│   │   │   ├── backups/             # Database snapshot backup center
+│   │   │   ├── cms/                 # Visual section arranger & bento editor
+│   │   │   ├── coupons/             # Promotional voucher issuance & banners
+│   │   │   ├── customers/           # Client accounts and wallet controls
+│   │   │   ├── orders/              # Customer orders & Admin Sales Order Creator
+│   │   │   ├── products/            # Hardware SKU catalog and specifications
+│   │   │   ├── purchase-orders/     # Supplier wholesale procurement orders
+│   │   │   ├── resellers/           # Multi-tenant partner management
+│   │   │   ├── settings/            # Platform variables and maintenance modes
+│   │   │   ├── vat/                 # UAE FTA VAT 201 tax audits
+│   │   │   └── page.tsx             # Master Operations Command Dashboard
 │   │   ├── api/                     # Next.js serverless route handlers
-│   │   │   ├── admin/               # Fallback admin category and brand routes
-│   │   │   └── products/            # Fallback public taxonomy routes
 │   │   ├── cart/                    # Interactive cart and price calculation
 │   │   ├── checkout/                # Order placement and checkout workflow
 │   │   ├── compare/                 # Side-by-side hardware comparison
@@ -465,6 +624,10 @@ eCommerce_Store/
 │   │   ├── layout.tsx               # Root application layout
 │   │   └── page.tsx                 # Dynamic storefront homepage
 │   ├── components/                  # Reusable UI component library
+│   │   ├── home/                    # Hero, Bento Grid, Taxonomy, & Solutions
+│   │   ├── layout/                  # Navbar, Footer, & GlobalCommandPalette (Cmd+K)
+│   │   ├── product/                 # ProductCard, Matrix Showcase, & Filters
+│   │   └── ui/                      # Modals, HUD diagnostics, & notifications
 │   ├── lib/                         # State providers, API client, and utilities
 │   │   ├── api-client.ts            # Type-safe API client with auto-fallback
 │   │   ├── auth-context.tsx         # User authentication state provider
@@ -545,10 +708,20 @@ eCommerce_Store/
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/orders` | Customer / Admin | Place new order with inventory deduction and E-Bill creation |
+| `POST` | `/api/orders` | Customer / Admin | Place new customer order with inventory deduction and E-Bill creation |
+| `POST` | `/api/admin/orders` | Admin | Admin direct sales order creation with client consignee & stock deduction |
 | `GET` | `/api/orders/my` | Customer | Retrieve authenticated customer order history |
 | `GET` | `/api/orders/:id` | Authenticated | Retrieve order status and invoice details (Ownership verified) |
 | `GET` | `/api/orders/:orderId/ebill` | Authenticated | Download official electronic tax invoice (Ownership verified) |
+
+### Supplier Purchase Orders and Procurement
+
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/admin/purchase-orders` | Admin | List all wholesale supplier POs with vendor and status filters |
+| `POST` | `/api/admin/purchase-orders` | Admin | Issue new purchase order to component manufacturer (Intel, NVIDIA, etc.) |
+| `PUT` | `/api/admin/purchase-orders/:id` | Admin | Update receiving status (`ISSUED`, `RECEIVED`), auto-incrementing warehouse inventory |
+| `DELETE` | `/api/admin/purchase-orders/:id` | Admin | Cancel or remove supplier procurement record |
 
 ### Customer Wallet Ledger
 
@@ -581,12 +754,13 @@ eCommerce_Store/
 | `GET` | `/api/security/cloudflare-status` | Public | Inspect Cloudflare CDN, WAF, and DDoS telemetry |
 | `POST` | `/api/security/verify-turnstile` | Public | Validate Cloudflare Turnstile challenge token |
 
-### Admin Command Center and Analytics
+### Admin Command Center, Backups, and Analytics
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/dashboard` | Admin | Retrieve core platform metrics and pending action counts |
-| `GET` | `/api/admin/analytics` | Admin | Business intelligence analytics, timeseries, and traffic telemetry |
+| `GET` | `/api/admin/profile` | Admin | Retrieve authenticated administrator profile attributes and roles |
+| `GET` | `/api/admin/dashboard` | Admin | Retrieve core commercial metrics (Sales, Procurement, Margin Spread) |
+| `GET` | `/api/admin/analytics` | Admin | BI timeseries, category distributions, and Sales vs. Purchase ratios |
 | `GET` | `/api/admin/products` | Admin | List all hardware SKUs across admin and reseller catalogs |
 | `POST` | `/api/admin/products` | Admin | Create new hardware SKU directly into active catalog |
 | `PUT` | `/api/admin/products/:id` | Admin | Update product information, pricing, stock, and specs |
@@ -596,6 +770,15 @@ eCommerce_Store/
 | `PUT` | `/api/admin/orders/:id/status` | Admin | Advance order fulfillment status (`PROCESSING`, `SHIPPED`, etc.) |
 | `POST` | `/api/admin/customers/:id/wallet-adjust` | Admin | Execute administrative balance credit or debit adjustment |
 | `GET` | `/api/admin/audit-logs` | Admin | Inspect platform security and operational audit trail |
+| `GET` | `/api/admin/backups` | Admin | List database snapshot archives with size and timestamp metadata |
+| `POST` | `/api/admin/backups` | Admin | Generate instant full database snapshot backup |
+| `DELETE` | `/api/admin/backups/:id` | Admin | Delete backup snapshot archive |
+| `GET` | `/api/admin/cms/sections` | Admin | Retrieve dynamic homepage section layout arrangement |
+| `PUT` | `/api/admin/cms/sections` | Admin | Reorder and update visibility of homepage sections |
+| `GET` | `/api/admin/cms/bento-features` | Admin | Retrieve bento trust grid assurance cards |
+| `POST` | `/api/admin/cms/bento-features` | Admin | Create new bento trust grid card |
+| `PUT` | `/api/admin/cms/bento-features/:id` | Admin | Update bento trust card content or order |
+| `DELETE` | `/api/admin/cms/bento-features/:id` | Admin | Remove bento trust card |
 
 ---
 
