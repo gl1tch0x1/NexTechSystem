@@ -58,6 +58,38 @@ const DEFAULT_PARTNER_STORES = [
   { id: 'reseller_hypertech', businessName: 'HyperTech Middle East', displayName: 'HyperTech Commercial', resellerCode: 'hypertech', city: 'Sharjah', commissionRate: 9 },
 ];
 
+const DEFAULT_FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+
+/**
+ * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
+ * Strictly allows only safe HTTP, HTTPS, or relative asset paths and rejects javascript:, data:text/html, etc.
+ */
+function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE): string {
+  if (typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // Explicitly block dangerous pseudo-protocols
+  if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
+    return fallback;
+  }
+
+  // Strictly validate HTTP, HTTPS, or safe relative paths
+  try {
+    const parsed = new URL(trimmed, 'https://nextech.local');
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return trimmed;
+    }
+  } catch {
+    if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+      return trimmed;
+    }
+  }
+
+  return fallback;
+}
+
 // Logistics and Fulfillment Warehousing Nodes
 const WAREHOUSE_LOCATIONS = [
   { id: 'loc_dxb_main', name: 'Dubai Logistics Hub (JAFZA)', city: 'Dubai', code: 'DXB-01' },
@@ -181,6 +213,8 @@ export default function AdminProductsPage() {
     specifications: {},
     customSpecs: [],
   });
+
+  const [previewImageError, setPreviewImageError] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -575,6 +609,7 @@ export default function AdminProductsPage() {
     setNewWhName('');
     setNewWhCode('');
     setNewWhCity('');
+    setPreviewImageError(false);
 
     setIsModalOpen(true);
   };
@@ -650,6 +685,7 @@ export default function AdminProductsPage() {
       specifications: loadedSpecs,
       customSpecs: customSpecsList,
     });
+    setPreviewImageError(false);
     setIsModalOpen(true);
   };
 
@@ -933,7 +969,7 @@ export default function AdminProductsPage() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <img
-                            src={prod.primaryImage || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=150&q=80'}
+                            src={getSafeImageUrl(prod.primaryImage, 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=150&q=80')}
                             alt={title}
                             className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shrink-0"
                           />
@@ -2122,7 +2158,10 @@ export default function AdminProductsPage() {
                               type="url"
                               placeholder="https://images.unsplash.com/photo-..."
                               value={formData.primaryImage}
-                              onChange={e => setFormData({ ...formData, primaryImage: e.target.value })}
+                              onChange={e => {
+                                setFormData({ ...formData, primaryImage: e.target.value });
+                                setPreviewImageError(false);
+                              }}
                               className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
                             />
                             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -2140,7 +2179,10 @@ export default function AdminProductsPage() {
                                 <button
                                   key={idx}
                                   type="button"
-                                  onClick={() => setFormData({ ...formData, primaryImage: preset.url })}
+                                  onClick={() => {
+                                    setFormData({ ...formData, primaryImage: preset.url });
+                                    setPreviewImageError(false);
+                                  }}
                                   className="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-purple-500 text-left text-xs transition-all cursor-pointer group"
                                 >
                                   <span className="font-bold block text-slate-800 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
@@ -2163,13 +2205,10 @@ export default function AdminProductsPage() {
                           <div className="w-full aspect-square rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden relative flex items-center justify-center shadow-inner group">
                             {formData.primaryImage ? (
                               <img
-                                src={formData.primaryImage}
+                                src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
                                 alt="SKU Preview"
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                onError={(e: any) => {
-                                  e.target.onerror = null;
-                                  e.target.src = 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
-                                }}
+                                onError={() => setPreviewImageError(true)}
                               />
                             ) : (
                               <div className="text-center p-4">
@@ -2381,12 +2420,10 @@ export default function AdminProductsPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-300 dark:border-slate-700">
                     <img
-                      src={formData.primaryImage || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80'}
+                      src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
                       alt=""
                       className="w-full h-full object-cover"
-                      onError={(e: any) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
-                      }}
+                      onError={() => setPreviewImageError(true)}
                     />
                   </div>
                   <div className="text-left">
