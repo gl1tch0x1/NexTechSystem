@@ -54,8 +54,17 @@ export class ContentService {
       brandRepository.count({ where: [{ field: 'isActive', operator: '==', value: true }] })
     ]);
 
-    // Pick the most beneficial active coupon (e.g. TECH10)
-    const featuredCoupon = activeCoupons.find(c => c.code === 'TECH10') || activeCoupons[0];
+    // Check if landing discount banner is enabled in store settings
+    const isBannerEnabled = settings?.isLandingDiscountBannerActive !== false;
+    let featuredCoupon: Coupon | undefined = undefined;
+
+    if (isBannerEnabled && activeCoupons.length > 0) {
+      const preferredCode = settings?.featuredLandingCouponCode;
+      featuredCoupon = (preferredCode ? activeCoupons.find(c => c.code === preferredCode) : null)
+        || activeCoupons.find(c => c.showOnLandingPage)
+        || activeCoupons.find(c => c.code === 'TECH10')
+        || activeCoupons[0];
+    }
 
     return {
       heroHighlights,

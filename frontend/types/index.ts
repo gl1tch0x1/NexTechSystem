@@ -254,14 +254,29 @@ export interface WalletTransaction {
 export interface Coupon {
   id: string;
   code: string;
+  title?: string;
+  description?: string;
+  badgeText?: string;
+  ctaText?: string;
+  ctaLink?: string;
   discountType: 'PERCENTAGE' | 'FIXED';
   discountValue: number;
   minOrderAmount: number;
   maxDiscountAmount?: number;
+  usageLimit?: number;
   usageCount: number;
+  perUserLimit?: number;
+  applicableCategoryIds?: string[];
+  applicableBrandIds?: string[];
+  applicableProductIds?: string[];
+  customerEligibility?: 'ALL' | 'B2B_ONLY' | 'VIP_ONLY';
+  resellerId?: string;
+  showOnLandingPage?: boolean;
   startDate?: string;
   endDate?: string;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Banner {
@@ -487,6 +502,8 @@ export interface StoreSettings {
   taxRegistrationNumber: string;
   announcementText?: string;
   isAnnouncementActive: boolean;
+  isLandingDiscountBannerActive?: boolean;
+  featuredLandingCouponCode?: string;
   logoUrl?: string;
   faviconUrl?: string;
   socialLinks?: {

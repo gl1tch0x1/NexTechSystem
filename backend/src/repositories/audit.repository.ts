@@ -21,7 +21,15 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
 
   async getSettings(): Promise<StoreSettings> {
     const existing = await this.findById('global_settings');
-    if (existing) return existing;
+    if (existing) {
+      if (existing.isLandingDiscountBannerActive === undefined) {
+        existing.isLandingDiscountBannerActive = true;
+      }
+      if (!existing.featuredLandingCouponCode) {
+        existing.featuredLandingCouponCode = 'TECH10';
+      }
+      return existing;
+    }
     const defaultSettings: StoreSettings & { id: string } = {
       id: 'global_settings',
       storeName: 'NexTech Systems Enterprise E-Commerce',
@@ -36,6 +44,8 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
       taxRegistrationNumber: 'TRN-10029384910003',
       announcementText: '🔥 Enterprise Summer Tech Deals — Up to 40% Off on RTX 4090 Workstations & Servers',
       isAnnouncementActive: true,
+      isLandingDiscountBannerActive: true,
+      featuredLandingCouponCode: 'TECH10',
       socialLinks: {
         facebook: 'https://facebook.com',
         twitter: 'https://twitter.com',

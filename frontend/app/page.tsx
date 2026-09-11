@@ -72,7 +72,9 @@ export default async function HomePage() {
       {/* MAIN CONTAINER FOR STRUCTURED SECTIONS */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         {/* 3. PROMOTIONAL VOUCHER BANNER (1-Click Copy TECH10 / Dynamic Coupon) */}
-        <VoucherClaimBanner activeCoupon={content?.activeCoupon} />
+        {content?.storeSettings?.isLandingDiscountBannerActive !== false && content?.activeCoupon && (
+          <VoucherClaimBanner activeCoupon={content.activeCoupon} />
+        )}
 
         {/* 4. VERIFIED HARDWARE MATRIX SHOWCASE (Ant Design Tabs + Search + Sort) */}
         <EnhancedHardwareMatrix products={products} />

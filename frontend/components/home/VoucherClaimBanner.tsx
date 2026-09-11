@@ -12,11 +12,18 @@ interface VoucherClaimBannerProps {
 export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
   const [copied, setCopied] = useState(false);
 
-  const code = activeCoupon?.code || 'TECH10';
-  const discountText = activeCoupon?.discountType === 'PERCENTAGE'
+  if (!activeCoupon) return null;
+
+  const code = activeCoupon.code || 'TECH10';
+  const discountText = activeCoupon.discountType === 'PERCENTAGE'
     ? `${activeCoupon.discountValue}%`
-    : `AED ${activeCoupon?.discountValue || 100}`;
-  const minSpend = activeCoupon?.minOrderAmount ? `AED ${activeCoupon.minOrderAmount}` : 'AED 500';
+    : `AED ${activeCoupon.discountValue}`;
+  const minSpend = activeCoupon.minOrderAmount ? `AED ${activeCoupon.minOrderAmount}` : 'AED 500';
+  const badge = activeCoupon.badgeText || 'GCC Direct Enterprise Promotion';
+  const title = activeCoupon.title || `Save ${discountText} on Enterprise Orders Over ${minSpend}`;
+  const description = activeCoupon.description || 'Apply this verified promotional voucher at checkout or wallet settlement to receive an instant margin deduction on all workstations, processors, and rack servers.';
+  const ctaText = activeCoupon.ctaText || 'Apply to Catalog';
+  const ctaLink = activeCoupon.ctaLink || '/products';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -36,13 +43,13 @@ export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
           <div className="min-w-0">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono font-bold uppercase tracking-wider mb-1">
               <Sparkles className="w-3 h-3" />
-              <span>GCC Direct Enterprise Promotion</span>
+              <span>{badge}</span>
             </div>
             <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Save {discountText} on Enterprise Orders Over {minSpend}
+              {title}
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-xl leading-relaxed">
-              Apply this verified promotional voucher at checkout or wallet settlement to receive an instant margin deduction on all workstations, processors, and rack servers.
+              {description}
             </p>
           </div>
         </div>
@@ -61,10 +68,10 @@ export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
           </button>
 
           <Link
-            href="/products"
+            href={ctaLink}
             className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl text-xs font-extrabold transition-all shadow-md flex items-center justify-center gap-1.5 shrink-0 w-full sm:w-auto text-center"
           >
-            <span>Apply to Catalog</span>
+            <span>{ctaText}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

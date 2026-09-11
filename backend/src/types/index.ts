@@ -270,6 +270,11 @@ export type CouponDiscountType = 'PERCENTAGE' | 'FIXED';
 export interface Coupon {
   id: string;
   code: string;
+  title?: string;
+  description?: string;
+  badgeText?: string;
+  ctaText?: string;
+  ctaLink?: string;
   discountType: CouponDiscountType;
   discountValue: number;
   minOrderAmount: number;
@@ -280,10 +285,14 @@ export interface Coupon {
   applicableCategoryIds?: string[];
   applicableBrandIds?: string[];
   applicableProductIds?: string[];
+  customerEligibility?: 'ALL' | 'B2B_ONLY' | 'VIP_ONLY';
   resellerId?: string;
+  showOnLandingPage?: boolean;
   startDate: string;
   endDate: string;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Review {
@@ -429,6 +438,8 @@ export interface StoreSettings {
   taxRegistrationNumber: string;
   announcementText?: string;
   isAnnouncementActive: boolean;
+  isLandingDiscountBannerActive?: boolean;
+  featuredLandingCouponCode?: string;
   logoUrl?: string;
   faviconUrl?: string;
   socialLinks?: {
