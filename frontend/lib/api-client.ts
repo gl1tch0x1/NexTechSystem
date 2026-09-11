@@ -78,7 +78,30 @@ export class ApiClient {
         return (await response.blob()) as unknown as T;
       }
 
-      const json = await response.json();
+      let json: any = {};
+      const isJson = contentType && contentType.includes('application/json');
+
+      if (isJson) {
+        try {
+          json = await response.json();
+        } catch {
+          json = {};
+        }
+      } else {
+        const text = await response.text();
+        try {
+          json = JSON.parse(text);
+        } catch {
+          json = {
+            success: response.ok,
+            error: {
+              message: response.ok
+                ? text
+                : `HTTP ${response.status}: Failed to reach API service (received non-JSON response)`,
+            },
+          };
+        }
+      }
 
       if (!response.ok || !json.success) {
         // If 401 Unauthorized, automatically clear stale / expired token from client storage

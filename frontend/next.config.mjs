@@ -31,17 +31,18 @@ const nextConfig = {
     }
   },
   async rewrites() {
-    const proxyTarget = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
-    if (proxyTarget) {
-      const cleanTarget = proxyTarget.replace(/\/$/, '').replace(/\/api$/, '');
-      return [
-        {
-          source: '/api/:path*',
-          destination: `${cleanTarget}/api/:path*`,
-        },
-      ];
-    }
-    return [];
+    const proxyTarget =
+      process.env.API_PROXY_TARGET ||
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      'http://localhost:5000';
+    const cleanTarget = proxyTarget.replace(/\/$/, '').replace(/\/api$/, '');
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${cleanTarget}/api/:path*`,
+      },
+    ];
   },
   async headers() {
     return [
