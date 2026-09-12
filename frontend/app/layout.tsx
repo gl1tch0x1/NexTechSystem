@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/lib/theme-context';
@@ -8,6 +8,12 @@ import { CurrencyProvider } from '@/lib/currency-context';
 import { StoreShell } from '@/components/layout/StoreShell';
 import { GlobalCommandPalette } from '@/components/layout/GlobalCommandPalette';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -66,7 +72,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body suppressHydrationWarning className="font-sans min-h-screen flex flex-col bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 antialiased selection:bg-tech-blue selection:text-white transition-colors duration-200">
+      <body suppressHydrationWarning className="font-sans min-h-screen flex flex-col bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 antialiased selection:bg-tech-blue selection:text-white transition-colors duration-200 w-full max-w-full overflow-x-hidden">
         <GoogleAnalytics />
         <ThemeProvider>
           <AuthProvider>

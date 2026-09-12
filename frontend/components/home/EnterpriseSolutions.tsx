@@ -175,8 +175,8 @@ export function EnterpriseSolutions({ solutions }: EnterpriseSolutionsProps) {
 
               {/* Bottom Target SKU & Action */}
               <div className="relative z-10 pt-5 mt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between shadow-xs">
-                  <div className="min-w-0 pr-2">
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
+                  <div className="min-w-0">
                     <div className="text-[10px] font-mono text-slate-400 uppercase">Pre-Configured Architecture</div>
                     <div className="text-xs font-black text-slate-900 dark:text-white truncate">{sol.popularSku}</div>
                   </div>

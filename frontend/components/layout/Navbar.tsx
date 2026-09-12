@@ -70,17 +70,17 @@ export function Navbar() {
       {/* 2. MAIN HEADER BAR */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 lg:gap-8">
         {/* Brand Logo (Modernized High-Impact Tech Badge) */}
-        <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-blue-500/25 group-hover:scale-105 group-hover:shadow-blue-500/40 transition-all duration-300">
-            <Cpu className="w-5 h-5" />
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-blue-500/25 group-hover:scale-105 group-hover:shadow-blue-500/40 transition-all duration-300 shrink-0">
+            <Cpu className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1 leading-none">
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1 leading-none">
               <span>NEXTECH</span>
-              <span className="text-tech-blue dark:text-cyan-400">SYSTEMS</span>
+              <span className="text-tech-blue dark:text-cyan-400 hidden xs:inline">SYSTEMS</span>
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block ml-0.5"></span>
             </div>
-            <div className="text-[10px] uppercase font-bold tracking-widest text-slate-500 dark:text-slate-400 mt-1">
+            <div className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 hidden sm:block truncate">
               Enterprise Technology Platform
             </div>
           </div>
@@ -109,7 +109,7 @@ export function Navbar() {
                     window.dispatchEvent(new CustomEvent('open-command-palette'));
                   }
                 }}
-                className="hidden lg:inline-flex items-center gap-1 text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-white/90 dark:bg-slate-800/90 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700/80 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all cursor-pointer shadow-2xs"
+                className="hidden lg:inline-flex items-center gap-1 text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-white/90 dark:bg-slate-800/90 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700/80 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:border-slate-600 transition-all cursor-pointer shadow-2xs"
                 title="Global Quick Find (⌘K / Ctrl+K)"
               >
                 <span>⌘</span>
@@ -120,9 +120,9 @@ export function Navbar() {
         </form>
 
         {/* Right Navigation Actions (Sleek Modern Segment) */}
-        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-          {/* Multi-Currency FX Selector (Enterprise Switcher) */}
-          <div className="relative">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Multi-Currency FX Selector (Enterprise Switcher - visible on sm+) */}
+          <div className="relative hidden sm:block">
             <button
               type="button"
               onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
@@ -190,19 +190,21 @@ export function Navbar() {
                 window.dispatchEvent(new CustomEvent('open-command-palette'));
               }
             }}
-            className="md:hidden p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm"
+            className="md:hidden p-2 sm:p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm shrink-0"
             title="Search Products (⌘K)"
           >
             <Search className="w-4 h-4" />
           </button>
 
-          {/* Theme Toggle Button */}
-          <ThemeToggle className="rounded-2xl" />
+          {/* Theme Toggle Button - visible on sm+ */}
+          <div className="hidden sm:block shrink-0">
+            <ThemeToggle className="rounded-2xl" />
+          </div>
 
-          {/* Wishlist Button */}
+          {/* Wishlist Button - visible on sm+ */}
           <Link
             href="/account/wishlist"
-            className="relative p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm group"
+            className="hidden sm:flex relative p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm group shrink-0"
             title="Wishlist"
           >
             <Heart className="w-4 h-4 text-slate-600 dark:text-slate-300 group-hover:text-red-500 transition-colors" />
@@ -213,10 +215,10 @@ export function Navbar() {
             )}
           </Link>
 
-          {/* Modern Cart Button (Shadcn Style) */}
+          {/* Modern Cart Button (Always visible) */}
           <Link
             href="/cart"
-            className="relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600/10 to-cyan-500/10 dark:from-blue-600/20 dark:to-cyan-500/20 text-tech-blue dark:text-cyan-300 hover:bg-tech-blue hover:text-white dark:hover:bg-tech-blue dark:hover:text-white border border-tech-blue/30 dark:border-cyan-500/30 transition-all duration-200 font-bold text-xs shadow-sm group"
+            className="relative flex items-center gap-1.5 sm:gap-2.5 p-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-gradient-to-r from-blue-600/10 to-cyan-500/10 dark:from-blue-600/20 dark:to-cyan-500/20 text-tech-blue dark:text-cyan-300 hover:bg-tech-blue hover:text-white dark:hover:bg-tech-blue dark:hover:text-white border border-tech-blue/30 dark:border-cyan-500/30 transition-all duration-200 font-bold text-xs shadow-sm group shrink-0"
           >
             <div className="relative">
               <ShoppingCart className="w-4 h-4" />
@@ -231,8 +233,8 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Modern Profile / User Button */}
-          <div className="relative">
+          {/* Modern Profile / User Button - visible on sm+ */}
+          <div className="relative hidden sm:block shrink-0">
             <button
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
               className="flex items-center gap-2 p-1.5 pl-2.5 pr-2 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm"
@@ -412,7 +414,52 @@ export function Navbar() {
 
       {/* 4. MOBILE DRAWER */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-4 animate-fadeIn shadow-xl max-h-[80vh] overflow-y-auto">
+        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-4 animate-fadeIn shadow-xl max-h-[85vh] overflow-y-auto">
+          {/* Mobile Top Controls: Currency + Theme + Wishlist */}
+          <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80">
+            {/* Currency Select */}
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className="text-base leading-none shrink-0">{currentCurrency.flag}</span>
+              <select
+                value={currentCurrency.code}
+                onChange={e => setCurrency(e.target.value)}
+                className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer w-full"
+                aria-label="Select Currency"
+              >
+                {availableCurrencies.map(c => (
+                  <option key={c.code} value={c.code} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                    {c.code} ({c.symbol}) - {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 shrink-0" />
+
+            {/* Theme Toggle */}
+            <div className="shrink-0">
+              <ThemeToggle className="rounded-xl" />
+            </div>
+
+            <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 shrink-0" />
+
+            {/* Wishlist Link */}
+            <Link
+              href="/account/wishlist"
+              onClick={() => setMobileMenuOpen(false)}
+              className="relative p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0"
+              title="Wishlist"
+            >
+              <Heart className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          {/* Search Bar */}
           <form onSubmit={handleSearch}>
             <div className="relative">
               <input
@@ -498,21 +545,57 @@ export function Navbar() {
           </div>
 
           {/* Account Tools */}
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <Link
-              href={user ? '/account' : '/login'}
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl bg-tech-blue text-white font-bold text-center flex-1 mr-2"
-            >
-              {user ? 'My Account' : 'Sign In / Register'}
-            </Link>
-            {user?.role === 'ADMIN' && (
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs">
+            {user ? (
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-slate-900 dark:text-white">{user.name}</div>
+                  <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                    Wallet: {formatPrice((user as any).walletBalance || 0)}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Link
+                    href="/account"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-300"
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    href="/account/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-300"
+                  >
+                    Orders & Bills
+                  </Link>
+                </div>
+                {role === 'ADMIN' && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block p-2 rounded-xl bg-purple-600 text-white text-center font-bold"
+                  >
+                    Admin Command Center
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-center text-[11px] font-bold text-red-500 hover:underline pt-1"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
               <Link
-                href="/admin"
+                href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-xl bg-indigo-600 text-white font-bold text-center"
+                className="block w-full py-2.5 bg-tech-blue text-white font-bold text-center rounded-2xl shadow-md"
               >
-                Admin Panel
+                Sign In / Register
               </Link>
             )}
           </div>

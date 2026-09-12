@@ -28,6 +28,12 @@
   --ring: rgba(59, 130, 246, 0.3);
 }
 
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+}
+
 body {
   color: var(--foreground);
   background-color: var(--background);

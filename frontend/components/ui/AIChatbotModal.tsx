@@ -112,15 +112,15 @@ export function AIChatbotModal() {
   return (
     <>
       {/* Floating Modern AI Trigger Button (Ant Design / Shadcn inspired) */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Open NexTech Hardware AI Assistant"
-          className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-tech-blue to-tech-cyan text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
+          className="group relative flex items-center gap-2 sm:gap-2.5 px-3 py-2.5 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-tech-blue to-tech-cyan text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
         >
           <div className="relative">
-            <Bot className="w-5 h-5 animate-bounce" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-900" />
+            <Bot className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
+            <span className="absolute -top-1 -right-1 w-2 sm:w-2.5 h-2 sm:h-2.5 bg-emerald-400 rounded-full border-2 border-slate-900" />
           </div>
           <span className="text-xs font-black tracking-wider uppercase hidden sm:inline">
             AI Assistant
@@ -133,7 +133,7 @@ export function AIChatbotModal() {
 
       {/* Interactive Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-4 sm:right-6 z-50 w-[92vw] sm:w-[420px] h-[min(540px,calc(100vh-120px))] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-700/90 shadow-2xl flex flex-col overflow-hidden animate-fadeIn transition-colors duration-200">
+        <div className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 z-50 w-[calc(100vw-24px)] sm:w-[420px] max-w-full h-[min(520px,calc(100vh-100px))] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-700/90 shadow-2xl flex flex-col overflow-hidden animate-fadeIn transition-colors duration-200">
           {/* Header */}
           <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">

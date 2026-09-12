@@ -106,7 +106,7 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
       </div>
 
       {/* Main Container */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="p-4 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
         {/* Category Switcher Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 max-w-full">
           {activeBenchmarks.map(b => {
