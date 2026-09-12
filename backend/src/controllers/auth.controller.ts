@@ -14,7 +14,6 @@ const PBKDF2_SALT = ENV.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026';
 const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_KEYLEN = 64;
 const PBKDF2_DIGEST = 'sha512';
-const LEGACY_HASH_PASSWORD123 = 'aaf3a19f47c7c8ebe09506114852a224230391718ee09ff64ba7cd3f0bd2c59d';
 
 function hashPassword(password: string): string {
   return crypto.pbkdf2Sync(password, PBKDF2_SALT, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
@@ -89,9 +88,10 @@ export class AuthController {
       return;
     }
 
-    let user = await userRepository.findByEmail(email);
+    const cleanIdentifier = String(email).trim().toLowerCase();
+    let user = await userRepository.findByEmail(cleanIdentifier);
     if (!user) {
-      user = await userRepository.findByUsername(email);
+      user = await userRepository.findByUsername(cleanIdentifier);
     }
 
     if (!user) {
@@ -104,27 +104,32 @@ export class AuthController {
       return;
     }
 
-    // Secure password verification with seamless migration for legacy/seeded demo records
-    const inputHash = hashPassword(password);
+    // Verify password against stored hash in the database
+    const rawPassword = String(password);
+    const trimmedPassword = rawPassword.trim();
+    const candidatePasswords = [rawPassword];
+    if (trimmedPassword !== rawPassword) {
+      candidatePasswords.push(trimmedPassword);
+    }
+
+    let isValid = false;
+
     if (user.passwordHash) {
-      if (user.passwordHash === inputHash) {
-        // Password matches PBKDF2 hash
-      } else if (user.passwordHash === LEGACY_HASH_PASSWORD123 && (password === 'password123' || password === 'admin123')) {
-        // Automatically upgrade legacy demo hash to PBKDF2
-        await userRepository.update(user.id, { passwordHash: inputHash });
-      } else {
-        res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } });
-        return;
-      }
-    } else {
-      // Seeded accounts default to 'password123'
-      if (password === 'password123' || password === 'admin123') {
-        await userRepository.update(user.id, { passwordHash: inputHash });
-      } else {
-        res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } });
-        return;
+      const userHashBuf = Buffer.from(user.passwordHash, 'hex');
+      for (const pwd of candidatePasswords) {
+        const inputHashBuf = Buffer.from(hashPassword(pwd), 'hex');
+        if (userHashBuf.length === inputHashBuf.length && crypto.timingSafeEqual(userHashBuf, inputHashBuf)) {
+          isValid = true;
+          break;
+        }
       }
     }
+
+    if (!isValid) {
+      res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } });
+      return;
+    }
+
 
     // If logging into a Reseller Subdomain, verify resellerCode match
     if (user.role === 'RESELLER' && resellerCode) {

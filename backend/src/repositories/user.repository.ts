@@ -7,12 +7,17 @@ export class UserRepository extends BaseRepository<User> {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.findOne([{ field: 'email', operator: '==', value: email.toLowerCase() }]);
+    if (!email) return null;
+    const cleanEmail = email.trim().toLowerCase();
+    return this.findOne([{ field: 'email', operator: '==', value: cleanEmail }]);
   }
 
   async findByUsername(username: string): Promise<User | null> {
-    return this.findOne([{ field: 'username', operator: '==', value: username.toLowerCase() }]);
+    if (!username) return null;
+    const cleanUsername = username.trim().toLowerCase();
+    return this.findOne([{ field: 'username', operator: '==', value: cleanUsername }]);
   }
 }
 
 export const userRepository = new UserRepository();
+

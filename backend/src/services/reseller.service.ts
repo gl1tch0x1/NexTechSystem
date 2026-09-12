@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
@@ -9,6 +10,7 @@ import { ENV } from '../config/env.js';
 export interface CreateResellerDTO {
   username: string;
   email: string;
+  password?: string;
   businessName: string;
   displayName: string;
   phone: string;
@@ -75,6 +77,10 @@ export class ResellerService {
     const userId = `user_${uuidv4()}`;
 
     // Create User record with RESELLER role
+    const passwordHash = dto.password
+      ? crypto.pbkdf2Sync(dto.password, ENV.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026', 100000, 64, 'sha512').toString('hex')
+      : undefined;
+
     const newUser: User = {
       id: userId,
       email: dto.email.toLowerCase(),
@@ -84,6 +90,7 @@ export class ResellerService {
       phone: dto.phone,
       addresses: [{ ...dto.address, id: `addr_${uuidv4()}`, isDefaultShipping: true, isDefaultBilling: true }],
       resellerId,
+      passwordHash,
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

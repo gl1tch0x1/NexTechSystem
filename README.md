@@ -846,8 +846,6 @@ NODE_ENV=development
 CLIENT_URL=http://localhost:3000
 JWT_SECRET=your_cryptographic_jwt_secret_key
 PASSWORD_SALT=your_pbkdf2_password_salt_key
-ADMIN_DEFAULT_EMAIL=admin@enterprise.local
-ADMIN_SECURITY_PIN=888888
 
 # Cloudflare Turnstile (Optional in development)
 CLOUDFLARE_TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA

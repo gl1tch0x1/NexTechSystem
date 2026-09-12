@@ -16,11 +16,8 @@ cd backend
 npx tsx test-suite.ts
 ```
 
-### 3. How do I access pre-seeded demo accounts?
-Use the built-in floating **Role Switcher** badge in the bottom-right corner of the web application, or log in manually with:
-- **Admin**: `admin@nextech.com` (`password123`)
-- **Reseller**: `reseller@comnet.com` (`password123`, code: `comnet101`)
-- **Customer**: `alex.morgan@enterprise.com` (`password123`)
+### 3. How do I access the administration portal?
+Navigate to `/login` and sign in using your designated administrator credentials.
 
 ---
 

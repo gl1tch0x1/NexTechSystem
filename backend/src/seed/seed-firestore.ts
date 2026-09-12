@@ -23,11 +23,11 @@ for (const f of envFiles) {
 }
 
 import { getFirestore, initializeFirebase } from '../config/firebase.js';
+import { dbStore } from '../config/db-store.js';
 import {
   SEED_CATEGORIES,
   SEED_BRANDS,
   SEED_PRODUCTS,
-  SEED_USERS,
   SEED_COUPONS,
   SEED_HERO_HIGHLIGHTS,
   SEED_ENTERPRISE_SOLUTIONS,
@@ -85,12 +85,15 @@ export async function seedCloudFirestore() {
     }
     console.log(`✅ Seeded ${SEED_PRODUCTS.length} products.`);
 
-    // 5. Single Master Admin User
-    console.log(`⏳ Uploading 1 Master Admin account (${SEED_USERS[0].email})...`);
-    for (const user of SEED_USERS) {
-      await db.collection('users').doc(user.id).set(user);
+    // 5. User Accounts (from database store)
+    const localUsers = await dbStore.find('users');
+    if (localUsers.length > 0) {
+      console.log(`⏳ Uploading ${localUsers.length} user accounts to Firestore...`);
+      for (const user of localUsers) {
+        await db.collection('users').doc(user.id).set(user);
+      }
+      console.log(`✅ Seeded ${localUsers.length} user accounts to Firestore.`);
     }
-    console.log(`✅ Seeded single master admin account (${SEED_USERS[0].email}) to Firestore.`);
 
     // 6. Coupons
     console.log(`⏳ Uploading ${SEED_COUPONS.length} active coupons...`);

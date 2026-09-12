@@ -56,7 +56,8 @@ export class DbStore {
   }
 
   private getFilePath(collectionName: string): string {
-    return path.join(DATA_DIR, `${collectionName}.json`);
+    const safeName = path.basename(collectionName).replace(/[^a-zA-Z0-9_-]/g, '');
+    return path.join(DATA_DIR, `${safeName}.json`);
   }
 
   private loadFromDisk() {
@@ -339,7 +340,13 @@ export class DbStore {
     const restoredCollections: string[] = [];
     let totalRecords = 0;
 
+    const FORBIDDEN_COLLECTIONS = new Set(['__proto__', 'constructor', 'prototype']);
+    const SAFE_COL_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
+
     for (const [colName, items] of Object.entries(collectionsObj)) {
+      if (FORBIDDEN_COLLECTIONS.has(colName) || !SAFE_COL_REGEX.test(colName)) {
+        continue;
+      }
       if (Array.isArray(items)) {
         const map = new Map<string, any>();
         for (const item of items) {

@@ -23,7 +23,10 @@ router.get('/summary', authenticate, requireRole('ADMIN'), async (req: Request, 
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Could not calculate VAT summary',
+      error: {
+        code: 'VAT_SUMMARY_ERROR',
+        message: error.message || 'Could not calculate VAT summary',
+      },
     });
   }
 });

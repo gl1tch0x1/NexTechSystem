@@ -56,33 +56,7 @@ export const SEED_BRANDS: Brand[] = [
   { id: 'brand_wd', name: 'Western Digital', slug: 'western-digital', logo: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=200&q=80', isActive: true, productCount: 4 },
 ];
 
-export const SEED_USERS: User[] = [
-  {
-    id: 'user_admin_1',
-    email: process.env.ADMIN_EMAIL || 'admin@enterprise.local',
-    role: 'ADMIN',
-    name: 'Chief Systems Architect',
-    username: 'admin',
-    phone: '+971 50 111 2222',
-    addresses: [
-      {
-        id: 'addr_adm_1',
-        fullName: 'NexTech Admin HQ',
-        phone: '+971 50 111 2222',
-        addressLine1: 'Silicon Oasis Tech Tower, Suite 400',
-        city: 'Dubai',
-        state: 'Dubai',
-        country: 'United Arab Emirates',
-        postalCode: '00000',
-        isDefaultShipping: true,
-        isDefaultBilling: true,
-      }
-    ],
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-];
+export const SEED_USERS: User[] = [];
 
 export const SEED_RESELLERS: Reseller[] = [];
 

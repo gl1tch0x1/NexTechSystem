@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { Cpu, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, ShieldCheck, ChevronDown, Search, Phone } from 'lucide-react';
+import { Cpu, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, ShieldCheck, ChevronDown, Search, Phone, Eye, EyeOff } from 'lucide-react';
 
 interface CountryCode {
   code: string;
@@ -136,6 +136,7 @@ function AuthContent() {
   // Sign In state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Register state
   const [regName, setRegName] = useState('');
@@ -143,6 +144,7 @@ function AuthContent() {
   const [regUsername, setRegUsername] = useState('');
   const [regPhone, setRegPhone] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[0]);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
@@ -155,13 +157,9 @@ function AuthContent() {
         setIsCountryDropdownOpen(false);
       }
     }
-    if (isCountryDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isCountryDropdownOpen]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const filteredCountries = COUNTRY_CODES.filter(c =>
     c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
@@ -183,7 +181,7 @@ function AuthContent() {
     e.preventDefault();
     setError('');
     try {
-      const { user: authedUser, reseller: resData } = await login(loginEmail, loginPassword);
+      const { user: authedUser, reseller: resData } = await login(loginEmail.trim(), loginPassword);
       handleRoleRedirect(authedUser, resData);
     } catch (err: any) {
       setError(err.message || 'Invalid email or password. Please try again.');
@@ -203,7 +201,7 @@ function AuthContent() {
           formattedPhone = `${selectedCountry.dialCode} ${cleanPhone.replace(/^0+/, '')}`;
         }
       }
-      const newUser = await register(regName, regEmail, regUsername, formattedPhone, regPassword);
+      const newUser = await register(regName.trim(), regEmail.trim(), regUsername.trim(), formattedPhone, regPassword);
       handleRoleRedirect(newUser, null);
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please check details.');
@@ -327,14 +325,26 @@ function AuthContent() {
               </div>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showLoginPassword ? 'text' : 'password'}
                   required
                   placeholder="••••••••"
                   value={loginPassword}
                   onChange={e => setLoginPassword(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 pr-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
                 <Lock className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(prev => !prev)}
+                  className="absolute right-2.5 md:right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+                  aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showLoginPassword ? (
+                    <EyeOff className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  ) : (
+                    <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -534,15 +544,27 @@ function AuthContent() {
               </label>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showRegPassword ? 'text' : 'password'}
                   required
                   autoComplete="new-password"
                   placeholder="••••••••"
                   value={regPassword}
                   onChange={e => setRegPassword(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue transition-colors"
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 pr-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue transition-colors"
                 />
                 <Lock className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
+                <button
+                  type="button"
+                  onClick={() => setShowRegPassword(prev => !prev)}
+                  className="absolute right-2.5 md:right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+                  aria-label={showRegPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showRegPassword ? (
+                    <EyeOff className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  ) : (
+                    <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  )}
+                </button>
               </div>
             </div>
 

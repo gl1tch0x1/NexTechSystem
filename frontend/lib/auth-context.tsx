@@ -74,42 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password?: string, resellerCode?: string): Promise<{ user: User; reseller: Reseller | null }> => {
+    const cleanEmail = email ? email.trim() : '';
     setIsLoading(true);
     try {
       let res: { token: string; user: User };
-      try {
-        // 1. Authenticate with Store Backend
-        res = await ApiClient.post<{ token: string; user: User }>('/auth/login', {
-          email,
-          password,
-          resellerCode,
-        });
-      } catch (backendErr: any) {
-        // If remote backend is unreachable (e.g. previewing frontend on Vercel), activate local interactive demo account
-        const isNetworkErr = backendErr.message?.includes('fetch') || backendErr.message?.includes('Network') || backendErr.status === 0 || !backendErr.status;
-        if (isNetworkErr) {
-          const role: UserRole = email.includes('admin') ? 'ADMIN' : (email.includes('reseller') || resellerCode ? 'RESELLER' : 'CUSTOMER');
-          const demoUser: User = {
-            id: `usr_${Date.now()}`,
-            name: email.split('@')[0].toUpperCase(),
-            email,
-            username: email.split('@')[0],
-            role,
-            addresses: [],
-            isActive: true,
-            resellerId: role === 'RESELLER' ? 'res_comnet' : undefined,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          const demoToken = `demo_token_${Date.now()}`;
-          localStorage.setItem('auth_token', demoToken);
-          localStorage.setItem('demo_user', JSON.stringify(demoUser));
-          setToken(demoToken);
-          setUser(demoUser);
-          return { user: demoUser, reseller: null };
-        }
-        throw backendErr;
-      }
+      // 1. Authenticate with Store Backend
+      res = await ApiClient.post<{ token: string; user: User }>('/auth/login', {
+        email: cleanEmail,
+        password,
+        resellerCode,
+      });
 
       localStorage.setItem('auth_token', res.token);
       setToken(res.token);

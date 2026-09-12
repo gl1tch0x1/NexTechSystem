@@ -59,7 +59,7 @@ export const ENV = {
   GA_PROPERTY_ID: process.env.GA_PROPERTY_ID || '',
   GA_API_SECRET: process.env.GA_API_SECRET || '',
   // Admin & Security Defaults
-  ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || 'admin@enterprise.local',
+  ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || '',
   PASSWORD_SALT: process.env.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026',
 };
 
