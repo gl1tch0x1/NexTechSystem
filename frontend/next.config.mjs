@@ -40,18 +40,25 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const proxyTarget =
-      process.env.API_PROXY_TARGET ||
-      process.env.BACKEND_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      'http://localhost:5000';
-    const cleanTarget = proxyTarget.replace(/\/$/, '').replace(/\/api$/, '');
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${cleanTarget}/api/:path*`,
-      },
-    ];
+    const proxyTarget = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
+    if (proxyTarget && !proxyTarget.includes('localhost') && !proxyTarget.includes('127.0.0.1')) {
+      const cleanTarget = proxyTarget.replace(/\/$/, '').replace(/\/api$/, '');
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${cleanTarget}/api/:path*`,
+        },
+      ];
+    }
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:5000/api/:path*',
+        },
+      ];
+    }
+    return [];
   },
   async headers() {
     return [

@@ -12,6 +12,9 @@ import {
   Coupon,
   StoreSettings,
   HomePageContent,
+  User,
+  Order,
+  Reseller,
 } from '@/types';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from './default-taxonomy';
 
@@ -32,7 +35,7 @@ export const FALLBACK_PRODUCTS: Product[] = [
     "compareAtPrice": 2499,
     "costPrice": 1850,
     "currency": "AED",
-    "stock": 41,
+    "stock": 40,
     "reservedStock": 2,
     "lowStockThreshold": 5,
     "images": [
@@ -68,7 +71,7 @@ export const FALLBACK_PRODUCTS: Product[] = [
     "isActive": true,
     "approvalStatus": "APPROVED",
     "createdAt": "2026-09-10T14:19:10.776Z",
-    "updatedAt": "2026-09-12T14:17:27.213Z"
+    "updatedAt": "2026-09-12T14:56:32.164Z"
   },
   {
     "id": "prod_cpu_7950x",
@@ -901,6 +904,75 @@ export const FALLBACK_PRODUCTS: Product[] = [
     "rejectionReason": "Incomplete warranty and technical specifications",
     "brandId": "brand_testbrand",
     "currency": "AED"
+  },
+  {
+    "name": "Enterprise Ultra NVMe 4TB SSD Module",
+    "sku": "COM-NVME-4TB-01",
+    "brandName": "ComNet Tech",
+    "categoryName": "Storage & Drives",
+    "categoryId": "cat_storage",
+    "price": 1499,
+    "stock": 35,
+    "description": "High performance PCIe 5.0 Enterprise Grade NVMe drive with 14,000 MB/s read speeds.",
+    "sellerType": "RESELLER",
+    "resellerId": "reseller_f2adda98-4940-479e-87ce-d88157cc6a1d",
+    "resellerCode": "code991463",
+    "resellerName": "Test Partner Store 991463",
+    "approvalStatus": "APPROVED",
+    "isActive": true,
+    "id": "prod_484b710c-e7b3-4a0c-bdb4-ee6420fd1ba4",
+    "slug": "enterprise-ultra-nvme-4tb-ssd-module-mtyid3o0",
+    "rating": 5,
+    "reviewCount": 0,
+    "reservedStock": 0,
+    "lowStockThreshold": 5,
+    "isFeatured": false,
+    "specifications": {},
+    "features": [],
+    "tags": [],
+    "images": [
+      "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80"
+    ],
+    "thumbnail": "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80",
+    "createdAt": "2026-09-12T14:56:32.208Z",
+    "updatedAt": "2026-09-12T14:56:32.252Z",
+    "brandId": "brand_comnettech",
+    "currency": "AED"
+  },
+  {
+    "name": "Rejected Sample Product",
+    "sku": "REJ-SAMPLE-01",
+    "brandName": "Test Brand",
+    "categoryName": "Components",
+    "categoryId": "cat_components",
+    "price": 99,
+    "stock": 5,
+    "description": "Test Description",
+    "sellerType": "RESELLER",
+    "resellerId": "reseller_f2adda98-4940-479e-87ce-d88157cc6a1d",
+    "resellerCode": "code991463",
+    "resellerName": "Test Partner Store 991463",
+    "approvalStatus": "REJECTED",
+    "isActive": false,
+    "id": "prod_77287513-b81f-47a1-8e87-639b16888a15",
+    "slug": "rejected-sample-product-mtyid3rn",
+    "rating": 5,
+    "reviewCount": 0,
+    "reservedStock": 0,
+    "lowStockThreshold": 5,
+    "isFeatured": false,
+    "specifications": {},
+    "features": [],
+    "tags": [],
+    "images": [
+      "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80"
+    ],
+    "thumbnail": "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80",
+    "createdAt": "2026-09-12T14:56:32.339Z",
+    "updatedAt": "2026-09-12T14:56:32.346Z",
+    "rejectionReason": "Incomplete warranty and technical specifications",
+    "brandId": "brand_testbrand",
+    "currency": "AED"
   }
 ];
 
@@ -1419,6 +1491,788 @@ export const FALLBACK_STORE_SETTINGS: StoreSettings = {
   "featuredLandingCouponCode": "SUMMER50"
 };
 
+export const FALLBACK_USERS: (User & { passwordHash?: string })[] = [
+  {
+    "id": "user_admin_1",
+    "email": "admin@nextech.com",
+    "role": "ADMIN",
+    "name": "Administrator",
+    "username": "admin@nextech.com",
+    "phone": "+971 50 111 2222",
+    "addresses": [
+      {
+        "id": "addr_adm_1",
+        "fullName": "NexTech Admin HQ",
+        "phone": "+971 50 111 2222",
+        "addressLine1": "Silicon Oasis Tech Tower, Suite 400",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "00000",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-09-10T14:19:10.774Z",
+    "updatedAt": "2026-09-12T15:19:04.722Z",
+    "passwordHash": "df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9",
+    "lastLoginAt": "2026-09-12T15:19:04.721Z"
+  },
+  {
+    "id": "user_bb7e9016-f05c-4a0f-9fb7-d82d069b5429",
+    "email": "client_130355@internal-test.local",
+    "role": "CUSTOMER",
+    "name": "Test Client User",
+    "username": "client_130355",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Test Client User",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_9d4c8068-aa0c-4da5-9fc2-170b2c45b8b3",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "c32914518fbb2c4f9628cb1d58568a83ea37094eb25d6d9251400dba03d0a592c049673afeac7799cf35109a8daf6781a89cb1d52592456f5e9085d105996df6",
+    "isActive": true,
+    "createdAt": "2026-09-12T13:52:10.420Z",
+    "updatedAt": "2026-09-12T13:52:10.420Z"
+  },
+  {
+    "id": "user_ba409f37-990a-40ad-96cc-c6b1c03ec1c2",
+    "email": "partner_130355@dynamic-test.local",
+    "role": "RESELLER",
+    "name": "Test Partner Store 130355",
+    "username": "code130355",
+    "phone": "+971 55 987 6543",
+    "addresses": [
+      {
+        "fullName": "Test Partner Distribution Center",
+        "phone": "+971 55 987 6543",
+        "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "11223",
+        "id": "addr_fc17714e-bea1-4384-9994-2d1b6f35d583",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "resellerId": "reseller_50895e9a-ee8e-4b9e-9a10-c303de840934",
+    "passwordHash": "793ef5f3d21e33ffcf6079f9f079ef84538401f5397bf4eb09b9039122fd312fae3ebd194f46114237628c6dc496b9e495eaeac4ac690c165d55a1bf5a858765",
+    "isActive": true,
+    "createdAt": "2026-09-12T13:52:10.772Z",
+    "updatedAt": "2026-09-12T13:52:10.830Z",
+    "lastLoginAt": "2026-09-12T13:52:10.830Z"
+  },
+  {
+    "id": "user_72fcd1ef-3ee1-4249-9df4-bcf629e147f1",
+    "email": "client_206206@internal-test.local",
+    "role": "CUSTOMER",
+    "name": "Test Client User",
+    "username": "client_206206",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Test Client User",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_35a90a6e-ecbd-431a-8549-5c0dea46a75a",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "4c3c8d2ed35f3d0f3af2d06c700f0b9c4aba1d8c365d314666970163ed0cb0c891dc332d0016611a8f3f79dba78c9e117270964db05d8661d626e00f3ac1f82a",
+    "isActive": true,
+    "createdAt": "2026-09-12T13:53:26.282Z",
+    "updatedAt": "2026-09-12T13:53:26.282Z"
+  },
+  {
+    "id": "user_6e4e2ac9-a27e-4349-b844-3a75b1e71136",
+    "email": "partner_206206@dynamic-test.local",
+    "role": "RESELLER",
+    "name": "Test Partner Store 206206",
+    "username": "code206206",
+    "phone": "+971 55 987 6543",
+    "addresses": [
+      {
+        "fullName": "Test Partner Distribution Center",
+        "phone": "+971 55 987 6543",
+        "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "11223",
+        "id": "addr_e592aaa5-6236-4bc3-a9c9-3a683c0a6096",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "resellerId": "reseller_6c968a4c-7cdd-4d08-9bb9-e439e3d76c43",
+    "passwordHash": "5a29633ac36d0a83b495760a743208847e282331dad20165190c35c5b892a76b1ef90d9644efcc60b64b9a61d5608d15248ce7c0d4b3c0f49d0924fcc2c84d1c",
+    "isActive": true,
+    "createdAt": "2026-09-12T13:53:26.349Z",
+    "updatedAt": "2026-09-12T13:53:26.411Z",
+    "lastLoginAt": "2026-09-12T13:53:26.411Z"
+  },
+  {
+    "id": "user_019386ea-f8ec-423c-9dd6-d54ce288114e",
+    "email": "client_646617@internal-test.local",
+    "role": "CUSTOMER",
+    "name": "Test Client User",
+    "username": "client_646617",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Test Client User",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_fce57999-15d5-447c-b110-4ddbf6726d8d",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "dd0b06c61eadf4d5c19804cc6087a8c93d96f1913f3436351a3fc424bcee7b9363125cc42df5bde6e4f718ade315b04477d472395b8a292a29a2f0cc3a61bf9a",
+    "isActive": true,
+    "createdAt": "2026-09-12T14:17:26.785Z",
+    "updatedAt": "2026-09-12T14:17:26.785Z"
+  },
+  {
+    "id": "user_d35e5062-71f3-48b3-859d-b0e8523f633a",
+    "email": "partner_646617@dynamic-test.local",
+    "role": "RESELLER",
+    "name": "Test Partner Store 646617",
+    "username": "code646617",
+    "phone": "+971 55 987 6543",
+    "addresses": [
+      {
+        "fullName": "Test Partner Distribution Center",
+        "phone": "+971 55 987 6543",
+        "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "11223",
+        "id": "addr_b28ec92c-2a25-4920-a76d-aefda77ab2f4",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "resellerId": "reseller_52ac85fa-509c-48b3-b156-1ab34d70a0b5",
+    "passwordHash": "7bda55c0c2f7908d53d202564ab78e485e348be113b30a3cf1ad1d92c617a600ce2d58c2e568f2be667c3a1bb1f5f05974e7522325fad0996eb759e6eeda41b5",
+    "isActive": true,
+    "createdAt": "2026-09-12T14:17:26.992Z",
+    "updatedAt": "2026-09-12T14:17:27.143Z",
+    "lastLoginAt": "2026-09-12T14:17:27.143Z"
+  },
+  {
+    "id": "user_900bc4b5-a4c2-4335-8f37-9d7200f07e73",
+    "email": "client_991463@internal-test.local",
+    "role": "CUSTOMER",
+    "name": "Test Client User",
+    "username": "client_991463",
+    "phone": "+971 52 333 4455",
+    "addresses": [
+      {
+        "fullName": "Test Client User",
+        "phone": "+971 52 333 4455",
+        "addressLine1": "Downtown Financial Tower, Apt 1402",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "33445",
+        "id": "addr_0c54aa8a-8425-4ded-a4fb-c3d7ce423517",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "a3b94f4383017f094290c4586ef5fac596cc4c5fa7e94eb8adb1003143fc1c7512608d35eba4597c6ea37e7b35c88033cfb4cf33a5c77618384c5407f11e929c",
+    "isActive": true,
+    "createdAt": "2026-09-12T14:56:31.674Z",
+    "updatedAt": "2026-09-12T14:56:31.674Z"
+  },
+  {
+    "id": "user_5c4ab278-d903-48fd-bc8b-4235c48a7377",
+    "email": "partner_991463@dynamic-test.local",
+    "role": "RESELLER",
+    "name": "Test Partner Store 991463",
+    "username": "code991463",
+    "phone": "+971 55 987 6543",
+    "addresses": [
+      {
+        "fullName": "Test Partner Distribution Center",
+        "phone": "+971 55 987 6543",
+        "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "11223",
+        "id": "addr_2819f5ab-fe7f-4ce7-8600-fda872e23196",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "resellerId": "reseller_f2adda98-4940-479e-87ce-d88157cc6a1d",
+    "passwordHash": "91cf47e79046d8157a7bb451528940a2d50ba67cb6231e3865ea8189dbb97bf1ad610bf49f9e02aced3afb0e2737114089a1d24f6ae24796d25f0b991baae5dc",
+    "isActive": true,
+    "createdAt": "2026-09-12T14:56:31.894Z",
+    "updatedAt": "2026-09-12T14:56:32.059Z",
+    "lastLoginAt": "2026-09-12T14:56:32.059Z"
+  }
+];
+
+export const FALLBACK_ORDERS: Order[] = [
+  {
+    "id": "order_b66372da-c76c-4424-ace8-2e88f71bb0b5",
+    "orderNumber": "ORD-2026-479149",
+    "userId": "user_admin_1",
+    "customerName": "Tariq Al-Mansoor",
+    "customerEmail": "tariq@techcorp.ae",
+    "customerPhone": "+971 4 800 TECH",
+    "items": [
+      {
+        "productId": "prod_cpu_14900k",
+        "productName": "Intel Core i9-14900K 24-Core Desktop Processor",
+        "sku": "BX8071514900K",
+        "slug": "intel-core-i9-14900k-processor",
+        "thumbnail": "/images/intel_i9_14900k.jpg",
+        "quantity": 1,
+        "unitPrice": 2099,
+        "discount": 150,
+        "subtotal": 2099,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "processor": "Intel Core i9-14900K",
+          "socket": "LGA1700",
+          "cores": "24 (8P + 16E)",
+          "threads": "32",
+          "maxBoostClock": "6.0 GHz",
+          "wattage": "125W Base / 253W Boost",
+          "cache": "36MB Intel Smart Cache"
+        }
+      }
+    ],
+    "subtotal": 2099,
+    "discount": 0,
+    "walletAmountUsed": 0,
+    "tax": 104.95,
+    "taxRate": 5,
+    "shippingFee": 0,
+    "total": 2203.95,
+    "currency": "AED",
+    "paymentMethod": "CREDIT_CARD",
+    "paymentStatus": "PAID",
+    "orderStatus": "PROCESSING",
+    "shippingAddress": {
+      "id": "addr_1789147223090",
+      "fullName": "Tariq Al-Mansoor",
+      "phone": "+971 4 800 TECH",
+      "addressLine1": "Business Bay, Tower 4, Suite 1200",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "AE",
+      "postalCode": "00000"
+    },
+    "billingAddress": {
+      "id": "addr_1789147223090",
+      "fullName": "Tariq Al-Mansoor",
+      "phone": "+971 4 800 TECH",
+      "addressLine1": "Business Bay, Tower 4, Suite 1200",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "AE",
+      "postalCode": "00000"
+    },
+    "notes": "Admin Direct Sales Order",
+    "statusHistory": [
+      {
+        "status": "CONFIRMED",
+        "note": "Order placed successfully and inventory allocated.",
+        "timestamp": "2026-09-11T17:20:25.234Z"
+      },
+      {
+        "status": "PROCESSING",
+        "note": "Admin Direct Status Override",
+        "timestamp": "2026-09-11T17:20:25.273Z"
+      }
+    ],
+    "createdAt": "2026-09-11T17:20:25.234Z",
+    "updatedAt": "2026-09-11T17:20:25.274Z",
+    "eBillId": "ebill_a374181a-3ee7-43e6-8aa5-c3e379d84a51"
+  },
+  {
+    "id": "order_bb866dec-3980-4436-94bf-1eb22fcf89aa",
+    "orderNumber": "ORD-2026-466511",
+    "userId": "user_bb7e9016-f05c-4a0f-9fb7-d82d069b5429",
+    "customerName": "Test Client User",
+    "customerEmail": "client_130355@internal-test.local",
+    "customerPhone": "",
+    "items": [
+      {
+        "productId": "prod_cpu_14900k",
+        "productName": "Intel Core i9-14900K 24-Core Desktop Processor",
+        "sku": "BX8071514900K",
+        "slug": "intel-core-i9-14900k-processor",
+        "thumbnail": "/images/intel_i9_14900k.jpg",
+        "quantity": 1,
+        "unitPrice": 2099,
+        "discount": 150,
+        "subtotal": 2099,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "processor": "Intel Core i9-14900K",
+          "socket": "LGA1700",
+          "cores": "24 (8P + 16E)",
+          "threads": "32",
+          "maxBoostClock": "6.0 GHz",
+          "wattage": "125W Base / 253W Boost",
+          "cache": "36MB Intel Smart Cache"
+        }
+      }
+    ],
+    "subtotal": 2099,
+    "discount": 209.9,
+    "couponCode": "TECH10",
+    "walletAmountUsed": 0,
+    "tax": 94.46,
+    "taxRate": 5,
+    "shippingFee": 0,
+    "total": 1983.56,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "orderStatus": "SHIPPED",
+    "shippingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "billingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "statusHistory": [
+      {
+        "status": "CONFIRMED",
+        "note": "Order placed successfully and inventory allocated.",
+        "timestamp": "2026-09-12T13:52:10.868Z"
+      },
+      {
+        "status": "SHIPPED",
+        "note": "Status updated to SHIPPED",
+        "timestamp": "2026-09-12T13:52:10.904Z"
+      }
+    ],
+    "createdAt": "2026-09-12T13:52:10.868Z",
+    "updatedAt": "2026-09-12T13:52:10.904Z",
+    "eBillId": "ebill_cb6f25b6-8770-48f2-9bf7-015f3772bf32"
+  },
+  {
+    "id": "order_d38edc29-9367-4986-b5cc-e2f4ff9cd4fd",
+    "orderNumber": "ORD-2026-685362",
+    "userId": "user_72fcd1ef-3ee1-4249-9df4-bcf629e147f1",
+    "customerName": "Test Client User",
+    "customerEmail": "client_206206@internal-test.local",
+    "customerPhone": "",
+    "items": [
+      {
+        "productId": "prod_cpu_14900k",
+        "productName": "Intel Core i9-14900K 24-Core Desktop Processor",
+        "sku": "BX8071514900K",
+        "slug": "intel-core-i9-14900k-processor",
+        "thumbnail": "/images/intel_i9_14900k.jpg",
+        "quantity": 1,
+        "unitPrice": 2099,
+        "discount": 150,
+        "subtotal": 2099,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "processor": "Intel Core i9-14900K",
+          "socket": "LGA1700",
+          "cores": "24 (8P + 16E)",
+          "threads": "32",
+          "maxBoostClock": "6.0 GHz",
+          "wattage": "125W Base / 253W Boost",
+          "cache": "36MB Intel Smart Cache"
+        }
+      }
+    ],
+    "subtotal": 2099,
+    "discount": 209.9,
+    "couponCode": "TECH10",
+    "walletAmountUsed": 500,
+    "tax": 94.46,
+    "taxRate": 5,
+    "shippingFee": 0,
+    "total": 1483.56,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "orderStatus": "SHIPPED",
+    "shippingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "billingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "statusHistory": [
+      {
+        "status": "CONFIRMED",
+        "note": "Order placed successfully and inventory allocated.",
+        "timestamp": "2026-09-12T13:53:26.457Z"
+      },
+      {
+        "status": "SHIPPED",
+        "note": "Status updated to SHIPPED",
+        "timestamp": "2026-09-12T13:53:26.497Z"
+      }
+    ],
+    "createdAt": "2026-09-12T13:53:26.457Z",
+    "updatedAt": "2026-09-12T13:53:26.497Z",
+    "eBillId": "ebill_9ad4c376-f1bd-478d-8fb4-1d1b92b7da88"
+  },
+  {
+    "id": "order_8b48542c-a0ea-4efd-95a2-8782c7b4e6a3",
+    "orderNumber": "ORD-2026-397146",
+    "userId": "user_019386ea-f8ec-423c-9dd6-d54ce288114e",
+    "customerName": "Test Client User",
+    "customerEmail": "client_646617@internal-test.local",
+    "customerPhone": "",
+    "items": [
+      {
+        "productId": "prod_cpu_14900k",
+        "productName": "Intel Core i9-14900K 24-Core Desktop Processor",
+        "sku": "BX8071514900K",
+        "slug": "intel-core-i9-14900k-processor",
+        "thumbnail": "/images/intel_i9_14900k.jpg",
+        "quantity": 1,
+        "unitPrice": 2099,
+        "discount": 150,
+        "subtotal": 2099,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "processor": "Intel Core i9-14900K",
+          "socket": "LGA1700",
+          "cores": "24 (8P + 16E)",
+          "threads": "32",
+          "maxBoostClock": "6.0 GHz",
+          "wattage": "125W Base / 253W Boost",
+          "cache": "36MB Intel Smart Cache"
+        }
+      }
+    ],
+    "subtotal": 2099,
+    "discount": 209.9,
+    "couponCode": "TECH10",
+    "walletAmountUsed": 500,
+    "tax": 94.46,
+    "taxRate": 5,
+    "shippingFee": 0,
+    "total": 1483.56,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "orderStatus": "SHIPPED",
+    "shippingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "billingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "statusHistory": [
+      {
+        "status": "CONFIRMED",
+        "note": "Order placed successfully and inventory allocated.",
+        "timestamp": "2026-09-12T14:17:27.219Z"
+      },
+      {
+        "status": "SHIPPED",
+        "note": "Status updated to SHIPPED",
+        "timestamp": "2026-09-12T14:17:27.361Z"
+      }
+    ],
+    "createdAt": "2026-09-12T14:17:27.219Z",
+    "updatedAt": "2026-09-12T14:17:27.361Z",
+    "eBillId": "ebill_5939acd3-621b-4fb2-8a07-6152fb8487c1"
+  },
+  {
+    "id": "order_b6d54953-8f20-4c9e-ac58-fcff85d396bf",
+    "orderNumber": "ORD-2026-288154",
+    "userId": "user_900bc4b5-a4c2-4335-8f37-9d7200f07e73",
+    "customerName": "Test Client User",
+    "customerEmail": "client_991463@internal-test.local",
+    "customerPhone": "",
+    "items": [
+      {
+        "productId": "prod_cpu_14900k",
+        "productName": "Intel Core i9-14900K 24-Core Desktop Processor",
+        "sku": "BX8071514900K",
+        "slug": "intel-core-i9-14900k-processor",
+        "thumbnail": "/images/intel_i9_14900k.jpg",
+        "quantity": 1,
+        "unitPrice": 2099,
+        "discount": 150,
+        "subtotal": 2099,
+        "sellerType": "ADMIN",
+        "specifications": {
+          "processor": "Intel Core i9-14900K",
+          "socket": "LGA1700",
+          "cores": "24 (8P + 16E)",
+          "threads": "32",
+          "maxBoostClock": "6.0 GHz",
+          "wattage": "125W Base / 253W Boost",
+          "cache": "36MB Intel Smart Cache"
+        }
+      }
+    ],
+    "subtotal": 2099,
+    "discount": 209.9,
+    "couponCode": "TECH10",
+    "walletAmountUsed": 500,
+    "tax": 94.46,
+    "taxRate": 5,
+    "shippingFee": 0,
+    "total": 1483.56,
+    "currency": "AED",
+    "paymentMethod": "WALLET",
+    "paymentStatus": "PAID",
+    "orderStatus": "SHIPPED",
+    "shippingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "billingAddress": {
+      "id": "addr_1",
+      "fullName": "Alex Morgan",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "phone": "+971 50 123 4567",
+      "addressLine1": "Sheikh Zayed Road, Building 4",
+      "postalCode": "00000"
+    },
+    "statusHistory": [
+      {
+        "status": "CONFIRMED",
+        "note": "Order placed successfully and inventory allocated.",
+        "timestamp": "2026-09-12T14:56:32.169Z"
+      },
+      {
+        "status": "SHIPPED",
+        "note": "Status updated to SHIPPED",
+        "timestamp": "2026-09-12T14:56:32.267Z"
+      }
+    ],
+    "createdAt": "2026-09-12T14:56:32.169Z",
+    "updatedAt": "2026-09-12T14:56:32.267Z",
+    "eBillId": "ebill_d77f14e2-8453-4eea-aa98-d2da34953316"
+  }
+];
+
+export const FALLBACK_RESELLERS: Reseller[] = [
+  {
+    "id": "reseller_50895e9a-ee8e-4b9e-9a10-c303de840934",
+    "userId": "user_ba409f37-990a-40ad-96cc-c6b1c03ec1c2",
+    "resellerCode": "code130355",
+    "username": "code130355",
+    "email": "partner_130355@dynamic-test.local",
+    "businessName": "Test Distribution LLC 130355",
+    "displayName": "Test Partner Store 130355",
+    "phone": "+971 55 987 6543",
+    "subdomain": "code130355",
+    "address": {
+      "fullName": "Test Partner Distribution Center",
+      "phone": "+971 55 987 6543",
+      "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "postalCode": "11223",
+      "id": "addr_556a0d5a-c040-496d-b440-4aab1847b232"
+    },
+    "businessInformation": {
+      "taxNumber": "TRN-100492819200003",
+      "tradeLicense": "DED-849201"
+    },
+    "status": "ACTIVE",
+    "productCount": 0,
+    "salesStats": {
+      "totalRevenue": 0,
+      "totalOrders": 0,
+      "unitsSold": 0
+    },
+    "commissionRate": 8,
+    "createdAt": "2026-09-12T13:52:10.773Z",
+    "updatedAt": "2026-09-12T13:52:10.773Z"
+  },
+  {
+    "id": "reseller_6c968a4c-7cdd-4d08-9bb9-e439e3d76c43",
+    "userId": "user_6e4e2ac9-a27e-4349-b844-3a75b1e71136",
+    "resellerCode": "code206206",
+    "username": "code206206",
+    "email": "partner_206206@dynamic-test.local",
+    "businessName": "Test Distribution LLC 206206",
+    "displayName": "Test Partner Store 206206",
+    "phone": "+971 55 987 6543",
+    "subdomain": "code206206",
+    "address": {
+      "fullName": "Test Partner Distribution Center",
+      "phone": "+971 55 987 6543",
+      "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "postalCode": "11223",
+      "id": "addr_9410f7fe-4cd8-4812-b539-454e2d42e5dd"
+    },
+    "businessInformation": {
+      "taxNumber": "TRN-100492819200003",
+      "tradeLicense": "DED-849201"
+    },
+    "status": "ACTIVE",
+    "productCount": 0,
+    "salesStats": {
+      "totalRevenue": 0,
+      "totalOrders": 0,
+      "unitsSold": 0
+    },
+    "commissionRate": 8,
+    "createdAt": "2026-09-12T13:53:26.350Z",
+    "updatedAt": "2026-09-12T13:53:26.350Z"
+  },
+  {
+    "id": "reseller_52ac85fa-509c-48b3-b156-1ab34d70a0b5",
+    "userId": "user_d35e5062-71f3-48b3-859d-b0e8523f633a",
+    "resellerCode": "code646617",
+    "username": "code646617",
+    "email": "partner_646617@dynamic-test.local",
+    "businessName": "Test Distribution LLC 646617",
+    "displayName": "Test Partner Store 646617",
+    "phone": "+971 55 987 6543",
+    "subdomain": "code646617",
+    "address": {
+      "fullName": "Test Partner Distribution Center",
+      "phone": "+971 55 987 6543",
+      "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "postalCode": "11223",
+      "id": "addr_297aa683-4f6e-4674-bf3e-97bd96a8488d"
+    },
+    "businessInformation": {
+      "taxNumber": "TRN-100492819200003",
+      "tradeLicense": "DED-849201"
+    },
+    "status": "ACTIVE",
+    "productCount": 0,
+    "salesStats": {
+      "totalRevenue": 0,
+      "totalOrders": 0,
+      "unitsSold": 0
+    },
+    "commissionRate": 8,
+    "createdAt": "2026-09-12T14:17:26.994Z",
+    "updatedAt": "2026-09-12T14:17:26.994Z"
+  },
+  {
+    "id": "reseller_f2adda98-4940-479e-87ce-d88157cc6a1d",
+    "userId": "user_5c4ab278-d903-48fd-bc8b-4235c48a7377",
+    "resellerCode": "code991463",
+    "username": "code991463",
+    "email": "partner_991463@dynamic-test.local",
+    "businessName": "Test Distribution LLC 991463",
+    "displayName": "Test Partner Store 991463",
+    "phone": "+971 55 987 6543",
+    "subdomain": "code991463",
+    "address": {
+      "fullName": "Test Partner Distribution Center",
+      "phone": "+971 55 987 6543",
+      "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
+      "city": "Dubai",
+      "state": "Dubai",
+      "country": "United Arab Emirates",
+      "postalCode": "11223",
+      "id": "addr_f035f62d-0432-48a4-a371-e61567486c66"
+    },
+    "businessInformation": {
+      "taxNumber": "TRN-100492819200003",
+      "tradeLicense": "DED-849201"
+    },
+    "status": "ACTIVE",
+    "productCount": 0,
+    "salesStats": {
+      "totalRevenue": 0,
+      "totalOrders": 0,
+      "unitsSold": 0
+    },
+    "commissionRate": 8,
+    "createdAt": "2026-09-12T14:56:31.897Z",
+    "updatedAt": "2026-09-12T14:56:31.897Z"
+  }
+];
+
 export const FALLBACK_HOMEPAGE_CONTENT: HomePageContent = {
   heroHighlights: FALLBACK_HERO_HIGHLIGHTS,
   solutions: FALLBACK_ENTERPRISE_SOLUTIONS,
@@ -1429,7 +2283,7 @@ export const FALLBACK_HOMEPAGE_CONTENT: HomePageContent = {
   activeCoupon: FALLBACK_COUPON,
   storeSettings: FALLBACK_STORE_SETTINGS,
   stats: {
-    totalProducts: 19,
+    totalProducts: 21,
     totalCategories: DEFAULT_CATEGORIES.length,
     totalBrands: DEFAULT_BRANDS.length,
     authorizedPartnersCount: 3,

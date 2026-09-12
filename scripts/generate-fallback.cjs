@@ -9,6 +9,9 @@ const testimonials = JSON.parse(fs.readFileSync('backend/data_store/testimonials
 const bento = JSON.parse(fs.readFileSync('backend/data_store/bento_features.json', 'utf8'));
 const builderPresets = JSON.parse(fs.readFileSync('backend/data_store/builder_presets.json', 'utf8'));
 const coupons = JSON.parse(fs.readFileSync('backend/data_store/coupons.json', 'utf8'));
+const users = JSON.parse(fs.readFileSync('backend/data_store/users.json', 'utf8'));
+const orders = JSON.parse(fs.readFileSync('backend/data_store/orders.json', 'utf8'));
+const resellers = JSON.parse(fs.readFileSync('backend/data_store/resellers.json', 'utf8'));
 const rawSettings = JSON.parse(fs.readFileSync('backend/data_store/settings.json', 'utf8'));
 const rawObj = Array.isArray(rawSettings) ? rawSettings[0] : (rawSettings.global_settings || rawSettings);
 const { id, updatedAt, createdAt, ...cleanSettings } = rawObj || {};
@@ -27,6 +30,27 @@ const sanitizedProducts = prods.map(p => {
   };
 });
 
+const cleanAddress = (addr, idx = 0) => {
+  if (!addr) return addr;
+  const { company, street, zipCode, ...rest } = addr;
+  return {
+    id: rest.id || `addr_${idx + 1}`,
+    ...rest,
+    addressLine1: rest.addressLine1 || street || 'Address Line 1',
+    postalCode: rest.postalCode || zipCode || '00000',
+  };
+};
+
+const sanitizedOrders = orders.map(o => ({
+  ...o,
+  shippingAddress: cleanAddress(o.shippingAddress),
+  billingAddress: cleanAddress(o.billingAddress),
+  statusHistory: (o.statusHistory || []).map(sh => {
+    const { updatedBy, ...restSh } = sh;
+    return restSh;
+  }),
+}));
+
 const outLines = [
   '// Resilient fallback data for standalone Next.js deployment (Vercel serverless runtime)',
   "import {",
@@ -42,6 +66,9 @@ const outLines = [
   "  Coupon,",
   "  StoreSettings,",
   "  HomePageContent,",
+  "  User,",
+  "  Order,",
+  "  Reseller,",
   "} from '@/types';",
   "import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from './default-taxonomy';",
   '',
@@ -63,6 +90,12 @@ const outLines = [
   '',
   `export const FALLBACK_STORE_SETTINGS: StoreSettings = ${JSON.stringify(cleanSettings || {}, null, 2)};`,
   '',
+  `export const FALLBACK_USERS: (User & { passwordHash?: string })[] = ${JSON.stringify(users, null, 2)};`,
+  '',
+  `export const FALLBACK_ORDERS: Order[] = ${JSON.stringify(sanitizedOrders, null, 2)};`,
+  '',
+  `export const FALLBACK_RESELLERS: Reseller[] = ${JSON.stringify(resellers, null, 2)};`,
+  '',
   'export const FALLBACK_HOMEPAGE_CONTENT: HomePageContent = {',
   '  heroHighlights: FALLBACK_HERO_HIGHLIGHTS,',
   '  solutions: FALLBACK_ENTERPRISE_SOLUTIONS,',
@@ -83,4 +116,4 @@ const outLines = [
 ];
 
 fs.writeFileSync('frontend/lib/fallback-data.ts', outLines.join('\n'), 'utf8');
-console.log('Successfully generated frontend/lib/fallback-data.ts with clean types');
+console.log('Successfully generated frontend/lib/fallback-data.ts with sanitized orders and users');
