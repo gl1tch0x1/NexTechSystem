@@ -40,62 +40,6 @@ const COLOR_MAP: Record<string, { bgGlow: string; iconBg: string; textCol: strin
   bot: { bgGlow: 'bg-emerald-600/10', iconBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white', textCol: 'text-emerald-600 dark:text-emerald-300', borderCol: 'hover:border-emerald-500/50' },
 };
 
-const FALLBACK_FEATURES: BentoFeature[] = [
-  {
-    id: 'feature-logistics',
-    title: 'Insured Regional Express Dispatch & Real-Time Tracking',
-    subtitle: '⚡ GCC EXPRESS LOGISTICS',
-    description: 'Complimentary insured delivery on all hardware orders exceeding AED 500. Same-day dispatch across Dubai & Abu Dhabi, with guaranteed 24-48 hour regional express transit to Riyadh, Doha, Kuwait, Muscat, and Manama.',
-    tag: 'LOGISTICS',
-    iconName: 'truck',
-    gridSpan: 7,
-    stats: [
-      { label: 'Zero-Loss Protection', value: '100% Insured' },
-      { label: 'UAE Direct Hubs', value: 'Same-Day' },
-      { label: 'GPS Route Tracking', value: 'Real-Time' }
-    ],
-    order: 1,
-    isActive: true,
-  },
-  {
-    id: 'feature-credit',
-    title: 'Net-30 Enterprise Credit & Digital Wallet Settlement',
-    subtitle: '💼 RESELLER TERMS',
-    description: 'Streamlined procurement for system integrators with automated Zakat/VAT compliant invoices, escrow settlement, and instant wallet balance margin top-ups.',
-    tag: 'CREDIT',
-    iconName: 'creditcard',
-    gridSpan: 5,
-    ctaText: 'Apply for Enterprise Terms',
-    ctaLink: '/login',
-    order: 2,
-    isActive: true,
-  },
-  {
-    id: 'feature-burnin',
-    title: '24-Hour Prime95 & FurMark Thermal Burn-In',
-    subtitle: '🔥 24H TORTURE TEST',
-    description: 'Every assembled workstation and rack server node undergoes sustained load testing to verify VRM thermal efficiency and eliminate hardware defects before handover.',
-    tag: 'STABILITY',
-    iconName: 'flame',
-    gridSpan: 5,
-    statusBadge: 'Certified Stable',
-    order: 3,
-    isActive: true,
-  },
-  {
-    id: 'feature-ai',
-    title: 'Enterprise AI Hardware Specialist & Live Technical Support',
-    subtitle: '🤖 24/7 AI SPECIALIST',
-    description: 'Calculate PCIe lane distribution, check cooler clearances, or verify DDR5 ECC memory timings instantly with our datasheet-trained assistant and senior hardware engineering staff.',
-    tag: 'SUPPORT',
-    iconName: 'bot',
-    gridSpan: 7,
-    statusBadge: 'AI Engine Online',
-    order: 4,
-    isActive: true,
-  }
-];
-
 interface EnterpriseBentoGridProps {
   features?: BentoFeature[];
   title?: string;
@@ -109,7 +53,11 @@ export function EnterpriseBentoGrid({
   subtitle = 'The NexTech Advantage',
   description = 'Engineered for mission-critical reliability, transparent procurement, and rapid GCC deployment.'
 }: EnterpriseBentoGridProps) {
-  const activeFeatures = (features && features.length > 0) ? features : FALLBACK_FEATURES;
+  if (!features || features.length === 0) {
+    return null;
+  }
+
+  const activeFeatures = features;
 
   return (
     <section className="space-y-6">

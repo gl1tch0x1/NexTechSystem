@@ -10,7 +10,7 @@ export async function GET() {
   const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
   try {
-    const res = await fetch(`${clean}/api/products/categories`, {
+    const res = await fetch(`${clean}/api/content/homepage`, {
       signal: AbortSignal.timeout(6000),
       cache: 'no-store',
     });
@@ -21,15 +21,14 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { success: false, data: [], meta: { total: 0 } },
+      { success: false, data: null },
       { status: res.status }
     );
   } catch (err: any) {
-    console.warn('[API Proxy] Error fetching categories from Node.js backend:', err.message);
+    console.warn('[API Proxy] Error fetching homepage content from Node.js backend:', err.message);
     return NextResponse.json({
       success: false,
-      data: [],
-      meta: { total: 0 },
+      data: null,
       error: { message: 'Node.js backend API is unreachable.' },
     });
   }

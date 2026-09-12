@@ -1,7 +1,17 @@
 export const getBaseApiUrl = (): string => {
-  if (process.env.NEXT_PUBLIC_API_URL) {
+  // If an external non-localhost backend API is provided explicitly
+  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost') && !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1')) {
     return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
   }
+  if (process.env.BACKEND_URL && !process.env.BACKEND_URL.includes('localhost') && !process.env.BACKEND_URL.includes('127.0.0.1')) {
+    const clean = process.env.BACKEND_URL.replace(/\/$/, '').replace(/\/api$/, '');
+    return `${clean}/api`;
+  }
+  if (process.env.API_PROXY_TARGET && !process.env.API_PROXY_TARGET.includes('localhost') && !process.env.API_PROXY_TARGET.includes('127.0.0.1')) {
+    const clean = process.env.API_PROXY_TARGET.replace(/\/$/, '').replace(/\/api$/, '');
+    return `${clean}/api`;
+  }
+
   if (typeof window !== 'undefined') {
     const isLocalhost =
       window.location.hostname === 'localhost' ||
@@ -11,6 +21,18 @@ export const getBaseApiUrl = (): string => {
     if (!isLocalhost) {
       return '/api';
     }
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  }
+
+  // Server-side (Node.js runtime / Vercel Serverless SSR)
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/api`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api`;
+  }
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return `${process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')}/api`;
   }
   return process.env.API_URL || 'http://localhost:5000/api';
 };

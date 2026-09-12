@@ -51,10 +51,20 @@ async function getHomeData(): Promise<{
       content = json.data || null;
     }
 
-    return { products, categories, brands, content };
+    return {
+      products,
+      categories,
+      brands,
+      content,
+    };
   } catch (err) {
-    console.error('Error loading homepage data:', err);
-    return { products: [], categories: [], brands: [], content: null };
+    console.warn('[Home] Failed to load data from Node.js backend:', err);
+    return {
+      products: [],
+      categories: [],
+      brands: [],
+      content: null,
+    };
   }
 }
 

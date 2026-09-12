@@ -20,13 +20,17 @@ async function getProductData(slug: string): Promise<{
 }> {
   try {
     const res = await fetch(getApiUrl(`/products/${slug}`), { cache: 'no-store' });
-    if (!res.ok) return { product: null, reviews: [], relatedProducts: [] };
-    const json = await res.json();
-    return json.data || { product: null, reviews: [], relatedProducts: [] };
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data && json.data.product) {
+        return json.data;
+      }
+    }
   } catch (err) {
-    console.error('Error loading product details:', err);
-    return { product: null, reviews: [], relatedProducts: [] };
+    console.warn(`[ProductDetail] Error fetching product ${slug} from Node.js backend:`, err);
   }
+
+  return { product: null, reviews: [], relatedProducts: [] };
 }
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {

@@ -17,56 +17,19 @@ import {
 } from 'lucide-react';
 import { BuilderPreset } from '@/types';
 
-const FALLBACK_PRESETS: BuilderPreset[] = [
-  {
-    id: 'ai-extreme',
-    name: 'AI & Deep Learning Station',
-    socket: 'LGA1700 (Z790)',
-    cpu: 'Intel Core i9-14900K (24C/32T)',
-    gpu: 'NVIDIA RTX 4090 24GB GDDR6X',
-    ram: '64GB DDR5 6000MHz CL30',
-    psuWatts: 1200,
-    estTotalWatts: 740,
-    headroomPercent: 38,
-    order: 1,
-    isActive: true,
-  },
-  {
-    id: 'render-studio',
-    name: '3D CAD & Unreal Engine Rig',
-    socket: 'AM5 (X670E)',
-    cpu: 'AMD Ryzen 9 7950X (16C/32T)',
-    gpu: 'NVIDIA RTX 4080 Super 16GB',
-    ram: '32GB DDR5 6000MHz Low-Latency',
-    psuWatts: 1000,
-    estTotalWatts: 580,
-    headroomPercent: 42,
-    order: 2,
-    isActive: true,
-  },
-  {
-    id: 'enterprise-node',
-    name: 'Virtualization & High-TDP Node',
-    socket: 'LGA4677 Xeon',
-    cpu: 'Intel Xeon Platinum 8480+ (56C)',
-    gpu: 'NVIDIA RTX A6000 48GB ECC',
-    ram: '128GB DDR5 ECC Registered',
-    psuWatts: 1600,
-    estTotalWatts: 980,
-    headroomPercent: 39,
-    order: 3,
-    isActive: true,
-  }
-];
-
 interface CompatibilityTeaserProps {
   presets?: BuilderPreset[];
 }
 
 export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) {
-  const activePresets = (presets && presets.length > 0) ? presets : FALLBACK_PRESETS;
-  const [selectedPresetId, setSelectedPresetId] = useState<string>(activePresets[0]?.id || 'ai-extreme');
-  const preset = activePresets.find(p => p.id === selectedPresetId) || activePresets[0] || FALLBACK_PRESETS[0];
+  if (!presets || presets.length === 0) {
+    return null;
+  }
+
+  const activePresets = presets;
+  const [selectedPresetId, setSelectedPresetId] = useState<string>(activePresets[0]?.id || '');
+  const preset = activePresets.find(p => p.id === selectedPresetId) || activePresets[0];
+  if (!preset) return null;
 
   const wattagePercentage = Math.round((preset.estTotalWatts / preset.psuWatts) * 100);
 

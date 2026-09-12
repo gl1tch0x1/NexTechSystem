@@ -26,6 +26,12 @@ interface ProductsPageProps {
 }
 
 async function getProductsData(params: Record<string, any>) {
+  let products: Product[] = [];
+  let total = 0;
+  let facets: any = null;
+  let categories: Category[] = [];
+  let brands: Brand[] = [];
+
   try {
     const qs = new URLSearchParams();
     for (const [k, v] of Object.entries(params)) {
@@ -33,31 +39,43 @@ async function getProductsData(params: Record<string, any>) {
     }
 
     const res = await fetch(getApiUrl(`/products?${qs.toString()}`), { cache: 'no-store' });
-    const json = await res.json();
+    if (res.ok) {
+      const json = await res.json();
+      products = (json.data || []) as Product[];
+      total = json.meta?.total || products.length;
+      facets = json.meta?.facets;
+    }
 
     const catRes = await fetch(getApiUrl('/products/categories'), { next: { revalidate: 60 } });
-    const catJson = await catRes.json();
+    if (catRes.ok) {
+      const catJson = await catRes.json();
+      categories = (catJson.data || []) as Category[];
+    }
 
     const brandRes = await fetch(getApiUrl('/products/brands'), { next: { revalidate: 60 } });
-    const brandJson = await brandRes.json();
-
-    return {
-      products: (json.data || []) as Product[],
-      total: json.meta?.total || 0,
-      facets: json.meta?.facets || { categories: [], brands: [], priceRange: { min: 0, max: 50000 } },
-      categories: (catJson.data || []) as Category[],
-      brands: (brandJson.data || []) as Brand[],
-    };
+    if (brandRes.ok) {
+      const brandJson = await brandRes.json();
+      brands = (brandJson.data || []) as Brand[];
+    }
   } catch (err) {
-    console.error('Error fetching catalog data:', err);
-    return {
-      products: [],
-      total: 0,
-      facets: { categories: [], brands: [], priceRange: { min: 0, max: 50000 } },
-      categories: [],
-      brands: [],
+    console.warn('[Products] Error fetching catalog data from Node.js backend:', err);
+  }
+
+  if (!facets) {
+    facets = {
+      categories: categories.map(c => ({ id: c.id, name: c.name, count: c.productCount || 0 })),
+      brands: brands.map(b => ({ id: b.id, name: b.name, count: b.productCount || 0 })),
+      priceRange: { min: 0, max: 50000 },
     };
   }
+
+  return {
+    products,
+    total,
+    facets,
+    categories,
+    brands,
+  };
 }
 
 export default async function ProductsCatalogPage({ searchParams }: ProductsPageProps) {

@@ -7,26 +7,30 @@ export async function GET() {
     process.env.NEXT_PUBLIC_API_URL ||
     'http://localhost:5000';
 
-  if (backendUrl) {
-    try {
-      const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
-      const res = await fetch(`${clean}/api/products/brands`, {
-        signal: AbortSignal.timeout(3500),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-          return NextResponse.json(json);
-        }
-      }
-    } catch (err) {
-      console.warn('Backend brands endpoint fetch failed:', err);
-    }
-  }
+  const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
-  return NextResponse.json({
-    success: true,
-    data: [],
-    meta: { total: 0 },
-  });
+  try {
+    const res = await fetch(`${clean}/api/products/brands`, {
+      signal: AbortSignal.timeout(6000),
+      cache: 'no-store',
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      return NextResponse.json(json);
+    }
+
+    return NextResponse.json(
+      { success: false, data: [], meta: { total: 0 } },
+      { status: res.status }
+    );
+  } catch (err: any) {
+    console.warn('[API Proxy] Error fetching brands from Node.js backend:', err.message);
+    return NextResponse.json({
+      success: false,
+      data: [],
+      meta: { total: 0 },
+      error: { message: 'Node.js backend API is unreachable.' },
+    });
+  }
 }

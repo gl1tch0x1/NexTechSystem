@@ -5,7 +5,6 @@ import { resellerRepository } from '../repositories/reseller.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
 import { brandRepository } from '../repositories/brand.repository.js';
 import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
-import { SEED_PURCHASE_ORDERS, SEED_ORDERS } from '../seed/seed-data.js';
 
 export class AnalyticsService {
   async getAdminDashboardMetrics(): Promise<{
@@ -81,26 +80,13 @@ export class AnalyticsService {
     };
     recentPurchases: Array<{ id: string; poNumber: string; supplierName: string; totalCost: number; totalUnits: number; status: string; createdAt: string }>;
   }> {
-    let orders = await orderRepository.find();
-    if (orders.length === 0) {
-      for (const ord of SEED_ORDERS) {
-        await orderRepository.create(ord);
-      }
-      orders = await orderRepository.find();
-    }
+    const orders = await orderRepository.find();
     const products = await productRepository.find();
     const users = await userRepository.find();
     const resellers = await resellerRepository.find();
     const categories = await categoryRepository.find();
     const brands = await brandRepository.find();
-    let purchaseOrders = await purchaseOrderRepository.find();
-
-    if (purchaseOrders.length === 0) {
-      for (const po of SEED_PURCHASE_ORDERS) {
-        await purchaseOrderRepository.create(po);
-      }
-      purchaseOrders = await purchaseOrderRepository.find();
-    }
+    const purchaseOrders = await purchaseOrderRepository.find();
 
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
@@ -597,13 +583,7 @@ export class AnalyticsService {
   }
 
   async getAdvancedAnalytics(timeRange: string = '30d'): Promise<any> {
-    let orders = await orderRepository.find();
-    if (orders.length === 0) {
-      for (const ord of SEED_ORDERS) {
-        await orderRepository.create(ord);
-      }
-      orders = await orderRepository.find();
-    }
+    const orders = await orderRepository.find();
     const products = await productRepository.find();
     const users = await userRepository.find();
     const resellers = await resellerRepository.find();
@@ -621,13 +601,7 @@ export class AnalyticsService {
 
     const startDate = new Date(now.getTime() - daysToInclude * 24 * 60 * 60 * 1000);
 
-    let purchaseOrders = await purchaseOrderRepository.find();
-    if (purchaseOrders.length === 0) {
-      for (const po of SEED_PURCHASE_ORDERS) {
-        await purchaseOrderRepository.create(po);
-      }
-      purchaseOrders = await purchaseOrderRepository.find();
-    }
+    const purchaseOrders = await purchaseOrderRepository.find();
 
     // Filter relevant orders
     const filteredOrders = orders.filter(o => new Date(o.createdAt) >= startDate);

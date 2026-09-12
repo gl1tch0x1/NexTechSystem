@@ -305,10 +305,10 @@ export class AdminController {
     }
 
     // Resolve customer details from database or request payload
-    let userId = customerId || req.user?.id || 'guest_admin_order';
-    let resolvedName = customerName || 'Enterprise Direct Client';
-    let resolvedEmail = customerEmail || 'orders@nextechsystems.com';
-    let resolvedPhone = customerPhone || '+971 4 800 TECH';
+    let userId = customerId || req.user?.id || 'admin_sales_order';
+    let resolvedName = customerName || (req.user as any)?.name || 'Direct Enterprise Client';
+    let resolvedEmail = customerEmail || (req.user as any)?.email || '';
+    let resolvedPhone = customerPhone || (req.user as any)?.phone || '';
 
     if (customerId) {
       const customer = await userRepository.findById(customerId);
