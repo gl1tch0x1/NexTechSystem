@@ -86,7 +86,7 @@ export function Footer() {
             <li><Link href="/pc-builder" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors font-bold text-tech-blue dark:text-tech-cyan">Custom PC Builder</Link></li>
             <li><Link href="/compare" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Hardware Comparison</Link></li>
             <li><Link href="/account/wallet" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Customer Wallet</Link></li>
-            <li><Link href="/reseller/comnet101/login" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Reseller Vendor Portal</Link></li>
+            <li><Link href="/reseller/comnet101/dashboard" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Reseller Vendor Portal</Link></li>
             <li><Link href="/admin" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Admin Command Center</Link></li>
           </ul>
         </div>
