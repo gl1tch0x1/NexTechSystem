@@ -954,7 +954,7 @@ export const SEED_BENTO_FEATURES: BentoFeature[] = [
     iconName: 'CreditCard',
     gridSpan: 5,
     ctaText: 'Apply for Enterprise Terms',
-    ctaLink: '/auth',
+    ctaLink: '/login',
     order: 2,
     isActive: true
   },

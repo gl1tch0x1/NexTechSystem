@@ -30,6 +30,15 @@ const nextConfig = {
       bodySizeLimit: '10mb'
     }
   },
+  async redirects() {
+    return [
+      {
+        source: '/auth',
+        destination: '/login',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     const proxyTarget =
       process.env.API_PROXY_TARGET ||
