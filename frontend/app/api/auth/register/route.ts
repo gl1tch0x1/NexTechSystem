@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { signJwt } from '@/lib/token';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_insecure_local_jwt_secret_change_in_env';
 
@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
     updatedAt: new Date().toISOString(),
   };
 
-  const token = jwt.sign(
+  const token = signJwt(
     { id: newUser.id, email: newUser.email, role: newUser.role },
     JWT_SECRET,
-    { expiresIn: '30d' }
+    86400 * 30
   );
 
   return NextResponse.json({

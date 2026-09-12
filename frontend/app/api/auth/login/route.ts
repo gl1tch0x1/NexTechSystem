@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
+import { signJwt } from '@/lib/token';
 import { FALLBACK_USERS } from '@/lib/fallback-data';
 import { User } from '@/types';
 
@@ -87,10 +87,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const token = jwt.sign(
+  const token = signJwt(
     { id: matchedUser.id, email: matchedUser.email, role: matchedUser.role, resellerId: matchedUser.resellerId },
     JWT_SECRET,
-    { expiresIn: '30d' }
+    86400 * 30
   );
 
   return NextResponse.json({

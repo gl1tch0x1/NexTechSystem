@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { verifyJwt } from '@/lib/token';
 import { FALLBACK_USERS, FALLBACK_RESELLERS } from '@/lib/fallback-data';
 import { User } from '@/types';
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = verifyJwt(token, JWT_SECRET) as any;
     const user: User = (FALLBACK_USERS.find(u => u.id === decoded.id || u.email === decoded.email) || {
       id: decoded.id,
       email: decoded.email,
