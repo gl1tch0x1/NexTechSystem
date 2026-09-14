@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+/**
+ * Next.js 16 Proxy (replaces deprecated "middleware" file convention).
+ * Handles multi-tenant reseller subdomain routing.
+ */
+export function proxy(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get('host') || '';
 
@@ -14,7 +18,8 @@ export function middleware(request: NextRequest) {
       subdomain = parts[0];
     }
   } else if (hostname.endsWith('.vercel.app') || hostname.includes('vercel.app')) {
-    // Vercel deployment URLs (e.g. project-branch-user.vercel.app) - do not treat Vercel project name as tenant
+    // Vercel deployment URLs (e.g. project-branch-user.vercel.app) — do not treat
+    // the Vercel project name as a tenant subdomain
     if (parts.length >= 4 && parts[0] !== 'www') {
       subdomain = parts[0];
     }

@@ -1,18 +1,11 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname),
-    };
-    return config;
-  },
+  // Turbopack is enabled by default in Next.js 16.
+  // The @ alias is resolved automatically via tsconfig.json paths —
+  // no custom webpack alias needed. Setting turbopack: {} silences
+  // the "webpack config with no turbopack config" build error.
+  turbopack: {},
+
   images: {
     remotePatterns: [
       {
