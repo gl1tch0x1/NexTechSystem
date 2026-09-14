@@ -97,3 +97,19 @@ export function truncateText(text: string, maxLength: number): string {
   if (!text || text.length <= maxLength) return text;
   return `${text.slice(0, maxLength)}...`;
 }
+
+/**
+ * Sanitizes a string to prevent CSV Formula Injection (CWE-1236)
+ * If a cell begins with =, +, -, @, \t, or \r, it prepends a single quote (').
+ */
+export function sanitizeCsvField(val: string | number | undefined | null): string {
+  if (val === undefined || val === null) return '""';
+  const str = String(val);
+  const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+  let sanitized = str;
+  if (dangerousChars.some(char => sanitized.startsWith(char))) {
+    sanitized = `'${sanitized}`;
+  }
+  return `"${sanitized.replace(/"/g, '""')}"`;
+}
+

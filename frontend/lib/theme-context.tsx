@@ -18,42 +18,71 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    // Read saved theme from localStorage
-    const saved = localStorage.getItem('nextech_theme') as Theme | null;
-    const initialTheme: Theme = saved || 'dark';
-    setThemeState(initialTheme);
-    applyTheme(initialTheme);
-    setMounted(true);
-  }, []);
-
   const applyTheme = (t: Theme) => {
+    if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    const effective: 'light' | 'dark' =
-      t === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : t;
-
+    const isSystemDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effective: 'light' | 'dark' = t === 'system' ? (isSystemDark ? 'dark' : 'light') : t;
 
     setResolvedTheme(effective);
 
     if (effective === 'dark') {
       root.classList.add('dark');
       root.classList.remove('light');
+      root.setAttribute('data-theme', 'dark');
+      root.style.colorScheme = 'dark';
     } else {
       root.classList.remove('dark');
       root.classList.add('light');
+      root.setAttribute('data-theme', 'light');
+      root.style.colorScheme = 'light';
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('nextech-theme-changed', { detail: { theme: t, resolvedTheme: effective } }));
     }
   };
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('nextech_theme') as Theme | null;
+      let initial: Theme;
+      if (saved === 'light' || saved === 'dark' || saved === 'system') {
+        initial = saved;
+      } else {
+        const hasDarkClass = document.documentElement.classList.contains('dark');
+        initial = hasDarkClass ? 'dark' : 'light';
+      }
+      setThemeState(initial);
+      applyTheme(initial);
+    } catch {
+      applyTheme('dark');
+    }
+    setMounted(true);
+
+    // Listen for system color-scheme changes if theme is 'system'
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemChange = (e: MediaQueryListEvent) => {
+      const saved = localStorage.getItem('nextech_theme');
+      if (saved === 'system') {
+        applyTheme('system');
+      }
+    };
+    mediaQuery.addEventListener('change', handleSystemChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemChange);
+  }, []);
+
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('nextech_theme', newTheme);
+    try {
+      localStorage.setItem('nextech_theme', newTheme);
+    } catch {}
     applyTheme(newTheme);
   };
 
   const toggleTheme = () => {
-    const next = resolvedTheme === 'dark' ? 'light' : 'dark';
+    const isCurrentlyDark = document.documentElement.classList.contains('dark');
+    const next: Theme = isCurrentlyDark ? 'light' : 'dark';
     setTheme(next);
   };
 

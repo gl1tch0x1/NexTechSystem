@@ -12,6 +12,8 @@ import securityRoutes from './security.routes.js';
 import specificationRoutes from './specification.routes.js';
 import currencyRoutes from './currency.routes.js';
 import vatRoutes from './vat.routes.js';
+import warrantyRoutes from './warranty.routes.js';
+import quoteRoutes from './quote.routes.js';
 
 const router = Router();
 
@@ -28,6 +30,8 @@ router.use('/security', securityRoutes);
 router.use('/specifications', specificationRoutes);
 router.use('/currencies', currencyRoutes);
 router.use('/vat', vatRoutes);
+router.use('/warranty', warrantyRoutes);
+router.use('/quotes', quoteRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {

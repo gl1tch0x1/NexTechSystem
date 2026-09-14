@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
-  Sparkles,
   Layers,
   ShoppingCart,
   Clock,
@@ -34,7 +33,6 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Server,
   HardDrive,
   Layers,
-  Sparkles
 };
 
 export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
@@ -132,13 +130,6 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Enterprise Narrative */}
           <div className="lg:col-span-6 space-y-6">
-            {/* Top Chip */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-tech-blue/10 dark:bg-tech-blue/20 border border-tech-blue/30 text-tech-blue dark:text-tech-cyan text-xs font-extrabold tracking-wide uppercase shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-tech-cyan animate-ping" />
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Next-Gen Enterprise Computing Platform</span>
-            </div>
-
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.08] sm:leading-[1.06]">
               Mission-Critical <br />

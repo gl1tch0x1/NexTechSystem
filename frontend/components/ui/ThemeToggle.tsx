@@ -2,82 +2,73 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '@/lib/theme-context';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
-interface ThemeToggleProps {
-  variant?: 'icon' | 'segmented';
+export interface ThemeToggleProps {
   className?: string;
 }
 
-export function ThemeToggle({ variant = 'icon', className = '' }: ThemeToggleProps) {
-  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
+/**
+ * Professional Theme Toggle Icon Button
+ * Matches the exact design and layout from the specification image:
+ * - Sits seamlessly alongside the Wishlist (Heart) button with matching dimensions and radius
+ * - In Light Mode: Shows the sleek Moon (☾) icon in tech-blue
+ * - In Dark Mode: Shows the sleek Sun (☀️) icon in radiant amber
+ * - Smooth micro-animations on hover and click
+ * - Immediate zero-latency DOM updates with SSR/hydration safety
+ */
+export function ThemeToggle({ className = '' }: ThemeToggleProps) {
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (variant === 'segmented') {
-    return (
-      <div className={`inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs ${className}`}>
-        <button
-          type="button"
-          onClick={() => setTheme('light')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold transition-all ${
-            mounted && theme === 'light'
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-          }`}
-          title="Light Theme"
-        >
-          <Sun className="w-3.5 h-3.5 text-amber-500" />
-          <span>Light</span>
-        </button>
+  const isDark = mounted ? (theme === 'system' ? resolvedTheme === 'dark' : theme === 'dark') : false;
 
-        <button
-          type="button"
-          onClick={() => setTheme('dark')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold transition-all ${
-            mounted && theme === 'dark'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-          }`}
-          title="Dark Theme"
-        >
-          <Moon className="w-3.5 h-3.5 text-tech-cyan" />
-          <span>Dark</span>
-        </button>
+  const handleToggle = () => {
+    const next = isDark ? 'light' : 'dark';
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      if (next === 'dark') {
+        root.classList.add('dark');
+        root.classList.remove('light');
+        if (document.body) {
+          document.body.classList.add('dark');
+          document.body.classList.remove('light');
+        }
+        root.setAttribute('data-theme', 'dark');
+        root.style.colorScheme = 'dark';
+      } else {
+        root.classList.remove('dark');
+        root.classList.add('light');
+        if (document.body) {
+          document.body.classList.remove('dark');
+          document.body.classList.add('light');
+        }
+        root.setAttribute('data-theme', 'light');
+        root.style.colorScheme = 'light';
+      }
+    }
+    setTheme(next);
+  };
 
-        <button
-          type="button"
-          onClick={() => setTheme('system')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold transition-all ${
-            mounted && theme === 'system'
-              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
-              : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-          }`}
-          title="System Sync"
-        >
-          <Monitor className="w-3.5 h-3.5 text-purple-400" />
-          <span>Auto</span>
-        </button>
-      </div>
-    );
-  }
-
-  // Icon Button (Always renders visible icon with zero skeleton delay/flash)
   return (
     <button
       type="button"
-      onClick={toggleTheme}
-      className={`relative p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm flex items-center justify-center shrink-0 ${className}`}
-      title={mounted ? (resolvedTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode') : 'Toggle Theme'}
-      aria-label="Toggle Theme"
+      onClick={handleToggle}
+      aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      title={mounted ? (isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode') : 'Toggle Theme'}
+      className={`group relative p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm flex items-center justify-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tech-blue/50 ${className}`}
     >
-      {/* Visible in dark mode, hidden in light mode */}
-      <Sun className="w-4 h-4 text-amber-400 hidden dark:block transition-transform duration-300 hover:rotate-45" />
-      {/* Visible in light mode, hidden in dark mode */}
-      <Moon className="w-4 h-4 text-tech-blue block dark:hidden transition-transform duration-300 hover:-rotate-12" />
+      {/* Light Mode: Displays Moon (☾) icon in tech-blue */}
+      <Moon className="w-4 h-4 text-tech-blue dark:hidden transition-transform duration-300 group-hover:-rotate-12" />
+
+      {/* Dark Mode: Displays Sun (☀️) icon in amber */}
+      <Sun className="w-4 h-4 text-amber-400 hidden dark:block transition-transform duration-300 group-hover:rotate-45" />
+
+      <span className="sr-only">Toggle theme</span>
     </button>
   );
 }

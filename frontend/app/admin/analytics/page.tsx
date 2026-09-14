@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice, formatDate, sanitizeCsvField } from '@/lib/utils';
 import CloudflareShieldBadge from '@/components/security/CloudflareShieldBadge';
 import {
   TrendingUp,
@@ -65,18 +65,23 @@ export default function AdminAnalyticsPage() {
   const handleExportCSV = () => {
     if (!analytics) return;
     const rows = [
-      ['Metric', 'Value'],
-      ['Time Range', timeRange],
-      ['Gross Revenue (AED)', analytics.kpis?.grossRevenue || 0],
-      ['Net Revenue (AED)', analytics.kpis?.netRevenue || 0],
-      ['Total Paid Orders', analytics.kpis?.totalOrders || 0],
-      ['Total Units Sold', analytics.kpis?.totalUnitsSold || 0],
-      ['Average Order Value (AED)', analytics.kpis?.averageOrderValue || 0],
-      ['Conversion Rate (%)', analytics.kpis?.conversionRate || 0],
-      ['Live Active Users', analytics.trafficAnalytics?.realTimeActiveUsers || 0],
+      ['Metric', 'Value'].map(sanitizeCsvField),
+      ['Time Range', timeRange].map(sanitizeCsvField),
+      [sanitizeCsvField('Gross Revenue (AED)'), analytics.kpis?.grossRevenue || 0],
+      [sanitizeCsvField('Net Revenue (AED)'), analytics.kpis?.netRevenue || 0],
+      [sanitizeCsvField('Total Paid Orders'), analytics.kpis?.totalOrders || 0],
+      [sanitizeCsvField('Total Units Sold'), analytics.kpis?.totalUnitsSold || 0],
+      [sanitizeCsvField('Average Order Value (AED)'), analytics.kpis?.averageOrderValue || 0],
+      [sanitizeCsvField('Conversion Rate (%)'), analytics.kpis?.conversionRate || 0],
+      [sanitizeCsvField('Live Active Users'), analytics.trafficAnalytics?.realTimeActiveUsers || 0],
       [],
-      ['Top Selling Products', 'SKU', 'Units Sold', 'Revenue (AED)'],
-      ...(analytics.topModels || []).map((p: any) => [p.name, p.sku, p.unitsSold, p.revenue]),
+      ['Top Selling Products', 'SKU', 'Units Sold', 'Revenue (AED)'].map(sanitizeCsvField),
+      ...(analytics.topModels || []).map((p: any) => [
+        sanitizeCsvField(p.name),
+        sanitizeCsvField(p.sku),
+        p.unitsSold || 0,
+        p.revenue || 0,
+      ]),
     ];
 
     const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(e => e.join(',')).join('\n');

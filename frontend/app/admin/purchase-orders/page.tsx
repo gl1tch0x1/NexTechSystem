@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { getApiUrl } from '@/lib/api-client';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice, formatDate, sanitizeCsvField } from '@/lib/utils';
 import { PurchaseOrder, POStatus } from '@/types';
 import {
   Server,
@@ -21,7 +21,10 @@ import {
   ArrowRight,
   ShieldCheck,
   PackageCheck,
-  Ban
+  Ban,
+  X,
+  Barcode,
+  Loader2,
 } from 'lucide-react';
 
 export default function AdminPurchaseOrdersPage() {
@@ -33,6 +36,9 @@ export default function AdminPurchaseOrdersPage() {
   const [threshold, setThreshold] = useState(10);
   const [expandedPoId, setExpandedPoId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [receivingPo, setReceivingPo] = useState<PurchaseOrder | null>(null);
+  const [receivingItems, setReceivingItems] = useState<Record<string, { receivedQuantity: number; serialNumbers: string }>>({});
+  const [isReceivingSubmit, setIsReceivingSubmit] = useState(false);
 
   const fetchPOs = async () => {
     try {
@@ -92,6 +98,68 @@ export default function AdminPurchaseOrdersPage() {
     }
   };
 
+  const handleOpenReceiveModal = (po: PurchaseOrder) => {
+    setReceivingPo(po);
+    const initial: Record<string, { receivedQuantity: number; serialNumbers: string }> = {};
+    po.items.forEach(it => {
+      initial[it.sku] = {
+        receivedQuantity: it.orderedQuantity || it.quantity || 1,
+        serialNumbers: (it.serialNumbers || []).join(', '),
+      };
+    });
+    setReceivingItems(initial);
+  };
+
+  const handleConfirmReceive = async () => {
+    if (!receivingPo) return;
+    try {
+      setIsReceivingSubmit(true);
+      const itemsPayload = receivingPo.items.map(it => {
+        const entry = receivingItems[it.sku] || {
+          receivedQuantity: it.orderedQuantity || it.quantity || 1,
+          serialNumbers: '',
+        };
+        const snList = entry.serialNumbers
+          .split(/[\n,]+/)
+          .map(s => s.trim().toUpperCase())
+          .filter(Boolean);
+        return {
+          sku: it.sku,
+          receivedQuantity: entry.receivedQuantity,
+          serialNumbers: snList,
+        };
+      });
+
+      const res = await fetch(getApiUrl(`/admin/purchase-orders/${receivingPo.id}/status`), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: 'RECEIVED',
+          items: itemsPayload,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || 'Failed to receive PO');
+      }
+
+      setStatusMessage({
+        type: 'success',
+        text: `PO ${receivingPo.poNumber} successfully received! Hardware stock incremented and Weighted Average Cost recalibrated.`,
+      });
+      setReceivingPo(null);
+      fetchPOs();
+    } catch (err: any) {
+      alert(err.message || 'Failed to process PO receipt');
+    } finally {
+      setIsReceivingSubmit(false);
+    }
+  };
+
   const handleUpdateStatus = async (id: string, newStatus: POStatus) => {
     try {
       setUpdatingId(id);
@@ -130,9 +198,9 @@ export default function AdminPurchaseOrdersPage() {
   const exportPoCsv = (po: PurchaseOrder) => {
     const headers = ['PO Number', 'SKU', 'Product Name', 'Quantity', 'Unit Cost', 'Subtotal'];
     const rows = po.items.map(it => [
-      po.poNumber,
-      `"${it.sku}"`,
-      `"${(it.name || it.title || 'Product').replace(/"/g, '""')}"`,
+      sanitizeCsvField(po.poNumber),
+      sanitizeCsvField(it.sku),
+      sanitizeCsvField(it.name || it.title || 'Product'),
       it.quantity ?? it.orderedQuantity ?? 0,
       it.unitCost,
       it.subtotal ?? it.totalCost ?? 0,
@@ -335,9 +403,9 @@ export default function AdminPurchaseOrdersPage() {
 
                       {po.status === 'ISSUED' && (
                         <button
-                          onClick={() => handleUpdateStatus(po.id, 'RECEIVED')}
+                          onClick={() => handleOpenReceiveModal(po)}
                           disabled={isUpdating}
-                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                         >
                           <PackageCheck className="w-3.5 h-3.5" />
                           <span>Receive &amp; Stock In</span>
@@ -413,6 +481,144 @@ export default function AdminPurchaseOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* PO Receiving & Hardware Serial Inward Modal */}
+      {receivingPo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <PackageCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white">
+                      Inward Receiving &amp; Serial Assignment
+                    </h3>
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
+                      {receivingPo.poNumber}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Vendor: {receivingPo.supplierName} | Destination: {receivingPo.destinationLocation || 'Dubai Logistics'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setReceivingPo(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-5 text-xs">
+              <div className="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-blue-800 dark:text-blue-300 flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 shrink-0 text-blue-600 mt-0.5" />
+                <div className="leading-relaxed">
+                  Confirming inward stock will dynamically recalculate each component&apos;s <strong>Weighted Average Cost (WAC)</strong> basis and enroll hardware serial numbers into the warranty verification database.
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                  Inbound Hardware Line Items
+                </div>
+
+                {receivingPo.items.map((item, idx) => {
+                  const entry = receivingItems[item.sku] || {
+                    receivedQuantity: item.orderedQuantity || item.quantity || 1,
+                    serialNumbers: '',
+                  };
+                  return (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <div className="font-bold text-slate-900 dark:text-white text-xs">
+                            {item.name || item.title}
+                          </div>
+                          <div className="font-mono text-[11px] text-slate-400">
+                            SKU: {item.sku} | Unit Cost: {formatPrice(item.unitCost)}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className="text-slate-500">Ordered: <strong>{item.orderedQuantity || item.quantity}</strong></span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-700 dark:text-slate-300">Received:</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max={999}
+                              value={entry.receivedQuantity}
+                              onChange={(e) => {
+                                const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                setReceivingItems({
+                                  ...receivingItems,
+                                  [item.sku]: { ...entry, receivedQuantity: val },
+                                });
+                              }}
+                              className="w-16 px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono font-bold text-center"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5">
+                          <Barcode className="w-3.5 h-3.5 text-purple-500" />
+                          <span>Assign Inward Hardware Serial Numbers (Comma or Newline separated)</span>
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={entry.serialNumbers}
+                          onChange={(e) => {
+                            setReceivingItems({
+                              ...receivingItems,
+                              [item.sku]: { ...entry, serialNumbers: e.target.value },
+                            });
+                          }}
+                          placeholder={`e.g. SN-${item.sku.slice(0, 6)}-001, SN-${item.sku.slice(0, 6)}-002`}
+                          className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-mono text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between">
+              <button
+                onClick={() => setReceivingPo(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirmReceive}
+                disabled={isReceivingSubmit}
+                className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isReceivingSubmit ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )}
+                <span>Confirm Inward &amp; Recalibrate WAC</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

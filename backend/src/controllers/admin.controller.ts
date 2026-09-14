@@ -269,8 +269,8 @@ export class AdminController {
 
   async updateOrderStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
-    const { status, note } = req.body;
-    const updated = await orderService.updateOrderStatus(id, status, note, req.user?.id);
+    const { status, note, items } = req.body;
+    const updated = await orderService.updateOrderStatus(id, status, note, req.user?.id, items);
     await auditService.log({
       userId: req.user?.id || 'admin',
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
@@ -278,7 +278,7 @@ export class AdminController {
       action: 'ADMIN_ORDER_STATUS_UPDATED',
       resource: 'order',
       resourceId: id,
-      details: { newStatus: status, note },
+      details: { newStatus: status, note, itemsCount: items?.length },
     });
     res.json({ success: true, data: updated });
   }
@@ -693,7 +693,7 @@ export class AdminController {
 
   async updatePOStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
-    const { status, receivedNotes } = req.body;
+    const { status, receivedNotes, items: receivedItems } = req.body;
 
     const existing = await purchaseOrderRepository.findById(id);
     if (!existing) {
@@ -706,22 +706,41 @@ export class AdminController {
       updatedAt: new Date().toISOString(),
     };
 
+    if (receivedItems && Array.isArray(receivedItems) && receivedItems.length > 0) {
+      updates.items = receivedItems;
+    }
+
     if (status === 'ISSUED' && !existing.issuedAt) {
       updates.issuedAt = new Date().toISOString();
     }
 
     if (status === 'RECEIVED' && !existing.receivedAt) {
       updates.receivedAt = new Date().toISOString();
-      // Automatically increment product stock for all items in the received PO
-      for (const item of existing.items) {
+      const activeItems = (receivedItems && receivedItems.length > 0) ? receivedItems : existing.items;
+
+      // Automatically increment stock and recalculate Weighted Average Cost (WAC)
+      for (const item of activeItems) {
         try {
           const prod = await productRepository.findById(item.productId);
           if (prod) {
-            const newStock = prod.stock + item.orderedQuantity;
-            await productRepository.update(item.productId, { stock: newStock });
+            const currentStock = Math.max(0, prod.stock || 0);
+            const currentCost = prod.costPrice || Math.round(prod.price * 0.75);
+            const incomingQty = item.receivedQuantity !== undefined ? item.receivedQuantity : (item.orderedQuantity || item.quantity || 0);
+            const incomingCost = item.unitCost || 0;
+            const newStock = currentStock + incomingQty;
+
+            // Weighted Average Cost Formula: ((Current Stock * Current Cost) + (Incoming Qty * Unit Cost)) / New Total Stock
+            const newCostPrice = newStock > 0
+              ? Math.round(((currentStock * currentCost) + (incomingQty * incomingCost)) / newStock)
+              : incomingCost;
+
+            await productRepository.update(item.productId, {
+              stock: newStock,
+              costPrice: newCostPrice,
+            });
           }
         } catch (err) {
-          console.error(`Failed to increment stock for product ${item.productId}:`, err);
+          console.error(`Failed to update stock and WAC for product ${item.productId}:`, err);
         }
       }
     }

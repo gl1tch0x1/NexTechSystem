@@ -957,35 +957,105 @@ node scratch/test-endpoints.js
 
 ## Security Hardening and Defense Architecture
 
-1. **Cryptographic Password Protection**:
-   - Password hashing utilizes PBKDF2 with 100,000 iterations, 64-byte key length, and SHA-512 digest.
-   - Salt values are configurable via the `PASSWORD_SALT` environment variable.
-   - Passwords are required upon registration with length and complexity enforcement.
-   - Controller responses strip password hashes using dedicated sanitization helpers (`sanitizeUser()`).
+> **Last Security Audit**: September 2026 — Full OWASP Top 10 review completed. All identified vulnerabilities patched.
 
-2. **Secondary Administrative PIN Security**:
-   - High-value wallet adjustments (> 2,500 AED) and privileged actions enforce a secondary administrative PIN check.
-   - Verification uses constant-time comparison (`timingSafeEqual`) to prevent timing side-channel attacks.
-   - System PIN is parameterizable via `ADMIN_SECURITY_PIN` without hardcoded fallback exposure.
+### OWASP Top 10 Coverage
 
-3. **Insecure Direct Object Reference (IDOR) Mitigation**:
-   - `/api/orders/:orderId/ebill` and `/api/orders/:id` verify ownership:
-     - `CUSTOMER`: Can only query invoices associated with their own user identifier.
-     - `RESELLER`: Can only view orders containing products provisioned by their vendor ID.
-     - `ADMIN`: Maintains global access for operational review.
-
-4. **Tax Summary Access Control**:
-   - The UAE FTA VAT 201 accounting calculation endpoint (`/api/vat/summary`) is protected with JWT authentication and strict `ADMIN` role-based access control.
-
-5. **Edge Rate Limiting and Bot Mitigation**:
-   - Route-level sliding-window rate limiters prevent brute-force attacks across authentication, orders, and administrative endpoints.
-   - Cloudflare Turnstile token validation blocks automated scraping and scripted abuse.
-
-6. **Input Sanitization and Inventory Integrity**:
-   - Strict numeric validation (`1 <= quantity <= 999`) prevents negative-quantity cart manipulation.
-   - Wallet top-ups enforce positive finite thresholds with currency precision rounding.
+| # | OWASP Category | Status | Controls Applied |
+|---|---------------|--------|-----------------|
+| A01 | Broken Access Control | ✅ Patched | RBAC (`requireRole`), IDOR checks on orders/e-bills/reseller resources, cross-tenant isolation (`requireResellerTenant`) |
+| A02 | Cryptographic Failures | ✅ Patched | PBKDF2 with **per-user random salts** (32 bytes), 100,000 iterations, SHA-512 digest, timing-safe comparison, zero-downtime hash migration |
+| A03 | Injection | ✅ Patched | CSV injection sanitization (`sanitizeCsvField`), input length caps, email format validation (RFC 5322), malicious bot UA blocking |
+| A04 | Insecure Design | ✅ Patched | Turnstile fail-closed posture (errors deny access), security telemetry behind ADMIN auth, IP validation before rate-key use |
+| A05 | Security Misconfiguration | ✅ Patched | Helmet headers, strict CORS origin whitelist, `JWT_SECRET` hard-fails in production without env var, demo-mode Turnstile bypass disabled in production |
+| A06 | Vulnerable Components | ✅ Monitored | Dependabot active (`.github/dependabot.yml`), CodeQL scanning (`.github/workflows/codeql.yml`) |
+| A07 | Authentication Failures | ✅ Patched | Brute-force rate limiting (`authLimiter` 60 req/15min), minimum 8-char passwords, max 128-char limit (DoS prevention), account deactivation check, timing-safe login |
+| A08 | Software & Data Integrity | ✅ Patched | Audit log on all privileged mutations, WAC stock recalibration validated on PO receipt, `sanitizeUser()` strips password hashes in all API responses |
+| A09 | Security Logging & Monitoring | ✅ Implemented | `auditService` logs all ADMIN actions, role violation attempts, cross-tenant breach attempts, backup/restore events; Cloudflare telemetry |
+| A10 | SSRF | ✅ N/A | No server-side URL-fetching from user-controlled input |
 
 ---
+
+### 1. Per-User Cryptographic Password Protection (CWE-760 Fix)
+
+- **Previous**: All passwords shared a single global PBKDF2 salt, enabling precomputed rainbow table attacks against the database.
+- **Fixed**: Each password now receives a unique 32-byte cryptographically random salt generated via `crypto.randomBytes(32)`. The salt is stored inline as `<salt>:<hash>` — no separate salt column required.
+- **Migration**: Existing users on the legacy hash format are transparently migrated to per-user salts on their next successful login (zero-downtime, zero user disruption).
+- Password constraints: minimum **8 characters**, maximum **128 characters**.
+- Controller responses strip password hashes using `sanitizeUser()` across all auth endpoints.
+
+### 2. Authentication and Session Security
+
+- **JWT**: Tokens signed with `JWT_SECRET` (required in production or server refuses to start). Expiry: 30 days.
+- **Timing-safe comparison**: All password verification uses `crypto.timingSafeEqual` preventing timing oracle attacks.
+- **Rate limiting**: `authLimiter` (60 req/15-min window, applied globally via `router.use()` — not per-route to prevent double-counting).
+- **Account status checks**: Deactivated accounts (`isActive: false`) are rejected at both login and JWT validation (re-checked against DB on every authenticated request).
+- **Reseller subdomain verification**: Reseller logins validate their `resellerCode` matches the tenant portal.
+
+### 3. Insecure Direct Object Reference (IDOR) — A01 Coverage
+
+- **`GET /api/orders/:id`** — CUSTOMER role restricted to own `userId`; RESELLER restricted to orders containing their `resellerId`; ADMIN unrestricted.
+- **`GET /api/orders/:orderId/ebill`** — Same ownership enforcement as above.
+- **`PUT/DELETE /api/reseller/products/:id`** — Product ownership verified against `resellerId` from authenticated token before allowing modification or deletion.
+- **Admin routes** — All admin operations require `ADMIN` role enforced at the router level with an `adminLimiter` + `authenticate` + `requireRole('ADMIN')` chain applied globally.
+
+### 4. Cloudflare Turnstile Fail-Closed Security (CWE-285 Fix)
+
+- **Previous**: A network error during Turnstile verification silently granted access ("graceful fallback").
+- **Fixed**: Errors now deny access by default (fail-closed). The catch block returns `{ success: false }`.
+- Demo bypass token (`demo_verified_token_2026`) is only accepted in `development`/`test` environments. In production it is blocked.
+
+### 5. IP Extraction and Rate Limit Integrity
+
+- **Previous**: `getClientIp()` trusted any `x-forwarded-for` header value, enabling IP spoofing to bypass rate limits.
+- **Fixed**: IP strings are validated against IPv4/IPv6 format before use. In production with Cloudflare enabled, only the `cf-connecting-ip` header (injected by Cloudflare's edge, un-spoofable by clients) is trusted.
+
+### 6. Security Telemetry Access Control
+
+- **Previous**: `GET /api/security/cloudflare-status` was publicly accessible, exposing attack statistics, blocked threat counts, and rate limit violations.
+- **Fixed**: Endpoint now requires JWT authentication (`authenticate`) and `ADMIN` role (`requireRole('ADMIN')`).
+
+### 7. Input Validation and Data Integrity
+
+- **Email**: RFC 5322 simplified regex + 254-character maximum on registration.
+- **Name**: 2–100 character bounds.
+- **Phone**: Truncated to 20 characters.
+- **Username**: Alphanumeric + underscore only, 30-character maximum.
+- **Wallet adjustments**: Capped at 1,000,000 AED with `Number.isFinite()` check; precision rounded to 2 decimal places.
+- **CSV Export**: All dynamic data sanitized via `sanitizeCsvField()` (strips `=`, `+`, `-`, `@` formula prefixes — CWE-1236).
+
+### 8. Global Security Headers (Helmet + Custom)
+
+All responses include:
+```
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+```
+
+### 9. CORS and Origin Control
+
+- Explicit origin whitelist via `ALLOWED_ORIGINS` environment variable.
+- Non-whitelisted origins receive a hard rejection (not a wildcard fallback).
+- `credentials: true` with restricted allowed headers.
+
+### 10. Rate Limiting Architecture
+
+| Limiter | Window | Limit | Applied To |
+|---------|--------|-------|-----------|
+| `apiLimiter` | 15 min | 300 req | All `/api/*` routes globally |
+| `authLimiter` | 15 min | 60 req | Auth routes (register, login, google, me) |
+| `orderLimiter` | 15 min | 100 req | Order creation and lookup |
+| `walletLimiter` | 15 min | 60 req | Wallet balance and top-up |
+| `resellerLimiter` | 15 min | 200 req | Reseller portal operations |
+| `adminLimiter` | 15 min | 300 req | Admin command center |
+| `securityLimiter` | 15 min | 100 req | Turnstile verification |
+| DDoS sliding window | 1 min | 120 req (prod) | All requests (in-memory per-IP) |
+
+---
+
 
 ## Vercel and Cloud Deployment
 

@@ -31,7 +31,8 @@ import {
   BarChart3,
   TrendingUp,
   Menu,
-  X
+  X,
+  FileText,
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -75,6 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       title: 'SALES & PROCUREMENT',
       items: [
         { href: '/admin/orders', label: 'Customer Sales Orders', icon: ShoppingBag },
+        { href: '/admin/quotes', label: 'B2B Quotes Engine', icon: FileText },
         { href: '/admin/purchase-orders', label: 'Supplier Purchase Orders', icon: Server },
         { href: '/admin/customers', label: 'Customers & Wallets', icon: Users },
         { href: '/admin/resellers', label: 'Reseller Network', icon: Store },

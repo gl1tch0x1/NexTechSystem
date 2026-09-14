@@ -206,7 +206,7 @@ export class OrderService {
     return orderRepository.find({ orderBy: { field: 'createdAt', direction: 'desc' } });
   }
 
-  async updateOrderStatus(orderId: string, status: OrderStatus, note?: string, adminUserId?: string): Promise<Order | null> {
+  async updateOrderStatus(orderId: string, status: OrderStatus, note?: string, adminUserId?: string, items?: OrderItem[]): Promise<Order | null> {
     const order = await orderRepository.findById(orderId);
     if (!order) return null;
 
@@ -220,11 +220,17 @@ export class OrderService {
       },
     ];
 
-    const updated = await orderRepository.update(orderId, {
+    const updates: any = {
       orderStatus: status,
       paymentStatus: status === 'DELIVERED' && order.paymentMethod === 'COD' ? 'PAID' : order.paymentStatus,
       statusHistory: newHistory,
-    });
+    };
+
+    if (items && Array.isArray(items) && items.length > 0) {
+      updates.items = items;
+    }
+
+    const updated = await orderRepository.update(orderId, updates);
 
     if (adminUserId) {
       const actingAdmin = await userRepository.findById(adminUserId);

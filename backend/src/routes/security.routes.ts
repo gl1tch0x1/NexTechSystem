@@ -5,6 +5,8 @@ import {
   getClientIp,
 } from '../middlewares/cloudflare-security.middleware.js';
 import { securityLimiter } from '../middlewares/rate-limiter.middleware.js';
+import { authenticate } from '../middleware/auth.js';
+import { requireRole } from '../middleware/rbac.js';
 
 const router = Router();
 
@@ -15,7 +17,7 @@ router.use(securityLimiter);
  * @route POST /api/security/verify-turnstile
  * @desc Verify Cloudflare Turnstile bot check challenge token
  */
-router.post('/verify-turnstile', securityLimiter, async (req: Request, res: Response) => {
+router.post('/verify-turnstile', async (req: Request, res: Response) => {
   const { token } = req.body;
   const clientIp = getClientIp(req);
 
@@ -50,9 +52,9 @@ router.post('/verify-turnstile', securityLimiter, async (req: Request, res: Resp
 
 /**
  * @route GET /api/security/cloudflare-status
- * @desc Real-time Cloudflare CDN & Anti-DDoS Security status
+ * @desc Real-time Cloudflare CDN & Anti-DDoS Security status (Admin only)
  */
-router.get('/cloudflare-status', (req: Request, res: Response) => {
+router.get('/cloudflare-status', authenticate, requireRole('ADMIN'), (req: Request, res: Response) => {
   const clientIp = getClientIp(req);
   const cfRay = req.headers['cf-ray'] || `ray_${Date.now().toString(36)}`;
   const cfCountry = req.headers['cf-ipcountry'] || 'AE';

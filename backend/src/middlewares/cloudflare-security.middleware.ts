@@ -52,21 +52,54 @@ const LEGITIMATE_CRAWLERS = [
 ];
 
 /**
- * Extract true client IP across Cloudflare reverse proxy headers
+ * Validate whether a string looks like a plausible IP address (IPv4 or IPv6).
+ * Used to prevent header injection / IP spoofing in rate limiting.
+ */
+function isValidIp(ip: string): boolean {
+  if (!ip || ip.length > 45) return false;
+  // IPv4
+  const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+  if (ipv4.test(ip)) {
+    return ip.split('.').every(seg => parseInt(seg, 10) <= 255);
+  }
+  // IPv6 (simplified: allows :: and hex groups)
+  const ipv6 = /^[0-9a-fA-F:]{2,39}$/;
+  return ipv6.test(ip);
+}
+
+/**
+ * Extract true client IP across Cloudflare reverse proxy headers.
+ * Only trust cf-connecting-ip (set by Cloudflare) and falls back to
+ * x-real-ip / x-forwarded-for only in non-production environments
+ * to prevent IP spoofing attacks in Cloudflare-protected deployments.
  */
 export function getClientIp(req: Request): string {
+  // Cloudflare injects this header and it cannot be spoofed by clients
   const cfIp = req.headers['cf-connecting-ip'];
-  if (typeof cfIp === 'string' && cfIp.trim()) {
-    return cfIp.trim();
+  if (typeof cfIp === 'string') {
+    const clean = cfIp.trim();
+    if (clean && isValidIp(clean)) return clean;
   }
+
+  // In production behind Cloudflare, we do NOT fall back to user-controlled headers
+  // to prevent rate limit bypass via IP spoofing.
+  if (process.env.NODE_ENV === 'production' && process.env.CLOUDFLARE_SECURITY_ENABLED !== 'false') {
+    return req.socket.remoteAddress || '127.0.0.1';
+  }
+
+  // Development / staging: allow standard proxy headers
   const xRealIp = req.headers['x-real-ip'];
-  if (typeof xRealIp === 'string' && xRealIp.trim()) {
-    return xRealIp.trim();
+  if (typeof xRealIp === 'string') {
+    const clean = xRealIp.trim();
+    if (clean && isValidIp(clean)) return clean;
   }
+
   const xForwardedFor = req.headers['x-forwarded-for'];
   if (typeof xForwardedFor === 'string' && xForwardedFor.trim()) {
-    return xForwardedFor.split(',')[0].trim();
+    const firstIp = xForwardedFor.split(',')[0].trim();
+    if (isValidIp(firstIp)) return firstIp;
   }
+
   return req.socket.remoteAddress || '127.0.0.1';
 }
 
@@ -161,12 +194,21 @@ export function cloudflareSecurityMiddleware(req: Request, res: Response, next: 
  * Verify Cloudflare Turnstile Bot Check Token
  */
 export async function verifyCloudflareTurnstile(token: string, remoteIp?: string): Promise<{ success: boolean; message?: string }> {
-  const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '0x4AAAAAAAx_DEMO_SECRET_KEY_2026';
+  const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '';
 
-  // Demo / local bypass mode
-  if (secretKey.includes('DEMO') || !token || token === 'demo_verified_token_2026') {
+  // Demo / local bypass mode: only allowed outside of production
+  const isDemoKey = !secretKey || secretKey.includes('DEMO');
+  const isDemoBypass = token === 'demo_verified_token_2026';
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if ((isDemoKey || isDemoBypass) && !isProduction) {
     securityTelemetry.turnstileVerifications++;
     return { success: true };
+  }
+
+  // In production, a missing secret key is a hard failure
+  if (!secretKey || isDemoKey) {
+    return { success: false, message: 'Turnstile is not configured on this server. Contact the administrator.' };
   }
 
   try {
@@ -189,8 +231,9 @@ export async function verifyCloudflareTurnstile(token: string, remoteIp?: string
       return { success: false, message: 'Cloudflare Turnstile token validation failed' };
     }
   } catch (err: any) {
-    console.error('Cloudflare Turnstile verification error:', err);
-    // Graceful fallback for resilient uptime
-    return { success: true, message: 'Turnstile fallback verification granted' };
+    // Fail-closed: a network error during verification does NOT grant access.
+    // Log the error for observability but deny access to prevent bypass-by-error.
+    console.error('[Turnstile] Verification request failed (fail-closed):', err?.message || err);
+    return { success: false, message: 'Turnstile verification service unavailable. Please retry.' };
   }
 }

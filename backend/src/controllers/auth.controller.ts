@@ -10,13 +10,55 @@ import { ENV } from '../config/env.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { User } from '../types/index.js';
 
-const PBKDF2_SALT = ENV.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026';
 const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_KEYLEN = 64;
 const PBKDF2_DIGEST = 'sha512';
 
-function hashPassword(password: string): string {
-  return crypto.pbkdf2Sync(password, PBKDF2_SALT, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
+/**
+ * Generate a secure, per-user random salt for password hashing.
+ * Returns hex-encoded 32-byte salt.
+ */
+function generateSalt(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+/**
+ * Hash a password with PBKDF2 using a per-user salt.
+ * Stores as "<salt>:<hash>" to keep the salt co-located with the hash.
+ * The legacy global-salt format (64-char hex without a colon) is handled transparently
+ * via verifyPassword() to allow existing users to log in and get their hash upgraded.
+ */
+function hashPassword(password: string, salt?: string): string {
+  const effectiveSalt = salt || generateSalt();
+  const hash = crypto.pbkdf2Sync(password, effectiveSalt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
+  return `${effectiveSalt}:${hash}`;
+}
+
+/**
+ * Verify a candidate password against a stored hash.
+ * Supports both the new "salt:hash" format and the legacy global-salt format
+ * to enable zero-downtime migration of existing accounts.
+ */
+function verifyPassword(candidate: string, stored: string): boolean {
+  if (!stored) return false;
+
+  if (stored.includes(':')) {
+    // New format: "<salt>:<hash>"
+    const colonIdx = stored.indexOf(':');
+    const salt = stored.slice(0, colonIdx);
+    const expectedHash = stored.slice(colonIdx + 1);
+    const candidateHash = crypto.pbkdf2Sync(candidate, salt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
+    const storedBuf = Buffer.from(expectedHash, 'hex');
+    const candidateBuf = Buffer.from(candidateHash, 'hex');
+    return storedBuf.length === candidateBuf.length && crypto.timingSafeEqual(storedBuf, candidateBuf);
+  } else {
+    // Legacy format: global static salt (migration path)
+    const legacySalt = ENV.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026';
+    const candidateHash = crypto.pbkdf2Sync(candidate, legacySalt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
+    const storedBuf = Buffer.from(stored, 'hex');
+    const candidateBuf = Buffer.from(candidateHash, 'hex');
+    return storedBuf.length === candidateBuf.length && crypto.timingSafeEqual(storedBuf, candidateBuf);
+  }
 }
 
 function sanitizeUser(user: User): User {
@@ -33,28 +75,48 @@ export class AuthController {
       return;
     }
 
-    if (password.length < 6) {
-      res.status(400).json({ success: false, error: { code: 'WEAK_PASSWORD', message: 'Password must be at least 6 characters long.' } });
+    const cleanEmail = String(email).toLowerCase().trim();
+    const cleanName = String(name).trim();
+
+    // Email format validation (RFC 5322 simplified)
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!EMAIL_REGEX.test(cleanEmail) || cleanEmail.length > 254) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_EMAIL', message: 'A valid email address is required.' } });
       return;
     }
 
-    const existing = await userRepository.findByEmail(email);
+    if (cleanName.length < 2 || cleanName.length > 100) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_NAME', message: 'Name must be between 2 and 100 characters.' } });
+      return;
+    }
+
+    if (password.length < 8) {
+      res.status(400).json({ success: false, error: { code: 'WEAK_PASSWORD', message: 'Password must be at least 8 characters long.' } });
+      return;
+    }
+
+    if (password.length > 128) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_PASSWORD', message: 'Password must not exceed 128 characters.' } });
+      return;
+    }
+
+    const existing = await userRepository.findByEmail(cleanEmail);
     if (existing) {
       res.status(400).json({ success: false, error: { code: 'EMAIL_IN_USE', message: 'An account with this email already exists.' } });
       return;
     }
 
     const userId = `user_${uuidv4()}`;
-    const cleanUsername = username ? username.toLowerCase().replace(/[^a-z0-9_]/g, '') : email.split('@')[0];
+    const cleanUsername = username ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) : cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '').slice(0, 30);
     const passwordHash = hashPassword(password);
 
     const newUser: User = {
       id: userId,
-      email: email.toLowerCase().trim(),
+      email: cleanEmail,
       role: 'CUSTOMER',
-      name: name.trim(),
+      name: cleanName,
       username: cleanUsername,
-      phone: phone || '',
+      phone: phone ? String(phone).trim().slice(0, 20) : '',
       addresses: address ? [{ ...address, id: `addr_${uuidv4()}`, isDefaultShipping: true, isDefaultBilling: true }] : [],
       passwordHash,
       isActive: true,
@@ -113,13 +175,16 @@ export class AuthController {
     }
 
     let isValid = false;
+    let needsRehash = false;
 
     if (user.passwordHash) {
-      const userHashBuf = Buffer.from(user.passwordHash, 'hex');
       for (const pwd of candidatePasswords) {
-        const inputHashBuf = Buffer.from(hashPassword(pwd), 'hex');
-        if (userHashBuf.length === inputHashBuf.length && crypto.timingSafeEqual(userHashBuf, inputHashBuf)) {
+        if (verifyPassword(pwd, user.passwordHash)) {
           isValid = true;
+          // If user is on legacy global-salt format, schedule rehash to new per-user-salt format
+          if (!user.passwordHash.includes(':')) {
+            needsRehash = true;
+          }
           break;
         }
       }
@@ -150,7 +215,12 @@ export class AuthController {
       }
     }
 
-    await userRepository.update(user.id, { lastLoginAt: new Date().toISOString() });
+    const loginUpdate: any = { lastLoginAt: new Date().toISOString() };
+    // Transparently migrate legacy global-salt hashes to per-user-salt format on next login
+    if (needsRehash) {
+      loginUpdate.passwordHash = hashPassword(candidatePasswords[0]);
+    }
+    await userRepository.update(user.id, loginUpdate);
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, resellerId: user.resellerId },
@@ -201,14 +271,15 @@ export class AuthController {
 
     const { name, phone, addresses } = req.body;
     const updated = await userRepository.update(req.user.id, {
-      name: name || undefined,
-      phone: phone || undefined,
-      addresses: addresses || undefined,
+      name: name ? String(name).trim().slice(0, 100) : undefined,
+      phone: phone ? String(phone).trim().slice(0, 20) : undefined,
+      addresses: Array.isArray(addresses) ? addresses : undefined,
     });
 
+    // Never return the passwordHash in profile responses
     res.json({
       success: true,
-      data: updated,
+      data: updated ? sanitizeUser(updated as User) : null,
     });
   }
 

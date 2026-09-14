@@ -209,6 +209,9 @@ export interface OrderItem {
   brandName?: string;
   categoryName?: string;
   specifications?: Record<string, string>;
+  serialNumbers?: string[];
+  warrantyMonths?: number;
+  warrantyExpiry?: string;
 }
 
 export interface OrderStatusHistoryItem {
@@ -606,6 +609,8 @@ export interface POLineItem {
   lowStockThreshold: number;
   suggestedReorderQuantity: number;
   orderedQuantity: number;
+  receivedQuantity?: number;
+  serialNumbers?: string[];
   quantity?: number;
   unitCost: number;
   totalCost: number;
@@ -628,6 +633,43 @@ export interface PurchaseOrder {
   notes?: string;
   issuedAt?: string;
   receivedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// B2B Corporate Quotations Types
+export type QuoteStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'CONVERTED' | 'REJECTED' | 'EXPIRED';
+
+export interface QuoteItem {
+  productId: string;
+  productName: string;
+  sku: string;
+  unitPrice: number;
+  quantity: number;
+  discount: number;
+  subtotal: number;
+  specifications?: Record<string, string>;
+}
+
+export interface Quote {
+  id: string;
+  quoteNumber: string; // e.g. "QTE-2026-89412"
+  companyName: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+  taxRegistrationNumber?: string;
+  items: QuoteItem[];
+  subtotal: number;
+  discount: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  currency: string;
+  status: QuoteStatus;
+  validUntil: string;
+  notes?: string;
+  convertedOrderId?: string;
   createdAt: string;
   updatedAt: string;
 }
