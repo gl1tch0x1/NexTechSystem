@@ -17,12 +17,6 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <div className={`w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse ${className}`} />
-    );
-  }
-
   if (variant === 'segmented') {
     return (
       <div className={`inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs ${className}`}>
@@ -30,7 +24,7 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
           type="button"
           onClick={() => setTheme('light')}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold transition-all ${
-            theme === 'light'
+            mounted && theme === 'light'
               ? 'bg-white text-slate-900 shadow-sm'
               : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
           }`}
@@ -44,7 +38,7 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
           type="button"
           onClick={() => setTheme('dark')}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold transition-all ${
-            theme === 'dark'
+            mounted && theme === 'dark'
               ? 'bg-slate-900 text-white shadow-sm'
               : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
           }`}
@@ -58,7 +52,7 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
           type="button"
           onClick={() => setTheme('system')}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold transition-all ${
-            theme === 'system'
+            mounted && theme === 'system'
               ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
               : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
           }`}
@@ -71,24 +65,19 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
     );
   }
 
-  // Icon Button (Ant Design / Shadcn standard icon toggle)
+  // Icon Button (Always renders visible icon with zero skeleton delay/flash)
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      className={`relative p-2 rounded-xl border transition-all duration-200 flex items-center justify-center ${
-        resolvedTheme === 'dark'
-          ? 'bg-slate-800/80 hover:bg-slate-700 text-amber-400 border-slate-700/80 shadow-sm'
-          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200 shadow-sm'
-      } ${className}`}
-      title={resolvedTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      className={`relative p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm flex items-center justify-center shrink-0 ${className}`}
+      title={mounted ? (resolvedTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode') : 'Toggle Theme'}
       aria-label="Toggle Theme"
     >
-      {resolvedTheme === 'dark' ? (
-        <Sun className="w-4 h-4 text-amber-400 transition-transform duration-300 hover:rotate-45" />
-      ) : (
-        <Moon className="w-4 h-4 text-tech-blue transition-transform duration-300 hover:-rotate-12" />
-      )}
+      {/* Visible in dark mode, hidden in light mode */}
+      <Sun className="w-4 h-4 text-amber-400 hidden dark:block transition-transform duration-300 hover:rotate-45" />
+      {/* Visible in light mode, hidden in dark mode */}
+      <Moon className="w-4 h-4 text-tech-blue block dark:hidden transition-transform duration-300 hover:-rotate-12" />
     </button>
   );
 }
