@@ -56,9 +56,125 @@ export const SEED_BRANDS: Brand[] = [
   { id: 'brand_wd', name: 'Western Digital', slug: 'western-digital', logo: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=200&q=80', isActive: true, productCount: 4 },
 ];
 
-export const SEED_USERS: User[] = [];
+export const SEED_USERS: User[] = [
+  {
+    id: 'user_admin_1',
+    email: 'admin@nextech.com',
+    role: 'ADMIN',
+    name: 'NexTech Systems Administrator',
+    username: 'admin@nextech.com',
+    phone: '+971 4 399 1000',
+    addresses: [
+      {
+        id: 'addr_adm_1',
+        fullName: 'NexTech Admin HQ',
+        phone: '+971 4 399 1000',
+        addressLine1: 'Silicon Oasis Tech Tower, Suite 400',
+        city: 'Dubai',
+        state: 'Dubai',
+        country: 'United Arab Emirates',
+        postalCode: '00000',
+        isDefaultShipping: true,
+        isDefaultBilling: true,
+      },
+    ],
+    isActive: true,
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+    passwordHash: 'df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9',
+  },
+  {
+    id: 'user_reseller_1',
+    email: 'partner@comnet.ae',
+    role: 'RESELLER',
+    name: 'ComNet Solutions Partner',
+    username: 'comnet101',
+    resellerId: 'reseller_comnet_101',
+    phone: '+971 4 399 2211',
+    addresses: [
+      {
+        id: 'addr_res_1',
+        fullName: 'ComNet Distribution Logistics Center',
+        phone: '+971 4 399 2211',
+        addressLine1: 'Al Quoz Industrial Area 3, Warehouse 18',
+        city: 'Dubai',
+        state: 'Dubai',
+        country: 'United Arab Emirates',
+        postalCode: '11223',
+        isDefaultShipping: true,
+        isDefaultBilling: true,
+      },
+    ],
+    isActive: true,
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+    passwordHash: 'df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9',
+  },
+  {
+    id: 'user_customer_1',
+    email: 'client@nextech.com',
+    role: 'CUSTOMER',
+    name: 'Rashid Al-Maktoum',
+    username: 'client@nextech.com',
+    phone: '+971 4 332 9901',
+    addresses: [
+      {
+        id: 'addr_cust_1',
+        fullName: 'Rashid Al-Maktoum',
+        phone: '+971 4 332 9901',
+        addressLine1: 'Level 42, Al Saada Tower, DIFC',
+        city: 'Dubai',
+        state: 'Dubai',
+        country: 'United Arab Emirates',
+        postalCode: '00000',
+        isDefaultShipping: true,
+        isDefaultBilling: true,
+      },
+    ],
+    isActive: true,
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+    passwordHash: 'df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9',
+  },
+];
 
-export const SEED_RESELLERS: Reseller[] = [];
+export const SEED_RESELLERS: Reseller[] = [
+  {
+    id: 'reseller_comnet_101',
+    userId: 'user_reseller_1',
+    resellerCode: 'comnet101',
+    username: 'comnet101',
+    email: 'partner@comnet.ae',
+    businessName: 'ComNet Solutions LLC',
+    displayName: 'ComNet Enterprise Systems',
+    phone: '+971 4 399 2211',
+    subdomain: 'comnet101',
+    address: {
+      id: 'addr_res_comnet_1',
+      fullName: 'ComNet Distribution Logistics Center',
+      phone: '+971 4 399 2211',
+      addressLine1: 'Al Quoz Industrial Area 3, Warehouse 18',
+      city: 'Dubai',
+      state: 'Dubai',
+      country: 'United Arab Emirates',
+      postalCode: '11223',
+    },
+    businessInformation: {
+      taxNumber: 'TRN-100492819200003',
+      tradeLicense: 'DED-849201',
+    },
+    status: 'ACTIVE',
+    productCount: 2,
+    salesStats: {
+      totalRevenue: 24500,
+      totalOrders: 12,
+      unitsSold: 28,
+    },
+    commissionRate: 8,
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
 export const SEED_PRODUCTS: Product[] = [
   // 1. CPU - Intel Core i9-14900K

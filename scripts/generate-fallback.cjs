@@ -32,7 +32,7 @@ const sanitizedProducts = prods.map(p => {
 
 const cleanAddress = (addr, idx = 0) => {
   if (!addr) return addr;
-  const { company, street, zipCode, ...rest } = addr;
+  const { company, street, zipCode, isDefault, ...rest } = addr;
   return {
     id: rest.id || `addr_${idx + 1}`,
     ...rest,
@@ -43,12 +43,33 @@ const cleanAddress = (addr, idx = 0) => {
 
 const sanitizedOrders = orders.map(o => ({
   ...o,
+  items: (o.items || []).map(it => ({
+    productId: it.productId,
+    productName: it.productName,
+    sku: it.sku,
+    slug: it.slug || (it.sku ? it.sku.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'prod-slug'),
+    thumbnail: it.thumbnail || it.image || DEFAULT_IMAGE,
+    quantity: it.quantity,
+    unitPrice: it.unitPrice || it.price || 0,
+    discount: it.discount || 0,
+    subtotal: it.subtotal || 0,
+    sellerType: it.sellerType || 'ADMIN',
+    ...(it.resellerId ? { resellerId: it.resellerId } : {}),
+    ...(it.resellerCode ? { resellerCode: it.resellerCode } : {}),
+    ...(it.warrantyMonths ? { warrantyMonths: it.warrantyMonths } : {}),
+    ...(it.warrantyExpiry ? { warrantyExpiry: it.warrantyExpiry } : {}),
+  })),
   shippingAddress: cleanAddress(o.shippingAddress),
   billingAddress: cleanAddress(o.billingAddress),
   statusHistory: (o.statusHistory || []).map(sh => {
     const { updatedBy, ...restSh } = sh;
     return restSh;
   }),
+}));
+
+const sanitizedResellers = resellers.map((r, idx) => ({
+  ...r,
+  address: cleanAddress(r.address, idx),
 }));
 
 const outLines = [
@@ -94,7 +115,7 @@ const outLines = [
   '',
   `export const FALLBACK_ORDERS: Order[] = ${JSON.stringify(sanitizedOrders, null, 2)};`,
   '',
-  `export const FALLBACK_RESELLERS: Reseller[] = ${JSON.stringify(resellers, null, 2)};`,
+  `export const FALLBACK_RESELLERS: Reseller[] = ${JSON.stringify(sanitizedResellers, null, 2)};`,
   '',
   'export const FALLBACK_HOMEPAGE_CONTENT: HomePageContent = {',
   '  heroHighlights: FALLBACK_HERO_HIGHLIGHTS,',

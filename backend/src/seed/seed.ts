@@ -35,11 +35,15 @@ import {
   SEED_ORDERS
 } from './seed-data.js';
 
+import { ebillService } from '../services/ebill.service.js';
+import { walletService } from '../services/wallet.service.js';
+import { auditService } from '../services/audit.service.js';
+
 export async function runSeed(clean = false) {
   console.log('[Seed] Starting database seed process...');
 
   if (clean) {
-    console.log('[Seed] Resetting existing collections...');
+    console.log('[Seed] Resetting existing collections and removing mock/test data...');
     dbStore.clearCollection('categories');
     dbStore.clearCollection('brands');
     dbStore.clearCollection('products');
@@ -56,6 +60,11 @@ export async function runSeed(clean = false) {
     dbStore.clearCollection('builder_presets');
     dbStore.clearCollection('purchase_orders');
     dbStore.clearCollection('orders');
+    dbStore.clearCollection('ebills');
+    dbStore.clearCollection('quotes');
+    dbStore.clearCollection('wallets');
+    dbStore.clearCollection('wallet_transactions');
+    dbStore.clearCollection('audit_logs');
   }
 
   // 1. Settings
@@ -122,6 +131,45 @@ export async function runSeed(clean = false) {
     await orderRepository.create(ord);
   }
   console.log(`[Seed] Seeded ${SEED_PURCHASE_ORDERS.length} Purchase Orders and ${SEED_ORDERS.length} Sales Orders.`);
+
+  // 9. Initial Customer & Admin Digital Wallets
+  await walletService.creditWallet({
+    userId: 'user_admin_1',
+    amount: 50000,
+    reason: 'Initial Enterprise Administrative Reserve Balance',
+    type: 'CREDIT',
+  });
+  await walletService.creditWallet({
+    userId: 'user_customer_1',
+    amount: 10000,
+    reason: 'Initial Customer Store Credit Balance',
+    type: 'CREDIT',
+  });
+  console.log('[Seed] Seeded initial customer & administrator wallet ledgers.');
+
+  // 10. Official Tax E-Bills for Orders
+  for (const ord of SEED_ORDERS) {
+    try {
+      const ebill = await ebillService.generateEBill(ord);
+      await orderRepository.update(ord.id, { eBillId: ebill.id });
+    } catch (err: any) {
+      console.warn('[Seed] EBill generation notice for order %s:', ord.orderNumber, err.message);
+    }
+  }
+  console.log(`[Seed] Seeded ${SEED_ORDERS.length} verified UAE FTA E-Bill tax invoices.`);
+
+  // 11. Initial System Bootstrap Audit Log
+  await auditService.log({
+    userId: 'user_admin_1',
+    userEmail: 'admin@nextech.com',
+    userRole: 'ADMIN',
+    action: 'SYSTEM_BOOTSTRAP',
+    resource: 'system',
+    details: {
+      message: 'NexTech Systems Enterprise Platform catalog & secure store initialized.',
+      timestamp: new Date().toISOString(),
+    },
+  });
 
   console.log('[Seed] Database seed completed successfully! 🚀');
 }

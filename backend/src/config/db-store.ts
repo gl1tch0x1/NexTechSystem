@@ -96,26 +96,36 @@ export class DbStore {
     }
   }
 
+  public clearCollection(collectionName: string) {
+    if (this.collections.has(collectionName)) {
+      this.collections.get(collectionName)!.clear();
+    } else {
+      this.collections.set(collectionName, new Map());
+    }
+    try {
+      const filePath = this.getFilePath(collectionName);
+      fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf-8');
+    } catch (err) {
+      console.error('[DbStore] Error clearing collection %s:', collectionName, err);
+    }
+  }
+
   private getCollectionMap(name: string): Map<string, any> {
-    if (!this.collections.has(name) || this.collections.get(name)!.size === 0) {
+    if (!this.collections.has(name)) {
       const filePath = this.getFilePath(name);
+      const map = new Map<string, any>();
       if (fs.existsSync(filePath)) {
         try {
           const content = fs.readFileSync(filePath, 'utf-8');
           const data: any[] = JSON.parse(content || '[]');
-          const map = this.collections.get(name) || new Map<string, any>();
           for (const item of data) {
             if (item && item.id) {
               map.set(item.id, item);
             }
           }
-          this.collections.set(name, map);
-          return map;
         } catch (e) {}
       }
-      if (!this.collections.has(name)) {
-        this.collections.set(name, new Map());
-      }
+      this.collections.set(name, map);
     }
     return this.collections.get(name)!;
   }
@@ -274,11 +284,6 @@ export class DbStore {
 
   public async runTransaction<R>(fn: (db: DbStore) => Promise<R>): Promise<R> {
     return await fn(this);
-  }
-
-  public clearCollection(collection: string) {
-    this.collections.set(collection, new Map());
-    this.persistCollection(collection);
   }
 
   public exportAll(): DbSnapshot {

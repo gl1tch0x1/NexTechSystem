@@ -659,7 +659,9 @@ async function runTestSuite() {
 
   // 36. Cloudflare CDN, Bot Check Security & Anti-DDoS Endpoints (/api/security)
   await test('Cloudflare Security: Global Edge & CDN Status (/api/security/cloudflare-status)', async () => {
-    const res = await fetch(`${BASE_URL}/security/cloudflare-status`);
+    const res = await fetch(`${BASE_URL}/security/cloudflare-status`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
     const json = await res.json();
     if (!json.success || !json.data) throw new Error('Cloudflare status fetch failed');
     if (!json.data.edgeNode || !json.data.wafMode || !json.data.rateLimitPolicy) {
