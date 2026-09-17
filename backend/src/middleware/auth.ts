@@ -20,16 +20,6 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    if (ENV.NODE_ENV === 'development') {
-      req.user = {
-        id: 'usr_admin_super',
-        email: 'admin@nextechsystems.ae',
-        role: 'ADMIN',
-        name: 'Enterprise SuperAdmin',
-        username: 'admin',
-      };
-      return next();
-    }
     res.status(401).json({
       success: false,
       error: { code: 'UNAUTHORIZED', message: 'Authentication token missing or invalid format.' },
@@ -45,16 +35,6 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
     const user = await userRepository.findById(decoded.id);
 
     if (!user || !user.isActive) {
-      if (ENV.NODE_ENV === 'development') {
-        req.user = {
-          id: 'usr_admin_super',
-          email: 'admin@nextechsystems.ae',
-          role: 'ADMIN',
-          name: 'Enterprise SuperAdmin',
-          username: 'admin',
-        };
-        return next();
-      }
       res.status(401).json({
         success: false,
         error: { code: 'UNAUTHORIZED', message: 'User account is inactive or not found.' },
@@ -73,16 +53,6 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
     };
     next();
   } catch (err: any) {
-    if (ENV.NODE_ENV === 'development') {
-      req.user = {
-        id: 'usr_admin_super',
-        email: 'admin@nextechsystems.ae',
-        role: 'ADMIN',
-        name: 'Enterprise SuperAdmin',
-        username: 'admin',
-      };
-      return next();
-    }
     // 2. Token invalid / expired
     res.status(401).json({
       success: false,
