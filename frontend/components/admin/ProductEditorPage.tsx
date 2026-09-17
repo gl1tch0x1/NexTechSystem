@@ -62,7 +62,13 @@ import {
   Star,
   Warehouse,
   Flame,
+  Wand2,
+  TrendingUp,
+  MapPin,
+  MoveLeft,
+  MoveRight,
 } from 'lucide-react';
+
 
 const WAREHOUSE_LOCATIONS = [
   { id: 'loc_dxb_main', name: 'Dubai Logistics Hub (JAFZA)', city: 'Dubai', code: 'DXB-01' },
@@ -113,13 +119,65 @@ function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE
   return fallback;
 }
 
-const HARDWARE_IMAGE_PRESETS = [
+export interface HardwarePreset {
+  label: string;
+  category: string;
+  catId: string;
+  brand: string;
+  url: string;
+  fullTitle: string;
+  skuPrefix: string;
+  price: number;
+  costPrice: number;
+  originalPrice: number;
+  weight: number;
+  dimensions: { length: number; width: number; height: number; unit: 'cm' };
+  hsCode: string;
+  warranty: string;
+  shortDesc: string;
+  specs: Record<string, string>;
+  collections: string[];
+  tags: string[];
+}
+
+const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
   {
     label: 'HP ProBook 460 G11',
     category: 'Laptops',
     catId: 'cat_laptops',
     brand: 'HP',
     url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
+    fullTitle: 'HP ProBook 460 G11 Intel Core Ultra 5 125U 16.0" WUXGA Business Laptop',
+    skuPrefix: 'LPT',
+    price: 3499,
+    costPrice: 2899,
+    originalPrice: 3899,
+    weight: 1.74,
+    dimensions: { length: 35.9, width: 25.1, height: 1.9, unit: 'cm' },
+    hsCode: '8471.30.01',
+    warranty: '3 Years Official Manufacturer Warranty',
+    shortDesc: 'Commercial 16-inch laptop powered by Intel Meteor Lake with AI Boost NPU and 16GB DDR5.',
+    specs: {
+      Condition: 'Brand New (Factory Sealed)',
+      'Product Category': 'Laptops',
+      'Processor Brand': 'Intel',
+      'Processor Model': 'Core Ultra 5 125U',
+      'Processor Cores': 'Dodeca-Core (12 Cores)',
+      'RAM Capacity': '16GB',
+      'RAM Type': 'DDR5 5600MHz',
+      'Storage Capacity': '512GB SSD',
+      'Storage Type': 'NVMe PCIe 4.0 SSD',
+      'Screen Size': '16.0" WUXGA',
+      'Display Technology': 'IPS Antiglare LED',
+      'Operating System': 'FreeDOS',
+      'Keyboard Language': 'English / Arabic',
+      'Backlit Keyboard': 'Yes',
+      'Fingerprint Reader': 'Yes',
+      Color: 'Pike Silver',
+      Warranty: '3 Years Official Manufacturer Warranty',
+    },
+    collections: ['Laptops', 'Home & Business Laptops'],
+    tags: ['Work Laptop', 'UAE', 'ProBook 460 G11'],
   },
   {
     label: 'ASUS ROG Astral RTX 5090',
@@ -127,6 +185,28 @@ const HARDWARE_IMAGE_PRESETS = [
     catId: 'cat_gpus',
     brand: 'ASUS',
     url: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80',
+    fullTitle: 'ASUS ROG Astral GeForce RTX 5090 OC Edition 32GB GDDR7 Flagship Gaming GPU',
+    skuPrefix: 'GPU',
+    price: 8999,
+    costPrice: 7499,
+    originalPrice: 9999,
+    weight: 2.45,
+    dimensions: { length: 35.8, width: 14.9, height: 7.1, unit: 'cm' },
+    hsCode: '8473.30.10',
+    warranty: '3 Years Official Manufacturer Warranty',
+    shortDesc: 'Next-gen flagship Blackwell architecture with 32GB GDDR7, axial-tech cooling, and PCIe 5.0.',
+    specs: {
+      Condition: 'Brand New (Factory Sealed)',
+      'Product Category': 'Graphics Cards',
+      'Graphics Card': 'NVIDIA GeForce RTX 5090 32GB',
+      'Graphics Memory': '32GB GDDR7',
+      'Form Factor': 'Quad-Slot (3.8-Slot)',
+      'Power Supply Wattage': '600W TDP (1000W PSU Recommended)',
+      Warranty: '3 Years Official Manufacturer Warranty',
+      'Country of Origin': 'Taiwan',
+    },
+    collections: ['Graphics Cards', 'Gaming Hardware'],
+    tags: ['RTX 5090', 'Blackwell', 'GDDR7', 'ASUS ROG'],
   },
   {
     label: 'Intel Core Ultra 9 285K',
@@ -134,13 +214,56 @@ const HARDWARE_IMAGE_PRESETS = [
     catId: 'cat_processors',
     brand: 'Intel',
     url: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
+    fullTitle: 'Intel Core Ultra 9 285K Arrow Lake 24-Core 5.7GHz LGA1851 Desktop Processor',
+    skuPrefix: 'CPU',
+    price: 2599,
+    costPrice: 2099,
+    originalPrice: 2899,
+    weight: 0.35,
+    dimensions: { length: 12.0, width: 11.5, height: 4.5, unit: 'cm' },
+    hsCode: '8542.31.00',
+    warranty: '3 Years Official Manufacturer Warranty',
+    shortDesc: 'Arrow Lake-S flagship 24-core unlocked desktop processor with dedicated NPU for local AI.',
+    specs: {
+      Condition: 'Brand New (Factory Sealed)',
+      'Product Category': 'Processors (CPUs)',
+      'Processor Brand': 'Intel',
+      'Processor Model': 'Core Ultra 9 285K',
+      'Processor Generation': 'Core Ultra Series 2 (Arrow Lake)',
+      'Processor Cores': '24 Cores (8P + 16E)',
+      'Socket Type': 'LGA1851',
+      'Power Supply Wattage': '125W Base / 250W Boost',
+      Warranty: '3 Years Official Manufacturer Warranty',
+    },
+    collections: ['Processors', 'CPUs'],
+    tags: ['Ultra 9', 'Arrow Lake', 'LGA1851', 'Intel'],
   },
   {
-    label: 'Samsung 990 PRO NVMe 2TB',
+    label: 'Samsung 990 PRO NVMe 4TB',
     category: 'Storage',
     catId: 'cat_storage',
     brand: 'Samsung',
     url: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80',
+    fullTitle: 'Samsung 990 PRO 4TB NVMe M.2 2280 PCIe 4.0 Internal Solid State Drive with Heatsink',
+    skuPrefix: 'SSD',
+    price: 1499,
+    costPrice: 1149,
+    originalPrice: 1799,
+    weight: 0.15,
+    dimensions: { length: 8.0, width: 2.4, height: 0.9, unit: 'cm' },
+    hsCode: '8471.70.30',
+    warranty: '5 Years Enterprise Gold Warranty',
+    shortDesc: 'Top-tier PCIe 4.0 NVMe read speeds up to 7,450 MB/s with smart thermal control heatsink.',
+    specs: {
+      Condition: 'Brand New (Factory Sealed)',
+      'Product Category': 'Storage (NVMe/SSD/HDD)',
+      'Storage Capacity': '4TB',
+      'Storage Type': 'NVMe PCIe 4.0 SSD',
+      'Form Factor': 'M.2 2280',
+      Warranty: '5 Years Enterprise Gold Warranty',
+    },
+    collections: ['Enterprise Storage', 'NVMe SSDs'],
+    tags: ['990 PRO', 'PCIe 4.0', '4TB', 'Samsung'],
   },
   {
     label: 'Corsair Dominator Titanium DDR5',
@@ -148,13 +271,57 @@ const HARDWARE_IMAGE_PRESETS = [
     catId: 'cat_ram',
     brand: 'Corsair',
     url: 'https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80',
+    fullTitle: 'Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 7200MHz CL34 High-Performance Memory',
+    skuPrefix: 'RAM',
+    price: 1299,
+    costPrice: 999,
+    originalPrice: 1499,
+    weight: 0.28,
+    dimensions: { length: 15.0, width: 12.0, height: 2.5, unit: 'cm' },
+    hsCode: '8473.30.90',
+    warranty: 'Lifetime Limited Warranty',
+    shortDesc: 'Ultra-low latency DDR5 dual-channel kit with forged aluminum and customizable lighting top bars.',
+    specs: {
+      Condition: 'Brand New (Factory Sealed)',
+      'Product Category': 'Memory (RAM)',
+      'RAM Capacity': '64GB (2x32GB)',
+      'RAM Type': 'DDR5 7200MHz CL34',
+      Warranty: 'Lifetime Limited Warranty',
+    },
+    collections: ['Memory', 'DDR5 RAM'],
+    tags: ['Dominator Titanium', 'DDR5', '64GB', 'Corsair'],
   },
   {
-    label: 'Platinum Server Power Supply',
-    category: 'PSUs',
-    catId: 'cat_psus',
-    brand: 'Seasonic',
+    label: 'Dell PowerEdge R760 2U Server',
+    category: 'Servers',
+    catId: 'cat_servers',
+    brand: 'Dell Technologies',
     url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80',
+    fullTitle: 'Dell PowerEdge R760 2U Rack Server Dual Intel Xeon Gold 6430 128GB DDR5 ECC',
+    skuPrefix: 'SRV',
+    price: 24999,
+    costPrice: 20499,
+    originalPrice: 28999,
+    weight: 28.5,
+    dimensions: { length: 71.0, width: 48.2, height: 8.6, unit: 'cm' },
+    hsCode: '8471.50.01',
+    warranty: '5 Years Enterprise Gold Warranty',
+    shortDesc: '2-socket 2U rack server engineered for intense compute workloads, virtualization, and AI inference.',
+    specs: {
+      Condition: 'Brand New (Factory Sealed)',
+      'Product Category': 'Enterprise Rackmount Servers',
+      'Processor Brand': 'Intel',
+      'Processor Model': 'Dual Intel Xeon Gold 6430 (64 Cores Total)',
+      'Socket Type': 'LGA4677',
+      'RAM Capacity': '128GB DDR5 ECC Registered',
+      'RAM Type': 'DDR5 4800MHz ECC RDIMM',
+      'Storage Capacity': '8x 2.5" Hot-Plug NVMe/SAS Bays',
+      'Form Factor': '2U Rackmount',
+      'Power Supply Wattage': 'Dual 1400W Titanium Hot-Plug Redundant',
+      Warranty: '5 Years Enterprise Gold Warranty',
+    },
+    collections: ['Servers', 'Enterprise Rackmount Servers'],
+    tags: ['PowerEdge', 'R760', 'Xeon Gold', 'Dell'],
   },
 ];
 
@@ -198,6 +365,23 @@ const WARRANTY_OPTIONS = [
   'Lifetime Limited Warranty',
 ];
 
+export interface TieredPrice {
+  minQty: number;
+  discountPercent: number;
+  unitPrice: number;
+}
+
+const FX_RATES: Record<'AED' | 'USD' | 'EUR' | 'GBP' | 'SAR' | 'QAR' | 'KWD' | 'INR', { rate: number; symbol: string; label: string }> = {
+  AED: { rate: 1.0,     symbol: 'AED', label: 'AED (Base)'  },
+  USD: { rate: 0.272,   symbol: '$',   label: 'USD ($)'     },
+  EUR: { rate: 0.251,   symbol: '€',   label: 'EUR (€)'     },
+  GBP: { rate: 0.214,   symbol: '£',   label: 'GBP (£)'     },
+  SAR: { rate: 1.020,   symbol: 'SAR', label: 'SAR (ر.س)'  },
+  QAR: { rate: 0.991,   symbol: 'QAR', label: 'QAR (ر.ق)'  },
+  KWD: { rate: 0.084,   symbol: 'KWD', label: 'KWD (د.ك)'  },
+  INR: { rate: 22.78,   symbol: '₹',   label: 'INR (₹)'    },
+};
+
 export interface ProductFormData {
   title: string;
   slug: string;
@@ -224,12 +408,17 @@ export interface ProductFormData {
     locationId: string;
     locationName: string;
     city: string;
+    binLocation?: string;
+    safetyStock?: number;
     quantity: number;
     available: number;
     committed: number;
     unavailable: number;
     onHand: number;
   }[];
+  tieredPricing?: TieredPrice[];
+  targetMargin?: number;
+  mapPrice?: number;
   weight?: number;
   dimensions: {
     length: number;
@@ -293,6 +482,12 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
   const [newOptionName, setNewOptionName] = useState('');
   const [previewImageError, setPreviewImageError] = useState(false);
 
+  // Studio 2.0 State Enhancements
+  const [previewCurrency, setPreviewCurrency] = useState<keyof typeof FX_RATES>('AED');
+  const [previewCardTheme, setPreviewCardTheme] = useState<'dark' | 'light'>('dark');
+  const [targetMarginInput, setTargetMarginInput] = useState<number>(25);
+  const [galleryUrlInput, setGalleryUrlInput] = useState<string>('');
+
   const generateRandomSku = useCallback((catId?: string) => {
     const prefixMap: Record<string, string> = {
       cat_laptops: 'LPT',
@@ -342,12 +537,22 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
       locationId: w.id,
       locationName: w.name,
       city: w.city,
+      binLocation: w.id === 'loc_dxb_main' ? 'DXB-A-04-18' : w.id === 'loc_deira_tech' ? 'DEI-SH-02-05' : w.id === 'loc_auh_hub' ? 'AUH-WH-01-12' : 'SHJ-RK-03-09',
+      safetyStock: 5,
       quantity: w.id === 'loc_dxb_main' ? 25 : 0,
       available: w.id === 'loc_dxb_main' ? 25 : 0,
       committed: 0,
       unavailable: 0,
       onHand: w.id === 'loc_dxb_main' ? 25 : 0,
     })),
+    tieredPricing: [
+      { minQty: 1, discountPercent: 0, unitPrice: 3499 },
+      { minQty: 5, discountPercent: 5, unitPrice: 3324 },
+      { minQty: 20, discountPercent: 10, unitPrice: 3149 },
+      { minQty: 50, discountPercent: 15, unitPrice: 2974 },
+    ],
+    targetMargin: 25,
+    mapPrice: 3199,
     weight: 1.74,
     dimensions: {
       length: 35.9,
@@ -784,7 +989,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
     });
   };
 
-  // Warehouse Multi-Location Stock Change
+  // Warehouse Multi-Location Stock & Bin Tracking
   const handleLocationStockChange = (
     locIndex: number,
     field: 'available' | 'committed' | 'unavailable',
@@ -807,7 +1012,87 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
     });
   };
 
-  // Quick Hardware Preset Loader
+  const handleLocationBinChange = (locIndex: number, binLocation: string) => {
+    setFormData(prev => {
+      const list = [...prev.locations];
+      list[locIndex] = { ...list[locIndex], binLocation };
+      return { ...prev, locations: list };
+    });
+  };
+
+  const handleLocationSafetyStockChange = (locIndex: number, safetyStock: number) => {
+    setFormData(prev => {
+      const list = [...prev.locations];
+      list[locIndex] = { ...list[locIndex], safetyStock: Math.max(0, safetyStock) };
+      return { ...prev, locations: list };
+    });
+  };
+
+  const handleSmartStockDistribution = (strategy: 'consolidate_jafza' | 'even' | 'ratio_70_10' | 'clear') => {
+    setFormData(prev => {
+      const baseTotal = prev.stock > 0 ? prev.stock : 40;
+      let list = [...prev.locations];
+
+      if (strategy === 'consolidate_jafza') {
+        list = list.map(l => ({
+          ...l,
+          available: l.locationId === 'loc_dxb_main' ? baseTotal : 0,
+          committed: 0,
+          unavailable: 0,
+          onHand: l.locationId === 'loc_dxb_main' ? baseTotal : 0,
+          quantity: l.locationId === 'loc_dxb_main' ? baseTotal : 0,
+        }));
+      } else if (strategy === 'even') {
+        const perHub = Math.floor(baseTotal / list.length);
+        const remainder = baseTotal % list.length;
+        list = list.map((l, idx) => {
+          const qty = idx === 0 ? perHub + remainder : perHub;
+          return {
+            ...l,
+            available: qty,
+            committed: 0,
+            unavailable: 0,
+            onHand: qty,
+            quantity: qty,
+          };
+        });
+      } else if (strategy === 'ratio_70_10') {
+        const jafzaQty = Math.round(baseTotal * 0.7);
+        const remaining = baseTotal - jafzaQty;
+        const otherHubsCount = Math.max(1, list.length - 1);
+        const perOther = Math.floor(remaining / otherHubsCount);
+        list = list.map((l, idx) => {
+          const qty = idx === 0 ? jafzaQty : perOther;
+          return {
+            ...l,
+            available: qty,
+            committed: 0,
+            unavailable: 0,
+            onHand: qty,
+            quantity: qty,
+          };
+        });
+      } else if (strategy === 'clear') {
+        list = list.map(l => ({
+          ...l,
+          available: 0,
+          committed: 0,
+          unavailable: 0,
+          onHand: 0,
+          quantity: 0,
+        }));
+      }
+
+      const totalAvailable = list.reduce((acc, l) => acc + l.available, 0);
+      return {
+        ...prev,
+        locations: list,
+        stock: totalAvailable,
+      };
+    });
+  };
+
+  // Quick Hardware Photo Preset Loader
   const handleApplyPreset = (preset: typeof HARDWARE_IMAGE_PRESETS[0]) => {
     setPreviewImageError(false);
     setFormData(prev => {
@@ -825,6 +1110,204 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
         brandName: foundBrand?.name || preset.brand,
       };
     });
+  };
+
+  // Full Enterprise Architecture Blueprint Ingestion
+  const handleApplyFullPreset = (preset: HardwarePreset) => {
+    setPreviewImageError(false);
+    const foundCat = categories.find(c => c.id === preset.catId);
+    const foundBrand = brands.find(b => b.name.toLowerCase() === preset.brand.toLowerCase());
+
+    setFormData(prev => {
+      const newSku = generateRandomSku(preset.catId);
+      const newBarcode = generateRandomBarcode();
+      const discount = preset.originalPrice > preset.price
+        ? Math.round(((preset.originalPrice - preset.price) / preset.originalPrice) * 100)
+        : 0;
+
+      return {
+        ...prev,
+        title: preset.fullTitle,
+        slug: preset.fullTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        sku: newSku,
+        barcode: newBarcode,
+        shortDescription: preset.shortDesc,
+        description: `${preset.shortDesc} Engineered with enterprise thermal stability, high-bandwidth interconnects, and strict OEM quality compliance.`,
+        price: preset.price,
+        costPrice: preset.costPrice,
+        originalPrice: preset.originalPrice,
+        discountPercentage: discount,
+        weight: preset.weight,
+        dimensions: preset.dimensions,
+        hsCode: preset.hsCode,
+        warranty: preset.warranty,
+        primaryImage: preset.url,
+        images: [preset.url],
+        categoryId: foundCat?.id || preset.catId,
+        categoryName: foundCat?.name || preset.category,
+        brandId: foundBrand?.id || (foundBrand ? foundBrand.id : prev.brandId),
+        brandName: foundBrand?.name || preset.brand,
+        collections: preset.collections,
+        tags: preset.tags,
+        specifications: { ...preset.specs },
+        tieredPricing: [
+          { minQty: 1, discountPercent: 0, unitPrice: preset.price },
+          { minQty: 5, discountPercent: 5, unitPrice: Math.round(preset.price * 0.95) },
+          { minQty: 20, discountPercent: 10, unitPrice: Math.round(preset.price * 0.9) },
+          { minQty: 50, discountPercent: 15, unitPrice: Math.round(preset.price * 0.85) },
+        ],
+      };
+    });
+    setSuccessNotice(`Ingested full architecture blueprint for "${preset.label}". All specs, logistics & pricing populated.`);
+  };
+
+  // Standardized Title Auto-Constructor
+  const handleGenerateStandardTitle = () => {
+    const brand = formData.brandName || '';
+    const cat = formData.categoryName || '';
+    const modelSpec =
+      formData.specifications['Processor Model'] ||
+      formData.specifications['GPU Chipset'] ||
+      formData.specifications['Storage Capacity'] ||
+      formData.specifications['RAM Capacity'] ||
+      '';
+    const series = formData.tags[0] || '';
+    const built = [brand, series, modelSpec, cat].filter(Boolean).join(' ');
+    if (built) {
+      setFormData(prev => ({
+        ...prev,
+        title: built,
+        slug: built.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      }));
+    }
+  };
+
+  // Multi-Asset Gallery Handlers (Strictly Sanitized via getSafeImageUrl)
+  const handleAddGalleryImage = (urlToAdd: string) => {
+    const sanitized = urlToAdd.trim().replace(/[<>'"]/g, '');
+    if (!sanitized) return;
+    const safe = getSafeImageUrl(sanitized);
+    setFormData(prev => {
+      const existing = prev.images.filter(img => img !== safe);
+      const newImages = [...existing, safe];
+      return {
+        ...prev,
+        primaryImage: prev.primaryImage || safe,
+        images: newImages,
+      };
+    });
+    setGalleryUrlInput('');
+  };
+
+  const handleRemoveGalleryImage = (indexToRemove: number) => {
+    setFormData(prev => {
+      const targetUrl = prev.images[indexToRemove];
+      const newImages = prev.images.filter((_, i) => i !== indexToRemove);
+      let newPrimary = prev.primaryImage;
+      if (newPrimary === targetUrl) {
+        newPrimary = newImages[0] || DEFAULT_FALLBACK_IMAGE;
+      }
+      return {
+        ...prev,
+        images: newImages,
+        primaryImage: newPrimary,
+      };
+    });
+  };
+
+  const handleSetPrimaryImage = (index: number) => {
+    setFormData(prev => {
+      const selectedUrl = prev.images[index];
+      if (!selectedUrl) return prev;
+      return {
+        ...prev,
+        primaryImage: selectedUrl,
+      };
+    });
+  };
+
+  const handleMoveImage = (index: number, direction: 'left' | 'right') => {
+    setFormData(prev => {
+      const targetIndex = direction === 'left' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= prev.images.length) return prev;
+      const newImages = [...prev.images];
+      const temp = newImages[index];
+      newImages[index] = newImages[targetIndex];
+      newImages[targetIndex] = temp;
+      return {
+        ...prev,
+        images: newImages,
+      };
+    });
+  };
+
+  // Target Margin & B2B Tiered Volume Pricing Handlers
+  const handleApplyTargetMargin = (marginPct: number) => {
+    const cost = Number(formData.costPrice) || 0;
+    if (cost <= 0 || marginPct >= 100) return;
+    const calculatedPrice = Math.round(cost / (1 - marginPct / 100));
+    setFormData(prev => ({
+      ...prev,
+      price: calculatedPrice,
+      originalPrice: Math.max(prev.originalPrice, Math.round(calculatedPrice * 1.15)),
+      unitPrice: calculatedPrice,
+      tieredPricing: [
+        { minQty: 1, discountPercent: 0, unitPrice: calculatedPrice },
+        { minQty: 5, discountPercent: 5, unitPrice: Math.round(calculatedPrice * 0.95) },
+        { minQty: 20, discountPercent: 10, unitPrice: Math.round(calculatedPrice * 0.9) },
+        { minQty: 50, discountPercent: 15, unitPrice: Math.round(calculatedPrice * 0.85) },
+      ],
+    }));
+  };
+
+  const handleUpdateTierPrice = (tierIndex: number, discountPercent: number) => {
+    setFormData(prev => {
+      const baseP = Number(prev.price) || 0;
+      const currentTiers = prev.tieredPricing || [];
+      const updated = [...currentTiers];
+      const unitP = Math.round(baseP * (1 - discountPercent / 100));
+      updated[tierIndex] = { ...updated[tierIndex], discountPercent, unitPrice: unitP };
+      return { ...prev, tieredPricing: updated };
+    });
+  };
+
+  // Variant Engine Batch Controls
+  const handleBatchVariantPrice = () => {
+    const basePrice = Number(formData.price) || 0;
+    const baseCost = Number(formData.costPrice) || 0;
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map(v => ({
+        ...v,
+        price: basePrice,
+        costPrice: baseCost,
+      })),
+    }));
+  };
+
+  const handleBatchVariantStock = (uniformStock: number) => {
+    setFormData(prev => {
+      const updated = prev.variants.map(v => ({
+        ...v,
+        stock: uniformStock,
+      }));
+      const totalStock = updated.reduce((sum, v) => sum + v.stock, 0);
+      return {
+        ...prev,
+        variants: updated,
+        stock: totalStock,
+      };
+    });
+  };
+
+  const handleBatchVariantMarkup = (markupPercent: number) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map(v => ({
+        ...v,
+        price: Math.round(v.price * (1 + markupPercent / 100)),
+      })),
+    }));
   };
 
   // SVG Barcode Renderer
@@ -1241,6 +1724,47 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 </span>
               </div>
 
+              {/* ── Auto-Title Builder & 1-Click Full Blueprint Presets ── */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/30 to-indigo-950/30 border border-purple-900/40 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs font-black text-white uppercase tracking-wider">Rapid Blueprint Ingestion</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-600/30 text-purple-300 font-bold">1-Click Full SKU</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGenerateStandardTitle}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold cursor-pointer transition-all"
+                  >
+                    <Wand2 className="w-3 h-3" /> 🪄 Auto-Construct Title
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {HARDWARE_IMAGE_PRESETS.map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleApplyFullPreset(preset)}
+                      className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/60 hover:bg-purple-950/40 transition-all text-left group cursor-pointer"
+                    >
+                      <div className="aspect-video rounded-lg overflow-hidden mb-1.5">
+                        <img
+                          src={getSafeImageUrl(preset.url)}
+                          alt={preset.label}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      </div>
+                      <div className="text-[10px] font-bold text-white truncate">{preset.label}</div>
+                      <div className="flex items-center justify-between mt-0.5">
+                        <span className="text-[9px] text-purple-300">{preset.brand} · {preset.category}</span>
+                        <span className="text-[9px] text-emerald-400 font-mono font-bold">AED {preset.price.toLocaleString()}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Title & Slug */}
               <div className="space-y-4">
                 <div>
@@ -1399,38 +1923,132 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                   />
                 </div>
 
-                {/* Visual Assets & High-Res Presets */}
+                {/* ── Multi-Asset Gallery Manager ── */}
                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-purple-600" />
-                    <span>Media Assets & Quick Hardware Presets</span>
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-purple-600" />
+                      <span>Multi-Asset Gallery Studio</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-300">
+                        {formData.images.length} asset{formData.images.length !== 1 ? 's' : ''}
+                      </span>
+                    </h3>
+                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Primary Hero Thumbnail */}
+                  {/* Primary Cover Preview */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Primary Cover Asset
-                      </label>
-                      <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 relative shadow-sm group">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Primary Cover Asset</label>
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 border-purple-500/60 relative shadow-md group">
                         <img
                           src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
                           alt="Primary Cover"
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           onError={() => setPreviewImageError(true)}
                         />
-                        <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-slate-900/80 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1">
-                          <Check className="w-3 h-3 text-emerald-400" /> Primary Cover
+                        <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-purple-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1">
+                          <Check className="w-3 h-3 text-white" /> Cover
                         </div>
                       </div>
                     </div>
 
-                    {/* Image URL Inputs & Presets */}
-                    <div className="md:col-span-2 space-y-4">
+                    {/* Gallery Thumbnails + Add URL */}
+                    <div className="md:col-span-2 space-y-3">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Gallery Queue</label>
+                      {/* Thumbnail Strip */}
+                      {formData.images.length > 0 && (
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                          {formData.images.map((imgUrl, imgIdx) => {
+                            const isPrimary = imgUrl === formData.primaryImage;
+                            return (
+                              <div
+                                key={imgIdx}
+                                className={`relative flex-shrink-0 w-20 rounded-xl overflow-hidden border-2 transition-all ${
+                                  isPrimary ? 'border-purple-500 shadow-lg shadow-purple-500/20' : 'border-slate-200 dark:border-slate-800'
+                                }`}
+                              >
+                                <div className="aspect-video">
+                                  <img
+                                    src={getSafeImageUrl(imgUrl)}
+                                    alt={`Asset ${imgIdx + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                {isPrimary && (
+                                  <div className="absolute top-1 left-1 w-3.5 h-3.5 rounded-full bg-purple-600 flex items-center justify-center">
+                                    <Check className="w-2 h-2 text-white" />
+                                  </div>
+                                )}
+                                {/* Thumbnail Controls */}
+                                <div className="absolute bottom-0 inset-x-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-between px-1 py-0.5">
+                                  <button
+                                    type="button"
+                                    disabled={imgIdx === 0}
+                                    onClick={() => handleMoveImage(imgIdx, 'left')}
+                                    className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 cursor-pointer"
+                                    title="Move Left"
+                                  >
+                                    <MoveLeft className="w-2.5 h-2.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetPrimaryImage(imgIdx)}
+                                    disabled={isPrimary}
+                                    className="p-0.5 text-amber-400/70 hover:text-amber-400 disabled:opacity-30 cursor-pointer"
+                                    title="Set as Cover"
+                                  >
+                                    <Star className="w-2.5 h-2.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveGalleryImage(imgIdx)}
+                                    className="p-0.5 text-red-400/70 hover:text-red-400 cursor-pointer"
+                                    title="Remove"
+                                  >
+                                    <X className="w-2.5 h-2.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={imgIdx === formData.images.length - 1}
+                                    onClick={() => handleMoveImage(imgIdx, 'right')}
+                                    className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 cursor-pointer"
+                                    title="Move Right"
+                                  >
+                                    <MoveRight className="w-2.5 h-2.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {/* Add Asset URL Input */}
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          placeholder="Paste image URL to add to gallery..."
+                          value={galleryUrlInput}
+                          onChange={e => setGalleryUrlInput(e.target.value.replace(/[<>'"]/g, ''))}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddGalleryImage(galleryUrlInput);
+                            }
+                          }}
+                          className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddGalleryImage(galleryUrlInput)}
+                          className="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add
+                        </button>
+                      </div>
+
+                      {/* Primary Image URL Direct Edit */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                          Primary Asset Direct URL
-                        </label>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-1">Cover Asset URL</label>
                         <input
                           type="url"
                           placeholder="https://..."
@@ -1440,42 +2058,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                             setFormData({ ...formData, primaryImage: sanitized });
                             setPreviewImageError(false);
                           }}
-                          className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
                         />
-                      </div>
-
-                      {/* 1-Click Hardware Photography Presets */}
-                      <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-purple-600" /> 1-Click Hardware Photo Presets
-                          </span>
-                          <span className="text-[10px] text-slate-400">Click to apply photo</span>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {HARDWARE_IMAGE_PRESETS.map((preset, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => handleApplyPreset(preset)}
-                              className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-purple-500 transition-all text-left group cursor-pointer shadow-sm"
-                            >
-                              <div className="aspect-video rounded-lg overflow-hidden mb-1">
-                                <img
-                                  src={getSafeImageUrl(preset.url)}
-                                  alt={preset.label}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                />
-                              </div>
-                              <div className="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate">
-                                {preset.label}
-                              </div>
-                              <div className="text-[9px] text-slate-400">
-                                {preset.brand} • {preset.category}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1592,6 +2176,143 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 </div>
               </div>
 
+              {/* ── Target Gross Margin Calculator ── */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50/40 dark:from-emerald-950/30 dark:to-teal-950/20 border border-emerald-200/60 dark:border-emerald-800/40 space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-black text-slate-900 dark:text-white">Target Gross Margin Calculator</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">Auto-Price from COGS</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Target Margin %</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        max="90"
+                        step="1"
+                        value={targetMarginInput}
+                        onChange={e => setTargetMarginInput(parseFloat(e.target.value) || 0)}
+                        className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-sm font-mono font-black border border-emerald-200 dark:border-emerald-800 focus:outline-none focus:border-emerald-500"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Target Price (computed)</label>
+                    <div className="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-sm font-mono font-black text-emerald-700 dark:text-emerald-300">
+                      {formData.costPrice > 0 && targetMarginInput < 100
+                        ? `AED ${Math.round(formData.costPrice / (1 - targetMarginInput / 100)).toLocaleString()}`
+                        : '—'}
+                    </div>
+                  </div>
+                  <div className="pt-5">
+                    <button
+                      type="button"
+                      onClick={() => handleApplyTargetMargin(targetMarginInput)}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                    >
+                      <Zap className="w-3.5 h-3.5" /> Apply & Sync
+                    </button>
+                  </div>
+                </div>
+                {formData.mapPrice !== undefined && (
+                  <div className="flex items-center gap-3 pt-1">
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">MAP Floor (Min. Advertised Price)</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          value={formData.mapPrice || ''}
+                          onChange={e => setFormData(prev => ({ ...prev, mapPrice: parseFloat(e.target.value) || 0 }))}
+                          className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">AED</span>
+                      </div>
+                    </div>
+                    {formData.mapPrice > 0 && formData.price < formData.mapPrice && (
+                      <div className="pt-5 text-[10px] font-bold text-red-500 flex items-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5" /> Below MAP!
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* ── B2B Volume Tiered Pricing Matrix ── */}
+              {formData.tieredPricing && formData.tieredPricing.length > 0 && (
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                        <Percent className="w-3.5 h-3.5 text-purple-600" /> B2B Volume Tiered Pricing Matrix
+                      </div>
+                      <div className="text-[10px] text-slate-500 mt-0.5">Wholesale discount tiers for enterprise bulk orders</div>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-300">
+                      {formData.tieredPricing.length} Tiers
+                    </span>
+                  </div>
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase text-slate-400">
+                      <tr>
+                        <th className="py-3 px-4">Min. Qty</th>
+                        <th className="py-3 px-4">Discount</th>
+                        <th className="py-3 px-4 text-right">Unit Price (AED)</th>
+                        <th className="py-3 px-4 text-right">Savings/Unit</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {formData.tieredPricing.map((tier, tIdx) => {
+                        const savings = formData.price - tier.unitPrice;
+                        return (
+                          <tr key={tIdx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                            <td className="py-3 px-4">
+                              <input
+                                type="number"
+                                min="1"
+                                value={tier.minQty}
+                                onChange={e => {
+                                  const tiers = [...(formData.tieredPricing || [])];
+                                  tiers[tIdx] = { ...tiers[tIdx], minQty: parseInt(e.target.value, 10) || 1 };
+                                  setFormData(prev => ({ ...prev, tieredPricing: tiers }));
+                                }}
+                                className="w-20 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold"
+                              />
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="80"
+                                  value={tier.discountPercent}
+                                  onChange={e => handleUpdateTierPrice(tIdx, parseFloat(e.target.value) || 0)}
+                                  className="w-20 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400"
+                                />
+                                <span className="text-slate-400 text-[10px]">%</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-mono font-black text-slate-900 dark:text-white">
+                              {tier.unitPrice.toLocaleString()} AED
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {savings > 0 ? (
+                                <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">-{savings.toLocaleString()} AED</span>
+                              ) : (
+                                <span className="text-slate-400">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
               {/* UAE VAT 5% Compliance Box */}
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
                 <div className="space-y-1">
@@ -1660,58 +2381,106 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 </div>
               </div>
 
-              {/* Warehouse Stock Matrix Table */}
+              {/* Smart Distribution Preset Buttons */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2 mb-1">
+                  <Warehouse className="w-3.5 h-3.5 text-purple-600" />
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Smart Stock Distribution</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={() => handleSmartStockDistribution('consolidate_jafza')}
+                    className="text-xs px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold cursor-pointer transition-all flex items-center gap-1">
+                    <MapPin className="w-3 h-3" /> Consolidate JAFZA
+                  </button>
+                  <button type="button" onClick={() => handleSmartStockDistribution('even')}
+                    className="text-xs px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer transition-all">
+                    ⚖️ Distribute Evenly
+                  </button>
+                  <button type="button" onClick={() => handleSmartStockDistribution('ratio_70_10')}
+                    className="text-xs px-3 py-1.5 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold hover:bg-indigo-200 dark:hover:bg-indigo-900 cursor-pointer transition-all">
+                    📊 Enterprise 70/10/10/10
+                  </button>
+                  <button type="button" onClick={() => handleSmartStockDistribution('clear')}
+                    className="text-xs px-3 py-1.5 rounded-xl bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 font-bold hover:bg-red-200 dark:hover:bg-red-900 cursor-pointer transition-all">
+                    <X className="w-3 h-3 inline mr-0.5" /> Clear All
+                  </button>
+                </div>
+              </div>
+
+              {/* Warehouse Stock Matrix Table with Bin Tracking */}
               <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase text-slate-400">
                     <tr>
                       <th className="py-3 px-4">Warehouse Facility</th>
-                      <th className="py-3 px-4">City / Region</th>
-                      <th className="py-3 px-4 text-center">Available</th>
-                      <th className="py-3 px-4 text-center">Committed</th>
-                      <th className="py-3 px-4 text-center">Unavailable</th>
-                      <th className="py-3 px-4 text-right">On Hand Total</th>
+                      <th className="py-3 px-3">Bin / Aisle / Rack</th>
+                      <th className="py-3 px-3 text-center">Safety Stock</th>
+                      <th className="py-3 px-3 text-center">Available</th>
+                      <th className="py-3 px-3 text-center">Committed</th>
+                      <th className="py-3 px-3 text-center">Unavailable</th>
+                      <th className="py-3 px-3 text-right">On Hand</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {formData.locations.map((loc, idx) => (
                       <tr key={loc.locationId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                        <td className="py-3 px-4 font-bold text-slate-900 dark:text-white min-w-[140px]">
                           <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>{loc.locationName}</span>
+                            <span className={`w-2 h-2 rounded-full ${loc.available > 0 ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                            <span className="text-[11px]">{loc.locationName}</span>
                           </div>
+                          <div className="text-[10px] text-slate-400 pl-4">{loc.city}</div>
                         </td>
-                        <td className="py-3.5 px-4 text-slate-500">{loc.city}</td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-3">
+                          <input
+                            type="text"
+                            placeholder="e.g. A-04-18"
+                            value={loc.binLocation || ''}
+                            onChange={e => handleLocationBinChange(idx, e.target.value)}
+                            className="w-24 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-[10px] font-mono"
+                          />
+                        </td>
+                        <td className="py-3 px-3">
+                          <input
+                            type="number"
+                            min="0"
+                            value={loc.safetyStock ?? 0}
+                            onChange={e => handleLocationSafetyStockChange(idx, parseInt(e.target.value, 10) || 0)}
+                            className="w-16 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono text-amber-600 dark:text-amber-400"
+                          />
+                        </td>
+                        <td className="py-3 px-3">
                           <input
                             type="number"
                             min="0"
                             value={loc.available}
                             onChange={e => handleLocationStockChange(idx, 'available', parseInt(e.target.value, 10) || 0)}
-                            className="w-24 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-purple-600 dark:text-purple-400"
+                            className="w-20 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-purple-600 dark:text-purple-400"
                           />
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-3">
                           <input
                             type="number"
                             min="0"
                             value={loc.committed}
                             onChange={e => handleLocationStockChange(idx, 'committed', parseInt(e.target.value, 10) || 0)}
-                            className="w-24 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono"
+                            className="w-20 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono"
                           />
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-3">
                           <input
                             type="number"
                             min="0"
                             value={loc.unavailable}
                             onChange={e => handleLocationStockChange(idx, 'unavailable', parseInt(e.target.value, 10) || 0)}
-                            className="w-24 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono"
+                            className="w-20 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono"
                           />
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-black text-slate-900 dark:text-white">
-                          {loc.onHand} units
+                        <td className="py-3 px-3 text-right font-mono font-black text-slate-900 dark:text-white">
+                          {loc.onHand}
+                          {(loc.safetyStock ?? 0) > 0 && loc.available <= (loc.safetyStock ?? 0) && (
+                            <div className="text-[9px] text-amber-500 font-bold">⚠ Low</div>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -1719,60 +2488,17 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 </table>
               </div>
 
-              {/* Warehouse Quick Tools & Low Stock Alert */}
-              <div className="flex items-center justify-between flex-wrap gap-4 pt-2">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData(prev => {
-                        const updated = prev.locations.map(l => ({
-                          ...l,
-                          available: l.locationId === 'loc_dxb_main' ? 25 : 0,
-                          committed: 0,
-                          unavailable: 0,
-                          onHand: l.locationId === 'loc_dxb_main' ? 25 : 0,
-                          quantity: l.locationId === 'loc_dxb_main' ? 25 : 0,
-                        }));
-                        return { ...prev, locations: updated, stock: 25 };
-                      });
-                    }}
-                    className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 cursor-pointer"
-                  >
-                    Consolidate in Dubai JAFZA (25)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData(prev => {
-                        const updated = prev.locations.map(l => ({
-                          ...l,
-                          available: 10,
-                          committed: 0,
-                          unavailable: 0,
-                          onHand: 10,
-                          quantity: 10,
-                        }));
-                        return { ...prev, locations: updated, stock: 40 };
-                      });
-                    }}
-                    className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 cursor-pointer"
-                  >
-                    Distribute 10 to Each Hub (40)
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 font-semibold">Low-Stock Alert Level:</span>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.lowStockThreshold}
-                    onChange={e => setFormData({ ...formData, lowStockThreshold: parseInt(e.target.value, 10) || 5 })}
-                    className="w-16 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-center"
-                  />
-                  <span className="text-xs text-slate-400">units</span>
-                </div>
+              {/* Low Stock Alert Level */}
+              <div className="flex items-center justify-end gap-2">
+                <span className="text-xs text-slate-500 font-semibold">Global Low-Stock Alert:</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.lowStockThreshold}
+                  onChange={e => setFormData({ ...formData, lowStockThreshold: parseInt(e.target.value, 10) || 5 })}
+                  className="w-16 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-center"
+                />
+                <span className="text-xs text-slate-400">units</span>
               </div>
             </div>
           )}
@@ -2056,6 +2782,50 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                         </span>
                       </div>
 
+                      {/* ── Batch Controls Ribbon ── */}
+                      <div className="px-4 py-3 bg-indigo-50/50 dark:bg-indigo-950/20 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-black uppercase text-slate-500 mr-1">Batch Actions:</span>
+                        <button type="button" onClick={handleBatchVariantPrice}
+                          className="text-[11px] px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold cursor-pointer transition-all flex items-center gap-1">
+                          <DollarSign className="w-3 h-3" /> Apply Base Price to All
+                        </button>
+                        <button type="button" onClick={() => handleBatchVariantMarkup(5)}
+                          className="text-[11px] px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer transition-all">
+                          +5% Markup All
+                        </button>
+                        <button type="button" onClick={() => handleBatchVariantMarkup(-5)}
+                          className="text-[11px] px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer transition-all">
+                          -5% Discount All
+                        </button>
+                        <div className="flex items-center gap-1.5 ml-auto">
+                          <span className="text-[10px] text-slate-500 font-semibold">Uniform Stock:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="qty"
+                            className="w-16 bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono text-center"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const qty = parseInt((e.target as HTMLInputElement).value, 10);
+                                if (!isNaN(qty)) handleBatchVariantStock(qty);
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={e => {
+                              const inp = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                              const qty = parseInt(inp?.value || '0', 10);
+                              if (!isNaN(qty) && qty >= 0) handleBatchVariantStock(qty);
+                            }}
+                            className="text-[11px] px-2 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold cursor-pointer"
+                          >
+                            Set All
+                          </button>
+                        </div>
+                      </div>
+
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs">
                           <thead className="bg-slate-100/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase text-slate-400">
@@ -2335,31 +3105,87 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
 
         {/* ===================== RIGHT SIDEBAR (4 COLS) ===================== */}
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
-          {/* SIDEBAR CARD 1: LIVE STOREFRONT PRODUCT CARD PREVIEW */}
+          {/* SIDEBAR CARD 1: LIVE STOREFRONT PRODUCT CARD PREVIEW + FX SIMULATOR */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-purple-600" /> Live Storefront Card Preview
+                <Eye className="w-4 h-4 text-purple-600" /> Live Preview Studio
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
                 Live Mockup
               </span>
             </div>
 
+            {/* FX Currency Simulator Pills */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Multi-Currency FX Simulator</span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {(Object.entries(FX_RATES) as [keyof typeof FX_RATES, typeof FX_RATES[keyof typeof FX_RATES]][]).map(([cur, info]) => (
+                  <button
+                    key={cur}
+                    type="button"
+                    onClick={() => setPreviewCurrency(cur)}
+                    className={`px-2 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center ${
+                      previewCurrency === cur
+                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {info.symbol} {cur}
+                  </button>
+                ))}
+              </div>
+              <div className="text-center">
+                <span className="text-xl font-mono font-black text-purple-600 dark:text-purple-400">
+                  {FX_RATES[previewCurrency].symbol} {(formData.price * FX_RATES[previewCurrency].rate).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </span>
+                <span className="text-[10px] text-slate-400 ml-1.5">{previewCurrency}</span>
+              </div>
+            </div>
+
+            {/* Card Theme Toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Card Preview Theme</span>
+              <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setPreviewCardTheme('dark')}
+                  className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                    previewCardTheme === 'dark' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  🌙 Dark
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewCardTheme('light')}
+                  className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                    previewCardTheme === 'light' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  ☀️ Light
+                </button>
+              </div>
+            </div>
+
             {/* The Actual Mock Product Card */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 overflow-hidden shadow-sm group">
-              <div className="aspect-video relative overflow-hidden bg-slate-100 dark:bg-slate-900">
+            <div className={`rounded-2xl border overflow-hidden shadow-md group transition-all ${
+              previewCardTheme === 'dark'
+                ? 'bg-slate-950 border-slate-800'
+                : 'bg-white border-slate-200'
+            }`}>
+              <div className="aspect-video relative overflow-hidden">
                 <img
                   src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
                   alt={formData.title ? formData.title.replace(/[<>'"]/g, '') : 'Product Preview'}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={() => setPreviewImageError(true)}
                 />
-                <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-600 text-white text-[10px] font-bold tracking-wider uppercase">
+                <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-600 text-white text-[10px] font-bold tracking-wider uppercase shadow-lg">
                   {formData.brandName || 'Brand'}
                 </div>
                 {formData.discountPercentage > 0 && (
-                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-red-600 text-white text-[10px] font-bold">
+                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-red-600 text-white text-[10px] font-bold shadow-lg">
                     -{formData.discountPercentage}%
                   </div>
                 )}
@@ -2368,38 +3194,44 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 </div>
               </div>
 
-              <div className="p-4 space-y-2.5">
+              <div className={`p-4 space-y-2.5 ${
+                previewCardTheme === 'dark' ? 'bg-slate-950' : 'bg-white'
+              }`}>
                 <div className="flex items-center gap-1 text-amber-400 text-xs">
                   <Star className="w-3.5 h-3.5 fill-current" />
                   <Star className="w-3.5 h-3.5 fill-current" />
                   <Star className="w-3.5 h-3.5 fill-current" />
                   <Star className="w-3.5 h-3.5 fill-current" />
                   <Star className="w-3.5 h-3.5 fill-current" />
-                  <span className="text-[10px] text-slate-400 font-bold ml-1">5.0 (Brand New)</span>
+                  <span className={`text-[10px] font-bold ml-1 ${
+                    previewCardTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                  }`}>5.0 (Brand New)</span>
                 </div>
 
-                <div className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2">
+                <div className={`text-xs font-bold line-clamp-2 ${
+                  previewCardTheme === 'dark' ? 'text-white' : 'text-slate-900'
+                }`}>
                   {formData.title || 'HP ProBook 460 G11 Business Laptop'}
                 </div>
 
-                <div className="flex items-baseline gap-2">
-                  <span className="text-base font-black font-mono text-purple-600 dark:text-purple-400">
-                    {formatPrice(formData.price)}
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-base font-black font-mono text-purple-500">
+                    {FX_RATES[previewCurrency].symbol}{(formData.price * FX_RATES[previewCurrency].rate).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </span>
                   {formData.originalPrice > formData.price && (
                     <span className="text-xs line-through text-slate-400 font-mono">
-                      {formatPrice(formData.originalPrice)}
+                      {FX_RATES[previewCurrency].symbol}{(formData.originalPrice * FX_RATES[previewCurrency].rate).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </span>
                   )}
-                  <span className="text-[10px] text-slate-400">
-                    {formData.chargeTax ? '(incl. VAT)' : '(0% Tax)'}
-                  </span>
+                  <span className="text-[9px] text-slate-400">{previewCurrency} {formData.chargeTax ? '(incl. VAT)' : '(0% tax)'}</span>
                 </div>
 
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Warranty:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px]">
-                    {formData.warrantyYears} Years Official
+                <div className={`pt-2 border-t ${previewCardTheme === 'dark' ? 'border-slate-800' : 'border-slate-100'} flex items-center justify-between text-[11px]`}>
+                  <span className="text-slate-400">Warranty:</span>
+                  <span className={`font-bold truncate max-w-[150px] ${
+                    previewCardTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'
+                  }`}>
+                    {formData.warrantyYears}Y Official
                   </span>
                 </div>
               </div>
