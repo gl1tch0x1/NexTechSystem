@@ -36,6 +36,20 @@ export default function AdminQuotesPage() {
   const [convertingId, setConvertingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Confirmation Modal State
+  const [confirmDialog, setConfirmDialog] = useState<{
+    type: 'CONVERT' | 'STATUS_CHANGE';
+    title: string;
+    message: string;
+    quote?: Quote;
+    targetStatus?: QuoteStatus;
+    details?: { label: string; value: string }[];
+    confirmLabel: string;
+    variant: 'emerald' | 'amber' | 'rose' | 'blue';
+    onConfirm: () => Promise<void> | void;
+  } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
   // New Quote Form State
   const [newQuoteData, setNewQuoteData] = useState({
     companyName: '',
@@ -60,11 +74,30 @@ export default function AdminQuotesPage() {
     setTimeout(() => setToastMessage(null), 4500);
   };
 
+  const safeJson = async (res: Response) => {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      try {
+        return await res.json();
+      } catch {
+        return { success: false, error: { message: 'Invalid JSON payload received.' } };
+      }
+    }
+    const text = await res.text();
+    return {
+      success: false,
+      error: { message: text.slice(0, 150) || `Server response status ${res.status}` },
+    };
+  };
+
   const fetchQuotes = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/quotes');
-      const data = await res.json();
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const res = await fetch('/api/admin/quotes', {
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      });
+      const data = await safeJson(res);
       if (data.success && Array.isArray(data.data)) {
         setQuotes(data.data);
       }
@@ -79,51 +112,91 @@ export default function AdminQuotesPage() {
     fetchQuotes();
   }, []);
 
-  const handleStatusChange = async (quoteId: string, newStatus: QuoteStatus) => {
+  const executeStatusChange = async (quoteId: string, newStatus: QuoteStatus) => {
     try {
-      const res = await fetch(`/api/admin/quotes/${quoteId}`, {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const res = await fetch(`/api/admin/quotes/${encodeURIComponent(quoteId)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ status: newStatus }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         showToast(`Quotation status updated to ${newStatus}`);
         setQuotes((prev) =>
-          prev.map((q) => (q.id === quoteId ? { ...q, status: newStatus } : q))
+          prev.map((q) => (q.id === quoteId || q.quoteNumber === quoteId ? { ...q, status: newStatus } : q))
         );
-        if (selectedQuote && selectedQuote.id === quoteId) {
+        if (selectedQuote && (selectedQuote.id === quoteId || selectedQuote.quoteNumber === quoteId)) {
           setSelectedQuote((prev) => (prev ? { ...prev, status: newStatus } : null));
         }
+      } else {
+        alert(data.error?.message || 'Failed to update quotation status.');
       }
     } catch (err) {
       console.error('Failed to update quote status:', err);
+      alert('Network error while updating quotation status.');
     }
   };
 
-  const handleConvertToOrder = async (quote: Quote) => {
-    if (quote.status === 'CONVERTED') {
-      showToast(`This quotation was already converted into Sales Order #${quote.convertedOrderId}`);
-      return;
-    }
+  const requestStatusConfirmation = (quote: Quote, newStatus: QuoteStatus) => {
+    if (quote.status === newStatus) return;
 
+    const variantMap: Record<string, 'emerald' | 'amber' | 'rose' | 'blue'> = {
+      APPROVED: 'emerald',
+      PENDING_REVIEW: 'amber',
+      REJECTED: 'rose',
+      DRAFT: 'blue',
+      CONVERTED: 'emerald',
+      EXPIRED: 'amber',
+    };
+
+    setConfirmDialog({
+      type: 'STATUS_CHANGE',
+      title: `Confirm Status Change: ${newStatus}`,
+      message: `Are you sure you want to update the status of Quotation ${quote.quoteNumber} (${quote.companyName}) from ${quote.status} to ${newStatus}?`,
+      quote,
+      targetStatus: newStatus,
+      details: [
+        { label: 'Quotation Number', value: quote.quoteNumber },
+        { label: 'Client Organization', value: quote.companyName },
+        { label: 'Current Status', value: quote.status },
+        { label: 'Target Status', value: newStatus },
+        { label: 'Total Value', value: `AED ${quote.total?.toLocaleString()}` },
+      ],
+      confirmLabel: `Confirm & Set ${newStatus}`,
+      variant: variantMap[newStatus] || 'blue',
+      onConfirm: async () => {
+        await executeStatusChange(quote.id, newStatus);
+      },
+    });
+  };
+
+  const executeConvertToOrder = async (quote: Quote) => {
     setConvertingId(quote.id);
     try {
-      const res = await fetch(`/api/admin/quotes/${quote.id}/convert`, {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const res = await fetch(`/api/admin/quotes/${encodeURIComponent(quote.id)}/convert`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         const orderNum = data.data?.order?.orderNumber || 'ORD-QTE-NEW';
         showToast(`🎉 Success! Quotation converted to verified Sales Order #${orderNum}`);
         setQuotes((prev) =>
           prev.map((q) =>
-            q.id === quote.id
+            q.id === quote.id || q.quoteNumber === quote.quoteNumber
               ? { ...q, status: 'CONVERTED' as QuoteStatus, convertedOrderId: orderNum }
               : q
           )
         );
-        if (selectedQuote && selectedQuote.id === quote.id) {
+        if (selectedQuote && (selectedQuote.id === quote.id || selectedQuote.quoteNumber === quote.quoteNumber)) {
           setSelectedQuote((prev) =>
             prev ? { ...prev, status: 'CONVERTED' as QuoteStatus, convertedOrderId: orderNum } : null
           );
@@ -133,10 +206,37 @@ export default function AdminQuotesPage() {
       }
     } catch (err) {
       console.error('Conversion failed:', err);
-      alert('Error during order conversion.');
+      alert('Error during order conversion. Please try again.');
     } finally {
       setConvertingId(null);
     }
+  };
+
+  const requestConvertConfirmation = (quote: Quote) => {
+    if (quote.status === 'CONVERTED') {
+      showToast(`This quotation was already converted into Sales Order #${quote.convertedOrderId}`);
+      return;
+    }
+
+    setConfirmDialog({
+      type: 'CONVERT',
+      title: 'Confirm Sales Order Conversion',
+      message: `Are you sure you want to convert Quotation ${quote.quoteNumber} into a binding corporate Sales Order?`,
+      quote,
+      details: [
+        { label: 'Quotation Number', value: quote.quoteNumber },
+        { label: 'Corporate Client', value: quote.companyName },
+        { label: 'Tax Registration (TRN)', value: quote.taxRegistrationNumber || 'N/A' },
+        { label: 'Hardware Line Items', value: `${quote.items?.length || 0} Line Items` },
+        { label: 'Total Value (Inc. 5% VAT)', value: `AED ${quote.total?.toLocaleString()}` },
+        { label: 'Current Status', value: quote.status },
+      ],
+      confirmLabel: 'Yes, Convert to Sales Order',
+      variant: 'emerald',
+      onConfirm: async () => {
+        await executeConvertToOrder(quote);
+      },
+    });
   };
 
   const handleCreateQuote = async (e: React.FormEvent) => {
@@ -152,7 +252,7 @@ export default function AdminQuotesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newQuoteData),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         showToast(`Quotation ${data.data.quoteNumber} created successfully!`);
         setIsNewQuoteModalOpen(false);
@@ -407,7 +507,7 @@ export default function AdminQuotesPage() {
 
                         {q.status !== 'CONVERTED' && (
                           <button
-                            onClick={() => handleConvertToOrder(q)}
+                            onClick={() => requestConvertConfirmation(q)}
                             disabled={convertingId === q.id}
                             className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
                             title="1-Click Convert to Sales Order"
@@ -557,19 +657,19 @@ export default function AdminQuotesPage() {
                 <div className="text-[11px] font-bold text-slate-500 uppercase">Admin Action &amp; Status</div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
-                    onClick={() => handleStatusChange(selectedQuote.id, 'APPROVED')}
+                    onClick={() => requestStatusConfirmation(selectedQuote, 'APPROVED')}
                     className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer"
                   >
                     Approve Quotation
                   </button>
                   <button
-                    onClick={() => handleStatusChange(selectedQuote.id, 'PENDING_REVIEW')}
+                    onClick={() => requestStatusConfirmation(selectedQuote, 'PENDING_REVIEW')}
                     className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold cursor-pointer"
                   >
                     Mark Pending Review
                   </button>
                   <button
-                    onClick={() => handleStatusChange(selectedQuote.id, 'REJECTED')}
+                    onClick={() => requestStatusConfirmation(selectedQuote, 'REJECTED')}
                     className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer"
                   >
                     Reject Quote
@@ -594,7 +694,7 @@ export default function AdminQuotesPage() {
                 </div>
               ) : (
                 <button
-                  onClick={() => handleConvertToOrder(selectedQuote)}
+                  onClick={() => requestConvertConfirmation(selectedQuote)}
                   disabled={convertingId === selectedQuote.id}
                   className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
                 >
@@ -722,6 +822,107 @@ export default function AdminQuotesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Action Confirmation Modal */}
+      {confirmDialog && (
+        <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 space-y-5">
+            <div className="flex items-start gap-4">
+              <div
+                className={`p-3 rounded-2xl shrink-0 ${
+                  confirmDialog.variant === 'emerald'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                    : confirmDialog.variant === 'rose'
+                    ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800'
+                    : confirmDialog.variant === 'amber'
+                    ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
+                    : 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                }`}
+              >
+                {confirmDialog.type === 'CONVERT' ? (
+                  <Zap className="w-6 h-6" />
+                ) : (
+                  <AlertCircle className="w-6 h-6" />
+                )}
+              </div>
+              <div className="space-y-1 min-w-0">
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                  {confirmDialog.title}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {confirmDialog.message}
+                </p>
+              </div>
+            </div>
+
+            {confirmDialog.details && (
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
+                {confirmDialog.details.map((item, idx) => (
+                  <div key={idx} className="flex justify-between py-1.5 first:pt-0 last:pb-0">
+                    <span className="text-slate-500 dark:text-slate-400">{item.label}:</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-right">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {confirmDialog.type === 'CONVERT' && (
+              <div className="p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 text-[11px] text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 shrink-0 text-blue-500" />
+                <span>
+                  Converting will generate an official sales order, lock pricing margins, and issue an FTA compliance tax invoice.
+                </span>
+              </div>
+            )}
+
+            <div className="pt-2 flex items-center justify-end gap-3">
+              <button
+                id="confirm-action-cancel"
+                type="button"
+                onClick={() => {
+                  if (!confirmLoading) setConfirmDialog(null);
+                }}
+                disabled={confirmLoading}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                id="confirm-action-submit"
+                type="button"
+                onClick={async () => {
+                  setConfirmLoading(true);
+                  try {
+                    await confirmDialog.onConfirm();
+                  } finally {
+                    setConfirmLoading(false);
+                    setConfirmDialog(null);
+                  }
+                }}
+                disabled={confirmLoading}
+                className={`px-5 py-2.5 rounded-xl text-white font-black text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer disabled:opacity-50 ${
+                  confirmDialog.variant === 'emerald'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-emerald-500/20'
+                    : confirmDialog.variant === 'rose'
+                    ? 'bg-rose-600 hover:bg-rose-700 active:scale-95 shadow-rose-500/20'
+                    : confirmDialog.variant === 'amber'
+                    ? 'bg-amber-600 hover:bg-amber-700 active:scale-95 shadow-amber-500/20'
+                    : 'bg-tech-blue hover:bg-blue-700 active:scale-95 shadow-blue-500/20'
+                }`}
+              >
+                {confirmLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : confirmDialog.type === 'CONVERT' ? (
+                  <Zap className="w-4 h-4" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )}
+                <span>{confirmDialog.confirmLabel}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

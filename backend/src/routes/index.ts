@@ -32,6 +32,7 @@ router.use('/currencies', currencyRoutes);
 router.use('/vat', vatRoutes);
 router.use('/warranty', warrantyRoutes);
 router.use('/quotes', quoteRoutes);
+router.use('/admin/quotes', quoteRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {

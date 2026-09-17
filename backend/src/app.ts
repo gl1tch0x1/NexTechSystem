@@ -57,6 +57,14 @@ export function createApp(): Express {
   // 3. Mount Master REST API Routes with standard Rate Limiting
   app.use('/api', apiLimiter, routes);
 
+  // Return JSON 404 for unhandled API routes instead of HTML error pages
+  app.use('/api', (req, res) => {
+    res.status(404).json({
+      success: false,
+      error: { code: 'NOT_FOUND', message: `API route not found: ${req.method} ${req.originalUrl}` },
+    });
+  });
+
 
   // 4. Centralized Error Handling
   app.use(errorHandler);
