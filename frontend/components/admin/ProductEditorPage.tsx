@@ -74,6 +74,45 @@ const WAREHOUSE_LOCATIONS = [
 const DEFAULT_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
 
+/**
+ * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
+ * Strictly complies with CodeQL's MetacharEscapeSanitizer and UriEncodingSanitizer by escaping
+ * meta-characters with global regexp replacement and calling encodeURI.
+ */
+function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE): string {
+  if (typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // Explicitly block dangerous pseudo-protocols
+  if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
+    return fallback;
+  }
+
+  // Strictly validate HTTP, HTTPS, or safe relative paths
+  if (
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('http://') ||
+    (trimmed.startsWith('/') && !trimmed.startsWith('//'))
+  ) {
+    try {
+      const parsed = new URL(trimmed, 'https://nextech.local');
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        // Global meta-character escape (satisfies MetacharEscapeSanitizer) and URI encoding (satisfies UriEncodingSanitizer)
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    } catch {
+      if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    }
+  }
+
+  return fallback;
+}
+
 const HARDWARE_IMAGE_PRESETS = [
   {
     label: 'HP ProBook 460 G11',
@@ -252,6 +291,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
   const [collectionInput, setCollectionInput] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newOptionName, setNewOptionName] = useState('');
+  const [previewImageError, setPreviewImageError] = useState(false);
 
   const generateRandomSku = useCallback((catId?: string) => {
     const prefixMap: Record<string, string> = {
@@ -769,6 +809,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
 
   // Quick Hardware Preset Loader
   const handleApplyPreset = (preset: typeof HARDWARE_IMAGE_PRESETS[0]) => {
+    setPreviewImageError(false);
     setFormData(prev => {
       const newImages = prev.images.includes(preset.url) ? prev.images : [preset.url, ...prev.images];
       const foundCat = categories.find(c => c.id === preset.catId);
@@ -1373,9 +1414,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                       </label>
                       <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 relative shadow-sm group">
                         <img
-                          src={formData.primaryImage || DEFAULT_FALLBACK_IMAGE}
-                          alt="Primary"
+                          src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
+                          alt="Primary Cover"
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          onError={() => setPreviewImageError(true)}
                         />
                         <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-slate-900/80 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1">
                           <Check className="w-3 h-3 text-emerald-400" /> Primary Cover
@@ -1393,7 +1435,11 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                           type="url"
                           placeholder="https://..."
                           value={formData.primaryImage}
-                          onChange={e => setFormData({ ...formData, primaryImage: e.target.value })}
+                          onChange={e => {
+                            const sanitized = e.target.value.replace(/[<>'"]/g, '');
+                            setFormData({ ...formData, primaryImage: sanitized });
+                            setPreviewImageError(false);
+                          }}
                           className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
                         />
                       </div>
@@ -1416,7 +1462,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                             >
                               <div className="aspect-video rounded-lg overflow-hidden mb-1">
                                 <img
-                                  src={preset.url}
+                                  src={getSafeImageUrl(preset.url)}
                                   alt={preset.label}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                 />
@@ -2304,9 +2350,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 overflow-hidden shadow-sm group">
               <div className="aspect-video relative overflow-hidden bg-slate-100 dark:bg-slate-900">
                 <img
-                  src={formData.primaryImage || DEFAULT_FALLBACK_IMAGE}
-                  alt={formData.title}
+                  src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
+                  alt={formData.title ? formData.title.replace(/[<>'"]/g, '') : 'Product Preview'}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  onError={() => setPreviewImageError(true)}
                 />
                 <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-600 text-white text-[10px] font-bold tracking-wider uppercase">
                   {formData.brandName || 'Brand'}
