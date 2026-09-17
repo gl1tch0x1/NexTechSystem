@@ -347,7 +347,7 @@ sequenceDiagram
     Admin->>UI: Clicks 1-Click Hardware Preset (e.g. ASUS ROG Astral RTX 5090)
     UI->>UI: Populates high-res photography, category specs, & tags
     UI->>UI: Live Storefront Mockup reflects title, price, stock, & warranty
-    Admin->>UI: Enables Multi-SKU Variants Matrix (RAM: 16GB, 32GB; SSD: 512GB, 1TB)
+    Admin->>UI: Enables Multi-SKU Variants Matrix (RAM: 16GB, 32GB and SSD: 512GB, 1TB)
     UI->>UI: Cartesian Engine generates 4 composite variants with unique SKUs & prices
     Admin->>UI: Allocates stock across regional warehouses (Dubai JAFZA: 25, Deira: 10)
     Admin->>UI: Inputs package dimensions (35.9 x 25.1 x 1.9 cm) & Net Weight (1.74 kg)
@@ -539,14 +539,14 @@ sequenceDiagram
 
     rect rgb(245, 255, 245)
         Note over OrdSvc,TxMgr: Step 2: Atomic Inventory & Multi-Warehouse Reservation
-        OrdSvc->>TxMgr: runTransaction(async tx => { ... })
+        OrdSvc->>TxMgr: runTransaction() atomic execution
         TxMgr->>DB: Check Stock across Warehouse Nodes (Dubai, Deira, Abu Dhabi, Sharjah)
         alt Stock Available
-            TxMgr->>DB: Decrement variant.stock & location.available / onHand atomically
-        else Stock is Zero & allowBackorder == true
-            TxMgr->>DB: Accept backorder & record negative allocation
-        else Stock Insufficient & allowBackorder == false
-            TxMgr-->>OrdSvc: Throw 400 Out of Stock Error
+            TxMgr->>DB: Decrement variant.stock and location quantities atomically
+        else Stock is Zero and allowBackorder is enabled
+            TxMgr->>DB: Accept backorder and record allocation
+        else Stock Insufficient and backorders disallowed
+            TxMgr-->>OrdSvc: Return Out of Stock Error
             OrdSvc-->>UI: Rejection notice with unavailable SKU names
         end
         opt Wallet Split Payment
