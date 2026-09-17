@@ -7,6 +7,16 @@ export async function GET(
 ) {
   const { slug } = await context.params;
 
+  // Validate slug format to prevent SSRF and path traversal
+  if (!slug || typeof slug !== 'string' || !/^[a-zA-Z0-9_-]{1,100}$/.test(slug)) {
+    return NextResponse.json(
+      { success: false, message: 'Invalid product identifier' },
+      { status: 400 }
+    );
+  }
+
+  const encodedSlug = encodeURIComponent(slug);
+
   const backendUrl =
     process.env.API_PROXY_TARGET ||
     process.env.BACKEND_URL ||
@@ -14,9 +24,10 @@ export async function GET(
 
   // 1. Try external backend if configured
   if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
-    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
     try {
-      const res = await fetch(`${clean}/api/products/${slug}`, {
+      const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
+      const remoteUrl = new URL(`${clean}/api/products/${encodedSlug}`);
+      const res = await fetch(remoteUrl.toString(), {
         signal: AbortSignal.timeout(5000),
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
@@ -33,7 +44,8 @@ export async function GET(
   // 2. Try local server if on localhost
   if (!backendUrl || backendUrl.includes('localhost')) {
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${slug}`, {
+      const localUrl = new URL(`http://localhost:5000/api/products/${encodedSlug}`);
+      const res = await fetch(localUrl.toString(), {
         signal: AbortSignal.timeout(1500),
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',

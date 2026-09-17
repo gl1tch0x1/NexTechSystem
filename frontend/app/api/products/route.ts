@@ -1,6 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FALLBACK_PRODUCTS } from '@/lib/fallback-data';
 
+function getSafeProductSearchParams(incomingParams: URLSearchParams): URLSearchParams {
+  const safeParams = new URLSearchParams();
+
+  // 1. Text filters: strictly limit length and character set
+  const textKeys = ['category', 'categorySlug', 'brand', 'brandSlug', 'sort', 'sellerType', 'location'];
+  for (const key of textKeys) {
+    const val = incomingParams.get(key);
+    if (val && /^[a-zA-Z0-9\-_]{1,64}$/.test(val)) {
+      safeParams.set(key, val.trim());
+    }
+  }
+
+  // Search keywords: allow letters, digits, spaces, and safe punctuation (max 100 chars)
+  const searchVal = incomingParams.get('search');
+  if (searchVal && /^[a-zA-Z0-9\s\-_.,+]{1,100}$/.test(searchVal)) {
+    safeParams.set('search', searchVal.trim());
+  }
+
+  // 2. Boolean flags: strictly allow only 'true' or 'false'
+  const boolKeys = ['inStock', 'isFeatured', 'onSale'];
+  for (const key of boolKeys) {
+    const val = incomingParams.get(key);
+    if (val === 'true' || val === 'false') {
+      safeParams.set(key, val);
+    }
+  }
+
+  // 3. Positive integer pagination
+  const page = parseInt(incomingParams.get('page') || '', 10);
+  if (!isNaN(page) && page > 0 && page <= 10000) {
+    safeParams.set('page', String(page));
+  }
+
+  const limit = parseInt(incomingParams.get('limit') || '', 10);
+  if (!isNaN(limit) && limit > 0 && limit <= 100) {
+    safeParams.set('limit', String(limit));
+  }
+
+  // 4. Bounded numeric filters
+  const minPrice = parseFloat(incomingParams.get('minPrice') || '');
+  if (!isNaN(minPrice) && minPrice >= 0 && minPrice <= 1000000) {
+    safeParams.set('minPrice', String(minPrice));
+  }
+
+  const maxPrice = parseFloat(incomingParams.get('maxPrice') || '');
+  if (!isNaN(maxPrice) && maxPrice >= 0 && maxPrice <= 1000000) {
+    safeParams.set('maxPrice', String(maxPrice));
+  }
+
+  const minRating = parseFloat(incomingParams.get('minRating') || '');
+  if (!isNaN(minRating) && minRating >= 0 && minRating <= 5) {
+    safeParams.set('minRating', String(minRating));
+  }
+
+  return safeParams;
+}
+
 export async function GET(request: NextRequest) {
   const backendUrl =
     process.env.API_PROXY_TARGET ||
@@ -9,12 +66,18 @@ export async function GET(request: NextRequest) {
 
   const url = new URL(request.url);
   const { searchParams } = url;
+  const safeParams = getSafeProductSearchParams(searchParams);
+  const safeQuery = safeParams.toString();
 
   // If a valid external remote backend is configured, attempt to query it
   if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
-    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
     try {
-      const res = await fetch(`${clean}/api/products${url.search}`, {
+      const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
+      const remoteTarget = new URL(`${clean}/api/products`);
+      if (safeQuery) {
+        remoteTarget.search = safeQuery;
+      }
+      const res = await fetch(remoteTarget.toString(), {
         signal: AbortSignal.timeout(5000),
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
@@ -33,7 +96,11 @@ export async function GET(request: NextRequest) {
   // Also try local node server if running on localhost
   if (!backendUrl || backendUrl.includes('localhost')) {
     try {
-      const res = await fetch(`http://localhost:5000/api/products${url.search}`, {
+      const localTarget = new URL('http://localhost:5000/api/products');
+      if (safeQuery) {
+        localTarget.search = safeQuery;
+      }
+      const res = await fetch(localTarget.toString(), {
         signal: AbortSignal.timeout(1500),
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',

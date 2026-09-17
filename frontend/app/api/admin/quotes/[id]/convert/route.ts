@@ -8,6 +8,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
+    if (!id || !/^[a-zA-Z0-9_\-]{1,64}$/.test(id)) {
+      return NextResponse.json({ success: false, error: { message: 'Invalid quotation identifier format.' } }, { status: 400 });
+    }
 
     try {
       const res = await fetch(`${BACKEND_URL}/quotes/${encodeURIComponent(id)}/convert`, {

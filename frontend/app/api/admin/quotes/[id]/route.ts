@@ -8,6 +8,9 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
+    if (!id || !/^[a-zA-Z0-9_\-]{1,64}$/.test(id)) {
+      return NextResponse.json({ success: false, error: { message: 'Invalid quotation identifier format.' } }, { status: 400 });
+    }
     const body = await request.json();
 
     try {
@@ -40,6 +43,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    if (!id || !/^[a-zA-Z0-9_\-]{1,64}$/.test(id)) {
+      return NextResponse.json({ success: false, error: { message: 'Invalid quotation identifier format.' } }, { status: 400 });
+    }
     const res = await fetch(`${BACKEND_URL}/quotes/${encodeURIComponent(id)}`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();

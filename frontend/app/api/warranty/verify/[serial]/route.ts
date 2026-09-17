@@ -10,9 +10,9 @@ export async function GET(
     const { serial } = await params;
     const cleanSerial = serial ? decodeURIComponent(serial).trim().toUpperCase() : '';
 
-    if (!cleanSerial || cleanSerial.length < 3) {
+    if (!cleanSerial || !/^[A-Z0-9_-]{3,64}$/.test(cleanSerial)) {
       return NextResponse.json(
-        { success: false, error: { message: 'A valid serial number (minimum 3 characters) is required.' } },
+        { success: false, error: { message: 'A valid alphanumeric serial number (3 to 64 characters) is required.' } },
         { status: 400 }
       );
     }
