@@ -102,7 +102,7 @@ export default function CheckoutPage() {
       const activeToken = token;
 
       const orderPayload = {
-        items: cartItems.map(i => ({ productId: i.productId, quantity: i.quantity })),
+        items: cartItems.map(i => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
         shippingAddress,
         billingAddress: shippingAddress,
         paymentMethod,
@@ -334,9 +334,12 @@ export default function CheckoutPage() {
             {/* Items mini list */}
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {cartItems.map(it => (
-                <div key={it.productId} className="flex items-center justify-between text-xs py-1">
+                <div key={`${it.productId}_${it.variantId || 'base'}`} className="flex items-center justify-between text-xs py-1">
                   <span className="text-slate-400 truncate max-w-[180px]">
                     {it.quantity}x {it.productName}
+                    {it.variantTitle && (
+                      <span className="ml-1.5 text-[10px] text-tech-cyan">({it.variantTitle})</span>
+                    )}
                   </span>
                   <span className="font-bold text-white">{formatPrice(it.subtotal)}</span>
                 </div>

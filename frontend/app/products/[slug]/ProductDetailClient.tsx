@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Product } from '@/types';
+import React, { useState, useMemo } from 'react';
+import { Product, ProductVariant } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import {
@@ -28,19 +28,61 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState<number>(1);
   const [addedMessage, setAddedMessage] = useState(false);
 
+  const hasVariants = Boolean(product.hasVariants && product.variants && product.variants.length > 0);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
+    hasVariants && product.variants ? product.variants[0] : null
+  );
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(
+    hasVariants && product.variants?.[0]?.options ? { ...product.variants[0].options } : {}
+  );
+
+  const optionDefinitions = useMemo(() => {
+    if (product.variantOptions && product.variantOptions.length > 0) {
+      return product.variantOptions;
+    }
+    if (product.variants && product.variants.length > 0) {
+      const keys = Array.from(new Set(product.variants.flatMap(v => Object.keys(v.options || {}))));
+      return keys.map(key => ({
+        name: key,
+        values: Array.from(new Set(product.variants!.map(v => v.options?.[key]).filter(Boolean) as string[])),
+      }));
+    }
+    return [];
+  }, [product.variantOptions, product.variants]);
+
+  const handleOptionSelect = (optName: string, optVal: string) => {
+    const updated = { ...selectedOptions, [optName]: optVal };
+    setSelectedOptions(updated);
+    if (product.variants) {
+      const matched = product.variants.find(v =>
+        Object.entries(updated).every(([k, val]) => v.options?.[k] === val)
+      );
+      if (matched) {
+        setSelectedVariant(matched);
+        if (matched.image) {
+          setSelectedImage(matched.image);
+        }
+      }
+    }
+  };
+
   const inWishlist = isInWishlist(product.id);
-  const price = product.salePrice || product.price;
-  const originalPrice = product.compareAtPrice || (product.salePrice ? product.price : null);
-  const isOutOfStock = product.stock === 0;
+  const currentPrice = selectedVariant ? selectedVariant.price : (product.salePrice || product.price);
+  const originalPrice = selectedVariant
+    ? (selectedVariant.compareAtPrice || null)
+    : (product.compareAtPrice || (product.salePrice ? product.price : null));
+  const currentSku = selectedVariant ? selectedVariant.sku : product.sku;
+  const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
+  const isOutOfStock = currentStock === 0 && !product.allowBackorder;
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    addToCart(product, quantity, selectedVariant);
     setAddedMessage(true);
     setTimeout(() => setAddedMessage(false), 2500);
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity);
+    addToCart(product, quantity, selectedVariant);
     router.push('/checkout');
   };
 
@@ -112,7 +154,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-tech-blue dark:text-tech-cyan uppercase tracking-wider">{product.brandName}</span>
               <span className="text-slate-300 dark:text-slate-600">•</span>
-              <span className="font-mono text-slate-500 dark:text-slate-400 font-semibold">SKU: {product.sku}</span>
+              <span className="font-mono text-slate-500 dark:text-slate-400 font-semibold">SKU: {currentSku}</span>
             </div>
 
             {product.sellerType === 'RESELLER' ? (
@@ -138,34 +180,82 @@ export function ProductDetailClient({ product }: { product: Product }) {
             {product.description}
           </p>
 
+          {/* Variant Option Pickers */}
+          {hasVariants && optionDefinitions.length > 0 && (
+            <div className="space-y-3 p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80">
+              <div className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                Configuration & Options
+              </div>
+              {optionDefinitions.map(def => (
+                <div key={def.name} className="space-y-1.5">
+                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center justify-between">
+                    <span>{def.name}:</span>
+                    <span className="font-bold text-slate-900 dark:text-white font-mono">
+                      {selectedOptions[def.name] || 'Select'}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {def.values.map(val => {
+                      const isSelected = selectedOptions[def.name] === val;
+                      return (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => handleOptionSelect(def.name, val)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-tech-blue text-white border-tech-blue shadow-sm shadow-blue-500/20'
+                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600'
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Price Box */}
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/90 dark:border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
             <div>
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {formatPrice(price)}
+                  {formatPrice(currentPrice)}
                 </span>
                 {originalPrice && (
                   <span className="text-sm text-slate-400 dark:text-slate-500 line-through font-mono">
                     {formatPrice(originalPrice)}
                   </span>
                 )}
-                {originalPrice && originalPrice > price && (
+                {originalPrice && originalPrice > currentPrice && (
                   <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono">
-                    -{Math.round(((originalPrice - price) / originalPrice) * 100)}% SAVE
+                    -{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% SAVE
                   </span>
                 )}
               </div>
+              {product.unitPrice && product.unitMeasure && (
+                <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+                  ({formatPrice(product.unitPrice)} / {product.unitMeasure})
+                </div>
+              )}
               <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                Includes 5% UAE VAT • Free GCC Express Delivery over AED 500
+                {product.chargeTax === false ? 'VAT Exempt' : 'Includes 5% UAE VAT'} • Free GCC Express Delivery over AED 500
               </div>
             </div>
 
             <div className="sm:text-right">
-              {product.stock > 0 ? (
+              {currentStock > 0 ? (
                 <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 px-3 py-1.5 rounded-xl">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{product.stock} Units In Stock</span>
+                  <span>{currentStock} Units In Stock</span>
+                </div>
+              ) : product.allowBackorder ? (
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/60 px-3 py-1.5 rounded-xl">
+                  <span className="w-2 h-2 rounded-full bg-blue-500" />
+                  <span>Available on Backorder</span>
                 </div>
               ) : (
                 <div className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-950/40 px-3 py-1.5 rounded-xl border border-red-200">

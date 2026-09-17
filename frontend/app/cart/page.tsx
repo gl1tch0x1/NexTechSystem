@@ -102,7 +102,7 @@ export default function CartPage() {
         <div className="lg:col-span-8 space-y-4">
           {cartItems.map(item => (
             <div
-              key={item.productId}
+              key={`${item.productId}_${item.variantId || 'base'}`}
               className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm"
             >
               <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -135,6 +135,14 @@ export default function CartPage() {
                     {item.productName}
                   </Link>
 
+                  {item.variantTitle && (
+                    <div className="mt-1">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-tech-cyan bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-900">
+                        {item.variantTitle}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
                     {formatPrice(item.salePrice || item.price)} each
                   </div>
@@ -145,7 +153,7 @@ export default function CartPage() {
               <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
                 <div className="flex items-center rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-1">
                   <button
-                    onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                    onClick={() => updateQuantity(item.productId, item.quantity - 1, item.variantId)}
                     className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded text-slate-700 dark:text-slate-300"
                   >
                     <Minus className="w-3.5 h-3.5" />
@@ -154,7 +162,7 @@ export default function CartPage() {
                     {item.quantity}
                   </span>
                   <button
-                    onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                    onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantId)}
                     className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded text-slate-700 dark:text-slate-300"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -168,7 +176,7 @@ export default function CartPage() {
                 </div>
 
                 <button
-                  onClick={() => removeFromCart(item.productId)}
+                  onClick={() => removeFromCart(item.productId, item.variantId)}
                   className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                   title="Remove from cart"
                 >

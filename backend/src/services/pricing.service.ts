@@ -28,8 +28,9 @@ export class PricingService {
     const settings = await settingsRepository.getSettings();
     const verifiedItems: CartItem[] = [];
     let subtotal = 0;
+    let taxableItemsSubtotal = 0;
 
-    for (const reqItem of params.items) {
+    for (const reqItem of params.items as Array<{ productId: string; quantity: number; variantId?: string }>) {
       if (!reqItem || typeof reqItem.productId !== 'string' || !reqItem.productId.trim()) {
         throw new Error('Invalid cart item: productId is required');
       }
@@ -45,24 +46,58 @@ export class PricingService {
         throw new Error(`Product not found: ${reqItem.productId}`);
       }
 
-      const unitPrice = product.salePrice && product.salePrice > 0 ? product.salePrice : product.price;
+      // Check variant if variantId provided
+      let effectivePrice = product.price;
+      let effectiveSalePrice = product.salePrice;
+      let effectiveSku = product.sku;
+      let effectiveTitle = product.name;
+      let effectiveImage = product.thumbnail || product.images?.[0] || '';
+      let effectiveStock = product.stock;
+      let isItemTaxable = product.chargeTax !== false;
+      let variantOptions: Record<string, string> | undefined;
+
+      if (reqItem.variantId && product.variants && product.variants.length > 0) {
+        const variant = product.variants.find((v: any) => v.id === reqItem.variantId);
+        if (variant) {
+          effectivePrice = variant.price;
+          effectiveSalePrice = variant.salePrice || (variant.compareAtPrice ? variant.price : product.salePrice);
+          effectiveSku = variant.sku;
+          effectiveTitle = `${product.name} - ${variant.title}`;
+          if (variant.image) effectiveImage = variant.image;
+          effectiveStock = variant.stock;
+          variantOptions = variant.options;
+          if (variant.chargeTax !== undefined) {
+            isItemTaxable = variant.chargeTax;
+          }
+        }
+      }
+
+      const unitPrice = effectiveSalePrice && effectiveSalePrice > 0 ? effectiveSalePrice : effectivePrice;
       const itemSubtotal = unitPrice * reqItem.quantity;
       subtotal += itemSubtotal;
 
+      if (isItemTaxable) {
+        taxableItemsSubtotal += itemSubtotal;
+      }
+
       verifiedItems.push({
         productId: product.id,
-        productName: product.name,
-        sku: product.sku,
+        productName: effectiveTitle,
+        variantId: reqItem.variantId,
+        variantTitle: reqItem.variantId && product.variants ? product.variants.find((v: any) => v.id === reqItem.variantId)?.title : undefined,
+        options: variantOptions,
+        sku: effectiveSku,
         slug: product.slug,
-        image: product.thumbnail || product.images?.[0] || '',
+        image: effectiveImage,
         quantity: reqItem.quantity,
-        price: product.price,
-        salePrice: product.salePrice,
+        price: effectivePrice,
+        salePrice: effectiveSalePrice,
+        chargeTax: isItemTaxable,
         sellerType: product.sellerType,
         resellerId: product.resellerId,
         resellerCode: product.resellerCode,
         subtotal: itemSubtotal,
-        stockAvailable: product.stock,
+        stockAvailable: effectiveStock,
       });
     }
 
@@ -94,9 +129,11 @@ export class PricingService {
     // Shipping calculation
     const shippingFee = discountedSubtotal >= settings.freeShippingThreshold ? 0 : settings.standardShippingFee;
 
-    // Tax calculation (e.g. 5% VAT)
+    // Tax calculation (e.g. 5% UAE VAT) respecting chargeTax toggle
     const taxRate = settings.taxRate || 5;
-    const tax = Math.round((discountedSubtotal * (taxRate / 100)) * 100) / 100;
+    const taxableRatio = subtotal > 0 ? (taxableItemsSubtotal / subtotal) : 1;
+    const discountedTaxableSubtotal = Math.max(0, taxableItemsSubtotal - (couponDiscount * taxableRatio));
+    const tax = Math.round((discountedTaxableSubtotal * (taxRate / 100)) * 100) / 100;
 
     const preWalletTotal = Math.round((discountedSubtotal + tax + shippingFee) * 100) / 100;
 

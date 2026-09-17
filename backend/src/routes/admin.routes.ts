@@ -17,6 +17,7 @@ router.get('/analytics', (req, res, next) => adminController.getAnalytics(req, r
 
 // 2. Products & Approvals
 router.get('/products', (req, res, next) => adminController.getProducts(req, res).catch(next));
+router.get('/products/:id', (req, res, next) => adminController.getProductById(req, res).catch(next));
 router.post('/products', (req, res, next) => adminController.createProduct(req, res).catch(next));
 router.put('/products/:id', (req, res, next) => adminController.updateProduct(req, res).catch(next));
 router.delete('/products/:id', (req, res, next) => adminController.deleteProduct(req, res).catch(next));

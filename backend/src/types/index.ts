@@ -88,6 +88,39 @@ export interface WarehouseLocationStock {
   city: string;
   quantity: number;
   reserved?: number;
+  unavailable?: number;
+  committed?: number;
+  available?: number;
+  onHand?: number;
+}
+
+export interface VariantOptionDefinition {
+  name: string; // e.g. "RAM", "Storage", "Color"
+  values: string[]; // e.g. ["16GB", "32GB"]
+}
+
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  barcode?: string;
+  title: string; // e.g. "16GB RAM / 512GB SSD / Silver"
+  price: number;
+  compareAtPrice?: number;
+  costPrice?: number;
+  stock: number;
+  options: Record<string, string>; // e.g. { "RAM": "16GB", "Storage": "512GB", "Color": "Silver" }
+  image?: string;
+  chargeTax?: boolean;
+  weight?: number;
+  locations?: WarehouseLocationStock[];
+  isActive?: boolean;
+}
+
+export interface ProductPackageDimensions {
+  length: number;
+  width: number;
+  height: number;
+  unit: 'cm' | 'in';
 }
 
 export interface Product {
@@ -121,6 +154,7 @@ export interface Product {
   specifications: Record<string, string>; // normalized key-values e.g. { socket: "LGA1700", ramType: "DDR5", wattage: "125W" }
   features: string[];
   tags: string[];
+  collections?: string[];
   warranty?: string;
   rating: number;
   reviewCount: number;
@@ -129,6 +163,23 @@ export interface Product {
   approvalStatus: ProductApprovalStatus;
   rejectionReason?: string;
   seo?: SEOData;
+  // Multi-variant support
+  hasVariants?: boolean;
+  variantOptions?: VariantOptionDefinition[];
+  variants?: ProductVariant[];
+  // Logistics & Shipping
+  weight?: number; // In kilograms (kg)
+  dimensions?: ProductPackageDimensions;
+  hsCode?: string; // Harmonized System tariff code
+  isPhysical?: boolean; // Physical vs Digital toggle
+  // Tax & Pricing policy
+  chargeTax?: boolean; // Defaults to true; if false, exempt from VAT
+  unitPrice?: number;
+  unitMeasure?: string; // e.g. "item", "kg", "meter"
+  // Inventory tracking & policy
+  inventoryTracked?: boolean;
+  allowBackorder?: boolean; // "Sell when out of stock" policy
+  status?: 'ACTIVE' | 'DRAFT' | 'ARCHIVED';
   createdAt: string;
   updatedAt: string;
 }
@@ -160,12 +211,16 @@ export interface Brand {
 export interface CartItem {
   productId: string;
   productName: string;
+  variantId?: string;
+  variantTitle?: string;
+  options?: Record<string, string>;
   sku: string;
   slug: string;
   image: string;
   quantity: number;
   price: number;
   salePrice?: number;
+  chargeTax?: boolean;
   sellerType: SellerType;
   resellerId?: string;
   resellerCode?: string;
@@ -193,6 +248,9 @@ export type PaymentMethod = 'CREDIT_CARD' | 'WALLET' | 'COD' | 'BANK_TRANSFER';
 export interface OrderItem {
   productId: string;
   productName: string;
+  variantId?: string;
+  variantTitle?: string;
+  options?: Record<string, string>;
   title?: string;
   sku: string;
   slug: string;
@@ -202,6 +260,7 @@ export interface OrderItem {
   unitPrice: number;
   price?: number;
   discount: number;
+  chargeTax?: boolean;
   subtotal: number;
   sellerType: SellerType;
   resellerId?: string;

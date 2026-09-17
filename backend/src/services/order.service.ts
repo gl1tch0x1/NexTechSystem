@@ -17,7 +17,7 @@ export interface CreateOrderDTO {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
-  items: Array<{ productId: string; quantity: number }>;
+  items: Array<{ productId: string; quantity: number; variantId?: string; locationId?: string }>;
   shippingAddress: Address;
   billingAddress: Address;
   paymentMethod: PaymentMethod;
@@ -72,12 +72,19 @@ export class OrderService {
       userWalletBalance,
     });
 
-    // 4. Verify stock availability
+    // 4. Verify stock availability (respecting variant and backorder settings)
     for (const item of dto.items) {
-      const { available, currentStock } = await inventoryService.checkStock(item.productId, item.quantity);
-      if (!available) {
+      const { available, currentStock, allowsBackorder } = await inventoryService.checkStock(
+        item.productId,
+        item.quantity,
+        item.variantId
+      );
+      if (!available && !allowsBackorder) {
         const prod = productsMap.get(item.productId);
-        throw new Error(`Insufficient stock for "${prod?.name}". Only ${currentStock} remaining.`);
+        const variantName = item.variantId && prod?.variants
+          ? ` (${prod.variants.find((v: any) => v.id === item.variantId)?.title || 'Variant'})`
+          : '';
+        throw new Error(`Insufficient stock for "${prod?.name}${variantName}". Only ${currentStock} remaining.`);
       }
     }
 
@@ -98,11 +105,14 @@ export class OrderService {
         });
       }
 
-      // 7. Format order items with seller attribution
+      // 7. Format order items with seller attribution and variant specifics
       const orderItems: OrderItem[] = pricing.items.map(item => {
         const prod = productsMap.get(item.productId);
         return {
           productId: item.productId,
+          variantId: item.variantId,
+          variantTitle: item.variantTitle,
+          options: item.options,
           productName: item.productName,
           sku: item.sku,
           slug: item.slug,
@@ -110,6 +120,7 @@ export class OrderService {
           quantity: item.quantity,
           unitPrice: item.salePrice || item.price,
           discount: item.salePrice ? item.price - item.salePrice : 0,
+          chargeTax: item.chargeTax,
           subtotal: item.subtotal,
           sellerType: item.sellerType,
           resellerId: item.resellerId,

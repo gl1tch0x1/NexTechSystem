@@ -50,6 +50,16 @@ export class AdminController {
     res.json({ success: true, data: result.products, meta: result });
   }
 
+  async getProductById(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const prod = await productService.getProductById(id);
+    if (!prod) {
+      res.status(404).json({ success: false, error: { message: 'Product not found' } });
+      return;
+    }
+    res.json({ success: true, data: prod });
+  }
+
   async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
     const sellerType = req.body.sellerType || (req.body.resellerId ? 'RESELLER' : 'ADMIN');
     const prod = await productService.createProduct({

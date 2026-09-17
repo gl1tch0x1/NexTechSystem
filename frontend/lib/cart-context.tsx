@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, CartItem, Cart } from '@/types';
+import { Product, ProductVariant, CartItem, Cart } from '@/types';
 import { ApiClient } from './api-client';
 import { useAuth } from './auth-context';
 
@@ -14,10 +14,10 @@ interface CartContextType {
   couponCode: string;
   appliedDiscount: number;
   isCalculating: boolean;
-  addToCart: (product: Product, quantity?: number) => void;
+  addToCart: (product: Product, quantity?: number, selectedVariant?: ProductVariant | null) => void;
   addBundleToCart: (products: Product[]) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string, variantId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   clearCart: () => void;
   applyCoupon: (code: string) => Promise<boolean>;
   removeCoupon: () => void;
@@ -41,7 +41,7 @@ const defaultCart: Cart = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<Array<{ productId: string; quantity: number }>>([]);
+  const [items, setItems] = useState<Array<{ productId: string; variantId?: string; quantity: number }>>([]);
   const [cartData, setCartData] = useState<Cart>(defaultCart);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [couponCode, setCouponCode] = useState<string>('');
@@ -90,15 +90,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('tech_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToCart = (product: Product, quantity = 1) => {
+  const addToCart = (product: Product, quantity = 1, selectedVariant?: ProductVariant | null) => {
     setItems(prev => {
-      const existing = prev.find(i => i.productId === product.id);
-      if (existing) {
-        return prev.map(i =>
-          i.productId === product.id ? { ...i, quantity: i.quantity + quantity } : i
-        );
+      const vId = selectedVariant?.id;
+      const existingIdx = prev.findIndex(
+        i => i.productId === product.id && (i.variantId || undefined) === (vId || undefined)
+      );
+      if (existingIdx >= 0) {
+        const copy = [...prev];
+        copy[existingIdx] = {
+          ...copy[existingIdx],
+          quantity: copy[existingIdx].quantity + quantity,
+        };
+        return copy;
       }
-      return [...prev, { productId: product.id, quantity }];
+      return [...prev, { productId: product.id, variantId: vId || undefined, quantity }];
     });
   };
 
@@ -107,7 +113,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const copy = [...prev];
       for (const p of products) {
         if (!p) continue;
-        const existingIdx = copy.findIndex(i => i.productId === p.id);
+        const existingIdx = copy.findIndex(i => i.productId === p.id && !i.variantId);
         if (existingIdx >= 0) {
           copy[existingIdx].quantity += 1;
         } else {
@@ -118,17 +124,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setItems(prev => prev.filter(i => i.productId !== productId));
+  const removeFromCart = (productId: string, variantId?: string) => {
+    setItems(prev =>
+      prev.filter(
+        i => !(i.productId === productId && (i.variantId || undefined) === (variantId || undefined))
+      )
+    );
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, variantId?: string) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, variantId);
       return;
     }
     setItems(prev =>
-      prev.map(i => (i.productId === productId ? { ...i, quantity } : i))
+      prev.map(i =>
+        i.productId === productId && (i.variantId || undefined) === (variantId || undefined)
+          ? { ...i, quantity }
+          : i
+      )
     );
   };
 
