@@ -30,8 +30,18 @@ router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(String(contactEmail).trim())) {
+    const cleanEmail = String(contactEmail).trim();
+    if (cleanEmail.length < 5 || cleanEmail.length > 254) {
+      res.status(400).json({
+        success: false,
+        error: { message: 'Please provide a valid corporate email address (maximum 254 characters).' },
+      });
+      return;
+    }
+
+    // W3C HTML5 compliant, linear-time O(n) email validation regex without polynomial backtracking
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    if (!emailRegex.test(cleanEmail)) {
       res.status(400).json({
         success: false,
         error: { message: 'Please provide a valid corporate email address.' },
