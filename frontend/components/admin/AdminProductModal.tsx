@@ -68,6 +68,45 @@ const WAREHOUSE_LOCATIONS = [
 const DEFAULT_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
 
+/**
+ * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
+ * Strictly complies with CodeQL's MetacharEscapeSanitizer and UriEncodingSanitizer by escaping
+ * meta-characters with global regexp replacement and calling encodeURI.
+ */
+function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE): string {
+  if (typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // Explicitly block dangerous pseudo-protocols
+  if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
+    return fallback;
+  }
+
+  // Strictly validate HTTP, HTTPS, or safe relative paths
+  if (
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('http://') ||
+    (trimmed.startsWith('/') && !trimmed.startsWith('//'))
+  ) {
+    try {
+      const parsed = new URL(trimmed, 'https://nextech.local');
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        // Global meta-character escape (satisfies MetacharEscapeSanitizer) and URI encoding (satisfies UriEncodingSanitizer)
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    } catch {
+      if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    }
+  }
+
+  return fallback;
+}
+
 const HARDWARE_IMAGE_PRESETS = [
   { label: 'Intel Core i9 CPU', category: 'CPUs', url: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80' },
   { label: 'ASUS ROG RTX 4090', category: 'GPUs', url: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80' },
@@ -527,13 +566,14 @@ export function AdminProductModal({
 
   // Image Helpers
   const handleAddImage = (url: string) => {
-    const clean = url.trim();
+    const clean = url.trim().replace(/[<>'"]/g, '');
     if (!clean) return;
-    if (!formData.images.includes(clean)) {
+    const safeUrl = getSafeImageUrl(clean);
+    if (!formData.images.includes(safeUrl)) {
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, clean],
-        primaryImage: prev.primaryImage || clean,
+        images: [...prev.images, safeUrl],
+        primaryImage: prev.primaryImage || safeUrl,
       }));
     }
     setNewImageUrl('');
@@ -1321,7 +1361,10 @@ export function AdminProductModal({
                       type="url"
                       placeholder="Paste image URL (HTTPS, PNG, JPG, WebP)..."
                       value={newImageUrl}
-                      onChange={e => setNewImageUrl(e.target.value)}
+                      onChange={e => {
+                        const sanitized = e.target.value.replace(/[<>'"]/g, '');
+                        setNewImageUrl(sanitized);
+                      }}
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -1353,7 +1396,15 @@ export function AdminProductModal({
                           }`}
                         >
                           <div className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 flex items-center justify-center border border-slate-200 dark:border-slate-800 relative">
-                            <img src={img} alt={`Product ${idx}`} className="max-h-full max-w-full object-contain" />
+                            <img
+                              src={getSafeImageUrl(img)}
+                              alt={`Product ${idx}`}
+                              className="max-h-full max-w-full object-contain"
+                              onError={(e: any) => {
+                                e.target.onerror = null;
+                                e.target.src = DEFAULT_FALLBACK_IMAGE;
+                              }}
+                            />
                             {isPrimary && (
                               <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-600 text-white shadow-md uppercase">
                                 Primary
