@@ -37,11 +37,22 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'NexTech Systems | Enterprise Computer & Technology Platform',
-  description: 'Premier B2B/B2C marketplace for CPUs, RTX 4090 GPUs, Rack Servers, Workstations, Enterprise Networking and PC Builder compatibility matrix.',
-  keywords: ['enterprise computing', 'servers', 'RTX 4090', 'Intel Core i9', 'PC builder', 'networking', 'technology ecommerce'],
-  authors: [{ name: 'NexTech Systems Enterprise' }],
-  robots: 'index, follow',
+  title: {
+    default: 'NexTech Systems | Enterprise Computer & Technology Commerce Platform',
+    template: '%s | NexTech Systems',
+  },
+  description: 'Enterprise B2B/B2C commerce for high-performance computing, AI workstations, gaming systems, rack servers, and enterprise networking hardware.',
+  keywords: ['computer hardware', 'PC builder', 'enterprise servers', 'GPUs', 'workstations', 'B2B technology', 'UAE electronics'],
+  authors: [{ name: 'NexTech Systems' }],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  openGraph: {
+    title: 'NexTech Systems - Enterprise Computer & Technology Platform',
+    description: 'B2B/B2C computer hardware and technology commerce platform with real-time compatibility matrix and dynamic multi-currency pricing.',
+    url: '/',
+    siteName: 'NexTech Systems',
+    locale: 'en_AE',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
@@ -50,28 +61,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const saved = localStorage.getItem('nextech_theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (saved === 'dark' || (!saved && prefersDark) || saved === 'system' && prefersDark) {
-                  document.documentElement.classList.add('dark');
-                  document.documentElement.classList.remove('light');
-                } else if (saved === 'light' || (!saved && !prefersDark) || saved === 'system' && !prefersDark) {
-                  document.documentElement.classList.add('light');
-                  document.documentElement.classList.remove('dark');
-                } else {
-                  document.documentElement.classList.add('dark');
-                }
-              } catch (e) {}
-            `,
-          }}
-        />
-      </head>
+    <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} dark`}>
       <body suppressHydrationWarning className="font-sans min-h-screen flex flex-col bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 antialiased selection:bg-tech-blue selection:text-white transition-colors duration-200 w-full max-w-full overflow-x-hidden">
         <GoogleAnalytics />
         <ThemeProvider>

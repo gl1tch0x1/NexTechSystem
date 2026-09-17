@@ -279,8 +279,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
   const [formData, setFormData] = useState<ProductFormData>({
     title: '',
     slug: '',
-    sku: generateRandomSku('cat_laptops'),
-    barcode: generateRandomBarcode(),
+    sku: 'NX-LPT-999274',
+    barcode: '729160341853',
     shortDescription: '',
     description: '',
     condition: 'Brand New (Factory Sealed)',
