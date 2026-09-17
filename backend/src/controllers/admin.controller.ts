@@ -740,7 +740,7 @@ export class AdminController {
             });
           }
         } catch (err) {
-          console.error(`Failed to update stock and WAC for product ${item.productId}:`, err);
+          console.error('Failed to update stock and WAC for product %s:', String(item.productId || ''), err);
         }
       }
     }
