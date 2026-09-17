@@ -2503,144 +2503,243 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
             </div>
           )}
 
-          {/* SECTION 4: TECHNICAL SPECIFICATIONS MATRIX */}
+          {/* SECTION 4: TECHNICAL SPECIFICATIONS MATRIX — REDESIGNED */}
           {(viewMode === 'all' || activeTab === 'specs') && (
-            <div id="section-specs" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <div id="section-specs" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
+
+              {/* Section Header */}
+              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-gradient-to-r from-slate-50 to-purple-50/30 dark:from-slate-900 dark:to-purple-950/10">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-purple-600/10 border border-purple-200 dark:border-purple-800">
                     <Cpu className="w-5 h-5 text-purple-600" />
-                    <span>Technical Specifications & Hardware Matrix</span>
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Namespaced hardware presets for Laptops, Enterprise HDDs, Core Platforms, and Custom Metafields.
-                  </p>
-                </div>
-                <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
-                  {configuredSpecsCount} Active Specs
-                </span>
-              </div>
-
-              {/* Spec Sub-Categories Bar */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-100 dark:border-slate-800">
-                {SPECIFICATION_GROUPS.map(group => {
-                  const isActive = activeSpecTab === group.id;
-                  return (
-                    <button
-                      key={group.id}
-                      type="button"
-                      onClick={() => setActiveSpecTab(group.id)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                        isActive
-                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-                          : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
-                      }`}
-                    >
-                      {group.name}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Spec Fields */}
-              {(() => {
-                const currentGroup = SPECIFICATION_GROUPS.find(g => g.id === activeSpecTab) || SPECIFICATION_GROUPS[0];
-                return (
-                  <div className="space-y-4">
-                    <div className="text-xs text-slate-500 italic">
-                      {currentGroup.description}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                      {currentGroup.fields.map(field => {
-                        const presets = field.presetKey
-                          ? SPECIFICATION_PRESETS[field.presetKey] || []
-                          : (SPECIFICATION_PRESETS[field.key as any] || []);
-                        const currentValue = formData.specifications[field.key] || '';
-
-                        return (
-                          <div key={field.key} className="space-y-1.5">
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title={field.label}>
-                              {field.label}
-                            </label>
-                            {presets.length > 0 ? (
-                              <select
-                                value={currentValue}
-                                onChange={e => handleSpecChange(field.key, e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 cursor-pointer"
-                              >
-                                <option value="">-- Select {field.label} --</option>
-                                {presets.map(p => (
-                                  <option key={p} value={p}>{p}</option>
-                                ))}
-                              </select>
-                            ) : (
-                              <input
-                                type="text"
-                                placeholder={field.placeholder || `Enter ${field.label}...`}
-                                value={currentValue}
-                                onChange={e => handleSpecChange(field.key, e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
-                );
-              })()}
-
-              {/* Custom Metafields Builder */}
-              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
-                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                      Custom Dynamic Metafields
-                    </h3>
-                    <p className="text-xs text-slate-500">Define arbitrary hardware parameters not in standard presets</p>
+                    <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Technical Specifications &amp; Hardware Matrix</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Configure hardware parameters across 6 namespaced engineering groups.</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleAddCustomSpec}
-                    className="px-3.5 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900 text-xs font-bold hover:bg-purple-600 hover:text-white transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add Metafield
-                  </button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="text-xs font-black text-slate-900 dark:text-white">{configuredSpecsCount} <span className="font-normal text-slate-400">/ {SPECIFICATION_GROUPS.reduce((t, g) => t + g.fields.length, 0)}</span></div>
+                    <div className="text-[10px] text-slate-400">params filled</div>
+                  </div>
+                  <div className="w-14 h-14 relative">
+                    <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-100 dark:text-slate-800" />
+                      <circle cx="18" cy="18" r="15.9" fill="none" strokeWidth="3" stroke="#9333ea"
+                        strokeDasharray={`${Math.round((configuredSpecsCount / Math.max(1, SPECIFICATION_GROUPS.reduce((t, g) => t + g.fields.length, 0))) * 100)} 100`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-purple-600 dark:text-purple-400">
+                      {Math.round((configuredSpecsCount / Math.max(1, SPECIFICATION_GROUPS.reduce((t, g) => t + g.fields.length, 0))) * 100)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body: Left Nav + Right Panel */}
+              <div className="flex min-h-[520px]">
+
+                {/* Left: Vertical Group Navigator */}
+                <div className="w-52 shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 p-3 space-y-1.5">
+                  {SPECIFICATION_GROUPS.map((group, gIdx) => {
+                    const isActive = activeSpecTab === group.id;
+                    const filledCount = group.fields.filter(f => Boolean(formData.specifications[f.key])).length;
+                    const totalCount = group.fields.length;
+                    const fillPct = Math.round((filledCount / totalCount) * 100);
+                    const pillColors = ['bg-purple-600','bg-blue-600','bg-emerald-600','bg-amber-500','bg-rose-600','bg-indigo-600'];
+                    const textColors = ['text-purple-600','text-blue-600','text-emerald-600','text-amber-600','text-rose-600','text-indigo-600'];
+                    const pc = pillColors[gIdx % pillColors.length];
+                    const tc = textColors[gIdx % textColors.length];
+                    return (
+                      <button
+                        key={group.id}
+                        type="button"
+                        onClick={() => setActiveSpecTab(group.id)}
+                        className={`w-full text-left p-3 rounded-xl transition-all cursor-pointer group ${
+                          isActive ? 'bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700' : 'hover:bg-white/60 dark:hover:bg-slate-900/60'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-[11px] font-black truncate pr-1 leading-tight ${
+                            isActive ? tc : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white'
+                          }`}>{group.name}</span>
+                          {filledCount > 0 && (
+                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full text-white ${pc} shrink-0`}>{filledCount}</span>
+                          )}
+                        </div>
+                        <div className="h-1 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-500 ${pc}`} style={{ width: `${fillPct}%` }} />
+                        </div>
+                        <div className="text-[9px] text-slate-400 mt-1">{filledCount}/{totalCount} params</div>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {formData.customSpecs.length > 0 ? (
-                  <div className="space-y-3">
-                    {formData.customSpecs.map((cs, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <input
-                          type="text"
-                          placeholder="Metafield Key (e.g. TPM 2.0 Chip, Heatpipe Config)"
-                          value={cs.key}
-                          onChange={e => handleCustomSpecChange(i, 'key', e.target.value)}
-                          className="flex-1 bg-slate-50 dark:bg-slate-950 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Metafield Value"
-                          value={cs.value}
-                          onChange={e => handleCustomSpecChange(i, 'value', e.target.value)}
-                          className="flex-1 bg-slate-50 dark:bg-slate-950 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveCustomSpec(i)}
-                          className="p-2 text-slate-400 hover:text-red-500"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                {/* Right: Spec Field Panel */}
+                <div className="flex-1 p-6 sm:p-8 space-y-6 min-w-0">
+                  {(() => {
+                    const currentGroup = SPECIFICATION_GROUPS.find(g => g.id === activeSpecTab) || SPECIFICATION_GROUPS[0];
+                    const gIdx = SPECIFICATION_GROUPS.findIndex(g => g.id === activeSpecTab);
+                    const gradients = ['from-purple-600 to-indigo-600','from-blue-600 to-cyan-600','from-emerald-600 to-teal-500','from-amber-500 to-orange-500','from-rose-600 to-pink-600','from-indigo-600 to-violet-600'];
+                    const badgeColors = [
+                      'bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+                      'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                      'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+                      'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+                      'bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+                      'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+                    ];
+                    const ringColors = ['focus:border-purple-500','focus:border-blue-500','focus:border-emerald-500','focus:border-amber-500','focus:border-rose-500','focus:border-indigo-500'];
+                    const grad = gradients[gIdx % gradients.length];
+                    const badge = badgeColors[gIdx % badgeColors.length];
+                    const ring = ringColors[gIdx % ringColors.length];
+                    const filledInGroup = currentGroup.fields.filter(f => Boolean(formData.specifications[f.key])).length;
+                    return (
+                      <div className="space-y-5">
+
+                        {/* Group Color Banner */}
+                        <div className={`p-4 rounded-2xl bg-gradient-to-r ${grad} text-white flex items-center justify-between gap-3 shadow-lg`}>
+                          <div className="min-w-0">
+                            <div className="text-sm font-black tracking-tight">{currentGroup.name}</div>
+                            <div className="text-xs text-white/70 mt-0.5 line-clamp-1">{currentGroup.description}</div>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <div className="text-right">
+                              <div className="text-xl font-black leading-none">{filledInGroup}<span className="text-sm font-normal text-white/50">/{currentGroup.fields.length}</span></div>
+                              <div className="text-[10px] text-white/60">filled</div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const cleared = { ...formData.specifications };
+                                currentGroup.fields.forEach(f => { cleared[f.key] = ''; });
+                                setFormData(prev => ({ ...prev, specifications: cleared }));
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/30 text-white text-[10px] font-bold cursor-pointer transition-all border border-white/20 whitespace-nowrap"
+                            >
+                              Clear Group
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Spec Fields Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                          {currentGroup.fields.map(field => {
+                            const presets = field.presetKey ? (SPECIFICATION_PRESETS[field.presetKey] || []) : (SPECIFICATION_PRESETS[field.key as keyof typeof SPECIFICATION_PRESETS] || []);
+                            const currentValue = formData.specifications[field.key] || '';
+                            const isFilled = Boolean(currentValue);
+                            return (
+                              <div key={field.key} className={`relative group rounded-2xl border transition-all p-3.5 space-y-2 ${
+                                isFilled ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm' : 'border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30'
+                              }`}>
+                                <div className="flex items-center justify-between gap-1">
+                                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                                    {field.label}
+                                  </label>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    {isFilled && (
+                                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full border ${badge}`}>&#x2713;</span>
+                                    )}
+                                    {isFilled && (
+                                      <button type="button" onClick={() => handleSpecChange(field.key, '')}
+                                        className="p-0.5 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer">
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                                {presets.length > 0 ? (
+                                  <select value={currentValue} onChange={e => handleSpecChange(field.key, e.target.value)}
+                                    className={`w-full bg-slate-50 dark:bg-slate-950 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none ${ring} cursor-pointer appearance-none transition-all`}>
+                                    <option value="">— Select —</option>
+                                    {presets.map(p => <option key={p} value={p}>{p}</option>)}
+                                  </select>
+                                ) : (
+                                  <input type="text" placeholder={field.placeholder || `Enter ${field.label}…`} value={currentValue}
+                                    onChange={e => handleSpecChange(field.key, e.target.value)}
+                                    className={`w-full bg-slate-50 dark:bg-slate-950 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none ${ring} transition-all`} />
+                                )}
+                                {isFilled && (
+                                  <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 truncate leading-tight">
+                                    &#x2192; {currentValue}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Active params summary strip */}
+                        {filledInGroup > 0 && (
+                          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                            <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Active Parameters — {currentGroup.name}</div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {currentGroup.fields.filter(f => Boolean(formData.specifications[f.key])).map(f => (
+                                <span key={f.key} className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg border ${badge}`}>
+                                  <span className="text-slate-400 font-medium">{f.label}:</span>
+                                  <span className="truncate max-w-[100px]">{formData.specifications[f.key]}</span>
+                                  <button type="button" onClick={() => handleSpecChange(f.key, '')} className="ml-0.5 hover:opacity-60 cursor-pointer">
+                                    <X className="w-2.5 h-2.5" />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ))}
+                    );
+                  })()}
+
+                  {/* Custom Dynamic Metafields Builder */}
+                  <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800">
+                          <Plus className="w-3.5 h-3.5 text-indigo-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-black text-slate-900 dark:text-white">Custom Dynamic Metafields</h3>
+                          <p className="text-[11px] text-slate-400">Arbitrary parameters not in standard spec groups</p>
+                        </div>
+                      </div>
+                      <button type="button" onClick={handleAddCustomSpec}
+                        className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer flex items-center gap-1.5 transition-all shadow-sm">
+                        <Plus className="w-3.5 h-3.5" /> Add Metafield
+                      </button>
+                    </div>
+                    {formData.customSpecs.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {formData.customSpecs.map((cs, i) => (
+                          <div key={i} className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 group">
+                            <div className="flex-1 space-y-1.5">
+                              <input type="text" placeholder="Key (e.g. TPM 2.0 Chip)" value={cs.key}
+                                onChange={e => handleCustomSpecChange(i, 'key', e.target.value)}
+                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
+                              <input type="text" placeholder="Value" value={cs.value}
+                                onChange={e => handleCustomSpecChange(i, 'value', e.target.value)}
+                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
+                            </div>
+                            <button type="button" onClick={() => handleRemoveCustomSpec(i)}
+                              className="p-2 text-slate-300 hover:text-red-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-all mt-0.5">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30 space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto">
+                          <Plus className="w-5 h-5 text-slate-400" />
+                        </div>
+                        <div className="text-xs font-bold text-slate-500">No custom metafields yet</div>
+                        <div className="text-[11px] text-slate-400">Add TPM version, cooling config, certifications, etc.</div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="p-5 text-center text-xs text-slate-400 bg-slate-50/50 dark:bg-slate-950/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                    No custom metafields defined yet.
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           )}
