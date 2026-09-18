@@ -2717,10 +2717,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                             <div className="flex-1 space-y-1.5">
                               <input type="text" placeholder="Key (e.g. TPM 2.0 Chip)" value={cs.key}
                                 onChange={e => handleCustomSpecChange(i, 'key', e.target.value)}
-                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
+                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
                               <input type="text" placeholder="Value" value={cs.value}
                                 onChange={e => handleCustomSpecChange(i, 'value', e.target.value)}
-                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
+                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
                             </div>
                             <button type="button" onClick={() => handleRemoveCustomSpec(i)}
                               className="p-2 text-slate-300 hover:text-red-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-all mt-0.5">
