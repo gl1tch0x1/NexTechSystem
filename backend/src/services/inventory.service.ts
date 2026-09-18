@@ -70,7 +70,7 @@ export class InventoryService {
         if (!product) continue;
 
         let newVariants = product.variants;
-        let newTotalStock = product.stock;
+        let newTotalStock: number;
 
         if (item.variantId && product.variants && product.variants.length > 0) {
           newVariants = product.variants.map(v => {
