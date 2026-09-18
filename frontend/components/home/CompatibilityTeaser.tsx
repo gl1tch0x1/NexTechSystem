@@ -34,33 +34,33 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
   const wattagePercentage = Math.round((preset.estTotalWatts / preset.psuWatts) * 100);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-[#0A0F1D] to-[#050811] text-white p-5 sm:p-10 border border-slate-800 shadow-2xl">
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 via-white to-purple-50/40 dark:from-slate-900 dark:via-[#0A0F1D] dark:to-[#050811] text-slate-900 dark:text-white p-5 sm:p-10 border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-2xl">
       {/* Dynamic Ambient Background Glows */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-tech-blue/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 dark:bg-tech-blue/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left Interactive Narrative */}
         <div className="lg:col-span-7 space-y-5">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold font-mono">
-            <Cpu className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 text-xs font-bold font-mono">
+            <Cpu className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
             <span>Hardware Verification Engine</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
             Intelligent PC Builder Studio with <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-tech-cyan to-blue-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 dark:from-purple-400 dark:via-tech-cyan dark:to-blue-400">
               Zero-Defect Socket & TDP Headroom Guard
             </span>
           </h2>
 
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl font-normal">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl font-normal">
             Never second-guess hardware compatibility. Our built-in validation engine dynamically matches CPU socket pinouts, RAM slot clearances, motherboard VRM phases, and power supply wattage headroom before you order.
           </p>
 
-          {/* Interactive Preset Buttons (Ant Design Segmented Picker) */}
+          {/* Interactive Preset Buttons */}
           <div className="space-y-2 pt-1">
-            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+            <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Explore Pre-Validated Architecture Presets:
             </div>
             <div className="flex flex-wrap gap-2">
@@ -71,7 +71,7 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
                   className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     p.id === selectedPresetId
                       ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400/50'
-                      : 'bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                   }`}
                 >
                   {p.name}
@@ -93,63 +93,63 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
 
             <Link
               href="/compare"
-              className="px-5 py-3.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 text-center"
+              className="px-5 py-3.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs dark:bg-slate-800/90 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 text-center"
             >
-              <Layers className="w-4 h-4 text-tech-cyan" />
+              <Layers className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
               <span>Compare Specs Side-by-Side</span>
             </Link>
           </div>
         </div>
 
         {/* Right Dynamic Live Telemetry & Wattage Gauge Card */}
-        <div className="lg:col-span-5 bg-slate-950/90 p-4 sm:p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4 sm:space-y-5 font-mono text-xs">
+        <div className="lg:col-span-5 bg-white/90 dark:bg-slate-950/90 p-4 sm:p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-2xl space-y-4 sm:space-y-5 font-mono text-xs backdrop-blur-xs">
           {/* Card Top Title */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-2 text-slate-300 font-bold text-xs truncate mr-2">
-              <Gauge className="w-4 h-4 text-tech-cyan shrink-0" />
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-bold text-xs truncate mr-2">
+              <Gauge className="w-4 h-4 text-tech-blue dark:text-tech-cyan shrink-0" />
               <span className="truncate">LIVE POWER HUD</span>
             </div>
-            <span className="flex items-center gap-1 text-emerald-400 font-bold text-[10px] sm:text-[11px] bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded shrink-0">
+            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] sm:text-[11px] bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded-md shrink-0">
               <CheckCircle2 className="w-3 h-3" /> VERIFIED
             </span>
           </div>
 
           {/* Architecture Spec Breakdown */}
           <div className="space-y-2">
-            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
-              <span className="text-slate-400 text-[11px] shrink-0">CPU Processor</span>
-              <span className="text-white font-bold truncate text-right">{preset.cpu}</span>
+            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+              <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">CPU Processor</span>
+              <span className="text-slate-900 dark:text-white font-bold truncate text-right">{preset.cpu}</span>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
-              <span className="text-slate-400 text-[11px] shrink-0">GPU Accelerator</span>
-              <span className="text-purple-300 font-bold truncate text-right">{preset.gpu}</span>
+            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+              <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">GPU Accelerator</span>
+              <span className="text-purple-700 dark:text-purple-300 font-bold truncate text-right">{preset.gpu}</span>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
-              <span className="text-slate-400 text-[11px] shrink-0">Socket & Bus</span>
-              <span className="text-tech-cyan font-bold truncate text-right">{preset.socket}</span>
+            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+              <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">Socket & Bus</span>
+              <span className="text-sky-600 dark:text-tech-cyan font-bold truncate text-right">{preset.socket}</span>
             </div>
           </div>
 
           {/* Ant Design Power Budget Progress Bar */}
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400 font-medium">Estimated Peak:</span>
-              <span className="text-white font-bold">{preset.estTotalWatts}W / {preset.psuWatts}W PSU</span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Estimated Peak:</span>
+              <span className="text-slate-900 dark:text-white font-bold">{preset.estTotalWatts}W / {preset.psuWatts}W PSU</span>
             </div>
 
             {/* Visual Gauge Bar */}
-            <div className="h-3 w-full rounded-full bg-slate-800 overflow-hidden relative">
+            <div className="h-3 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
               <div
                 className="h-full bg-gradient-to-r from-emerald-500 via-tech-cyan to-purple-500 transition-all duration-500"
                 style={{ width: `${wattagePercentage}%` }}
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-slate-400 pt-0.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-slate-500 dark:text-slate-400 pt-0.5">
               <span>{wattagePercentage}% Capacity</span>
-              <span className="text-emerald-400 font-bold">+{preset.headroomPercent}% Headroom (Optimal)</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">+{preset.headroomPercent}% Headroom (Optimal)</span>
             </div>
           </div>
         </div>

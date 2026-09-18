@@ -10,7 +10,6 @@ import {
   Heart,
   Star,
   ShieldCheck,
-  Store,
   CheckCircle2,
   Check,
   ArrowRight,
@@ -111,20 +110,14 @@ export function ProductCard({ product }: { product: Product }) {
       {/* Details Container */}
       <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-white dark:bg-slate-900/95">
         <div className="space-y-2.5">
-          {/* Brand & Seller Attribution */}
+          {/* Brand & Category */}
           <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
             <span className="font-mono font-bold text-tech-blue dark:text-cyan-400 uppercase tracking-wider">
               {product.brandName}
             </span>
-            {product.sellerType === 'RESELLER' ? (
-              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 px-2 py-0.5 rounded-md text-[10px]">
-                <Store className="w-3 h-3" />
-                {product.resellerCode || 'Partner'}
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 px-2 py-0.5 rounded-md text-[10px] font-mono">
-                <ShieldCheck className="w-3 h-3" />
-                OEM Direct
+            {product.categoryName && (
+              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate max-w-[130px]">
+                {product.categoryName}
               </span>
             )}
           </div>

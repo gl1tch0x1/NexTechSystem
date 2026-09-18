@@ -168,7 +168,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   <span>100%</span>
                   <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                 </div>
-                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">OEM Direct Supply</div>
+                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">Official Warranty</div>
               </div>
 
               <div className="space-y-0.5 min-w-0">
