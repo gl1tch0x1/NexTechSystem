@@ -243,7 +243,7 @@ export function AdminProductModal({
   const isEditing = Boolean(product);
 
   const [activeModalStep, setActiveModalStep] = useState<AdminModalStep>('basic');
-  const [activeSpecTab, setActiveSpecTab] = useState<string>('core_platform');
+  const [activeSpecTab, setActiveSpecTab] = useState<string>(SPECIFICATION_GROUPS[0]?.id || 'core');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 

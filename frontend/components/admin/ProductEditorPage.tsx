@@ -382,6 +382,13 @@ const FX_RATES: Record<'AED' | 'USD' | 'EUR' | 'GBP' | 'SAR' | 'QAR' | 'KWD' | '
   INR: { rate: 22.78,   symbol: '₹',   label: 'INR (₹)'    },
 };
 
+const formatFxPrice = (amount: number, cur: keyof typeof FX_RATES): string => {
+  const rateInfo = FX_RATES[cur] || FX_RATES.AED;
+  const converted = Math.round((amount || 0) * rateInfo.rate).toLocaleString();
+  const isPrefix = ['$', '€', '£', '₹'].includes(rateInfo.symbol);
+  return isPrefix ? `${rateInfo.symbol}${converted}` : `${rateInfo.symbol} ${converted}`;
+};
+
 export interface ProductFormData {
   title: string;
   slug: string;
@@ -470,7 +477,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
   // Layout View Mode: 'all' shows all sections in a master layout, 'tabs' shows single tab
   const [viewMode, setViewMode] = useState<'all' | 'tabs'>('all');
   const [activeTab, setActiveTab] = useState<TabKey>('general');
-  const [activeSpecTab, setActiveSpecTab] = useState<string>('core_platform');
+  const [activeSpecTab, setActiveSpecTab] = useState<string>(SPECIFICATION_GROUPS[0]?.id || 'core');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
@@ -484,7 +491,6 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
 
   // Studio 2.0 State Enhancements
   const [previewCurrency, setPreviewCurrency] = useState<keyof typeof FX_RATES>('AED');
-  const [previewCardTheme, setPreviewCardTheme] = useState<'dark' | 'light'>('dark');
   const [targetMarginInput, setTargetMarginInput] = useState<number>(25);
   const [galleryUrlInput, setGalleryUrlInput] = useState<string>('');
 
@@ -1330,11 +1336,11 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
     });
 
     return (
-      <div className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
-        <svg viewBox={`0 0 ${clean.length * 11 + 16} 38`} className="h-8 text-slate-900 dark:text-slate-100">
+      <div className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800 max-w-sm mx-auto shadow-sm">
+        <svg viewBox={`0 0 ${clean.length * 11 + 16} 38`} className="h-7 text-slate-900 dark:text-slate-100">
           {bars}
         </svg>
-        <span className="font-mono text-[11px] font-black tracking-widest text-slate-600 dark:text-slate-300 mt-1">
+        <span className="font-mono text-[11px] font-black tracking-widest text-slate-700 dark:text-slate-300 mt-1">
           {code}
         </span>
       </div>
@@ -1512,15 +1518,15 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
       <div className="sticky top-0 z-30 backdrop-blur-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Breadcrumbs & Title */}
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/admin/products"
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors shrink-0 cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors shrink-0 cursor-pointer"
               title="Return to Catalog"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <div className="min-w-0">
+            <div className="min-w-0 max-w-md xl:max-w-xl">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
                 <Link href="/admin/products" className="hover:underline">Hardware Catalog</Link>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
@@ -1528,20 +1534,20 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                   {mode === 'edit' ? 'SKU Configuration Studio' : 'New Hardware SKU'}
                 </span>
               </div>
-              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate mt-0.5">
+              <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight truncate mt-0.5" title={formData.title}>
                 {formData.title || (mode === 'edit' ? 'Edit Hardware SKU' : 'Add New Hardware SKU')}
               </h1>
             </div>
           </div>
 
           {/* Controls: View Mode, Status & Actions */}
-          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-between lg:justify-end">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end shrink-0">
             {/* View Mode Toggle: All Sections vs Tabs */}
-            <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs font-bold">
+            <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs font-bold shrink-0">
               <button
                 type="button"
                 onClick={() => setViewMode('all')}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   viewMode === 'all'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1549,12 +1555,12 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 title="View complete document layout"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">All Sections</span>
+                <span className="whitespace-nowrap">All Sections</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('tabs')}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   viewMode === 'tabs'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1562,7 +1568,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 title="Focused step-by-step tabs"
               >
                 <ListOrdered className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Tabbed</span>
+                <span className="whitespace-nowrap">Tabbed</span>
               </button>
             </div>
 
@@ -1570,7 +1576,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
             <select
               value={formData.status}
               onChange={e => setFormData({ ...formData, status: e.target.value as any })}
-              className={`text-xs font-bold px-3 py-2 rounded-xl border cursor-pointer focus:outline-none transition-all ${
+              className={`h-9 text-xs font-bold px-3 rounded-xl border cursor-pointer focus:outline-none transition-all whitespace-nowrap shrink-0 ${
                 formData.status === 'ACTIVE'
                   ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
                   : formData.status === 'DRAFT'
@@ -1585,7 +1591,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
 
             <Link
               href="/admin/products"
-              className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="h-9 px-3.5 flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors whitespace-nowrap shrink-0"
             >
               Discard
             </Link>
@@ -1594,7 +1600,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               type="button"
               onClick={() => handleSaveProduct('DRAFT')}
               disabled={isSubmitting}
-              className="px-3.5 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors cursor-pointer"
+              className="h-9 px-3.5 flex items-center rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               Save Draft
             </button>
@@ -1603,7 +1609,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               type="button"
               onClick={() => handleSaveProduct()}
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-600/20 flex items-center gap-2 cursor-pointer transition-all disabled:opacity-50 shrink-0"
+              className="h-9 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-sm shadow-purple-600/30 flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-50 shrink-0 whitespace-nowrap"
             >
               {isSubmitting ? (
                 <>
@@ -1614,7 +1620,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 <>
                   <Save className="w-3.5 h-3.5" />
                   <span>{mode === 'edit' ? 'Save Changes' : 'Publish SKU'}</span>
-                  <span className="hidden md:inline text-[10px] opacity-70 font-mono">⌘S</span>
+                  <span className="hidden xl:inline text-[10px] opacity-70 font-mono">⌘S</span>
                 </>
               )}
             </button>
@@ -1725,43 +1731,65 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               </div>
 
               {/* ── Auto-Title Builder & 1-Click Full Blueprint Presets ── */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/30 to-indigo-950/30 border border-purple-900/40 space-y-3">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/90 dark:border-slate-800/90 space-y-3.5 shadow-sm">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
-                    <Wand2 className="w-4 h-4 text-purple-400" />
-                    <span className="text-xs font-black text-white uppercase tracking-wider">Rapid Blueprint Ingestion</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-600/30 text-purple-300 font-bold">1-Click Full SKU</span>
+                    <div className="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-200/80 dark:border-purple-800/80">
+                      <Wand2 className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">Rapid Blueprint Ingestion</span>
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold border border-purple-200/80 dark:border-purple-800">1-Click SKU Preset</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleGenerateStandardTitle}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold cursor-pointer transition-all"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold cursor-pointer transition-all shadow-sm shadow-purple-500/20"
                   >
-                    <Wand2 className="w-3 h-3" /> 🪄 Auto-Construct Title
+                    <Wand2 className="w-3 h-3" /> Auto-Construct Title
                   </button>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {HARDWARE_IMAGE_PRESETS.map((preset, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleApplyFullPreset(preset)}
-                      className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/60 hover:bg-purple-950/40 transition-all text-left group cursor-pointer"
-                    >
-                      <div className="aspect-video rounded-lg overflow-hidden mb-1.5">
-                        <img
-                          src={getSafeImageUrl(preset.url)}
-                          alt={preset.label}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-                      <div className="text-[10px] font-bold text-white truncate">{preset.label}</div>
-                      <div className="flex items-center justify-between mt-0.5">
-                        <span className="text-[9px] text-purple-300">{preset.brand} · {preset.category}</span>
-                        <span className="text-[9px] text-emerald-400 font-mono font-bold">AED {preset.price.toLocaleString()}</span>
-                      </div>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {HARDWARE_IMAGE_PRESETS.map((preset, idx) => {
+                    const isSelected = formData.title === preset.fullTitle || formData.primaryImage === preset.url;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleApplyFullPreset(preset)}
+                        className={`p-2.5 rounded-xl transition-all text-left group cursor-pointer ${
+                          isSelected
+                            ? 'bg-purple-50/80 dark:bg-purple-950/50 border-2 border-purple-600 shadow-sm'
+                            : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md'
+                        }`}
+                      >
+                        <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-800/80 relative">
+                          <img
+                            src={getSafeImageUrl(preset.url)}
+                            alt={preset.label}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {isSelected && (
+                            <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-purple-600 text-[9px] font-black text-white shadow">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <div className={`text-[11px] font-black truncate transition-colors ${
+                          isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400'
+                        }`}>
+                          {preset.label}
+                        </div>
+                        <div className="flex items-center justify-between mt-1 text-[10px]">
+                          <span className="text-slate-500 dark:text-slate-400 font-medium truncate pr-1">
+                            {preset.brand} · {preset.category}
+                          </span>
+                          <span className="text-purple-600 dark:text-purple-400 font-mono font-black shrink-0">
+                            AED {preset.price.toLocaleString()}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -2542,7 +2570,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               <div className="flex min-h-[520px]">
 
                 {/* Left: Vertical Group Navigator */}
-                <div className="w-52 shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 p-3 space-y-1.5">
+                <div className="w-56 sm:w-60 shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 p-3 space-y-1.5">
                   {SPECIFICATION_GROUPS.map((group, gIdx) => {
                     const isActive = activeSpecTab === group.id;
                     const filledCount = group.fields.filter(f => Boolean(formData.specifications[f.key])).length;
@@ -2561,18 +2589,18 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                           isActive ? 'bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700' : 'hover:bg-white/60 dark:hover:bg-slate-900/60'
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className={`text-[11px] font-black truncate pr-1 leading-tight ${
-                            isActive ? tc : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white'
+                        <div className="flex items-start justify-between gap-1 mb-2">
+                          <span className={`text-xs font-bold leading-snug ${
+                            isActive ? tc : 'text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'
                           }`}>{group.name}</span>
                           {filledCount > 0 && (
-                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full text-white ${pc} shrink-0`}>{filledCount}</span>
+                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full text-white ${pc} shrink-0 mt-0.5`}>{filledCount}</span>
                           )}
                         </div>
                         <div className="h-1 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                           <div className={`h-full rounded-full transition-all duration-500 ${pc}`} style={{ width: `${fillPct}%` }} />
                         </div>
-                        <div className="text-[9px] text-slate-400 mt-1">{filledCount}/{totalCount} params</div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-medium">{filledCount}/{totalCount} params filled</div>
                       </button>
                     );
                   })}
@@ -2581,91 +2609,104 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 {/* Right: Spec Field Panel */}
                 <div className="flex-1 p-6 sm:p-8 space-y-6 min-w-0">
                   {(() => {
-                    const currentGroup = SPECIFICATION_GROUPS.find(g => g.id === activeSpecTab) || SPECIFICATION_GROUPS[0];
-                    const gIdx = SPECIFICATION_GROUPS.findIndex(g => g.id === activeSpecTab);
-                    const gradients = ['from-purple-600 to-indigo-600','from-blue-600 to-cyan-600','from-emerald-600 to-teal-500','from-amber-500 to-orange-500','from-rose-600 to-pink-600','from-indigo-600 to-violet-600'];
-                    const badgeColors = [
-                      'bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
-                      'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-                      'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-                      'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-                      'bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
-                      'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
-                    ];
-                    const ringColors = ['focus:border-purple-500','focus:border-blue-500','focus:border-emerald-500','focus:border-amber-500','focus:border-rose-500','focus:border-indigo-500'];
-                    const grad = gradients[gIdx % gradients.length];
-                    const badge = badgeColors[gIdx % badgeColors.length];
-                    const ring = ringColors[gIdx % ringColors.length];
+                    const groupIndex = Math.max(0, SPECIFICATION_GROUPS.findIndex(g => g.id === activeSpecTab));
+                    const currentGroup = SPECIFICATION_GROUPS[groupIndex] || SPECIFICATION_GROUPS[0];
                     const filledInGroup = currentGroup.fields.filter(f => Boolean(formData.specifications[f.key])).length;
                     return (
-                      <div className="space-y-5">
+                      <div className="space-y-6">
 
-                        {/* Group Color Banner */}
-                        <div className={`p-4 rounded-2xl bg-gradient-to-r ${grad} text-white flex items-center justify-between gap-3 shadow-lg`}>
-                          <div className="min-w-0">
-                            <div className="text-sm font-black tracking-tight">{currentGroup.name}</div>
-                            <div className="text-xs text-white/70 mt-0.5 line-clamp-1">{currentGroup.description}</div>
+                        {/* Group Header Banner — Theme Adaptive (Light & Dark) */}
+                        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50/80 via-slate-50 to-slate-100/60 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 flex items-center justify-between gap-4 shadow-sm border border-purple-100/90 dark:border-slate-800">
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-purple-600 shrink-0"></span>
+                              <h3 className="text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white">{currentGroup.name}</h3>
+                              <span className="inline-flex items-center whitespace-nowrap shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 shadow-xs">
+                                Group {groupIndex + 1} of {SPECIFICATION_GROUPS.length}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{currentGroup.description}</p>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
                             <div className="text-right">
-                              <div className="text-xl font-black leading-none">{filledInGroup}<span className="text-sm font-normal text-white/50">/{currentGroup.fields.length}</span></div>
-                              <div className="text-[10px] text-white/60">filled</div>
+                              <div className="text-lg font-black text-slate-900 dark:text-white leading-none">
+                                {filledInGroup}<span className="text-xs font-normal text-slate-400 dark:text-slate-500">/{currentGroup.fields.length}</span>
+                              </div>
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">completed</div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const cleared = { ...formData.specifications };
-                                currentGroup.fields.forEach(f => { cleared[f.key] = ''; });
-                                setFormData(prev => ({ ...prev, specifications: cleared }));
-                              }}
-                              className="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/30 text-white text-[10px] font-bold cursor-pointer transition-all border border-white/20 whitespace-nowrap"
-                            >
-                              Clear Group
-                            </button>
+                            {filledInGroup > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const cleared = { ...formData.specifications };
+                                  currentGroup.fields.forEach(f => { cleared[f.key] = ''; });
+                                  setFormData(prev => ({ ...prev, specifications: cleared }));
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 dark:bg-white/10 dark:hover:bg-rose-500/20 dark:text-slate-200 dark:hover:text-rose-300 dark:border-white/15 text-xs font-bold cursor-pointer transition-all whitespace-nowrap shadow-xs"
+                              >
+                                Clear Group
+                              </button>
+                            )}
                           </div>
                         </div>
 
-                        {/* Spec Fields Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                        {/* Spec Fields Grid — Clean 2-Column Professional Layout */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {currentGroup.fields.map(field => {
                             const presets = field.presetKey ? (SPECIFICATION_PRESETS[field.presetKey] || []) : (SPECIFICATION_PRESETS[field.key as keyof typeof SPECIFICATION_PRESETS] || []);
                             const currentValue = formData.specifications[field.key] || '';
                             const isFilled = Boolean(currentValue);
                             return (
-                              <div key={field.key} className={`relative group rounded-2xl border transition-all p-3.5 space-y-2 ${
-                                isFilled ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm' : 'border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30'
+                              <div key={field.key} className={`relative group rounded-2xl border transition-all p-4 space-y-2.5 ${
+                                isFilled ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm' : 'border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/40'
                               }`}>
-                                <div className="flex items-center justify-between gap-1">
-                                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                                <div className="flex items-center justify-between gap-2">
+                                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
                                     {field.label}
                                   </label>
-                                  <div className="flex items-center gap-1 shrink-0">
+                                  <div className="flex items-center gap-1.5 shrink-0">
                                     {isFilled && (
-                                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full border ${badge}`}>&#x2713;</span>
+                                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 flex items-center gap-1">
+                                        <Check className="w-2.5 h-2.5" /> Set
+                                      </span>
                                     )}
                                     {isFilled && (
-                                      <button type="button" onClick={() => handleSpecChange(field.key, '')}
-                                        className="p-0.5 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSpecChange(field.key, '')}
+                                        className="p-1 text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                                        title="Clear spec"
+                                      >
                                         <X className="w-3 h-3" />
                                       </button>
                                     )}
                                   </div>
                                 </div>
                                 {presets.length > 0 ? (
-                                  <select value={currentValue} onChange={e => handleSpecChange(field.key, e.target.value)}
-                                    className={`w-full bg-slate-50 dark:bg-slate-950 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none ${ring} cursor-pointer appearance-none transition-all`}>
-                                    <option value="">— Select —</option>
-                                    {presets.map(p => <option key={p} value={p}>{p}</option>)}
-                                  </select>
-                                ) : (
-                                  <input type="text" placeholder={field.placeholder || `Enter ${field.label}…`} value={currentValue}
-                                    onChange={e => handleSpecChange(field.key, e.target.value)}
-                                    className={`w-full bg-slate-50 dark:bg-slate-950 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none ${ring} transition-all`} />
-                                )}
-                                {isFilled && (
-                                  <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 truncate leading-tight">
-                                    &#x2192; {currentValue}
+                                  <div className="relative">
+                                    <select
+                                      value={currentValue}
+                                      onChange={e => handleSpecChange(field.key, e.target.value)}
+                                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 cursor-pointer appearance-none transition-all pr-8"
+                                    >
+                                      <option value="">— Select —</option>
+                                      {currentValue && !presets.includes(currentValue) && (
+                                        <option value={currentValue}>{currentValue}</option>
+                                      )}
+                                      {presets.map(p => (
+                                        <option key={p} value={p}>{p}</option>
+                                      ))}
+                                    </select>
+                                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 rotate-90 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                                   </div>
+                                ) : (
+                                  <input
+                                    type="text"
+                                    placeholder={field.placeholder || `Enter ${field.label}…`}
+                                    value={currentValue}
+                                    onChange={e => handleSpecChange(field.key, e.target.value)}
+                                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 transition-all placeholder:text-slate-400"
+                                  />
                                 )}
                               </div>
                             );
@@ -2674,15 +2715,25 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
 
                         {/* Active params summary strip */}
                         {filledInGroup > 0 && (
-                          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                            <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Active Parameters — {currentGroup.name}</div>
-                            <div className="flex flex-wrap gap-1.5">
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 space-y-2">
+                            <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              Active Parameters — {currentGroup.name}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
                               {currentGroup.fields.filter(f => Boolean(formData.specifications[f.key])).map(f => (
-                                <span key={f.key} className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg border ${badge}`}>
-                                  <span className="text-slate-400 font-medium">{f.label}:</span>
-                                  <span className="truncate max-w-[100px]">{formData.specifications[f.key]}</span>
-                                  <button type="button" onClick={() => handleSpecChange(f.key, '')} className="ml-0.5 hover:opacity-60 cursor-pointer">
-                                    <X className="w-2.5 h-2.5" />
+                                <span
+                                  key={f.key}
+                                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800 shadow-sm"
+                                >
+                                  <span className="text-slate-500 dark:text-slate-400">{f.label}:</span>
+                                  <span className="font-bold text-slate-900 dark:text-white">{formData.specifications[f.key]}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSpecChange(f.key, '')}
+                                    className="p-0.5 text-purple-400 hover:text-red-500 cursor-pointer transition-colors"
+                                    title="Remove"
+                                  >
+                                    <X className="w-3 h-3" />
                                   </button>
                                 </span>
                               ))}
@@ -3216,121 +3267,104 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
             </div>
 
             {/* FX Currency Simulator Pills */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Multi-Currency FX Simulator</span>
               <div className="grid grid-cols-4 gap-1.5">
-                {(Object.entries(FX_RATES) as [keyof typeof FX_RATES, typeof FX_RATES[keyof typeof FX_RATES]][]).map(([cur, info]) => (
-                  <button
-                    key={cur}
-                    type="button"
-                    onClick={() => setPreviewCurrency(cur)}
-                    className={`px-2 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center ${
-                      previewCurrency === cur
-                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    {info.symbol} {cur}
-                  </button>
-                ))}
+                {(Object.entries(FX_RATES) as [keyof typeof FX_RATES, typeof FX_RATES[keyof typeof FX_RATES]][]).map(([cur, info]) => {
+                  const isSelected = previewCurrency === cur;
+                  const displayLabel = info.symbol !== cur ? `${info.symbol} ${cur}` : cur;
+                  return (
+                    <button
+                      key={cur}
+                      type="button"
+                      onClick={() => setPreviewCurrency(cur)}
+                      className={`px-2 py-1.5 rounded-xl text-[10px] font-black transition-all cursor-pointer text-center ${
+                        isSelected
+                          ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {displayLabel}
+                    </button>
+                  );
+                })}
               </div>
-              <div className="text-center">
-                <span className="text-xl font-mono font-black text-purple-600 dark:text-purple-400">
-                  {FX_RATES[previewCurrency].symbol} {(formData.price * FX_RATES[previewCurrency].rate).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                </span>
-                <span className="text-[10px] text-slate-400 ml-1.5">{previewCurrency}</span>
-              </div>
-            </div>
-
-            {/* Card Theme Toggle */}
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Card Preview Theme</span>
-              <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <button
-                  type="button"
-                  onClick={() => setPreviewCardTheme('dark')}
-                  className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                    previewCardTheme === 'dark' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  🌙 Dark
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewCardTheme('light')}
-                  className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                    previewCardTheme === 'light' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  ☀️ Light
-                </button>
+              <div className="text-center pt-1 pb-0.5">
+                <div className="text-2xl font-mono font-black text-purple-600 dark:text-purple-400 tracking-tight">
+                  {formatFxPrice(formData.price, previewCurrency)}
+                </div>
+                <div className="text-[10px] font-medium text-slate-400 mt-0.5">
+                  Simulated Customer Price ({previewCurrency})
+                </div>
               </div>
             </div>
 
-            {/* The Actual Mock Product Card */}
-            <div className={`rounded-2xl border overflow-hidden shadow-md group transition-all ${
-              previewCardTheme === 'dark'
-                ? 'bg-slate-950 border-slate-800'
-                : 'bg-white border-slate-200'
-            }`}>
-              <div className="aspect-video relative overflow-hidden">
+            {/* The Actual Mock Product Card — Automatically Theme Adaptive */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm hover:shadow-md transition-all">
+              <div className="aspect-video relative overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img
                   src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
                   alt={formData.title ? formData.title.replace(/[<>'"]/g, '') : 'Product Preview'}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={() => setPreviewImageError(true)}
                 />
-                <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-600 text-white text-[10px] font-bold tracking-wider uppercase shadow-lg">
+                <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-slate-900/80 dark:bg-slate-900/90 text-white text-[10px] font-black tracking-wider uppercase backdrop-blur-md border border-white/10 shadow-sm">
                   {formData.brandName || 'Brand'}
                 </div>
                 {formData.discountPercentage > 0 && (
-                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-red-600 text-white text-[10px] font-bold shadow-lg">
+                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] font-black tracking-wider shadow-sm">
                     -{formData.discountPercentage}%
                   </div>
                 )}
-                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[10px] font-bold backdrop-blur-sm">
+                <div className={`absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-lg text-[10px] font-bold backdrop-blur-md shadow-sm ${
+                  formData.stock > 0 ? 'bg-emerald-600/90 text-white' : 'bg-rose-600/90 text-white'
+                }`}>
                   {formData.stock > 0 ? `In Stock (${formData.stock})` : 'Out of Stock'}
                 </div>
               </div>
 
-              <div className={`p-4 space-y-2.5 ${
-                previewCardTheme === 'dark' ? 'bg-slate-950' : 'bg-white'
-              }`}>
-                <div className="flex items-center gap-1 text-amber-400 text-xs">
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <span className={`text-[10px] font-bold ml-1 ${
-                    previewCardTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'
-                  }`}>5.0 (Brand New)</span>
+              <div className="p-4 space-y-2.5 bg-white dark:bg-slate-950">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-amber-400 text-xs">
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <span className="text-[11px] font-black ml-1 text-slate-700 dark:text-slate-200">
+                      5.0
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60">
+                    {formData.condition || 'Brand New'}
+                  </span>
                 </div>
 
-                <div className={`text-xs font-bold line-clamp-2 ${
-                  previewCardTheme === 'dark' ? 'text-white' : 'text-slate-900'
-                }`}>
+                <div className="text-xs font-black text-slate-900 dark:text-white line-clamp-2 leading-snug">
                   {formData.title || 'HP ProBook 460 G11 Business Laptop'}
                 </div>
 
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-base font-black font-mono text-purple-500">
-                    {FX_RATES[previewCurrency].symbol}{(formData.price * FX_RATES[previewCurrency].rate).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                <div className="flex items-baseline gap-2 flex-wrap pt-0.5">
+                  <span className="text-base font-black font-mono text-purple-600 dark:text-purple-400">
+                    {formatFxPrice(formData.price, previewCurrency)}
                   </span>
                   {formData.originalPrice > formData.price && (
                     <span className="text-xs line-through text-slate-400 font-mono">
-                      {FX_RATES[previewCurrency].symbol}{(formData.originalPrice * FX_RATES[previewCurrency].rate).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      {formatFxPrice(formData.originalPrice, previewCurrency)}
                     </span>
                   )}
-                  <span className="text-[9px] text-slate-400">{previewCurrency} {formData.chargeTax ? '(incl. VAT)' : '(0% tax)'}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                    ({formData.chargeTax ? 'incl. 5% VAT' : '0% Tax'})
+                  </span>
                 </div>
 
-                <div className={`pt-2 border-t ${previewCardTheme === 'dark' ? 'border-slate-800' : 'border-slate-100'} flex items-center justify-between text-[11px]`}>
-                  <span className="text-slate-400">Warranty:</span>
-                  <span className={`font-bold truncate max-w-[150px] ${
-                    previewCardTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'
-                  }`}>
-                    {formData.warrantyYears}Y Official
+                <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    {formData.warrantyYears}Y Warranty
+                  </span>
+                  <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[120px]">
+                    {formData.sku}
                   </span>
                 </div>
               </div>
