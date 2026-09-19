@@ -24,6 +24,7 @@ export class PricingService {
     couponCode?: string;
     requestedWalletDeduction?: number;
     userWalletBalance?: number;
+    taxTreatment?: string;
   }): Promise<PricingCalculationResult> {
     const settings = await settingsRepository.getSettings();
     const verifiedItems: CartItem[] = [];
@@ -129,11 +130,16 @@ export class PricingService {
     // Shipping calculation
     const shippingFee = discountedSubtotal >= settings.freeShippingThreshold ? 0 : settings.standardShippingFee;
 
-    // Tax calculation (e.g. 5% UAE VAT) respecting chargeTax toggle
-    const taxRate = settings.taxRate || 5;
+    // Tax calculation (e.g. 5% UAE VAT) respecting chargeTax toggle and tax treatment
+    const isZeroRated =
+      params.taxTreatment === 'FREE_ZONE' ||
+      params.taxTreatment === 'EXPORT' ||
+      params.taxTreatment === 'EXEMPT' ||
+      params.taxTreatment === 'ZERO_RATED';
+    const taxRate = isZeroRated ? 0 : (settings.taxRate || 5);
     const taxableRatio = subtotal > 0 ? (taxableItemsSubtotal / subtotal) : 1;
     const discountedTaxableSubtotal = Math.max(0, taxableItemsSubtotal - (couponDiscount * taxableRatio));
-    const tax = Math.round((discountedTaxableSubtotal * (taxRate / 100)) * 100) / 100;
+    const tax = isZeroRated ? 0 : Math.round((discountedTaxableSubtotal * (taxRate / 100)) * 100) / 100;
 
     const preWalletTotal = Math.round((discountedSubtotal + tax + shippingFee) * 100) / 100;
 

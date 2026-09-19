@@ -30,7 +30,14 @@ import {
   Loader2,
   Layers,
   ChevronDown,
-  XCircle
+  XCircle,
+  User,
+  Briefcase,
+  RotateCcw,
+  ShieldCheck,
+  Hash,
+  UserCheck,
+  HelpCircle
 } from 'lucide-react';
 
 interface OrderItemDraft {
@@ -155,16 +162,41 @@ export default function AdminOrdersPage() {
   const [createError, setCreateError] = useState('');
   const [createSuccess, setCreateSuccess] = useState('');
 
-  // Form Fields
+  // Form Fields & Modes
+  const [clientSelectionMode, setClientSelectionMode] = useState<'DATABASE' | 'MANUAL'>('DATABASE');
+  const [customerType, setCustomerType] = useState<'INDIVIDUAL' | 'BUSINESS'>('INDIVIDUAL');
+
+  // Customer Contact Fields
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+
+  // Business / Seller B2B Fields
+  const [companyName, setCompanyName] = useState('');
+  const [tradeLicense, setTradeLicense] = useState('');
+  const [trn, setTrn] = useState('');
+  const [contactPerson, setContactPerson] = useState('');
+  const [contactRole, setContactRole] = useState('Procurement Lead');
+  const [poNumber, setPoNumber] = useState('');
+  const [partnerTier, setPartnerTier] = useState('CERTIFIED_PARTNER');
+  const [paymentTerms, setPaymentTerms] = useState('NET_30');
+  const [taxTreatment, setTaxTreatment] = useState<'STANDARD' | 'FREE_ZONE' | 'EXPORT' | 'EXEMPT'>('STANDARD');
+
+  // Shipping Address
   const [addressLine1, setAddressLine1] = useState('Business Bay, Tower 4, Suite 1200');
   const [city, setCity] = useState('Dubai');
   const [stateRegion, setStateRegion] = useState('Dubai');
   const [country, setCountry] = useState('AE');
   const [postalCode, setPostalCode] = useState('00000');
+
+  // Billing Address
+  const [sameAsShipping, setSameAsShipping] = useState(true);
+  const [billingAddressLine1, setBillingAddressLine1] = useState('');
+  const [billingCity, setBillingCity] = useState('');
+  const [billingStateRegion, setBillingStateRegion] = useState('');
+  const [billingCountry, setBillingCountry] = useState('AE');
+  const [billingPostalCode, setBillingPostalCode] = useState('');
 
   // Line items
   const [orderItems, setOrderItems] = useState<OrderItemDraft[]>([]);
@@ -246,13 +278,10 @@ export default function AdminOrdersPage() {
         setSelectedProductIdToAdd(prodsList[0].id);
       }
 
-      // Default to first customer if available
-      if (custList.length > 0 && !selectedCustomerId) {
+      // Default to first customer if available and in database mode
+      if (clientSelectionMode === 'DATABASE' && custList.length > 0 && !selectedCustomerId) {
         const firstCust = custList[0];
-        setSelectedCustomerId(firstCust.id);
-        setCustomerName(firstCust.name || firstCust.fullName || '');
-        setCustomerEmail(firstCust.email || '');
-        setCustomerPhone(firstCust.phone || '+971 4 800 TECH');
+        handleSelectCustomer(firstCust.id, custList);
       }
     } catch (err: any) {
       console.error('Failed to load modal data:', err);
@@ -261,16 +290,38 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleSelectCustomer = (custId: string) => {
+  const handleSelectCustomer = (custId: string, customList?: any[]) => {
     setSelectedCustomerId(custId);
+    const list = customList || availableCustomers;
     if (!custId) {
       setCustomerName('');
       setCustomerEmail('');
       setCustomerPhone('');
+      setCompanyName('');
+      setTradeLicense('');
+      setTrn('');
+      setContactPerson('');
       return;
     }
-    const customer = availableCustomers.find(c => c.id === custId);
+    const customer = list.find(c => c.id === custId);
     if (customer) {
+      const isBusiness =
+        customer.role === 'RESELLER' ||
+        !!customer.companyName ||
+        customer.customerType === 'BUSINESS';
+
+      if (isBusiness) {
+        setCustomerType('BUSINESS');
+        setCompanyName(customer.companyName || customer.organization || customer.name || 'Commercial Partner LLC');
+        setContactPerson(customer.name || customer.fullName || 'Authorized Agent');
+        setContactRole(customer.role === 'RESELLER' ? 'Authorized Reseller Partner' : 'Commercial Procurement Lead');
+        setTradeLicense(customer.tradeLicense || customer.crn || 'CN-904128-DXB');
+        setTrn(customer.trn || customer.taxNumber || '100293848200003');
+        if (customer.partnerTier) setPartnerTier(customer.partnerTier);
+      } else {
+        setCustomerType('INDIVIDUAL');
+      }
+
       setCustomerName(customer.name || customer.fullName || '');
       setCustomerEmail(customer.email || '');
       setCustomerPhone(customer.phone || '+971 4 800 TECH');
@@ -283,6 +334,27 @@ export default function AdminOrdersPage() {
         setPostalCode(addr.postalCode || postalCode);
       }
     }
+  };
+
+  const handleClearCustomerForm = () => {
+    setSelectedCustomerId('');
+    setCustomerName('');
+    setCustomerEmail('');
+    setCustomerPhone('');
+    setCompanyName('');
+    setTradeLicense('');
+    setTrn('');
+    setContactPerson('');
+    setContactRole('Procurement Lead');
+    setPoNumber('');
+    setAddressLine1('');
+    setCity('Dubai');
+    setStateRegion('Dubai');
+    setCountry('AE');
+    setPostalCode('');
+    setBillingAddressLine1('');
+    setBillingCity('');
+    setBillingPostalCode('');
   };
 
   const handleSelectProduct = (prod: any) => {
@@ -344,7 +416,8 @@ export default function AdminOrdersPage() {
   };
 
   const itemsSubtotal = orderItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
-  const vatTax = itemsSubtotal * 0.05;
+  const isZeroRatedTax = taxTreatment === 'FREE_ZONE' || taxTreatment === 'EXPORT' || taxTreatment === 'EXEMPT';
+  const vatTax = isZeroRatedTax ? 0 : itemsSubtotal * 0.05;
   const shippingFee = itemsSubtotal > 5000 || itemsSubtotal === 0 ? 0 : 50;
   const orderGrandTotal = itemsSubtotal + vatTax + shippingFee;
 
@@ -356,30 +429,74 @@ export default function AdminOrdersPage() {
       setCreateError('Please add at least one hardware product line item to the sales order.');
       return;
     }
-    if (!customerName.trim() || !customerEmail.trim()) {
-      setCreateError('Customer name and email are required.');
-      return;
+
+    if (customerType === 'BUSINESS') {
+      if (!companyName.trim()) {
+        setCreateError('Company Legal / Trading Name is required for Business Seller sales orders.');
+        return;
+      }
+      if (!customerEmail.trim()) {
+        setCreateError('Corporate email address is required.');
+        return;
+      }
+      if (!contactPerson.trim() && !customerName.trim()) {
+        setCreateError('Authorized contact person or representative name is required.');
+        return;
+      }
+    } else {
+      if (!customerName.trim() || !customerEmail.trim()) {
+        setCreateError('Customer full name and email address are required.');
+        return;
+      }
     }
 
     setCreatingOrder(true);
     setCreateError('');
 
     try {
+      const resolvedContactName = customerType === 'BUSINESS'
+        ? (contactPerson.trim() || customerName.trim())
+        : customerName.trim();
+
+      const shippingAddr = {
+        id: `addr_${Date.now()}`,
+        fullName: resolvedContactName,
+        phone: customerPhone.trim() || '+971 4 800 TECH',
+        addressLine1: addressLine1.trim() || 'Sheikh Zayed Road, Commercial District',
+        city: city.trim() || 'Dubai',
+        state: stateRegion.trim() || 'Dubai',
+        country: country.trim() || 'AE',
+        postalCode: postalCode.trim() || '00000',
+      };
+
+      const billingAddr = sameAsShipping ? shippingAddr : {
+        id: `addr_bill_${Date.now()}`,
+        fullName: customerType === 'BUSINESS' ? (companyName.trim() || resolvedContactName) : resolvedContactName,
+        phone: customerPhone.trim() || '+971 4 800 TECH',
+        addressLine1: billingAddressLine1.trim() || addressLine1.trim(),
+        city: billingCity.trim() || city.trim(),
+        state: billingStateRegion.trim() || stateRegion.trim(),
+        country: billingCountry.trim() || country.trim(),
+        postalCode: billingPostalCode.trim() || postalCode.trim(),
+      };
+
       const payload = {
-        customerId: selectedCustomerId || undefined,
-        customerName: customerName.trim(),
+        customerId: clientSelectionMode === 'DATABASE' && selectedCustomerId ? selectedCustomerId : undefined,
+        customerName: resolvedContactName,
         customerEmail: customerEmail.trim(),
         customerPhone: customerPhone.trim() || '+971 4 800 TECH',
-        shippingAddress: {
-          id: `addr_${Date.now()}`,
-          fullName: customerName.trim(),
-          phone: customerPhone.trim() || '+971 4 800 TECH',
-          addressLine1,
-          city,
-          state: stateRegion,
-          country,
-          postalCode,
-        },
+        customerType,
+        companyName: customerType === 'BUSINESS' ? companyName.trim() : undefined,
+        tradeLicense: customerType === 'BUSINESS' ? tradeLicense.trim() : undefined,
+        trn: customerType === 'BUSINESS' ? trn.trim() : undefined,
+        contactPerson: customerType === 'BUSINESS' ? (contactPerson.trim() || resolvedContactName) : undefined,
+        contactRole: customerType === 'BUSINESS' ? contactRole.trim() : undefined,
+        poNumber: customerType === 'BUSINESS' ? poNumber.trim() : undefined,
+        partnerTier: customerType === 'BUSINESS' ? partnerTier : undefined,
+        paymentTerms: customerType === 'BUSINESS' ? paymentTerms : 'PREPAID',
+        taxTreatment,
+        shippingAddress: shippingAddr,
+        billingAddress: billingAddr,
         items: orderItems.map(it => ({
           productId: it.productId,
           quantity: it.quantity,
@@ -528,8 +645,19 @@ export default function AdminOrdersPage() {
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900 dark:text-slate-200">{order.customerName}</div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400">{order.customerEmail}</div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-slate-900 dark:text-slate-200">
+                          {order.companyName || order.customerName}
+                        </span>
+                        {order.customerType === 'BUSINESS' || order.companyName ? (
+                          <span className="text-[9px] font-bold font-mono uppercase bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                            B2B
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                        {order.companyName ? `${order.customerName} • ` : ''}{order.customerEmail}
+                      </div>
                     </td>
 
                     <td className="py-3.5 px-4">
@@ -644,112 +772,575 @@ export default function AdminOrdersPage() {
               )}
 
               <form id="createSalesOrderForm" onSubmit={handleCreateSalesOrder} className="space-y-5 text-xs">
-                {/* SECTION 1: CUSTOMER & CONSIGNEE DETAILS */}
+                {/* SECTION 1: CLIENT & CONSIGNEE SPECIFICATION */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/80 dark:border-slate-800/80 pb-3">
-                    <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-xs">
-                      <div className="w-6 h-6 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                        <Building2 className="w-3.5 h-3.5" />
+                  {/* Top Bar: Title & Database vs Manual Pill Switch */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800/80 pb-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                        <Building2 className="w-4 h-4" />
                       </div>
-                      <span>Customer & Consignee Selection</span>
+                      <div>
+                        <div className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-2">
+                          <span>Client & Consignee Specification</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                            {clientSelectionMode === 'DATABASE' ? 'Database Mode' : 'Manual Entry'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          {clientSelectionMode === 'DATABASE'
+                            ? 'Fetch existing customer/business record from database or switch to manual entry'
+                            : 'Manually enter fresh client details for this sales record without database linkage'}
+                        </p>
+                      </div>
                     </div>
-                    {availableCustomers.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Pick Database Client:</span>
+
+                    {/* Mode Segmented Pill Switch: "Pick Database Client" vs "Add New Client Manually" */}
+                    <div className="inline-flex p-1 rounded-xl bg-slate-200/70 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-inner self-start sm:self-auto">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClientSelectionMode('DATABASE');
+                          if (availableCustomers.length > 0 && !selectedCustomerId) {
+                            handleSelectCustomer(availableCustomers[0].id);
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                          clientSelectionMode === 'DATABASE'
+                            ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-300 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <UserCheck className="w-3.5 h-3.5" />
+                        <span>Pick Database Client</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClientSelectionMode('MANUAL');
+                          setSelectedCustomerId('');
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                          clientSelectionMode === 'MANUAL'
+                            ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-300 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add New Client Manually</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Customer Type Selector: Retail Customer (B2C) vs Business Seller / B2B Commercial Partner */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Client Entity Classification
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setCustomerType('INDIVIDUAL')}
+                        className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
+                          customerType === 'INDIVIDUAL'
+                            ? 'bg-purple-50/70 dark:bg-purple-950/30 border-purple-300 dark:border-purple-800 ring-2 ring-purple-500/20'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className={`p-2 rounded-lg shrink-0 ${
+                          customerType === 'INDIVIDUAL'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                        }`}>
+                          <User className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-slate-900 dark:text-white">Individual Retail Customer</span>
+                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300">
+                              B2C
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                            Direct sales to end-user retail consumer. Standard domestic delivery.
+                          </p>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setCustomerType('BUSINESS')}
+                        className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
+                          customerType === 'BUSINESS'
+                            ? 'bg-purple-50/70 dark:bg-purple-950/30 border-purple-300 dark:border-purple-800 ring-2 ring-purple-500/20'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className={`p-2 rounded-lg shrink-0 ${
+                          customerType === 'BUSINESS'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                        }`}>
+                          <Briefcase className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-slate-900 dark:text-white">Business Seller / Commercial Partner</span>
+                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300">
+                              B2B / Reseller
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                            Corporate entity, reseller partner, wholesale procurement with TRN / CRN tax accounting.
+                          </p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Database Client Picker Bar (Only shown in DATABASE mode) */}
+                  {clientSelectionMode === 'DATABASE' && (
+                    <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 shrink-0">
+                          Pick Database Client:
+                        </span>
                         <select
                           value={selectedCustomerId}
                           onChange={e => handleSelectCustomer(e.target.value)}
-                          className="bg-white dark:bg-slate-900 text-xs font-medium text-slate-900 dark:text-white px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs"
+                          className="flex-1 bg-slate-50 dark:bg-slate-950 text-xs font-medium text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                         >
-                          <option value="">-- Manual / Guest Consignee --</option>
-                          {availableCustomers.map(c => (
-                            <option key={c.id} value={c.id}>
-                              {c.name || c.email} ({c.email})
-                            </option>
-                          ))}
+                          <option value="">-- Select Client from Database ({availableCustomers.length} registered) --</option>
+                          {availableCustomers.map(c => {
+                            const isReseller = c.role === 'RESELLER';
+                            return (
+                              <option key={c.id} value={c.id}>
+                                {c.companyName || c.name || c.fullName || c.email} ({c.email}) {isReseller ? '★ [Reseller]' : ''}
+                              </option>
+                            );
+                          })}
                         </select>
                       </div>
-                    )}
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                        Customer Full Name <span className="text-purple-600 dark:text-purple-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={customerName}
-                        onChange={e => setCustomerName(e.target.value)}
-                        placeholder="e.g. Tariq Al-Mansoor"
-                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
-                      />
+                      {selectedCustomerId && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-900/50 font-bold flex items-center gap-1">
+                            <Check className="w-3 h-3" />
+                            <span>DB Record Linked</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleClearCustomerForm}
+                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
+                            title="Reset client fields"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
+                  )}
 
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                        Email Address <span className="text-purple-600 dark:text-purple-400">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={customerEmail}
-                        onChange={e => setCustomerEmail(e.target.value)}
-                        placeholder="e.g. procurement@techcorp.ae"
-                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
-                      />
+                  {/* Manual Mode Banner */}
+                  {clientSelectionMode === 'MANUAL' && (
+                    <div className="p-3 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/70 dark:border-purple-900/40 flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                        <Plus className="w-4 h-4 shrink-0" />
+                        <span className="text-[11px] font-medium">
+                          <strong>Manual Direct Entry Active:</strong> Enter consignee or business seller information directly below. This order will be recorded without linking to an existing account.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleClearCustomerForm}
+                        className="px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-300 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Clear Form</span>
+                      </button>
                     </div>
+                  )}
 
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                        Phone Number
-                      </label>
-                      <input
-                        type="text"
-                        value={customerPhone}
-                        onChange={e => setCustomerPhone(e.target.value)}
-                        placeholder="+971 4 800 1234"
-                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
-                      />
-                    </div>
-                  </div>
+                  {/* CLIENT SPECIFICATION FIELDS */}
+                  {customerType === 'INDIVIDUAL' ? (
+                    /* RETAIL CUSTOMER (B2C) FIELDS */
+                    <div className="space-y-3.5 pt-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Customer Full Name <span className="text-purple-600 dark:text-purple-400">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={customerName}
+                            onChange={e => setCustomerName(e.target.value)}
+                            placeholder="e.g. Tariq Al-Mansoor"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          />
+                        </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
-                    <div className="sm:col-span-2">
-                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                        Shipping Street Address
-                      </label>
-                      <input
-                        type="text"
-                        value={addressLine1}
-                        onChange={e => setAddressLine1(e.target.value)}
-                        placeholder="Street, Building, Unit Number"
-                        className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                        City & Country
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        <input
-                          type="text"
-                          value={city}
-                          onChange={e => setCity(e.target.value)}
-                          placeholder="Dubai"
-                          className="col-span-2 w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
-                        />
-                        <input
-                          type="text"
-                          value={country}
-                          onChange={e => setCountry(e.target.value)}
-                          placeholder="AE"
-                          className="col-span-1 w-full text-center bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-bold uppercase"
-                        />
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Email Address <span className="text-purple-600 dark:text-purple-400">*</span>
+                          </label>
+                          <input
+                            type="email"
+                            required
+                            value={customerEmail}
+                            onChange={e => setCustomerEmail(e.target.value)}
+                            placeholder="e.g. customer@domain.ae"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Phone Number
+                          </label>
+                          <input
+                            type="text"
+                            value={customerPhone}
+                            onChange={e => setCustomerPhone(e.target.value)}
+                            placeholder="+971 4 800 1234"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                        <div className="sm:col-span-2">
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Shipping Street Address
+                          </label>
+                          <input
+                            type="text"
+                            value={addressLine1}
+                            onChange={e => setAddressLine1(e.target.value)}
+                            placeholder="Street, Building, Apartment / Villa Number"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            City & Country
+                          </label>
+                          <div className="grid grid-cols-3 gap-2">
+                            <input
+                              type="text"
+                              value={city}
+                              onChange={e => setCity(e.target.value)}
+                              placeholder="Dubai"
+                              className="col-span-2 w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                            />
+                            <input
+                              type="text"
+                              value={country}
+                              onChange={e => setCountry(e.target.value)}
+                              placeholder="AE"
+                              className="col-span-1 w-full text-center bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-bold uppercase"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    /* BUSINESS SELLER / B2B COMMERCIAL PARTNER FIELDS */
+                    <div className="space-y-4 pt-1">
+                      {/* Sub-section 1: Commercial Legal Entity Profile */}
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div className="text-[11px] font-bold text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                          <span className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400">
+                            <Building2 className="w-3.5 h-3.5" />
+                            <span>1. Commercial Legal Entity Profile</span>
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">GCC / UAE Commercial Compliance</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                          <div className="sm:col-span-2">
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Company / Legal Trading Name <span className="text-purple-600 dark:text-purple-400">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={companyName}
+                              onChange={e => setCompanyName(e.target.value)}
+                              placeholder="e.g. Apex Hardware Technologies FZ-LLC"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Trade License / CRN
+                            </label>
+                            <input
+                              type="text"
+                              value={tradeLicense}
+                              onChange={e => setTradeLicense(e.target.value)}
+                              placeholder="e.g. CN-1049281-DXB"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Tax Registration (TRN / VAT ID)
+                            </label>
+                            <input
+                              type="text"
+                              value={trn}
+                              onChange={e => setTrn(e.target.value)}
+                              placeholder="15-digit TRN: 100xxxxxxxx0003"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Commercial Partner Tier / Reseller Category
+                            </label>
+                            <select
+                              value={partnerTier}
+                              onChange={e => setPartnerTier(e.target.value)}
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                            >
+                              <option value="CERTIFIED_PARTNER">Certified Technology Reseller</option>
+                              <option value="GOLD_PARTNER">Gold Wholesale Partner (Volume Tier)</option>
+                              <option value="PLATINUM_ENTERPRISE">Platinum Enterprise Tier</option>
+                              <option value="GOVERNMENT_ACADEMIC">Government / Educational Institution</option>
+                              <option value="COMMERCIAL_BUYER">Direct Commercial / Corporate Buyer</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Client PO / Purchase Contract Ref #
+                            </label>
+                            <input
+                              type="text"
+                              value={poNumber}
+                              onChange={e => setPoNumber(e.target.value)}
+                              placeholder="e.g. PO-2026-APEX-8891"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono font-bold"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sub-section 2: Authorized Representative & Official Contact */}
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div className="text-[11px] font-bold text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                          <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
+                            <UserCheck className="w-3.5 h-3.5" />
+                            <span>2. Authorized Representative & Corporate Contact</span>
+                          </span>
+                          <span className="text-[10px] text-slate-400">Recipient of Dispatch & Warranty Notices</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Contact Person Name <span className="text-purple-600 dark:text-purple-400">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required={customerType === 'BUSINESS'}
+                              value={contactPerson}
+                              onChange={e => {
+                                setContactPerson(e.target.value);
+                                if (!customerName) setCustomerName(e.target.value);
+                              }}
+                              placeholder="e.g. Tariq Al-Mansoor"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Job Title / Department
+                            </label>
+                            <input
+                              type="text"
+                              value={contactRole}
+                              onChange={e => setContactRole(e.target.value)}
+                              placeholder="e.g. VP Infrastructure Procurement"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Official Corporate Email <span className="text-purple-600 dark:text-purple-400">*</span>
+                            </label>
+                            <input
+                              type="email"
+                              required
+                              value={customerEmail}
+                              onChange={e => setCustomerEmail(e.target.value)}
+                              placeholder="e.g. procurement@apexsolutions.ae"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Phone / Extension
+                            </label>
+                            <input
+                              type="text"
+                              value={customerPhone}
+                              onChange={e => setCustomerPhone(e.target.value)}
+                              placeholder="+971 4 800 1234 ext 201"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sub-section 3: Commercial Credit Terms & VAT Treatment */}
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div className="text-[11px] font-bold text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                            <CreditCard className="w-3.5 h-3.5" />
+                            <span>3. Commercial Settlement & Tax Treatment</span>
+                          </span>
+                          <span className="text-[10px] text-slate-400">Affects dynamic VAT computation</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Commercial Payment / Credit Terms
+                            </label>
+                            <select
+                              value={paymentTerms}
+                              onChange={e => setPaymentTerms(e.target.value)}
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                            >
+                              <option value="PREPAID">Prepaid / Wire Advance (Immediate)</option>
+                              <option value="NET_15">Net 15 Days (Commercial Terms)</option>
+                              <option value="NET_30">Net 30 Days (Standard Corporate Credit)</option>
+                              <option value="NET_60">Net 60 Days (Enterprise Approved Line)</option>
+                              <option value="LC">Letter of Credit (L/C Confirmed)</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                              Tax Treatment / VAT Exemption Category
+                            </label>
+                            <select
+                              value={taxTreatment}
+                              onChange={e => setTaxTreatment(e.target.value as any)}
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium font-mono"
+                            >
+                              <option value="STANDARD">Standard Rate (5% UAE VAT)</option>
+                              <option value="FREE_ZONE">Designated Free Zone Exemption (0% VAT - Art. 45)</option>
+                              <option value="EXPORT">Direct Export Outside State (0% VAT)</option>
+                              <option value="EXEMPT">Tax Exempt Entity / Diplomatic (0% VAT)</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sub-section 4: Delivery and Separate Billing Addresses */}
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div className="text-[11px] font-bold text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                          <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>4. Delivery & Commercial Invoicing Addresses</span>
+                          </span>
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={sameAsShipping}
+                              onChange={e => setSameAsShipping(e.target.checked)}
+                              className="rounded text-purple-600 focus:ring-purple-500 w-3.5 h-3.5"
+                            />
+                            <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                              Billing address same as delivery address
+                            </span>
+                          </label>
+                        </div>
+
+                        {/* Delivery / Physical Shipping Address */}
+                        <div>
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                            Physical Delivery / Warehouse Dispatch Destination
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="sm:col-span-2">
+                              <input
+                                type="text"
+                                value={addressLine1}
+                                onChange={e => setAddressLine1(e.target.value)}
+                                placeholder="Street, Warehouse Bay, Unit / Floor"
+                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              />
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <input
+                                type="text"
+                                value={city}
+                                onChange={e => setCity(e.target.value)}
+                                placeholder="City (e.g. Dubai)"
+                                className="col-span-2 w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              />
+                              <input
+                                type="text"
+                                value={country}
+                                onChange={e => setCountry(e.target.value)}
+                                placeholder="AE"
+                                className="col-span-1 w-full text-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-bold uppercase"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Separate Billing Address if unchecked */}
+                        {!sameAsShipping && (
+                          <div className="pt-2 border-t border-dashed border-slate-200 dark:border-slate-800 animate-in fade-in-0 duration-200">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1.5">
+                              Official Invoicing & Tax Billing Address
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div className="sm:col-span-2">
+                                <input
+                                  type="text"
+                                  value={billingAddressLine1}
+                                  onChange={e => setBillingAddressLine1(e.target.value)}
+                                  placeholder="Headquarters, Corporate Tower, Suite #"
+                                  className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                                />
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                <input
+                                  type="text"
+                                  value={billingCity}
+                                  onChange={e => setBillingCity(e.target.value)}
+                                  placeholder="City"
+                                  className="col-span-2 w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                                />
+                                <input
+                                  type="text"
+                                  value={billingCountry}
+                                  onChange={e => setBillingCountry(e.target.value)}
+                                  placeholder="AE"
+                                  className="col-span-1 w-full text-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-bold uppercase"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* SECTION 2: HARDWARE LINE ITEMS */}
@@ -1073,8 +1664,14 @@ export default function AdminOrdersPage() {
                         <span className="font-mono font-bold text-slate-900 dark:text-white">{formatPrice(itemsSubtotal)}</span>
                       </div>
                       <div className="flex justify-between text-slate-600 dark:text-slate-400 font-medium">
-                        <span>UAE VAT (5%):</span>
-                        <span className="font-mono text-slate-700 dark:text-slate-300">{formatPrice(vatTax)}</span>
+                        <span>
+                          {isZeroRatedTax
+                            ? `VAT Exemption (${taxTreatment === 'FREE_ZONE' ? 'Free Zone 0%' : taxTreatment === 'EXPORT' ? 'Export 0%' : 'Tax Exempt 0%'}):`
+                            : 'UAE VAT (5% Standard):'}
+                        </span>
+                        <span className={`font-mono ${isZeroRatedTax ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-700 dark:text-slate-300'}`}>
+                          {isZeroRatedTax ? 'د.إ 0.00 (Zero-Rated)' : formatPrice(vatTax)}
+                        </span>
                       </div>
                       <div className="flex justify-between text-slate-600 dark:text-slate-400 font-medium">
                         <span>Dispatch Shipping:</span>
@@ -1182,12 +1779,48 @@ export default function AdminOrdersPage() {
               {/* Consignee & Payment Summary */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
-                  <div className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                    <span>Consignee Shipping Address</span>
+                  <div className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                      <span>Consignee & Client Details</span>
+                    </div>
+                    {selectedOrder.customerType === 'BUSINESS' || selectedOrder.companyName ? (
+                      <span className="text-[9px] font-bold uppercase bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800">
+                        B2B Commercial Partner
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-bold uppercase bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                        Retail Client
+                      </span>
+                    )}
                   </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">{selectedOrder.customerName}</div>
+                  {selectedOrder.companyName && (
+                    <div className="font-black text-slate-900 dark:text-white text-sm">{selectedOrder.companyName}</div>
+                  )}
+                  <div className={`${selectedOrder.companyName ? 'text-xs text-slate-700 dark:text-slate-300 font-semibold' : 'font-bold text-slate-900 dark:text-white text-sm'}`}>
+                    {selectedOrder.contactPerson ? `Attn: ${selectedOrder.contactPerson}${selectedOrder.contactRole ? ` (${selectedOrder.contactRole})` : ''}` : selectedOrder.customerName}
+                  </div>
                   <div className="text-slate-600 dark:text-slate-400 font-medium">{selectedOrder.customerEmail} • {selectedOrder.customerPhone || 'No phone'}</div>
+                  {selectedOrder.tradeLicense && (
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
+                      Trade License: <strong className="text-slate-800 dark:text-slate-200">{selectedOrder.tradeLicense}</strong>
+                    </div>
+                  )}
+                  {selectedOrder.trn && (
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
+                      TRN / VAT ID: <strong className="text-slate-800 dark:text-slate-200">{selectedOrder.trn}</strong>
+                    </div>
+                  )}
+                  {selectedOrder.poNumber && (
+                    <div className="text-[11px] text-purple-700 dark:text-purple-400 font-mono font-bold">
+                      PO Reference: #{selectedOrder.poNumber}
+                    </div>
+                  )}
+                  {selectedOrder.paymentTerms && (
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Payment Terms: <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedOrder.paymentTerms}</span>
+                    </div>
+                  )}
                   <div className="text-slate-700 dark:text-slate-300 font-medium pt-1">{selectedOrder.shippingAddress?.addressLine1}</div>
                   <div className="text-slate-500 dark:text-slate-400 text-[11px]">{selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.country}</div>
                 </div>

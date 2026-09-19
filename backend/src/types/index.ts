@@ -306,6 +306,16 @@ export interface Order {
   statusHistory: OrderStatusHistoryItem[];
   notes?: string;
   eBillId?: string;
+  customerType?: 'INDIVIDUAL' | 'BUSINESS';
+  companyName?: string;
+  tradeLicense?: string;
+  trn?: string;
+  contactPerson?: string;
+  contactRole?: string;
+  poNumber?: string;
+  paymentTerms?: string;
+  taxTreatment?: string;
+  partnerTier?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -329,6 +339,7 @@ export interface Wallet {
   userId: string;
   balance: number;
   currency: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -396,6 +407,16 @@ export interface EBill {
     email: string;
     phone?: string;
     address: Address;
+    customerType?: 'INDIVIDUAL' | 'BUSINESS';
+    companyName?: string;
+    tradeLicense?: string;
+    trn?: string;
+    contactPerson?: string;
+    contactRole?: string;
+    poNumber?: string;
+    paymentTerms?: string;
+    taxTreatment?: string;
+    partnerTier?: string;
   };
   items: OrderItem[];
   subtotal: number;

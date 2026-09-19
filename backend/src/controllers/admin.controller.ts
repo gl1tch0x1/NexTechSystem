@@ -299,6 +299,16 @@ export class AdminController {
       customerName,
       customerEmail,
       customerPhone,
+      customerType,
+      companyName,
+      tradeLicense,
+      trn,
+      contactPerson,
+      contactRole,
+      poNumber,
+      paymentTerms,
+      taxTreatment,
+      partnerTier,
       items,
       shippingAddress,
       billingAddress,
@@ -316,7 +326,7 @@ export class AdminController {
 
     // Resolve customer details from database or request payload
     let userId = customerId || req.user?.id || 'admin_sales_order';
-    let resolvedName = customerName || (req.user as any)?.name || 'Direct Enterprise Client';
+    let resolvedName = customerName || (req.user as any)?.name || (companyName || 'Direct Enterprise Client');
     let resolvedEmail = customerEmail || (req.user as any)?.email || '';
     let resolvedPhone = customerPhone || (req.user as any)?.phone || '';
 
@@ -346,6 +356,16 @@ export class AdminController {
       customerName: resolvedName,
       customerEmail: resolvedEmail,
       customerPhone: resolvedPhone,
+      customerType: customerType || (companyName ? 'BUSINESS' : 'INDIVIDUAL'),
+      companyName,
+      tradeLicense,
+      trn,
+      contactPerson,
+      contactRole,
+      poNumber,
+      paymentTerms,
+      taxTreatment,
+      partnerTier,
       items,
       shippingAddress: shippingAddress || defaultAddress,
       billingAddress: billingAddress || shippingAddress || defaultAddress,

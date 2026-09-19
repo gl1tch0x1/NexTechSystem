@@ -203,12 +203,47 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
           {/* Consignee / Bill To Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-200 text-xs">
             <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Customer Consignee (Bill To / Ship To)
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Consignee / Client
+                </span>
+                {order.customerType === 'BUSINESS' || order.companyName ? (
+                  <span className="text-[9px] font-bold uppercase bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200">
+                    B2B Commercial Partner
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-bold uppercase bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                    Retail Customer
+                  </span>
+                )}
               </div>
-              <div className="text-sm font-black text-slate-900">{order.customerName}</div>
-              <div className="text-slate-600 font-medium">{order.customerEmail}</div>
-              <div className="text-slate-600 font-medium">{order.customerPhone || '+971 4 800 TECH'}</div>
+              {order.companyName && (
+                <div className="text-sm font-black text-slate-900">{order.companyName}</div>
+              )}
+              <div className={`text-slate-800 ${order.companyName ? 'text-xs font-semibold' : 'text-sm font-black text-slate-900'}`}>
+                {order.contactPerson ? `Attn: ${order.contactPerson}${order.contactRole ? ` (${order.contactRole})` : ''}` : order.customerName}
+              </div>
+              <div className="text-slate-600 font-medium">{order.customerEmail} • {order.customerPhone || '+971 4 800 TECH'}</div>
+              {order.tradeLicense && (
+                <div className="text-[11px] text-slate-600 font-mono">
+                  Trade License / CRN: <strong className="text-slate-800">{order.tradeLicense}</strong>
+                </div>
+              )}
+              {order.trn && (
+                <div className="text-[11px] text-slate-600 font-mono">
+                  Tax Registration No (TRN): <strong className="text-slate-800">{order.trn}</strong>
+                </div>
+              )}
+              {order.poNumber && (
+                <div className="text-[11px] text-purple-700 font-mono font-bold">
+                  Client PO Ref: #{order.poNumber}
+                </div>
+              )}
+              {order.paymentTerms && (
+                <div className="text-[11px] text-slate-600">
+                  Payment Terms: <span className="font-semibold text-slate-800">{order.paymentTerms}</span>
+                </div>
+              )}
               {order.shippingAddress && (
                 <div className="text-slate-700 pt-1">
                   <div>{order.shippingAddress.addressLine1}</div>
@@ -220,12 +255,26 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
 
             <div className="space-y-1 sm:text-right sm:border-l sm:border-slate-100 sm:pl-6">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Fulfillment & Warranty Terms
+                Fulfillment & Commercial Terms
               </div>
               <div className="font-bold text-slate-800">Dispatch Hub: Dubai South Logistics City</div>
               <div className="text-slate-600">Standard Warranty: 24 Months Manufacturer Direct</div>
               <div className="text-slate-600">Currency: United Arab Emirates Dirham (AED)</div>
               <div className="text-slate-600">Fulfillment Status: <strong>{order.orderStatus || order.status || 'PROCESSING'}</strong></div>
+              {order.taxTreatment && (
+                <div className="text-slate-600 text-[11px]">
+                  Tax Treatment:{' '}
+                  <strong className="text-slate-800">
+                    {order.taxTreatment === 'FREE_ZONE'
+                      ? 'Designated Free Zone (0% VAT)'
+                      : order.taxTreatment === 'EXPORT'
+                      ? 'Export Exemption (0% VAT)'
+                      : order.taxTreatment === 'EXEMPT'
+                      ? 'Tax Exempt Entity'
+                      : 'Standard Rate (5% VAT)'}
+                  </strong>
+                </div>
+              )}
             </div>
           </div>
 

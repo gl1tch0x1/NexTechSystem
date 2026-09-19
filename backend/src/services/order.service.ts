@@ -24,6 +24,16 @@ export interface CreateOrderDTO {
   couponCode?: string;
   walletAmountToUse?: number;
   notes?: string;
+  customerType?: 'INDIVIDUAL' | 'BUSINESS';
+  companyName?: string;
+  tradeLicense?: string;
+  trn?: string;
+  contactPerson?: string;
+  contactRole?: string;
+  poNumber?: string;
+  paymentTerms?: string;
+  taxTreatment?: string;
+  partnerTier?: string;
 }
 
 export class OrderService {
@@ -70,6 +80,7 @@ export class OrderService {
       couponCode: dto.couponCode,
       requestedWalletDeduction: dto.walletAmountToUse,
       userWalletBalance,
+      taxTreatment: dto.taxTreatment,
     });
 
     // 4. Verify stock availability (respecting variant and backorder settings)
@@ -153,6 +164,16 @@ export class OrderService {
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
         notes: dto.notes,
+        customerType: dto.customerType || (dto.companyName ? 'BUSINESS' : 'INDIVIDUAL'),
+        companyName: dto.companyName,
+        tradeLicense: dto.tradeLicense,
+        trn: dto.trn,
+        contactPerson: dto.contactPerson,
+        contactRole: dto.contactRole,
+        poNumber: dto.poNumber,
+        paymentTerms: dto.paymentTerms,
+        taxTreatment: dto.taxTreatment,
+        partnerTier: dto.partnerTier,
         statusHistory: [
           {
             status: 'CONFIRMED',
