@@ -9,16 +9,9 @@ import {
   ShoppingCart,
   Heart,
   Star,
-  ShieldCheck,
-  CheckCircle2,
   Check,
-  ArrowRight,
-  Eye,
   Zap,
-  Cpu,
-  Layers,
   Sparkles,
-  Truck
 } from 'lucide-react';
 
 export function ProductCard({ product }: { product: Product }) {
@@ -33,10 +26,9 @@ export function ProductCard({ product }: { product: Product }) {
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
     : 0;
 
-  const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 5);
   const isOutOfStock = product.stock === 0;
 
-  // Extract key technical spec highlights
+  // Extract key technical spec values
   const specEntries = Object.entries(product.specifications || {}).slice(0, 3);
 
   // Check if product is Intel i9 14900k to ensure authentic Intel hardware render
@@ -55,27 +47,24 @@ export function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-slate-900/95 rounded-3xl border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/80 dark:hover:border-cyan-400/80 hover:shadow-2xl dark:hover:shadow-[0_12px_36px_rgba(0,212,255,0.12)] transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1.5">
-      {/* Visual Accent Glow on Hover */}
-      <div className="absolute -top-24 -right-24 w-52 h-52 bg-gradient-to-br from-tech-blue/15 to-cyan-400/10 dark:from-cyan-400/15 dark:to-blue-600/10 rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity duration-500 pointer-events-none" />
+    <div className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1">
+      {/* Visual Ambient Glow on Hover */}
+      <div className="absolute -top-20 -right-20 w-44 h-44 bg-tech-blue/10 dark:bg-cyan-500/10 rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity duration-500 pointer-events-none" />
 
       {/* Top Image Stage Container */}
-      <div className="relative aspect-[4/3] bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 dark:from-[#0B0F19] dark:via-[#0E1527] dark:to-[#070B14] p-5 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
-        {/* Ambient Spotlight */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-tech-blue/8 dark:from-cyan-400/15 via-transparent to-transparent pointer-events-none" />
-
+      <div className="relative aspect-[4/3] bg-slate-50/70 dark:bg-slate-950/60 p-4 sm:p-5 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         {/* Top Badges (Left) */}
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
           {discountPercent > 0 && (
-            <span className="bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-lg shadow-sm font-mono tracking-wider flex items-center gap-1">
-              <Zap className="w-3 h-3 fill-current" />
-              <span>SAVE {discountPercent}%</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500 text-white shadow-xs">
+              <Zap className="w-2.5 h-2.5 fill-current" />
+              <span>-{discountPercent}%</span>
             </span>
           )}
           {product.isFeatured && (
-            <span className="bg-tech-blue text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-lg shadow-sm font-mono tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              <span>FEATURED</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-900/85 dark:bg-slate-800/90 text-white backdrop-blur-xs shadow-xs">
+              <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+              <span>Featured</span>
             </span>
           )}
         </div>
@@ -87,14 +76,14 @@ export function ProductCard({ product }: { product: Product }) {
             e.preventDefault();
             toggleWishlist(product);
           }}
-          className={`absolute top-3 right-3 z-10 p-2.5 rounded-xl backdrop-blur-md transition-all ${
+          className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
             inWishlist
-              ? 'bg-red-500/20 text-red-500 border border-red-500/40 shadow-sm scale-110'
-              : 'bg-white/90 dark:bg-slate-900/80 text-slate-400 hover:text-red-500 hover:scale-110 border border-slate-200 dark:border-slate-700 shadow-sm'
+              ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-500 border border-rose-200 dark:border-rose-800 shadow-xs scale-105'
+              : 'bg-white/90 dark:bg-slate-900/80 text-slate-400 hover:text-rose-500 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 backdrop-blur-xs shadow-2xs'
           }`}
           title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current text-red-500' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 ${inWishlist ? 'fill-current text-rose-500' : ''}`} />
         </button>
 
         {/* Product Image */}
@@ -102,91 +91,84 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={displayImage}
             alt={product.name}
-            className="max-h-full max-w-full object-contain filter drop-shadow-md group-hover:scale-108 transition-transform duration-500"
+            className="max-h-full max-w-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-500"
           />
         </Link>
       </div>
 
       {/* Details Container */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-white dark:bg-slate-900/95">
-        <div className="space-y-2.5">
-          {/* Brand & Category */}
-          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-            <span className="font-mono font-bold text-tech-blue dark:text-cyan-400 uppercase tracking-wider">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3 bg-white dark:bg-slate-900">
+        <div className="space-y-2">
+          {/* Brand & Category Row */}
+          <div className="flex items-center justify-between gap-2 text-[11px] h-4 leading-none">
+            <span className="font-bold text-tech-blue dark:text-cyan-400 uppercase tracking-wider truncate max-w-[130px]">
               {product.brandName}
             </span>
             {product.categoryName && (
-              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate max-w-[130px]">
+              <span className="text-slate-400 dark:text-slate-500 font-medium truncate max-w-[120px] text-right">
                 {product.categoryName}
               </span>
             )}
           </div>
 
-          {/* Product Name */}
+          {/* Product Name (Consistent 2-line clamped height for perfect grid alignment) */}
           <Link
             href={`/products/${product.slug}`}
-            className="text-sm font-black text-slate-900 dark:text-white line-clamp-2 hover:text-tech-blue dark:hover:text-cyan-400 transition-colors leading-snug"
+            className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 h-10 hover:text-tech-blue dark:hover:text-cyan-400 transition-colors leading-snug block"
+            title={product.name}
           >
             {product.name}
           </Link>
 
-          {/* Technical Specs Tags (Ant Design Spec Chips) */}
+          {/* Technical Specs Tags */}
           {specEntries.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-0.5">
+            <div className="flex flex-wrap items-center gap-1.5 min-h-[1.5rem] pt-0.5">
               {specEntries.map(([key, val]) => (
                 <span
                   key={key}
-                  className="text-[10px] font-mono font-medium bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-slate-800"
+                  className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate max-w-[170px] border border-slate-200/60 dark:border-slate-700/60"
+                  title={`${key}: ${val}`}
                 >
-                  <span className="text-slate-400 uppercase text-[9px] mr-1">{key.slice(0, 5)}:</span>
                   {val}
                 </span>
               ))}
             </div>
           )}
 
-          {/* Ratings & Stock Status Row */}
-          <div className="flex items-center justify-between pt-1">
+          {/* Ratings Row (In-Stock completely removed per user request) */}
+          <div className="flex items-center justify-between text-xs pt-0.5">
             <div className="flex items-center gap-1.5">
               <div className="flex items-center text-amber-400">
                 <Star className="w-3.5 h-3.5 fill-current" />
               </div>
-              <span className="text-xs font-black text-slate-800 dark:text-slate-200 font-mono">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-mono">
                 {(product.rating || 4.9).toFixed(1)}
               </span>
-              <span className="text-[11px] text-slate-400 font-mono">({product.reviewCount || 18})</span>
+              <span className="text-[11px] text-slate-400 font-mono">
+                ({product.reviewCount || 18})
+              </span>
             </div>
 
-            {isOutOfStock ? (
-              <span className="text-[10px] font-bold text-red-500 font-mono bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 px-2 py-0.5 rounded">
-                Out of Stock
-              </span>
-            ) : isLowStock ? (
-              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 font-mono bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-2 py-0.5 rounded flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                Only {product.stock} Left
-              </span>
-            ) : (
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 px-2 py-0.5 rounded">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                In Stock ({product.stock})
+            {isOutOfStock && (
+              <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono">
+                Sold Out
               </span>
             )}
           </div>
         </div>
 
-        {/* Pricing & Interactive Instant Action Bar */}
-        <div className="pt-3.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
-          <div>
-            <div className="text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight">
+        {/* Pricing & Add to Cart Action Bar */}
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-end justify-between gap-2">
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight leading-none">
               {formatPrice(price)}
             </div>
             {originalPrice && originalPrice > price ? (
-              <div className="text-xs text-slate-400 line-through font-mono">
+              <div className="text-[11px] text-slate-400 line-through font-mono mt-1">
                 {formatPrice(originalPrice)}
               </div>
             ) : (
-              <div className="text-[10px] text-slate-400 font-sans">
+              <div className="text-[10px] text-slate-400 font-medium mt-1">
                 Inc. 5% UAE VAT
               </div>
             )}
@@ -195,18 +177,18 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm ${
+            className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
               isOutOfStock
-                ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
                 : justAdded
-                ? 'bg-emerald-600 text-white shadow-emerald-500/25 scale-105'
-                : 'bg-tech-blue hover:bg-blue-600 text-white shadow-tech-blue/20 hover:shadow-tech-glow'
+                ? 'bg-emerald-600 text-white shadow-emerald-500/20 scale-102'
+                : 'bg-tech-blue hover:bg-blue-600 text-white shadow-tech-blue/20 hover:shadow-md'
             }`}
           >
             {justAdded ? (
               <>
-                <Check className="w-3.5 h-3.5" />
-                <span>Added!</span>
+                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Added</span>
               </>
             ) : (
               <>
