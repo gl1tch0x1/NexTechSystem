@@ -24,6 +24,9 @@ export interface User {
   avatar?: string;
   addresses: Address[];
   resellerId?: string;
+  company?: string;
+  tradeLicense?: string;
+  taxRegistrationNumber?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -118,6 +121,7 @@ export interface Product {
   brandName: string;
   categoryId: string;
   categoryName: string;
+  category?: string | { id?: string; name?: string; slug?: string };
   subcategoryId?: string;
   sellerType: SellerType;
   resellerId?: string;
@@ -693,7 +697,12 @@ export interface Quote {
   contactName: string;
   contactEmail: string;
   contactPhone?: string;
+  tradeLicense?: string;
   taxRegistrationNumber?: string;
+  clientReference?: string;
+  paymentTerms?: string;
+  deliverySLA?: string;
+  taxTreatment?: string;
   items: QuoteItem[];
   subtotal: number;
   discount: number;

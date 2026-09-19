@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FileText,
   Search,
   Plus,
+  Minus,
+  ChevronDown,
+  ChevronUp,
   Filter,
   CheckCircle2,
   Clock,
@@ -22,8 +25,23 @@ import {
   ShieldCheck,
   Send,
   Zap,
+  Trash2,
+  UserPlus,
+  Users,
+  CreditCard,
+  Truck,
+  Percent,
+  Tag,
+  HelpCircle,
+  Check,
+  Briefcase,
+  Receipt,
+  RotateCcw,
+  Sparkles,
+  Package,
 } from 'lucide-react';
-import { Quote, QuoteStatus, QuoteItem } from '@/types';
+import { Quote, QuoteStatus, QuoteItem, Product, User } from '@/types';
+import { FALLBACK_PRODUCTS, FALLBACK_USERS } from '@/lib/fallback-data';
 
 export default function AdminQuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -35,6 +53,17 @@ export default function AdminQuotesPage() {
   const [isNewQuoteModalOpen, setIsNewQuoteModalOpen] = useState(false);
   const [convertingId, setConvertingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Directory state for products & database customers
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(FALLBACK_PRODUCTS);
+  const [databaseCustomers, setDatabaseCustomers] = useState<User[]>(FALLBACK_USERS);
+  const [clientMode, setClientMode] = useState<'DATABASE' | 'MANUAL'>('DATABASE');
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
+  const [productSearchQuery, setProductSearchQuery] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [submittingQuote, setSubmittingQuote] = useState(false);
+  const comboboxRef = useRef<HTMLDivElement>(null);
 
   // Confirmation Modal State
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -52,19 +81,40 @@ export default function AdminQuotesPage() {
 
   // New Quote Form State
   const [newQuoteData, setNewQuoteData] = useState({
-    companyName: '',
-    contactName: '',
-    contactEmail: '',
-    contactPhone: '',
-    taxRegistrationNumber: '',
-    notes: '',
+    companyName: 'Dubai Future Labs LLC',
+    contactName: 'Tariq Mansoor',
+    contactEmail: 'tariq.mansoor@dubaifuture.gov.ae',
+    contactPhone: '+971 4 516 6666',
+    tradeLicense: 'TL-DXB-948210',
+    taxRegistrationNumber: '100492817200003',
+    clientReference: 'RFP-DFL-2026-AI-09',
+    validityDays: 30,
+    paymentTerms: 'NET_30' as 'NET_15' | 'NET_30' | 'NET_60' | 'ADVANCE' | 'LC',
+    deliverySLA: 'EX_STOCK' as 'EX_STOCK' | '3_5_DAYS' | '2_3_WEEKS' | 'EXPRESS',
+    taxTreatment: 'STANDARD' as 'STANDARD' | 'FREE_ZONE' | 'EXPORT' | 'EXEMPT',
+    shipping: 0,
+    commercialDiscount: 0,
+    notes: 'Official corporate quotation. Includes 3-Year Enterprise On-Site Hardware Replacement SLA, free GCC FTA electronic tax invoicing, and certified factory burn-in testing.',
     items: [
       {
+        id: 'item-1',
+        productId: 'prod_cpu_14900k',
+        productName: 'Intel Core i9-14900K 24-Core Desktop Processor',
+        sku: 'BX8071514900K',
+        quantity: 4,
+        unitPrice: 2249,
+        discount: 100,
+        thumbnail: '/images/intel_i9_14900k.jpg',
+      },
+      {
+        id: 'item-2',
+        productId: 'prod_rtx4090',
         productName: 'ASUS ROG Strix GeForce RTX 4090 OC Edition 24GB GDDR6X',
         sku: 'ROG-STRIX-RTX4090-O24G-GAMING',
         quantity: 4,
         unitPrice: 7699,
         discount: 400,
+        thumbnail: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&q=80',
       },
     ],
   });
@@ -110,6 +160,39 @@ export default function AdminQuotesPage() {
 
   useEffect(() => {
     fetchQuotes();
+
+    // Load available products for quotation builder
+    fetch('/api/products?limit=50')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data?.products)) {
+          setCatalogProducts(data.data.products);
+        } else if (Array.isArray(data.data)) {
+          setCatalogProducts(data.data);
+        }
+      })
+      .catch(() => {});
+
+    // Load registered database clients
+    fetch('/api/admin/customers')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setDatabaseCustomers(data.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Handle clicking outside combobox to dismiss dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (comboboxRef.current && !comboboxRef.current.contains(event.target as Node)) {
+        setIsSearchDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const executeStatusChange = async (quoteId: string, newStatus: QuoteStatus) => {
@@ -239,27 +322,230 @@ export default function AdminQuotesPage() {
     });
   };
 
+  // Handle customer selection from database
+  const handleSelectCustomer = (customerId: string) => {
+    setSelectedCustomerId(customerId);
+    const found = databaseCustomers.find((c) => c.id === customerId);
+    if (found) {
+      setNewQuoteData((prev) => ({
+        ...prev,
+        companyName: (found as any).company || (found.name ? `${found.name} Technologies LLC` : 'Enterprise Partner LLC'),
+        contactName: found.name,
+        contactEmail: found.email,
+        contactPhone: (found as any).phone || '+971 4 380 4400',
+        tradeLicense: (found as any).tradeLicense || 'TL-DXB-883921',
+        taxRegistrationNumber: (found as any).taxRegistrationNumber || '100382910400003',
+      }));
+    }
+  };
+
+  // Add a specific product to quote
+  const handleAddProduct = (prod: Product) => {
+    if (!prod) return;
+    const existingIdx = newQuoteData.items.findIndex((it) => it.productId === prod.id);
+    if (existingIdx >= 0) {
+      const updated = [...newQuoteData.items];
+      updated[existingIdx].quantity += 1;
+      setNewQuoteData({ ...newQuoteData, items: updated });
+    } else {
+      const newItem = {
+        id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+        productId: prod.id,
+        productName: prod.name,
+        sku: prod.sku,
+        quantity: 1,
+        unitPrice: prod.salePrice || prod.price,
+        discount: 0,
+        thumbnail: prod.thumbnail || prod.images?.[0] || '',
+      };
+      setNewQuoteData({ ...newQuoteData, items: [...newQuoteData.items, newItem] });
+    }
+    showToast(`Added "${prod.name}" to quotation`);
+  };
+
+  const getProductCategory = (p: Product): string => {
+    if (p.categoryName) return p.categoryName;
+    if (typeof p.category === 'string') return p.category;
+    if (typeof p.category === 'object' && p.category?.name) return p.category.name;
+    return 'Hardware';
+  };
+
+  // Extract unique categories for quick-filter tabs in combobox
+  const catalogCategories = [
+    'ALL',
+    ...Array.from(
+      new Set(
+        catalogProducts
+          .map((p) => getProductCategory(p))
+          .filter(Boolean)
+      )
+    ),
+  ];
+
+  // Filter catalog products for unified searchable combobox
+  const filteredCatalogProducts = catalogProducts.filter((p) => {
+    const categoryName = getProductCategory(p);
+    const matchesCategory = selectedCategoryFilter === 'ALL' || categoryName === selectedCategoryFilter;
+    if (!matchesCategory) return false;
+
+    if (!productSearchQuery.trim()) return true;
+    const q = productSearchQuery.toLowerCase().trim();
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.sku?.toLowerCase().includes(q) ||
+      (p as any).brandName?.toLowerCase().includes(q) ||
+      categoryName.toLowerCase().includes(q)
+    );
+  });
+
+  const handleSelectFromCombobox = (prod: Product) => {
+    handleAddProduct(prod);
+    setProductSearchQuery('');
+    setIsSearchDropdownOpen(false);
+  };
+
+  // Add custom service or non-catalog hardware
+  const handleAddCustomLineItem = () => {
+    const newItem = {
+      id: `item-custom-${Date.now()}`,
+      productId: `custom-${Date.now()}`,
+      productName: 'Custom Enterprise Hardware / Technical Service',
+      sku: 'SRV-CUSTOM-RFP',
+      quantity: 1,
+      unitPrice: 1500,
+      discount: 0,
+      thumbnail: '',
+    };
+    setNewQuoteData({ ...newQuoteData, items: [...newQuoteData.items, newItem] });
+  };
+
+  const handleUpdateItemQuantity = (index: number, newQty: number) => {
+    if (newQty < 1) return;
+    const updated = [...newQuoteData.items];
+    updated[index].quantity = newQty;
+    setNewQuoteData({ ...newQuoteData, items: updated });
+  };
+
+  const handleUpdateItemPrice = (index: number, newPrice: number) => {
+    const updated = [...newQuoteData.items];
+    updated[index].unitPrice = Math.max(0, newPrice);
+    setNewQuoteData({ ...newQuoteData, items: updated });
+  };
+
+  const handleUpdateItemDiscount = (index: number, newDiscount: number) => {
+    const updated = [...newQuoteData.items];
+    updated[index].discount = Math.max(0, newDiscount);
+    setNewQuoteData({ ...newQuoteData, items: updated });
+  };
+
+  const handleUpdateItemName = (index: number, name: string) => {
+    const updated = [...newQuoteData.items];
+    updated[index].productName = name;
+    setNewQuoteData({ ...newQuoteData, items: updated });
+  };
+
+  const handleUpdateItemSku = (index: number, sku: string) => {
+    const updated = [...newQuoteData.items];
+    updated[index].sku = sku;
+    setNewQuoteData({ ...newQuoteData, items: updated });
+  };
+
+  const handleRemoveItem = (index: number) => {
+    const updated = newQuoteData.items.filter((_, i) => i !== index);
+    setNewQuoteData({ ...newQuoteData, items: updated });
+  };
+
+  // Real-time financial calculations
+  const quoteItemsSubtotal = newQuoteData.items.reduce(
+    (sum, it) => sum + (Number(it.unitPrice || 0) * Number(it.quantity || 1)),
+    0
+  );
+  const quoteItemsDiscount = newQuoteData.items.reduce(
+    (sum, it) => sum + (Number(it.discount || 0) * Number(it.quantity || 1)),
+    0
+  );
+  const quoteCommercialDiscount = Number(newQuoteData.commercialDiscount || 0);
+  const quoteTotalDiscount = quoteItemsDiscount + quoteCommercialDiscount;
+  const quoteNetTaxable = Math.max(0, quoteItemsSubtotal - quoteTotalDiscount);
+
+  const isZeroTax =
+    newQuoteData.taxTreatment === 'FREE_ZONE' ||
+    newQuoteData.taxTreatment === 'EXPORT' ||
+    newQuoteData.taxTreatment === 'EXEMPT';
+  const quoteTax = isZeroTax ? 0 : Math.round(quoteNetTaxable * 0.05 * 100) / 100;
+  const quoteShipping = Number(newQuoteData.shipping || 0);
+  const quoteGrandTotal = quoteNetTaxable + quoteTax + quoteShipping;
+
+  const computeExpiryDate = (days: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + Number(days || 30));
+    return d.toLocaleDateString('en-AE', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
   const handleCreateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newQuoteData.companyName || !newQuoteData.contactEmail) {
-      alert('Please fill company name and contact email.');
+    if (!newQuoteData.companyName.trim()) {
+      alert('Please enter the Company / Organization Name.');
+      return;
+    }
+    if (!newQuoteData.contactEmail.trim()) {
+      alert('Please enter a valid Contact Email.');
+      return;
+    }
+    if (newQuoteData.items.length === 0) {
+      alert('Please add at least one line item to the quotation.');
       return;
     }
 
+    setSubmittingQuote(true);
     try {
+      const payload = {
+        companyName: newQuoteData.companyName.trim(),
+        contactName: newQuoteData.contactName.trim() || 'Procurement Officer',
+        contactEmail: newQuoteData.contactEmail.trim(),
+        contactPhone: newQuoteData.contactPhone.trim(),
+        tradeLicense: newQuoteData.tradeLicense.trim(),
+        taxRegistrationNumber: newQuoteData.taxRegistrationNumber.trim(),
+        clientReference: newQuoteData.clientReference.trim(),
+        validityDays: Number(newQuoteData.validityDays),
+        paymentTerms: newQuoteData.paymentTerms,
+        deliverySLA: newQuoteData.deliverySLA,
+        taxTreatment: newQuoteData.taxTreatment,
+        shipping: quoteShipping,
+        discount: quoteTotalDiscount,
+        subtotal: quoteItemsSubtotal,
+        tax: quoteTax,
+        total: quoteGrandTotal,
+        notes: newQuoteData.notes,
+        items: newQuoteData.items.map((it) => ({
+          productId: it.productId,
+          productName: it.productName,
+          sku: it.sku,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          discount: it.discount,
+          subtotal: it.unitPrice * it.quantity - it.discount * it.quantity,
+        })),
+      };
+
       const res = await fetch('/api/admin/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newQuoteData),
+        body: JSON.stringify(payload),
       });
       const data = await safeJson(res);
       if (data.success) {
-        showToast(`Quotation ${data.data.quoteNumber} created successfully!`);
+        showToast(`🎉 Quotation ${data.data?.quoteNumber || 'QTE-NEW'} drafted successfully!`);
         setIsNewQuoteModalOpen(false);
         fetchQuotes();
+      } else {
+        alert(data.error?.message || 'Failed to submit quote.');
       }
     } catch (err) {
       console.error('Failed to create quote:', err);
+      alert('Network error while creating corporate quotation.');
+    } finally {
+      setSubmittingQuote(false);
     }
   };
 
@@ -565,7 +851,7 @@ export default function AdminQuotesPage() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6 text-xs">
               {/* Client & Tax Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
                 <div>
                   <div className="text-slate-400 text-[10px] uppercase font-bold">Corporate Contact</div>
                   <div className="font-bold text-slate-900 dark:text-white">{selectedQuote.contactName}</div>
@@ -573,18 +859,29 @@ export default function AdminQuotesPage() {
                   <div className="text-slate-500">{selectedQuote.contactPhone || 'No phone'}</div>
                 </div>
                 <div>
-                  <div className="text-slate-400 text-[10px] uppercase font-bold">Tax Registration (TRN)</div>
+                  <div className="text-slate-400 text-[10px] uppercase font-bold">Tax Registration &amp; License</div>
                   <div className="font-mono font-bold text-slate-900 dark:text-white">
                     {selectedQuote.taxRegistrationNumber || 'Exempt / None'}
                   </div>
-                  <div className="text-slate-500">UAE FTA Standard 5% VAT</div>
+                  <div className="text-slate-500">License: {selectedQuote.tradeLicense || 'Direct Corporate'}</div>
+                  <div className="text-purple-600 dark:text-purple-400 font-semibold">{selectedQuote.taxTreatment || 'UAE FTA Standard 5%'}</div>
+                </div>
+                <div>
+                  <div className="text-slate-400 text-[10px] uppercase font-bold">Commercial Terms &amp; SLA</div>
+                  <div className="font-bold text-slate-900 dark:text-white">
+                    {selectedQuote.paymentTerms || 'Net-30 Corporate Terms'}
+                  </div>
+                  <div className="text-slate-500">SLA: {selectedQuote.deliverySLA || 'Ex-Stock (24-48h)'}</div>
+                  {selectedQuote.clientReference && (
+                    <div className="text-slate-500 font-mono text-[10px]">Ref: {selectedQuote.clientReference}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-slate-400 text-[10px] uppercase font-bold">Quote Validity</div>
                   <div className="font-bold text-slate-900 dark:text-white">
                     Until {new Date(selectedQuote.validUntil).toLocaleDateString()}
                   </div>
-                  <div className="text-slate-500">Net-30 Corporate Terms</div>
+                  <div className="text-slate-500">Status: {selectedQuote.status}</div>
                 </div>
               </div>
 
@@ -711,114 +1008,787 @@ export default function AdminQuotesPage() {
         </div>
       )}
 
-      {/* New Quote Draft Modal */}
+      {/* New Corporate Quotation Draft Engine Modal */}
       {isNewQuoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-              <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Draft New Corporate Quotation
-              </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-purple-500/5 via-transparent to-transparent shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-purple-600/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold shadow-inner">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      Draft New Corporate Quotation
+                    </h3>
+                    <span className="hidden sm:inline-flex text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800">
+                      Enterprise RFP Engine
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    B2B enterprise proposals, custom hardware matrices, dynamic GCC/FTA VAT compliance &amp; payment SLAs.
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setIsNewQuoteModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateQuote} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Company / Organization Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newQuoteData.companyName}
-                  onChange={(e) => setNewQuoteData({ ...newQuoteData, companyName: e.target.value })}
-                  placeholder="e.g. Dubai Future Labs LLC"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                />
-              </div>
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleCreateQuote} className="p-6 overflow-y-auto space-y-6 text-xs flex-1">
+              {/* SECTION 1: CLIENT SELECTION & PROFILE */}
+              <div className="space-y-3.5 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800/80">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                      1. Corporate Client &amp; Consignee Details
+                    </span>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
+                  {/* Segmented Dual Mode Toggle */}
+                  <div className="inline-flex p-1 rounded-xl bg-slate-200 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setClientMode('DATABASE')}
+                      className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                        clientMode === 'DATABASE'
+                          ? 'bg-purple-600 text-white shadow-sm'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <Users className="w-3.5 h-3.5" />
+                      <span>Pick Database Client</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setClientMode('MANUAL')}
+                      className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                        clientMode === 'MANUAL'
+                          ? 'bg-purple-600 text-white shadow-sm'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Add New Client Manually</span>
+                    </button>
+                  </div>
+                </div>
+
+                {clientMode === 'DATABASE' && (
+                  <div className="space-y-2">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      Select Registered Corporate Client / Organization
+                    </label>
+                    <select
+                      value={selectedCustomerId}
+                      onChange={(e) => handleSelectCustomer(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-800/60 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <option value="">-- Choose Existing Client from Database --</option>
+                      {databaseCustomers.map((cust) => (
+                        <option key={cust.id} value={cust.id}>
+                          {cust.company ? `${cust.company} (${cust.name})` : cust.name} • {cust.email}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Form Fields for Client Data */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Company / Organization Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newQuoteData.companyName}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, companyName: e.target.value })}
+                      placeholder="e.g. Dubai Future Labs LLC"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Trade License Number
+                    </label>
+                    <input
+                      type="text"
+                      value={newQuoteData.tradeLicense}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, tradeLicense: e.target.value })}
+                      placeholder="e.g. TL-DXB-948210"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Tax Registration (TRN)
+                    </label>
+                    <input
+                      type="text"
+                      value={newQuoteData.taxRegistrationNumber}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, taxRegistrationNumber: e.target.value })}
+                      placeholder="100492817200003"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Contact Person &amp; Title *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newQuoteData.contactName}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, contactName: e.target.value })}
+                      placeholder="e.g. Tariq Mansoor (Procurement)"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Business Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={newQuoteData.contactEmail}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, contactEmail: e.target.value })}
+                      placeholder="tariq.mansoor@company.ae"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Contact Phone &amp; Extension
+                    </label>
+                    <input
+                      type="text"
+                      value={newQuoteData.contactPhone}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, contactPhone: e.target.value })}
+                      placeholder="+971 4 516 6666"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-1">
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    Contact Name *
+                    Client RFP / Tender / PO Reference
                   </label>
                   <input
                     type="text"
-                    required
-                    value={newQuoteData.contactName}
-                    onChange={(e) => setNewQuoteData({ ...newQuoteData, contactName: e.target.value })}
-                    placeholder="e.g. Tariq Mansoor"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    Business Email *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={newQuoteData.contactEmail}
-                    onChange={(e) => setNewQuoteData({ ...newQuoteData, contactEmail: e.target.value })}
-                    placeholder="tariq@company.ae"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    value={newQuoteData.clientReference}
+                    onChange={(e) => setNewQuoteData({ ...newQuoteData, clientReference: e.target.value })}
+                    placeholder="e.g. RFP-DFL-2026-AI-09 / TENDER-GOV-442"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    Contact Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={newQuoteData.contactPhone}
-                    onChange={(e) => setNewQuoteData({ ...newQuoteData, contactPhone: e.target.value })}
-                    placeholder="+971 4 000 0000"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  />
+              {/* SECTION 2: COMMERCIAL TERMS, VALIDITY & TAX COMPLIANCE */}
+              <div className="space-y-3.5 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800/80">
+                  <Briefcase className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                    2. Commercial SLA &amp; Tax Compliance Framework
+                  </span>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    Tax Registration (TRN)
-                  </label>
-                  <input
-                    type="text"
-                    value={newQuoteData.taxRegistrationNumber}
-                    onChange={(e) =>
-                      setNewQuoteData({ ...newQuoteData, taxRegistrationNumber: e.target.value })
-                    }
-                    placeholder="100XXXXXXXXXXXX"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  {/* Validity Period */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                        Quote Validity
+                      </label>
+                      <span className="text-[10px] font-semibold text-purple-600 dark:text-purple-400">
+                        Exp: {computeExpiryDate(newQuoteData.validityDays)}
+                      </span>
+                    </div>
+                    <select
+                      value={newQuoteData.validityDays}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, validityDays: Number(e.target.value) })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <option value={7}>7 Days (Fast-Track RFP)</option>
+                      <option value={14}>14 Days (Standard Two Weeks)</option>
+                      <option value={30}>30 Days (Corporate Standard)</option>
+                      <option value={60}>60 Days (Enterprise Tender)</option>
+                      <option value={90}>90 Days (Government Tender)</option>
+                    </select>
+                  </div>
+
+                  {/* Payment Terms */}
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      Payment Terms
+                    </label>
+                    <select
+                      value={newQuoteData.paymentTerms}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, paymentTerms: e.target.value as any })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <option value="NET_30">Net 30 Days (Corporate Standard)</option>
+                      <option value="NET_15">Net 15 Days</option>
+                      <option value="NET_60">Net 60 Days (Enterprise Approved)</option>
+                      <option value="ADVANCE">100% Advance Payment</option>
+                      <option value="LC">Letter of Credit (L/C at Sight)</option>
+                    </select>
+                  </div>
+
+                  {/* Delivery SLA */}
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      Delivery &amp; Logistics SLA
+                    </label>
+                    <select
+                      value={newQuoteData.deliverySLA}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, deliverySLA: e.target.value as any })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <option value="EX_STOCK">Immediate Ex-Stock (24-48 Hours)</option>
+                      <option value="3_5_DAYS">Standard Delivery (3-5 Business Days)</option>
+                      <option value="EXPRESS">Priority Express (Next-Day Air Courier)</option>
+                      <option value="2_3_WEEKS">OEM Direct Import (2-3 Weeks)</option>
+                    </select>
+                  </div>
+
+                  {/* Tax Treatment */}
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      VAT / Tax Treatment
+                    </label>
+                    <select
+                      value={newQuoteData.taxTreatment}
+                      onChange={(e) => setNewQuoteData({ ...newQuoteData, taxTreatment: e.target.value as any })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <option value="STANDARD">UAE FTA Standard (5% VAT)</option>
+                      <option value="FREE_ZONE">Designated Free Zone (0% VAT)</option>
+                      <option value="EXPORT">International Export (0% VAT)</option>
+                      <option value="EXEMPT">Official Tax Exempt (0% VAT)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: HARDWARE LINE ITEMS & TECHNICAL SERVICES */}
+              <div className="space-y-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800/80">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-purple-600/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                      <Package className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-xs">
+                          3. Hardware Matrix &amp; Line Items
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-bold text-[10px] border border-purple-200 dark:border-purple-800/60">
+                          {newQuoteData.items.length} {newQuoteData.items.length === 1 ? 'Item' : 'Items'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Pick components from the unified catalog below or append custom RFP service deliverables.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddCustomLineItem}
+                    className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <span>+ Custom Line Item</span>
+                  </button>
+                </div>
+
+                {/* UNIFIED SEARCHABLE COMBOBOX */}
+                <div ref={comboboxRef} className="relative z-20">
+                  <div
+                    className={`relative flex items-center bg-white dark:bg-slate-900 rounded-2xl border transition-all shadow-sm ${
+                      isSearchDropdownOpen
+                        ? 'border-purple-500 ring-2 ring-purple-500/20'
+                        : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="pl-4 pr-2 text-slate-400 flex items-center justify-center">
+                      <Search className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={productSearchQuery}
+                      onChange={(e) => {
+                        setProductSearchQuery(e.target.value);
+                        setIsSearchDropdownOpen(true);
+                      }}
+                      onFocus={() => setIsSearchDropdownOpen(true)}
+                      placeholder="Select hardware from catalog dropdown or type to search (e.g. RTX 4090, i9-14900K, DDR5, Corsair)..."
+                      className="w-full py-3 pr-2 text-xs font-medium text-slate-900 dark:text-white bg-transparent focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    />
+                    <div className="flex items-center gap-1.5 pr-3 shrink-0">
+                      {productSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setProductSearchQuery('')}
+                          className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          title="Clear search"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
+                        title="Toggle Catalog Dropdown"
+                      >
+                        <span>Catalog ({catalogProducts.length})</span>
+                        {isSearchDropdownOpen ? (
+                          <ChevronUp className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Floating Unified Dropdown Menu */}
+                  {isSearchDropdownOpen && (
+                    <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden z-30 animate-fadeIn">
+                      {/* Category Pills Quick Filter Bar */}
+                      <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 overflow-x-auto">
+                        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-none">
+                          {catalogCategories.map((cat) => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setSelectedCategoryFilter(cat)}
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-colors cursor-pointer ${
+                                selectedCategoryFilter === cat
+                                  ? 'bg-purple-600 text-white shadow-sm'
+                                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-700'
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap pl-2 shrink-0">
+                          {filteredCatalogProducts.length} matching
+                        </span>
+                      </div>
+
+                      {/* Products Scrollable List */}
+                      <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/80">
+                        {filteredCatalogProducts.length === 0 ? (
+                          <div className="p-6 text-center">
+                            <Package className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+                            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                              No catalog components found matching &quot;{productSearchQuery}&quot;
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-1">
+                              Try another search keyword or create a custom service deliverable.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleAddCustomLineItem();
+                                setIsSearchDropdownOpen(false);
+                              }}
+                              className="mt-3 px-3.5 py-1.5 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-700 transition-colors cursor-pointer"
+                            >
+                              + Create Custom Line Item
+                            </button>
+                          </div>
+                        ) : (
+                          filteredCatalogProducts.map((prod) => (
+                            <div
+                              key={prod.id}
+                              onClick={() => handleSelectFromCombobox(prod)}
+                              className="px-4 py-3 flex items-center justify-between gap-3 hover:bg-purple-50/70 dark:hover:bg-purple-950/40 transition-colors cursor-pointer group"
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                {prod.thumbnail || prod.images?.[0] ? (
+                                  <img
+                                    src={prod.thumbnail || prod.images?.[0]}
+                                    alt={prod.name}
+                                    className="w-10 h-10 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/50 text-purple-600 flex items-center justify-center shrink-0">
+                                    <Package className="w-5 h-5" />
+                                  </div>
+                                )}
+                                <div className="min-w-0">
+                                  <div className="font-bold text-slate-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors text-xs">
+                                    {prod.name}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono mt-0.5">
+                                    <span className="font-semibold text-slate-600 dark:text-slate-400">
+                                      SKU: {prod.sku}
+                                    </span>
+                                    {prod.categoryName && (
+                                      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-sans text-[9px] font-bold">
+                                        {prod.categoryName}
+                                      </span>
+                                    )}
+                                    {prod.brandName && (
+                                      <span className="text-slate-400 font-sans">
+                                        • {prod.brandName}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3 shrink-0">
+                                <div className="text-right">
+                                  <div className="font-black text-slate-900 dark:text-white text-xs">
+                                    AED {(prod.salePrice || prod.price).toLocaleString()}
+                                  </div>
+                                  {prod.compareAtPrice && prod.compareAtPrice > (prod.salePrice || prod.price) && (
+                                    <div className="text-[10px] line-through text-slate-400">
+                                      AED {prod.compareAtPrice.toLocaleString()}
+                                    </div>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectFromCombobox(prod);
+                                  }}
+                                  className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>Add</span>
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Line Items Table */}
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-100/80 dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800 text-[10px] uppercase tracking-wider">
+                        <tr>
+                          <th className="px-4 py-3">Component / Service Deliverable</th>
+                          <th className="px-4 py-3 w-28 text-center">Qty</th>
+                          <th className="px-4 py-3 w-36">Unit Price (AED)</th>
+                          <th className="px-4 py-3 w-32">Discount (AED)</th>
+                          <th className="px-4 py-3 text-right w-36">Net Line Total</th>
+                          <th className="px-3 py-3 text-center w-12"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {newQuoteData.items.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-12 text-center text-slate-400">
+                              <Package className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-slate-700" />
+                              <p className="font-bold text-slate-700 dark:text-slate-300 text-xs">
+                                No items in quotation matrix
+                              </p>
+                              <p className="text-[11px] text-slate-400 mt-1">
+                                Use the catalog combobox above or click &quot;+ Custom Line Item&quot;.
+                              </p>
+                            </td>
+                          </tr>
+                        ) : (
+                          newQuoteData.items.map((item, idx) => {
+                            const lineTotal = Math.max(
+                              0,
+                              item.unitPrice * item.quantity - item.discount * item.quantity
+                            );
+                            return (
+                              <tr
+                                key={item.id || idx}
+                                className="hover:bg-purple-50/20 dark:hover:bg-slate-800/30 transition-colors"
+                              >
+                                <td className="px-4 py-3.5">
+                                  <div className="flex items-center gap-3">
+                                    {item.thumbnail ? (
+                                      <img
+                                        src={item.thumbnail}
+                                        alt={item.productName}
+                                        className="w-10 h-10 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0"
+                                      />
+                                    ) : (
+                                      <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-800/40">
+                                        <Package className="w-5 h-5" />
+                                      </div>
+                                    )}
+                                    <div className="min-w-0 flex-1 space-y-0.5">
+                                      <input
+                                        type="text"
+                                        value={item.productName}
+                                        onChange={(e) => handleUpdateItemName(idx, e.target.value)}
+                                        className="w-full px-2 py-1 rounded-lg bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs border border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:bg-white dark:focus:bg-slate-900 focus:border-purple-500 focus:outline-none transition-all"
+                                        placeholder="Component or Service Name"
+                                      />
+                                      <input
+                                        type="text"
+                                        value={item.sku}
+                                        onChange={(e) => handleUpdateItemSku(idx, e.target.value)}
+                                        className="w-full px-2 py-0.5 rounded-lg bg-transparent text-[10px] font-mono text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:border-purple-500 focus:outline-none transition-all"
+                                        placeholder="SKU Reference"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3.5 text-center">
+                                  <div className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 p-0.5 shadow-sm">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateItemQuantity(idx, item.quantity - 1)}
+                                      disabled={item.quantity <= 1}
+                                      className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 transition-colors disabled:opacity-30 cursor-pointer"
+                                    >
+                                      <Minus className="w-3.5 h-3.5" />
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={item.quantity}
+                                      onChange={(e) =>
+                                        handleUpdateItemQuantity(idx, parseInt(e.target.value, 10) || 1)
+                                      }
+                                      className="w-9 text-center bg-transparent text-xs font-black text-slate-900 dark:text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateItemQuantity(idx, item.quantity + 1)}
+                                      className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3.5">
+                                  <div className="relative flex items-center">
+                                    <span className="absolute left-2.5 text-[10px] font-bold text-slate-400 select-none">
+                                      AED
+                                    </span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      value={item.unitPrice}
+                                      onChange={(e) =>
+                                        handleUpdateItemPrice(idx, parseFloat(e.target.value) || 0)
+                                      }
+                                      className="w-full pl-10 pr-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-xs focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
+                                    />
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3.5">
+                                  <div className="relative flex items-center">
+                                    <span className="absolute left-2.5 text-[11px] font-bold text-emerald-500 select-none">
+                                      -
+                                    </span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      value={item.discount}
+                                      onChange={(e) =>
+                                        handleUpdateItemDiscount(idx, parseFloat(e.target.value) || 0)
+                                      }
+                                      className="w-full pl-6 pr-2.5 py-1.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 font-bold text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                                    />
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3.5 text-right">
+                                  <div className="font-black text-slate-900 dark:text-white text-xs">
+                                    AED {lineTotal.toLocaleString()}
+                                  </div>
+                                  {item.discount > 0 && (
+                                    <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                      Saved AED {(item.discount * item.quantity).toLocaleString()}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="px-3 py-3.5 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveItem(idx)}
+                                    className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-800/50 transition-all cursor-pointer"
+                                    title="Remove item"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 4: FREIGHT, COMMERCIAL DISCOUNTS & SCOPE OF WORK */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800/80">
+                    <Truck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                      Freight &amp; Commercial Contract Discounts
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                        Logistics / Freight (AED)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={newQuoteData.shipping}
+                        onChange={(e) => setNewQuoteData({ ...newQuoteData, shipping: parseFloat(e.target.value) || 0 })}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                        Global Contract Discount (AED)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={newQuoteData.commercialDiscount}
+                        onChange={(e) =>
+                          setNewQuoteData({ ...newQuoteData, commercialDiscount: parseFloat(e.target.value) || 0 })
+                        }
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-emerald-600 dark:text-emerald-400 font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800/80">
+                    <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                      Commercial Scope, SLA &amp; Notes
+                    </span>
+                  </div>
+
+                  <textarea
+                    rows={3}
+                    value={newQuoteData.notes}
+                    onChange={(e) => setNewQuoteData({ ...newQuoteData, notes: e.target.value })}
+                    placeholder="Provide quotation notes, warranty clauses, deployment scope, and OEM validation guarantees..."
+                    className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none resize-none text-xs"
                   />
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 space-y-1">
-                <div className="font-bold">Initial Line Item:</div>
-                <div>4x ASUS ROG Strix RTX 4090 OC (AED 30,396)</div>
-                <div className="text-[10px] text-purple-500">More items can be added after creation.</div>
+              {/* SECTION 5: REAL-TIME FINANCIAL SUMMARY CARD */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-50 via-white to-slate-50 dark:from-purple-950/30 dark:via-slate-900 dark:to-slate-950 border border-purple-200 dark:border-purple-800/60 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-xs uppercase tracking-wider">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Enterprise Financial Computation</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Tax Treatment: <strong className="text-slate-800 dark:text-slate-200">{newQuoteData.taxTreatment}</strong> • Terms:{' '}
+                    <strong className="text-slate-800 dark:text-slate-200">{newQuoteData.paymentTerms}</strong>
+                  </div>
+                </div>
+
+                <div className="w-full sm:w-80 space-y-1.5 text-xs bg-white/80 dark:bg-slate-900/80 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                  <div className="flex justify-between text-slate-500">
+                    <span>Hardware Subtotal:</span>
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      AED {quoteItemsSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  {quoteTotalDiscount > 0 && (
+                    <div className="flex justify-between text-emerald-600 font-semibold">
+                      <span>Total Contract Discount:</span>
+                      <span>- AED {quoteTotalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-slate-500">
+                    <span>Net Taxable Base:</span>
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      AED {quoteNetTaxable.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-500">
+                    <span>VAT ({isZeroTax ? '0% Zero-Rated' : '5% Standard'}):</span>
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      AED {quoteTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  {quoteShipping > 0 && (
+                    <div className="flex justify-between text-slate-500">
+                      <span>Logistics / Freight:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        AED {quoteShipping.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  )}
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                    <span>Quotation Grand Total:</span>
+                    <span className="text-purple-600 dark:text-purple-400 font-mono">
+                      AED {quoteGrandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+              {/* FOOTER ACTIONS */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsNewQuoteModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold"
+                  disabled={submittingQuote}
+                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold"
+                  disabled={submittingQuote}
+                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-95 disabled:opacity-50 text-white font-bold flex items-center gap-2 shadow-lg shadow-purple-500/25 transition-all cursor-pointer"
                 >
-                  Submit Quote
+                  {submittingQuote ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Generating Quotation...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Generate &amp; Submit Corporate Quotation</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

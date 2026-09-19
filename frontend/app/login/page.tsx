@@ -309,6 +309,7 @@ function AuthContent() {
                 <input
                   type="text"
                   required
+                  autoComplete="username"
                   placeholder="Enter your email or username"
                   value={loginEmail}
                   onChange={e => setLoginEmail(e.target.value)}
@@ -327,6 +328,7 @@ function AuthContent() {
                 <input
                   type={showLoginPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={loginPassword}
                   onChange={e => setLoginPassword(e.target.value)}

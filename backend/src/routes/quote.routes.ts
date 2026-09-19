@@ -20,7 +20,23 @@ const getParamId = (param: string | string[] | undefined): string => {
 // 1. Submit B2B Corporate Quotation Request (Public with rate limiter & input sanitization)
 router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { companyName, contactName, contactEmail, contactPhone, taxRegistrationNumber, items, notes } = req.body;
+    const {
+      companyName,
+      contactName,
+      contactEmail,
+      contactPhone,
+      taxRegistrationNumber,
+      tradeLicense,
+      clientReference,
+      paymentTerms,
+      deliverySLA,
+      taxTreatment,
+      validityDays,
+      discount: rawDiscount,
+      shipping: rawShipping,
+      items,
+      notes,
+    } = req.body;
 
     if (!companyName || !contactName || !contactEmail) {
       res.status(400).json({
@@ -71,8 +87,8 @@ router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> 
     for (const rawItem of items) {
       const qty = Math.min(500, Math.max(1, parseInt(rawItem.quantity, 10) || 1));
       const unitPrice = Math.min(1000000, Math.max(0, parseFloat(rawItem.unitPrice) || 0));
-      const discount = Math.min(unitPrice * qty, Math.max(0, parseFloat(rawItem.discount) || 0));
-      const lineSubtotal = Math.max(0, (unitPrice * qty) - discount);
+      const itemDisc = Math.min(unitPrice * qty, Math.max(0, parseFloat(rawItem.discount) || 0));
+      const lineSubtotal = Math.max(0, (unitPrice * qty) - itemDisc);
 
       subtotal += lineSubtotal;
       processedItems.push({
@@ -81,23 +97,29 @@ router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> 
         sku: String(rawItem.sku || 'SKU-GEN').slice(0, 64),
         unitPrice,
         quantity: qty,
-        discount,
+        discount: itemDisc,
         subtotal: lineSubtotal,
         specifications: rawItem.specifications || {},
       });
     }
 
-    const vatRate = 0.05; // 5% UAE Standard VAT
-    const tax = Math.round(subtotal * vatRate * 100) / 100;
-    const shipping = subtotal > 5000 ? 0 : 150; // Free B2B delivery over 5000 AED
-    const total = Math.round((subtotal + tax + shipping) * 100) / 100;
+    const quoteDiscount = Math.max(0, parseFloat(rawDiscount) || 0);
+    const isZeroRated = taxTreatment === 'FREE_ZONE' || taxTreatment === 'EXPORT' || taxTreatment === 'EXEMPT';
+    const vatRate = isZeroRated ? 0 : 0.05;
+    const taxableAmount = Math.max(0, subtotal - quoteDiscount);
+    const tax = isZeroRated ? 0 : Math.round(taxableAmount * vatRate * 100) / 100;
+    const shipping = rawShipping !== undefined
+      ? Math.max(0, parseFloat(rawShipping) || 0)
+      : (subtotal > 5000 ? 0 : 150);
+    const total = Math.max(0, Math.round((taxableAmount + tax + shipping) * 100) / 100);
 
     const quoteId = uuidv4();
     const randomSuffix = Math.floor(10000 + Math.random() * 90000);
     const quoteNumber = `QTE-2026-${randomSuffix}`;
 
+    const validDays = parseInt(validityDays, 10) || 30;
     const validUntilDate = new Date();
-    validUntilDate.setDate(validUntilDate.getDate() + 30); // 30 days corporate validity
+    validUntilDate.setDate(validUntilDate.getDate() + validDays);
 
     const newQuote: Quote = {
       id: quoteId,
@@ -106,10 +128,15 @@ router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> 
       contactName: String(contactName).trim().slice(0, 100),
       contactEmail: String(contactEmail).trim().toLowerCase().slice(0, 120),
       contactPhone: contactPhone ? String(contactPhone).trim().slice(0, 30) : undefined,
+      tradeLicense: tradeLicense ? String(tradeLicense).trim().slice(0, 50) : undefined,
       taxRegistrationNumber: taxRegistrationNumber ? String(taxRegistrationNumber).trim().slice(0, 30) : undefined,
+      clientReference: clientReference ? String(clientReference).trim().slice(0, 50) : undefined,
+      paymentTerms: paymentTerms ? String(paymentTerms).trim().slice(0, 50) : 'NET_30',
+      deliverySLA: deliverySLA ? String(deliverySLA).trim().slice(0, 50) : 'EX_STOCK',
+      taxTreatment: taxTreatment ? String(taxTreatment).trim().slice(0, 50) : 'STANDARD',
       items: processedItems,
       subtotal,
-      discount: 0,
+      discount: quoteDiscount,
       tax,
       shipping,
       total,

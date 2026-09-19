@@ -25,6 +25,9 @@ export interface User {
   avatar?: string;
   addresses: Address[];
   resellerId?: string; // If role is RESELLER
+  company?: string;
+  tradeLicense?: string;
+  taxRegistrationNumber?: string;
   passwordHash?: string;
   adminPinHash?: string; // Secondary Admin Security PIN (PBKDF2 120,000 iterations)
   isActive: boolean;
@@ -738,7 +741,12 @@ export interface Quote {
   contactName: string;
   contactEmail: string;
   contactPhone?: string;
+  tradeLicense?: string;
   taxRegistrationNumber?: string;
+  clientReference?: string;
+  paymentTerms?: string;
+  deliverySLA?: string;
+  taxTreatment?: string;
   items: QuoteItem[];
   subtotal: number;
   discount: number;

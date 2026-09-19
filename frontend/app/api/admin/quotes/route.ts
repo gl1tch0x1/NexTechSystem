@@ -119,12 +119,20 @@ export async function POST(request: NextRequest) {
 
     const newId = `qte-${Date.now()}`;
     const quoteNumber = `QTE-2026-${Math.floor(10000 + Math.random() * 90000)}`;
-    const subtotal = body.items.reduce((acc: number, item: any) => acc + (item.subtotal || item.unitPrice * item.quantity), 0);
-    const tax = Math.round(subtotal * 0.05 * 100) / 100;
-    const total = subtotal + tax;
+    const items = Array.isArray(body.items) ? body.items : [];
+    const subtotal = body.subtotal !== undefined
+      ? body.subtotal
+      : items.reduce((sum: number, it: any) => sum + (Number(it.unitPrice || 0) * Number(it.quantity || 1) - Number(it.discount || 0)), 0);
+    const isZeroRated = body.taxTreatment === 'FREE_ZONE' || body.taxTreatment === 'EXPORT' || body.taxTreatment === 'EXEMPT';
+    const discount = body.discount || 0;
+    const taxableSubtotal = Math.max(0, subtotal - discount);
+    const tax = body.tax !== undefined ? body.tax : (isZeroRated ? 0 : Math.round(taxableSubtotal * 0.05 * 100) / 100);
+    const shipping = body.shipping !== undefined ? body.shipping : (subtotal > 5000 ? 0 : 150);
+    const total = body.total !== undefined ? body.total : (taxableSubtotal + tax + shipping);
 
+    const validDays = parseInt(body.validityDays, 10) || 30;
     const validUntilDate = new Date();
-    validUntilDate.setDate(validUntilDate.getDate() + 30);
+    validUntilDate.setDate(validUntilDate.getDate() + validDays);
 
     const fallbackQuote = {
       id: newId,
@@ -133,16 +141,21 @@ export async function POST(request: NextRequest) {
       contactName: body.contactName,
       contactEmail: body.contactEmail,
       contactPhone: body.contactPhone,
+      tradeLicense: body.tradeLicense,
       taxRegistrationNumber: body.taxRegistrationNumber,
+      clientReference: body.clientReference,
+      paymentTerms: body.paymentTerms || 'NET_30',
+      deliverySLA: body.deliverySLA || 'EX_STOCK',
+      taxTreatment: body.taxTreatment || 'STANDARD',
       items: body.items,
       subtotal,
-      discount: body.discount || 0,
+      discount,
       tax,
-      shipping: 0,
+      shipping,
       total,
       currency: 'AED',
       status: 'PENDING_REVIEW',
-      validUntil: validUntilDate.toISOString(),
+      validUntil: body.validUntil || validUntilDate.toISOString(),
       notes: body.notes,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

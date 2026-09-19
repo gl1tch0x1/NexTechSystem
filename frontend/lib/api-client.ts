@@ -13,15 +13,9 @@ export const getBaseApiUrl = (): string => {
   }
 
   if (typeof window !== 'undefined') {
-    const isLocalhost =
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1' ||
-      window.location.hostname.endsWith('.local');
-    // In production browsers (Vercel deployment, HTTPS), use relative /api to avoid Mixed Content errors
-    if (!isLocalhost) {
-      return '/api';
-    }
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    // In browser runtime, always route through Next.js /api to leverage internal Next.js API routes,
+    // session cookies, and resilient fallback mocks without direct localhost:5000 port connection failures
+    return '/api';
   }
 
   // Server-side (Node.js runtime / Vercel Serverless SSR)
