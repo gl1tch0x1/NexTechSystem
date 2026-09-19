@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
-import { Reseller, User, ResellerStatus } from '../types/index.js';
+import { Reseller, User, ResellerStatus, ResellerBusinessInformation } from '../types/index.js';
 import { auditService } from './audit.service.js';
 import { ENV } from '../config/env.js';
 
@@ -26,12 +26,7 @@ export interface CreateResellerDTO {
     country: string;
     postalCode: string;
   };
-  businessInformation?: {
-    taxNumber?: string;
-    tradeLicense?: string;
-    description?: string;
-    website?: string;
-  };
+  businessInformation?: ResellerBusinessInformation;
   commissionRate?: number;
 }
 

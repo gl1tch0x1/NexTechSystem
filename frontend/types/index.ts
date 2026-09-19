@@ -35,6 +35,22 @@ export interface User {
 
 export type ResellerStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING_APPROVAL' | 'INACTIVE';
 
+export interface ResellerBusinessInformation {
+  taxNumber?: string; // 15-digit FTA TRN
+  tradeLicense?: string;
+  licenseJurisdiction?: string;
+  licenseExpiryDate?: string;
+  businessType?: string;
+  specializations?: string[];
+  authorizedSignatory?: string;
+  signatoryTitle?: string;
+  website?: string;
+  description?: string;
+  settlementTerms?: string;
+  creditLimitAED?: number;
+  dispatchHub?: string;
+}
+
 export interface Reseller {
   id: string;
   userId: string;
@@ -47,12 +63,7 @@ export interface Reseller {
   logo?: string;
   subdomain: string;
   address: Address;
-  businessInformation: {
-    taxNumber?: string;
-    tradeLicense?: string;
-    description?: string;
-    website?: string;
-  };
+  businessInformation: ResellerBusinessInformation;
   status: ResellerStatus;
   productCount: number;
   salesStats: {

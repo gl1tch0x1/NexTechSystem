@@ -24,7 +24,16 @@ import {
   Phone,
   Percent,
   MapPin,
-  X
+  X,
+  FileText,
+  Briefcase,
+  Calendar,
+  Truck,
+  CreditCard,
+  Lock,
+  Tag,
+  Check,
+  Layers
 } from 'lucide-react';
 
 export default function AdminResellersPage() {
@@ -34,20 +43,107 @@ export default function AdminResellersPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Form states for creating new reseller
+  // Section 1: Corporate Legal & KYC
   const [businessName, setBusinessName] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [tradeLicense, setTradeLicense] = useState('');
+  const [licenseJurisdiction, setLicenseJurisdiction] = useState('Dubai Economy and Tourism (DET / DED)');
+  const [jurisdictions, setJurisdictions] = useState<string[]>([
+    'Dubai Economy and Tourism (DET / DED)',
+    'Abu Dhabi Department of Economic Development (ADDED)',
+    'Dubai Multi Commodities Centre (DMCC Free Zone)',
+    'Jebel Ali Free Zone Authority (JAFZA)',
+    'Dubai Integrated Economic Zones (DIEZ / DAFZA)',
+    'Dubai Development Authority (DDA Free Zone)',
+    'Sharjah Media City (Shams)',
+    'Ras Al Khaimah Economic Zone (RAKEZ)',
+    'Saudi Arabia Ministry of Investment (MISA / CR)',
+    'International Entity'
+  ]);
+  const [isAddingJurisdiction, setIsAddingJurisdiction] = useState(false);
+  const [newJurisdictionInput, setNewJurisdictionInput] = useState('');
+  const [taxNumber, setTaxNumber] = useState('');
+  const [licenseExpiryDate, setLicenseExpiryDate] = useState('2028-12-31');
+
+  // Section 2: Business Classification & Hardware Specializations
+  const [businessType, setBusinessType] = useState('Value-Added Reseller (VAR)');
+  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([
+    'Enterprise Servers & Racks',
+    'AI & Deep Learning Hardware',
+    'High-Performance Workstations'
+  ]);
+  const [website, setWebsite] = useState('');
+  const [description, setDescription] = useState('');
+
+  // Section 3: Authorized Signatory & Access
+  const [authorizedSignatory, setAuthorizedSignatory] = useState('');
+  const [signatoryTitle, setSignatoryTitle] = useState('Managing Director');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Section 4: Multi-Tenant Subdomain & Commercial Terms
   const [resellerCode, setResellerCode] = useState('');
   const [subdomain, setSubdomain] = useState('');
-  const [taxNumber, setTaxNumber] = useState('');
   const [addressLine, setAddressLine] = useState('');
   const [city, setCity] = useState('Dubai');
+  const [dispatchHub, setDispatchHub] = useState('Al Quoz Industrial Hub (Dubai)');
+  const [dispatchHubs, setDispatchHubs] = useState<string[]>([
+    'Al Quoz Industrial Hub (Dubai)',
+    'Dubai South / DWC Logistics City',
+    'JAFZA Freezone Cargo Terminal',
+    'Musaffah Industrial Zone (Abu Dhabi)',
+    'Sharjah Industrial Logistics District',
+    'Vendor Direct Showroom Facility'
+  ]);
+  const [isAddingDispatchHub, setIsAddingDispatchHub] = useState(false);
+  const [newDispatchHubInput, setNewDispatchHubInput] = useState('');
   const [commissionRate, setCommissionRate] = useState(8);
+  const [settlementTerms, setSettlementTerms] = useState('Weekly Automatic Settlement');
+  const [creditLimitAED, setCreditLimitAED] = useState(150000);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+
+  const handleSaveNewJurisdiction = () => {
+    const trimmed = newJurisdictionInput.trim();
+    if (!trimmed) return;
+    if (!jurisdictions.includes(trimmed)) {
+      setJurisdictions(prev => [...prev, trimmed]);
+    }
+    setLicenseJurisdiction(trimmed);
+    setNewJurisdictionInput('');
+    setIsAddingJurisdiction(false);
+  };
+
+  const handleSaveNewDispatchHub = () => {
+    const trimmed = newDispatchHubInput.trim();
+    if (!trimmed) return;
+    if (!dispatchHubs.includes(trimmed)) {
+      setDispatchHubs(prev => [...prev, trimmed]);
+    }
+    setDispatchHub(trimmed);
+    setNewDispatchHubInput('');
+    setIsAddingDispatchHub(false);
+  };
+
+  const availableSpecializations = [
+    'Enterprise Servers & Racks',
+    'AI & Deep Learning Hardware',
+    'High-Performance Workstations',
+    'Custom Liquid-Cooled Gaming Rigs',
+    'Datacenter Networking & Cyber Infrastructure',
+    'OEM Storage & Flash Arrays',
+    'Commercial Displays & Audio-Visual',
+    'Bulk Hardware Wholesale'
+  ];
+
+  const toggleSpecialization = (spec: string) => {
+    setSelectedSpecializations(prev =>
+      prev.includes(spec) ? prev.filter(s => s !== spec) : [...prev, spec]
+    );
+  };
 
   const fetchResellers = () => {
     if (token) {
@@ -73,24 +169,36 @@ export default function AdminResellersPage() {
         {
           businessName,
           displayName: displayName || businessName,
-          username: username.toLowerCase().replace(/[^a-z0-9]/g, ''),
+          username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
           email: email.toLowerCase().trim(),
           phone,
+          password: password || undefined,
           resellerCode: resellerCode.toLowerCase().replace(/[^a-z0-9]/g, ''),
           subdomain: (subdomain || resellerCode).toLowerCase().replace(/[^a-z0-9]/g, ''),
           commissionRate: Number(commissionRate),
           address: {
             fullName: displayName || businessName,
             phone,
-            addressLine1: addressLine || 'Silicon Oasis Tech Park',
+            addressLine1: addressLine || 'Al Quoz Industrial Hub',
             city,
             state: 'Dubai',
             country: 'United Arab Emirates',
             postalCode: '00000',
           },
           businessInformation: {
+            tradeLicense,
+            licenseJurisdiction,
             taxNumber,
-            tradeLicense: 'DED-99281',
+            licenseExpiryDate,
+            businessType,
+            specializations: selectedSpecializations,
+            authorizedSignatory: authorizedSignatory || displayName || businessName,
+            signatoryTitle,
+            website,
+            description,
+            settlementTerms,
+            creditLimitAED: Number(creditLimitAED),
+            dispatchHub,
           },
         },
         { token: token || undefined }
@@ -100,13 +208,17 @@ export default function AdminResellersPage() {
       // Reset form
       setBusinessName('');
       setDisplayName('');
+      setTradeLicense('');
+      setTaxNumber('');
       setUsername('');
       setEmail('');
       setPhone('');
+      setPassword('');
       setResellerCode('');
       setSubdomain('');
-      setTaxNumber('');
       setAddressLine('');
+      setWebsite('');
+      setDescription('');
       fetchResellers();
     } catch (err: any) {
       setFormError(err.message || 'Failed to create reseller account.');
@@ -134,23 +246,25 @@ export default function AdminResellersPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <div className="text-xs text-purple-600 dark:text-purple-400 font-mono uppercase font-bold tracking-wider mb-1">
-            Multi-Tenant Vendor Directory
+          <div className="text-xs text-purple-600 dark:text-purple-400 font-mono uppercase font-bold tracking-wider mb-1 flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Multi-Tenant Vendor Ecosystem &amp; KYC Verification</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Store className="w-7 h-7 text-amber-500" />
             Authorized Technology Reseller Accounts
           </h1>
           <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-            Provision isolated vendor subdomains (<code>*.store.com</code>), commission structures, and Excel bulk-upload privileges.
+            Provision verified B2B vendors, custom subdomains (<code>*.store.com</code>), commission structures, and multi-tenant portal access.
           </p>
         </div>
 
         <button
           onClick={() => setModalOpen(true)}
-          className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-tech transition-colors cursor-pointer"
+          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-tech hover:shadow-purple-600/30 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Provision New Reseller</span>
@@ -162,39 +276,87 @@ export default function AdminResellersPage() {
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search resellers by business name, unique code, email..."
+            placeholder="Search resellers by business name, trade license, TRN, code..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="w-full bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
-        <div className="text-xs text-slate-600 dark:text-slate-400 font-mono">
-          {filtered.length} Active Vendors
+        <div className="text-xs text-slate-600 dark:text-slate-400 font-mono font-bold">
+          {filtered.length} {filtered.length === 1 ? 'Registered Vendor' : 'Registered Vendors'}
         </div>
       </div>
 
       {/* Reseller Accounts Table */}
       <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full min-w-[900px] text-left text-xs border-collapse text-slate-700 dark:text-slate-300">
+          <table className="w-full min-w-[960px] text-left text-xs border-collapse text-slate-700 dark:text-slate-300">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px]">
-                <th className="py-3 px-3 min-w-[220px]">Business Entity</th>
-                <th className="py-3 px-3 min-w-[130px]">Unique Code</th>
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                <th className="py-3 px-3 min-w-[260px]">Corporate Entity &amp; KYC</th>
+                <th className="py-3 px-3 min-w-[140px]">Unique Code</th>
                 <th className="py-3 px-3 min-w-[180px]">Subdomain URL</th>
-                <th className="py-3 px-3 text-center min-w-[90px] whitespace-nowrap">Products</th>
-                <th className="py-3 px-3 text-right min-w-[130px] whitespace-nowrap">Vendor Sales</th>
+                <th className="py-3 px-3 text-center min-w-[90px] whitespace-nowrap">Catalog</th>
+                <th className="py-3 px-3 text-right min-w-[130px] whitespace-nowrap">Gross Volume</th>
                 <th className="py-3 px-3 text-center min-w-[100px] whitespace-nowrap">Status</th>
-                <th className="py-3 px-3 text-right min-w-[140px] whitespace-nowrap">Storefront Link</th>
+                <th className="py-3 px-3 text-right min-w-[220px] whitespace-nowrap">Portal Access &amp; Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
               {filtered.map(r => (
                 <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-950/60 transition-colors">
                   <td className="py-4 px-3">
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">{r.businessName}</div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400">{r.email} • {r.phone}</div>
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 border border-purple-500/20">
+                        <Building2 className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2 flex-wrap">
+                          <span>{r.businessName}</span>
+                          {r.businessInformation?.businessType && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/50">
+                              {r.businessInformation.businessType}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                          <span>{r.email}</span>
+                          <span>•</span>
+                          <span>{r.phone}</span>
+                          {r.businessInformation?.tradeLicense && (
+                            <>
+                              <span>•</span>
+                              <span className="font-mono text-slate-600 dark:text-slate-400 font-medium">
+                                TL: {r.businessInformation.tradeLicense}
+                              </span>
+                            </>
+                          )}
+                          {r.businessInformation?.taxNumber && (
+                            <>
+                              <span>•</span>
+                              <span className="font-mono text-slate-600 dark:text-slate-400 font-medium">
+                                TRN: {r.businessInformation.taxNumber}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        {r.businessInformation?.specializations && r.businessInformation.specializations.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {r.businessInformation.specializations.slice(0, 3).map((spec, i) => (
+                              <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                {spec}
+                              </span>
+                            ))}
+                            {r.businessInformation.specializations.length > 3 && (
+                              <span className="text-[9px] text-slate-400 font-medium">
+                                +{r.businessInformation.specializations.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="py-4 px-3 font-mono font-bold text-amber-600 dark:text-amber-400">{r.resellerCode}</td>
                   <td className="py-4 px-3 font-mono text-purple-600 dark:text-purple-300 font-semibold">
@@ -217,20 +379,26 @@ export default function AdminResellersPage() {
                       {r.status}
                     </span>
                   </td>
-                  <td className="py-4 px-3 text-right space-x-2">
-                    <Link
-                      href={`/reseller/${r.resellerCode}/dashboard`}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg font-bold text-[11px] transition-colors border border-amber-500/30"
-                    >
-                      <span>Open Portal</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </Link>
-                    <button
-                      onClick={() => handleStatusToggle(r)}
-                      className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-[11px] font-medium transition-colors cursor-pointer"
-                    >
-                      {r.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                    </button>
+                  <td className="py-4 px-3 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/reseller/${r.resellerCode}/dashboard`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 shadow-sm transition-all hover:shadow cursor-pointer"
+                      >
+                        <span>Open Portal</span>
+                        <ExternalLink className="w-3.5 h-3.5 text-purple-500" />
+                      </Link>
+                      <button
+                        onClick={() => handleStatusToggle(r)}
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shadow-sm ${
+                          r.status === 'ACTIVE'
+                            ? 'bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/50'
+                            : 'bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50'
+                        }`}
+                      >
+                        {r.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -239,184 +407,570 @@ export default function AdminResellersPage() {
         </div>
       </div>
 
-      {/* Provision Reseller Modal */}
+      {/* ENHANCED PROVISION RESELLER MODAL (4-SECTION ENTERPRISE ONBOARDING) */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[92vh] flex flex-col my-auto overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center shadow-sm shrink-0">
-                  <Store className="w-5 h-5" />
+            <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-purple-500/5 via-transparent to-transparent shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-purple-600/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold shadow-inner shrink-0">
+                  <Store className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>Provision Technology Reseller</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                      Multi-Tenant
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                      Provision Technology Reseller
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800">
+                      Enterprise Multi-Tenant
                     </span>
-                  </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Deploy vendor subdomain, configure commission rate, and set up store portal access.
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Corporate entity KYC verification, hardware specializations, multi-tenant portal subdomain, and automated settlement SLA.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                title="Close dialog"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateReseller} className="flex-1 overflow-y-auto py-4 space-y-4 text-xs custom-scrollbar">
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleCreateReseller} className="flex-1 overflow-y-auto p-6 space-y-6 text-xs custom-scrollbar">
               {formError && (
-                <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 font-bold text-xs flex items-center gap-2">
+                <div className="p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 font-bold text-xs flex items-center gap-2.5">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
                   <span>{formError}</span>
                 </div>
               )}
 
-              {/* Business Entity Name */}
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-purple-500" />
-                  <span>Business Name (Legal Entity)</span>
-                  <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Apex Hardware Technologies LLC"
-                    value={businessName}
-                    onChange={e => {
-                      setBusinessName(e.target.value);
-                      if (!resellerCode) {
-                        setResellerCode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10));
-                      }
-                    }}
-                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs placeholder:text-slate-400"
+              {/* SECTION 1: CORPORATE LEGAL IDENTITY & KYC */}
+              <div className="space-y-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+                  <Building2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                    1. Corporate Legal Identity &amp; Tax Compliance (KYC)
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Legal Business Entity Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Apex Hardware Technologies LLC"
+                      value={businessName}
+                      onChange={e => {
+                        setBusinessName(e.target.value);
+                        if (!resellerCode) {
+                          setResellerCode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8));
+                        }
+                        if (!subdomain) {
+                          setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8));
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Commercial Brand / Storefront Display Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Apex Tech Solutions"
+                      value={displayName}
+                      onChange={e => setDisplayName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Trade License / CR Number *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. TL-DXB-948210"
+                      value={tradeLicense}
+                      onChange={e => setTradeLicense(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                        Issuing Jurisdiction
+                      </label>
+                      {!isAddingJurisdiction ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingJurisdiction(true)}
+                          className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-0.5 cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Custom</span>
+                        </button>
+                      ) : null}
+                    </div>
+
+                    {!isAddingJurisdiction ? (
+                      <select
+                        value={licenseJurisdiction}
+                        onChange={e => {
+                          if (e.target.value === '__ADD_NEW__') {
+                            setIsAddingJurisdiction(true);
+                          } else {
+                            setLicenseJurisdiction(e.target.value);
+                          }
+                        }}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                      >
+                        {jurisdictions.map(j => (
+                          <option key={j} value={j}>{j}</option>
+                        ))}
+                        <option value="__ADD_NEW__" className="text-purple-600 font-bold">+ Add Custom Jurisdiction...</option>
+                      </select>
+                    ) : (
+                      <div className="flex items-center gap-1.5 animate-fadeIn">
+                        <input
+                          type="text"
+                          autoFocus
+                          placeholder="e.g. Fujairah Free Zone Authority (FFZA)"
+                          value={newJurisdictionInput}
+                          onChange={e => setNewJurisdictionInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveNewJurisdiction();
+                            } else if (e.key === 'Escape') {
+                              setIsAddingJurisdiction(false);
+                            }
+                          }}
+                          className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-purple-500 text-slate-900 dark:text-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSaveNewJurisdiction}
+                          className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                          title="Save Jurisdiction"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAddingJurisdiction(false);
+                            setNewJurisdictionInput('');
+                          }}
+                          className="p-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all cursor-pointer shrink-0"
+                          title="Cancel"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Tax Registration (15-Digit TRN)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="100382910400003"
+                      value={taxNumber}
+                      onChange={e => setTaxNumber(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      License Expiry Date
+                    </label>
+                    <input
+                      type="date"
+                      value={licenseExpiryDate}
+                      onChange={e => setLicenseExpiryDate(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: BUSINESS CLASSIFICATION & HARDWARE FOCUS */}
+              <div className="space-y-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+                  <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                    2. Organization Classification &amp; Hardware Specializations
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Reseller Partnership Tier / Model
+                    </label>
+                    <select
+                      value={businessType}
+                      onChange={e => setBusinessType(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <option value="Value-Added Reseller (VAR)">Value-Added Reseller (VAR)</option>
+                      <option value="Enterprise System Integrator (SI)">Enterprise System Integrator (SI)</option>
+                      <option value="Authorized OEM Distributor">Authorized OEM Distributor</option>
+                      <option value="Custom PC Builder & Boutique Integrator">Custom PC Builder &amp; Boutique Integrator</option>
+                      <option value="Wholesale Hardware Distributor">Wholesale Hardware Distributor</option>
+                      <option value="Retail Computer Hardware Showroom">Retail Computer Hardware Showroom</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Official Corporate Website
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://apextech.ae"
+                      value={website}
+                      onChange={e => setWebsite(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Interactive Specialization Chips */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">
+                    Primary Hardware Specializations &amp; Catalog Domains
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableSpecializations.map((spec) => {
+                      const isSelected = selectedSpecializations.includes(spec);
+                      return (
+                        <button
+                          key={spec}
+                          type="button"
+                          onClick={() => toggleSpecialization(spec)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-purple-600 text-white shadow-sm ring-2 ring-purple-600/30'
+                              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-purple-300'
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3.5 h-3.5" />}
+                          <span>{spec}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Organization Overview &amp; Commercial Scope
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Brief description of hardware expertise, warranty capabilities, and enterprise service facilities..."
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              {/* Reseller Code & Subdomain Slug */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                    <Hash className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Unique Reseller Code</span>
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. apex101"
-                    value={resellerCode}
-                    onChange={e => setResellerCode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 text-amber-600 dark:text-amber-400 font-mono font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs placeholder:text-slate-400"
-                  />
+              {/* SECTION 3: AUTHORIZED SIGNATORY & ADMIN ACCESS */}
+              <div className="space-y-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+                  <User className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                    3. Authorized Corporate Signatory &amp; Admin Access
+                  </span>
                 </div>
 
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-purple-500" />
-                    <span>Subdomain Slug</span>
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. apex101"
-                    value={subdomain || resellerCode}
-                    onChange={e => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 text-purple-600 dark:text-purple-400 font-mono font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs placeholder:text-slate-400"
-                  />
-                </div>
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Authorized Signatory Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Tariq Al-Mansoor"
+                      value={authorizedSignatory}
+                      onChange={e => setAuthorizedSignatory(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
 
-              {/* Admin Username & Contact Email */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-blue-500" />
-                    <span>Admin Username</span>
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. apex_admin"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs placeholder:text-slate-400"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Signatory Executive Title
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Managing Director"
+                      value={signatoryTitle}
+                      onChange={e => setSignatoryTitle(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Contact Email</span>
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="e.g. sales@apextech.ae"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs placeholder:text-slate-400"
-                  />
-                </div>
-              </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Corporate Business Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. sales@apextech.ae"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
 
-              {/* Phone Number & Commission Rate */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-indigo-500" />
-                    <span>Phone Number</span>
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. +971 50 123 4567"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs font-mono placeholder:text-slate-400"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Direct Contact Phone *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. +971 4 380 4400"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                    <Percent className="w-3.5 h-3.5 text-pink-500" />
-                    <span>Platform Commission (%)</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={commissionRate}
-                    onChange={e => setCommissionRate(Number(e.target.value))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs font-mono font-bold"
-                  />
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Vendor Portal Admin Username *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. apex_admin"
+                      value={username}
+                      onChange={e => setUsername(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Initial Passphrase (Optional)
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Leave blank for auto-passphrase"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Warehouse Address */}
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-teal-500" />
-                  <span>Warehouse Address & City</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Al Quoz Industrial Area 4, Warehouse 12, Dubai"
-                  value={addressLine}
-                  onChange={e => setAddressLine(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-xs placeholder:text-slate-400"
-                />
+              {/* SECTION 4: MULTI-TENANT SUBDOMAIN & COMMERCIAL TERMS */}
+              <div className="space-y-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+                  <Globe className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                    4. Multi-Tenant Subdomain, Logistics Hub &amp; Settlement SLA
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {/* Subdomain Slug with Live Preview */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                        Subdomain Slug *
+                      </label>
+                      <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold">
+                        https://{(subdomain || 'partner').toLowerCase()}.store.com
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. apex101"
+                        value={subdomain}
+                        onChange={e => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-purple-600 dark:text-purple-400 font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Unique Reseller Code *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. apex101"
+                      value={resellerCode}
+                      onChange={e => setResellerCode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-amber-600 dark:text-amber-400 font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Warehouse / Showroom Physical Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Al Quoz Industrial Area 4, Warehouse 12"
+                      value={addressLine}
+                      onChange={e => setAddressLine(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                        Fulfillment &amp; Regional Dispatch Hub
+                      </label>
+                      {!isAddingDispatchHub ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingDispatchHub(true)}
+                          className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-0.5 cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Custom</span>
+                        </button>
+                      ) : null}
+                    </div>
+
+                    {!isAddingDispatchHub ? (
+                      <select
+                        value={dispatchHub}
+                        onChange={e => {
+                          if (e.target.value === '__ADD_NEW__') {
+                            setIsAddingDispatchHub(true);
+                          } else {
+                            setDispatchHub(e.target.value);
+                          }
+                        }}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                      >
+                        {dispatchHubs.map(hub => (
+                          <option key={hub} value={hub}>{hub}</option>
+                        ))}
+                        <option value="__ADD_NEW__" className="text-purple-600 font-bold">+ Add Custom Dispatch Hub...</option>
+                      </select>
+                    ) : (
+                      <div className="flex items-center gap-1.5 animate-fadeIn">
+                        <input
+                          type="text"
+                          autoFocus
+                          placeholder="e.g. Riyadh Dry Port & Logistics Terminal"
+                          value={newDispatchHubInput}
+                          onChange={e => setNewDispatchHubInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveNewDispatchHub();
+                            } else if (e.key === 'Escape') {
+                              setIsAddingDispatchHub(false);
+                            }
+                          }}
+                          className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-purple-500 text-slate-900 dark:text-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSaveNewDispatchHub}
+                          className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                          title="Save Dispatch Hub"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAddingDispatchHub(false);
+                            setNewDispatchHubInput('');
+                          }}
+                          className="p-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all cursor-pointer shrink-0"
+                          title="Cancel"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Platform Commission (%)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="50"
+                      value={commissionRate}
+                      onChange={e => setCommissionRate(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Settlement &amp; Payout SLA
+                    </label>
+                    <select
+                      value={settlementTerms}
+                      onChange={e => setSettlementTerms(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <option value="Weekly Automatic Settlement">Weekly Automatic Settlement</option>
+                      <option value="Bi-Weekly Automated Clearing">Bi-Weekly Automated Clearing</option>
+                      <option value="Monthly Net 30 Consolidated">Monthly Net 30 Consolidated</option>
+                      <option value="Real-Time Instant Escrow Release">Real-Time Instant Escrow Release</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Credit Limit Allocation (AED)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5000"
+                      value={creditLimitAED}
+                      onChange={e => setCreditLimitAED(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Modal Actions */}
@@ -434,7 +988,7 @@ export default function AdminResellersPage() {
                   className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl font-black text-xs shadow-lg shadow-purple-600/25 hover:shadow-purple-600/40 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Provisioning...' : 'Confirm & Create Reseller'}</span>
+                  <span>{isSubmitting ? 'Provisioning Reseller...' : 'Confirm & Create Reseller'}</span>
                 </button>
               </div>
             </form>
@@ -444,4 +998,3 @@ export default function AdminResellersPage() {
     </div>
   );
 }
-
