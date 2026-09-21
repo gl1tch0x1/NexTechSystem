@@ -152,13 +152,6 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
             Enterprise procurement platform with real-time stock allocation across UAE logistics hubs.
           </p>
         </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center gap-2">
-            <Boxes className="w-4 h-4 text-tech-blue dark:text-cyan-400" />
-            <span>{total} {total === 1 ? 'Product Verified' : 'Products Verified'}</span>
-          </span>
-        </div>
       </div>
 
       {/* Main Catalog Layout */}

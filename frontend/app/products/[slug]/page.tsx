@@ -8,16 +8,10 @@ import { ProductDetailClient } from './ProductDetailClient';
 import {
   ShieldCheck,
   Truck,
-  RotateCcw,
   Cpu,
   CheckCircle2,
-  Store,
   Star,
-  Building,
-  Building2,
-  MapPin,
   Boxes,
-  Warehouse,
   Layers,
   Sparkles,
   Activity,
@@ -27,8 +21,10 @@ import {
   Sliders,
   Award,
   Check,
-  Clock,
-  ArrowRight
+  ArrowRight,
+  HardDrive,
+  Monitor,
+  Laptop
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { getApiUrl } from '@/lib/api-client';
@@ -86,6 +82,112 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
       images: [primaryImg],
     },
   };
+}
+
+// Spec Key Formatter & Icon Resolver
+function formatSpecKey(key: string): string {
+  const normalized = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  const dictionary: Record<string, string> = {
+    condition: 'Item Condition',
+    productcategory: 'Product Category',
+    category: 'Product Category',
+    processorbrand: 'Processor Brand',
+    processormodel: 'Processor Model',
+    processorcores: 'Processor Cores',
+    processorthreads: 'Execution Threads',
+    cores: 'Processor Cores',
+    threads: 'Execution Threads',
+    socket: 'Socket Form Factor',
+    package: 'Package / Socket Type',
+    ramcapacity: 'RAM Capacity',
+    ramtype: 'RAM Type',
+    ramspeed: 'RAM Speed / Frequency',
+    memory: 'Installed RAM',
+    memorycapacity: 'Memory Capacity',
+    memorytype: 'Memory Type',
+    storagecapacity: 'Storage Capacity',
+    storagetype: 'Storage Type',
+    storageinterface: 'Storage Interface',
+    screensize: 'Screen Size',
+    displaytechnology: 'Display Technology',
+    resolution: 'Display Resolution',
+    refreshrate: 'Refresh Rate',
+    aspectratio: 'Aspect Ratio',
+    brightness: 'Screen Brightness',
+    touchscreen: 'Touchscreen Support',
+    operatingsystem: 'Operating System',
+    os: 'Operating System',
+    graphicscard: 'Graphics Card (GPU)',
+    gpu: 'GPU Model',
+    gputype: 'GPU Architecture',
+    dedicatedvram: 'Dedicated VRAM',
+    graphicsmemory: 'Graphics Memory',
+    powersupply: 'Power Supply Unit (PSU)',
+    tdp: 'Thermal Design Power (TDP)',
+    wattage: 'TDP / Power Consumption',
+    formfactor: 'Form Factor',
+    motherboardchipset: 'Motherboard Chipset',
+    chipset: 'Chipset',
+    maxboostclock: 'Max Turbo Frequency',
+    boostclock: 'Max Boost Clock',
+    baseclock: 'Base Clock Frequency',
+    cache: 'Smart Cache Capacity',
+    wireless: 'Wi-Fi & Bluetooth',
+    network: 'Networking & Ethernet',
+    ports: 'I/O Ports & Interfaces',
+    battery: 'Battery Specification',
+    weight: 'Product Weight',
+    dimensions: 'Physical Dimensions',
+    warranty: 'Warranty Coverage',
+  };
+
+  if (dictionary[normalized]) {
+    return dictionary[normalized];
+  }
+
+  return key
+    .replace(/([A-Z]+)(?=[A-Z][a-z])/g, '$1 ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/_/g, ' ')
+    .trim()
+    .replace(/\b(ram|ssd|hdd|nvme|pcie|gpu|cpu|tdp|os|ips|led|oled|wuxga|fhd|uhd|rgb|psu|io|lan|usb|hdmi)\b/gi, m => m.toUpperCase())
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function getSpecIcon(key: string) {
+  const k = key.toLowerCase();
+  if (k.includes('processor') || k.includes('cpu') || k.includes('socket') || k.includes('core') || k.includes('thread') || k.includes('package')) {
+    return Cpu;
+  }
+  if (k.includes('ram') || k.includes('memory') || k.includes('ddr')) {
+    return Boxes;
+  }
+  if (k.includes('storage') || k.includes('ssd') || k.includes('nvme') || k.includes('hdd') || k.includes('cache')) {
+    return HardDrive;
+  }
+  if (k.includes('screen') || k.includes('display') || k.includes('resolution') || k.includes('panel') || k.includes('refresh') || k.includes('wuxga') || k.includes('oled') || k.includes('ips')) {
+    return Monitor;
+  }
+  if (k.includes('category') || k.includes('laptop') || k.includes('chassis') || k.includes('form')) {
+    return Laptop;
+  }
+  if (k.includes('gpu') || k.includes('graphic') || k.includes('video') || k.includes('vram')) {
+    return Sparkles;
+  }
+  if (k.includes('os') || k.includes('operating') || k.includes('system') || k.includes('software')) {
+    return Sliders;
+  }
+  if (k.includes('power') || k.includes('watt') || k.includes('tdp') || k.includes('battery')) {
+    return Flame;
+  }
+  if (k.includes('clock') || k.includes('boost') || k.includes('frequency') || k.includes('speed')) {
+    return Gauge;
+  }
+  if (k.includes('condition') || k.includes('warranty') || k.includes('sealed')) {
+    return ShieldCheck;
+  }
+  return Layers;
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
@@ -190,126 +292,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       {/* Main Product Hero Grid */}
       <ProductDetailClient product={product} />
 
-      {/* Multi-Warehouse Inventory & Regional Logistics Availability */}
-      {product.locations && product.locations.length > 0 && (
-        <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-6 transition-all">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800/80">
-            <div className="flex items-start sm:items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-tech-blue/10 dark:bg-cyan-500/10 flex items-center justify-center text-tech-blue dark:text-cyan-400 shrink-0 shadow-sm border border-tech-blue/20">
-                <Warehouse className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                    Warehouse Real-Time Inventory &amp; Regional Logistics
-                  </h3>
-                  <span className="text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1.5 whitespace-nowrap">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Verified Live Stock
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Physical hardware allocated across UAE logistics centers for immediate courier dispatch or direct collection
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 self-start sm:self-auto shrink-0 bg-slate-50 dark:bg-slate-950/80 px-4 py-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-              <Boxes className="w-5 h-5 text-tech-blue dark:text-cyan-400 shrink-0" />
-              <div>
-                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Total Regional Pool</div>
-                <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono leading-none mt-0.5 whitespace-nowrap">
-                  {product.stock} Units Available
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-            {product.locations.map(loc => {
-              const isJafza = loc.locationName.toLowerCase().includes('jafza') || loc.locationName.toLowerCase().includes('logistics');
-              const isShowroom = loc.locationName.toLowerCase().includes('showroom') || loc.locationName.toLowerCase().includes('deira');
-
-              const hubTag = isJafza
-                ? 'Port Hub'
-                : isShowroom
-                ? 'Retail & Tech Center'
-                : 'Regional Hub';
-
-              const fulfillmentBadge = isShowroom
-                ? 'Counter Pickup & Express'
-                : 'Same-Day Courier Dispatch';
-
-              const stockPercent = Math.min(100, Math.max(15, Math.round((loc.quantity / (product.stock || 34)) * 100)));
-
-              return (
-                <div
-                  key={loc.locationId}
-                  className="p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-white dark:from-slate-950/80 dark:to-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 hover:border-tech-blue/50 dark:hover:border-cyan-500/50 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4 group relative overflow-hidden"
-                >
-                  <div className="space-y-3">
-                    {/* Header: Hub name & Tag */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:text-tech-blue dark:group-hover:text-cyan-400 group-hover:border-tech-blue/30 transition-colors shrink-0 shadow-xs">
-                          <Building2 className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-bold text-slate-900 dark:text-white leading-snug">
-                            {loc.locationName}
-                          </div>
-                          <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                            <span>{loc.city}, UAE</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60 whitespace-nowrap shrink-0">
-                        {hubTag}
-                      </span>
-                    </div>
-
-                    {/* Stock level bar & status */}
-                    <div className="space-y-1.5 pt-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Allocated Inventory</span>
-                        <span className={`font-mono font-black ${loc.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
-                          {loc.quantity > 0 ? `${loc.quantity} Units in stock` : '0 Units (Awaiting Stock)'}
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-slate-800 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            loc.quantity > 10
-                              ? 'bg-emerald-500'
-                              : loc.quantity > 0
-                              ? 'bg-amber-500'
-                              : 'bg-slate-300 dark:bg-slate-700'
-                          }`}
-                          style={{ width: `${loc.quantity > 0 ? stockPercent : 0}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer Badge: Dispatch speed */}
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-                    <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400 shrink-0" />
-                      <span>{fulfillmentBadge}</span>
-                    </span>
-                    <span className="font-mono text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 whitespace-nowrap">
-                      Immediate
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
       {/* Technical Specifications Matrix */}
       <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-6 transition-all">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800/80">
@@ -325,6 +307,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-tech-blue/10 text-tech-blue dark:text-cyan-400 border border-tech-blue/20 px-2.5 py-0.5 rounded-full">
                   Architecture Datasheet
                 </span>
+                {specEntries.length > 0 && (
+                  <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/70 dark:border-slate-700/60">
+                    {specEntries.length} Parameters
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Verified hardware parameters for system integration, socket compatibility &amp; power delivery
@@ -332,105 +319,41 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <div className="flex items-center gap-2 self-start sm:self-auto text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>OEM Verified Specifications</span>
+            <span className="font-semibold">OEM Verified Specifications</span>
           </div>
         </div>
 
         {specEntries.length > 0 ? (
-          <div className="space-y-3.5">
-            {/* If odd count and starts with processor, show processor as flagship banner */}
-            {specEntries[0]?.[0].toLowerCase().includes('processor') && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/80 via-slate-50 to-purple-50/50 dark:from-blue-950/30 dark:via-slate-950/50 dark:to-purple-950/20 border border-blue-200/60 dark:border-blue-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-tech-blue text-white flex items-center justify-center shrink-0 shadow-md shadow-tech-blue/20">
-                    <Cpu className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-tech-blue dark:text-cyan-400">
-                      FLAGSHIP COMPUTING ARCHITECTURE
-                    </div>
-                    <div className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
-                      {specEntries[0][1]}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-xs">
-                    {product.brandName} Enterprise Grade
-                  </span>
-                </div>
-              </div>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5">
+            {specEntries.map(([key, value]) => {
+              const IconComp = getSpecIcon(key);
+              const formattedKey = formatSpecKey(key);
+              const displayVal = Array.isArray(value) ? value.join(', ') : String(value ?? '');
 
-            {/* Symmetrical Specification Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {(specEntries[0]?.[0].toLowerCase().includes('processor') ? specEntries.slice(1) : specEntries).map(([key, value]) => {
-                const k = key.toLowerCase();
-                const IconComp = k.includes('socket') || k.includes('package')
-                  ? Layers
-                  : k.includes('core')
-                  ? Sparkles
-                  : k.includes('thread')
-                  ? Activity
-                  : k.includes('boost') || k.includes('clock') || k.includes('freq')
-                  ? Gauge
-                  : k.includes('watt') || k.includes('power') || k.includes('tdp')
-                  ? Flame
-                  : k.includes('cache')
-                  ? Database
-                  : k.includes('memory') || k.includes('ram')
-                  ? Boxes
-                  : Sliders;
-
-                const formattedKey =
-                  k === 'socket'
-                    ? 'Socket Form Factor'
-                    : k === 'cores'
-                    ? 'Processor Cores'
-                    : k === 'threads'
-                    ? 'Execution Threads'
-                    : k === 'maxboostclock' || k === 'boostclock'
-                    ? 'Max Turbo Frequency'
-                    : k === 'wattage' || k === 'tdp' || k === 'power'
-                    ? 'TDP / Power Rating'
-                    : k === 'cache'
-                    ? 'Smart Cache Capacity'
-                    : key
-                        .replace(/([A-Z])/g, ' $1')
-                        .replace(/_/g, ' ')
-                        .trim()
-                        .replace(/\b\w/g, c => c.toUpperCase());
-
-                return (
-                  <div
-                    key={key}
-                    className="p-4 rounded-2xl bg-gradient-to-r from-slate-50/90 to-white dark:from-slate-950/80 dark:to-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 hover:border-tech-blue/40 dark:hover:border-cyan-500/40 hover:shadow-xs transition-all flex items-center gap-3.5 group"
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:text-tech-blue dark:group-hover:text-cyan-400 shrink-0 transition-colors shadow-xs">
+              return (
+                <div
+                  key={key}
+                  className="group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 hover:border-tech-blue/40 dark:hover:border-cyan-500/40 hover:bg-white dark:hover:bg-slate-900/90 hover:shadow-xs transition-all duration-150 gap-4"
+                >
+                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:text-tech-blue dark:group-hover:text-cyan-400 group-hover:border-tech-blue/30 dark:group-hover:border-cyan-500/30 shrink-0 transition-colors shadow-2xs">
                       <IconComp className="w-4 h-4" />
                     </div>
-                    <div className="w-36 sm:w-44 shrink-0">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
-                        PARAMETER
-                      </div>
-                      <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {formattedKey}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0 pl-3 border-l border-slate-200/80 dark:border-slate-800">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-tech-blue dark:text-cyan-400 font-mono">
-                        SPECIFICATION
-                      </div>
-                      <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 dark:text-white break-words">
-                        {value}
-                      </div>
-                    </div>
+                    <span className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate">
+                      {formattedKey}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+
+                  <div className="text-right shrink-0 max-w-[55%]">
+                    <span className="inline-block text-xs sm:text-sm font-mono font-bold text-slate-900 dark:text-white break-words">
+                      {displayVal}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className="text-xs text-slate-500 dark:text-slate-400">Standard specifications apply as per manufacturer datasheets.</p>

@@ -157,15 +157,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
               <span className="font-mono text-slate-500 dark:text-slate-400 font-semibold">SKU: {currentSku}</span>
             </div>
 
-            {product.sellerType === 'RESELLER' ? (
+            {product.sellerType === 'RESELLER' && (
               <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
                 <Store className="w-3.5 h-3.5 text-amber-500" />
                 Verified Partner: {product.resellerName || product.resellerCode}
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                Direct from NexTech Official Store
               </span>
             )}
           </div>
