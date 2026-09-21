@@ -192,12 +192,15 @@ export function BrandMarquee({ brands }: BrandMarqueeProps) {
             b.name.toLowerCase().includes(p.search.toLowerCase()) ||
             (b.slug && p.code.toLowerCase() === b.slug.toLowerCase().replace(/^brand_/, ''))
         );
+        const isUnsplashPhoto = b.logo && b.logo.includes('unsplash.com');
+        const resolvedLogo = (!isUnsplashPhoto && b.logo) ? b.logo : (matchingPreset?.logo || b.logo || '/brands/intel.svg');
+
         return {
           name: b.name,
           code: b.slug ? b.slug.toUpperCase().replace(/^BRAND_/, '') : b.name.slice(0, 4).toUpperCase(),
           search: b.name,
           role: b.description || matchingPreset?.role || 'Authorized GCC Supply Partner',
-          logo: b.logo || matchingPreset?.logo || '/brands/intel.svg',
+          logo: resolvedLogo,
           badge: b.tier === 'TIER_1' ? 'Tier-1 Direct' : b.tier === 'TIER_2' ? 'Certified' : 'Official Partner',
         };
       });
@@ -206,8 +209,8 @@ export function BrandMarquee({ brands }: BrandMarqueeProps) {
   }, [brands]);
 
   return (
-    <section className="py-6 border-y border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-[#070B14]/90 transition-colors overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+    <section className="py-8 sm:py-9 border-y border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-[#070B14]/90 transition-colors overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-slate-800/80">
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider">
             <Award className="w-4 h-4 text-tech-blue dark:text-tech-cyan shrink-0" />
@@ -237,43 +240,47 @@ export function BrandMarquee({ brands }: BrandMarqueeProps) {
       {/* Infinite Marquee Track with Edge Gradients */}
       <div className="relative w-full overflow-hidden marquee-container">
         {/* Left Gradient Fade Mask */}
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-28 z-10 bg-gradient-to-r from-slate-50/90 dark:from-[#070B14] to-transparent" />
+        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-32 z-10 bg-gradient-to-r from-slate-50/90 dark:from-[#070B14] to-transparent" />
 
         {/* Right Gradient Fade Mask */}
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-28 z-10 bg-gradient-to-l from-slate-50/90 dark:from-[#070B14] to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-32 z-10 bg-gradient-to-l from-slate-50/90 dark:from-[#070B14] to-transparent" />
 
         {/* Continuous Smooth Scrolling Marquee Container */}
-        <div className="flex items-center animate-marquee gap-3 sm:gap-4 select-none py-1">
+        <div className="flex items-center animate-marquee gap-4 sm:gap-5 select-none py-1.5">
           {/* Double mapped array for seamless infinite loop */}
           {[...displayPartners, ...displayPartners].map((partner, idx) => (
             <Link
               key={`${partner.code}-${idx}`}
               href={`/products?search=${encodeURIComponent(partner.search)}`}
-              className="group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/80 dark:hover:border-tech-cyan/80 hover:shadow-md dark:hover:shadow-tech-cyan/5 transition-all shrink-0 select-none min-w-[240px] sm:min-w-[260px]"
+              className="group flex items-center gap-4 px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/80 dark:hover:border-tech-cyan/80 hover:shadow-lg dark:hover:shadow-tech-cyan/5 transition-all shrink-0 select-none min-w-[280px] sm:min-w-[320px]"
             >
-              {/* Brand Logo Box with Image */}
-              <div className="h-9 w-20 sm:w-24 px-2 py-1 rounded-lg bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              {/* Brand Logo Box with Enhanced Height */}
+              <div className="h-14 sm:h-16 w-28 sm:w-32 px-3 py-2 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-inner">
                 <img
                   src={partner.logo}
                   alt={partner.name}
-                  className="max-h-6 max-w-full object-contain filter dark:brightness-110 contrast-125"
+                  className="max-h-9 sm:max-h-11 max-w-full object-contain filter dark:brightness-110 contrast-125"
                   loading="lazy"
+                  onError={(e) => {
+                    // Fallback to text if image fails
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
                 />
               </div>
 
               {/* Brand Metadata */}
               <div className="min-w-0 flex-1 flex flex-col justify-center">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors truncate">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors truncate">
                     {partner.name.split(' ')[0]}
                   </span>
                   {partner.badge && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-tech-blue dark:text-tech-cyan border border-blue-200/60 dark:border-blue-800/50 hidden xs:inline-block shrink-0">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-tech-blue dark:text-tech-cyan border border-blue-200/60 dark:border-blue-800/50 hidden xs:inline-block shrink-0">
                       {partner.badge}
                     </span>
                   )}
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate font-mono mt-0.5">
+                <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate font-mono mt-1">
                   {partner.role}
                 </div>
               </div>
