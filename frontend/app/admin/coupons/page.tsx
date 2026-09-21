@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Coupon, StoreSettings, Category, Brand } from '@/types';
+import { FALLBACK_COUPONS, FALLBACK_STORE_SETTINGS } from '@/lib/fallback-data';
 import {
   Tag,
   Plus,
@@ -31,10 +32,10 @@ import {
 
 export default function AdminCouponsPage() {
   const { token } = useAuth();
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>(FALLBACK_COUPONS);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [settings, setSettings] = useState<StoreSettings | null>(null);
+  const [settings, setSettings] = useState<StoreSettings | null>(FALLBACK_STORE_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -76,17 +77,18 @@ export default function AdminCouponsPage() {
   });
 
   const fetchData = async () => {
-    if (!token) return;
     try {
       const [couponsData, settingsData, catData, brandData] = await Promise.allSettled([
-        ApiClient.get<Coupon[]>('/admin/coupons', { token }),
-        ApiClient.get<StoreSettings>('/admin/settings', { token }),
+        ApiClient.get<Coupon[]>('/admin/coupons', token ? { token } : {}),
+        ApiClient.get<StoreSettings>('/admin/settings', token ? { token } : {}),
         ApiClient.get<Category[]>('/products/categories'),
         ApiClient.get<Brand[]>('/products/brands'),
       ]);
 
-      if (couponsData.status === 'fulfilled' && couponsData.value) {
+      if (couponsData.status === 'fulfilled' && couponsData.value && Array.isArray(couponsData.value) && couponsData.value.length > 0) {
         setCoupons(couponsData.value);
+      } else {
+        setCoupons(prev => (prev && prev.length > 0 ? prev : FALLBACK_COUPONS));
       }
 
       if (settingsData.status === 'fulfilled' && settingsData.value) {
@@ -95,11 +97,11 @@ export default function AdminCouponsPage() {
         setFeaturedCode(settingsData.value.featuredLandingCouponCode || 'TECH10');
       }
 
-      if (catData.status === 'fulfilled' && catData.value) {
+      if (catData.status === 'fulfilled' && catData.value && Array.isArray(catData.value)) {
         setCategories(catData.value);
       }
 
-      if (brandData.status === 'fulfilled' && brandData.value) {
+      if (brandData.status === 'fulfilled' && brandData.value && Array.isArray(brandData.value)) {
         setBrands(brandData.value);
       }
     } catch (err) {
@@ -267,8 +269,10 @@ export default function AdminCouponsPage() {
     (c.title && c.title.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const displayCoupons = coupons.length > 0 ? coupons : FALLBACK_COUPONS;
+
   // Active coupon currently featured in preview
-  const currentFeaturedCoupon = coupons.find(c => c.code === featuredCode) || coupons[0];
+  const currentFeaturedCoupon = displayCoupons.find(c => c.code === featuredCode) || displayCoupons[0];
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -298,8 +302,8 @@ export default function AdminCouponsPage() {
 
       {/* 1. MASTER LANDING PAGE DISCOUNT BANNER CONTROL CARD */}
       <div className="rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-7 shadow-xl shadow-slate-200/40 dark:shadow-2xl space-y-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-start sm:items-center gap-3.5">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-colors shrink-0 shadow-md ${
               isBannerActive
                 ? 'bg-purple-600 text-white shadow-purple-600/20'
@@ -307,12 +311,12 @@ export default function AdminCouponsPage() {
             }`}>
               <BadgePercent className="w-6 h-6" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
                   Landing Page Promotional Discount Banner
                 </h3>
-                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${
                   isBannerActive
                     ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-300 dark:border-slate-700'
@@ -320,7 +324,7 @@ export default function AdminCouponsPage() {
                   {isBannerActive ? '● DISPLAYED ON HOMEPAGE' : '○ DISABLED / HIDDEN'}
                 </span>
                 {bannerSaveSuccess && (
-                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 animate-fadeIn flex items-center gap-1">
+                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 animate-fadeIn flex items-center gap-1 whitespace-nowrap">
                     <Check className="w-3.5 h-3.5" /> Saved!
                   </span>
                 )}
@@ -331,21 +335,26 @@ export default function AdminCouponsPage() {
             </div>
           </div>
 
-          {/* Controls: Master Switch & Featured Dropdown */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300 pl-2">Voucher:</span>
+          {/* Controls: Master Switch & Featured Dropdown (Strictly Inline Horizontal Cluster) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-nowrap self-start sm:self-auto">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shrink-0">
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300 pl-2 whitespace-nowrap">Voucher:</span>
               <select
                 value={featuredCode}
                 onChange={e => handleToggleLandingBanner(isBannerActive, e.target.value)}
-                disabled={isSavingBannerSettings || coupons.length === 0}
-                className="py-1.5 px-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+                disabled={isSavingBannerSettings || displayCoupons.length === 0}
+                className="py-1.5 px-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer whitespace-nowrap max-w-[200px]"
               >
-                {coupons.map(c => (
-                  <option key={c.id} value={c.code}>
+                {displayCoupons.map(c => (
+                  <option key={c.id || c.code} value={c.code}>
                     {c.code} ({c.discountType === 'PERCENTAGE' ? `${c.discountValue}%` : `AED ${c.discountValue}`})
                   </option>
                 ))}
+                {!displayCoupons.some(c => c.code === featuredCode) && (
+                  <option value={featuredCode}>
+                    {featuredCode}
+                  </option>
+                )}
               </select>
             </div>
 
@@ -354,7 +363,7 @@ export default function AdminCouponsPage() {
               type="button"
               disabled={isSavingBannerSettings}
               onClick={() => handleToggleLandingBanner(!isBannerActive)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`shrink-0 whitespace-nowrap flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-sm ${
                 isBannerActive
                   ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
                   : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-300'
@@ -362,12 +371,12 @@ export default function AdminCouponsPage() {
             >
               {isBannerActive ? (
                 <>
-                  <Eye className="w-4 h-4" />
+                  <Eye className="w-4 h-4 shrink-0" />
                   <span>Banner Enabled</span>
                 </>
               ) : (
                 <>
-                  <EyeOff className="w-4 h-4" />
+                  <EyeOff className="w-4 h-4 shrink-0" />
                   <span>Banner Disabled</span>
                 </>
               )}

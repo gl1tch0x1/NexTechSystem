@@ -1186,6 +1186,11 @@ export const FALLBACK_BUILDER_PRESETS: BuilderPreset[] = [
 export const FALLBACK_COUPON: Coupon = {
   "id": "coupon_tech10",
   "code": "TECH10",
+  "title": "Save AED 100 on Enterprise Orders Over AED 1000",
+  "badgeText": "GCC Direct Enterprise Promotion",
+  "description": "Apply this verified promotional voucher at checkout or wallet settlement to receive an instant margin deduction on all workstations, processors, and rack servers.",
+  "ctaText": "Apply to Catalog",
+  "ctaLink": "/products",
   "discountType": "PERCENTAGE",
   "discountValue": 10,
   "minOrderAmount": 1000,
@@ -1193,10 +1198,58 @@ export const FALLBACK_COUPON: Coupon = {
   "usageLimit": 1000,
   "usageCount": 42,
   "perUserLimit": 2,
+  "customerEligibility": "ALL",
   "startDate": "2026-01-01T00:00:00Z",
   "endDate": "2026-12-31T23:59:59Z",
+  "showOnLandingPage": true,
   "isActive": true
 };
+
+export const FALLBACK_COUPONS: Coupon[] = [
+  FALLBACK_COUPON,
+  {
+    "id": "coupon_summer50",
+    "code": "SUMMER50",
+    "title": "AED 50 Flat Discount on Workstation Orders Over AED 500",
+    "badgeText": "Seasonal Hardware Incentive",
+    "description": "Enjoy an instant AED 50 flat margin deduction across all retail components, gaming GPUs, and high-frequency memory kits.",
+    "ctaText": "Explore Components",
+    "ctaLink": "/products",
+    "discountType": "FIXED",
+    "discountValue": 50,
+    "minOrderAmount": 500,
+    "maxDiscountAmount": 50,
+    "usageLimit": 500,
+    "usageCount": 18,
+    "perUserLimit": 1,
+    "customerEligibility": "ALL",
+    "startDate": "2026-01-01T00:00:00Z",
+    "endDate": "2026-12-31T23:59:59Z",
+    "showOnLandingPage": false,
+    "isActive": true
+  },
+  {
+    "id": "coupon_vip25",
+    "code": "VIP25",
+    "title": "25% Off Datacenter Racks & Enterprise Hardware",
+    "badgeText": "Tier-1 Partner Exclusive",
+    "description": "Exclusive enterprise deduction reserved for verified B2B procurement accounts and registered government contractors.",
+    "ctaText": "Request B2B Quote",
+    "ctaLink": "/quote",
+    "discountType": "PERCENTAGE",
+    "discountValue": 25,
+    "minOrderAmount": 5000,
+    "maxDiscountAmount": 2500,
+    "usageLimit": 200,
+    "usageCount": 12,
+    "perUserLimit": 5,
+    "customerEligibility": "B2B_ONLY",
+    "startDate": "2026-01-01T00:00:00Z",
+    "endDate": "2026-12-31T23:59:59Z",
+    "showOnLandingPage": false,
+    "isActive": true
+  }
+];
 
 export const FALLBACK_STORE_SETTINGS: StoreSettings = {
   "storeName": "NexTech Systems",
@@ -1210,7 +1263,9 @@ export const FALLBACK_STORE_SETTINGS: StoreSettings = {
   "address": "NexTech Systems Tower, Silicon Oasis Tech Park, Dubai, UAE",
   "taxRegistrationNumber": "TRN-100294819200003",
   "announcementText": "GCC EXPRESS DISPATCH: Free Insured Shipping on Workstations, CPUs & Servers over AED 500",
-  "isAnnouncementActive": true
+  "isAnnouncementActive": true,
+  "isLandingDiscountBannerActive": true,
+  "featuredLandingCouponCode": "TECH10"
 };
 
 export const FALLBACK_USERS: (User & { passwordHash?: string })[] = [
