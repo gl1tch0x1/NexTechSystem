@@ -181,6 +181,17 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
   },
 ];
 
+function isUnsplashPhotoUrl(urlString?: string): boolean {
+  if (!urlString) return false;
+  try {
+    const parsed = new URL(urlString, 'http://localhost');
+    const hostname = parsed.hostname.toLowerCase();
+    return hostname === 'unsplash.com' || hostname.endsWith('.unsplash.com');
+  } catch {
+    return false;
+  }
+}
+
 export function BrandMarquee({ brands }: BrandMarqueeProps) {
   // Dynamic brands from database/admin API with fallback to 20 Tier-1 presets
   const displayPartners = React.useMemo(() => {
@@ -192,8 +203,8 @@ export function BrandMarquee({ brands }: BrandMarqueeProps) {
             b.name.toLowerCase().includes(p.search.toLowerCase()) ||
             (b.slug && p.code.toLowerCase() === b.slug.toLowerCase().replace(/^brand_/, ''))
         );
-        const isUnsplashPhoto = b.logo && b.logo.includes('unsplash.com');
-        const resolvedLogo = (!isUnsplashPhoto && b.logo) ? b.logo : (matchingPreset?.logo || b.logo || '/brands/intel.svg');
+        const isLegacyPlaceholder = isUnsplashPhotoUrl(b.logo);
+        const resolvedLogo = (!isLegacyPlaceholder && b.logo) ? b.logo : (matchingPreset?.logo || b.logo || '/brands/intel.svg');
 
         return {
           name: b.name,
