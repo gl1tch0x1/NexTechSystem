@@ -176,8 +176,9 @@ export default function AdminBrandsPage() {
       // Fallback: use FileReader data URL
       const reader = new FileReader();
       reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setFormData(prev => ({ ...prev, logo: reader.result }));
+        const result = reader.result;
+        if (typeof result === 'string') {
+          setFormData(prev => ({ ...prev, logo: result }));
           setFormSuccess('Image loaded as local data URL');
         }
       };
@@ -186,8 +187,9 @@ export default function AdminBrandsPage() {
       console.warn('Upload route fallback to data URL:', err);
       const reader = new FileReader();
       reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setFormData(prev => ({ ...prev, logo: reader.result }));
+        const result = reader.result;
+        if (typeof result === 'string') {
+          setFormData(prev => ({ ...prev, logo: result }));
         }
       };
       reader.readAsDataURL(file);
