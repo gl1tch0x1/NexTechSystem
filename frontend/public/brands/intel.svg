@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
+    <path d="M14 11h4v18h-4zM22 15h4v14h-4zM22 11h4v2.5h-4zM30 18h4v11h-4zM30 15h4v1.8h-4zM38 13h4v16h-4z" fill="#0068B5"/>
+    <text x="46" y="27" font-family="'Segoe UI', -apple-system, sans-serif" font-weight="900" font-size="20" fill="#0071C5" letter-spacing="-0.5">intel</text>
+    <circle cx="70" cy="14" r="2.2" fill="#00C7FD"/>
+  </svg>

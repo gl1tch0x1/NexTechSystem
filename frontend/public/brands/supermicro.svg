@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 40" fill="none">
+    <circle cx="16" cy="20" r="9" stroke="#007F3E" stroke-width="2.5" fill="none"/>
+    <path d="M10 20a6 6 0 0 1 12 0" stroke="#00549E" stroke-width="2.5" fill="none"/>
+    <text x="30" y="25.5" font-family="'Arial Black', sans-serif" font-weight="900" font-size="12.5" fill="#007F3E" letter-spacing="0.5">SUPERMICRO</text>
+  </svg>

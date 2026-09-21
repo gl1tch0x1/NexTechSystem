@@ -14,10 +14,15 @@ export async function GET(request: Request) {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (authHeader) headers['Authorization'] = authHeader;
 
-      const res = await fetch(`${clean}/api/admin/brands`, {
+      let res = await fetch(`${clean}/api/admin/brands`, {
         headers,
         signal: AbortSignal.timeout(3500),
       });
+      if (!res.ok) {
+        res = await fetch(`${clean}/api/products/brands`, {
+          signal: AbortSignal.timeout(3500),
+        });
+      }
       if (res.ok) {
         const json = await res.json();
         if (json.data && Array.isArray(json.data) && json.data.length > 0) {
@@ -29,10 +34,12 @@ export async function GET(request: Request) {
     }
   }
 
+  const { DEFAULT_BRANDS } = await import('@/lib/default-taxonomy');
+
   return NextResponse.json({
     success: true,
-    data: [],
-    meta: { total: 0 },
+    data: DEFAULT_BRANDS,
+    meta: { total: DEFAULT_BRANDS.length },
   });
 }
 

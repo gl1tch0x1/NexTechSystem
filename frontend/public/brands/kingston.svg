@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 40" fill="none">
+    <circle cx="18" cy="20" r="11" fill="#E31837"/>
+    <path d="M14 16l4 8 4-8" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+    <text x="34" y="26" font-family="'Arial Black', sans-serif" font-weight="900" font-size="16" fill="#E31837" letter-spacing="0.5">Kingston</text>
+  </svg>

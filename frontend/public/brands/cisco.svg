@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 40" fill="none">
+    <rect x="8" y="18" width="3" height="5" rx="1.5" fill="#049FD9"/>
+    <rect x="13" y="14" width="3" height="9" rx="1.5" fill="#049FD9"/>
+    <rect x="18" y="11" width="3" height="12" rx="1.5" fill="#049FD9"/>
+    <rect x="23" y="14" width="3" height="9" rx="1.5" fill="#049FD9"/>
+    <rect x="28" y="18" width="3" height="5" rx="1.5" fill="#049FD9"/>
+    <text x="38" y="26" font-family="'Segoe UI', sans-serif" font-weight="900" font-size="18" fill="#049FD9" letter-spacing="1">CISCO</text>
+  </svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 40" fill="none">
+    <rect x="8" y="10" width="20" height="20" rx="3" fill="#ED1C24"/>
+    <path d="M12 24l6-8 6 8" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+    <text x="34" y="27" font-family="'Arial Black', sans-serif" font-weight="900" font-size="20" fill="#ED1C24" letter-spacing="1.5">msi</text>
+  </svg>

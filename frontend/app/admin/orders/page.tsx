@@ -732,16 +732,16 @@ export default function AdminOrdersPage() {
         <div className="fixed inset-0 z-[110] bg-slate-950/70 backdrop-blur-sm flex justify-center items-start sm:items-center p-2 sm:p-4 md:p-6 overflow-y-auto animate-fadeIn">
           <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col my-auto max-h-[92vh] overflow-hidden">
             {/* Modal Fixed Header */}
-            <div className="px-5 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-between shrink-0 z-10">
-              <div>
+            <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-between shrink-0 z-10">
+              <div className="min-w-0 flex-1 pr-2">
                 <div className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase font-bold flex items-center gap-1.5">
-                  <PackageCheck className="w-3.5 h-3.5" />
-                  <span>Admin Direct Dispatch & Procurement</span>
+                  <PackageCheck className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Admin Direct Dispatch &amp; Procurement</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate">
                   Create New Customer Sales Order
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 sm:line-clamp-none">
                   Directly dispatch inventory, issue digital e-bills, and persist transaction records into the database.
                 </p>
               </div>
@@ -749,40 +749,40 @@ export default function AdminOrdersPage() {
                 type="button"
                 onClick={() => setIsCreateModalOpen(false)}
                 aria-label="Close modal"
-                className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Scrollable Body */}
-            <div className="overflow-y-auto p-5 sm:p-6 space-y-5 flex-1 custom-scrollbar">
+            <div className="overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-5 flex-1 custom-scrollbar">
               {/* Notifications */}
               {createError && (
-                <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{createError}</span>
                 </div>
               )}
               {createSuccess && (
-                <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 flex items-center gap-2.5 text-xs text-emerald-600 dark:text-emerald-400">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 flex items-center gap-2.5 text-xs text-emerald-600 dark:text-emerald-400">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>{createSuccess}</span>
                 </div>
               )}
 
-              <form id="createSalesOrderForm" onSubmit={handleCreateSalesOrder} className="space-y-5 text-xs">
+              <form id="createSalesOrderForm" onSubmit={handleCreateSalesOrder} className="space-y-4 sm:space-y-5 text-xs">
                 {/* SECTION 1: CLIENT & CONSIGNEE SPECIFICATION */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-4">
+                <div className="p-3 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-3.5 sm:space-y-4">
                   {/* Top Bar: Title & Database vs Manual Pill Switch */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800/80 pb-3.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800/80 pb-3 sm:pb-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                      <div className="w-7 h-7 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
                         <Building2 className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-2">
-                          <span>Client & Consignee Specification</span>
+                        <div className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-2 flex-wrap">
+                          <span>Client &amp; Consignee Specification</span>
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                             {clientSelectionMode === 'DATABASE' ? 'Database Mode' : 'Manual Entry'}
                           </span>
@@ -796,7 +796,7 @@ export default function AdminOrdersPage() {
                     </div>
 
                     {/* Mode Segmented Pill Switch: "Pick Database Client" vs "Add New Client Manually" */}
-                    <div className="inline-flex p-1 rounded-xl bg-slate-200/70 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-inner self-start sm:self-auto">
+                    <div className="grid grid-cols-2 sm:inline-flex p-1 rounded-xl bg-slate-200/70 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-inner w-full sm:w-auto shrink-0">
                       <button
                         type="button"
                         onClick={() => {
@@ -805,14 +805,14 @@ export default function AdminOrdersPage() {
                             handleSelectCustomer(availableCustomers[0].id);
                           }
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                           clientSelectionMode === 'DATABASE'
                             ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-300 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
-                        <UserCheck className="w-3.5 h-3.5" />
-                        <span>Pick Database Client</span>
+                        <UserCheck className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">Pick Database Client</span>
                       </button>
 
                       <button
@@ -821,14 +821,14 @@ export default function AdminOrdersPage() {
                           setClientSelectionMode('MANUAL');
                           setSelectedCustomerId('');
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                           clientSelectionMode === 'MANUAL'
                             ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-300 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add New Client Manually</span>
+                        <Plus className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">Add New Client Manually</span>
                       </button>
                     </div>
                   </div>
@@ -855,10 +855,10 @@ export default function AdminOrdersPage() {
                         }`}>
                           <User className="w-4 h-4" />
                         </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1.5 flex-wrap">
                             <span className="font-bold text-xs text-slate-900 dark:text-white">Individual Retail Customer</span>
-                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300">
+                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 shrink-0">
                               B2C
                             </span>
                           </div>
@@ -884,10 +884,10 @@ export default function AdminOrdersPage() {
                         }`}>
                           <Briefcase className="w-4 h-4" />
                         </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1.5 flex-wrap">
                             <span className="font-bold text-xs text-slate-900 dark:text-white">Business Seller / Commercial Partner</span>
-                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300">
+                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 shrink-0">
                               B2B / Reseller
                             </span>
                           </div>
@@ -901,15 +901,15 @@ export default function AdminOrdersPage() {
 
                   {/* Database Client Picker Bar (Only shown in DATABASE mode) */}
                   {clientSelectionMode === 'DATABASE' && (
-                    <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 shrink-0">
+                    <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shadow-xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 min-w-0 flex-1 w-full">
+                        <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 shrink-0">
                           Pick Database Client:
-                        </span>
+                        </label>
                         <select
                           value={selectedCustomerId}
                           onChange={e => handleSelectCustomer(e.target.value)}
-                          className="flex-1 bg-slate-50 dark:bg-slate-950 text-xs font-medium text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                          className="w-full sm:flex-1 min-w-0 bg-slate-50 dark:bg-slate-950 text-xs font-medium text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 truncate"
                         >
                           <option value="">-- Select Client from Database ({availableCustomers.length} registered) --</option>
                           {availableCustomers.map(c => {
@@ -924,7 +924,7 @@ export default function AdminOrdersPage() {
                       </div>
 
                       {selectedCustomerId && (
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/80 w-full sm:w-auto">
                           <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-900/50 font-bold flex items-center gap-1">
                             <Check className="w-3 h-3" />
                             <span>DB Record Linked</span>
@@ -932,10 +932,11 @@ export default function AdminOrdersPage() {
                           <button
                             type="button"
                             onClick={handleClearCustomerForm}
-                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors flex items-center gap-1 text-[11px] cursor-pointer"
                             title="Reset client fields"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
+                            <span className="sm:hidden text-slate-500">Reset</span>
                           </button>
                         </div>
                       )}
@@ -1513,23 +1514,23 @@ export default function AdminOrdersPage() {
                       {orderItems.map(item => (
                         <div
                           key={item.productId}
-                          className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs transition-colors hover:border-slate-300 dark:hover:border-slate-700"
+                          className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shadow-xs transition-colors hover:border-slate-300 dark:hover:border-slate-700"
                         >
-                          <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                             <img
                               src={item.thumbnail || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=100&q=80'}
                               alt=""
-                              className="w-11 h-11 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-800"
+                              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-800"
                             />
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <div className="font-bold text-slate-900 dark:text-white truncate text-xs">{item.productName}</div>
-                              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                              <div className="text-[10.5px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 truncate">
                                 SKU: {item.sku} • Stock: {item.stock} • Unit: {formatPrice(item.price)}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-3.5 shrink-0">
+                          <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/80 w-full sm:w-auto">
                             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/90 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
                               <button
                                 type="button"
@@ -1555,7 +1556,7 @@ export default function AdminOrdersPage() {
                               </button>
                             </div>
 
-                            <div className="font-mono font-black text-slate-900 dark:text-white min-w-[85px] text-right text-xs">
+                            <div className="font-mono font-black text-slate-900 dark:text-white min-w-[75px] sm:min-w-[85px] text-right text-xs">
                               {formatPrice(item.price * item.quantity)}
                             </div>
 
@@ -1584,7 +1585,7 @@ export default function AdminOrdersPage() {
                       <span>Payment & Fulfillment Parameters</span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                           Payment Method
@@ -1616,7 +1617,7 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                           Initial Order Status
@@ -1692,19 +1693,19 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* Modal Fixed Footer Actions */}
-            <div className="px-5 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md flex items-center justify-between shrink-0 z-10">
-              <div className="hidden sm:flex items-center gap-2">
+            <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0 z-10">
+              <div className="flex items-center justify-between sm:justify-start gap-2">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Order Total:</span>
                 <span className="font-mono font-black text-slate-900 dark:text-white text-sm">
                   {formatPrice(orderGrandTotal)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer text-center"
                 >
                   Cancel
                 </button>
@@ -1713,17 +1714,17 @@ export default function AdminOrdersPage() {
                   type="submit"
                   form="createSalesOrderForm"
                   disabled={creatingOrder || orderItems.length === 0}
-                  className="px-5 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-600/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-2 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center"
                 >
                   {creatingOrder ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                       <span>Persisting Order...</span>
                     </>
                   ) : (
                     <>
-                      <PackageCheck className="w-4 h-4" />
-                      <span>Confirm & Generate Order</span>
+                      <PackageCheck className="w-4 h-4 shrink-0" />
+                      <span>Confirm &amp; Generate Order</span>
                     </>
                   )}
                 </button>
@@ -1933,11 +1934,11 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* Modal Fixed Footer */}
-            <div className="px-5 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md flex items-center justify-between shrink-0 z-10">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0 z-10">
               <button
                 type="button"
                 onClick={() => setEBillOrder(selectedOrder)}
-                className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center justify-center sm:justify-start gap-1.5 transition-colors cursor-pointer py-1"
               >
                 <FileText className="w-4 h-4" />
                 <span>Open Digital E-Bill Tax Invoice</span>
@@ -1945,7 +1946,7 @@ export default function AdminOrdersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer text-center"
               >
                 Close
               </button>

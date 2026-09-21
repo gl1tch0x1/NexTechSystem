@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
+    <circle cx="18" cy="20" r="10" fill="#0066B3"/>
+    <path d="M14 23c2 2 6 2 8-1s-2-5-4-5-4-2-2-4 5-1 7 1" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <text x="33" y="26" font-family="'Segoe UI', sans-serif" font-weight="800" font-size="17" fill="#0066B3" letter-spacing="0.5">SeaSonic</text>
+  </svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
+    <circle cx="12" cy="17" r="3" fill="#0070BA"/>
+    <circle cx="19" cy="23" r="3" fill="#0070BA"/>
+    <circle cx="26" cy="17" r="3" fill="#0070BA"/>
+    <text x="34" y="26" font-family="'Segoe UI', sans-serif" font-weight="800" font-size="16" fill="#0070BA" letter-spacing="0.5">Synology</text>
+  </svg>
