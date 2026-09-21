@@ -160,15 +160,15 @@ export function ProductCard({ product }: { product: Product }) {
         {/* Pricing & Add to Cart Action Bar */}
         <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-end justify-between gap-2">
           <div className="min-w-0">
-            <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight leading-none">
+            <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight leading-none whitespace-nowrap">
               {formatPrice(price)}
             </div>
             {originalPrice && originalPrice > price ? (
-              <div className="text-[11px] text-slate-400 line-through font-mono mt-1">
+              <div className="text-[11px] text-slate-400 line-through font-mono mt-1 whitespace-nowrap">
                 {formatPrice(originalPrice)}
               </div>
             ) : (
-              <div className="text-[10px] text-slate-400 font-medium mt-1">
+              <div className="text-[10px] text-slate-400 font-medium mt-1 whitespace-nowrap">
                 Inc. 5% UAE VAT
               </div>
             )}

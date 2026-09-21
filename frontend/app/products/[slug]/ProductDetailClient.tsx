@@ -219,25 +219,25 @@ export function ProductDetailClient({ product }: { product: Product }) {
           )}
 
           {/* Price Box */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/90 dark:border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-            <div>
-              <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/90 dark:border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
                   {formatPrice(currentPrice)}
                 </span>
                 {originalPrice && (
-                  <span className="text-sm text-slate-400 dark:text-slate-500 line-through font-mono">
+                  <span className="text-sm text-slate-400 dark:text-slate-500 line-through font-mono whitespace-nowrap">
                     {formatPrice(originalPrice)}
                   </span>
                 )}
                 {originalPrice && originalPrice > currentPrice && (
-                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono">
+                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">
                     -{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% SAVE
                   </span>
                 )}
               </div>
               {product.unitPrice && product.unitMeasure && (
-                <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+                <div className="text-[11px] font-mono text-slate-400 mt-0.5 whitespace-nowrap">
                   ({formatPrice(product.unitPrice)} / {product.unitMeasure})
                 </div>
               )}
@@ -246,19 +246,19 @@ export function ProductDetailClient({ product }: { product: Product }) {
               </div>
             </div>
 
-            <div className="sm:text-right">
+            <div className="sm:text-right shrink-0">
               {currentStock > 0 ? (
-                <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 px-3 py-1.5 rounded-xl">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{currentStock} Units In Stock</span>
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="whitespace-nowrap">{currentStock} Units In Stock</span>
                 </div>
               ) : product.allowBackorder ? (
-                <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/60 px-3 py-1.5 rounded-xl">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />
-                  <span>Available on Backorder</span>
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/60 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                  <span className="whitespace-nowrap">Available on Backorder</span>
                 </div>
               ) : (
-                <div className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-950/40 px-3 py-1.5 rounded-xl border border-red-200">
+                <div className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-950/40 px-3.5 py-2 rounded-xl border border-red-200 whitespace-nowrap shadow-sm">
                   Currently Out of Stock
                 </div>
               )}
