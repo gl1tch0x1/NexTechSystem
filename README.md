@@ -98,10 +98,11 @@ NexTech Systems is an enterprise B2B and B2C computer hardware and technology co
    - Cumulative TDP consumption calculations featuring an automated +30% safety headroom recommendation for Power Supply Units (PSU).
    - Direct bundle export enabling one-click transfer of all validated hardware components into the active cart.
 
-6. **Real-Time Multi-Currency Conversion Engine**:
-   - Dynamic foreign exchange rate integration using open exchange rate feeds with cached fallback mechanisms.
-   - Real-time conversion across major currencies (AED, USD, EUR, GBP, SAR, KWD, QAR, OMR, BHD, JPY, CAD, AUD, INR) with AED as the base currency.
-   - User-selectable currency dropdown in the primary navigation bar with instant client-side price recalculations and persistent preferences.
+6. **Real-Time Multi-Currency Engine & Official UAE Dirham (`U+20C3`) Symbol Standard**:
+   - Official UAE Dirham currency symbol integration matching the Central Bank of the UAE and Unicode 18.0 (`U+20C3`) vector geometry via the `dirham` package ([pooyagolchian/dirham](https://github.com/pooyagolchian/dirham)).
+   - Native React vector component (`<DirhamSymbol />`), high-contrast dark square badge (`<DirhamBadge />`), and price tag formatter (`<PriceTag />`) in `frontend/components/ui/DirhamSymbol.tsx`.
+   - Optimized, professional Navbar Multi-Currency selector featuring a standalone neutral Dirham icon matching the design language of adjacent controls, with clean multi-currency switching across AED, USD, EUR, SAR, GBP, KWD, INR, and PKR.
+   - Dynamic foreign exchange rate integration using live exchange feeds (`fawazahmed0/currency-api`) with cached fallback mechanisms and AED as the authoritative platform base currency.
 
 7. **UAE FTA VAT 201 Tax Reporting & Granular Tax Exemption Engine**:
    - Authoritative calculation of Standard-Rated Supplies (5%), Zero-Rated Supplies, Exempt Supplies, and Reverse Charge Provisions.
@@ -698,7 +699,7 @@ stateDiagram-v2
 | **Cryptography** | PBKDF2 (SHA-512 / SHA-256), timingSafeEqual | Password hashing (100,000 rounds) and administrative PIN validation |
 | **Data Ingestion** | XLSX (SheetJS), Multer | High-performance Excel buffer parsing and catalog ingestion |
 | **Persistence** | Modular Repository Pattern, JSON DataStore | Structured document-based persistence with database interfaces |
-| **Currency Feeds** | Open Exchange Rates API | Dynamic multi-currency valuation against AED base currency |
+| **Currency & Symbols** | `dirham` ([pooyagolchian/dirham](https://github.com/pooyagolchian/dirham)), Live Exchange API | Official UAE Dirham symbol (`U+20C3`), Web Font, SVG components & dynamic FX conversion |
 
 ---
 

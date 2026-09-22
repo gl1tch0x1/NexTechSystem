@@ -7,6 +7,7 @@ import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatDate } from '@/lib/utils';
 import { Wallet, WalletTransaction } from '@/types';
+import { DirhamSymbol, DirhamBadge } from '@/components/ui/DirhamSymbol';
 import {
   Wallet as WalletIcon,
   Plus,
@@ -117,23 +118,32 @@ export default function CustomerWalletPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase font-bold text-tech-cyan tracking-wider">
-                NexTech Verified Wallet
-              </span>
+              <div className="flex items-center gap-2.5">
+                <DirhamBadge size={38} variant="glass" weight="bold" />
+                <div>
+                  <span className="text-xs font-mono uppercase font-bold text-tech-cyan tracking-wider block">
+                    NexTech Verified Wallet
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">Central Bank of UAE (U+20C3)</span>
+                </div>
+              </div>
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
             </div>
 
             <div>
               <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Available Balance</div>
-              <div className="text-4xl font-black tracking-tight text-white mt-1">
-                {formatPrice(wallet?.balance || 0)}
+              <div className="text-4xl font-black tracking-tight text-white mt-1 flex items-baseline gap-2">
+                <span>{formatPrice(wallet?.balance || 0)}</span>
               </div>
               <div className="text-[11px] text-slate-400 mt-1">100% redeemable across all hardware orders</div>
             </div>
 
             <div className="pt-4 border-t border-slate-700/80 flex items-center justify-between text-xs text-slate-400 font-mono">
               <span>LEDGER # {wallet?.id}</span>
-              <span>AED CURRENCY</span>
+              <span className="flex items-center gap-1.5">
+                <DirhamSymbol size={13} weight="bold" className="text-emerald-400" />
+                <span>AED CURRENCY</span>
+              </span>
             </div>
           </div>
 
@@ -155,23 +165,29 @@ export default function CustomerWalletPage() {
               <button
                 disabled={topupLoading}
                 onClick={() => initiateTopup(500)}
-                className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors"
+                className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors flex items-center justify-center gap-1"
               >
-                +AED 500
+                <span>+</span>
+                <DirhamSymbol size={12} weight="bold" />
+                <span>500</span>
               </button>
               <button
                 disabled={topupLoading}
                 onClick={() => initiateTopup(1000)}
-                className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors"
+                className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors flex items-center justify-center gap-1"
               >
-                +AED 1,000
+                <span>+</span>
+                <DirhamSymbol size={12} weight="bold" />
+                <span>1,000</span>
               </button>
               <button
                 disabled={topupLoading}
                 onClick={() => initiateTopup(2500)}
-                className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors"
+                className="py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-tech-blue hover:text-white text-slate-300 text-xs font-bold transition-colors flex items-center justify-center gap-1"
               >
-                +AED 2,500
+                <span>+</span>
+                <DirhamSymbol size={12} weight="bold" />
+                <span>2,500</span>
               </button>
               <button
                 disabled={topupLoading}

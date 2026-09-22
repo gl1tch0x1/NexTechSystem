@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order, Wallet } from '@/types';
+import { DirhamBadge } from '@/components/ui/DirhamSymbol';
 import {
   User,
   ShoppingBag,
@@ -86,10 +87,13 @@ export default function CustomerAccountDashboard() {
         <div className="flex items-center gap-4">
           <Link
             href="/account/wallet"
-            className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-right min-w-[140px]"
+            className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-right min-w-[170px] flex items-center gap-3.5 hover:bg-white/15 transition-all"
           >
-            <div className="text-[10px] uppercase font-bold text-tech-cyan tracking-wider">Wallet Balance</div>
-            <div className="text-xl font-black">{formatPrice(wallet?.balance || 0)}</div>
+            <DirhamBadge size={40} variant="dark" weight="bold" />
+            <div>
+              <div className="text-[10px] uppercase font-bold text-tech-cyan tracking-wider">Wallet Balance</div>
+              <div className="text-xl font-black">{formatPrice(wallet?.balance || 0)}</div>
+            </div>
           </Link>
         </div>
       </div>
@@ -123,7 +127,7 @@ export default function CustomerAccountDashboard() {
         >
           <div className="flex items-center justify-between text-slate-400 mb-3">
             <span className="text-xs font-bold uppercase">Wallet Credits</span>
-            <WalletIcon className="w-5 h-5 text-tech-cyan" />
+            <DirhamBadge size={26} variant="dark" weight="bold" />
           </div>
           <div className="text-2xl font-black text-white">{formatPrice(wallet?.balance || 0)}</div>
           <div className="text-[11px] text-tech-cyan mt-1">Available for immediate checkout</div>

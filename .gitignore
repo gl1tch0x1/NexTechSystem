@@ -70,3 +70,10 @@ backend/data_store/
 */data_store/
 data_store
 backend/data_store
+
+# Auto-generated agent docs
+AGENTS.md
+CLAUDE.md
+frontend/AGENTS.md
+frontend/CLAUDE.md
+

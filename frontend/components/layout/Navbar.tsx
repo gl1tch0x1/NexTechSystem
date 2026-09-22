@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { DirhamSymbol } from '@/components/ui/DirhamSymbol';
 import {
   Search,
   ShoppingCart,
@@ -126,13 +127,22 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-2 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700/80 text-xs font-bold transition-all shadow-xs"
-              title="Change Display Currency"
+              className="p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 shrink-0 cursor-pointer group"
+              title={`Active Currency: ${currentCurrency.name} (${currentCurrency.code})`}
               aria-label="Currency Selector"
             >
-              <span className="text-sm leading-none">{currentCurrency.flag}</span>
-              <span className="font-mono text-[11px] font-extrabold">{currentCurrency.code}</span>
-              <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${currencyDropdownOpen ? 'rotate-180' : ''}`} />
+              {currentCurrency.code === 'AED' ? (
+                <DirhamSymbol
+                  size={16}
+                  weight="bold"
+                  className="text-slate-900 dark:text-white transition-transform duration-200 group-hover:scale-110"
+                />
+              ) : (
+                <span className="font-mono text-xs font-black text-slate-900 dark:text-white">
+                  {currentCurrency.symbol || currentCurrency.code}
+                </span>
+              )}
+              <ChevronDown className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200 ${currencyDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {currencyDropdownOpen && (
@@ -141,12 +151,12 @@ export function Navbar() {
                   className="fixed inset-0 z-40"
                   onClick={() => setCurrencyDropdownOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95">
-                  <div className="px-3 py-1.5 text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <span>Regional Currency</span>
-                    <span className="text-[9px] text-tech-blue">GCC / Global</span>
+                <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95">
+                  <div className="px-3.5 py-1.5 text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span>Select Currency</span>
+                    <span className="text-[9px] font-mono text-tech-blue">GCC & Global</span>
                   </div>
-                  <div className="max-h-60 overflow-y-auto py-1">
+                  <div className="max-h-64 overflow-y-auto py-1">
                     {availableCurrencies.map(cur => {
                       const isSelected = cur.code === currentCurrency.code;
                       return (
@@ -157,22 +167,31 @@ export function Navbar() {
                             setCurrency(cur.code);
                             setCurrencyDropdownOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${
+                          className={`w-full flex items-center justify-between px-3.5 py-2 text-xs transition-colors cursor-pointer ${
                             isSelected
-                              ? 'text-tech-blue dark:text-cyan-400 bg-blue-50/70 dark:bg-cyan-950/30 font-bold'
-                              : 'text-slate-700 dark:text-slate-300'
+                              ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold'
+                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                           }`}
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2.5">
                             <span className="text-base leading-none">{cur.flag}</span>
                             <div className="text-left">
-                              <div className="font-bold">{cur.code}</div>
-                              <div className="text-[10px] text-slate-400 font-normal">{cur.name}</div>
+                              <div className="font-bold text-xs leading-none">{cur.code}</div>
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-normal mt-0.5">{cur.name}</div>
                             </div>
                           </div>
-                          <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
-                            {cur.symbol}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono text-slate-700 dark:text-slate-300">
+                              {cur.code === 'AED' ? (
+                                <DirhamSymbol size={14} weight="bold" className="text-slate-900 dark:text-white" />
+                              ) : (
+                                cur.symbol
+                              )}
+                            </span>
+                            {isSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-tech-blue" />
+                            )}
+                          </div>
                         </button>
                       );
                     })}

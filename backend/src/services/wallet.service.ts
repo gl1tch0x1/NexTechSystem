@@ -12,6 +12,7 @@ export class WalletService {
         userId,
         balance: 0,
         currency: 'AED',
+        isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
