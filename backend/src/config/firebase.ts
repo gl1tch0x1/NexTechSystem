@@ -7,27 +7,23 @@ let firestoreInstance: admin.firestore.Firestore | null = null;
 export function initializeFirebase(): admin.app.App | null {
   if (firebaseInitialized && admin.apps.length > 0) return admin.app();
 
+  if (!ENV.FIREBASE_SERVICE_ACCOUNT_CONFIGURED) {
+    console.warn('[Firebase] Admin SDK not initialized because Firebase service-account credentials are missing or placeholder values were detected.');
+    return null;
+  }
+
   try {
-    if (ENV.FIREBASE_CLIENT_EMAIL && ENV.FIREBASE_PRIVATE_KEY) {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId: ENV.FIREBASE_PROJECT_ID,
-          clientEmail: ENV.FIREBASE_CLIENT_EMAIL,
-          privateKey: ENV.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-        }),
-        storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
-      });
-      firebaseInitialized = true;
-      console.log('[Firebase] Admin SDK initialized with service account for [%s].', ENV.FIREBASE_PROJECT_ID);
-    } else if (ENV.FIREBASE_PROJECT_ID) {
-      admin.initializeApp({
+    admin.initializeApp({
+      credential: admin.credential.cert({
         projectId: ENV.FIREBASE_PROJECT_ID,
-        storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
-      });
-      firebaseInitialized = true;
-      console.log('[Firebase] Admin SDK initialized with Project ID [%s].', ENV.FIREBASE_PROJECT_ID);
-    }
-    
+        clientEmail: ENV.FIREBASE_CLIENT_EMAIL,
+        privateKey: ENV.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      }),
+      storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
+    });
+    firebaseInitialized = true;
+    console.log('[Firebase] Admin SDK initialized with service account for [%s].', ENV.FIREBASE_PROJECT_ID);
+
     if (admin.apps.length > 0) {
       firestoreInstance = admin.firestore();
     }
