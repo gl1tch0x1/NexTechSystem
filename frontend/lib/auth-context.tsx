@@ -90,13 +90,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(res.user);
 
       // 2. Synchronize Cloud Firebase Authentication session (only if live key configured)
+      // Firebase sync is optional – any failure must be swallowed so the backend JWT login is unaffected.
       if (isLiveKey && firebaseAuth && firebaseAuth.app && password) {
         try {
           await signInWithEmailAndPassword(firebaseAuth, email, password);
         } catch (fbErr: any) {
+          // Try to create the account if it doesn't exist yet
           if (fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') {
-            await createUserWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
+            await createUserWithEmailAndPassword(firebaseAuth, email, password).catch(() => { });
           }
+          // All other Firebase errors (403 API key, domain restriction, etc.) are silently ignored
         }
       }
 
@@ -156,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await createUserWithEmailAndPassword(firebaseAuth, email, password);
         } catch (fbErr: any) {
           if (fbErr.code === 'auth/email-already-in-use') {
-            await signInWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
+            await signInWithEmailAndPassword(firebaseAuth, email, password).catch(() => { });
           }
         }
       }
@@ -248,7 +251,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setReseller(null);
     if (firebaseAuth && firebaseAuth.app) {
-      firebaseSignOut(firebaseAuth).catch(() => {});
+      firebaseSignOut(firebaseAuth).catch(() => { });
     }
   };
 

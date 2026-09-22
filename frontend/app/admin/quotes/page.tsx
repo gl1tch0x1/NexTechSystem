@@ -174,7 +174,10 @@ export default function AdminQuotesPage() {
       .catch(() => {});
 
     // Load registered database clients
-    fetch('/api/admin/customers')
+    const authToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    fetch('/api/admin/customers', {
+      headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+    })
       .then((r) => r.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {

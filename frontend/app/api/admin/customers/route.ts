@@ -25,10 +25,14 @@ export async function GET(request: NextRequest) {
         headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
         signal: AbortSignal.timeout(1500),
       });
-      const json = await res.json();
-      return NextResponse.json(json, { status: res.status });
+      // Only use backend response if it was authorised
+      if (res.ok) {
+        const json = await res.json();
+        return NextResponse.json(json, { status: res.status });
+      }
+      // Non-ok (e.g. 401) → fall through to fallback below
     } catch {
-      // Fall through
+      // Fetch error → fall through to fallback
     }
   }
 

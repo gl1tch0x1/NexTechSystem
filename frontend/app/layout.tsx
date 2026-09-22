@@ -34,6 +34,7 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
+  preload: false,
   weight: ['400', '500', '600'],
 });
 
