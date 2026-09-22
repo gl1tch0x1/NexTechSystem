@@ -14,17 +14,17 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "firebase-admin": "^14.4.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0",
-    "multer": "^2.3.0",
+    "morgan": "^1.12.1",
+    "multer": "^2.4.0",
     "uuid": "^14.0.2",
     "xlsx": "^0.18.5",
-    "zod": "^4.6.2"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -32,7 +32,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^2.2.0",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.2",
     "@types/uuid": "^11.0.0",
     "tsx": "^4.19.3",
     "typescript": "^7.0.2"
