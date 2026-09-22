@@ -13,7 +13,6 @@ import {
   ShoppingCart,
   Heart,
   User,
-  Cpu,
   Layers,
   ShieldCheck,
   Store,
@@ -70,10 +69,16 @@ export function Navbar() {
 
       {/* 2. MAIN HEADER BAR */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 lg:gap-8">
-        {/* Brand Logo (Modernized High-Impact Tech Badge) */}
+        {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-0">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-blue-500/25 group-hover:scale-105 group-hover:shadow-blue-500/40 transition-all duration-300 shrink-0">
-            <Cpu className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60 shadow-md shadow-slate-200/60 dark:shadow-black/30 group-hover:scale-105 group-hover:shadow-blue-500/20 transition-all duration-300 shrink-0 flex items-center justify-center p-0.5">
+            <img
+              src="/images/nextech-logo.png"
+              alt="NexTech Systems Logo"
+              width={40}
+              height={40}
+              className="w-full h-full object-contain"
+            />
           </div>
           <div className="min-w-0">
             <div className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1 leading-none">

@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Cpu, Shield, Truck, RefreshCw, Headphones, Lock, Sparkles } from 'lucide-react';
+import { Shield, Truck, RefreshCw, Headphones, Lock, Sparkles } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -54,8 +54,14 @@ export function Footer() {
       <div className="max-w-7xl mx-auto py-10 sm:py-12 px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
         <div className="col-span-2 space-y-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-tech-blue to-tech-cyan flex items-center justify-center text-white shadow-sm">
-              <Cpu className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex items-center justify-center p-0.5 shrink-0">
+              <img
+                src="/images/nextech-logo.png"
+                alt="NexTech Systems"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="text-base font-black text-slate-900 dark:text-white">
               NEXTECH<span className="text-tech-blue">SYSTEMS</span>
