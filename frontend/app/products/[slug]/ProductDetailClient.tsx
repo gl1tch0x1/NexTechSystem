@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Truck,
   CheckCircle2,
-  Store,
   Share2,
   Minus,
   Plus,
@@ -149,20 +148,29 @@ export function ProductDetailClient({ product }: { product: Product }) {
       {/* Right Product Details & Buy Box */}
       <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
         <div className="space-y-4">
-          {/* Seller Attribution & SKU */}
+          {/* Product Category & SKU Meta */}
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-tech-blue dark:text-tech-cyan uppercase tracking-wider">{product.brandName}</span>
-              <span className="text-slate-300 dark:text-slate-600">•</span>
-              <span className="font-mono text-slate-500 dark:text-slate-400 font-semibold">SKU: {currentSku}</span>
-            </div>
-
-            {product.sellerType === 'RESELLER' && (
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
-                <Store className="w-3.5 h-3.5 text-amber-500" />
-                Verified Partner: {product.resellerName || product.resellerCode}
+              {product.categoryName && (
+                <span className="font-extrabold text-tech-blue dark:text-cyan-400 uppercase tracking-wider text-[11px]">
+                  {product.categoryName}
+                </span>
+              )}
+              {product.brandName && product.brandName.toLowerCase() !== 'comnet tech' && (
+                <>
+                  {product.categoryName && <span className="text-slate-300 dark:text-slate-600">•</span>}
+                  <span className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+                    {product.brandName}
+                  </span>
+                </>
+              )}
+              {(product.categoryName || (product.brandName && product.brandName.toLowerCase() !== 'comnet tech')) && (
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+              )}
+              <span className="font-mono text-slate-500 dark:text-slate-400 font-semibold bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-md border border-slate-200/80 dark:border-slate-700/80 text-[11px]">
+                SKU: {currentSku}
               </span>
-            )}
+            </div>
           </div>
 
           {/* Product Title */}

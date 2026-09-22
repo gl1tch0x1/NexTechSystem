@@ -345,7 +345,7 @@ async function runTestSuite() {
       body: JSON.stringify({
         name: 'Enterprise Ultra NVMe 4TB SSD Module',
         sku: 'COM-NVME-4TB-01',
-        brandName: 'ComNet Tech',
+        brandName: 'Samsung Semiconductor',
         categoryName: 'Storage & Drives',
         categoryId: 'cat_storage',
         price: 1499,

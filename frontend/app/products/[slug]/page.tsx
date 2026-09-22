@@ -62,7 +62,8 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
     };
   }
 
-  const title = `${product.name} - ${product.brandName || 'Enterprise'} SKU | NexTech Systems UAE`;
+  const brand = product.brandName && product.brandName.toLowerCase() !== 'comnet tech' ? product.brandName : 'Enterprise';
+  const title = `${product.name} - ${brand} SKU | NexTech Systems UAE`;
   const description = product.shortDescription || (product.description ? product.description.slice(0, 160) : 'Enterprise grade computing hardware, workstations, and server components.');
   const primaryImg = product.primaryImage || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
 
