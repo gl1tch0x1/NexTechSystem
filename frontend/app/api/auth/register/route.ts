@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { signJwt } from '@/lib/token';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_insecure_local_jwt_secret_change_in_env';
 
 export async function POST(request: NextRequest) {
   const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
   const body = await request.json().catch(() => ({}));
-  const { name, email, username, phone } = body;
 
   if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
     const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
@@ -19,37 +15,44 @@ export async function POST(request: NextRequest) {
       });
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });
-    } catch {
-      // Fall through
+    } catch (err: any) {
+      console.warn('[Auth API] Remote registration service is unavailable:', err?.message || err);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'REGISTRATION_SERVICE_UNAVAILABLE',
+            message: 'Registration is unavailable because the backend auth service and Firebase Authentication are not reachable.',
+          },
+        },
+        { status: 503 }
+      );
     }
   }
 
-  const id = `user_${Date.now()}`;
-  const cleanEmail = (email || '').toLowerCase().trim();
-  const newUser = {
-    id,
-    email: cleanEmail,
-    role: 'CUSTOMER' as const,
-    name: name || 'Customer',
-    username: username || cleanEmail.split('@')[0],
-    phone: phone || '',
-    addresses: [],
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(1500),
+      });
+      const json = await res.json();
+      return NextResponse.json(json, { status: res.status });
+    } catch {
+      // No local demo registration path.
+    }
+  }
 
-  const token = signJwt(
-    { id: newUser.id, email: newUser.email, role: newUser.role },
-    JWT_SECRET,
-    86400 * 30
-  );
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      token,
-      user: newUser,
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        code: 'REGISTRATION_SERVICE_UNAVAILABLE',
+        message: 'Registration service is unavailable. Configure the backend and Firebase Authentication before creating a new account.',
+      },
     },
-  });
+    { status: 503 }
+  );
 }

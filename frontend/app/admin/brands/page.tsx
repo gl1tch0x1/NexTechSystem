@@ -22,8 +22,6 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-import { DEFAULT_BRANDS } from '@/lib/default-taxonomy';
-
 const PRESET_BRAND_LOGOS = [
   { name: 'Intel', logo: '/brands/intel.svg' },
   { name: 'NVIDIA', logo: '/brands/nvidia.svg' },
@@ -49,7 +47,7 @@ const PRESET_BRAND_LOGOS = [
 
 export default function AdminBrandsPage() {
   const { token } = useAuth();
-  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<string>('ALL');
@@ -87,11 +85,11 @@ export default function AdminBrandsPage() {
       if (data && Array.isArray(data) && data.length > 0) {
         setBrands(data);
       } else {
-        setBrands(DEFAULT_BRANDS);
+        setBrands([]);
       }
     } catch (err) {
       console.error('Failed to fetch brands:', err);
-      setBrands(DEFAULT_BRANDS);
+      setBrands([]);
     } finally {
       setLoading(false);
     }

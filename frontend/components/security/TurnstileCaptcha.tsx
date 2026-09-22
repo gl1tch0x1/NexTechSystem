@@ -34,14 +34,13 @@ export default function TurnstileCaptcha({
   const [token, setToken] = useState<string>('');
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
-  const siteKey =
-    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || '0x4AAAAAAAx_DEMO_SITE_KEY_2026';
+  const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || '';
 
   const renderWidget = () => {
     if (typeof window !== 'undefined' && window.turnstile && containerRef.current && !widgetIdRef.current) {
       try {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey.includes('DEMO') ? '1x00000000000000000000AA' : siteKey,
+          sitekey: siteKey || '1x00000000000000000000AA',
           action,
           theme,
           callback: (t: string) => {
@@ -54,10 +53,9 @@ export default function TurnstileCaptcha({
             setToken('');
           },
           'error-callback': () => {
-            // In demo / offline mode, auto-grant verified fallback
-            setIsVerified(true);
-            setToken('demo_verified_token_2026');
-            if (onVerify) onVerify('demo_verified_token_2026');
+            setIsVerified(false);
+            setToken('');
+            console.warn('Turnstile verification failed.');
           },
         });
       } catch (err) {
@@ -80,12 +78,14 @@ export default function TurnstileCaptcha({
     };
   }, [scriptLoaded]);
 
-  // Demo fallback verification if user clicks the quick pass button
   const handleSimulatePass = () => {
-    const demoToken = 'demo_verified_token_2026';
-    setIsVerified(true);
-    setToken(demoToken);
-    if (onVerify) onVerify(demoToken);
+    if (!siteKey) {
+      setIsVerified(false);
+      setToken('');
+      return;
+    }
+    setIsVerified(false);
+    setToken('');
   };
 
   return (
@@ -122,9 +122,10 @@ export default function TurnstileCaptcha({
           <button
             type="button"
             onClick={handleSimulatePass}
-            className="px-2.5 py-1.5 rounded-lg bg-purple-50 dark:bg-slate-800 hover:bg-purple-100 dark:hover:bg-slate-700 text-purple-600 dark:text-purple-300 font-bold text-[11px] border border-purple-200 dark:border-slate-700 transition-colors cursor-pointer shrink-0"
+            className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition-colors cursor-default shrink-0"
+            disabled
           >
-            Verify Secure
+            Awaiting verification
           </button>
         ) : (
           <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 font-mono shrink-0">

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
+import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 import { formatPrice } from '@/lib/utils';
 import {
   Product,
@@ -14,7 +15,6 @@ import {
   SellerType,
   Reseller,
 } from '@/types';
-import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 import {
   SPECIFICATION_FIELDS,
   SPECIFICATION_PRESETS,
@@ -470,8 +470,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
   const { token } = useAuth();
 
   const [loading, setLoading] = useState(mode === 'edit');
-  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
-  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [resellers, setResellers] = useState<Reseller[]>([]);
   
   // Layout View Mode: 'all' shows all sections in a master layout, 'tabs' shows single tab

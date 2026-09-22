@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { FALLBACK_COUPONS } from '@/lib/fallback-data';
 
 export async function GET(request: Request) {
   const backendUrl =
@@ -21,20 +20,25 @@ export async function GET(request: Request) {
       });
       if (res.ok) {
         const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+        if (json.data && Array.isArray(json.data)) {
           return NextResponse.json(json);
         }
       }
     } catch (err) {
-      console.warn('Backend admin coupons endpoint fetch failed, using fallbacks:', err);
+      console.warn('Backend admin coupons endpoint fetch failed:', err);
     }
   }
 
-  return NextResponse.json({
-    success: true,
-    data: FALLBACK_COUPONS,
-    meta: { total: FALLBACK_COUPONS.length },
-  });
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        code: 'DATA_UNAVAILABLE',
+        message: 'Coupon catalog is not available because the backend service is not configured or reachable.',
+      },
+    },
+    { status: 503 }
+  );
 }
 
 export async function POST(request: Request) {

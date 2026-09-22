@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FALLBACK_PRODUCTS } from '@/lib/fallback-data';
 
 function getSafeProductSearchParams(incomingParams: URLSearchParams): URLSearchParams {
   const safeParams = new URLSearchParams();
@@ -116,58 +115,14 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Resilient Local / Standalone / Vercel Serverless Fallback
-  const category = searchParams.get('category');
-  const search = searchParams.get('search')?.toLowerCase();
-  const brand = searchParams.get('brand');
-  const inStock = searchParams.get('inStock');
-  const isFeatured = searchParams.get('isFeatured');
-  const sort = searchParams.get('sort');
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const limit = parseInt(searchParams.get('limit') || '50', 10);
-
-  let filtered = [...FALLBACK_PRODUCTS];
-
-  if (category) {
-    filtered = filtered.filter(p => p.categoryId === category || p.categoryName?.toLowerCase().includes(category.toLowerCase()));
-  }
-  if (brand) {
-    filtered = filtered.filter(p => p.brandId === brand || p.brandName?.toLowerCase().includes(brand.toLowerCase()));
-  }
-  if (search) {
-    filtered = filtered.filter(p =>
-      p.name.toLowerCase().includes(search) ||
-      p.sku.toLowerCase().includes(search) ||
-      p.tags?.some(t => t.toLowerCase().includes(search))
-    );
-  }
-  if (inStock === 'true') {
-    filtered = filtered.filter(p => p.stock > 0);
-  }
-  if (isFeatured === 'true') {
-    filtered = filtered.filter(p => p.isFeatured);
-  }
-
-  if (sort === 'price_asc') {
-    filtered.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price));
-  } else if (sort === 'price_desc') {
-    filtered.sort((a, b) => (b.salePrice || b.price) - (a.salePrice || a.price));
-  } else if (sort === 'rating') {
-    filtered.sort((a, b) => b.rating - a.rating);
-  }
-
-  const total = filtered.length;
-  const startIndex = (page - 1) * limit;
-  const paginated = filtered.slice(startIndex, startIndex + limit);
-
-  return NextResponse.json({
-    success: true,
-    data: paginated,
-    meta: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        code: 'DATA_UNAVAILABLE',
+        message: 'Catalog is unavailable because the backend service is not configured or reachable.',
+      },
     },
-  });
+    { status: 503 }
+  );
 }

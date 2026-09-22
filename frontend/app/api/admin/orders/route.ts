@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FALLBACK_ORDERS } from '@/lib/fallback-data';
 
 export async function GET(request: NextRequest) {
   const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
@@ -28,12 +27,18 @@ export async function GET(request: NextRequest) {
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });
     } catch {
-      // Fall through
+      // Fail closed; no mock order records.
     }
   }
 
-  return NextResponse.json({
-    success: true,
-    data: FALLBACK_ORDERS,
-  });
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        code: 'DATA_UNAVAILABLE',
+        message: 'Orders are unavailable because the backend service is not configured or reachable.',
+      },
+    },
+    { status: 503 }
+  );
 }

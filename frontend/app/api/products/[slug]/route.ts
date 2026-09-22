@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FALLBACK_PRODUCTS } from '@/lib/fallback-data';
 
 export async function GET(
   request: NextRequest,
@@ -59,24 +58,8 @@ export async function GET(
     }
   }
 
-  // 3. Resilient Local / Vercel Serverless Fallback
-  const cleanSlug = slug.toLowerCase();
-  const product = FALLBACK_PRODUCTS.find(p => p.slug.toLowerCase() === cleanSlug || p.id === slug);
-
-  if (product) {
-    const relatedProducts = FALLBACK_PRODUCTS.filter(p => p.categoryId === product.categoryId && p.id !== product.id).slice(0, 4);
-    return NextResponse.json({
-      success: true,
-      data: {
-        product,
-        reviews: [],
-        relatedProducts,
-      },
-    });
-  }
-
   return NextResponse.json(
-    { success: false, message: 'Product not found in catalog' },
-    { status: 404 }
+    { success: false, message: 'Product unavailable because the backend catalog service is not configured or reachable.' },
+    { status: 503 }
   );
 }

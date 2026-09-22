@@ -24,24 +24,16 @@ export async function POST(
       const errData = await res.json();
       return NextResponse.json(errData, { status: res.status });
     } catch (err) {
-      // Offline fallback: generate mock sales order conversion
-      const orderNumber = `ORD-QTE-${Math.floor(10000 + Math.random() * 90000)}`;
-      return NextResponse.json({
-        success: true,
-        data: {
-          order: {
-            orderNumber,
-            status: 'CONFIRMED',
-            paymentStatus: 'PAID',
-          },
-          quote: {
-            id,
-            status: 'CONVERTED',
-            convertedOrderId: orderNumber,
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Quote conversion is unavailable because the backend service is not configured or reachable.',
           },
         },
-        message: `Quotation successfully converted to verified Sales Order #${orderNumber}!`,
-      });
+        { status: 503 }
+      );
     }
   } catch (err: any) {
     return NextResponse.json({ success: false, error: { message: err.message || 'Failed to convert quote.' } }, { status: 500 });

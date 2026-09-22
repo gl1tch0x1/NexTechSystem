@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FALLBACK_USERS } from '@/lib/fallback-data';
 
 export async function GET(request: NextRequest) {
   const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
@@ -25,26 +24,23 @@ export async function GET(request: NextRequest) {
         headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
         signal: AbortSignal.timeout(1500),
       });
-      // Only use backend response if it was authorised
       if (res.ok) {
         const json = await res.json();
         return NextResponse.json(json, { status: res.status });
       }
-      // Non-ok (e.g. 401) → fall through to fallback below
     } catch {
-      // Fetch error → fall through to fallback
+      // Fail closed; no mock customer data.
     }
   }
 
-  const customers = FALLBACK_USERS.filter(u => u.role === 'CUSTOMER').map(u => ({
-    ...u,
-    walletBalance: 2500,
-    orderCount: 2,
-    totalSpent: 4200,
-  }));
-
-  return NextResponse.json({
-    success: true,
-    data: customers,
-  });
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        code: 'DATA_UNAVAILABLE',
+        message: 'Customer records are unavailable because the backend is not configured or reachable.',
+      },
+    },
+    { status: 503 }
+  );
 }

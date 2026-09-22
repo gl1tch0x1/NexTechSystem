@@ -13,8 +13,7 @@ export const getBaseApiUrl = (): string => {
   }
 
   if (typeof window !== 'undefined') {
-    // In browser runtime, always route through Next.js /api to leverage internal Next.js API routes,
-    // session cookies, and resilient fallback mocks without direct localhost:5000 port connection failures
+    // In browser runtime, always route through Next.js /api to leverage the internal API layer.
     return '/api';
   }
 
