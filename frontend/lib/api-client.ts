@@ -1,23 +1,30 @@
 export const getBaseApiUrl = (): string => {
-  // If an external non-localhost backend API is provided explicitly
-  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost') && !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1')) {
+  const isLocalhost = (value?: string) => !!value && (value.includes('localhost') || value.includes('127.0.0.1'));
+
+  // Prefer an explicitly configured remote backend in production.
+  if (process.env.NEXT_PUBLIC_API_URL && !isLocalhost(process.env.NEXT_PUBLIC_API_URL)) {
     return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
   }
-  if (process.env.BACKEND_URL && !process.env.BACKEND_URL.includes('localhost') && !process.env.BACKEND_URL.includes('127.0.0.1')) {
+  if (process.env.BACKEND_URL && !isLocalhost(process.env.BACKEND_URL)) {
     const clean = process.env.BACKEND_URL.replace(/\/$/, '').replace(/\/api$/, '');
     return `${clean}/api`;
   }
-  if (process.env.API_PROXY_TARGET && !process.env.API_PROXY_TARGET.includes('localhost') && !process.env.API_PROXY_TARGET.includes('127.0.0.1')) {
+  if (process.env.API_PROXY_TARGET && !isLocalhost(process.env.API_PROXY_TARGET)) {
     const clean = process.env.API_PROXY_TARGET.replace(/\/$/, '').replace(/\/api$/, '');
     return `${clean}/api`;
   }
 
+  // In the browser, route through the Next.js API layer and let the proxy decide.
   if (typeof window !== 'undefined') {
-    // In browser runtime, always route through Next.js /api to leverage the internal API layer.
     return '/api';
   }
 
-  // Server-side (Node.js runtime / Vercel Serverless SSR)
+  // Production server-side builds must never default to localhost.
+  if (process.env.NODE_ENV !== 'development') {
+    return '/api';
+  }
+
+  // Local development fallback only.
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/api`;
   }
