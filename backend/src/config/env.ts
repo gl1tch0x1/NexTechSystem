@@ -44,39 +44,17 @@ const defaultAllowedOrigins = [
   'http://localhost:3001',
 ];
 
-const isPlaceholderValue = (value: string | undefined) => {
-  if (!value) return true;
-  return /REPLACE_WITH_VALID|DEMO|your_project|your-project|placeholder|000000000000/i.test(value);
-};
-
-const firebaseProjectId = (process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '').trim();
-const firebaseClientEmail = (process.env.FIREBASE_CLIENT_EMAIL || '').trim();
-const firebasePrivateKey = (process.env.FIREBASE_PRIVATE_KEY || '').trim();
-const firebaseStorageBucket = (process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '').trim();
-const firebaseServiceAccountConfigured = Boolean(
-  firebaseProjectId &&
-  !isPlaceholderValue(firebaseProjectId) &&
-  firebaseClientEmail &&
-  !isPlaceholderValue(firebaseClientEmail) &&
-  firebasePrivateKey &&
-  firebasePrivateKey.includes('BEGIN PRIVATE KEY') &&
-  !isPlaceholderValue(firebasePrivateKey) &&
-  firebaseStorageBucket &&
-  !isPlaceholderValue(firebaseStorageBucket)
-);
-
 export const ENV = {
   PORT: parseInt(process.env.PORT || '5000', 10),
   NODE_ENV: nodeEnv,
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
   ALLOWED_ORIGINS: rawAllowedOrigins.length > 0 ? rawAllowedOrigins : defaultAllowedOrigins,
   JWT_SECRET: jwtSecret || generatedDevelopmentJwtSecret,
-  FIREBASE_PROJECT_ID: firebaseProjectId,
-  FIREBASE_CLIENT_EMAIL: firebaseClientEmail,
-  FIREBASE_PRIVATE_KEY: firebasePrivateKey,
-  FIREBASE_STORAGE_BUCKET: firebaseStorageBucket,
-  FIREBASE_SERVICE_ACCOUNT_CONFIGURED: firebaseServiceAccountConfigured,
-  ENABLE_FIRESTORE_SYNC: process.env.ENABLE_FIRESTORE_SYNC !== 'false' && firebaseServiceAccountConfigured,
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
+  FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
+  FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY || '',
+  FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
+  ENABLE_FIRESTORE_SYNC: process.env.ENABLE_FIRESTORE_SYNC !== 'false',
   // Cloudflare Edge & Bot Security
   CLOUDFLARE_TURNSTILE_SECRET_KEY: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '',
   CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN || '',

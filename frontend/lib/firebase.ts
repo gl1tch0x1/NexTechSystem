@@ -4,46 +4,27 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 
-const firebaseEnabled = process.env.NEXT_PUBLIC_FIREBASE_ENABLED === 'true';
-const rawApiKey = (process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '').trim();
-const rawAuthDomain = (process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '').trim();
-const rawProjectId = (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '').trim();
-const rawAppId = (process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '').trim();
-
-const isPlaceholderValue = (value: string | undefined) => {
-  if (!value) return true;
-  return /REPLACE_WITH_VALID|DEMO|your-project|your_project|placeholder|000000000000/i.test(value);
-};
-
 const firebaseConfig = {
-  apiKey: rawApiKey,
-  authDomain: rawAuthDomain,
-  projectId: rawProjectId,
-  storageBucket: (process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '').trim(),
-  messagingSenderId: (process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '').trim(),
-  appId: rawAppId,
-  measurementId: (process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || '').trim(),
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || ''
 };
 
-const hasSafeClientConfig = Boolean(
-  firebaseEnabled &&
-  !isPlaceholderValue(rawApiKey) &&
-  rawApiKey.startsWith('AIza') &&
-  rawApiKey.length > 20 &&
-  !isPlaceholderValue(rawAuthDomain) &&
-  !isPlaceholderValue(rawProjectId) &&
-  !isPlaceholderValue(rawAppId) &&
+const hasValidClientConfig = Boolean(
+  firebaseConfig.apiKey &&
   firebaseConfig.authDomain &&
   firebaseConfig.projectId &&
   firebaseConfig.appId
 );
 
-export const isLiveKey = hasSafeClientConfig;
+export const isLiveKey = hasValidClientConfig;
 
 let app: FirebaseApp | null = null;
-if (!firebaseEnabled) {
-  console.info('[Firebase] Client SDK is disabled. Set NEXT_PUBLIC_FIREBASE_ENABLED=true with a valid Firebase web config to enable authentication and analytics.');
-} else if (hasSafeClientConfig) {
+if (hasValidClientConfig) {
   try {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   } catch (error) {
@@ -51,7 +32,7 @@ if (!firebaseEnabled) {
     app = null;
   }
 } else {
-  console.warn('[Firebase] Firebase client configuration is incomplete or invalid. Frontend auth and analytics are disabled until a valid, enabled project key is configured.');
+  console.warn('[Firebase] Firebase client environment variables are missing. Frontend auth will remain disabled until they are configured in production.');
 }
 
 let auth: Auth | null = null;
@@ -78,7 +59,7 @@ if (app) {
     console.warn('[Firebase] Storage initialization failed:', error);
   }
 
-  if (typeof window !== 'undefined' && firebaseConfig.measurementId && firebaseConfig.measurementId.startsWith('G-')) {
+  if (typeof window !== 'undefined') {
     try {
       analytics = getAnalytics(app);
     } catch (error) {
