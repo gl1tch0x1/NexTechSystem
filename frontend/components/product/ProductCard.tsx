@@ -28,15 +28,40 @@ export function ProductCard({ product }: { product: Product }) {
 
   const isOutOfStock = product.stock === 0;
 
-  // Extract key technical spec values
-  const specEntries = Object.entries(product.specifications || {}).slice(0, 3);
+  // Extract key technical spec values with intelligent label formatting
+  const specEntries = Object.entries(product.specifications || {}).slice(0, 3).map(([key, val]) => {
+    let strVal = String(val);
+    const lowerKey = key.toLowerCase();
+    if (lowerKey.includes('core') && !strVal.toLowerCase().includes('core')) {
+      strVal = `${strVal} Cores`;
+    } else if (lowerKey.includes('thread') && !strVal.toLowerCase().includes('thread')) {
+      strVal = `${strVal} Threads`;
+    }
+    return { key, label: strVal };
+  });
 
-  // Check if product is Intel i9 14900k to ensure authentic Intel hardware render
+  // Clean brand name to avoid awkward truncation
+  const cleanBrandName = product.brandName === 'Samsung Semiconductor'
+    ? 'Samsung'
+    : (product.brandName || '').replace(/ Semiconductor/i, '').trim();
+
+  // Authentic hardware photography mapping
   const isIntelI9 = (product.slug?.includes('14900k') || product.name?.toLowerCase().includes('14900k'));
+  const isRyzen7950X = (product.slug?.includes('7950x') || product.name?.toLowerCase().includes('7950x'));
+  const isSamsung990 = (product.slug?.includes('990-pro') || product.name?.toLowerCase().includes('990 pro'));
+  const isRtx4090 = (product.slug?.includes('4090') || product.name?.toLowerCase().includes('rtx 4090'));
+
   const rawImage = product.thumbnail || product.images?.[0] || '';
-  const displayImage = isIntelI9 && (!rawImage || rawImage.includes('photo-1591799264318'))
-    ? '/images/intel_i9_14900k.jpg'
-    : (rawImage || '/images/intel_i9_14900k.jpg');
+  let displayImage = rawImage || '/images/intel_i9_14900k.jpg';
+  if (isIntelI9) {
+    displayImage = '/images/intel_i9_14900k.jpg';
+  } else if (isRyzen7950X) {
+    displayImage = '/images/amd_ryzen_7950x.jpg';
+  } else if (isSamsung990) {
+    displayImage = '/images/samsung_990_pro.jpg';
+  } else if (isRtx4090) {
+    displayImage = '/images/hero_rtx4090.jpg';
+  }
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,12 +72,12 @@ export function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 hover:border-tech-blue/50 dark:hover:border-cyan-500/40 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1">
       {/* Visual Ambient Glow on Hover */}
       <div className="absolute -top-20 -right-20 w-44 h-44 bg-tech-blue/10 dark:bg-cyan-500/10 rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity duration-500 pointer-events-none" />
 
       {/* Top Image Stage Container */}
-      <div className="relative aspect-[4/3] bg-slate-50/70 dark:bg-slate-950/60 p-4 sm:p-5 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
+      <div className="relative aspect-[4/3] w-full bg-gradient-to-b from-slate-900 to-slate-950 p-2.5 sm:p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         {/* Top Badges (Left) */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
           {discountPercent > 0 && (
@@ -62,7 +87,7 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           )}
           {product.isFeatured && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-900/85 dark:bg-slate-800/90 text-white backdrop-blur-xs shadow-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-900/85 dark:bg-slate-800/90 text-white backdrop-blur-xs shadow-xs border border-white/10">
               <Sparkles className="w-2.5 h-2.5 text-amber-400" />
               <span>Featured</span>
             </span>
@@ -79,7 +104,7 @@ export function ProductCard({ product }: { product: Product }) {
           className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
             inWishlist
               ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-500 border border-rose-200 dark:border-rose-800 shadow-xs scale-105'
-              : 'bg-white/90 dark:bg-slate-900/80 text-slate-400 hover:text-rose-500 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 backdrop-blur-xs shadow-2xs'
+              : 'bg-slate-900/70 hover:bg-slate-900 text-slate-300 hover:text-rose-400 border border-white/10 backdrop-blur-xs shadow-2xs'
           }`}
           title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
@@ -91,51 +116,49 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={displayImage}
             alt={product.name}
-            className="max-h-full max-w-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover filter drop-shadow-sm group-hover:scale-105 transition-transform duration-500 rounded-lg"
           />
         </Link>
       </div>
 
       {/* Details Container */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3 bg-white dark:bg-slate-900">
-        <div className="space-y-2">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3.5 bg-white dark:bg-slate-900">
+        <div className="space-y-2.5">
           {/* Brand & Category Row */}
-          <div className="flex items-center justify-between gap-2 text-[11px] h-4 leading-none">
-            <span className="font-bold text-tech-blue dark:text-cyan-400 uppercase tracking-wider truncate max-w-[130px]">
-              {product.brandName}
+          <div className="flex items-center justify-between gap-2 text-[11px] h-5 leading-none">
+            <span className="font-mono font-bold text-[10px] tracking-wider text-tech-blue dark:text-cyan-400 uppercase bg-tech-blue/10 dark:bg-cyan-500/10 px-2 py-0.5 rounded-md border border-tech-blue/15 dark:border-cyan-500/20 shrink-0">
+              {cleanBrandName}
             </span>
             {product.categoryName && (
-              <span className="text-slate-400 dark:text-slate-500 font-medium truncate max-w-[120px] text-right">
+              <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px] truncate text-right">
                 {product.categoryName}
               </span>
             )}
           </div>
 
-          {/* Product Name (Consistent 2-line clamped height for perfect grid alignment) */}
+          {/* Product Name (Crisp font-heading with 2-line clamped height for perfect grid alignment) */}
           <Link
             href={`/products/${product.slug}`}
-            className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 h-10 hover:text-tech-blue dark:hover:text-cyan-400 transition-colors leading-snug block"
+            className="font-heading text-sm font-bold text-slate-900 dark:text-white line-clamp-2 h-10 group-hover:text-tech-blue dark:group-hover:text-cyan-400 transition-colors leading-snug block"
             title={product.name}
           >
             {product.name}
           </Link>
 
-          {/* Technical Specs Tags */}
-          {specEntries.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 min-h-[1.5rem] pt-0.5">
-              {specEntries.map(([key, val]) => (
-                <span
-                  key={key}
-                  className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate max-w-[170px] border border-slate-200/60 dark:border-slate-700/60"
-                  title={`${key}: ${val}`}
-                >
-                  {val}
-                </span>
-              ))}
-            </div>
-          )}
+          {/* Technical Specs Tags (Fixed uniform height for flawless row alignment across cards) */}
+          <div className="h-11 overflow-hidden flex flex-wrap content-start items-center gap-1.5 pt-0.5">
+            {specEntries.map(({ key, label }) => (
+              <span
+                key={key}
+                className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate max-w-[155px] border border-slate-200/60 dark:border-slate-700/60"
+                title={`${key}: ${label}`}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
 
-          {/* Ratings Row (In-Stock completely removed per user request) */}
+          {/* Ratings Row */}
           <div className="flex items-center justify-between text-xs pt-0.5">
             <div className="flex items-center gap-1.5">
               <div className="flex items-center text-amber-400">
@@ -149,16 +172,21 @@ export function ProductCard({ product }: { product: Product }) {
               </span>
             </div>
 
-            {isOutOfStock && (
+            {isOutOfStock ? (
               <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono">
                 Sold Out
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                In Stock
               </span>
             )}
           </div>
         </div>
 
         {/* Pricing & Add to Cart Action Bar */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-end justify-between gap-2">
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-end justify-between gap-2 mt-auto">
           <div className="min-w-0">
             <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight leading-none whitespace-nowrap">
               {formatPrice(price)}
@@ -177,12 +205,12 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
+            className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
               isOutOfStock
                 ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
                 : justAdded
                 ? 'bg-emerald-600 text-white shadow-emerald-500/20 scale-102'
-                : 'bg-tech-blue hover:bg-blue-600 text-white shadow-tech-blue/20 hover:shadow-md'
+                : 'bg-tech-blue hover:bg-blue-600 text-white shadow-tech-blue/20 hover:shadow-md active:scale-95'
             }`}
           >
             {justAdded ? (

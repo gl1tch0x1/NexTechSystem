@@ -107,23 +107,43 @@ export function AIChatbotModal() {
 
   return (
     <>
-      {/* Floating Modern AI Trigger Button (Ant Design / Shadcn inspired) */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+      {/* Floating Modern AI Circular Trigger Button */}
+      <div className="group fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 flex items-center">
+        {/* Sleek Tooltip on Hover */}
+        <div
+          role="tooltip"
+          className="mr-3 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 dark:bg-slate-800/95 text-white text-xs font-semibold shadow-xl border border-slate-700/60 backdrop-blur-md opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>NexTech AI Assistant</span>
+          <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-950/70 px-1.5 py-0.5 rounded-full border border-cyan-800/50">Online</span>
+        </div>
+
         <button
           onClick={() => setIsOpen(!isOpen)}
-          aria-label="Open NexTech Hardware AI Assistant"
-          className="group relative flex items-center gap-2 sm:gap-2.5 px-3 py-2.5 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-tech-blue to-tech-cyan text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
+          aria-label={isOpen ? "Close NexTech AI Assistant" : "Open NexTech Hardware AI Assistant"}
+          aria-expanded={isOpen}
+          className="relative w-14 h-14 sm:w-15 sm:h-15 rounded-full flex items-center justify-center bg-gradient-to-tr from-tech-blue via-blue-600 to-tech-cyan text-white shadow-xl shadow-tech-blue/25 hover:shadow-2xl hover:shadow-cyan-500/35 hover:scale-108 active:scale-95 transition-all duration-300 cursor-pointer border border-white/25 dark:border-cyan-400/30"
         >
-          <div className="relative">
-            <Bot className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
-            <span className="absolute -top-1 -right-1 w-2 sm:w-2.5 h-2 sm:h-2.5 bg-emerald-400 rounded-full border-2 border-slate-900" />
+          {/* Ambient Glow Aura */}
+          <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-tech-blue to-tech-cyan opacity-40 blur-md group-hover:opacity-80 transition duration-500 pointer-events-none" />
+
+          {/* Active Ping Status Dot (Top-Right) */}
+          {!isOpen && (
+            <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 z-10">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900" />
+            </span>
+          )}
+
+          {/* Icon (Toggle between Bot and X) */}
+          <div className="relative z-10 flex items-center justify-center">
+            {isOpen ? (
+              <X className="w-6 h-6 text-white transition-transform duration-300 rotate-0 group-hover:rotate-90" />
+            ) : (
+              <Bot className="w-6 h-6 sm:w-7 sm:h-7 text-white transition-transform duration-300 group-hover:scale-110" />
+            )}
           </div>
-          <span className="text-xs font-black tracking-wider uppercase hidden sm:inline">
-            AI Assistant
-          </span>
-          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono font-bold hidden md:inline">
-            Online
-          </span>
         </button>
       </div>
 

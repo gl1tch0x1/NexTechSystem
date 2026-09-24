@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+@theme {
+  --font-sans: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-heading), var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --color-tech-blue: #2563EB;
+  --color-tech-cyan: #06B6D4;
+}
+
 :root {
   --background: #F8FAFC;
   --foreground: #0F172A;
@@ -103,6 +111,17 @@ p {
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569;
+}
+
+/* Cross-browser No Scrollbar Utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important;    /* Firefox */
 }
 
 /* Glassmorphism utilities */

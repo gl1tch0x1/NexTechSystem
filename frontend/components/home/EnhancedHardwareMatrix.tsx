@@ -27,11 +27,11 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
   const [sortBy, setSortBy] = useState<string>('FEATURED');
 
   const tabs = [
-    { id: 'ALL', label: 'All Catalog', icon: Sparkles },
+    { id: 'ALL', label: 'All Hardware', icon: Sparkles },
     { id: 'CPU', label: 'Processors (CPUs)', icon: Cpu },
     { id: 'GPU', label: 'Graphics (GPUs)', icon: Zap },
-    { id: 'SERVER', label: 'Servers & PoE', icon: Server },
-    { id: 'STORAGE', label: 'Gen5 NVMe Storage', icon: HardDrive },
+    { id: 'SERVER', label: 'Servers & Networking', icon: Server },
+    { id: 'STORAGE', label: 'NVMe Storage', icon: HardDrive },
     { id: 'MEMORY', label: 'Motherboards & RAM', icon: Layers },
   ];
 
@@ -98,7 +98,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
               GCC Logistics Online
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h2 className="font-heading text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Enterprise Hardware & Component Catalog
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xl mt-1 leading-relaxed">
@@ -120,17 +120,17 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
       </div>
 
       {/* Control Bar: Ant Design Segmented Tabs + Search + Sort */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800/90 shadow-lg shadow-slate-200/30 dark:shadow-2xl">
-        {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-1 max-w-full">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800/90 shadow-lg shadow-slate-200/30 dark:shadow-2xl">
+        {/* Segmented Tab Controls */}
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-1 flex-1 min-w-0 bg-slate-100/70 dark:bg-slate-950/60 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 activeTab === id
-                  ? 'bg-tech-blue text-white shadow-md shadow-tech-blue/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-tech-blue text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
               }`}
             >
               <Icon className={`w-3.5 h-3.5 ${activeTab === id ? 'text-white' : 'text-slate-400'}`} />
@@ -140,7 +140,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
         </div>
 
         {/* Search & Sort Widgets */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto shrink-0 px-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full xl:w-auto shrink-0 px-1">
           {/* Quick Search Input */}
           <div className="relative flex-1 sm:flex-initial">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -149,7 +149,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
               placeholder="Search components..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 w-full sm:w-52 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue dark:focus:border-cyan-400 transition-colors"
+              className="pl-8 pr-3 py-1.5 w-full sm:w-44 lg:w-48 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue dark:focus:border-cyan-400 transition-colors"
             />
           </div>
 
