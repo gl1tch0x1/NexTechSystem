@@ -17,7 +17,6 @@ import {
   builderPresetRepo
 } from '../repositories/content.repository.js';
 import { dbStore } from '../config/db-store.js';
-import { ensureBootstrapAdmin } from '../services/admin-bootstrap.service.js';
 import {
   SEED_CATEGORIES,
   SEED_BRANDS,
@@ -87,7 +86,6 @@ export async function runSeed(clean = false) {
   for (const user of SEED_USERS) {
     await userRepository.create(user);
   }
-  const adminUser = await ensureBootstrapAdmin();
   console.log(`[Seed] Seeded ${SEED_USERS.length} system users.`);
 
   // 5. Resellers
@@ -135,14 +133,12 @@ export async function runSeed(clean = false) {
   console.log(`[Seed] Seeded ${SEED_PURCHASE_ORDERS.length} Purchase Orders and ${SEED_ORDERS.length} Sales Orders.`);
 
   // 9. Initial Customer & Admin Digital Wallets
-  if (adminUser) {
-    await walletService.creditWallet({
-      userId: adminUser.id,
-      amount: 50000,
-      reason: 'Initial Enterprise Administrative Reserve Balance',
-      type: 'CREDIT',
-    });
-  }
+  await walletService.creditWallet({
+    userId: 'user_admin_1',
+    amount: 50000,
+    reason: 'Initial Enterprise Administrative Reserve Balance',
+    type: 'CREDIT',
+  });
   await walletService.creditWallet({
     userId: 'user_customer_1',
     amount: 10000,
@@ -163,19 +159,17 @@ export async function runSeed(clean = false) {
   console.log(`[Seed] Seeded ${SEED_ORDERS.length} verified UAE FTA E-Bill tax invoices.`);
 
   // 11. Initial System Bootstrap Audit Log
-  if (adminUser) {
-    await auditService.log({
-      userId: adminUser.id,
-      userEmail: adminUser.email,
-      userRole: 'ADMIN',
-      action: 'SYSTEM_BOOTSTRAP',
-      resource: 'system',
-      details: {
-        message: 'NexTech Systems Enterprise Platform catalog & secure store initialized.',
-        timestamp: new Date().toISOString(),
-      },
-    });
-  }
+  await auditService.log({
+    userId: 'user_admin_1',
+    userEmail: 'admin@nextech.com',
+    userRole: 'ADMIN',
+    action: 'SYSTEM_BOOTSTRAP',
+    resource: 'system',
+    details: {
+      message: 'NexTech Systems Enterprise Platform catalog & secure store initialized.',
+      timestamp: new Date().toISOString(),
+    },
+  });
 
   console.log('[Seed] Database seed completed successfully! 🚀');
 }

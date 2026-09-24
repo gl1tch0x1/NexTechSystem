@@ -1,12 +1,127 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { Cpu, Lock, Mail, User as UserIcon, ArrowRight, ArrowLeft, AlertCircle, ShieldCheck, Eye, EyeOff, CheckCircle2, ShoppingBag, Building2 } from 'lucide-react';
-import { ResellerApplicationForm, ResellerApplicationSuccess } from '@/components/auth/ResellerApplicationForm';
-import { PhoneCountryField, COUNTRY_CODES, formatInternationalPhone, type CountryCode } from '@/components/auth/PhoneCountryField';
+import { Cpu, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, ShieldCheck, ChevronDown, Search, Phone, Eye, EyeOff } from 'lucide-react';
 
+interface CountryCode {
+  code: string;
+  name: string;
+  dialCode: string;
+}
+
+/** Render a real country flag SVG image from flagcdn with clean fallback */
+function CountryFlag({ code, size = 20 }: { code: string; size?: number }) {
+  const [hasError, setHasError] = useState(false);
+  const lower = code.toLowerCase();
+  const height = Math.round(size * 0.7);
+
+  if (hasError) {
+    return (
+      <span
+        className="inline-flex items-center justify-center rounded-[2px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[9px] font-mono font-bold leading-none shrink-0"
+        style={{ width: `${size}px`, height: `${height}px` }}
+      >
+        {code}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-[2px] overflow-hidden border border-slate-300/60 dark:border-slate-600/60 shrink-0 shadow-xs"
+      style={{ width: `${size}px`, height: `${height}px` }}
+    >
+      <img
+        src={`https://flagcdn.com/${lower}.svg`}
+        width={size}
+        height={height}
+        alt=""
+        aria-hidden="true"
+        className="w-full h-full object-cover"
+        loading="lazy"
+        onError={() => setHasError(true)}
+      />
+    </span>
+  );
+}
+
+const COUNTRY_CODES: CountryCode[] = [
+  // Gulf & Middle East
+  { code: 'AE', name: 'United Arab Emirates', dialCode: '+971' },
+  { code: 'SA', name: 'Saudi Arabia', dialCode: '+966' },
+  { code: 'QA', name: 'Qatar', dialCode: '+974' },
+  { code: 'KW', name: 'Kuwait', dialCode: '+965' },
+  { code: 'OM', name: 'Oman', dialCode: '+968' },
+  { code: 'BH', name: 'Bahrain', dialCode: '+973' },
+  { code: 'JO', name: 'Jordan', dialCode: '+962' },
+  { code: 'LB', name: 'Lebanon', dialCode: '+961' },
+  { code: 'IQ', name: 'Iraq', dialCode: '+964' },
+  { code: 'SY', name: 'Syria', dialCode: '+963' },
+  { code: 'YE', name: 'Yemen', dialCode: '+967' },
+  { code: 'EG', name: 'Egypt', dialCode: '+20' },
+  { code: 'IL', name: 'Israel', dialCode: '+972' },
+  // North America
+  { code: 'US', name: 'United States', dialCode: '+1' },
+  { code: 'CA', name: 'Canada', dialCode: '+1' },
+  { code: 'MX', name: 'Mexico', dialCode: '+52' },
+  // Europe
+  { code: 'GB', name: 'United Kingdom', dialCode: '+44' },
+  { code: 'DE', name: 'Germany', dialCode: '+49' },
+  { code: 'FR', name: 'France', dialCode: '+33' },
+  { code: 'IT', name: 'Italy', dialCode: '+39' },
+  { code: 'ES', name: 'Spain', dialCode: '+34' },
+  { code: 'NL', name: 'Netherlands', dialCode: '+31' },
+  { code: 'BE', name: 'Belgium', dialCode: '+32' },
+  { code: 'CH', name: 'Switzerland', dialCode: '+41' },
+  { code: 'SE', name: 'Sweden', dialCode: '+46' },
+  { code: 'NO', name: 'Norway', dialCode: '+47' },
+  { code: 'DK', name: 'Denmark', dialCode: '+45' },
+  { code: 'FI', name: 'Finland', dialCode: '+358' },
+  { code: 'PL', name: 'Poland', dialCode: '+48' },
+  { code: 'PT', name: 'Portugal', dialCode: '+351' },
+  { code: 'AT', name: 'Austria', dialCode: '+43' },
+  { code: 'GR', name: 'Greece', dialCode: '+30' },
+  { code: 'TR', name: 'Turkey', dialCode: '+90' },
+  { code: 'RU', name: 'Russia', dialCode: '+7' },
+  { code: 'UA', name: 'Ukraine', dialCode: '+380' },
+  // South Asia
+  { code: 'IN', name: 'India', dialCode: '+91' },
+  { code: 'PK', name: 'Pakistan', dialCode: '+92' },
+  { code: 'BD', name: 'Bangladesh', dialCode: '+880' },
+  { code: 'LK', name: 'Sri Lanka', dialCode: '+94' },
+  { code: 'NP', name: 'Nepal', dialCode: '+977' },
+  // East & Southeast Asia
+  { code: 'CN', name: 'China', dialCode: '+86' },
+  { code: 'JP', name: 'Japan', dialCode: '+81' },
+  { code: 'KR', name: 'South Korea', dialCode: '+82' },
+  { code: 'SG', name: 'Singapore', dialCode: '+65' },
+  { code: 'MY', name: 'Malaysia', dialCode: '+60' },
+  { code: 'ID', name: 'Indonesia', dialCode: '+62' },
+  { code: 'TH', name: 'Thailand', dialCode: '+66' },
+  { code: 'VN', name: 'Vietnam', dialCode: '+84' },
+  { code: 'PH', name: 'Philippines', dialCode: '+63' },
+  { code: 'HK', name: 'Hong Kong', dialCode: '+852' },
+  { code: 'TW', name: 'Taiwan', dialCode: '+886' },
+  // Oceania
+  { code: 'AU', name: 'Australia', dialCode: '+61' },
+  { code: 'NZ', name: 'New Zealand', dialCode: '+64' },
+  // Africa
+  { code: 'ZA', name: 'South Africa', dialCode: '+27' },
+  { code: 'NG', name: 'Nigeria', dialCode: '+234' },
+  { code: 'KE', name: 'Kenya', dialCode: '+254' },
+  { code: 'GH', name: 'Ghana', dialCode: '+233' },
+  { code: 'ET', name: 'Ethiopia', dialCode: '+251' },
+  { code: 'MA', name: 'Morocco', dialCode: '+212' },
+  { code: 'TN', name: 'Tunisia', dialCode: '+216' },
+  { code: 'DZ', name: 'Algeria', dialCode: '+213' },
+  // South America
+  { code: 'BR', name: 'Brazil', dialCode: '+55' },
+  { code: 'AR', name: 'Argentina', dialCode: '+54' },
+  { code: 'CL', name: 'Chile', dialCode: '+56' },
+  { code: 'CO', name: 'Colombia', dialCode: '+57' },
+];
 
 function AuthContent() {
   const router = useRouter();
@@ -15,10 +130,8 @@ function AuthContent() {
 
   const { login, register, loginWithGoogle, isLoading } = useAuth();
   const [tab, setTab] = useState<'signin' | 'register'>(initialTab);
-  const [accountType, setAccountType] = useState<'customer' | 'reseller' | null>(null);
   const [error, setError] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [resellerSuccess, setResellerSuccess] = useState<ResellerApplicationSuccess | null>(null);
 
   // Sign In state
   const [loginEmail, setLoginEmail] = useState('');
@@ -33,6 +146,26 @@ function AuthContent() {
   const [regPassword, setRegPassword] = useState('');
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[0]);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
+        setIsCountryDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredCountries = COUNTRY_CODES.filter(c =>
+    c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    c.dialCode.includes(countrySearch) ||
+    c.code.toLowerCase().includes(countrySearch.toLowerCase())
+  );
 
   const handleRoleRedirect = (authenticatedUser: any, resellerData: any) => {
     if (authenticatedUser.role === 'ADMIN') {
@@ -59,9 +192,17 @@ function AuthContent() {
     e.preventDefault();
     setError('');
     try {
-      const formattedPhone = regPhone.trim() ? formatInternationalPhone(regPhone, selectedCountry) : '';
-      await register(regName.trim(), regEmail.trim(), regUsername.trim(), formattedPhone, regPassword);
-      router.push('/products');
+      const cleanPhone = regPhone.trim();
+      let formattedPhone = '';
+      if (cleanPhone) {
+        if (cleanPhone.startsWith('+')) {
+          formattedPhone = cleanPhone;
+        } else {
+          formattedPhone = `${selectedCountry.dialCode} ${cleanPhone.replace(/^0+/, '')}`;
+        }
+      }
+      const newUser = await register(regName.trim(), regEmail.trim(), regUsername.trim(), formattedPhone, regPassword);
+      handleRoleRedirect(newUser, null);
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please check details.');
     }
@@ -72,11 +213,7 @@ function AuthContent() {
     setGoogleLoading(true);
     try {
       const { user: authedUser, reseller: resData } = await loginWithGoogle();
-      if (tab === 'register' && accountType === 'customer' && authedUser.role === 'CUSTOMER') {
-        router.push('/products');
-      } else {
-        handleRoleRedirect(authedUser, resData);
-      }
+      handleRoleRedirect(authedUser, resData);
     } catch (err: any) {
       if (err.code !== 'auth/popup-closed-by-user') {
         setError(err.message || 'Google authentication was cancelled or encountered an error.');
@@ -87,7 +224,7 @@ function AuthContent() {
   };
 
   return (
-    <div className={`mx-auto px-4 py-8 md:py-12 space-y-6 w-full ${tab === 'register' && accountType === 'reseller' ? 'max-w-md md:max-w-3xl' : 'max-w-md md:max-w-2xl'}`}>
+    <div className="max-w-md md:max-w-2xl mx-auto px-4 py-8 md:py-12 space-y-6 w-full">
       {/* Brand Header */}
       <div className="text-center space-y-2">
         <div className="w-12 h-12 rounded-2xl bg-tech-blue flex items-center justify-center text-white mx-auto shadow-tech-glow">
@@ -107,7 +244,7 @@ function AuthContent() {
         <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 gap-1">
           <button
             type="button"
-            onClick={() => { setTab('signin'); setAccountType(null); setError(''); setResellerSuccess(null); }}
+            onClick={() => { setTab('signin'); setError(''); }}
             className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${
               tab === 'signin'
                 ? 'bg-tech-blue text-white shadow-tech'
@@ -118,7 +255,7 @@ function AuthContent() {
           </button>
           <button
             type="button"
-            onClick={() => { setTab('register'); setAccountType(null); setError(''); setResellerSuccess(null); }}
+            onClick={() => { setTab('register'); setError(''); }}
             className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${
               tab === 'register'
                 ? 'bg-tech-blue text-white shadow-tech'
@@ -129,37 +266,6 @@ function AuthContent() {
           </button>
         </div>
 
-        {/* Choose an account type before either registration form is shown. */}
-        {tab === 'register' && !accountType && !resellerSuccess && (
-          <section className="space-y-4" aria-labelledby="account-type-heading">
-            <div className="text-center space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-tech-blue dark:text-tech-cyan">Step 1 of 2</p>
-              <h2 id="account-type-heading" className="text-lg md:text-xl font-black text-slate-900 dark:text-white">How will you use NexTech?</h2>
-              <p className="text-xs text-slate-500">Choose your account type to see the right registration form.</p>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <button type="button" onClick={() => { setAccountType('customer'); setError(''); }} className="group flex flex-col items-start gap-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/70 p-4 md:p-5 text-left transition-all hover:border-tech-blue hover:bg-blue-50/60 dark:hover:bg-blue-950/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tech-blue">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40 text-tech-blue dark:text-blue-300"><ShoppingBag className="h-5 w-5" /></span>
-                <span className="space-y-1"><span className="block text-sm font-black text-slate-900 dark:text-white">I’m a Customer</span><span className="block text-xs leading-relaxed text-slate-600 dark:text-slate-400">Shop products, build a PC, compare hardware, and manage orders.</span></span>
-                <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-bold text-tech-blue dark:text-tech-cyan">Create a shopping account <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" /></span>
-              </button>
-              <button type="button" onClick={() => { setAccountType('reseller'); setError(''); }} className="group flex flex-col items-start gap-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/70 p-4 md:p-5 text-left transition-all hover:border-amber-500 hover:bg-amber-50/60 dark:hover:bg-amber-950/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"><Building2 className="h-5 w-5" /></span>
-                <span className="space-y-1"><span className="block text-sm font-black text-slate-900 dark:text-white">I’m a Reseller</span><span className="block text-xs leading-relaxed text-slate-600 dark:text-slate-400">Apply with complete business and operating details for admin review.</span></span>
-                <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">Start partner application <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" /></span>
-              </button>
-            </div>
-            <p className="rounded-xl bg-slate-100 dark:bg-slate-900 px-3 py-2.5 text-center text-[11px] text-slate-600 dark:text-slate-400">Customer access starts after registration. Reseller access starts only after approval and ID assignment.</p>
-          </section>
-        )}
-
-        {tab === 'register' && accountType && !resellerSuccess && (
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-4">
-            <button type="button" onClick={() => { setAccountType(null); setError(''); }} className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-tech-blue dark:hover:text-tech-cyan"><ArrowLeft className="h-4 w-4" /> Change account type</button>
-            <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">{accountType === 'customer' ? 'Customer registration' : 'Reseller application'}</span>
-          </div>
-        )}
-
         {/* Error Alert */}
         {error && (
           <div className="p-2.5 md:p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-[11px] md:text-xs font-semibold flex items-center gap-2 border border-red-200 dark:border-red-900/50">
@@ -168,65 +274,31 @@ function AuthContent() {
           </div>
         )}
 
-        {/* Reseller application success */}
-        {tab === 'register' && resellerSuccess && (
-          <div className="space-y-4 animate-fadeIn text-center py-2">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto border border-emerald-500/25">
-              <CheckCircle2 className="w-7 h-7" />
-            </div>
-            <div>
-              <h2 className="text-base md:text-lg font-black text-slate-900 dark:text-white">Application Submitted</h2>
-              <p className="text-[11px] md:text-xs text-slate-500 mt-1.5 leading-relaxed max-w-md mx-auto">
-                {resellerSuccess.message}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 text-left text-[11px] space-y-2 bg-slate-50 dark:bg-slate-950/40">
-              <div className="flex justify-between gap-2"><span className="text-slate-400 font-bold">Business</span><span className="font-semibold text-slate-800 dark:text-slate-200">{resellerSuccess.businessName}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-slate-400 font-bold">Email</span><span className="font-semibold text-slate-800 dark:text-slate-200">{resellerSuccess.email}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-slate-400 font-bold">Status</span><span className="font-bold text-amber-600 dark:text-amber-400">PENDING APPROVAL</span></div>
-            </div>
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              NexTech Administration has been notified. After approval you will receive your unique reseller ID and can sign in to the partner portal.
-            </p>
-            <button
-              type="button"
-              onClick={() => { setTab('signin'); setResellerSuccess(null); setAccountType(null); }}
-              className="w-full py-3 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-[11px] md:text-xs font-extrabold flex items-center justify-center gap-2 shadow-tech-glow transition-all"
-            >
-              Return to Sign In
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+        {/* Google Sign-In Button */}
+        <button
+          type="button"
+          onClick={handleGoogleAuth}
+          disabled={googleLoading || isLoading}
+          className="w-full py-2.5 md:py-3 px-3 md:px-4 bg-slate-50 dark:bg-tech-slate hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-white rounded-xl text-[11px] md:text-xs font-bold flex items-center justify-center gap-2 md:gap-3 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 shadow-sm"
+        >
+          <svg className="w-3.5 h-3.5 md:w-4 md:h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+          </svg>
+          <span>
+            {googleLoading ? 'Connecting to Google...' : tab === 'signin' ? 'Continue with Google' : 'Sign up with Google'}
+          </span>
+        </button>
 
-        {/* Google — sign-in or customer register only */}
-        {(tab === 'signin' || (tab === 'register' && accountType === 'customer' && !resellerSuccess)) && (
-          <>
-            <button
-              type="button"
-              onClick={handleGoogleAuth}
-              disabled={googleLoading || isLoading}
-              className="w-full py-2.5 md:py-3 px-3 md:px-4 bg-slate-50 dark:bg-tech-slate hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-white rounded-xl text-[11px] md:text-xs font-bold flex items-center justify-center gap-2 md:gap-3 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 shadow-sm"
-            >
-              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-              </svg>
-              <span>
-                {googleLoading ? 'Connecting to Google...' : tab === 'signin' ? 'Continue with Google' : 'Sign up with Google'}
-              </span>
-            </button>
-
-            <div className="relative flex items-center justify-center">
-              <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
-              <span className="bg-white dark:bg-tech-card px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative">
-                Or with Email
-              </span>
-            </div>
-          </>
-        )}
+        {/* Divider */}
+        <div className="relative flex items-center justify-center">
+          <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+          <span className="bg-white dark:bg-tech-card px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative">
+            Or with Email
+          </span>
+        </div>
 
         {/* 1. SIGN IN TAB */}
         {tab === 'signin' && (
@@ -295,14 +367,14 @@ function AuthContent() {
           </form>
         )}
 
-        {/* 2a. CREATE CUSTOMER ACCOUNT */}
-        {tab === 'register' && accountType === 'customer' && !resellerSuccess && (
+        {/* 2. CREATE CUSTOMER ACCOUNT TAB */}
+        {tab === 'register' && (
           <form onSubmit={handleRegisterSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {/* Full Name */}
               <div>
                 <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">
-                  Full Name
+                  Full Name / Organization
                 </label>
                 <div className="relative">
                   <input
@@ -318,17 +390,17 @@ function AuthContent() {
                 </div>
               </div>
 
-              {/* Email */}
+              {/* Business Email */}
               <div>
                 <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">
-                  Email Address
+                  Business Email Address
                 </label>
                 <div className="relative">
                   <input
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="you@example.com"
+                    placeholder="name@company.com"
                     value={regEmail}
                     onChange={e => setRegEmail(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue transition-colors"
@@ -361,14 +433,109 @@ function AuthContent() {
                   Phone Number <span className="font-normal text-slate-500">(Optional)</span>
                 </label>
 
-                <PhoneCountryField
-                  id="customer-phone"
-                  label="Phone number"
-                  value={regPhone}
-                  onValueChange={setRegPhone}
-                  country={selectedCountry}
-                  onCountryChange={setSelectedCountry}
-                />
+                {/* Unified Flag + Dial Code + Input Row */}
+                <div className="relative flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-tech-slate focus-within:border-tech-blue transition-colors">
+                  {/* Country Selector Trigger */}
+                  <div ref={countryDropdownRef} className="relative shrink-0">
+                    <button
+                      type="button"
+                      id="phone-country-selector"
+                      onClick={() => {
+                        setIsCountryDropdownOpen(prev => !prev);
+                        setCountrySearch('');
+                      }}
+                      className="h-full flex items-center gap-1.5 pl-2.5 md:pl-3 pr-2 py-2.5 md:py-3 rounded-l-xl hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors group"
+                      title={`${selectedCountry.name} (${selectedCountry.dialCode})`}
+                      aria-label="Select country code"
+                    >
+                      {/* Flag together with dial code */}
+                      <CountryFlag code={selectedCountry.code} size={20} />
+                      <span className="font-mono text-slate-800 dark:text-slate-100 text-[11px] md:text-xs font-bold">
+                        {selectedCountry.dialCode}
+                      </span>
+                      <ChevronDown
+                        className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform ${
+                          isCountryDropdownOpen ? 'rotate-180 text-tech-blue' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {/* Country Dropdown Popover */}
+                    {isCountryDropdownOpen && (
+                      <div className="absolute left-0 top-full mt-2 w-72 rounded-2xl bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-slate-800 shadow-2xl z-[200] flex flex-col overflow-hidden">
+                        {/* Search bar */}
+                        <div className="p-2 border-b border-slate-100 dark:border-slate-800">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              placeholder="Search country or code..."
+                              value={countrySearch}
+                              onChange={e => setCountrySearch(e.target.value)}
+                              className="w-full bg-slate-100 dark:bg-slate-800 pl-8 pr-3 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue placeholder:text-slate-400"
+                              autoFocus
+                            />
+                            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                          </div>
+                        </div>
+
+                        {/* Country list */}
+                        <div className="overflow-y-auto p-1.5 space-y-0.5" style={{ maxHeight: '220px' }}>
+                          {filteredCountries.map(c => {
+                            const isSelected = selectedCountry.code === c.code;
+                            return (
+                              <button
+                                key={c.code}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCountry(c);
+                                  setIsCountryDropdownOpen(false);
+                                  setCountrySearch('');
+                                }}
+                                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs text-left transition-colors ${
+                                  isSelected
+                                    ? 'bg-tech-blue text-white font-bold'
+                                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                                }`}
+                              >
+                                <CountryFlag code={c.code} size={20} />
+                                <span className="flex-1 truncate text-[11px]">{c.name}</span>
+                                <span
+                                  className={`font-mono text-[11px] shrink-0 px-1.5 py-0.5 rounded-md ${
+                                    isSelected
+                                      ? 'bg-white/20 text-white'
+                                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                                  }`}
+                                >
+                                  {c.dialCode}
+                                </span>
+                              </button>
+                            );
+                          })}
+                          {filteredCountries.length === 0 && (
+                            <div className="text-center py-6 text-xs text-slate-400">
+                              No countries found
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Vertical separator */}
+                  <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
+
+                  {/* Phone input */}
+                  <input
+                    type="tel"
+                    id="phone-number-input"
+                    autoComplete="tel"
+                    placeholder="50 123 4567"
+                    value={regPhone}
+                    onChange={e => setRegPhone(e.target.value)}
+                    className="flex-1 bg-transparent px-3 py-2.5 md:py-3 text-[11px] md:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none min-w-0"
+                  />
+                  <Phone className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 shrink-0 mr-3" />
+                </div>
               </div>
             </div>
 
@@ -419,23 +586,16 @@ function AuthContent() {
             </button>
           </form>
         )}
-
-        {/* 2b. RESELLER PARTNER APPLICATION */}
-        {tab === 'register' && accountType === 'reseller' && !resellerSuccess && (
-          <ResellerApplicationForm
-            onSuccess={(result) => setResellerSuccess(result)}
-          />
-        )}
       </div>
 
       {/* Role Notice Card */}
       <div className="p-3 md:p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-[11px] md:text-xs text-slate-400 space-y-1">
         <div className="font-bold text-slate-300 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
-          <span>Account &amp; Partner Policy</span>
+          <span>Role Policy Notice</span>
         </div>
         <p className="text-[10px] md:text-[11px] text-slate-500">
-          Customer accounts activate immediately. Reseller partner applications require full KYC review — NexTech Administration assigns your unique reseller ID upon approval.
+          Customer self-registration creates standard client accounts. Reseller partner storefront accounts are provisioned exclusively by NexTech Systems Administration.
         </p>
       </div>
     </div>

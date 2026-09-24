@@ -1,5 +1,5 @@
-import { orderRepository } from "../repositories/order.repository.js";
-import { Order } from "../types/index.js";
+import { orderRepository } from '../repositories/order.repository.js';
+import { Order } from '../types/index.js';
 
 export interface VatFilingBoxSummary {
   boxNumber: string;
@@ -24,20 +24,15 @@ export interface UaeVatReturnSummary {
 }
 
 export class VatService {
-  private static readonly UAE_TRN = "100492810300003";
-  private static readonly LEGAL_NAME =
-    "NexTech Systems FZ-LLC / ComNet Solutions";
+  private static readonly UAE_TRN = '100492810300003';
+  private static readonly LEGAL_NAME = 'NexTech Systems FZ-LLC / ComNet Solutions';
 
-  public static async getVatReturnSummary(
-    periodStart?: string,
-    periodEnd?: string,
-  ): Promise<UaeVatReturnSummary> {
+  public static async getVatReturnSummary(periodStart?: string, periodEnd?: string): Promise<UaeVatReturnSummary> {
     const orders = await orderRepository.find();
-
+    
     // Filter by period if provided, or default to all completed/confirmed orders
     const relevantOrders = orders.filter((order: Order) => {
-      if (order.paymentStatus === "FAILED" || order.orderStatus === "CANCELLED")
-        return false;
+      if (order.paymentStatus === 'FAILED' || order.orderStatus === 'CANCELLED') return false;
       if (!periodStart && !periodEnd) return true;
       const orderDate = order.createdAt.slice(0, 10);
       if (periodStart && orderDate < periodStart) return false;
@@ -52,17 +47,12 @@ export class VatService {
       // Subtotal before tax
       const netTaxable = order.subtotal - (order.discount || 0);
       standardNetTaxable += Math.max(0, netTaxable);
-      standardOutputVat +=
-        order.tax || Number((netTaxable * (order.taxRate || 0.05)).toFixed(2));
+      standardOutputVat += order.tax || Number((netTaxable * (order.taxRate || 0.05)).toFixed(2));
     }
 
     const now = new Date();
     const currentQuarter = `Q${Math.floor(now.getMonth() / 3) + 1} ${now.getFullYear()}`;
-    const dueDate = new Date(
-      now.getFullYear(),
-      (Math.floor(now.getMonth() / 3) + 1) * 3,
-      28,
-    )
+    const dueDate = new Date(now.getFullYear(), (Math.floor(now.getMonth() / 3) + 1) * 3, 28)
       .toISOString()
       .slice(0, 10);
 
@@ -72,26 +62,25 @@ export class VatService {
       taxPeriod: currentQuarter,
       filingDueDate: dueDate,
       standardRatedSupplies: {
-        boxNumber: "Box 1a",
-        boxTitle: "Standard Rated Supplies in Dubai & Emirates",
+        boxNumber: 'Box 1a',
+        boxTitle: 'Standard Rated Supplies in Dubai & Emirates',
         taxableAmountAED: Number(standardNetTaxable.toFixed(2)),
         vatAmountAED: Number(standardOutputVat.toFixed(2)),
-        rateDescription: "5% Standard GCC VAT",
+        rateDescription: '5% Standard GCC VAT',
       },
       touristRefundsPlanet: {
-        boxNumber: "Box 1c",
-        boxTitle:
-          "Supplies subject to the Tax Invoices Scheme for Tourists (Planet)",
+        boxNumber: 'Box 1c',
+        boxTitle: 'Supplies subject to the Tax Invoices Scheme for Tourists (Planet)',
         taxableAmountAED: 0,
         vatAmountAED: 0,
-        rateDescription: "Electronic Tourist Validation",
+        rateDescription: 'Electronic Tourist Validation',
       },
       zeroRatedSupplies: {
-        boxNumber: "Box 4",
-        boxTitle: "Zero-rated supplies (Direct Exports & Free Zone Commercial)",
+        boxNumber: 'Box 4',
+        boxTitle: 'Zero-rated supplies (Direct Exports & Free Zone Commercial)',
         taxableAmountAED: 0,
         vatAmountAED: 0,
-        rateDescription: "0% Export Relief",
+        rateDescription: '0% Export Relief',
       },
       totalTaxableSuppliesAED: Number(standardNetTaxable.toFixed(2)),
       totalOutputVatAED: Number(standardOutputVat.toFixed(2)),

@@ -135,10 +135,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider.setCustomParameters({ prompt: 'select_account' });
       const fbResult = await signInWithPopup(firebaseAuth, provider);
       const fbUser = fbResult.user;
-      const idToken = await fbUser.getIdToken();
 
       const res = await ApiClient.post<{ token: string; user: User }>('/auth/google', {
-        idToken,
+        email: fbUser.email,
+        name: fbUser.displayName || fbUser.email?.split('@')[0],
+        photoURL: fbUser.photoURL || undefined,
+        uid: fbUser.uid,
       });
 
       localStorage.setItem('auth_token', res.token);

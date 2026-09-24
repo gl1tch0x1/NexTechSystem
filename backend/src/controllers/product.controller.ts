@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
-import { productService } from "../services/product.service.js";
-import { categoryRepository } from "../repositories/category.repository.js";
-import { brandRepository } from "../repositories/brand.repository.js";
-import { bannerRepository } from "../repositories/banner.repository.js";
-import { settingsRepository } from "../repositories/settings.repository.js";
-import { reviewRepository } from "../repositories/review.repository.js";
+import { Request, Response } from 'express';
+import { productService } from '../services/product.service.js';
+import { categoryRepository } from '../repositories/category.repository.js';
+import { brandRepository } from '../repositories/brand.repository.js';
+import { bannerRepository } from '../repositories/banner.repository.js';
+import { settingsRepository } from '../repositories/settings.repository.js';
+import { reviewRepository } from '../repositories/review.repository.js';
 
 export class ProductController {
   async getProducts(req: Request, res: Response): Promise<void> {
@@ -31,23 +31,13 @@ export class ProductController {
     } = req.query;
 
     // Collect and sanitize custom specs safely via Map to prevent prototype pollution / remote property injection
-    const FORBIDDEN_PROPERTIES = new Set([
-      "__proto__",
-      "constructor",
-      "prototype",
-      "resellerId",
-      "status",
-      "sellerType",
-      "minRating",
-      "onSale",
-      "location",
-    ]);
+    const FORBIDDEN_PROPERTIES = new Set(['__proto__', 'constructor', 'prototype', 'resellerId', 'status', 'sellerType', 'minRating', 'onSale', 'location']);
     const SPEC_KEY_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
 
     const specMap = new Map<string, string>();
     for (const [k, v] of Object.entries(otherParams)) {
       if (
-        typeof v === "string" &&
+        typeof v === 'string' &&
         !FORBIDDEN_PROPERTIES.has(k) &&
         SPEC_KEY_REGEX.test(k)
       ) {
@@ -66,17 +56,16 @@ export class ProductController {
       tag: tag as string,
       minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
       maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
-      inStock: inStock === "true",
-      isFeatured: isFeatured === "true",
+      inStock: inStock === 'true',
+      isFeatured: isFeatured === 'true',
       sellerType: sellerType as any,
       minRating: minRating ? parseFloat(minRating as string) : undefined,
-      onSale: onSale === "true",
+      onSale: onSale === 'true',
       location: location as string,
       sortBy: sort as any,
       page: page ? parseInt(page as string, 10) : 1,
       limit: limit ? parseInt(limit as string, 10) : 20,
-      specifications:
-        Object.keys(specifications).length > 0 ? specifications : undefined,
+      specifications: Object.keys(specifications).length > 0 ? specifications : undefined,
     });
 
     res.json({
@@ -97,12 +86,7 @@ export class ProductController {
     const product = await productService.getProductBySlug(slug);
 
     if (!product) {
-      res
-        .status(404)
-        .json({
-          success: false,
-          error: { code: "NOT_FOUND", message: "Product not found." },
-        });
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Product not found.' } });
       return;
     }
 
@@ -117,9 +101,7 @@ export class ProductController {
       data: {
         product,
         reviews,
-        relatedProducts: relatedProducts.products.filter(
-          (p) => p.id !== product.id,
-        ),
+        relatedProducts: relatedProducts.products.filter(p => p.id !== product.id),
       },
     });
   }

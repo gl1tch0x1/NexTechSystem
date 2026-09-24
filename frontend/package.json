@@ -13,12 +13,13 @@
     "dirham": "^1.5.3",
     "firebase": "^12.19.0",
     "lucide-react": "^1.44.0",
-    "next": "16.3.6",
+    "next": "^16.3.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-hook-form": "^7.54.2",
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.0.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.6.2"
   },
   "devDependencies": {

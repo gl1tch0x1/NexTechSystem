@@ -228,8 +228,6 @@ interface AdminProductModalProps {
   brands: Brand[];
   resellers: Reseller[];
   token: string | null;
-  mode?: 'admin' | 'reseller';
-  resellerCode?: string;
 }
 
 export function AdminProductModal({
@@ -241,8 +239,6 @@ export function AdminProductModal({
   brands,
   resellers,
   token,
-  mode = 'admin',
-  resellerCode = '',
 }: AdminProductModalProps) {
   const isEditing = Boolean(product);
 
@@ -470,14 +466,14 @@ export function AdminProductModal({
         condition: 'Brand New (Factory Sealed)',
         warrantyYears: 3,
         warranty: '3 Years Official Manufacturer Warranty',
-        price: mode === 'reseller' ? 0 : 999,
-        originalPrice: mode === 'reseller' ? 0 : 1199,
-        costPrice: mode === 'reseller' ? 0 : 799,
-        discountPercentage: mode === 'reseller' ? 0 : 16.7,
+        price: 999,
+        originalPrice: 1199,
+        costPrice: 799,
+        discountPercentage: 16.7,
         chargeTax: true,
-        unitPrice: mode === 'reseller' ? 0 : 999,
+        unitPrice: 999,
         unitMeasure: 'unit',
-        stock: mode === 'reseller' ? 0 : 25,
+        stock: 25,
         lowStockThreshold: 5,
         inventoryTracked: true,
         allowBackorder: false,
@@ -486,26 +482,26 @@ export function AdminProductModal({
           locationId: w.id,
           locationName: w.name,
           city: w.city,
-          quantity: mode === 'reseller' ? 0 : w.id === 'loc_dxb_main' ? 25 : 0,
-          available: mode === 'reseller' ? 0 : w.id === 'loc_dxb_main' ? 25 : 0,
+          quantity: w.id === 'loc_dxb_main' ? 25 : 0,
+          available: w.id === 'loc_dxb_main' ? 25 : 0,
           committed: 0,
           unavailable: 0,
-          onHand: mode === 'reseller' ? 0 : w.id === 'loc_dxb_main' ? 25 : 0,
+          onHand: w.id === 'loc_dxb_main' ? 25 : 0,
         })),
-        weight: mode === 'reseller' ? 0 : 1.5,
+        weight: 1.5,
         dimensions: {
-          length: mode === 'reseller' ? 0 : 30,
-          width: mode === 'reseller' ? 0 : 20,
-          height: mode === 'reseller' ? 0 : 5,
+          length: 30,
+          width: 20,
+          height: 5,
           unit: 'cm',
         },
-        hsCode: mode === 'reseller' ? '' : '8471.30.01',
+        hsCode: '8471.30.01',
         isPhysical: true,
-        collections: mode === 'reseller' ? [] : ['Laptops', 'Home & Business Laptops'],
-        tags: mode === 'reseller' ? [] : ['Work Laptop', 'UAE'],
+        collections: ['Laptops', 'Home & Business Laptops'],
+        tags: ['Work Laptop', 'UAE'],
         primaryImage: DEFAULT_FALLBACK_IMAGE,
         images: [DEFAULT_FALLBACK_IMAGE],
-        sellerType: mode === 'reseller' ? 'RESELLER' : 'ADMIN',
+        sellerType: 'ADMIN',
         resellerId: '',
         resellerName: '',
         resellerCode: '',
@@ -513,10 +509,10 @@ export function AdminProductModal({
         categoryName: initialCat?.name || '',
         brandId: initialBrand?.id || '',
         brandName: initialBrand?.name || '',
-        socket: mode === 'reseller' ? '' : 'LGA1700',
-        tdp: mode === 'reseller' ? 0 : 125,
-        formFactor: mode === 'reseller' ? '' : 'ATX',
-        specifications: mode === 'reseller' ? {} : {
+        socket: 'LGA1700',
+        tdp: 125,
+        formFactor: 'ATX',
+        specifications: {
           Condition: 'Brand New (Factory Sealed)',
           'Product Category': initialCat?.name || 'Laptops',
           'Processor Brand': 'Intel',
@@ -801,10 +797,6 @@ export function AdminProductModal({
     setFormError('');
 
     try {
-      if (mode === 'reseller' && (!formData.title.trim() || !formData.sku.trim() || !formData.description.trim() ||
-          !formData.categoryId || !formData.brandId || !Number.isFinite(Number(formData.price)) || Number(formData.price) <= 0)) {
-        throw new Error('Complete the product title, SKU, full description, category, brand, and a price greater than zero.');
-      }
       // 1. Validate Variant SKUs
       if (formData.hasVariants && formData.variants.length > 0) {
         const variantSkus = new Set<string>();
@@ -840,8 +832,8 @@ export function AdminProductModal({
       const matchedCat = activeCats.find(c => c.id === formData.categoryId);
       const matchedBrand = activeBrands.find(b => b.id === formData.brandId);
 
-      const isPartner = mode === 'reseller' || formData.sellerType === 'RESELLER';
-      const matchedPartner = mode === 'reseller' ? resellers[0] : isPartner ? resellers.find(r => r.id === formData.resellerId) : null;
+      const isPartner = formData.sellerType === 'RESELLER';
+      const matchedPartner = isPartner ? resellers.find(r => r.id === formData.resellerId) : null;
       const selectedHub = WAREHOUSE_LOCATIONS.find(w => w.id === formData.warehouseLocation) || WAREHOUSE_LOCATIONS[0];
 
       const stockVal = formData.hasVariants && formData.variants.length > 0
@@ -885,7 +877,7 @@ export function AdminProductModal({
         hsCode: formData.hsCode || undefined,
         collections: formData.collections,
         tags: formData.tags,
-        sellerType: mode === 'reseller' ? 'RESELLER' : formData.sellerType,
+        sellerType: formData.sellerType,
         resellerId: isPartner ? (matchedPartner?.id || formData.resellerId || undefined) : undefined,
         resellerName: isPartner ? (matchedPartner?.displayName || matchedPartner?.businessName || formData.resellerName || undefined) : undefined,
         resellerCode: isPartner ? (matchedPartner?.resellerCode || formData.resellerCode || undefined) : undefined,
@@ -928,11 +920,9 @@ export function AdminProductModal({
       };
 
       if (isEditing && product) {
-        await ApiClient.put(mode === 'reseller' ? `/reseller/products/${product.id}` : `/admin/products/${product.id}`, payload,
-          { token, ...(mode === 'reseller' ? { params: { resellerCode } } : {}) });
+        await ApiClient.put(`/admin/products/${product.id}`, payload, { token });
       } else {
-        await ApiClient.post(mode === 'reseller' ? '/reseller/products' : '/admin/products', payload,
-          { token, ...(mode === 'reseller' ? { params: { resellerCode } } : {}) });
+        await ApiClient.post('/admin/products', payload, { token });
       }
 
       onSaved();
@@ -953,7 +943,7 @@ export function AdminProductModal({
     { id: 'shipping', label: '6. Shipping & Logistics', icon: Truck },
     { id: 'specs', label: '7. Specifications', icon: Cpu },
     { id: 'variants', label: '8. Variants Matrix', icon: Sparkles },
-    ...(mode === 'admin' ? [{ id: 'status' as AdminModalStep, label: '9. Status & Publishing', icon: ShieldCheck }] : []),
+    { id: 'status', label: '9. Status & Publishing', icon: ShieldCheck },
   ];
 
   const currentStepIndex = MODAL_STEPS.findIndex(s => s.id === activeModalStep);
@@ -981,16 +971,16 @@ export function AdminProductModal({
                     {formData.variants.length} Variants Active
                   </span>
                 )}
-                {mode === 'admin' ? <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
                   formData.status === 'ACTIVE'
                     ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                     : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                 }`}>
                   {formData.status}
-                </span> : <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Admin review required</span>}
+                </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {mode === 'reseller' ? 'Build a complete hardware listing. New and edited SKUs go to admin review.' : 'Multi-SKU catalog configuration, UAE tax toggles, inventory locations, and specifications'}
+                Multi-SKU catalog configuration, UAE tax toggles, inventory locations, and specifications
               </p>
             </div>
           </div>
@@ -2430,7 +2420,7 @@ export function AdminProductModal({
               >
                 <Check className="w-4 h-4" />
                 <span>
-                  {isSubmitting ? 'Submitting SKU...' : mode === 'reseller' ? isEditing ? 'Submit Changes for Review' : 'Submit Hardware SKU' : isEditing ? 'Update Hardware Product' : 'Create Hardware SKU'}
+                  {isSubmitting ? 'Saving SKU...' : isEditing ? 'Update Hardware Product' : 'Create Hardware SKU'}
                 </span>
               </button>
             </div>

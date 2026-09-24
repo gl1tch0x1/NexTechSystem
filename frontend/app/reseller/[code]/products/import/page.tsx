@@ -98,16 +98,16 @@ export default function ResellerProductImportPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div>
-          <div className="text-xs text-amber-600 dark:text-amber-400 font-mono uppercase font-bold tracking-wider mb-1">
+          <div className="text-xs text-amber-400 font-mono uppercase font-bold tracking-wider mb-1">
             Bulk Product Management Engine
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
             <FileSpreadsheet className="w-7 h-7 text-amber-400" />
             Excel & CSV Hardware Product Importer
           </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Dynamic column header detection, automatic data mapping, missing-field red alerts, and duplicate SKU detection.
           </p>
         </div>
@@ -131,7 +131,7 @@ export default function ResellerProductImportPage() {
           <div>
             <h3 className="text-base font-bold text-white">Upload Your Hardware Product Spreadsheet</h3>
             <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
-              Supports Microsoft Excel (<code>.xlsx</code>) and standard CSV files. Our engine automatically detects variations like &ldquo;Item Name&rdquo;, &ldquo;Qty&rdquo;, &ldquo;MSRP&rdquo;, etc.
+              Supports Microsoft Excel (<code>.xlsx</code>, <code>.xls</code>) and standard CSV files. Our engine automatically detects variations like &ldquo;Item Name&rdquo;, &ldquo;Qty&rdquo;, &ldquo;MSRP&rdquo;, etc.
             </p>
           </div>
 
@@ -139,7 +139,7 @@ export default function ResellerProductImportPage() {
             <input
               type="file"
               id="excel-upload"
-              accept=".xlsx, .csv"
+              accept=".xlsx, .xls, .csv"
               onChange={handleFileChange}
               className="hidden"
             />

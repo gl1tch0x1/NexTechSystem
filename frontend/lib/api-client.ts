@@ -85,20 +85,10 @@ export class ApiClient {
     }
 
     try {
-      const request = { ...options, headers };
-      const canRetry = (options.method || 'GET').toUpperCase() === 'GET';
-      let response: Response;
-      for (let attempt = 0; ; attempt++) {
-        try {
-          response = await fetch(url.toString(), request);
-        } catch (error) {
-          if (!canRetry || attempt >= 2 || options.signal?.aborted) throw error;
-          await new Promise(resolve => setTimeout(resolve, 400 * (attempt + 1)));
-          continue;
-        }
-        if (!canRetry || ![500, 502, 503, 504].includes(response.status) || attempt >= 2) break;
-        await new Promise(resolve => setTimeout(resolve, 400 * (attempt + 1)));
-      }
+      const response = await fetch(url.toString(), {
+        ...options,
+        headers,
+      });
 
       if (response.status === 204) {
         return {} as T;

@@ -1,65 +1,57 @@
-import { BaseRepository } from "./base.repository.js";
-import {
-  AuditLog,
-  StoreSettings,
-  Banner,
-  ProductImportReport,
-} from "../types/index.js";
+import { BaseRepository } from './base.repository.js';
+import { AuditLog, StoreSettings, Banner, ProductImportReport } from '../types/index.js';
 
 export class AuditRepository extends BaseRepository<AuditLog> {
   constructor() {
-    super("audit_logs");
+    super('audit_logs');
   }
 
   async findRecent(limit = 100): Promise<AuditLog[]> {
     return this.find({
-      orderBy: { field: "createdAt", direction: "desc" },
-      limit,
+      orderBy: { field: 'createdAt', direction: 'desc' },
+      limit
     });
   }
 }
 
-export class SettingsRepository extends BaseRepository<
-  StoreSettings & { id: string }
-> {
+export class SettingsRepository extends BaseRepository<StoreSettings & { id: string }> {
   constructor() {
-    super("settings");
+    super('settings');
   }
 
   async getSettings(): Promise<StoreSettings> {
-    const existing = await this.findById("global_settings");
+    const existing = await this.findById('global_settings');
     if (existing) {
       if (existing.isLandingDiscountBannerActive === undefined) {
         existing.isLandingDiscountBannerActive = true;
       }
       if (!existing.featuredLandingCouponCode) {
-        existing.featuredLandingCouponCode = "TECH10";
+        existing.featuredLandingCouponCode = 'TECH10';
       }
       return existing;
     }
     const defaultSettings: StoreSettings & { id: string } = {
-      id: "global_settings",
-      storeName: "NexTech Systems Enterprise E-Commerce",
-      supportEmail: "support@nextechsystems.com",
-      supportPhone: "+971 4 800 TECH",
-      defaultCurrency: "AED",
-      currencySymbol: "AED ",
+      id: 'global_settings',
+      storeName: 'NexTech Systems Enterprise E-Commerce',
+      supportEmail: 'support@nextechsystems.com',
+      supportPhone: '+971 4 800 TECH',
+      defaultCurrency: 'AED',
+      currencySymbol: 'AED ',
       taxRate: 5,
       standardShippingFee: 25,
       freeShippingThreshold: 500,
-      address: "Silicon Oasis Tech Park, Dubai, UAE",
-      taxRegistrationNumber: "TRN-10029384910003",
-      announcementText:
-        "🔥 Enterprise Summer Tech Deals — Up to 40% Off on RTX 4090 Workstations & Servers",
+      address: 'Silicon Oasis Tech Park, Dubai, UAE',
+      taxRegistrationNumber: 'TRN-10029384910003',
+      announcementText: '🔥 Enterprise Summer Tech Deals — Up to 40% Off on RTX 4090 Workstations & Servers',
       isAnnouncementActive: true,
       isLandingDiscountBannerActive: true,
-      featuredLandingCouponCode: "TECH10",
+      featuredLandingCouponCode: 'TECH10',
       socialLinks: {
-        facebook: "https://facebook.com",
-        twitter: "https://twitter.com",
-        instagram: "https://instagram.com",
-        linkedin: "https://linkedin.com",
-      },
+        facebook: 'https://facebook.com',
+        twitter: 'https://twitter.com',
+        instagram: 'https://instagram.com',
+        linkedin: 'https://linkedin.com'
+      }
     };
     await this.create(defaultSettings);
     return defaultSettings;
@@ -68,26 +60,26 @@ export class SettingsRepository extends BaseRepository<
 
 export class BannerRepository extends BaseRepository<Banner> {
   constructor() {
-    super("banners");
+    super('banners');
   }
 
   async findActive(): Promise<Banner[]> {
     return this.find({
-      where: [{ field: "isActive", operator: "==", value: true }],
-      orderBy: { field: "order", direction: "asc" },
+      where: [{ field: 'isActive', operator: '==', value: true }],
+      orderBy: { field: 'order', direction: 'asc' }
     });
   }
 }
 
 export class ImportRepository extends BaseRepository<ProductImportReport> {
   constructor() {
-    super("product_imports");
+    super('product_imports');
   }
 
   async findByResellerId(resellerId: string): Promise<ProductImportReport[]> {
     return this.find({
-      where: [{ field: "resellerId", operator: "==", value: resellerId }],
-      orderBy: { field: "createdAt", direction: "desc" },
+      where: [{ field: 'resellerId', operator: '==', value: resellerId }],
+      orderBy: { field: 'createdAt', direction: 'desc' }
     });
   }
 }

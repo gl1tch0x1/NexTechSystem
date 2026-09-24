@@ -87,8 +87,7 @@ export const ENV = {
   GA_PROPERTY_ID: process.env.GA_PROPERTY_ID || '',
   GA_API_SECRET: process.env.GA_API_SECRET || '',
   // Admin & Security Defaults
-  ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || process.env.ADMIN_BOOTSTRAP_EMAIL || '',
-  ADMIN_BOOTSTRAP_EMAIL: (process.env.ADMIN_BOOTSTRAP_EMAIL || '').trim().toLowerCase(),
-  ADMIN_BOOTSTRAP_PASSWORD: process.env.ADMIN_BOOTSTRAP_PASSWORD || '',
+  ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || '',
   PASSWORD_SALT: process.env.PASSWORD_SALT || (nodeEnv === 'production' ? '' : 'nextech_enterprise_salt_v2_2026'),
 };
+

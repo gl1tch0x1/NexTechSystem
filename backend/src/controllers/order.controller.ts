@@ -1,57 +1,24 @@
-import { Response } from "express";
-import { orderService } from "../services/order.service.js";
-import { ebillService } from "../services/ebill.service.js";
-import { AuthenticatedRequest } from "../middleware/auth.js";
+import { Response } from 'express';
+import { orderService } from '../services/order.service.js';
+import { ebillService } from '../services/ebill.service.js';
+import { AuthenticatedRequest } from '../middleware/auth.js';
 
 export class OrderController {
   async createOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
     if (!req.user) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          error: {
-            code: "UNAUTHORIZED",
-            message: "Authentication required to place order.",
-          },
-        });
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required to place order.' } });
       return;
     }
 
-    const {
-      items,
-      shippingAddress,
-      billingAddress,
-      paymentMethod,
-      couponCode,
-      walletAmountToUse,
-      notes,
-      customerPhone,
-    } = req.body;
+    const { items, shippingAddress, billingAddress, paymentMethod, couponCode, walletAmountToUse, notes, customerPhone } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: {
-            code: "EMPTY_ORDER",
-            message: "Cart items cannot be empty.",
-          },
-        });
+      res.status(400).json({ success: false, error: { code: 'EMPTY_ORDER', message: 'Cart items cannot be empty.' } });
       return;
     }
 
     if (!shippingAddress) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: {
-            code: "MISSING_ADDRESS",
-            message: "Shipping address is required.",
-          },
-        });
+      res.status(400).json({ success: false, error: { code: 'MISSING_ADDRESS', message: 'Shipping address is required.' } });
       return;
     }
 
@@ -60,37 +27,25 @@ export class OrderController {
         userId: req.user.id,
         customerName: req.user.name,
         customerEmail: req.user.email,
-        customerPhone: customerPhone || "",
+        customerPhone: customerPhone || '',
         items,
         shippingAddress,
         billingAddress: billingAddress || shippingAddress,
-        paymentMethod: paymentMethod || "CREDIT_CARD",
+        paymentMethod: paymentMethod || 'CREDIT_CARD',
         couponCode,
-        walletAmountToUse: walletAmountToUse
-          ? parseFloat(walletAmountToUse)
-          : undefined,
+        walletAmountToUse: walletAmountToUse ? parseFloat(walletAmountToUse) : undefined,
         notes,
       });
 
       res.status(201).json({ success: true, data: order });
     } catch (err: any) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: { code: "ORDER_CREATION_FAILED", message: err.message },
-        });
+      res.status(400).json({ success: false, error: { code: 'ORDER_CREATION_FAILED', message: err.message } });
     }
   }
 
   async getMyOrders(req: AuthenticatedRequest, res: Response): Promise<void> {
     if (!req.user) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required." },
-        });
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } });
       return;
     }
 
@@ -100,12 +55,7 @@ export class OrderController {
 
   async getOrderById(req: AuthenticatedRequest, res: Response): Promise<void> {
     if (!req.user) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required." },
-        });
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } });
       return;
     }
 
@@ -113,23 +63,13 @@ export class OrderController {
     const order = await orderService.getOrderById(id);
 
     if (!order) {
-      res
-        .status(404)
-        .json({
-          success: false,
-          error: { code: "NOT_FOUND", message: "Order not found." },
-        });
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Order not found.' } });
       return;
     }
 
     // Role check: customer can only view own order; admin can view all; reseller can view if contains their items
-    if (req.user.role === "CUSTOMER" && order.userId !== req.user.id) {
-      res
-        .status(403)
-        .json({
-          success: false,
-          error: { code: "FORBIDDEN", message: "Access denied." },
-        });
+    if (req.user.role === 'CUSTOMER' && order.userId !== req.user.id) {
+      res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
       return;
     }
 
@@ -146,12 +86,7 @@ export class OrderController {
 
   async getEBill(req: AuthenticatedRequest, res: Response): Promise<void> {
     if (!req.user) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required." },
-        });
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } });
       return;
     }
 
@@ -159,37 +94,20 @@ export class OrderController {
     const order = await orderService.getOrderById(orderId);
 
     if (!order) {
-      res
-        .status(404)
-        .json({
-          success: false,
-          error: { code: "NOT_FOUND", message: "Order not found." },
-        });
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Order not found.' } });
       return;
     }
 
     // Role check: customer can only view own e-bill; reseller can view if contains their items; admin can view all
-    if (req.user.role === "CUSTOMER" && order.userId !== req.user.id) {
-      res
-        .status(403)
-        .json({
-          success: false,
-          error: { code: "FORBIDDEN", message: "Access denied." },
-        });
+    if (req.user.role === 'CUSTOMER' && order.userId !== req.user.id) {
+      res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
       return;
     }
 
-    if (req.user.role === "RESELLER") {
-      const hasResellerItem = order.items.some(
-        (i) => i.resellerId === req.user?.resellerId,
-      );
+    if (req.user.role === 'RESELLER') {
+      const hasResellerItem = order.items.some(i => i.resellerId === req.user?.resellerId);
       if (!hasResellerItem) {
-        res
-          .status(403)
-          .json({
-            success: false,
-            error: { code: "FORBIDDEN", message: "Access denied." },
-          });
+        res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
         return;
       }
     }
@@ -197,12 +115,7 @@ export class OrderController {
     const ebill = await ebillService.getEBillByOrderId(orderId);
 
     if (!ebill) {
-      res
-        .status(404)
-        .json({
-          success: false,
-          error: { code: "NOT_FOUND", message: "E-Bill not found." },
-        });
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'E-Bill not found.' } });
       return;
     }
 

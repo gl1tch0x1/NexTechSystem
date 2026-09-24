@@ -1,42 +1,30 @@
-import { v4 as uuidv4 } from "uuid";
-import { orderRepository } from "../repositories/order.repository.js";
-import { productRepository } from "../repositories/product.repository.js";
-import { resellerRepository } from "../repositories/reseller.repository.js";
-import { pricingService } from "./pricing.service.js";
-import { inventoryService } from "./inventory.service.js";
-import { walletService } from "./wallet.service.js";
-import { ebillService } from "./ebill.service.js";
-import { auditService } from "./audit.service.js";
-import { userRepository } from "../repositories/user.repository.js";
-import { ENV } from "../config/env.js";
-import {
-  Order,
-  OrderStatus,
-  PaymentMethod,
-  PaymentStatus,
-  Address,
-  OrderItem,
-} from "../types/index.js";
-import { dbStore } from "../config/db-store.js";
+import { v4 as uuidv4 } from 'uuid';
+import { orderRepository } from '../repositories/order.repository.js';
+import { productRepository } from '../repositories/product.repository.js';
+import { resellerRepository } from '../repositories/reseller.repository.js';
+import { pricingService } from './pricing.service.js';
+import { inventoryService } from './inventory.service.js';
+import { walletService } from './wallet.service.js';
+import { ebillService } from './ebill.service.js';
+import { auditService } from './audit.service.js';
+import { userRepository } from '../repositories/user.repository.js';
+import { ENV } from '../config/env.js';
+import { Order, OrderStatus, PaymentMethod, PaymentStatus, Address, OrderItem } from '../types/index.js';
+import { dbStore } from '../config/db-store.js';
 
 export interface CreateOrderDTO {
   userId: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
-  items: Array<{
-    productId: string;
-    quantity: number;
-    variantId?: string;
-    locationId?: string;
-  }>;
+  items: Array<{ productId: string; quantity: number; variantId?: string; locationId?: string }>;
   shippingAddress: Address;
   billingAddress: Address;
   paymentMethod: PaymentMethod;
   couponCode?: string;
   walletAmountToUse?: number;
   notes?: string;
-  customerType?: "INDIVIDUAL" | "BUSINESS";
+  customerType?: 'INDIVIDUAL' | 'BUSINESS';
   companyName?: string;
   tradeLicense?: string;
   trn?: string;
@@ -51,34 +39,30 @@ export interface CreateOrderDTO {
 export class OrderService {
   async createOrder(dto: CreateOrderDTO): Promise<Order> {
     if (!dto.items || dto.items.length === 0) {
-      throw new Error("Order must contain at least one item");
+      throw new Error('Order must contain at least one item');
     }
 
     for (const item of dto.items) {
-      if (!item || !item.productId || typeof item.productId !== "string") {
-        throw new Error("Invalid order item: productId is required");
+      if (!item || !item.productId || typeof item.productId !== 'string') {
+        throw new Error('Invalid order item: productId is required');
       }
       const qty = Number(item.quantity);
       if (!Number.isInteger(qty) || qty <= 0 || qty > 999) {
-        throw new Error(
-          `Invalid quantity for item "${item.productId}". Must be a positive integer between 1 and 999.`,
-        );
+        throw new Error(`Invalid quantity for item "${item.productId}". Must be a positive integer between 1 and 999.`);
       }
       item.quantity = qty;
     }
 
     // 1. Fetch products map from authoritative DB
-    const productIds = dto.items.map((it) => it.productId);
+    const productIds = dto.items.map(it => it.productId);
     const productsMap = new Map<string, any>();
     for (const pid of productIds) {
       const p = await productRepository.findById(pid);
       if (!p) {
         throw new Error(`Product not found: ${pid}`);
       }
-      if (!p.isActive || p.approvalStatus !== "APPROVED") {
-        throw new Error(
-          `Product is currently not available for purchase: ${p.name}`,
-        );
+      if (!p.isActive || p.approvalStatus !== 'APPROVED') {
+        throw new Error(`Product is currently not available for purchase: ${p.name}`);
       }
       productsMap.set(pid, p);
     }
@@ -101,21 +85,17 @@ export class OrderService {
 
     // 4. Verify stock availability (respecting variant and backorder settings)
     for (const item of dto.items) {
-      const { available, currentStock, allowsBackorder } =
-        await inventoryService.checkStock(
-          item.productId,
-          item.quantity,
-          item.variantId,
-        );
+      const { available, currentStock, allowsBackorder } = await inventoryService.checkStock(
+        item.productId,
+        item.quantity,
+        item.variantId
+      );
       if (!available && !allowsBackorder) {
         const prod = productsMap.get(item.productId);
-        const variantName =
-          item.variantId && prod?.variants
-            ? ` (${prod.variants.find((v: any) => v.id === item.variantId)?.title || "Variant"})`
-            : "";
-        throw new Error(
-          `Insufficient stock for "${prod?.name}${variantName}". Only ${currentStock} remaining.`,
-        );
+        const variantName = item.variantId && prod?.variants
+          ? ` (${prod.variants.find((v: any) => v.id === item.variantId)?.title || 'Variant'})`
+          : '';
+        throw new Error(`Insufficient stock for "${prod?.name}${variantName}". Only ${currentStock} remaining.`);
       }
     }
 
@@ -137,7 +117,7 @@ export class OrderService {
       }
 
       // 7. Format order items with seller attribution and variant specifics
-      const orderItems: OrderItem[] = pricing.items.map((item) => {
+      const orderItems: OrderItem[] = pricing.items.map(item => {
         const prod = productsMap.get(item.productId);
         return {
           productId: item.productId,
@@ -179,14 +159,12 @@ export class OrderService {
         total: pricing.total,
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,
-        // Order creation is not proof of external payment capture.
-        paymentStatus: "PENDING",
-        orderStatus: "CONFIRMED",
+        paymentStatus: dto.paymentMethod === 'COD' ? 'PENDING' : 'PAID',
+        orderStatus: 'CONFIRMED',
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
         notes: dto.notes,
-        customerType:
-          dto.customerType || (dto.companyName ? "BUSINESS" : "INDIVIDUAL"),
+        customerType: dto.customerType || (dto.companyName ? 'BUSINESS' : 'INDIVIDUAL'),
         companyName: dto.companyName,
         tradeLicense: dto.tradeLicense,
         trn: dto.trn,
@@ -198,8 +176,8 @@ export class OrderService {
         partnerTier: dto.partnerTier,
         statusHistory: [
           {
-            status: "CONFIRMED",
-            note: "Order placed successfully and inventory allocated.",
+            status: 'CONFIRMED',
+            note: 'Order placed successfully and inventory allocated.',
             timestamp: new Date().toISOString(),
           },
         ],
@@ -220,11 +198,9 @@ export class OrderService {
           if (reseller) {
             await resellerRepository.update(reseller.id, {
               salesStats: {
-                totalRevenue:
-                  (reseller.salesStats?.totalRevenue || 0) + item.subtotal,
+                totalRevenue: (reseller.salesStats?.totalRevenue || 0) + item.subtotal,
                 totalOrders: (reseller.salesStats?.totalOrders || 0) + 1,
-                unitsSold:
-                  (reseller.salesStats?.unitsSold || 0) + item.quantity,
+                unitsSold: (reseller.salesStats?.unitsSold || 0) + item.quantity,
               },
             });
           }
@@ -235,15 +211,11 @@ export class OrderService {
       await auditService.log({
         userId: dto.userId,
         userEmail: dto.customerEmail,
-        userRole: "CUSTOMER",
-        action: "ORDER_CREATED",
-        resource: "orders",
+        userRole: 'CUSTOMER',
+        action: 'ORDER_CREATED',
+        resource: 'orders',
         resourceId: createdOrder.id,
-        details: {
-          orderNumber,
-          total: pricing.total,
-          itemCount: orderItems.length,
-        },
+        details: { orderNumber, total: pricing.total, itemCount: orderItems.length },
       });
 
       return createdOrder;
@@ -263,18 +235,10 @@ export class OrderService {
   }
 
   async getAllOrders(): Promise<Order[]> {
-    return orderRepository.find({
-      orderBy: { field: "createdAt", direction: "desc" },
-    });
+    return orderRepository.find({ orderBy: { field: 'createdAt', direction: 'desc' } });
   }
 
-  async updateOrderStatus(
-    orderId: string,
-    status: OrderStatus,
-    note?: string,
-    adminUserId?: string,
-    items?: OrderItem[],
-  ): Promise<Order | null> {
+  async updateOrderStatus(orderId: string, status: OrderStatus, note?: string, adminUserId?: string, items?: OrderItem[]): Promise<Order | null> {
     const order = await orderRepository.findById(orderId);
     if (!order) return null;
 
@@ -290,10 +254,7 @@ export class OrderService {
 
     const updates: any = {
       orderStatus: status,
-      paymentStatus:
-        status === "DELIVERED" && order.paymentMethod === "COD"
-          ? "PAID"
-          : order.paymentStatus,
+      paymentStatus: status === 'DELIVERED' && order.paymentMethod === 'COD' ? 'PAID' : order.paymentStatus,
       statusHistory: newHistory,
     };
 
@@ -308,9 +269,9 @@ export class OrderService {
       await auditService.log({
         userId: adminUserId,
         userEmail: actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL,
-        userRole: "ADMIN",
+        userRole: 'ADMIN',
         action: `ORDER_STATUS_${status}`,
-        resource: "orders",
+        resource: 'orders',
         resourceId: orderId,
         details: { previousStatus: order.orderStatus, newStatus: status, note },
       });

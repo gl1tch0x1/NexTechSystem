@@ -1,4 +1,4 @@
-import { dbStore, QueryFilter } from "../config/db-store.js";
+import { dbStore, QueryFilter } from '../config/db-store.js';
 
 export abstract class BaseRepository<T extends { id: string }> {
   protected collectionName: string;
@@ -15,11 +15,8 @@ export abstract class BaseRepository<T extends { id: string }> {
     return dbStore.find<T>(this.collectionName, query);
   }
 
-  async findOne(where: QueryFilter<T>["where"]): Promise<T | null> {
-    const results = await dbStore.find<T>(this.collectionName, {
-      where,
-      limit: 1,
-    });
+  async findOne(where: QueryFilter<T>['where']): Promise<T | null> {
+    const results = await dbStore.find<T>(this.collectionName, { where, limit: 1 });
     return results.length > 0 ? results[0] : null;
   }
 

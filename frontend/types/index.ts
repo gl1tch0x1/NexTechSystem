@@ -51,8 +51,6 @@ export interface ResellerBusinessInformation {
   dispatchHub?: string;
 }
 
-export type ResellerApplicationSource = 'SELF_APPLICATION' | 'ADMIN_PROVISION';
-
 export interface Reseller {
   id: string;
   userId: string;
@@ -74,13 +72,6 @@ export interface Reseller {
     unitsSold: number;
   };
   commissionRate?: number;
-  applicationSource?: ResellerApplicationSource;
-  rejectionReason?: string;
-  adminNotes?: string;
-  approvedAt?: string;
-  approvedBy?: string;
-  deniedAt?: string;
-  deniedBy?: string;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;

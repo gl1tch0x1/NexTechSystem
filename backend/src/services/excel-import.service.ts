@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import ExcelJS from 'exceljs';
-import { Readable } from 'node:stream';
+import * as XLSX from 'xlsx';
 import { productRepository } from '../repositories/product.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
 import { brandRepository } from '../repositories/brand.repository.js';
@@ -80,35 +79,16 @@ export class ExcelImportService {
     columnMappings: Record<string, string>;
     rows: ProductImportRow[];
   }> {
-    const extension = fileName.toLowerCase().split('.').pop();
-    if (extension !== 'xlsx' && extension !== 'csv') {
-      throw new Error('Only .xlsx and .csv files are supported.');
-    }
-    const workbook = new ExcelJS.Workbook();
-    if (extension === 'csv') {
-      await workbook.csv.read(Readable.from([buffer]));
-    } else {
-      await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
-    }
-    const worksheet = workbook.worksheets[0];
-    if (!worksheet) throw new Error('The uploaded file contains no worksheet.');
-    const headerRow = worksheet.getRow(1);
-    const headers = Array.from({ length: headerRow.cellCount }, (_, index) => headerRow.getCell(index + 1).text.trim());
-    const rawData: { rowNumber: number; data: Record<string, string> }[] = [];
-    for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
-      const row = worksheet.getRow(rowNumber);
-      const data = Object.fromEntries(headers.flatMap((header, index) =>
-        header && !['__proto__', 'constructor', 'prototype'].includes(header)
-          ? [[header, row.getCell(index + 1).text]]
-          : []
-      ));
-      if (Object.values(data).some(value => value.trim())) rawData.push({ rowNumber, data });
-    }
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+
+    const rawData: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
     if (rawData.length === 0) {
       throw new Error('The uploaded Excel file contains no data rows.');
     }
 
-    const detectedHeaders = Object.keys(rawData[0].data);
+    const detectedHeaders = Object.keys(rawData[0]);
     const mappings = customMappings || this.detectColumnMappings(detectedHeaders);
 
     const categories = await categoryRepository.find();
@@ -123,7 +103,8 @@ export class ExcelImportService {
     const errorsList: { row: number; field: string; message: string }[] = [];
 
     for (let index = 0; index < rawData.length; index++) {
-      const { data: rawRow, rowNumber } = rawData[index];
+      const rawRow = rawData[index];
+      const rowNumber = index + 2; // Excel 1-indexed plus header row
       const missingRequiredFields: string[] = [];
       const invalidFields: { field: string; message: string }[] = [];
       const normalizedSpecsMap = new Map<string, string>();
@@ -280,50 +261,20 @@ export class ExcelImportService {
     productsToImport: Partial<Product>[],
     duplicateAction: 'SKIP' | 'UPDATE' = 'SKIP'
   ): Promise<{ importedCount: number; updatedCount: number; skippedCount: number }> {
-    const report = await importRepository.findById(reportId);
-    if (!report || report.resellerId !== resellerId) throw new Error('Import report does not belong to this reseller.');
-    if (report.status === 'COMPLETED') throw new Error('This import has already been completed.');
     let importedCount = 0;
     let updatedCount = 0;
     let skippedCount = 0;
 
     for (const prodData of productsToImport) {
-      if (!prodData.name || !prodData.sku || typeof prodData.price !== 'number' || !Number.isFinite(prodData.price) || prodData.price <= 0 ||
-          (prodData.stock !== undefined && (!Number.isInteger(prodData.stock) || prodData.stock < 0))) {
-        skippedCount++;
-        continue;
-      }
+      if (!prodData.name || !prodData.sku || !prodData.price) continue;
 
       const existing = await productRepository.findBySku(prodData.sku);
       if (existing) {
         if (duplicateAction === 'UPDATE' && existing.resellerId === resellerId) {
-          const changes = {
-            name: prodData.name,
-            description: prodData.description,
-            shortDescription: prodData.shortDescription,
-            barcode: prodData.barcode,
-            brandId: prodData.brandId,
-            brandName: prodData.brandName,
-            categoryId: prodData.categoryId,
-            categoryName: prodData.categoryName,
-            price: prodData.price,
-            salePrice: prodData.salePrice,
-            compareAtPrice: prodData.compareAtPrice,
-            costPrice: prodData.costPrice,
-            stock: prodData.stock,
-            images: prodData.images,
-            thumbnail: prodData.thumbnail,
-            specifications: prodData.specifications,
-            features: prodData.features,
-            tags: prodData.tags,
-            warranty: prodData.warranty,
+          await productRepository.update(existing.id, {
+            ...prodData,
             approvalStatus: 'PENDING_APPROVAL',
-            isActive: false,
-            updatedAt: new Date().toISOString(),
-          };
-          await productRepository.update(existing.id, Object.fromEntries(
-            Object.entries(changes).filter(([, value]) => value !== undefined)
-          ) as Partial<Product>);
+          });
           updatedCount++;
         } else {
           skippedCount++;
@@ -401,7 +352,7 @@ export class ExcelImportService {
   /**
    * Generates a downloadable standard Excel listing template
    */
-  async generateSampleTemplateBuffer(): Promise<Buffer> {
+  generateSampleTemplateBuffer(): Buffer {
     const templateData = [
       {
         'Product Name': 'ASUS ROG Strix GeForce RTX 4090 OC 24GB',
@@ -438,11 +389,11 @@ export class ExcelImportService {
       }
     ];
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Product_Listing_Template');
-    worksheet.columns = Object.keys(templateData[0]).map(key => ({ header: key, key }));
-    for (const product of templateData) worksheet.addRow(product);
-    return Buffer.from(await workbook.xlsx.writeBuffer());
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Product_Listing_Template');
+
+    return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
   }
 }
 

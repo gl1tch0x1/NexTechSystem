@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { contentService } from "../services/content.service.js";
+import { Request, Response } from 'express';
+import { contentService } from '../services/content.service.js';
 
 export class ContentController {
   /**
@@ -14,12 +14,12 @@ export class ContentController {
         data,
       });
     } catch (err: any) {
-      console.error("[ContentController.getHomePageContent] Error:", err);
+      console.error('[ContentController.getHomePageContent] Error:', err);
       res.status(500).json({
         success: false,
         error: {
-          code: "FETCH_HOMEPAGE_CONTENT_ERROR",
-          message: err.message || "Failed to fetch homepage content",
+          code: 'FETCH_HOMEPAGE_CONTENT_ERROR',
+          message: err.message || 'Failed to fetch homepage content',
         },
       });
     }
@@ -35,7 +35,7 @@ export class ContentController {
     } catch (err: any) {
       res.status(500).json({
         success: false,
-        error: { code: "FETCH_HERO_ERROR", message: err.message },
+        error: { code: 'FETCH_HERO_ERROR', message: err.message },
       });
     }
   }
@@ -50,7 +50,7 @@ export class ContentController {
     } catch (err: any) {
       res.status(500).json({
         success: false,
-        error: { code: "FETCH_SOLUTIONS_ERROR", message: err.message },
+        error: { code: 'FETCH_SOLUTIONS_ERROR', message: err.message },
       });
     }
   }
@@ -65,7 +65,7 @@ export class ContentController {
     } catch (err: any) {
       res.status(500).json({
         success: false,
-        error: { code: "FETCH_BENCHMARKS_ERROR", message: err.message },
+        error: { code: 'FETCH_BENCHMARKS_ERROR', message: err.message },
       });
     }
   }
@@ -80,7 +80,7 @@ export class ContentController {
     } catch (err: any) {
       res.status(500).json({
         success: false,
-        error: { code: "FETCH_TESTIMONIALS_ERROR", message: err.message },
+        error: { code: 'FETCH_TESTIMONIALS_ERROR', message: err.message },
       });
     }
   }
@@ -95,7 +95,7 @@ export class ContentController {
     } catch (err: any) {
       res.status(500).json({
         success: false,
-        error: { code: "FETCH_FEATURES_ERROR", message: err.message },
+        error: { code: 'FETCH_FEATURES_ERROR', message: err.message },
       });
     }
   }
@@ -110,7 +110,7 @@ export class ContentController {
     } catch (err: any) {
       res.status(500).json({
         success: false,
-        error: { code: "FETCH_PRESETS_ERROR", message: err.message },
+        error: { code: 'FETCH_PRESETS_ERROR', message: err.message },
       });
     }
   }

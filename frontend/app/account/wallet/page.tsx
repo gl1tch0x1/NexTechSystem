@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 
 export default function CustomerWalletPage() {
-  const allowSandboxTopUp = process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_ENABLE_DEMO_WALLET_TOPUP === 'true';
   const { token, isAuthenticated } = useAuth();
   const { formatPrice, currentCurrency } = useCurrency();
   const [wallet, setWallet] = useState<Wallet | null>(null);
@@ -148,8 +147,8 @@ export default function CustomerWalletPage() {
             </div>
           </div>
 
-          {/* Explicitly enabled local sandbox only; real credits require payment verification. */}
-          {allowSandboxTopUp ? <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+          {/* Sandbox Top-up Buttons */}
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <Plus className="w-4 h-4 text-tech-cyan" />
               Instant Sandbox Top-Up
@@ -200,7 +199,7 @@ export default function CustomerWalletPage() {
                 <span>+AED 5,000</span>
               </button>
             </div>
-          </div> : <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Wallet top-ups are unavailable until a verified payment provider is connected. Existing credits and refunds remain visible in your ledger.</div>}
+          </div>
         </div>
 
         {/* Right Immutable Transaction Ledger */}
@@ -266,7 +265,7 @@ export default function CustomerWalletPage() {
       </div>
 
       {/* Secondary Security PIN Authorization Modal */}
-      {allowSandboxTopUp && pinModalOpen && (
+      {pinModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
           <div className="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative">
             <button

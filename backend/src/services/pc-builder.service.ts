@@ -1,35 +1,26 @@
-import {
-  Product,
-  PCBuilderCompatibilityResult,
-  CompatibilityIssue,
-  PCBuilderCategorySlots,
-} from "../types/index.js";
-import { productRepository } from "../repositories/product.repository.js";
+import { Product, PCBuilderCompatibilityResult, CompatibilityIssue, PCBuilderCategorySlots } from '../types/index.js';
+import { productRepository } from '../repositories/product.repository.js';
 
 function parseWattage(wattageInput: any, fallback: number): number {
   if (!wattageInput) return fallback;
   const str = String(wattageInput);
-  const nonReqMatches = [
-    ...str.matchAll(
-      /(\d{2,4})\s*W(?:att)?(?!\s*(?:req|psu|system|minimum|recom))/gi,
-    ),
-  ]
-    .map((m) => parseInt(m[1], 10))
-    .filter((n) => !isNaN(n) && n > 0 && n < 1500);
+  const nonReqMatches = [...str.matchAll(/(\d{2,4})\s*W(?:att)?(?!\s*(?:req|psu|system|minimum|recom))/gi)]
+    .map(m => parseInt(m[1], 10))
+    .filter(n => !isNaN(n) && n > 0 && n < 1500);
 
   if (nonReqMatches.length > 0) {
     return Math.max(...nonReqMatches);
   }
 
   const anyWattMatches = [...str.matchAll(/(\d{2,4})\s*W(?:att)?/gi)]
-    .map((m) => parseInt(m[1], 10))
-    .filter((n) => !isNaN(n) && n > 0 && n < 1500);
+    .map(m => parseInt(m[1], 10))
+    .filter(n => !isNaN(n) && n > 0 && n < 1500);
 
   if (anyWattMatches.length > 0) {
     return anyWattMatches[0];
   }
 
-  const cleanNum = parseInt(str.replace(/[^0-9]/g, ""), 10);
+  const cleanNum = parseInt(str.replace(/[^0-9]/g, ''), 10);
   if (!isNaN(cleanNum) && cleanNum > 0 && cleanNum < 1500) {
     return cleanNum;
   }
@@ -38,9 +29,7 @@ function parseWattage(wattageInput: any, fallback: number): number {
 }
 
 export class PCBuilderService {
-  async evaluateCompatibility(
-    slots: PCBuilderCategorySlots,
-  ): Promise<PCBuilderCompatibilityResult> {
+  async evaluateCompatibility(slots: PCBuilderCategorySlots): Promise<PCBuilderCompatibilityResult> {
     const issues: CompatibilityIssue[] = [];
     let estimatedWattage = 75; // Baseline motherboard, fans, chipset, SSDs
     let totalPrice = 0;
@@ -68,22 +57,19 @@ export class PCBuilderService {
     let mbRamType: string | null = null;
     if (motherboard) {
       mbSocket = motherboard.specifications?.socket || null;
-      mbRamType =
-        motherboard.specifications?.ramType ||
-        motherboard.specifications?.memoryType ||
-        null;
+      mbRamType = motherboard.specifications?.ramType || motherboard.specifications?.memoryType || null;
     }
 
     // Check CPU <-> Motherboard Socket Match
     if (cpu && motherboard && cpuSocket && mbSocket) {
-      const cleanCpuSocket = cpuSocket.toUpperCase().replace(/\s+/g, "");
-      const cleanMbSocket = mbSocket.toUpperCase().replace(/\s+/g, "");
+      const cleanCpuSocket = cpuSocket.toUpperCase().replace(/\s+/g, '');
+      const cleanMbSocket = mbSocket.toUpperCase().replace(/\s+/g, '');
       if (cleanCpuSocket !== cleanMbSocket) {
         issues.push({
-          type: "ERROR",
-          category: "CPU_MOTHERBOARD_SOCKET",
+          type: 'ERROR',
+          category: 'CPU_MOTHERBOARD_SOCKET',
           message: `CPU Socket (${cpuSocket}) does not match Motherboard Socket (${mbSocket}). They are physically incompatible.`,
-          affectedComponents: ["CPU", "Motherboard"],
+          affectedComponents: ['CPU', 'Motherboard'],
         });
       }
     }
@@ -91,14 +77,7 @@ export class PCBuilderService {
     // 3. RAM Type Match (DDR4 vs DDR5)
     let ramType: string | null = null;
     if (ram) {
-      ramType =
-        ram.specifications?.ramType ||
-        ram.specifications?.memoryType ||
-        (ram.name.includes("DDR5")
-          ? "DDR5"
-          : ram.name.includes("DDR4")
-            ? "DDR4"
-            : null);
+      ramType = ram.specifications?.ramType || ram.specifications?.memoryType || (ram.name.includes('DDR5') ? 'DDR5' : ram.name.includes('DDR4') ? 'DDR4' : null);
       estimatedWattage += 15;
     }
 
@@ -107,10 +86,10 @@ export class PCBuilderService {
       const cleanRam = ramType.toUpperCase();
       if (!cleanMbRam.includes(cleanRam) && !cleanRam.includes(cleanMbRam)) {
         issues.push({
-          type: "ERROR",
-          category: "RAM_MOTHERBOARD_GENERATION",
+          type: 'ERROR',
+          category: 'RAM_MOTHERBOARD_GENERATION',
           message: `Motherboard requires ${mbRamType} memory, but selected RAM is ${ramType}.`,
-          affectedComponents: ["Motherboard", "RAM"],
+          affectedComponents: ['Motherboard', 'RAM'],
         });
       }
     }
@@ -118,13 +97,7 @@ export class PCBuilderService {
     // 4. GPU Wattage & Case Clearance
     let gpuWattage = 0;
     if (gpu) {
-      const defaultGpuW = gpu.name.includes("4090")
-        ? 450
-        : gpu.name.includes("4080")
-          ? 320
-          : gpu.name.includes("4070")
-            ? 220
-            : 200;
+      const defaultGpuW = gpu.name.includes('4090') ? 450 : gpu.name.includes('4080') ? 320 : gpu.name.includes('4070') ? 220 : 200;
       gpuWattage = parseWattage(gpu.specifications?.wattage, defaultGpuW);
       estimatedWattage += gpuWattage;
     }
@@ -138,17 +111,17 @@ export class PCBuilderService {
 
       if (psuWattage < estimatedWattage) {
         issues.push({
-          type: "ERROR",
-          category: "PSU_INSUFFICIENT_WATTAGE",
+          type: 'ERROR',
+          category: 'PSU_INSUFFICIENT_WATTAGE',
           message: `Selected PSU (${psuWattage}W) cannot supply system peak power (${estimatedWattage}W). System will shut down under load.`,
-          affectedComponents: ["Power Supply"],
+          affectedComponents: ['Power Supply'],
         });
       } else if (psuWattage < recommendedPsuWattage) {
         issues.push({
-          type: "WARNING",
-          category: "PSU_TIGHT_HEADROOM",
+          type: 'WARNING',
+          category: 'PSU_TIGHT_HEADROOM',
           message: `Selected PSU (${psuWattage}W) provides minimal headroom above estimated ${estimatedWattage}W. Recommended: ${recommendedPsuWattage}W+.`,
-          affectedComponents: ["Power Supply"],
+          affectedComponents: ['Power Supply'],
         });
       }
     }
@@ -156,22 +129,17 @@ export class PCBuilderService {
     // 6. Cooler Compatibility
     if (cooler && cpu && cpuTdp > 200) {
       const coolerType = cooler.specifications?.coolerType || cooler.name;
-      if (
-        !coolerType.includes("360") &&
-        !coolerType.includes("280") &&
-        !coolerType.includes("Liquid") &&
-        !coolerType.includes("AIO")
-      ) {
+      if (!coolerType.includes('360') && !coolerType.includes('280') && !coolerType.includes('Liquid') && !coolerType.includes('AIO')) {
         issues.push({
-          type: "WARNING",
-          category: "COOLER_THERMAL_CAPACITY",
+          type: 'WARNING',
+          category: 'COOLER_THERMAL_CAPACITY',
           message: `High-TDP processor (${cpu.name}, ~${cpuTdp}W) may thermal-throttle with a basic air cooler. 280mm/360mm AIO recommended.`,
-          affectedComponents: ["CPU", "CPU Cooler"],
+          affectedComponents: ['CPU', 'CPU Cooler'],
         });
       }
     }
 
-    const hasErrors = issues.some((i) => i.type === "ERROR");
+    const hasErrors = issues.some(i => i.type === 'ERROR');
 
     return {
       isCompatible: !hasErrors,
@@ -185,8 +153,8 @@ export class PCBuilderService {
   async getComponentsByCategory(): Promise<Record<string, Product[]>> {
     const products = await productRepository.find({
       where: [
-        { field: "isActive", operator: "==", value: true },
-        { field: "approvalStatus", operator: "==", value: "APPROVED" },
+        { field: 'isActive', operator: '==', value: true },
+        { field: 'approvalStatus', operator: '==', value: 'APPROVED' },
       ],
     });
 
@@ -205,66 +173,21 @@ export class PCBuilderService {
       const name = p.name.toLowerCase();
       const cat = p.categoryName.toLowerCase();
 
-      if (
-        cat.includes("processor") ||
-        cat.includes("cpu") ||
-        name.includes("core i") ||
-        name.includes("ryzen")
-      ) {
+      if (cat.includes('processor') || cat.includes('cpu') || name.includes('core i') || name.includes('ryzen')) {
         grouped.cpu.push(p);
-      } else if (
-        cat.includes("motherboard") ||
-        name.includes("z790") ||
-        name.includes("b650") ||
-        name.includes("x670") ||
-        name.includes("motherboard")
-      ) {
+      } else if (cat.includes('motherboard') || name.includes('z790') || name.includes('b650') || name.includes('x670') || name.includes('motherboard')) {
         grouped.motherboard.push(p);
-      } else if (
-        cat.includes("ram") ||
-        cat.includes("memory") ||
-        name.includes("ddr4") ||
-        name.includes("ddr5")
-      ) {
+      } else if (cat.includes('ram') || cat.includes('memory') || name.includes('ddr4') || name.includes('ddr5')) {
         grouped.ram.push(p);
-      } else if (
-        cat.includes("gpu") ||
-        cat.includes("graphics") ||
-        name.includes("geforce") ||
-        name.includes("radeon") ||
-        name.includes("rtx")
-      ) {
+      } else if (cat.includes('gpu') || cat.includes('graphics') || name.includes('geforce') || name.includes('radeon') || name.includes('rtx')) {
         grouped.gpu.push(p);
-      } else if (
-        cat.includes("storage") ||
-        cat.includes("ssd") ||
-        cat.includes("nvme") ||
-        name.includes("ssd") ||
-        name.includes("990 pro")
-      ) {
+      } else if (cat.includes('storage') || cat.includes('ssd') || cat.includes('nvme') || name.includes('ssd') || name.includes('990 pro')) {
         grouped.storage.push(p);
-      } else if (
-        cat.includes("power") ||
-        cat.includes("psu") ||
-        name.includes("power supply") ||
-        name.includes("corsair rm") ||
-        name.includes("850w")
-      ) {
+      } else if (cat.includes('power') || cat.includes('psu') || name.includes('power supply') || name.includes('corsair rm') || name.includes('850w')) {
         grouped.psu.push(p);
-      } else if (
-        cat.includes("case") ||
-        name.includes("chassis") ||
-        name.includes("tower") ||
-        name.includes("h9 flow") ||
-        name.includes("o11")
-      ) {
+      } else if (cat.includes('case') || name.includes('chassis') || name.includes('tower') || name.includes('h9 flow') || name.includes('o11')) {
         grouped.case.push(p);
-      } else if (
-        cat.includes("cooler") ||
-        name.includes("kraken") ||
-        name.includes("liquid") ||
-        name.includes("noctua")
-      ) {
+      } else if (cat.includes('cooler') || name.includes('kraken') || name.includes('liquid') || name.includes('noctua')) {
         grouped.cooler.push(p);
       }
     }

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { ApiClient } from '@/lib/api-client';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   LayoutDashboard,
@@ -34,14 +33,12 @@ import {
   Menu,
   X,
   FileText,
-  Settings,
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, role, token, logout, isLoading } = useAuth();
-  const [pendingResellerCount, setPendingResellerCount] = useState(0);
+  const { user, role, logout, isLoading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
@@ -66,19 +63,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     setMobileDrawerOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    if (!token || role !== 'ADMIN') return;
-    let active = true;
-    const refresh = () => {
-      ApiClient.get<{ count: number }>('/admin/resellers/pending', { token })
-        .then(result => { if (active) setPendingResellerCount(result.count || 0); })
-        .catch(() => { /* Keep the last count during a temporary API error. */ });
-    };
-    refresh();
-    const timer = setInterval(refresh, 30000);
-    return () => { active = false; clearInterval(timer); };
-  }, [token, role, pathname]);
 
   const navSections = [
     {
@@ -112,12 +96,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: '/admin/coupons', label: 'Discount Coupons', icon: Tag },
         { href: '/admin/banners', label: 'Storefront Banners', icon: ImageIcon },
         { href: '/admin/cms', label: 'Storefront CMS & Content', icon: Sliders },
-      ],
-    },
-    {
-      title: 'ACCOUNT',
-      items: [
-        { href: '/admin/account', label: 'Account Settings', icon: Settings },
       ],
     },
   ];
@@ -160,11 +138,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex items-center gap-2 sm:gap-3.5">
           {/* Theme Toggle Button */}
           <ThemeToggle />
-
-          <Link href="/admin/resellers" title="Reseller applications awaiting review" className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label={`${pendingResellerCount} reseller applications awaiting review`}>
-            <Bell className="w-5 h-5" />
-            {pendingResellerCount > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center">{pendingResellerCount}</span>}
-          </Link>
 
           {/* Live Clock Badge (Hidden on mobile) */}
           <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-xs font-mono text-slate-700 dark:text-slate-300">
@@ -235,7 +208,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     >
                       <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
                       {!collapsed && <span className="truncate">{label}</span>}
-                      {href === '/admin/resellers' && pendingResellerCount > 0 && <span className="ml-auto rounded-full bg-amber-500 text-white text-[10px] font-bold px-1.5">{pendingResellerCount}</span>}
                     </Link>
                   );
                 })}
@@ -307,7 +279,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         >
                           <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                           <span>{label}</span>
-                          {href === '/admin/resellers' && pendingResellerCount > 0 && <span className="ml-auto rounded-full bg-amber-500 text-white text-[10px] font-bold px-1.5">{pendingResellerCount}</span>}
                         </Link>
                       );
                     })}

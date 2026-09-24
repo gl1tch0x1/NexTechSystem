@@ -58,6 +58,32 @@ export const SEED_BRANDS: Brand[] = [
 
 export const SEED_USERS: User[] = [
   {
+    id: 'user_admin_1',
+    email: 'admin@nextech.com',
+    role: 'ADMIN',
+    name: 'NexTech Systems Administrator',
+    username: 'admin@nextech.com',
+    phone: '+971 4 399 1000',
+    addresses: [
+      {
+        id: 'addr_adm_1',
+        fullName: 'NexTech Admin HQ',
+        phone: '+971 4 399 1000',
+        addressLine1: 'Silicon Oasis Tech Tower, Suite 400',
+        city: 'Dubai',
+        state: 'Dubai',
+        country: 'United Arab Emirates',
+        postalCode: '00000',
+        isDefaultShipping: true,
+        isDefaultBilling: true,
+      },
+    ],
+    isActive: true,
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+    passwordHash: 'bac2c1baa719f2b185020be98b03099a14ae275446716f28922c86bbcedd0bf4:6a57cc8a753a1fdfa4dfe6961a6e62157894a9aad806747cee40b76f71d3d145f3dea158b50bcec1fe44e6d484922887f79825e0499b4fa1849b22156494021a',
+  },
+  {
     id: 'user_reseller_1',
     email: 'partner@comnet.ae',
     role: 'RESELLER',
