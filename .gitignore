@@ -62,6 +62,7 @@ Thumbs.db
 # Scratch and temporary testing artifacts
 scratch/
 coverage/
+.npm-cache/
 .vercel
 
 # Database stores & runtime caches (store data in Cloud Firestore/database, not codebase)

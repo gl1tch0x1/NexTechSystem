@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { GA_TRACKING_ID } from '@/lib/analytics';
 
@@ -9,7 +9,16 @@ import { GA_TRACKING_ID } from '@/lib/analytics';
  * Loads gtag.js asynchronously without impacting Core Web Vitals.
  */
 export default function GoogleAnalytics() {
-  if (!GA_TRACKING_ID) {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    setEnabled(process.env.NODE_ENV === 'production' && /^G-[A-Z0-9]+$/.test(GA_TRACKING_ID) &&
+      hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '::1');
+  }, []);
+
+  // A local production build should stay as quiet as the development server.
+  if (!enabled) {
     return null;
   }
 

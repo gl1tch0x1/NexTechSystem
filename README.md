@@ -1189,7 +1189,8 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
    - `PORT`: `5000`
    - `JWT_SECRET`: Production-grade cryptographic key
    - `PASSWORD_SALT`: Dedicated PBKDF2 salt string
-   - `ADMIN_DEFAULT_EMAIL`: Production administrative email address
+   - `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD`: Initial administrator credentials, used only when no admin exists in the database. Set these in the backend environment; changing them later does not reset an existing account. Admin sign-in always checks the stored password hash, and the admin can change the password in Account Settings.
+   - `ADMIN_DEFAULT_EMAIL`: Optional fallback email for audit records
    - `ADMIN_SECURITY_PIN`: Privileged secondary security PIN
    - `CLIENT_URL`: Deployed frontend URL for CORS origin validation
    - `ALLOWED_ORIGINS`: Comma-delimited list of authorized origins

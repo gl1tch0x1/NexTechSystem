@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'CUSTOMER' | 'RESELLER';
+export type UserRole = "ADMIN" | "CUSTOMER" | "RESELLER";
 
 export interface Address {
   id: string;
@@ -29,6 +29,8 @@ export interface User {
   tradeLicense?: string;
   taxRegistrationNumber?: string;
   passwordHash?: string;
+  passwordChangedAt?: string;
+  tokenVersion?: number;
   adminPinHash?: string; // Secondary Admin Security PIN (PBKDF2 120,000 iterations)
   isActive: boolean;
   createdAt: string;
@@ -36,7 +38,8 @@ export interface User {
   lastLoginAt?: string;
 }
 
-export type ResellerStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING_APPROVAL' | 'INACTIVE';
+export type ResellerStatus =
+  "ACTIVE" | "SUSPENDED" | "PENDING_APPROVAL" | "INACTIVE";
 
 export interface ResellerBusinessInformation {
   taxNumber?: string; // 15-digit FTA TRN
@@ -54,10 +57,12 @@ export interface ResellerBusinessInformation {
   dispatchHub?: string;
 }
 
+export type ResellerApplicationSource = "SELF_APPLICATION" | "ADMIN_PROVISION";
+
 export interface Reseller {
   id: string;
   userId: string;
-  resellerCode: string; // e.g. "comnet101", "techhub"
+  resellerCode: string; // e.g. "comnet101", "techhub" — assigned by admin on approval for self-applications
   username: string;
   email: string;
   businessName: string;
@@ -75,13 +80,28 @@ export interface Reseller {
     unitsSold: number;
   };
   commissionRate?: number; // admin margin percentage if applicable
+  applicationSource?: ResellerApplicationSource;
+  rejectionReason?: string;
+  adminNotes?: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  deniedAt?: string;
+  deniedBy?: string;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
 }
 
-export type SellerType = 'ADMIN' | 'RESELLER';
-export type ProductApprovalStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
+export type SellerType = "ADMIN" | "RESELLER";
+export type ProductApprovalStatus =
+  | "DRAFT"
+  | "PENDING_APPROVAL"
+  | "APPROVED"
+  | "REJECTED"
+  | "ACTIVE"
+  | "INACTIVE"
+  | "OUT_OF_STOCK"
+  | "ARCHIVED";
 
 export interface ProductSpecification {
   categoryKey: string; // e.g. "processor", "ram", "storage", "gpu", "socket", "wattage", "formFactor"
@@ -134,7 +154,7 @@ export interface ProductPackageDimensions {
   length: number;
   width: number;
   height: number;
-  unit: 'cm' | 'in';
+  unit: "cm" | "in";
 }
 
 export interface Product {
@@ -193,7 +213,7 @@ export interface Product {
   // Inventory tracking & policy
   inventoryTracked?: boolean;
   allowBackorder?: boolean; // "Sell when out of stock" policy
-  status?: 'ACTIVE' | 'DRAFT' | 'ARCHIVED';
+  status?: "ACTIVE" | "DRAFT" | "ARCHIVED";
   createdAt: string;
   updatedAt: string;
 }
@@ -255,9 +275,17 @@ export interface Cart {
   updatedAt: string;
 }
 
-export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURNED' | 'REFUNDED';
-export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
-export type PaymentMethod = 'CREDIT_CARD' | 'WALLET' | 'COD' | 'BANK_TRANSFER';
+export type OrderStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "RETURNED"
+  | "REFUNDED";
+export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+export type PaymentMethod = "CREDIT_CARD" | "WALLET" | "COD" | "BANK_TRANSFER";
 
 export interface OrderItem {
   productId: string;
@@ -320,7 +348,7 @@ export interface Order {
   statusHistory: OrderStatusHistoryItem[];
   notes?: string;
   eBillId?: string;
-  customerType?: 'INDIVIDUAL' | 'BUSINESS';
+  customerType?: "INDIVIDUAL" | "BUSINESS";
   companyName?: string;
   tradeLicense?: string;
   trn?: string;
@@ -334,7 +362,8 @@ export interface Order {
   updatedAt: string;
 }
 
-export type WalletTransactionType = 'CREDIT' | 'DEBIT' | 'REFUND' | 'ADMIN_ADJUSTMENT';
+export type WalletTransactionType =
+  "CREDIT" | "DEBIT" | "REFUND" | "ADMIN_ADJUSTMENT";
 
 export interface WalletTransaction {
   id: string;
@@ -358,7 +387,7 @@ export interface Wallet {
   updatedAt: string;
 }
 
-export type CouponDiscountType = 'PERCENTAGE' | 'FIXED';
+export type CouponDiscountType = "PERCENTAGE" | "FIXED";
 
 export interface Coupon {
   id: string;
@@ -378,7 +407,7 @@ export interface Coupon {
   applicableCategoryIds?: string[];
   applicableBrandIds?: string[];
   applicableProductIds?: string[];
-  customerEligibility?: 'ALL' | 'B2B_ONLY' | 'VIP_ONLY';
+  customerEligibility?: "ALL" | "B2B_ONLY" | "VIP_ONLY";
   resellerId?: string;
   showOnLandingPage?: boolean;
   startDate: string;
@@ -421,7 +450,7 @@ export interface EBill {
     email: string;
     phone?: string;
     address: Address;
-    customerType?: 'INDIVIDUAL' | 'BUSINESS';
+    customerType?: "INDIVIDUAL" | "BUSINESS";
     companyName?: string;
     tradeLicense?: string;
     trn?: string;
@@ -459,7 +488,7 @@ export interface PCBuilderCategorySlots {
 }
 
 export interface CompatibilityIssue {
-  type: 'ERROR' | 'WARNING';
+  type: "ERROR" | "WARNING";
   category: string;
   message: string;
   affectedComponents: string[];
@@ -493,7 +522,7 @@ export interface ProductImportReport {
   errorRows: number;
   duplicateRows: number;
   importedCount: number;
-  status: 'PREVIEW' | 'COMPLETED' | 'FAILED';
+  status: "PREVIEW" | "COMPLETED" | "FAILED";
   errors: { row: number; field: string; message: string }[];
   createdAt: string;
 }
@@ -521,7 +550,7 @@ export interface Banner {
   buttonText: string;
   imageUrl: string;
   badge?: string;
-  position: 'HERO' | 'PROMO_SECTION' | 'SIDEBAR' | 'POPUP';
+  position: "HERO" | "PROMO_SECTION" | "SIDEBAR" | "POPUP";
   order: number;
   isActive: boolean;
   startDate?: string;
@@ -690,7 +719,7 @@ export interface HomePageContent {
 }
 
 // Purchase Orders & Restock Types
-export type POStatus = 'DRAFT' | 'ISSUED' | 'RECEIVED' | 'CANCELLED';
+export type POStatus = "DRAFT" | "ISSUED" | "RECEIVED" | "CANCELLED";
 
 export interface POLineItem {
   productId: string;
@@ -732,7 +761,13 @@ export interface PurchaseOrder {
 }
 
 // B2B Corporate Quotations Types
-export type QuoteStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'CONVERTED' | 'REJECTED' | 'EXPIRED';
+export type QuoteStatus =
+  | "DRAFT"
+  | "PENDING_REVIEW"
+  | "APPROVED"
+  | "CONVERTED"
+  | "REJECTED"
+  | "EXPIRED";
 
 export interface QuoteItem {
   productId: string;
@@ -795,4 +830,3 @@ export interface DbSnapshot {
   sizeBytes: number;
   collections: Record<string, any[]>;
 }
-

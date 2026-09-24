@@ -1,10 +1,10 @@
-import { orderRepository } from '../repositories/order.repository.js';
-import { productRepository } from '../repositories/product.repository.js';
-import { userRepository } from '../repositories/user.repository.js';
-import { resellerRepository } from '../repositories/reseller.repository.js';
-import { categoryRepository } from '../repositories/category.repository.js';
-import { brandRepository } from '../repositories/brand.repository.js';
-import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
+import { orderRepository } from "../repositories/order.repository.js";
+import { productRepository } from "../repositories/product.repository.js";
+import { userRepository } from "../repositories/user.repository.js";
+import { resellerRepository } from "../repositories/reseller.repository.js";
+import { categoryRepository } from "../repositories/category.repository.js";
+import { brandRepository } from "../repositories/brand.repository.js";
+import { purchaseOrderRepository } from "../repositories/purchase-order.repository.js";
 
 export class AnalyticsService {
   async getAdminDashboardMetrics(): Promise<{
@@ -37,7 +37,13 @@ export class AnalyticsService {
       total: number;
       active: number;
       pending: number;
-      topResellers: Array<{ id: string; name: string; code: string; revenue: number; orders: number }>;
+      topResellers: Array<{
+        id: string;
+        name: string;
+        code: string;
+        revenue: number;
+        orders: number;
+      }>;
     };
     inventory: {
       totalProducts: number;
@@ -48,13 +54,46 @@ export class AnalyticsService {
       lowStock: number;
       totalInventoryValue: number;
       byCategory: Record<string, number>;
-      lowStockItems: Array<{ id: string; name: string; sku: string; stock: number; price: number; categoryName: string }>;
+      lowStockItems: Array<{
+        id: string;
+        name: string;
+        sku: string;
+        stock: number;
+        price: number;
+        categoryName: string;
+      }>;
     };
-    topProducts: Array<{ id: string; name: string; price: number; unitsSold: number; revenue: number; stock: number }>;
-    categoryPerformance: Array<{ id: string; name: string; revenue: number; productCount: number }>;
-    brandPerformance: Array<{ id: string; name: string; revenue: number; productCount: number }>;
+    topProducts: Array<{
+      id: string;
+      name: string;
+      price: number;
+      unitsSold: number;
+      revenue: number;
+      stock: number;
+    }>;
+    categoryPerformance: Array<{
+      id: string;
+      name: string;
+      revenue: number;
+      productCount: number;
+    }>;
+    brandPerformance: Array<{
+      id: string;
+      name: string;
+      revenue: number;
+      productCount: number;
+    }>;
     salesChart: Array<{ date: string; revenue: number; orders: number }>;
-    recentOrders: Array<{ id: string; orderNumber: string; customerName: string; total: number; itemsCount: number; orderStatus: string; paymentStatus: string; createdAt: string }>;
+    recentOrders: Array<{
+      id: string;
+      orderNumber: string;
+      customerName: string;
+      total: number;
+      itemsCount: number;
+      orderStatus: string;
+      paymentStatus: string;
+      createdAt: string;
+    }>;
     salesSummary: {
       totalSalesRevenue: number;
       totalSalesCount: number;
@@ -78,7 +117,15 @@ export class AnalyticsService {
       grossMarginPercentage: number;
       salesToPurchaseRatio: number;
     };
-    recentPurchases: Array<{ id: string; poNumber: string; supplierName: string; totalCost: number; totalUnits: number; status: string; createdAt: string }>;
+    recentPurchases: Array<{
+      id: string;
+      poNumber: string;
+      supplierName: string;
+      totalCost: number;
+      totalUnits: number;
+      status: string;
+      createdAt: string;
+    }>;
   }> {
     const orders = await orderRepository.find();
     const products = await productRepository.find();
@@ -111,8 +158,14 @@ export class AnalyticsService {
     let returnedOrders = 0;
     let refundedOrders = 0;
 
-    const productSalesMap: Record<string, { unitsSold: number; revenue: number }> = {};
-    const resellerSalesMap: Record<string, { revenue: number; orders: number }> = {};
+    const productSalesMap: Record<
+      string,
+      { unitsSold: number; revenue: number }
+    > = {};
+    const resellerSalesMap: Record<
+      string,
+      { revenue: number; orders: number }
+    > = {};
     const categoryRevenueMap: Record<string, number> = {};
     const brandRevenueMap: Record<string, number> = {};
     const dailyMap: Record<string, { revenue: number; orders: number }> = {};
@@ -129,7 +182,7 @@ export class AnalyticsService {
       const ordDate = new Date(ord.createdAt);
       const ordDateStr = ord.createdAt.slice(0, 10);
 
-      if (ord.paymentStatus === 'PAID' || ord.paymentMethod === 'COD') {
+      if (ord.paymentStatus === "PAID" || ord.paymentMethod === "COD") {
         totalRevenue += ord.total;
 
         if (ordDateStr === todayStr) {
@@ -147,26 +200,26 @@ export class AnalyticsService {
       }
 
       switch (ord.orderStatus) {
-        case 'PENDING':
-        case 'CONFIRMED':
+        case "PENDING":
+        case "CONFIRMED":
           pendingOrders++;
           break;
-        case 'PROCESSING':
+        case "PROCESSING":
           processingOrders++;
           break;
-        case 'SHIPPED':
+        case "SHIPPED":
           shippedOrders++;
           break;
-        case 'DELIVERED':
+        case "DELIVERED":
           deliveredOrders++;
           break;
-        case 'CANCELLED':
+        case "CANCELLED":
           cancelledOrders++;
           break;
-        case 'RETURNED':
+        case "RETURNED":
           returnedOrders++;
           break;
-        case 'REFUNDED':
+        case "REFUNDED":
           refundedOrders++;
           break;
       }
@@ -188,15 +241,20 @@ export class AnalyticsService {
         }
 
         // Attribution to category and brand
-        const p = products.find(prod => prod.id === item.productId);
+        const p = products.find((prod) => prod.id === item.productId);
         if (p) {
-          categoryRevenueMap[p.categoryId] = (categoryRevenueMap[p.categoryId] || 0) + item.subtotal;
-          brandRevenueMap[p.brandId] = (brandRevenueMap[p.brandId] || 0) + item.subtotal;
+          categoryRevenueMap[p.categoryId] =
+            (categoryRevenueMap[p.categoryId] || 0) + item.subtotal;
+          brandRevenueMap[p.brandId] =
+            (brandRevenueMap[p.brandId] || 0) + item.subtotal;
         }
       }
     }
 
-    const aov = totalOrders > 0 ? Math.round((totalRevenue / totalOrders) * 100) / 100 : 0;
+    const aov =
+      totalOrders > 0
+        ? Math.round((totalRevenue / totalOrders) * 100) / 100
+        : 0;
 
     // Inventory metrics
     let activeProds = 0;
@@ -212,18 +270,18 @@ export class AnalyticsService {
       if (p.stock === 0) outOfStockProds++;
       else if (p.stock <= (p.lowStockThreshold || 5)) lowStockProds++;
 
-      if (p.approvalStatus === 'APPROVED' && p.isActive) activeProds++;
-      else if (p.approvalStatus === 'DRAFT') draftProds++;
-      else if (p.approvalStatus === 'PENDING_APPROVAL') pendingApprovalProds++;
+      if (p.approvalStatus === "APPROVED" && p.isActive) activeProds++;
+      else if (p.approvalStatus === "DRAFT") draftProds++;
+      else if (p.approvalStatus === "PENDING_APPROVAL") pendingApprovalProds++;
 
-      const cat = categories.find(c => c.id === p.categoryId);
-      const catName = cat ? cat.name : (p.categoryName || 'PC Components');
+      const cat = categories.find((c) => c.id === p.categoryId);
+      const catName = cat ? cat.name : p.categoryName || "PC Components";
       byCategory[catName] = (byCategory[catName] || 0) + 1;
     }
 
     // Top Products
     const topProducts = products
-      .map(p => ({
+      .map((p) => ({
         id: p.id,
         name: p.name,
         price: p.salePrice || p.price,
@@ -236,21 +294,21 @@ export class AnalyticsService {
 
     // Low stock items for operational emergency alerts
     const lowStockItems = products
-      .filter(p => p.stock <= (p.lowStockThreshold || 5))
+      .filter((p) => p.stock <= (p.lowStockThreshold || 5))
       .sort((a, b) => a.stock - b.stock)
       .slice(0, 6)
-      .map(p => ({
+      .map((p) => ({
         id: p.id,
         name: p.name,
         sku: p.sku,
         stock: p.stock,
         price: p.salePrice || p.price,
-        categoryName: p.categoryName || 'Hardware Component',
+        categoryName: p.categoryName || "Hardware Component",
       }));
 
     // Top Resellers
     const topResellers = resellers
-      .map(r => ({
+      .map((r) => ({
         id: r.id,
         name: r.displayName || r.businessName,
         code: r.resellerCode,
@@ -261,19 +319,19 @@ export class AnalyticsService {
       .slice(0, 5);
 
     // Category Performance
-    const categoryPerformance = categories.map(c => ({
+    const categoryPerformance = categories.map((c) => ({
       id: c.id,
       name: c.name,
       revenue: categoryRevenueMap[c.id] || 0,
-      productCount: products.filter(p => p.categoryId === c.id).length,
+      productCount: products.filter((p) => p.categoryId === c.id).length,
     }));
 
     // Brand Performance
-    const brandPerformance = brands.map(b => ({
+    const brandPerformance = brands.map((b) => ({
       id: b.id,
       name: b.name,
       revenue: brandRevenueMap[b.id] || 0,
-      productCount: products.filter(p => p.brandId === b.id).length,
+      productCount: products.filter((p) => p.brandId === b.id).length,
     }));
 
     const salesChart = Object.entries(dailyMap).map(([date, data]) => ({
@@ -284,12 +342,15 @@ export class AnalyticsService {
 
     // Dynamic recent orders feed
     const recentOrders = orders
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
       .slice(0, 6)
-      .map(o => ({
+      .map((o) => ({
         id: o.id,
         orderNumber: o.orderNumber,
-        customerName: o.shippingAddress?.fullName || 'Client User',
+        customerName: o.shippingAddress?.fullName || "Client User",
         total: o.total,
         itemsCount: o.items.reduce((sum, it) => sum + it.quantity, 0),
         orderStatus: o.orderStatus,
@@ -297,134 +358,166 @@ export class AnalyticsService {
         createdAt: o.createdAt,
       }));
 
-    const dynamicGrowth = monthRevenue > 0 && totalRevenue > monthRevenue
-      ? Math.round(((monthRevenue / (totalRevenue - monthRevenue)) * 100) * 10) / 10
-      : 0;
-
-    // Calculate Total Purchases Metrics
-    const totalPurchaseSpend = purchaseOrders.reduce((sum, po) => sum + (po.totalEstimatedCost || po.totalCost || 0), 0);
-      let totalUnitsPurchased = 0;
-      let receivedPurchaseSpend = 0;
-      let pendingPurchaseSpend = 0;
-      let draftPOCount = 0;
-      let issuedPOCount = 0;
-      let receivedPOCount = 0;
-
-      for (const po of purchaseOrders) {
-        const cost = po.totalEstimatedCost || po.totalCost || 0;
-        const units = po.totalUnits || po.items.reduce((sum, it) => sum + (it.orderedQuantity || it.quantity || 0), 0);
-        totalUnitsPurchased += units;
-
-        if (po.status === 'RECEIVED') {
-          receivedPOCount++;
-          receivedPurchaseSpend += cost;
-        } else if (po.status === 'ISSUED') {
-          issuedPOCount++;
-          pendingPurchaseSpend += cost;
-        } else if (po.status === 'DRAFT') {
-          draftPOCount++;
-          pendingPurchaseSpend += cost;
-        }
-      }
-
-      let totalUnitsSold = 0;
-      for (const order of orders) {
-        for (const it of order.items) {
-          totalUnitsSold += it.quantity;
-        }
-      }
-
-      const grossMargin = Math.round((totalRevenue - totalPurchaseSpend) * 100) / 100;
-      const grossMarginPercentage = totalRevenue > 0
-        ? Math.round(((totalRevenue - totalPurchaseSpend) / totalRevenue) * 1000) / 10
+    const dynamicGrowth =
+      monthRevenue > 0 && totalRevenue > monthRevenue
+        ? Math.round(
+            (monthRevenue / (totalRevenue - monthRevenue)) * 100 * 10,
+          ) / 10
         : 0;
 
-      const recentPurchases = purchaseOrders
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 6)
-        .map(po => ({
-          id: po.id,
-          poNumber: po.poNumber,
-          supplierName: po.supplierName,
-          totalCost: po.totalEstimatedCost || po.totalCost || 0,
-          totalUnits: po.totalUnits || po.items.reduce((s, it) => s + (it.orderedQuantity || it.quantity || 0), 0),
-          status: po.status,
-          createdAt: po.createdAt,
-        }));
+    // Calculate Total Purchases Metrics
+    const totalPurchaseSpend = purchaseOrders.reduce(
+      (sum, po) => sum + (po.totalEstimatedCost || po.totalCost || 0),
+      0,
+    );
+    let totalUnitsPurchased = 0;
+    let receivedPurchaseSpend = 0;
+    let pendingPurchaseSpend = 0;
+    let draftPOCount = 0;
+    let issuedPOCount = 0;
+    let receivedPOCount = 0;
 
-      return {
-        revenue: {
-          total: Math.round(totalRevenue * 100) / 100,
-          today: Math.round(todayRevenue * 100) / 100,
-          thisWeek: Math.round(weekRevenue * 100) / 100,
-          thisMonth: Math.round(monthRevenue * 100) / 100,
-          thisYear: Math.round(yearRevenue * 100) / 100,
-          growthPercentage: dynamicGrowth,
-          averageOrderValue: aov,
-        },
-        orders: {
-          total: totalOrders,
-          today: todayOrders,
-          pending: pendingOrders,
-          processing: processingOrders,
-          shipped: shippedOrders,
-          delivered: deliveredOrders,
-          cancelled: cancelledOrders,
-          returned: returnedOrders,
-          refunded: refundedOrders,
-        },
-        customers: {
-          total: users.filter(u => u.role === 'CUSTOMER').length,
-          active: users.filter(u => u.role === 'CUSTOMER' && u.isActive).length,
-          newThisMonth: users.filter(u => u.role === 'CUSTOMER' && new Date(u.createdAt) >= startOfMonth).length,
-        },
-        resellers: {
-          total: resellers.length,
-          active: resellers.filter(r => r.status === 'ACTIVE').length,
-          pending: resellers.filter(r => r.status === 'PENDING_APPROVAL').length,
-          topResellers,
-        },
-        inventory: {
-          totalProducts: products.length,
-          activeProducts: activeProds,
-          draftProducts: draftProds,
-          pendingApproval: pendingApprovalProds,
-          outOfStock: outOfStockProds,
-          lowStock: lowStockProds,
-          totalInventoryValue: Math.round(totalInvValue * 100) / 100,
-          byCategory,
-          lowStockItems,
-        },
-        topProducts,
-        categoryPerformance,
-        brandPerformance,
-        salesChart,
-        recentOrders,
-        salesSummary: {
-          totalSalesRevenue: Math.round(totalRevenue * 100) / 100,
-          totalSalesCount: totalOrders,
-          totalUnitsSold,
-          averageSaleValue: aov,
-          completedOrders: deliveredOrders,
-          pendingOrders: pendingOrders + processingOrders,
-        },
-        purchasesSummary: {
-          totalPurchaseSpend: Math.round(totalPurchaseSpend * 100) / 100,
-          totalPurchaseCount: purchaseOrders.length,
-          totalUnitsPurchased,
-          receivedSpend: Math.round(receivedPurchaseSpend * 100) / 100,
-          pendingSpend: Math.round(pendingPurchaseSpend * 100) / 100,
-          receivedPOCount,
-          pendingPOCount: issuedPOCount + draftPOCount,
-          averagePOCost: purchaseOrders.length > 0 ? Math.round(totalPurchaseSpend / purchaseOrders.length) : 0,
-        },
-        profitabilitySummary: {
-          grossMargin,
-          grossMarginPercentage,
-          salesToPurchaseRatio: totalPurchaseSpend > 0 ? Math.round((totalRevenue / totalPurchaseSpend) * 100) / 100 : 1,
-        },
-        recentPurchases,
-      };
+    for (const po of purchaseOrders) {
+      const cost = po.totalEstimatedCost || po.totalCost || 0;
+      const units =
+        po.totalUnits ||
+        po.items.reduce(
+          (sum, it) => sum + (it.orderedQuantity || it.quantity || 0),
+          0,
+        );
+      totalUnitsPurchased += units;
+
+      if (po.status === "RECEIVED") {
+        receivedPOCount++;
+        receivedPurchaseSpend += cost;
+      } else if (po.status === "ISSUED") {
+        issuedPOCount++;
+        pendingPurchaseSpend += cost;
+      } else if (po.status === "DRAFT") {
+        draftPOCount++;
+        pendingPurchaseSpend += cost;
+      }
+    }
+
+    let totalUnitsSold = 0;
+    for (const order of orders) {
+      for (const it of order.items) {
+        totalUnitsSold += it.quantity;
+      }
+    }
+
+    const grossMargin =
+      Math.round((totalRevenue - totalPurchaseSpend) * 100) / 100;
+    const grossMarginPercentage =
+      totalRevenue > 0
+        ? Math.round(
+            ((totalRevenue - totalPurchaseSpend) / totalRevenue) * 1000,
+          ) / 10
+        : 0;
+
+    const recentPurchases = purchaseOrders
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .slice(0, 6)
+      .map((po) => ({
+        id: po.id,
+        poNumber: po.poNumber,
+        supplierName: po.supplierName,
+        totalCost: po.totalEstimatedCost || po.totalCost || 0,
+        totalUnits:
+          po.totalUnits ||
+          po.items.reduce(
+            (s, it) => s + (it.orderedQuantity || it.quantity || 0),
+            0,
+          ),
+        status: po.status,
+        createdAt: po.createdAt,
+      }));
+
+    return {
+      revenue: {
+        total: Math.round(totalRevenue * 100) / 100,
+        today: Math.round(todayRevenue * 100) / 100,
+        thisWeek: Math.round(weekRevenue * 100) / 100,
+        thisMonth: Math.round(monthRevenue * 100) / 100,
+        thisYear: Math.round(yearRevenue * 100) / 100,
+        growthPercentage: dynamicGrowth,
+        averageOrderValue: aov,
+      },
+      orders: {
+        total: totalOrders,
+        today: todayOrders,
+        pending: pendingOrders,
+        processing: processingOrders,
+        shipped: shippedOrders,
+        delivered: deliveredOrders,
+        cancelled: cancelledOrders,
+        returned: returnedOrders,
+        refunded: refundedOrders,
+      },
+      customers: {
+        total: users.filter((u) => u.role === "CUSTOMER").length,
+        active: users.filter((u) => u.role === "CUSTOMER" && u.isActive).length,
+        newThisMonth: users.filter(
+          (u) => u.role === "CUSTOMER" && new Date(u.createdAt) >= startOfMonth,
+        ).length,
+      },
+      resellers: {
+        total: resellers.length,
+        active: resellers.filter((r) => r.status === "ACTIVE").length,
+        pending: resellers.filter((r) => r.status === "PENDING_APPROVAL")
+          .length,
+        topResellers,
+      },
+      inventory: {
+        totalProducts: products.length,
+        activeProducts: activeProds,
+        draftProducts: draftProds,
+        pendingApproval: pendingApprovalProds,
+        outOfStock: outOfStockProds,
+        lowStock: lowStockProds,
+        totalInventoryValue: Math.round(totalInvValue * 100) / 100,
+        byCategory,
+        lowStockItems,
+      },
+      topProducts,
+      categoryPerformance,
+      brandPerformance,
+      salesChart,
+      recentOrders,
+      salesSummary: {
+        totalSalesRevenue: Math.round(totalRevenue * 100) / 100,
+        totalSalesCount: totalOrders,
+        totalUnitsSold,
+        averageSaleValue: aov,
+        completedOrders: deliveredOrders,
+        pendingOrders: pendingOrders + processingOrders,
+      },
+      purchasesSummary: {
+        totalPurchaseSpend: Math.round(totalPurchaseSpend * 100) / 100,
+        totalPurchaseCount: purchaseOrders.length,
+        totalUnitsPurchased,
+        receivedSpend: Math.round(receivedPurchaseSpend * 100) / 100,
+        pendingSpend: Math.round(pendingPurchaseSpend * 100) / 100,
+        receivedPOCount,
+        pendingPOCount: issuedPOCount + draftPOCount,
+        averagePOCost:
+          purchaseOrders.length > 0
+            ? Math.round(totalPurchaseSpend / purchaseOrders.length)
+            : 0,
+      },
+      profitabilitySummary: {
+        grossMargin,
+        grossMarginPercentage,
+        salesToPurchaseRatio:
+          totalPurchaseSpend > 0
+            ? Math.round((totalRevenue / totalPurchaseSpend) * 100) / 100
+            : 1,
+      },
+      recentPurchases,
+    };
   }
 
   async getResellerDashboardMetrics(resellerId: string): Promise<{
@@ -444,15 +537,42 @@ export class AnalyticsService {
       totalProducts: number;
       activeProducts: number;
       pendingApproval: number;
+      rejected: number;
       outOfStock: number;
       lowStock: number;
       inventoryValuation: number;
+      skuCount: number;
     };
-    topProducts: Array<{ id: string; name: string; price: number; unitsSold: number; revenue: number; stock: number }>;
+    performance: { unitsSold: number; averageOrderValue: number };
+    recentOrders: Array<{
+      id: string;
+      orderNumber: string;
+      createdAt: string;
+      status: string;
+      itemCount: number;
+      resellerTotal: number;
+    }>;
+    lowStockItems: Array<{
+      id: string;
+      name: string;
+      sku: string;
+      stock: number;
+      threshold: number;
+    }>;
+    topProducts: Array<{
+      id: string;
+      name: string;
+      sku: string;
+      price: number;
+      unitsSold: number;
+      revenue: number;
+      stock: number;
+    }>;
     salesChart: Array<{ date: string; revenue: number; orders: number }>;
   }> {
     const allOrders = await orderRepository.find();
-    const resellerProducts = await productRepository.findByResellerId(resellerId);
+    const resellerProducts =
+      await productRepository.findByResellerId(resellerId);
 
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
@@ -466,11 +586,23 @@ export class AnalyticsService {
     let monthRevenue = 0;
 
     let totalOrders = 0;
+    let salesOrders = 0;
     let pendingOrders = 0;
     let processingOrders = 0;
     let deliveredOrders = 0;
 
-    const productSalesMap: Record<string, { unitsSold: number; revenue: number }> = {};
+    const productSalesMap: Record<
+      string,
+      { unitsSold: number; revenue: number }
+    > = {};
+    const recentOrders: Array<{
+      id: string;
+      orderNumber: string;
+      createdAt: string;
+      status: string;
+      itemCount: number;
+      resellerTotal: number;
+    }> = [];
     const dailyMap: Record<string, { revenue: number; orders: number }> = {};
 
     for (let i = 6; i >= 0; i--) {
@@ -481,40 +613,59 @@ export class AnalyticsService {
     }
 
     for (const ord of allOrders) {
-      const resellerItems = ord.items.filter(it => it.resellerId === resellerId);
+      const resellerItems = ord.items.filter(
+        (it) => it.resellerId === resellerId,
+      );
       if (resellerItems.length === 0) continue;
 
       totalOrders++;
       const ordDate = new Date(ord.createdAt);
       const ordDateStr = ord.createdAt.slice(0, 10);
 
-      const resellerOrderTotal = resellerItems.reduce((acc, it) => acc + it.subtotal, 0);
+      const resellerOrderTotal = resellerItems.reduce(
+        (acc, it) => acc + it.subtotal,
+        0,
+      );
+      recentOrders.push({
+        id: ord.id,
+        orderNumber: ord.orderNumber,
+        createdAt: ord.createdAt,
+        status: ord.orderStatus,
+        itemCount: resellerItems.reduce((sum, item) => sum + item.quantity, 0),
+        resellerTotal: Math.round(resellerOrderTotal * 100) / 100,
+      });
 
-      totalRevenue += resellerOrderTotal;
-      if (ordDateStr === todayStr) todayRevenue += resellerOrderTotal;
-      if (ordDate >= startOfWeek) weekRevenue += resellerOrderTotal;
-      if (ordDate >= startOfMonth) monthRevenue += resellerOrderTotal;
+      const countsAsSale = !["CANCELLED", "RETURNED", "REFUNDED"].includes(
+        ord.orderStatus,
+      );
+      if (countsAsSale) {
+        salesOrders++;
+        totalRevenue += resellerOrderTotal;
+        if (ordDateStr === todayStr) todayRevenue += resellerOrderTotal;
+        if (ordDate >= startOfWeek) weekRevenue += resellerOrderTotal;
+        if (ordDate >= startOfMonth) monthRevenue += resellerOrderTotal;
+      }
 
       if (dailyMap[ordDateStr]) {
-        dailyMap[ordDateStr].revenue += resellerOrderTotal;
+        if (countsAsSale) dailyMap[ordDateStr].revenue += resellerOrderTotal;
         dailyMap[ordDateStr].orders += 1;
       }
 
       switch (ord.orderStatus) {
-        case 'PENDING':
-        case 'CONFIRMED':
+        case "PENDING":
+        case "CONFIRMED":
           pendingOrders++;
           break;
-        case 'PROCESSING':
-        case 'SHIPPED':
+        case "PROCESSING":
+        case "SHIPPED":
           processingOrders++;
           break;
-        case 'DELIVERED':
+        case "DELIVERED":
           deliveredOrders++;
           break;
       }
 
-      for (const it of resellerItems) {
+      for (const it of countsAsSale ? resellerItems : []) {
         if (!productSalesMap[it.productId]) {
           productSalesMap[it.productId] = { unitsSold: 0, revenue: 0 };
         }
@@ -525,23 +676,44 @@ export class AnalyticsService {
 
     let activeProds = 0;
     let pendingApprovalProds = 0;
+    let rejectedProds = 0;
     let outOfStockProds = 0;
     let lowStockProds = 0;
     let inventoryValuation = 0;
+    let skuCount = 0;
+    const lowStockItems: Array<{
+      id: string;
+      name: string;
+      sku: string;
+      stock: number;
+      threshold: number;
+    }> = [];
 
     for (const p of resellerProducts) {
+      skuCount += p.hasVariants && p.variants?.length ? p.variants.length : 1;
       inventoryValuation += (p.salePrice || p.price) * p.stock;
       if (p.stock === 0) outOfStockProds++;
       else if (p.stock <= p.lowStockThreshold) lowStockProds++;
+      if (p.stock <= p.lowStockThreshold) {
+        lowStockItems.push({
+          id: p.id,
+          name: p.name,
+          sku: p.sku,
+          stock: p.stock,
+          threshold: p.lowStockThreshold,
+        });
+      }
 
-      if (p.approvalStatus === 'APPROVED' && p.isActive) activeProds++;
-      else if (p.approvalStatus === 'PENDING_APPROVAL') pendingApprovalProds++;
+      if (p.approvalStatus === "APPROVED" && p.isActive) activeProds++;
+      else if (p.approvalStatus === "PENDING_APPROVAL") pendingApprovalProds++;
+      else if (p.approvalStatus === "REJECTED") rejectedProds++;
     }
 
     const topProducts = resellerProducts
-      .map(p => ({
+      .map((p) => ({
         id: p.id,
         name: p.name,
+        sku: p.sku,
         price: p.salePrice || p.price,
         unitsSold: productSalesMap[p.id]?.unitsSold || 0,
         revenue: productSalesMap[p.id]?.revenue || 0,
@@ -573,16 +745,33 @@ export class AnalyticsService {
         totalProducts: resellerProducts.length,
         activeProducts: activeProds,
         pendingApproval: pendingApprovalProds,
+        rejected: rejectedProds,
         outOfStock: outOfStockProds,
         lowStock: lowStockProds,
         inventoryValuation: Math.round(inventoryValuation * 100) / 100,
+        skuCount,
       },
+      performance: {
+        unitsSold: Object.values(productSalesMap).reduce(
+          (sum, item) => sum + item.unitsSold,
+          0,
+        ),
+        averageOrderValue: salesOrders
+          ? Math.round((totalRevenue / salesOrders) * 100) / 100
+          : 0,
+      },
+      recentOrders: recentOrders
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 6),
+      lowStockItems: lowStockItems
+        .sort((a, b) => a.stock - b.stock)
+        .slice(0, 6),
       topProducts,
       salesChart,
     };
   }
 
-  async getAdvancedAnalytics(timeRange: string = '30d'): Promise<any> {
+  async getAdvancedAnalytics(timeRange: string = "30d"): Promise<any> {
     const orders = await orderRepository.find();
     const products = await productRepository.find();
     const users = await userRepository.find();
@@ -592,49 +781,111 @@ export class AnalyticsService {
 
     const now = new Date();
     let daysToInclude = 30;
-    if (timeRange === '24h') daysToInclude = 1;
-    else if (timeRange === '7d') daysToInclude = 7;
-    else if (timeRange === '30d') daysToInclude = 30;
-    else if (timeRange === '90d') daysToInclude = 90;
-    else if (timeRange === '1y') daysToInclude = 365;
-    else if (timeRange === 'all') daysToInclude = 730;
+    if (timeRange === "24h") daysToInclude = 1;
+    else if (timeRange === "7d") daysToInclude = 7;
+    else if (timeRange === "30d") daysToInclude = 30;
+    else if (timeRange === "90d") daysToInclude = 90;
+    else if (timeRange === "1y") daysToInclude = 365;
+    else if (timeRange === "all") daysToInclude = 730;
 
-    const startDate = new Date(now.getTime() - daysToInclude * 24 * 60 * 60 * 1000);
+    const startDate = new Date(
+      now.getTime() - daysToInclude * 24 * 60 * 60 * 1000,
+    );
 
     const purchaseOrders = await purchaseOrderRepository.find();
 
     // Filter relevant orders
-    const filteredOrders = orders.filter(o => new Date(o.createdAt) >= startDate);
-    const paidOrders = filteredOrders.filter(o => o.paymentStatus === 'PAID' || o.paymentMethod === 'COD');
+    const filteredOrders = orders.filter(
+      (o) => new Date(o.createdAt) >= startDate,
+    );
+    const paidOrders = filteredOrders.filter(
+      (o) => o.paymentStatus === "PAID" || o.paymentMethod === "COD",
+    );
 
     // Filter relevant POs
-    const filteredPOs = purchaseOrders.filter(po => new Date(po.createdAt) >= startDate);
+    const filteredPOs = purchaseOrders.filter(
+      (po) => new Date(po.createdAt) >= startDate,
+    );
     const posToAnalyze = filteredPOs.length > 0 ? filteredPOs : purchaseOrders;
 
-    const totalProcurementSpend = posToAnalyze.reduce((s, po) => s + (po.totalEstimatedCost || po.totalCost || 0), 0);
-    const totalProcuredUnits = posToAnalyze.reduce((s, po) => s + (po.totalUnits || po.items.reduce((sum, it) => sum + (it.orderedQuantity || it.quantity || 0), 0)), 0);
-    const receivedPOs = posToAnalyze.filter(po => po.status === 'RECEIVED');
-    const pendingPOs = posToAnalyze.filter(po => po.status === 'ISSUED' || po.status === 'DRAFT');
-    const receivedSpend = receivedPOs.reduce((s, po) => s + (po.totalEstimatedCost || po.totalCost || 0), 0);
-    const pendingSpend = pendingPOs.reduce((s, po) => s + (po.totalEstimatedCost || po.totalCost || 0), 0);
+    const totalProcurementSpend = posToAnalyze.reduce(
+      (s, po) => s + (po.totalEstimatedCost || po.totalCost || 0),
+      0,
+    );
+    const totalProcuredUnits = posToAnalyze.reduce(
+      (s, po) =>
+        s +
+        (po.totalUnits ||
+          po.items.reduce(
+            (sum, it) => sum + (it.orderedQuantity || it.quantity || 0),
+            0,
+          )),
+      0,
+    );
+    const receivedPOs = posToAnalyze.filter((po) => po.status === "RECEIVED");
+    const pendingPOs = posToAnalyze.filter(
+      (po) => po.status === "ISSUED" || po.status === "DRAFT",
+    );
+    const receivedSpend = receivedPOs.reduce(
+      (s, po) => s + (po.totalEstimatedCost || po.totalCost || 0),
+      0,
+    );
+    const pendingSpend = pendingPOs.reduce(
+      (s, po) => s + (po.totalEstimatedCost || po.totalCost || 0),
+      0,
+    );
 
     let totalRevenue = 0;
     let totalUnitsSold = 0;
-    const paymentMethodSplit: Record<string, number> = { CREDIT_CARD: 0, WALLET: 0, COD: 0, BANK_TRANSFER: 0 };
-    const sellerChannelSplit: Record<string, number> = { ADMIN: 0, RESELLER: 0 };
-    const productSalesMap: Record<string, { unitsSold: number; revenue: number }> = {};
-    const categorySalesMap: Record<string, { unitsSold: number; revenue: number }> = {};
-    const brandSalesMap: Record<string, { unitsSold: number; revenue: number }> = {};
+    const paymentMethodSplit: Record<string, number> = {
+      CREDIT_CARD: 0,
+      WALLET: 0,
+      COD: 0,
+      BANK_TRANSFER: 0,
+    };
+    const sellerChannelSplit: Record<string, number> = {
+      ADMIN: 0,
+      RESELLER: 0,
+    };
+    const productSalesMap: Record<
+      string,
+      { unitsSold: number; revenue: number }
+    > = {};
+    const categorySalesMap: Record<
+      string,
+      { unitsSold: number; revenue: number }
+    > = {};
+    const brandSalesMap: Record<
+      string,
+      { unitsSold: number; revenue: number }
+    > = {};
 
     // Grouping for timeseries
-    const timeBuckets: Record<string, { label: string; revenue: number; orders: number; units: number; wallet: number; card: number }> = {};
+    const timeBuckets: Record<
+      string,
+      {
+        label: string;
+        revenue: number;
+        orders: number;
+        units: number;
+        wallet: number;
+        card: number;
+      }
+    > = {};
 
-    if (timeRange === '24h') {
+    if (timeRange === "24h") {
       // 24 hourly buckets
       for (let h = 23; h >= 0; h--) {
         const d = new Date(now.getTime() - h * 60 * 60 * 1000);
-        const key = `${d.getHours().toString().padStart(2, '0')}:00`;
-        timeBuckets[key] = { label: key, revenue: 0, orders: 0, units: 0, wallet: 0, card: 0 };
+        const key = `${d.getHours().toString().padStart(2, "0")}:00`;
+        timeBuckets[key] = {
+          label: key,
+          revenue: 0,
+          orders: 0,
+          units: 0,
+          wallet: 0,
+          card: 0,
+        };
       }
     } else {
       // Daily buckets (or sampled if > 60 days)
@@ -642,19 +893,30 @@ export class AnalyticsService {
       for (let i = daysToInclude; i >= 0; i -= step) {
         const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
         const key = d.toISOString().slice(0, 10);
-        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        timeBuckets[key] = { label, revenue: 0, orders: 0, units: 0, wallet: 0, card: 0 };
+        const label = d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        timeBuckets[key] = {
+          label,
+          revenue: 0,
+          orders: 0,
+          units: 0,
+          wallet: 0,
+          card: 0,
+        };
       }
     }
 
     for (const ord of paidOrders) {
       totalRevenue += ord.total;
-      paymentMethodSplit[ord.paymentMethod] = (paymentMethodSplit[ord.paymentMethod] || 0) + ord.total;
+      paymentMethodSplit[ord.paymentMethod] =
+        (paymentMethodSplit[ord.paymentMethod] || 0) + ord.total;
 
       const ordDate = new Date(ord.createdAt);
-      let bucketKey = '';
-      if (timeRange === '24h') {
-        bucketKey = `${ordDate.getHours().toString().padStart(2, '0')}:00`;
+      let bucketKey = "";
+      if (timeRange === "24h") {
+        bucketKey = `${ordDate.getHours().toString().padStart(2, "0")}:00`;
       } else {
         bucketKey = ord.createdAt.slice(0, 10);
       }
@@ -665,8 +927,9 @@ export class AnalyticsService {
         totalUnitsSold += item.quantity;
 
         // Seller split
-        const sellerType = item.sellerType || 'ADMIN';
-        sellerChannelSplit[sellerType] = (sellerChannelSplit[sellerType] || 0) + item.subtotal;
+        const sellerType = item.sellerType || "ADMIN";
+        sellerChannelSplit[sellerType] =
+          (sellerChannelSplit[sellerType] || 0) + item.subtotal;
 
         // Product tally
         if (!productSalesMap[item.productId]) {
@@ -676,7 +939,7 @@ export class AnalyticsService {
         productSalesMap[item.productId].revenue += item.subtotal;
 
         // Category & Brand attribution
-        const prod = products.find(p => p.id === item.productId);
+        const prod = products.find((p) => p.id === item.productId);
         if (prod) {
           if (!categorySalesMap[prod.categoryId]) {
             categorySalesMap[prod.categoryId] = { unitsSold: 0, revenue: 0 };
@@ -696,17 +959,20 @@ export class AnalyticsService {
         timeBuckets[bucketKey].revenue += ord.total;
         timeBuckets[bucketKey].orders += 1;
         timeBuckets[bucketKey].units += orderUnits;
-        if (ord.paymentMethod === 'WALLET') timeBuckets[bucketKey].wallet += ord.total;
+        if (ord.paymentMethod === "WALLET")
+          timeBuckets[bucketKey].wallet += ord.total;
         else timeBuckets[bucketKey].card += ord.total;
       }
     }
 
     // Top Selling Models with complete product metadata
     const topModels = products
-      .map(p => {
+      .map((p) => {
         const stats = productSalesMap[p.id] || { unitsSold: 0, revenue: 0 };
-        const cat = categories.find(c => c.id === p.categoryId)?.name || p.categoryName;
-        const brand = brands.find(b => b.id === p.brandId)?.name || p.brandName;
+        const cat =
+          categories.find((c) => c.id === p.categoryId)?.name || p.categoryName;
+        const brand =
+          brands.find((b) => b.id === p.brandId)?.name || p.brandName;
         return {
           id: p.id,
           name: p.name,
@@ -718,10 +984,15 @@ export class AnalyticsService {
           stock: p.stock,
           unitsSold: stats.unitsSold,
           revenue: Math.round(stats.revenue * 100) / 100,
-          image: p.thumbnail || (p.images && p.images[0]) || '',
+          image: p.thumbnail || (p.images && p.images[0]) || "",
           growthRate: 18.2 + ((stats.unitsSold * 3) % 15),
           margin: 22.5 + ((p.price * 7) % 12),
-          status: p.stock > 0 ? (p.stock <= p.lowStockThreshold ? 'LOW_STOCK' : 'IN_STOCK') : 'OUT_OF_STOCK',
+          status:
+            p.stock > 0
+              ? p.stock <= p.lowStockThreshold
+                ? "LOW_STOCK"
+                : "IN_STOCK"
+              : "OUT_OF_STOCK",
         };
       })
       .sort((a, b) => b.revenue - a.revenue || b.unitsSold - a.unitsSold)
@@ -729,9 +1000,12 @@ export class AnalyticsService {
 
     // Category Distribution
     const categoryDistribution = categories
-      .map(c => {
+      .map((c) => {
         const data = categorySalesMap[c.id] || { unitsSold: 0, revenue: 0 };
-        const pct = totalRevenue > 0 ? Math.round((data.revenue / totalRevenue) * 100) : 0;
+        const pct =
+          totalRevenue > 0
+            ? Math.round((data.revenue / totalRevenue) * 100)
+            : 0;
         return {
           id: c.id,
           name: c.name,
@@ -739,16 +1013,19 @@ export class AnalyticsService {
           revenue: Math.round(data.revenue * 100) / 100,
           unitsSold: data.unitsSold,
           percentage: pct,
-          productCount: products.filter(p => p.categoryId === c.id).length,
+          productCount: products.filter((p) => p.categoryId === c.id).length,
         };
       })
       .sort((a, b) => b.revenue - a.revenue);
 
     // Brand Market Share
     const brandDistribution = brands
-      .map(b => {
+      .map((b) => {
         const data = brandSalesMap[b.id] || { unitsSold: 0, revenue: 0 };
-        const pct = totalRevenue > 0 ? Math.round((data.revenue / totalRevenue) * 100) : 0;
+        const pct =
+          totalRevenue > 0
+            ? Math.round((data.revenue / totalRevenue) * 100)
+            : 0;
         return {
           id: b.id,
           name: b.name,
@@ -756,7 +1033,7 @@ export class AnalyticsService {
           revenue: Math.round(data.revenue * 100) / 100,
           unitsSold: data.unitsSold,
           percentage: pct,
-          productCount: products.filter(p => p.brandId === b.id).length,
+          productCount: products.filter((p) => p.brandId === b.id).length,
         };
       })
       .sort((a, b) => b.revenue - a.revenue);
@@ -776,7 +1053,12 @@ export class AnalyticsService {
     const baseVisitors = 38 + Math.floor(Math.random() * 25);
     const livePulseMinutes = Array.from({ length: 30 }).map((_, idx) => {
       const minAgo = 29 - idx;
-      const count = Math.max(12, Math.floor(baseVisitors * 0.7 + Math.sin(idx * 0.5) * 15 + Math.random() * 8));
+      const count = Math.max(
+        12,
+        Math.floor(
+          baseVisitors * 0.7 + Math.sin(idx * 0.5) * 15 + Math.random() * 8,
+        ),
+      );
       return {
         minute: `${minAgo}m ago`,
         activeUsers: count,
@@ -785,39 +1067,159 @@ export class AnalyticsService {
     });
 
     const trafficSources = [
-      { source: 'Google Organic Search (SEO)', percentage: 38, visitors: 4820, bounceRate: '24.2%', conversionRate: '4.8%' },
-      { source: 'Direct / Bookmarks / Enterprise HUD', percentage: 32, visitors: 4060, bounceRate: '18.1%', conversionRate: '8.4%' },
-      { source: 'Tech Review Portals & Reddit (r/hardware)', percentage: 18, visitors: 2280, bounceRate: '31.5%', conversionRate: '3.6%' },
-      { source: 'Tier-1 Reseller & System Integrator Referrals', percentage: 12, visitors: 1520, bounceRate: '12.0%', conversionRate: '14.2%' },
+      {
+        source: "Google Organic Search (SEO)",
+        percentage: 38,
+        visitors: 4820,
+        bounceRate: "24.2%",
+        conversionRate: "4.8%",
+      },
+      {
+        source: "Direct / Bookmarks / Enterprise HUD",
+        percentage: 32,
+        visitors: 4060,
+        bounceRate: "18.1%",
+        conversionRate: "8.4%",
+      },
+      {
+        source: "Tech Review Portals & Reddit (r/hardware)",
+        percentage: 18,
+        visitors: 2280,
+        bounceRate: "31.5%",
+        conversionRate: "3.6%",
+      },
+      {
+        source: "Tier-1 Reseller & System Integrator Referrals",
+        percentage: 12,
+        visitors: 1520,
+        bounceRate: "12.0%",
+        conversionRate: "14.2%",
+      },
     ];
 
     const geoDistribution = [
-      { country: 'United Arab Emirates', code: 'AE', cities: 'Dubai, Abu Dhabi, Sharjah', percentage: 54, sessions: 6860, revenueShare: '58%' },
-      { country: 'Saudi Arabia', code: 'SA', cities: 'Riyadh, Jeddah, Dammam', percentage: 26, sessions: 3300, revenueShare: '28%' },
-      { country: 'Qatar', code: 'QA', cities: 'Doha, Lusail', percentage: 8, sessions: 1010, revenueShare: '7%' },
-      { country: 'Kuwait', code: 'KW', cities: 'Kuwait City, Hawalli', percentage: 5, sessions: 635, revenueShare: '4%' },
-      { country: 'Oman & Bahrain', code: 'OM/BH', cities: 'Muscat, Manama', percentage: 4, sessions: 508, revenueShare: '2%' },
-      { country: 'International / EU & US', code: 'GLOBAL', cities: 'London, Singapore, Frankfurt', percentage: 3, sessions: 380, revenueShare: '1%' },
+      {
+        country: "United Arab Emirates",
+        code: "AE",
+        cities: "Dubai, Abu Dhabi, Sharjah",
+        percentage: 54,
+        sessions: 6860,
+        revenueShare: "58%",
+      },
+      {
+        country: "Saudi Arabia",
+        code: "SA",
+        cities: "Riyadh, Jeddah, Dammam",
+        percentage: 26,
+        sessions: 3300,
+        revenueShare: "28%",
+      },
+      {
+        country: "Qatar",
+        code: "QA",
+        cities: "Doha, Lusail",
+        percentage: 8,
+        sessions: 1010,
+        revenueShare: "7%",
+      },
+      {
+        country: "Kuwait",
+        code: "KW",
+        cities: "Kuwait City, Hawalli",
+        percentage: 5,
+        sessions: 635,
+        revenueShare: "4%",
+      },
+      {
+        country: "Oman & Bahrain",
+        code: "OM/BH",
+        cities: "Muscat, Manama",
+        percentage: 4,
+        sessions: 508,
+        revenueShare: "2%",
+      },
+      {
+        country: "International / EU & US",
+        code: "GLOBAL",
+        cities: "London, Singapore, Frankfurt",
+        percentage: 3,
+        sessions: 380,
+        revenueShare: "1%",
+      },
     ];
 
     const deviceBreakdown = [
-      { device: 'High-End Workstation / Desktop (Chrome/Edge)', percentage: 68, sessions: 8640, icon: 'Monitor' },
-      { device: 'Mobile Smartphone (iOS Safari / Android)', percentage: 24, sessions: 3050, icon: 'Smartphone' },
-      { device: 'Enterprise Tablet / iPad Pro', percentage: 8, sessions: 1010, icon: 'Tablet' },
+      {
+        device: "High-End Workstation / Desktop (Chrome/Edge)",
+        percentage: 68,
+        sessions: 8640,
+        icon: "Monitor",
+      },
+      {
+        device: "Mobile Smartphone (iOS Safari / Android)",
+        percentage: 24,
+        sessions: 3050,
+        icon: "Smartphone",
+      },
+      {
+        device: "Enterprise Tablet / iPad Pro",
+        percentage: 8,
+        sessions: 1010,
+        icon: "Tablet",
+      },
     ];
 
     const conversionFunnel = [
-      { stage: '1. Storefront & Catalog Discovery', users: 12700, percentage: 100, dropoff: '0%' },
-      { stage: '2. Product Datasheet & Spec Radar View', users: 9400, percentage: 74.0, dropoff: '26.0%' },
-      { stage: '3. PC Builder Studio Configuration', users: 5800, percentage: 45.7, dropoff: '38.3%' },
-      { stage: '4. Hardware Added to Cart', users: 3200, percentage: 25.2, dropoff: '44.8%' },
-      { stage: '5. Initiated Checkout & VAT Review', users: 2100, percentage: 16.5, dropoff: '34.4%' },
-      { stage: '6. Verified Order & E-Bill Generated', users: 1680, percentage: 13.2, dropoff: '20.0%' },
+      {
+        stage: "1. Storefront & Catalog Discovery",
+        users: 12700,
+        percentage: 100,
+        dropoff: "0%",
+      },
+      {
+        stage: "2. Product Datasheet & Spec Radar View",
+        users: 9400,
+        percentage: 74.0,
+        dropoff: "26.0%",
+      },
+      {
+        stage: "3. PC Builder Studio Configuration",
+        users: 5800,
+        percentage: 45.7,
+        dropoff: "38.3%",
+      },
+      {
+        stage: "4. Hardware Added to Cart",
+        users: 3200,
+        percentage: 25.2,
+        dropoff: "44.8%",
+      },
+      {
+        stage: "5. Initiated Checkout & VAT Review",
+        users: 2100,
+        percentage: 16.5,
+        dropoff: "34.4%",
+      },
+      {
+        stage: "6. Verified Order & E-Bill Generated",
+        users: 1680,
+        percentage: 13.2,
+        dropoff: "20.0%",
+      },
     ];
 
-    const avgOrderValue = paidOrders.length > 0 ? Math.round((totalRevenue / paidOrders.length) * 100) / 100 : 0;
-    const grossProfit = Math.round((totalRevenue - totalProcurementSpend) * 100) / 100;
-    const grossMarginPct = totalRevenue > 0 ? Math.round(((totalRevenue - totalProcurementSpend) / totalRevenue) * 1000) / 10 : 0;
+    const avgOrderValue =
+      paidOrders.length > 0
+        ? Math.round((totalRevenue / paidOrders.length) * 100) / 100
+        : 0;
+    const grossProfit =
+      Math.round((totalRevenue - totalProcurementSpend) * 100) / 100;
+    const grossMarginPct =
+      totalRevenue > 0
+        ? Math.round(
+            ((totalRevenue - totalProcurementSpend) / totalRevenue) * 1000,
+          ) / 10
+        : 0;
 
     return {
       timeRange,
@@ -828,12 +1230,17 @@ export class AnalyticsService {
         totalUnitsSold,
         averageOrderValue: avgOrderValue,
         conversionRate: 13.2,
-        activeCustomersCount: users.filter(u => u.role === 'CUSTOMER' && u.isActive).length,
-        activeResellersCount: resellers.filter(r => r.status === 'ACTIVE').length,
+        activeCustomersCount: users.filter(
+          (u) => u.role === "CUSTOMER" && u.isActive,
+        ).length,
+        activeResellersCount: resellers.filter((r) => r.status === "ACTIVE")
+          .length,
         totalCatalogItems: products.length,
-        inStockItems: products.filter(p => p.stock > 0).length,
-        lowStockItems: products.filter(p => p.stock > 0 && p.stock <= p.lowStockThreshold).length,
-        outOfStockItems: products.filter(p => p.stock === 0).length,
+        inStockItems: products.filter((p) => p.stock > 0).length,
+        lowStockItems: products.filter(
+          (p) => p.stock > 0 && p.stock <= p.lowStockThreshold,
+        ).length,
+        outOfStockItems: products.filter((p) => p.stock === 0).length,
         // Sales vs Purchases specific metrics
         totalSalesRevenue: Math.round(totalRevenue * 100) / 100,
         totalSalesCount: paidOrders.length,
@@ -861,7 +1268,10 @@ export class AnalyticsService {
       profitabilitySummary: {
         grossProfit,
         grossMarginPercentage: grossMarginPct,
-        salesToPurchaseRatio: totalProcurementSpend > 0 ? Math.round((totalRevenue / totalProcurementSpend) * 100) / 100 : 1,
+        salesToPurchaseRatio:
+          totalProcurementSpend > 0
+            ? Math.round((totalRevenue / totalProcurementSpend) * 100) / 100
+            : 1,
       },
       revenueTimeline,
       topModels,
@@ -882,4 +1292,3 @@ export class AnalyticsService {
 }
 
 export const analyticsService = new AnalyticsService();
-

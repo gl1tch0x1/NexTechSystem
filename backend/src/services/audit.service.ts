@@ -1,6 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
-import { auditRepository } from '../repositories/audit.repository.js';
-import { AuditLog, UserRole } from '../types/index.js';
+import { v4 as uuidv4 } from "uuid";
+import { auditRepository } from "../repositories/audit.repository.js";
+import { AuditLog, UserRole } from "../types/index.js";
 
 export class AuditService {
   async log(params: {

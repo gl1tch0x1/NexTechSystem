@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(15000),
       });
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(1500),
+        signal: AbortSignal.timeout(15000),
       });
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });

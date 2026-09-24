@@ -21,6 +21,13 @@ export class ResellerRepository extends BaseRepository<Reseller> {
   async findByUsername(username: string): Promise<Reseller | null> {
     return this.findOne([{ field: 'username', operator: '==', value: username.toLowerCase() }]);
   }
+
+  async findByStatus(status: Reseller['status']): Promise<Reseller[]> {
+    return this.find({
+      where: [{ field: 'status', operator: '==', value: status }],
+      orderBy: { field: 'createdAt', direction: 'desc' },
+    });
+  }
 }
 
 export const resellerRepository = new ResellerRepository();

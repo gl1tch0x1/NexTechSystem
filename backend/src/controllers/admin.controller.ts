@@ -1,25 +1,31 @@
-import { Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.js';
-import { analyticsService } from '../services/analytics.service.js';
-import { productService } from '../services/product.service.js';
-import { resellerService } from '../services/reseller.service.js';
-import { orderService } from '../services/order.service.js';
-import { walletService } from '../services/wallet.service.js';
-import { userRepository } from '../repositories/user.repository.js';
-import { couponRepository } from '../repositories/coupon.repository.js';
-import { categoryRepository } from '../repositories/category.repository.js';
-import { brandRepository } from '../repositories/brand.repository.js';
-import { bannerRepository } from '../repositories/banner.repository.js';
-import { settingsRepository } from '../repositories/settings.repository.js';
-import { productRepository } from '../repositories/product.repository.js';
-import { orderRepository } from '../repositories/order.repository.js';
-import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
-import { bentoFeatureRepo } from '../repositories/content.repository.js';
-import { dbStore } from '../config/db-store.js';
-import { auditService } from '../services/audit.service.js';
-import { ENV } from '../config/env.js';
-import { v4 as uuidv4 } from 'uuid';
-import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address } from '../types/index.js';
+import { Response } from "express";
+import { AuthenticatedRequest } from "../middleware/auth.js";
+import { analyticsService } from "../services/analytics.service.js";
+import { productService } from "../services/product.service.js";
+import { resellerService } from "../services/reseller.service.js";
+import { orderService } from "../services/order.service.js";
+import { walletService } from "../services/wallet.service.js";
+import { userRepository } from "../repositories/user.repository.js";
+import { couponRepository } from "../repositories/coupon.repository.js";
+import { categoryRepository } from "../repositories/category.repository.js";
+import { brandRepository } from "../repositories/brand.repository.js";
+import { bannerRepository } from "../repositories/banner.repository.js";
+import { settingsRepository } from "../repositories/settings.repository.js";
+import { productRepository } from "../repositories/product.repository.js";
+import { orderRepository } from "../repositories/order.repository.js";
+import { purchaseOrderRepository } from "../repositories/purchase-order.repository.js";
+import { bentoFeatureRepo } from "../repositories/content.repository.js";
+import { dbStore } from "../config/db-store.js";
+import { auditService } from "../services/audit.service.js";
+import { ENV } from "../config/env.js";
+import { v4 as uuidv4 } from "uuid";
+import {
+  PurchaseOrder,
+  POLineItem,
+  StorefrontSectionConfig,
+  BentoFeature,
+  Address,
+} from "../types/index.js";
 
 export class AdminController {
   async getDashboard(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -28,11 +34,10 @@ export class AdminController {
   }
 
   async getAnalytics(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const range = (req.query.range as string) || '30d';
+    const range = (req.query.range as string) || "30d";
     const analytics = await analyticsService.getAdvancedAnalytics(range);
     res.json({ success: true, data: analytics });
   }
-
 
   // ==========================================
   // 1. PRODUCT MANAGEMENT CRUD
@@ -50,30 +55,36 @@ export class AdminController {
     res.json({ success: true, data: result.products, meta: result });
   }
 
-  async getProductById(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getProductById(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const prod = await productService.getProductById(id);
     if (!prod) {
-      res.status(404).json({ success: false, error: { message: 'Product not found' } });
+      res
+        .status(404)
+        .json({ success: false, error: { message: "Product not found" } });
       return;
     }
     res.json({ success: true, data: prod });
   }
 
   async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const sellerType = req.body.sellerType || (req.body.resellerId ? 'RESELLER' : 'ADMIN');
+    const sellerType =
+      req.body.sellerType || (req.body.resellerId ? "RESELLER" : "ADMIN");
     const prod = await productService.createProduct({
       ...req.body,
       sellerType,
-      approvalStatus: req.body.approvalStatus || 'APPROVED',
+      approvalStatus: req.body.approvalStatus || "APPROVED",
       isActive: req.body.isActive !== false,
     });
     await auditService.log({
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
-      action: 'ADMIN_PRODUCT_CREATED',
-      resource: 'product',
+      userRole: "ADMIN",
+      action: "ADMIN_PRODUCT_CREATED",
+      resource: "product",
       resourceId: prod.id,
       details: { title: prod.name, sku: prod.sku, price: prod.price },
     });
@@ -84,11 +95,11 @@ export class AdminController {
     const id = req.params.id as string;
     const updated = await productService.updateProduct(id, req.body);
     await auditService.log({
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
-      action: 'ADMIN_PRODUCT_UPDATED',
-      resource: 'product',
+      userRole: "ADMIN",
+      action: "ADMIN_PRODUCT_UPDATED",
+      resource: "product",
       resourceId: id,
       details: req.body,
     });
@@ -99,26 +110,34 @@ export class AdminController {
     const id = req.params.id as string;
     await productService.deleteProduct(id);
     await auditService.log({
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
-      action: 'ADMIN_PRODUCT_DELETED',
-      resource: 'product',
+      userRole: "ADMIN",
+      action: "ADMIN_PRODUCT_DELETED",
+      resource: "product",
       resourceId: id,
     });
-    res.json({ success: true, message: 'Product deleted successfully.' });
+    res.json({ success: true, message: "Product deleted successfully." });
   }
 
-  async setProductApproval(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async setProductApproval(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const { status, rejectionReason } = req.body;
-    const updated = await productService.setApprovalStatus(id, status, rejectionReason, req.user?.id);
+    const updated = await productService.setApprovalStatus(
+      id,
+      status,
+      rejectionReason,
+      req.user?.id,
+    );
     await auditService.log({
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       action: `ADMIN_PRODUCT_${status}`,
-      resource: 'product',
+      resource: "product",
       resourceId: id,
       details: { status, rejectionReason },
     });
@@ -133,14 +152,25 @@ export class AdminController {
     res.json({ success: true, data: resellers });
   }
 
-  async getResellerById(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getResellerById(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const reseller = await resellerService.getResellerById(id);
     if (!reseller) {
-      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Reseller not found.' } });
+      res
+        .status(404)
+        .json({
+          success: false,
+          error: { code: "NOT_FOUND", message: "Reseller not found." },
+        });
       return;
     }
-    const products = await productService.getProducts({ resellerId: id, limit: 100 });
+    const products = await productService.getProducts({
+      resellerId: id,
+      limit: 100,
+    });
     const orders = await orderService.getOrdersByReseller(id);
     res.json({
       success: true,
@@ -152,116 +182,271 @@ export class AdminController {
     });
   }
 
-  async createReseller(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async createReseller(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     try {
-      const result = await resellerService.createReseller(req.body, req.user?.id || 'admin');
+      const result = await resellerService.createReseller(
+        req.body,
+        req.user?.id || "admin",
+      );
       await auditService.log({
-        userId: req.user?.id || 'admin',
+        userId: req.user?.id || "admin",
         userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-        userRole: 'ADMIN',
-        action: 'ADMIN_RESELLER_PROVISIONED',
-        resource: 'reseller',
+        userRole: "ADMIN",
+        action: "ADMIN_RESELLER_PROVISIONED",
+        resource: "reseller",
         resourceId: result.reseller.id,
-        details: { businessName: req.body.businessName, resellerCode: req.body.resellerCode },
+        details: {
+          businessName: req.body.businessName,
+          resellerCode: req.body.resellerCode,
+        },
       });
-      res.status(201).json({ success: true, data: result });
+      const { passwordHash: _passwordHash, ...safeUser } = result.user;
+      res
+        .status(201)
+        .json({
+          success: true,
+          data: { reseller: result.reseller, user: safeUser },
+        });
     } catch (err: any) {
-      res.status(400).json({ success: false, error: { code: 'RESELLER_CREATION_FAILED', message: err.message } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { code: "RESELLER_CREATION_FAILED", message: err.message },
+        });
     }
   }
 
-  async updateReseller(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getPendingResellerApplications(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
+    const pending = await resellerService.getPendingApplications();
+    res.json({
+      success: true,
+      data: {
+        applications: pending,
+        count: pending.length,
+        notified: true,
+        message: pending.length
+          ? `${pending.length} reseller partner application(s) awaiting approval.`
+          : "No pending reseller applications.",
+      },
+    });
+  }
+
+  async approveResellerApplication(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
+    const id = req.params.id as string;
+    try {
+      const { resellerCode, subdomain, commissionRate, adminNotes } = req.body;
+      const updated = await resellerService.approveApplication(
+        id,
+        { resellerCode, subdomain, commissionRate, adminNotes },
+        req.user?.id || "admin",
+      );
+      res.json({
+        success: true,
+        data: updated,
+        message: `Reseller approved. Unique ID "${updated.resellerCode}" has been assigned.`,
+      });
+    } catch (err: any) {
+      res.status(400).json({
+        success: false,
+        error: { code: "RESELLER_APPROVAL_FAILED", message: err.message },
+      });
+    }
+  }
+
+  async denyResellerApplication(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
+    const id = req.params.id as string;
+    try {
+      const { reason } = req.body;
+      const updated = await resellerService.denyApplication(
+        id,
+        reason,
+        req.user?.id || "admin",
+      );
+      res.json({
+        success: true,
+        data: updated,
+        message: "Reseller application denied.",
+      });
+    } catch (err: any) {
+      res.status(400).json({
+        success: false,
+        error: { code: "RESELLER_DENIAL_FAILED", message: err.message },
+      });
+    }
+  }
+
+  async updateReseller(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const updated = await resellerService.updateResellerProfile(id, req.body);
     res.json({ success: true, data: updated });
   }
 
-  async updateResellerStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async updateResellerStatus(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const { status } = req.body;
-    const updated = await resellerService.updateResellerStatus(id, status, req.user?.id || 'admin');
-    res.json({ success: true, data: updated });
+    try {
+      const updated = await resellerService.updateResellerStatus(
+        id,
+        status,
+        req.user?.id || "admin",
+      );
+      if (!updated) {
+        res
+          .status(404)
+          .json({
+            success: false,
+            error: { code: "NOT_FOUND", message: "Reseller not found." },
+          });
+        return;
+      }
+      res.json({ success: true, data: updated });
+    } catch (err: any) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { code: "INVALID_STATUS_CHANGE", message: err.message },
+        });
+    }
   }
 
-  async deleteReseller(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async deleteReseller(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
-    await resellerService.updateResellerStatus(id, 'SUSPENDED', req.user?.id || 'admin');
-    res.json({ success: true, message: 'Reseller account suspended successfully.' });
+    await resellerService.updateResellerStatus(
+      id,
+      "SUSPENDED",
+      req.user?.id || "admin",
+    );
+    res.json({
+      success: true,
+      message: "Reseller account suspended successfully.",
+    });
   }
 
   // ==========================================
   // 3. CUSTOMER ACCOUNTS & WALLET CONTROL
   // ==========================================
   async getCustomers(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const allUsers = await userRepository.find({ where: [{ field: 'role', operator: '==', value: 'CUSTOMER' }] });
+    const allUsers = await userRepository.find({
+      where: [{ field: "role", operator: "==", value: "CUSTOMER" }],
+    });
     // Fetch wallet balances for each customer
     const customersWithWallets = await Promise.all(
       allUsers.map(async (u) => {
         const wallet = await walletService.getOrCreateWallet(u.id);
         const orders = await orderService.getOrdersByUser(u.id);
+        const { passwordHash: _passwordHash, adminPinHash: _adminPinHash, ...safeUser } = u;
         return {
-          ...u,
+          ...safeUser,
           walletBalance: wallet.balance,
           orderCount: orders.length,
           totalSpent: orders.reduce((sum, o) => sum + o.total, 0),
         };
-      })
+      }),
     );
     res.json({ success: true, data: customersWithWallets });
   }
 
-  async toggleCustomerStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async toggleCustomerStatus(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const user = await userRepository.findById(id);
     if (!user) {
-      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Customer not found.' } });
+      res
+        .status(404)
+        .json({
+          success: false,
+          error: { code: "NOT_FOUND", message: "Customer not found." },
+        });
       return;
     }
-    const updated = await userRepository.update(id, { isActive: !user.isActive });
+    const updated = await userRepository.update(id, {
+      isActive: !user.isActive,
+    });
     res.json({ success: true, data: updated });
   }
 
-  async adjustCustomerWallet(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async adjustCustomerWallet(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const { amount, type, reason } = req.body;
 
     const user = await userRepository.findById(id);
     if (!user) {
-      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Customer not found.' } });
+      res
+        .status(404)
+        .json({
+          success: false,
+          error: { code: "NOT_FOUND", message: "Customer not found." },
+        });
       return;
     }
 
     const num = parseFloat(amount);
     if (!Number.isFinite(num) || num <= 0 || num > 1000000) {
-      res.status(400).json({ success: false, error: { code: 'INVALID_AMOUNT', message: 'Amount must be a positive number up to 1,000,000 AED.' } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: {
+            code: "INVALID_AMOUNT",
+            message: "Amount must be a positive number up to 1,000,000 AED.",
+          },
+        });
       return;
     }
     const cleanAmount = Math.round(num * 100) / 100;
 
     let result;
-    if (type === 'DEBIT') {
+    if (type === "DEBIT") {
       result = await walletService.debitWallet({
         userId: id,
         amount: cleanAmount,
-        reason: reason || 'Administrative Debit Adjustment',
+        reason: reason || "Administrative Debit Adjustment",
         referenceId: `admin_adj_${uuidv4().substring(0, 8)}`,
       });
     } else {
       result = await walletService.creditWallet({
         userId: id,
         amount: cleanAmount,
-        reason: reason || 'Administrative Credit Adjustment',
+        reason: reason || "Administrative Credit Adjustment",
         referenceId: `admin_adj_${uuidv4().substring(0, 8)}`,
-        type: 'CREDIT',
+        type: "CREDIT",
       });
     }
 
     await auditService.log({
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
-      action: 'ADMIN_WALLET_ADJUSTED',
-      resource: 'wallet',
+      userRole: "ADMIN",
+      action: "ADMIN_WALLET_ADJUSTED",
+      resource: "wallet",
       resourceId: user.id,
       details: { amount, type, reason, newBalance: result.wallet.balance },
     });
@@ -277,16 +462,25 @@ export class AdminController {
     res.json({ success: true, data: orders });
   }
 
-  async updateOrderStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async updateOrderStatus(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const { status, note, items } = req.body;
-    const updated = await orderService.updateOrderStatus(id, status, note, req.user?.id, items);
+    const updated = await orderService.updateOrderStatus(
+      id,
+      status,
+      note,
+      req.user?.id,
+      items,
+    );
     await auditService.log({
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
-      action: 'ADMIN_ORDER_STATUS_UPDATED',
-      resource: 'order',
+      userRole: "ADMIN",
+      action: "ADMIN_ORDER_STATUS_UPDATED",
+      resource: "order",
       resourceId: id,
       details: { newStatus: status, note, itemsCount: items?.length },
     });
@@ -320,15 +514,24 @@ export class AdminController {
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
-      res.status(400).json({ success: false, error: { message: 'At least one order item is required.' } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { message: "At least one order item is required." },
+        });
       return;
     }
 
     // Resolve customer details from database or request payload
-    let userId = customerId || req.user?.id || 'admin_sales_order';
-    let resolvedName = customerName || (req.user as any)?.name || (companyName || 'Direct Enterprise Client');
-    let resolvedEmail = customerEmail || (req.user as any)?.email || '';
-    let resolvedPhone = customerPhone || (req.user as any)?.phone || '';
+    let userId = customerId || req.user?.id || "admin_sales_order";
+    let resolvedName =
+      customerName ||
+      (req.user as any)?.name ||
+      companyName ||
+      "Direct Enterprise Client";
+    let resolvedEmail = customerEmail || (req.user as any)?.email || "";
+    let resolvedPhone = customerPhone || (req.user as any)?.phone || "";
 
     if (customerId) {
       const customer = await userRepository.findById(customerId);
@@ -340,14 +543,16 @@ export class AdminController {
     }
 
     const defaultAddress: Address = {
-      id: 'addr_admin_default',
+      id: "addr_admin_default",
       fullName: resolvedName,
       phone: resolvedPhone,
-      addressLine1: shippingAddress?.addressLine1 || 'Sheikh Zayed Road, Business Bay Tower',
-      city: shippingAddress?.city || 'Dubai',
-      state: shippingAddress?.state || 'Dubai',
-      country: shippingAddress?.country || 'AE',
-      postalCode: shippingAddress?.postalCode || '00000',
+      addressLine1:
+        shippingAddress?.addressLine1 ||
+        "Sheikh Zayed Road, Business Bay Tower",
+      city: shippingAddress?.city || "Dubai",
+      state: shippingAddress?.state || "Dubai",
+      country: shippingAddress?.country || "AE",
+      postalCode: shippingAddress?.postalCode || "00000",
       isDefault: false,
     };
 
@@ -356,7 +561,7 @@ export class AdminController {
       customerName: resolvedName,
       customerEmail: resolvedEmail,
       customerPhone: resolvedPhone,
-      customerType: customerType || (companyName ? 'BUSINESS' : 'INDIVIDUAL'),
+      customerType: customerType || (companyName ? "BUSINESS" : "INDIVIDUAL"),
       companyName,
       tradeLicense,
       trn,
@@ -369,9 +574,9 @@ export class AdminController {
       items,
       shippingAddress: shippingAddress || defaultAddress,
       billingAddress: billingAddress || shippingAddress || defaultAddress,
-      paymentMethod: paymentMethod || 'CREDIT_CARD',
+      paymentMethod: paymentMethod || "CREDIT_CARD",
       couponCode,
-      notes: notes || 'Admin Direct Sales Order',
+      notes: notes || "Admin Direct Sales Order",
     });
 
     // If admin specified a custom payment or fulfillment status upfront, update it
@@ -380,16 +585,21 @@ export class AdminController {
       order.paymentStatus = paymentStatus;
     }
     if (orderStatus && orderStatus !== order.orderStatus) {
-      await orderService.updateOrderStatus(order.id, orderStatus, 'Admin Direct Status Override', req.user?.id);
+      await orderService.updateOrderStatus(
+        order.id,
+        orderStatus,
+        "Admin Direct Status Override",
+        req.user?.id,
+      );
       order.orderStatus = orderStatus;
     }
 
     await auditService.log({
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
-      action: 'ADMIN_SALES_ORDER_CREATED',
-      resource: 'order',
+      userRole: "ADMIN",
+      action: "ADMIN_SALES_ORDER_CREATED",
+      resource: "order",
       resourceId: order.id,
       details: {
         orderNumber: order.orderNumber,
@@ -410,14 +620,27 @@ export class AdminController {
     res.json({ success: true, data: categories });
   }
 
-  async createCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async createCategory(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const { name } = req.body;
-    if (!name || typeof name !== 'string' || !name.trim()) {
-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Category name is required.' } });
+    if (!name || typeof name !== "string" || !name.trim()) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { code: "BAD_REQUEST", message: "Category name is required." },
+        });
       return;
     }
     const cleanName = name.trim();
-    const slug = req.body.slug || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const slug =
+      req.body.slug ||
+      cleanName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
 
     const cat = await categoryRepository.create({
       ...req.body,
@@ -432,16 +655,22 @@ export class AdminController {
     res.status(201).json({ success: true, data: cat });
   }
 
-  async updateCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async updateCategory(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const updated = await categoryRepository.update(id, req.body);
     res.json({ success: true, data: updated });
   }
 
-  async deleteCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async deleteCategory(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     await categoryRepository.delete(id);
-    res.json({ success: true, message: 'Category deleted successfully.' });
+    res.json({ success: true, message: "Category deleted successfully." });
   }
 
   // ==========================================
@@ -454,12 +683,22 @@ export class AdminController {
 
   async createBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     const { name } = req.body;
-    if (!name || typeof name !== 'string' || !name.trim()) {
-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Brand name is required.' } });
+    if (!name || typeof name !== "string" || !name.trim()) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { code: "BAD_REQUEST", message: "Brand name is required." },
+        });
       return;
     }
     const cleanName = name.trim();
-    const slug = req.body.slug || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const slug =
+      req.body.slug ||
+      cleanName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
 
     const brand = await brandRepository.create({
       ...req.body,
@@ -483,7 +722,7 @@ export class AdminController {
   async deleteBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
     await brandRepository.delete(id);
-    res.json({ success: true, message: 'Brand deleted successfully.' });
+    res.json({ success: true, message: "Brand deleted successfully." });
   }
 
   // ==========================================
@@ -496,8 +735,13 @@ export class AdminController {
 
   async createCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
     const { code, discountType, discountValue } = req.body;
-    if (!code || typeof code !== 'string' || !code.trim()) {
-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Coupon code is required.' } });
+    if (!code || typeof code !== "string" || !code.trim()) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { code: "BAD_REQUEST", message: "Coupon code is required." },
+        });
       return;
     }
 
@@ -506,7 +750,7 @@ export class AdminController {
       ...req.body,
       id: `coupon_${uuidv4()}`,
       code: cleanCode,
-      discountType: discountType || 'PERCENTAGE',
+      discountType: discountType || "PERCENTAGE",
       discountValue: discountValue != null ? Number(discountValue) : 10,
       usageCount: 0,
       isActive: req.body.isActive !== false,
@@ -528,7 +772,7 @@ export class AdminController {
   async deleteCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
     await couponRepository.delete(id);
-    res.json({ success: true, message: 'Coupon deleted successfully.' });
+    res.json({ success: true, message: "Coupon deleted successfully." });
   }
 
   // ==========================================
@@ -559,7 +803,7 @@ export class AdminController {
   async deleteBanner(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
     await bannerRepository.delete(id);
-    res.json({ success: true, message: 'Banner deleted successfully.' });
+    res.json({ success: true, message: "Banner deleted successfully." });
   }
 
   // ==========================================
@@ -570,8 +814,14 @@ export class AdminController {
     res.json({ success: true, data: settings });
   }
 
-  async updateSettings(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const updated = await settingsRepository.update('global_settings', req.body);
+  async updateSettings(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
+    const updated = await settingsRepository.update(
+      "global_settings",
+      req.body,
+    );
     res.json({ success: true, data: updated });
   }
 
@@ -580,15 +830,20 @@ export class AdminController {
     res.json({ success: true, data: logs });
   }
 
-  async getAdminProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const adminUser = req.user?.id ? await userRepository.findById(req.user.id) : null;
+  async getAdminProfile(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
+    const adminUser = req.user?.id
+      ? await userRepository.findById(req.user.id)
+      : null;
     res.json({
       success: true,
       data: {
-        id: adminUser?.id || req.user?.id || 'admin',
+        id: adminUser?.id || req.user?.id || "admin",
         email: adminUser?.email || req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-        name: adminUser ? adminUser.name : 'System Administrator',
-        role: adminUser?.role || 'ADMIN',
+        name: adminUser ? adminUser.name : "System Administrator",
+        role: adminUser?.role || "ADMIN",
       },
     });
   }
@@ -599,12 +854,12 @@ export class AdminController {
   async createBackup(req: AuthenticatedRequest, res: Response): Promise<void> {
     const snapshot = dbStore.exportAll();
     await auditService.log({
-      action: 'CREATE',
-      resource: 'DATABASE_BACKUP',
+      action: "CREATE",
+      resource: "DATABASE_BACKUP",
       resourceId: snapshot.id,
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       details: {
         filename: snapshot.filename,
         collectionCount: snapshot.collectionCount,
@@ -618,37 +873,52 @@ export class AdminController {
   async restoreBackup(req: AuthenticatedRequest, res: Response): Promise<void> {
     const snapshotData = req.body;
     if (!snapshotData) {
-      res.status(400).json({ success: false, error: { message: 'Snapshot payload is required for restoration.' } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { message: "Snapshot payload is required for restoration." },
+        });
       return;
     }
     const result = await dbStore.importAll(snapshotData);
     await auditService.log({
-      action: 'UPDATE',
-      resource: 'DATABASE_RESTORE',
-      resourceId: snapshotData.id || 'snapshot_import',
-      userId: req.user?.id || 'admin',
+      action: "UPDATE",
+      resource: "DATABASE_RESTORE",
+      resourceId: snapshotData.id || "snapshot_import",
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       details: {
         restoredCollections: result.restoredCollections,
         totalRecords: result.totalRecords,
       },
     });
-    res.json({ success: true, message: 'Database restored successfully from snapshot.', data: result });
+    res.json({
+      success: true,
+      message: "Database restored successfully from snapshot.",
+      data: result,
+    });
   }
 
   // ==========================================
   // 11. PURCHASE ORDERS & AUTOMATED RESTOCK
   // ==========================================
-  async getPurchaseOrders(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getPurchaseOrders(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const orders = await purchaseOrderRepository.findRecent(100);
     res.json({ success: true, data: orders });
   }
 
-  async generateLowStockPO(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async generateLowStockPO(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const allProducts = await productRepository.find();
     // Filter products whose current stock is at or below their lowStockThreshold
-    const lowStockItems = allProducts.filter(p => {
+    const lowStockItems = allProducts.filter((p) => {
       const threshold = p.lowStockThreshold || 5;
       return p.stock <= threshold;
     });
@@ -656,13 +926,14 @@ export class AdminController {
     if (lowStockItems.length === 0) {
       res.json({
         success: true,
-        message: 'All inventory levels are optimal. No products currently require restock.',
+        message:
+          "All inventory levels are optimal. No products currently require restock.",
         data: null,
       });
       return;
     }
 
-    const items: POLineItem[] = lowStockItems.map(p => {
+    const items: POLineItem[] = lowStockItems.map((p) => {
       const threshold = p.lowStockThreshold || 5;
       const suggestedQty = Math.max(15, threshold * 3 - p.stock);
       const cost = p.costPrice || Math.round(p.price * 0.75);
@@ -678,25 +949,36 @@ export class AdminController {
         orderedQuantity: suggestedQty,
         unitCost: cost,
         totalCost: cost * suggestedQty,
-        supplierName: p.sellerType === 'RESELLER' && p.resellerName ? p.resellerName : `${p.brandName || 'Direct'} Authorized Distributor`,
+        supplierName:
+          p.sellerType === "RESELLER" && p.resellerName
+            ? p.resellerName
+            : `${p.brandName || "Direct"} Authorized Distributor`,
       };
     });
 
-    const totalUnits = items.reduce((sum, item) => sum + item.orderedQuantity, 0);
-    const totalEstimatedCost = items.reduce((sum, item) => sum + item.totalCost, 0);
+    const totalUnits = items.reduce(
+      (sum, item) => sum + item.orderedQuantity,
+      0,
+    );
+    const totalEstimatedCost = items.reduce(
+      (sum, item) => sum + item.totalCost,
+      0,
+    );
     const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newPO: PurchaseOrder = {
       id: `po_${Date.now()}`,
       poNumber,
-      status: 'DRAFT',
+      status: "DRAFT",
       items,
       totalUnits,
       totalEstimatedCost,
-      currency: 'AED',
-      targetWarehouse: req.body?.targetWarehouse || 'loc_dxb_main',
-      supplierName: req.body?.supplierName || 'GCC Master Hardware Consortium',
-      notes: req.body?.notes || 'Automated low-stock threshold trigger restock batch.',
+      currency: "AED",
+      targetWarehouse: req.body?.targetWarehouse || "loc_dxb_main",
+      supplierName: req.body?.supplierName || "GCC Master Hardware Consortium",
+      notes:
+        req.body?.notes ||
+        "Automated low-stock threshold trigger restock batch.",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -704,12 +986,12 @@ export class AdminController {
     const created = await purchaseOrderRepository.create(newPO);
 
     await auditService.log({
-      action: 'CREATE',
-      resource: 'PURCHASE_ORDER',
+      action: "CREATE",
+      resource: "PURCHASE_ORDER",
       resourceId: created.id,
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       details: {
         poNumber: created.poNumber,
         itemCount: items.length,
@@ -721,13 +1003,21 @@ export class AdminController {
     res.json({ success: true, data: created });
   }
 
-  async updatePOStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async updatePOStatus(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const { status, receivedNotes, items: receivedItems } = req.body;
 
     const existing = await purchaseOrderRepository.findById(id);
     if (!existing) {
-      res.status(404).json({ success: false, error: { message: 'Purchase Order not found.' } });
+      res
+        .status(404)
+        .json({
+          success: false,
+          error: { message: "Purchase Order not found." },
+        });
       return;
     }
 
@@ -736,17 +1026,24 @@ export class AdminController {
       updatedAt: new Date().toISOString(),
     };
 
-    if (receivedItems && Array.isArray(receivedItems) && receivedItems.length > 0) {
+    if (
+      receivedItems &&
+      Array.isArray(receivedItems) &&
+      receivedItems.length > 0
+    ) {
       updates.items = receivedItems;
     }
 
-    if (status === 'ISSUED' && !existing.issuedAt) {
+    if (status === "ISSUED" && !existing.issuedAt) {
       updates.issuedAt = new Date().toISOString();
     }
 
-    if (status === 'RECEIVED' && !existing.receivedAt) {
+    if (status === "RECEIVED" && !existing.receivedAt) {
       updates.receivedAt = new Date().toISOString();
-      const activeItems = (receivedItems && receivedItems.length > 0) ? receivedItems : existing.items;
+      const activeItems =
+        receivedItems && receivedItems.length > 0
+          ? receivedItems
+          : existing.items;
 
       // Automatically increment stock and recalculate Weighted Average Cost (WAC)
       for (const item of activeItems) {
@@ -755,14 +1052,21 @@ export class AdminController {
           if (prod) {
             const currentStock = Math.max(0, prod.stock || 0);
             const currentCost = prod.costPrice || Math.round(prod.price * 0.75);
-            const incomingQty = item.receivedQuantity !== undefined ? item.receivedQuantity : (item.orderedQuantity || item.quantity || 0);
+            const incomingQty =
+              item.receivedQuantity !== undefined
+                ? item.receivedQuantity
+                : item.orderedQuantity || item.quantity || 0;
             const incomingCost = item.unitCost || 0;
             const newStock = currentStock + incomingQty;
 
             // Weighted Average Cost Formula: ((Current Stock * Current Cost) + (Incoming Qty * Unit Cost)) / New Total Stock
-            const newCostPrice = newStock > 0
-              ? Math.round(((currentStock * currentCost) + (incomingQty * incomingCost)) / newStock)
-              : incomingCost;
+            const newCostPrice =
+              newStock > 0
+                ? Math.round(
+                    (currentStock * currentCost + incomingQty * incomingCost) /
+                      newStock,
+                  )
+                : incomingCost;
 
             await productRepository.update(item.productId, {
               stock: newStock,
@@ -770,8 +1074,15 @@ export class AdminController {
             });
           }
         } catch (err) {
-          const sanitizedProductId = String(item.productId || '').replace(/\n|\r/g, '');
-          console.error('Failed to update stock and WAC for product %s:', sanitizedProductId, err);
+          const sanitizedProductId = String(item.productId || "").replace(
+            /\n|\r/g,
+            "",
+          );
+          console.error(
+            "Failed to update stock and WAC for product %s:",
+            sanitizedProductId,
+            err,
+          );
         }
       }
     }
@@ -786,43 +1097,96 @@ export class AdminController {
   async getCmsLayout(req: AuthenticatedRequest, res: Response): Promise<void> {
     const settings: any = await settingsRepository.getSettings();
     const defaultSections: StorefrontSectionConfig[] = [
-      { id: 'hero', title: 'Main Hero & Visual Showcase', description: 'Enterprise hardware computing headline & direct CTAs', isVisible: true, order: 1 },
-      { id: 'voucher_banner', title: 'Landing Promotional Discount Banner', description: 'Interactive discount code & margin deduction promo', isVisible: settings?.isLandingDiscountBannerActive !== false, order: 2 },
-      { id: 'enterprise_bento', title: 'Enterprise Solutions Grid (Bento)', description: 'Workstation deployment, AI clusters, and rack units', isVisible: true, order: 3 },
-      { id: 'catalog_matrix', title: 'Hardware Catalog & Live Filters', description: 'Featured component matrix with multi-attribute filtering', isVisible: true, order: 4 },
-      { id: 'benchmarks', title: 'Hardware Benchmark & Performance Ratings', description: 'Cinebench, compute ratings & benchmark metrics', isVisible: true, order: 5 },
-      { id: 'partner_stores', title: 'Authorized GCC Partner Reseller Network', description: 'ComNet, Al-Falasi, and licensed partner store highlights', isVisible: true, order: 6 },
-      { id: 'testimonials', title: 'Enterprise Client Testimonials', description: 'Verified procurement testimonials from IT leaders', isVisible: true, order: 7 },
+      {
+        id: "hero",
+        title: "Main Hero & Visual Showcase",
+        description: "Enterprise hardware computing headline & direct CTAs",
+        isVisible: true,
+        order: 1,
+      },
+      {
+        id: "voucher_banner",
+        title: "Landing Promotional Discount Banner",
+        description: "Interactive discount code & margin deduction promo",
+        isVisible: settings?.isLandingDiscountBannerActive !== false,
+        order: 2,
+      },
+      {
+        id: "enterprise_bento",
+        title: "Enterprise Solutions Grid (Bento)",
+        description: "Workstation deployment, AI clusters, and rack units",
+        isVisible: true,
+        order: 3,
+      },
+      {
+        id: "catalog_matrix",
+        title: "Hardware Catalog & Live Filters",
+        description: "Featured component matrix with multi-attribute filtering",
+        isVisible: true,
+        order: 4,
+      },
+      {
+        id: "benchmarks",
+        title: "Hardware Benchmark & Performance Ratings",
+        description: "Cinebench, compute ratings & benchmark metrics",
+        isVisible: true,
+        order: 5,
+      },
+      {
+        id: "partner_stores",
+        title: "Authorized GCC Partner Reseller Network",
+        description: "ComNet, Al-Falasi, and licensed partner store highlights",
+        isVisible: true,
+        order: 6,
+      },
+      {
+        id: "testimonials",
+        title: "Enterprise Client Testimonials",
+        description: "Verified procurement testimonials from IT leaders",
+        isVisible: true,
+        order: 7,
+      },
     ];
 
-    const sections = settings?.storefrontSections && Array.isArray(settings.storefrontSections) && settings.storefrontSections.length > 0
-      ? settings.storefrontSections
-      : defaultSections;
+    const sections =
+      settings?.storefrontSections &&
+      Array.isArray(settings.storefrontSections) &&
+      settings.storefrontSections.length > 0
+        ? settings.storefrontSections
+        : defaultSections;
 
     res.json({ success: true, data: sections });
   }
 
-  async updateCmsLayout(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async updateCmsLayout(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const sections: StorefrontSectionConfig[] = req.body.sections;
     if (!Array.isArray(sections)) {
-      res.status(400).json({ success: false, error: { message: 'Sections array is required.' } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { message: "Sections array is required." },
+        });
       return;
     }
 
-    const updated = await settingsRepository.update('global_settings', {
+    const updated = await settingsRepository.update("global_settings", {
       storefrontSections: sections,
     } as any);
 
     await auditService.log({
-      action: 'UPDATE',
-      resource: 'STOREFRONT_CMS',
-      resourceId: 'global_settings',
-      userId: req.user?.id || 'admin',
+      action: "UPDATE",
+      resource: "STOREFRONT_CMS",
+      resourceId: "global_settings",
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       details: {
         totalSections: sections.length,
-        visibleCount: sections.filter(s => s.isVisible).length,
+        visibleCount: sections.filter((s) => s.isVisible).length,
       },
     });
 
@@ -832,22 +1196,30 @@ export class AdminController {
   // ==========================================
   // 13. BENTO TRUST FEATURES ("Why Tech Teams Trust NexTech")
   // ==========================================
-  async getBentoFeatures(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const features = await bentoFeatureRepo.find({ orderBy: { field: 'order', direction: 'asc' } });
+  async getBentoFeatures(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
+    const features = await bentoFeatureRepo.find({
+      orderBy: { field: "order", direction: "asc" },
+    });
     res.json({ success: true, data: features });
   }
 
-  async createBentoFeature(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async createBentoFeature(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const data = req.body;
     const newFeature: BentoFeature = {
       id: data.id || `feat_${Date.now()}`,
-      title: data.title || 'Enterprise Guarantee',
-      subtitle: data.subtitle || 'Verified Standard',
-      description: data.description || '',
-      tag: data.tag || 'PROCUREMENT',
-      iconName: data.iconName || 'shield',
+      title: data.title || "Enterprise Guarantee",
+      subtitle: data.subtitle || "Verified Standard",
+      description: data.description || "",
+      tag: data.tag || "PROCUREMENT",
+      iconName: data.iconName || "shield",
       gridSpan: Number(data.gridSpan) || 5,
-      statusBadge: data.statusBadge || 'Active',
+      statusBadge: data.statusBadge || "Active",
       stats: data.stats || [],
       order: Number(data.order) || 1,
       isActive: data.isActive !== false,
@@ -855,50 +1227,58 @@ export class AdminController {
 
     const created = await bentoFeatureRepo.create(newFeature);
     await auditService.log({
-      action: 'CREATE',
-      resource: 'BENTO_FEATURE',
+      action: "CREATE",
+      resource: "BENTO_FEATURE",
       resourceId: created.id,
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       details: { title: created.title },
     });
     res.json({ success: true, data: created });
   }
 
-  async updateBentoFeature(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async updateBentoFeature(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     const updates = req.body;
     const updated = await bentoFeatureRepo.update(id, updates);
     if (!updated) {
-      res.status(404).json({ success: false, error: { message: 'Feature not found.' } });
+      res
+        .status(404)
+        .json({ success: false, error: { message: "Feature not found." } });
       return;
     }
     await auditService.log({
-      action: 'UPDATE',
-      resource: 'BENTO_FEATURE',
+      action: "UPDATE",
+      resource: "BENTO_FEATURE",
       resourceId: id,
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       details: { title: updated.title },
     });
     res.json({ success: true, data: updated });
   }
 
-  async deleteBentoFeature(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async deleteBentoFeature(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<void> {
     const id = req.params.id as string;
     await bentoFeatureRepo.delete(id);
     await auditService.log({
-      action: 'DELETE',
-      resource: 'BENTO_FEATURE',
+      action: "DELETE",
+      resource: "BENTO_FEATURE",
       resourceId: id,
-      userId: req.user?.id || 'admin',
+      userId: req.user?.id || "admin",
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: "ADMIN",
       details: { featureId: id },
     });
-    res.json({ success: true, message: 'Feature deleted successfully.' });
+    res.json({ success: true, message: "Feature deleted successfully." });
   }
 }
 

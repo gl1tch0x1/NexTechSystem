@@ -12,6 +12,9 @@ router.use(authLimiter);
 router.post("/register", (req, res, next) =>
   authController.register(req, res).catch(next),
 );
+router.post("/reseller-apply", (req, res, next) =>
+  authController.registerReseller(req, res).catch(next),
+);
 router.post("/login", (req, res, next) =>
   authController.login(req, res).catch(next),
 );
@@ -30,6 +33,9 @@ router.get("/me", authenticate, (req, res, next) =>
 );
 router.put("/profile", authenticate, (req, res, next) =>
   authController.updateProfile(req, res).catch(next),
+);
+router.put("/password", authenticate, (req, res, next) =>
+  authController.changePassword(req, res).catch(next),
 );
 
 export default router;

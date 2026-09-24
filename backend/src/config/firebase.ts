@@ -1,11 +1,14 @@
-import admin from 'firebase-admin';
+import { App, cert, getApp, getApps, initializeApp } from 'firebase-admin/app';
+import { getFirestore as createFirestore, Firestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { getStorage } from 'firebase-admin/storage';
 import { ENV } from './env.js';
 
 let firebaseInitialized = false;
-let firestoreInstance: admin.firestore.Firestore | null = null;
+let firestoreInstance: Firestore | null = null;
 
-export function initializeFirebase(): admin.app.App | null {
-  if (firebaseInitialized && admin.apps.length > 0) return admin.app();
+export function initializeFirebase(): App | null {
+  if (firebaseInitialized && getApps().length > 0) return getApp();
 
   if (!ENV.FIREBASE_SERVICE_ACCOUNT_CONFIGURED) {
     console.warn('[Firebase] Admin SDK not initialized because Firebase service-account credentials are missing or placeholder values were detected.');
@@ -13,8 +16,8 @@ export function initializeFirebase(): admin.app.App | null {
   }
 
   try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+    const app = initializeApp({
+      credential: cert({
         projectId: ENV.FIREBASE_PROJECT_ID,
         clientEmail: ENV.FIREBASE_CLIENT_EMAIL,
         privateKey: ENV.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
@@ -24,23 +27,21 @@ export function initializeFirebase(): admin.app.App | null {
     firebaseInitialized = true;
     console.log('[Firebase] Admin SDK initialized with service account for [%s].', ENV.FIREBASE_PROJECT_ID);
 
-    if (admin.apps.length > 0) {
-      firestoreInstance = admin.firestore();
-    }
+    firestoreInstance = createFirestore(app);
   } catch (err: any) {
     console.warn('[Firebase] Initialization notice:', err.message);
   }
 
-  return admin.apps.length > 0 ? admin.app() : null;
+  return getApps().length > 0 ? getApp() : null;
 }
 
 export const isFirebaseLive = (): boolean => firebaseInitialized && !!firestoreInstance;
-export const getFirebaseAdmin = () => admin;
-export const getFirestore = (): admin.firestore.Firestore | null => {
+export const getFirebaseAdmin = () => ({ getApp, getApps, initializeApp, cert, getAuth, getStorage });
+export const getFirestore = (): Firestore | null => {
   if (!firestoreInstance) {
     initializeFirebase();
   }
   return firestoreInstance;
 };
-export const getFirebaseAuth = () => admin.auth();
-export const getFirebaseStorage = () => admin.storage();
+export const getFirebaseAuth = () => getAuth();
+export const getFirebaseStorage = () => getStorage();

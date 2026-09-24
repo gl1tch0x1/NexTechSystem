@@ -1,5 +1,8 @@
-import { Router, Request, Response } from 'express';
-import { SPECIFICATION_FIELDS, SPECIFICATION_PRESETS } from '../constants/specifications.js';
+import { Router, Request, Response } from "express";
+import {
+  SPECIFICATION_FIELDS,
+  SPECIFICATION_PRESETS,
+} from "../constants/specifications.js";
 
 const router = Router();
 
@@ -7,7 +10,7 @@ const router = Router();
  * GET /api/specifications
  * Returns all standardized hardware specification fields and taxonomy presets
  */
-router.get('/', (_req: Request, res: Response) => {
+router.get("/", (_req: Request, res: Response) => {
   res.json({
     success: true,
     data: {
@@ -21,7 +24,7 @@ router.get('/', (_req: Request, res: Response) => {
  * GET /api/specifications/presets
  * Returns only the specification preset dictionary
  */
-router.get('/presets', (_req: Request, res: Response) => {
+router.get("/presets", (_req: Request, res: Response) => {
   res.json({
     success: true,
     data: SPECIFICATION_PRESETS,
@@ -32,7 +35,7 @@ router.get('/presets', (_req: Request, res: Response) => {
  * GET /api/specifications/fields
  * Returns all allowed specification field keys
  */
-router.get('/fields', (_req: Request, res: Response) => {
+router.get("/fields", (_req: Request, res: Response) => {
   res.json({
     success: true,
     data: SPECIFICATION_FIELDS,

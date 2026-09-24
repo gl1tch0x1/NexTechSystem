@@ -1,45 +1,45 @@
-import { Router } from 'express';
-import authRoutes from './auth.routes.js';
-import productRoutes from './product.routes.js';
-import cartRoutes from './cart.routes.js';
-import orderRoutes from './order.routes.js';
-import pcBuilderRoutes from './pc-builder.routes.js';
-import walletRoutes from './wallet.routes.js';
-import adminRoutes from './admin.routes.js';
-import resellerRoutes from './reseller.routes.js';
-import contentRoutes from './content.routes.js';
-import securityRoutes from './security.routes.js';
-import specificationRoutes from './specification.routes.js';
-import currencyRoutes from './currency.routes.js';
-import vatRoutes from './vat.routes.js';
-import warrantyRoutes from './warranty.routes.js';
-import quoteRoutes from './quote.routes.js';
+import { Router } from "express";
+import authRoutes from "./auth.routes.js";
+import productRoutes from "./product.routes.js";
+import cartRoutes from "./cart.routes.js";
+import orderRoutes from "./order.routes.js";
+import pcBuilderRoutes from "./pc-builder.routes.js";
+import walletRoutes from "./wallet.routes.js";
+import adminRoutes from "./admin.routes.js";
+import resellerRoutes from "./reseller.routes.js";
+import contentRoutes from "./content.routes.js";
+import securityRoutes from "./security.routes.js";
+import specificationRoutes from "./specification.routes.js";
+import currencyRoutes from "./currency.routes.js";
+import vatRoutes from "./vat.routes.js";
+import warrantyRoutes from "./warranty.routes.js";
+import quoteRoutes from "./quote.routes.js";
 
 const router = Router();
 
-router.use('/auth', authRoutes);
-router.use('/products', productRoutes);
-router.use('/cart', cartRoutes);
-router.use('/orders', orderRoutes);
-router.use('/pc-builder', pcBuilderRoutes);
-router.use('/wallet', walletRoutes);
-router.use('/admin', adminRoutes);
-router.use('/reseller', resellerRoutes);
-router.use('/content', contentRoutes);
-router.use('/security', securityRoutes);
-router.use('/specifications', specificationRoutes);
-router.use('/currencies', currencyRoutes);
-router.use('/vat', vatRoutes);
-router.use('/warranty', warrantyRoutes);
-router.use('/quotes', quoteRoutes);
-router.use('/admin/quotes', quoteRoutes);
+router.use("/auth", authRoutes);
+router.use("/products", productRoutes);
+router.use("/cart", cartRoutes);
+router.use("/orders", orderRoutes);
+router.use("/pc-builder", pcBuilderRoutes);
+router.use("/wallet", walletRoutes);
+router.use("/admin", adminRoutes);
+router.use("/reseller", resellerRoutes);
+router.use("/content", contentRoutes);
+router.use("/security", securityRoutes);
+router.use("/specifications", specificationRoutes);
+router.use("/currencies", currencyRoutes);
+router.use("/vat", vatRoutes);
+router.use("/warranty", warrantyRoutes);
+router.use("/quotes", quoteRoutes);
+router.use("/admin/quotes", quoteRoutes);
 
 // Health check endpoint
-router.get('/health', (req, res) => {
+router.get("/health", (req, res) => {
   res.json({
-    status: 'healthy',
-    platform: 'Enterprise Computer & Technology E-Commerce API',
-    version: '1.0.0',
+    status: "healthy",
+    platform: "Enterprise Computer & Technology E-Commerce API",
+    version: "1.0.0",
     timestamp: new Date().toISOString(),
   });
 });

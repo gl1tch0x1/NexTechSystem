@@ -242,12 +242,11 @@ export class ProductService {
       }
       const existingWithSku = await productRepository.findBySku(data.sku.trim());
       if (existingWithSku && existingWithSku.id !== currentId) {
-        if (existingWithSku.name === data.name && existingWithSku.sellerType === (data.sellerType || 'RESELLER')) {
-          await productRepository.delete(existingWithSku.id);
-        } else {
-          throw new Error(`SKU "${data.sku}" is already in use by another product ("${existingWithSku.name}").`);
-        }
+        throw new Error(`SKU "${data.sku}" is already in use by another product ("${existingWithSku.name}").`);
       }
+      const existingVariant = (await productRepository.find()).find(product =>
+        product.id !== currentId && product.variants?.some(variant => variant.sku?.toLowerCase() === data.sku!.trim().toLowerCase()));
+      if (existingVariant) throw new Error(`SKU "${data.sku}" is already in use by a variant of "${existingVariant.name}".`);
     }
 
     // 3. Price and numbers validation
@@ -428,7 +427,7 @@ export class ProductService {
       rating: data.rating || 5.0,
       reviewCount: data.reviewCount || 0,
       reservedStock: data.reservedStock || 0,
-      lowStockThreshold: data.lowStockThreshold || 5,
+      lowStockThreshold: data.lowStockThreshold ?? 5,
       isFeatured: !!data.isFeatured,
       isActive: data.isActive !== false,
       approvalStatus: data.approvalStatus || (data.sellerType === 'ADMIN' ? 'APPROVED' : 'PENDING_APPROVAL'),

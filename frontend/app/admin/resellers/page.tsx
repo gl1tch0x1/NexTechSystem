@@ -39,9 +39,22 @@ import {
 export default function AdminResellersPage() {
   const { token } = useAuth();
   const [resellers, setResellers] = useState<Reseller[]>([]);
+  const [pendingApps, setPendingApps] = useState<Reseller[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'INACTIVE'>('ALL');
+
+  // Approve / Deny modal state
+  const [reviewTarget, setReviewTarget] = useState<Reseller | null>(null);
+  const [reviewMode, setReviewMode] = useState<'approve' | 'deny' | null>(null);
+  const [approveCode, setApproveCode] = useState('');
+  const [approveSubdomain, setApproveSubdomain] = useState('');
+  const [approveCommission, setApproveCommission] = useState(10);
+  const [approveNotes, setApproveNotes] = useState('');
+  const [denyReason, setDenyReason] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState('');
 
   // Section 1: Corporate Legal & KYC
   const [businessName, setBusinessName] = useState('');
@@ -148,7 +161,11 @@ export default function AdminResellersPage() {
   const fetchResellers = () => {
     if (token) {
       ApiClient.get<Reseller[]>('/admin/resellers', { token })
-        .then(res => setResellers(res || []))
+        .then(res => {
+          const records = Array.isArray(res) ? res : [];
+          setResellers(records);
+          setPendingApps(records.filter(r => r.status === 'PENDING_APPROVAL'));
+        })
         .catch(err => console.error(err))
         .finally(() => setLoading(false));
     }
@@ -228,7 +245,7 @@ export default function AdminResellersPage() {
   };
 
   const handleStatusToggle = async (reseller: Reseller) => {
-    if (!token) return;
+    if (!token || reseller.status === 'PENDING_APPROVAL' || !!reseller.rejectionReason) return;
     const nextStatus = reseller.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     try {
       await ApiClient.put(`/admin/resellers/${reseller.id}/status`, { status: nextStatus }, { token });
@@ -238,10 +255,50 @@ export default function AdminResellersPage() {
     }
   };
 
+  const beginReview = (reseller: Reseller, mode: 'approve' | 'deny') => {
+    setReviewTarget(reseller);
+    setReviewMode(mode);
+    setApproveCode('');
+    setApproveSubdomain('');
+    setApproveNotes('');
+    setDenyReason('');
+    setReviewError('');
+  };
+
+  const submitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewTarget || !reviewMode || !token) return;
+    setReviewSubmitting(true);
+    setReviewError('');
+    try {
+      if (reviewMode === 'approve') {
+        await ApiClient.post(`/admin/resellers/${reviewTarget.id}/approve`, {
+          resellerCode: approveCode.trim().toLowerCase(),
+          subdomain: approveSubdomain.trim().toLowerCase() || undefined,
+          commissionRate: Number(approveCommission),
+          adminNotes: approveNotes.trim() || undefined,
+        }, { token });
+      } else {
+        await ApiClient.post(`/admin/resellers/${reviewTarget.id}/deny`, {
+          reason: denyReason.trim(),
+        }, { token });
+      }
+      setReviewTarget(null);
+      setReviewMode(null);
+      fetchResellers();
+    } catch (err: any) {
+      setReviewError(err.message || 'Could not save the review decision.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
   const filtered = resellers.filter(r =>
-    r.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (statusFilter === 'ALL' || r.status === statusFilter) &&
+    (r.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.resellerCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.email.toLowerCase().includes(searchQuery.toLowerCase())
+    r.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.businessInformation?.tradeLicense?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -271,6 +328,63 @@ export default function AdminResellersPage() {
         </button>
       </div>
 
+      {/* Incoming applications are the admin's in-app notification and review queue. */}
+      <section className="rounded-3xl border border-amber-300 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/20 p-4 sm:p-6 space-y-4" aria-label="Reseller applications awaiting review">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-500" /> Applications awaiting review
+              <span className="rounded-full bg-amber-500 text-white text-xs px-2 py-0.5">{pendingApps.length}</span>
+            </h2>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Review submitted business details before approving access and assigning a reseller ID.</p>
+          </div>
+          <button type="button" onClick={fetchResellers} className="text-xs font-bold text-amber-700 dark:text-amber-300 hover:underline">Refresh applications</button>
+        </div>
+        {pendingApps.length === 0 ? (
+          <p className="text-xs text-slate-500 py-3">{loading ? 'Loading applications…' : 'No applications are waiting for review.'}</p>
+        ) : pendingApps.map(app => (
+          <article key={app.id} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 sm:p-5 space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="font-black text-slate-900 dark:text-white">{app.businessName}</h3>
+                <p className="text-xs text-slate-500 mt-1">Submitted {formatDate(app.createdAt)} · {app.businessInformation?.businessType || 'Business partner'}</p>
+              </div>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">Pending approval</span>
+            </div>
+            <dl className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+              <div><dt className="font-bold text-slate-500">Contact</dt><dd className="mt-1 text-slate-900 dark:text-white break-words">{app.displayName}<br />{app.email}<br />{app.phone}</dd></div>
+              <div><dt className="font-bold text-slate-500">Legal details</dt><dd className="mt-1 text-slate-900 dark:text-white break-words">License: {app.businessInformation?.tradeLicense || '—'}<br />Tax: {app.businessInformation?.taxNumber || '—'}<br />{app.businessInformation?.licenseJurisdiction || '—'}</dd></div>
+              <div><dt className="font-bold text-slate-500">Registered address</dt><dd className="mt-1 text-slate-900 dark:text-white break-words">{[app.address?.addressLine1, app.address?.addressLine2, app.address?.city, app.address?.state, app.address?.country, app.address?.postalCode].filter(Boolean).join(', ')}</dd></div>
+              <div><dt className="font-bold text-slate-500">Authorized signatory</dt><dd className="mt-1 text-slate-900 dark:text-white">{app.businessInformation?.authorizedSignatory || '—'} · {app.businessInformation?.signatoryTitle || '—'}</dd></div>
+              <div><dt className="font-bold text-slate-500">Operations</dt><dd className="mt-1 text-slate-900 dark:text-white">{app.businessInformation?.dispatchHub || '—'}<br />{app.businessInformation?.settlementTerms || '—'}</dd></div>
+              <div><dt className="font-bold text-slate-500">Specializations</dt><dd className="mt-1 text-slate-900 dark:text-white">{app.businessInformation?.specializations?.join(', ') || '—'}</dd></div>
+            </dl>
+            <div><p className="text-xs font-bold text-slate-500">Business description</p><p className="text-xs leading-relaxed text-slate-800 dark:text-slate-200 mt-1 whitespace-pre-wrap">{app.businessInformation?.description || '—'}</p></div>
+            {app.businessInformation?.website && <p className="text-xs text-slate-600 dark:text-slate-400">Website: {app.businessInformation.website}</p>}
+            <div className="flex gap-2 flex-wrap border-t border-slate-100 dark:border-slate-800 pt-4">
+              <button type="button" onClick={() => beginReview(app, 'approve')} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve and assign ID</button>
+              <button type="button" onClick={() => beginReview(app, 'deny')} className="px-4 py-2 rounded-xl border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold">Deny application</button>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      {reviewTarget && reviewMode && (
+        <div className="fixed inset-0 z-[120] bg-slate-950/75 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`${reviewMode} reseller application`}>
+          <form onSubmit={submitReview} className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl p-5 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center gap-3"><h2 className="font-black text-slate-900 dark:text-white">{reviewMode === 'approve' ? 'Approve reseller' : 'Deny application'}: {reviewTarget.businessName}</h2><button type="button" aria-label="Close" onClick={() => setReviewTarget(null)}><X className="w-5 h-5" /></button></div>
+            {reviewMode === 'approve' ? <>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300">Unique reseller ID *<input required minLength={3} maxLength={30} pattern="[a-z0-9]+" value={approveCode} onChange={e => setApproveCode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))} placeholder="e.g. apex101" className="mt-1 w-full rounded-xl border p-3 bg-transparent text-slate-900 dark:text-white" /></label>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300">Storefront subdomain (defaults to ID)<input value={approveSubdomain} onChange={e => setApproveSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))} className="mt-1 w-full rounded-xl border p-3 bg-transparent text-slate-900 dark:text-white" /></label>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300">Commission rate (%)<input type="number" min={0} max={100} step={0.1} value={approveCommission} onChange={e => setApproveCommission(Number(e.target.value))} className="mt-1 w-full rounded-xl border p-3 bg-transparent text-slate-900 dark:text-white" /></label>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300">Internal review notes<textarea value={approveNotes} onChange={e => setApproveNotes(e.target.value)} className="mt-1 w-full rounded-xl border p-3 bg-transparent text-slate-900 dark:text-white" /></label>
+            </> : <label className="block text-xs font-bold text-slate-600 dark:text-slate-300">Reason for denial *<textarea required minLength={10} value={denyReason} onChange={e => setDenyReason(e.target.value)} placeholder="Explain why this application was denied" className="mt-1 w-full rounded-xl border p-3 bg-transparent text-slate-900 dark:text-white" /></label>}
+            {reviewError && <p role="alert" className="text-xs text-red-600">{reviewError}</p>}
+            <div className="flex justify-end gap-2"><button type="button" onClick={() => setReviewTarget(null)} className="px-4 py-2 text-xs font-bold">Cancel</button><button disabled={reviewSubmitting} type="submit" className={`px-4 py-2 rounded-xl text-white text-xs font-bold disabled:opacity-50 ${reviewMode === 'approve' ? 'bg-emerald-600' : 'bg-red-600'}`}>{reviewSubmitting ? 'Saving…' : reviewMode === 'approve' ? 'Approve application' : 'Deny application'}</button></div>
+          </form>
+        </div>
+      )}
+
       {/* Search Bar */}
       <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 shadow-sm">
         <div className="relative flex-1 max-w-md">
@@ -283,6 +397,13 @@ export default function AdminResellersPage() {
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
+        <select aria-label="Filter resellers by status" value={statusFilter} onChange={e => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs text-slate-900 dark:text-white">
+          <option value="ALL">All statuses</option>
+          <option value="PENDING_APPROVAL">Pending approval</option>
+          <option value="ACTIVE">Active</option>
+          <option value="SUSPENDED">Suspended</option>
+          <option value="INACTIVE">Inactive</option>
+        </select>
         <div className="text-xs text-slate-600 dark:text-slate-400 font-mono font-bold">
           {filtered.length} {filtered.length === 1 ? 'Registered Vendor' : 'Registered Vendors'}
         </div>
@@ -358,9 +479,9 @@ export default function AdminResellersPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-3 font-mono font-bold text-amber-600 dark:text-amber-400">{r.resellerCode}</td>
+                  <td className="py-4 px-3 font-mono font-bold text-amber-600 dark:text-amber-400">{r.status === 'PENDING_APPROVAL' ? 'Awaiting assignment' : r.resellerCode}</td>
                   <td className="py-4 px-3 font-mono text-purple-600 dark:text-purple-300 font-semibold">
-                    {r.subdomain}.store.com
+                    {r.status === 'PENDING_APPROVAL' ? '—' : `${r.subdomain}.store.com`}
                   </td>
                   <td className="py-4 px-3 text-center font-mono font-bold text-slate-800 dark:text-slate-300">
                     {r.productCount || 0} listings
@@ -381,14 +502,14 @@ export default function AdminResellersPage() {
                   </td>
                   <td className="py-4 px-3 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2">
-                      <Link
+                      {r.status === 'ACTIVE' && <Link
                         href={`/reseller/${r.resellerCode}/dashboard`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 shadow-sm transition-all hover:shadow cursor-pointer"
                       >
                         <span>Open Portal</span>
                         <ExternalLink className="w-3.5 h-3.5 text-purple-500" />
-                      </Link>
-                      <button
+                      </Link>}
+                      {r.status === 'PENDING_APPROVAL' ? <button type="button" onClick={() => beginReview(r, 'approve')} className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold">Review</button> : !r.rejectionReason && <button
                         onClick={() => handleStatusToggle(r)}
                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shadow-sm ${
                           r.status === 'ACTIVE'
@@ -397,7 +518,7 @@ export default function AdminResellersPage() {
                         }`}
                       >
                         {r.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                      </button>
+                      </button>}
                     </div>
                   </td>
                 </tr>

@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { ENV } from '../config/env.js';
-import { userRepository } from '../repositories/user.repository.js';
-import { User, UserRole } from '../types/index.js';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { ENV } from "../config/env.js";
+import { userRepository } from "../repositories/user.repository.js";
+import { resellerRepository } from "../repositories/reseller.repository.js";
+import { User, UserRole } from "../types/index.js";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -16,18 +17,25 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export async function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+export async function authenticate(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({
       success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication token missing or invalid format.' },
+      error: {
+        code: "UNAUTHORIZED",
+        message: "Authentication token missing or invalid format.",
+      },
     });
     return;
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
 
   try {
     // 1. Try JWT verification (standard backend token)
@@ -37,9 +45,23 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
     if (!user || !user.isActive) {
       res.status(401).json({
         success: false,
-        error: { code: 'UNAUTHORIZED', message: 'User account is inactive or not found.' },
+        error: {
+          code: "UNAUTHORIZED",
+          message: "User account is inactive or not found.",
+        },
       });
       return;
+    }
+    if ((decoded.tokenVersion ?? 0) !== (user.tokenVersion ?? 0)) {
+      res.status(401).json({ success: false, error: { code: "SESSION_REVOKED", message: "Sign in again to continue." } });
+      return;
+    }
+    if (user.role === "RESELLER") {
+      const reseller = user.resellerId ? await resellerRepository.findById(user.resellerId) : null;
+      if (!reseller || reseller.status !== "ACTIVE") {
+        res.status(403).json({ success: false, error: { code: "RESELLER_NOT_ACTIVE", message: "Reseller access is inactive." } });
+        return;
+      }
     }
 
     req.user = {
@@ -56,33 +78,43 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
     // 2. Token invalid / expired
     res.status(401).json({
       success: false,
-      error: { code: 'INVALID_TOKEN', message: 'Token is invalid or has expired.' },
+      error: {
+        code: "INVALID_TOKEN",
+        message: "Token is invalid or has expired.",
+      },
     });
   }
 }
 
-export function optionalAuthenticate(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+export function optionalAuthenticate(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): void {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return next();
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, ENV.JWT_SECRET) as any;
-    userRepository.findById(decoded.id).then(user => {
-      if (user && user.isActive) {
-        req.user = {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          name: user.name,
-          username: user.username,
-          resellerId: user.resellerId,
-        };
-      }
-      next();
-    }).catch(() => next());
+    userRepository
+      .findById(decoded.id)
+      .then((user) => {
+        if (user && user.isActive && (decoded.tokenVersion ?? 0) === (user.tokenVersion ?? 0)) {
+          req.user = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            name: user.name,
+            username: user.username,
+            resellerId: user.resellerId,
+          };
+        }
+        next();
+      })
+      .catch(() => next());
   } catch {
     next();
   }

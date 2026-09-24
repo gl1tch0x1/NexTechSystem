@@ -1,7 +1,7 @@
-import { v4 as uuidv4 } from 'uuid';
-import { ebillRepository } from '../repositories/ebill.repository.js';
-import { settingsRepository } from '../repositories/settings.repository.js';
-import { EBill, Order } from '../types/index.js';
+import { v4 as uuidv4 } from "uuid";
+import { ebillRepository } from "../repositories/ebill.repository.js";
+import { settingsRepository } from "../repositories/settings.repository.js";
+import { EBill, Order } from "../types/index.js";
 
 export class EBillService {
   async generateEBill(order: Order): Promise<EBill> {

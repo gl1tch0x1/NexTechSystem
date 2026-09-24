@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
-import { pricingService } from '../services/pricing.service.js';
-import { productRepository } from '../repositories/product.repository.js';
-import { couponRepository } from '../repositories/coupon.repository.js';
-import { walletService } from '../services/wallet.service.js';
-import { AuthenticatedRequest } from '../middleware/auth.js';
+import { Request, Response } from "express";
+import { pricingService } from "../services/pricing.service.js";
+import { productRepository } from "../repositories/product.repository.js";
+import { couponRepository } from "../repositories/coupon.repository.js";
+import { walletService } from "../services/wallet.service.js";
+import { AuthenticatedRequest } from "../middleware/auth.js";
 
 export class CartController {
   async calculateCart(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -22,20 +22,37 @@ export class CartController {
           shippingFee: 0,
           walletAmountUsed: 0,
           total: 0,
-          currency: 'AED',
+          currency: "AED",
         },
       });
       return;
     }
 
     for (const it of items) {
-      if (!it || typeof it.productId !== 'string' || !it.productId.trim()) {
-        res.status(400).json({ success: false, error: { code: 'INVALID_ITEM', message: 'Item productId is required.' } });
+      if (!it || typeof it.productId !== "string" || !it.productId.trim()) {
+        res
+          .status(400)
+          .json({
+            success: false,
+            error: {
+              code: "INVALID_ITEM",
+              message: "Item productId is required.",
+            },
+          });
         return;
       }
       const q = Number(it.quantity);
       if (!Number.isInteger(q) || q <= 0 || q > 999) {
-        res.status(400).json({ success: false, error: { code: 'INVALID_QUANTITY', message: 'Item quantity must be a positive integer between 1 and 999.' } });
+        res
+          .status(400)
+          .json({
+            success: false,
+            error: {
+              code: "INVALID_QUANTITY",
+              message:
+                "Item quantity must be a positive integer between 1 and 999.",
+            },
+          });
         return;
       }
       it.quantity = q;
@@ -67,7 +84,7 @@ export class CartController {
           shippingFee: 0,
           walletAmountUsed: 0,
           total: 0,
-          currency: 'AED',
+          currency: "AED",
         },
       });
       return;
@@ -83,13 +100,20 @@ export class CartController {
         items: validItems,
         productsMap,
         couponCode,
-        requestedWalletDeduction: requestedWalletDeduction ? parseFloat(requestedWalletDeduction) : undefined,
+        requestedWalletDeduction: requestedWalletDeduction
+          ? parseFloat(requestedWalletDeduction)
+          : undefined,
         userWalletBalance,
       });
 
       res.json({ success: true, data: result });
     } catch (err: any) {
-      res.status(400).json({ success: false, error: { code: 'CART_CALCULATION_ERROR', message: err.message } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { code: "CART_CALCULATION_ERROR", message: err.message },
+        });
     }
   }
 
@@ -97,27 +121,51 @@ export class CartController {
     const { code } = req.body;
     const subtotal = req.body.subtotal ?? req.body.cartSubtotal;
     if (!code) {
-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Coupon code is required.' } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: { code: "BAD_REQUEST", message: "Coupon code is required." },
+        });
       return;
     }
 
     const coupon = await couponRepository.findByCode(code);
     if (!coupon || !coupon.isActive) {
-      res.status(404).json({ success: false, error: { code: 'COUPON_INVALID', message: 'Coupon is invalid or has expired.' } });
+      res
+        .status(404)
+        .json({
+          success: false,
+          error: {
+            code: "COUPON_INVALID",
+            message: "Coupon is invalid or has expired.",
+          },
+        });
       return;
     }
 
     const now = new Date().toISOString();
     if (coupon.startDate > now || coupon.endDate < now) {
-      res.status(400).json({ success: false, error: { code: 'COUPON_EXPIRED', message: 'This coupon has expired.' } });
+      res
+        .status(400)
+        .json({
+          success: false,
+          error: {
+            code: "COUPON_EXPIRED",
+            message: "This coupon has expired.",
+          },
+        });
       return;
     }
 
     let discountAmount = 0;
     if (subtotal && subtotal > 0) {
-      if (coupon.discountType === 'PERCENTAGE') {
+      if (coupon.discountType === "PERCENTAGE") {
         discountAmount = (subtotal * coupon.discountValue) / 100;
-        if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
+        if (
+          coupon.maxDiscountAmount &&
+          discountAmount > coupon.maxDiscountAmount
+        ) {
           discountAmount = coupon.maxDiscountAmount;
         }
       } else {
