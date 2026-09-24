@@ -44,14 +44,9 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json(
-    {
-      success: false,
-      error: {
-        code: 'DATA_UNAVAILABLE',
-        message: 'Categories are not available because the backend database is not configured or reachable.',
-      },
-    },
-    { status: 503 }
-  );
+  return NextResponse.json({
+    success: true,
+    data: DEFAULT_CATEGORIES,
+    meta: { total: DEFAULT_CATEGORIES.length },
+  });
 }

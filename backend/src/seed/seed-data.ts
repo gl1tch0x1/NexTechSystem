@@ -81,7 +81,7 @@ export const SEED_USERS: User[] = [
     isActive: true,
     createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
     updatedAt: new Date().toISOString(),
-    passwordHash: 'bac2c1baa719f2b185020be98b03099a14ae275446716f28922c86bbcedd0bf4:6a57cc8a753a1fdfa4dfe6961a6e62157894a9aad806747cee40b76f71d3d145f3dea158b50bcec1fe44e6d484922887f79825e0499b4fa1849b22156494021a',
+    passwordHash: 'df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9',
   },
   {
     id: 'user_reseller_1',

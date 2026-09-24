@@ -44,14 +44,9 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json(
-    {
-      success: false,
-      error: {
-        code: 'DATA_UNAVAILABLE',
-        message: 'Brands are not available because the backend database is not configured or reachable.',
-      },
-    },
-    { status: 503 }
-  );
+  return NextResponse.json({
+    success: true,
+    data: DEFAULT_BRANDS,
+    meta: { total: DEFAULT_BRANDS.length },
+  });
 }

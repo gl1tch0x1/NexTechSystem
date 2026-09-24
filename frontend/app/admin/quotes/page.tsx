@@ -41,6 +41,7 @@ import {
   Package,
 } from 'lucide-react';
 import { Quote, QuoteStatus, QuoteItem, Product, User } from '@/types';
+import { FALLBACK_PRODUCTS, FALLBACK_USERS } from '@/lib/fallback-data';
 
 export default function AdminQuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -54,8 +55,8 @@ export default function AdminQuotesPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Directory state for products & database customers
-  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
-  const [databaseCustomers, setDatabaseCustomers] = useState<User[]>([]);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(FALLBACK_PRODUCTS);
+  const [databaseCustomers, setDatabaseCustomers] = useState<User[]>(FALLBACK_USERS);
   const [clientMode, setClientMode] = useState<'DATABASE' | 'MANUAL'>('DATABASE');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [productSearchQuery, setProductSearchQuery] = useState('');

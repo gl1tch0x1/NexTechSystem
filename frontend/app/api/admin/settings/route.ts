@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { FALLBACK_STORE_SETTINGS } from '@/lib/fallback-data';
 
-let memorySettings: Record<string, any> = {};
+let memorySettings = { ...FALLBACK_STORE_SETTINGS };
 
 export async function GET(request: Request) {
   const backendUrl =

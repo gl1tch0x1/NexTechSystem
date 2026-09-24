@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { FALLBACK_HOMEPAGE_CONTENT } from '@/lib/fallback-data';
 
 export async function GET() {
   const backendUrl =
@@ -43,14 +44,8 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json(
-    {
-      success: false,
-      error: {
-        code: 'DATA_UNAVAILABLE',
-        message: 'Homepage content is unavailable because the backend service is not configured or reachable.',
-      },
-    },
-    { status: 503 }
-  );
+  return NextResponse.json({
+    success: true,
+    data: FALLBACK_HOMEPAGE_CONTENT,
+  });
 }

@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
 import { Product, ProductApprovalStatus, Category, Brand, Reseller } from '@/types';
+import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 import { AdminProductModal } from '@/components/admin/AdminProductModal';
 import {
   Package,
@@ -64,8 +65,8 @@ function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE
 export default function AdminProductsPage() {
   const { token } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [resellers, setResellers] = useState<Reseller[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');

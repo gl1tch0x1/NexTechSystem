@@ -26,8 +26,7 @@ import {
   SlidersHorizontal,
   CreditCard,
   LogOut,
-  PackageCheck,
-  Cpu
+  PackageCheck
 } from 'lucide-react';
 
 export function Navbar() {

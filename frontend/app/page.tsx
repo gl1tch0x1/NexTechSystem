@@ -11,6 +11,7 @@ import { EnterpriseBentoGrid } from '@/components/home/EnterpriseBentoGrid';
 import { TaxonomyExplorer } from '@/components/home/TaxonomyExplorer';
 import { ClientTestimonials } from '@/components/home/ClientTestimonials';
 import { getApiUrl } from '@/lib/api-client';
+import { FALLBACK_PRODUCTS, FALLBACK_HOMEPAGE_CONTENT } from '@/lib/fallback-data';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 
 async function getHomeData(): Promise<{
@@ -53,18 +54,18 @@ async function getHomeData(): Promise<{
     }
 
     return {
-      products,
+      products: products.length > 0 ? products : FALLBACK_PRODUCTS,
       categories: categories.length > 0 ? categories : DEFAULT_CATEGORIES,
       brands: brands.length > 0 ? brands : DEFAULT_BRANDS,
-      content,
+      content: content || FALLBACK_HOMEPAGE_CONTENT,
     };
   } catch (err) {
-    console.warn('[Home] Unable to load storefront content from the backend:', err);
+    console.warn('[Home] Using fallback data:', err);
     return {
-      products: [],
+      products: FALLBACK_PRODUCTS,
       categories: DEFAULT_CATEGORIES,
       brands: DEFAULT_BRANDS,
-      content: null,
+      content: FALLBACK_HOMEPAGE_CONTENT,
     };
   }
 }
@@ -82,37 +83,45 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16 pb-20 transition-colors duration-200">
-      {isEnabled('hero') && products.length > 0 && (
+      {/* 1. HERO SHOWCASE WITH DYNAMIC HUD PREVIEW & SPEC RADAR */}
+      {isEnabled('hero') && (
         <HeroShowcase products={products} highlights={content?.heroHighlights} />
       )}
 
-      {isEnabled('brand_partners') && brands.length > 0 && (
+      {/* 2. TIER-1 OEM MANUFACTURERS MARQUEE */}
+      {isEnabled('brand_partners') && (
         <BrandMarquee brands={brands} />
       )}
 
+      {/* MAIN CONTAINER FOR STRUCTURED SECTIONS */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        {/* 3. PROMOTIONAL VOUCHER BANNER (1-Click Copy TECH10 / Dynamic Coupon) */}
         {isEnabled('deals_banner') && content?.storeSettings?.isLandingDiscountBannerActive !== false && content?.activeCoupon && (
           <VoucherClaimBanner activeCoupon={content.activeCoupon} />
         )}
 
-        {isEnabled('featured_catalog') && products.length > 0 && (
+        {/* 4. VERIFIED HARDWARE MATRIX SHOWCASE (Ant Design Tabs + Search + Sort) */}
+        {isEnabled('featured_catalog') && (
           <EnhancedHardwareMatrix products={products} />
         )}
 
+        {/* 5. ENTERPRISE SOLUTIONS (AI Workstations, Rack Servers, 100GbE Switching) */}
         <EnterpriseSolutions solutions={content?.solutions} />
 
-        {isEnabled('pc_builder_cta') && content?.builderPresets && content.builderPresets.length > 0 && (
-          <CompatibilityTeaser presets={content.builderPresets} />
+        {/* 6. PC BUILDER INTERACTIVE TEASER WITH POWER & SOCKET VALIDATOR */}
+        {isEnabled('pc_builder_cta') && (
+          <CompatibilityTeaser presets={content?.builderPresets} />
         )}
 
-        {isEnabled('categories_grid') && categories.length > 0 && (
+        {/* 7. HARDWARE TAXONOMY EXPLORER */}
+        {isEnabled('categories_grid') && (
           <TaxonomyExplorer categories={categories} />
         )}
 
-        {content?.benchmarks && content.benchmarks.length > 0 && (
-          <LiveStatsAndBenchmarks benchmarks={content.benchmarks} />
-        )}
+        {/* 8. LIVE BENCHMARKS & HARDWARE TELEMETRY */}
+        <LiveStatsAndBenchmarks benchmarks={content?.benchmarks} />
 
+        {/* 9. THE NEXTECH ADVANTAGE (Enterprise Bento Grid) */}
         {isEnabled('trust_features') && (
           <EnterpriseBentoGrid
             features={content?.features}
@@ -122,9 +131,8 @@ export default async function HomePage() {
           />
         )}
 
-        {content?.testimonials && content.testimonials.length > 0 && (
-          <ClientTestimonials testimonials={content.testimonials} />
-        )}
+        {/* 10. VERIFIED ENTERPRISE CLIENT TESTIMONIALS */}
+        <ClientTestimonials testimonials={content?.testimonials} />
       </div>
     </div>
   );

@@ -17,9 +17,11 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 
+import { DEFAULT_CATEGORIES } from '@/lib/default-taxonomy';
+
 export default function AdminCategoriesPage() {
   const { token } = useAuth();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
