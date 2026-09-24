@@ -16,7 +16,10 @@
     "build:backend": "npm --workspace=backend run build",
     "start": "npm --workspace=frontend run start",
     "test:backend": "npm --workspace=backend test",
-    "lint": "npm --workspace=frontend run lint"
+    "test:endpoints": "node scripts/test-endpoints.js",
+    "lint": "npm --workspace=frontend run lint && npm --workspace=backend run lint",
+    "lint:frontend": "npm --workspace=frontend run lint",
+    "lint:backend": "npm --workspace=backend run lint"
   },
   "engines": {
     "node": ">=18.18.0"

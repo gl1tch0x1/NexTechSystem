@@ -786,7 +786,9 @@ eCommerce_Store/
 │   ├── next.config.mjs              # Next.js configuration and proxy rewrites
 │   ├── package.json
 │   └── tsconfig.json
-├── scratch/                         # Live endpoint probes and testing scripts
+├── scripts/                         # Monorepo build and verification utilities
+│   ├── generate-fallback.cjs        # Fallback dataset generator
+│   └── test-endpoints.js            # Live endpoint probes and testing scripts
 ├── package.json                     # Monorepo root scripts
 └── README.md
 ```
@@ -941,7 +943,7 @@ npm run dev:frontend  # Next.js 15 Web Application on http://localhost:3000
 # 3. Execute automated verification test suites
 npm run test:backend                     # 38-Step Integration Test Suite
 npx --prefix backend tsx test-catalog-features.ts # 7-Step Advanced Catalog & Multi-SKU Suite
-node scratch/test-endpoints.js           # 26 Live Endpoint Probes
+node scripts/test-endpoints.js           # 26 Live Endpoint Probes
 
 # 4. Compile production bundles
 npm run build
@@ -1028,7 +1030,7 @@ npx tsx test-catalog-features.ts
 Live end-to-end probes can be run against active frontend and backend instances:
 
 ```bash
-node scratch/test-endpoints.js
+node scripts/test-endpoints.js
 ```
 
 ### Verified Live Endpoints (26/26 Operational)
