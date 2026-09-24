@@ -76,6 +76,18 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   const originalPrice = matchedProduct?.compareAtPrice || (matchedProduct?.salePrice ? matchedProduct?.price : currentPrice + 400);
   const stockCount = matchedProduct?.stock || 25;
   const displayImage = matchedProduct?.images?.[0] || matchedProduct?.thumbnail || currentHighlight.defaultImage;
+  let resolvedImage = displayImage;
+  const lowerName = (displayName || '').toLowerCase();
+  const lowerId = (selectedTabId || '').toLowerCase();
+  if (lowerId.includes('gpu') || lowerName.includes('4090')) {
+    resolvedImage = '/images/hero_rtx4090.jpg';
+  } else if (lowerId.includes('cpu') || lowerName.includes('14900k') || lowerName.includes('intel')) {
+    resolvedImage = '/images/intel_i9_14900k.jpg';
+  } else if (lowerId.includes('ssd') || lowerName.includes('990') || lowerName.includes('samsung')) {
+    resolvedImage = '/images/samsung_990_pro.jpg';
+  } else if (lowerName.includes('7950x') || lowerName.includes('ryzen')) {
+    resolvedImage = '/images/amd_ryzen_7950x.jpg';
+  }
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -225,72 +237,83 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 </div>
               </div>
 
-              {/* Hardware Visual Presentation Stage (Clean, Open & Seamless) */}
-              <div className="relative aspect-[16/9] sm:aspect-[2/1] rounded-2xl bg-gradient-to-b from-slate-50 via-slate-100/50 to-slate-50 dark:from-[#0E1527] dark:via-[#090D18] dark:to-[#0B101D] border border-slate-100 dark:border-slate-800/80 p-4 flex items-center justify-center overflow-hidden group">
+              {/* Hardware Visual Presentation Stage (Clean Dark Obsidian Viewport) */}
+              <div className="relative aspect-[16/9] sm:aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-950 via-[#0A0F1D] to-slate-950 border border-slate-800/90 overflow-hidden group shadow-inner flex items-center justify-center">
                 {/* Ambient Radial Spotlight */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-tech-blue/10 dark:from-tech-blue/20 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.22)_0%,_transparent_70%)] pointer-events-none" />
 
                 {/* Top Corner Floating Tags */}
                 <div className="absolute top-3 left-3 z-10">
-                  <span className="px-2.5 py-1 rounded-lg bg-tech-blue/10 dark:bg-tech-blue/20 border border-tech-blue/30 text-tech-blue dark:text-tech-cyan text-[10px] font-mono font-extrabold uppercase tracking-wider backdrop-blur-md">
+                  <span className="px-2.5 py-1 rounded-lg bg-tech-blue/20 border border-tech-blue/40 text-cyan-400 text-[10px] font-mono font-extrabold uppercase tracking-wider backdrop-blur-md shadow-xs">
                     {currentHighlight.badge}
                   </span>
                 </div>
 
                 <div className="absolute top-3 right-3 z-10">
-                  <span className="px-2.5 py-1 rounded-lg bg-slate-900/80 dark:bg-slate-900/90 border border-slate-700/80 text-amber-300 text-[10px] font-mono font-bold backdrop-blur-md shadow-xs">
+                  <span className="px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-700/80 text-amber-300 text-[10px] font-mono font-bold backdrop-blur-md shadow-xs">
                     ⚡ {currentHighlight.powerRating}
                   </span>
                 </div>
 
                 {/* Hardware Photo Canvas */}
-                <div className="relative z-0 w-full h-full flex items-center justify-center pt-4">
-                  <img
-                    src={displayImage}
-                    alt={displayName}
-                    className="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.25)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] group-hover:scale-106 transition-transform duration-500"
-                  />
-                </div>
+                <img
+                  src={resolvedImage}
+                  alt={displayName}
+                  className="w-full h-full object-cover filter brightness-105 contrast-105 group-hover:scale-104 transition-transform duration-500 rounded-xl"
+                />
               </div>
 
               {/* Hardware Title, Brand & Price Header */}
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  <span className="font-mono font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider truncate max-w-[220px]">
-                    {currentHighlight.brand} • {currentHighlight.category}
-                  </span>
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-tech-blue dark:text-cyan-400 bg-tech-blue/10 dark:bg-cyan-500/10 px-2 py-0.5 rounded-md border border-tech-blue/20 dark:border-cyan-500/20">
+                      {currentHighlight.brand}
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400 text-xs font-medium truncate max-w-[200px]">
+                      {currentHighlight.category}
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5" />
                     Official GCC Stock
                   </span>
                 </div>
 
-                <div className="flex items-start justify-between gap-3 pt-1">
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white line-clamp-1 tracking-tight min-w-0 flex-1">
-                    {displayName}
-                  </h3>
+                {/* Full Un-truncated Title */}
+                <h3 className="font-heading text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
+                  {displayName}
+                </h3>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                {/* Clean Level Price Bar */}
+                <div className="flex items-baseline justify-between pt-0.5">
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="font-mono text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                       {formatPrice(currentPrice)}
-                    </div>
+                    </span>
                     {originalPrice && originalPrice > currentPrice && (
-                      <div className="text-[11px] text-slate-400 line-through font-mono">
+                      <span className="font-mono text-sm text-slate-400 line-through">
                         {formatPrice(originalPrice)}
-                      </div>
+                      </span>
                     )}
                   </div>
+                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
+                    Inc. 5% UAE VAT • Free Delivery
+                  </span>
                 </div>
               </div>
 
-              {/* Spec Badges Grid (Clean 4-column / 2x2 Ant Design HUD Chips) */}
+              {/* Spec Badges Grid (Clean 4-column HUD Chips with proper text fit) */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 {currentHighlight.specs?.map((spec, i) => (
                   <div
                     key={i}
-                    className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-xs flex flex-col justify-center min-w-0 overflow-hidden"
+                    className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-xs flex flex-col justify-center min-w-0"
                   >
-                    <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400 truncate">{spec.label}</span>
-                    <span className="font-black text-slate-900 dark:text-slate-200 truncate mt-0.5 text-[11px] font-mono">{spec.value}</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500">{spec.label}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100 text-xs font-mono mt-0.5 truncate" title={spec.value}>
+                      {spec.value.replace(' 384-bit', '').replace(' (1000W Req)', '')}
+                    </span>
                   </div>
                 ))}
               </div>
