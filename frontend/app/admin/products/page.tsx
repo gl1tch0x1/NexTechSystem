@@ -1,15 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
-import { Product, ProductApprovalStatus, Category, Brand, Reseller } from '@/types';
-import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
-import { AdminProductModal } from '@/components/admin/AdminProductModal';
+import { Product, ProductApprovalStatus } from '@/types';
 import {
-  Package,
   CheckCircle2,
   XCircle,
   Clock,
@@ -19,7 +16,7 @@ import {
   Trash2,
   X,
   AlertTriangle,
-  Check,
+  Check
 } from 'lucide-react';
 
 const DEFAULT_FALLBACK_IMAGE =
@@ -65,51 +62,24 @@ function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE
 export default function AdminProductsPage() {
   const { token } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
-  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
-  const [resellers, setResellers] = useState<Reseller[]>([]);
-  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Modals state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [rejectingProduct, setRejectingProduct] = useState<Product | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const fetchData = async () => {
+    if (!token) return;
     try {
-      const fetchOpts = token ? { token } : {};
-      const [prodRes, catRes, brandRes, resellerRes] = await Promise.all([
-        token
-          ? ApiClient.get<Product[]>('/admin/products?limit=100', { token }).catch(() => [])
-          : Promise.resolve([]),
-        ApiClient.get<Category[]>('/admin/categories', fetchOpts)
-          .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => [])),
-        ApiClient.get<Brand[]>('/admin/brands', fetchOpts)
-          .catch(() => ApiClient.get<Brand[]>('/products/brands').catch(() => [])),
-        token
-          ? ApiClient.get<Reseller[]>('/admin/resellers', { token }).catch(() => [])
-          : Promise.resolve([]),
-      ]);
-
-      if (prodRes && Array.isArray(prodRes) && prodRes.length > 0) {
+      const prodRes = await ApiClient.get<Product[]>('/admin/products?limit=100', { token });
+      if (prodRes && Array.isArray(prodRes)) {
         setProducts(prodRes);
       }
-      if (catRes && Array.isArray(catRes) && catRes.length > 0) {
-        setCategories(catRes);
-      }
-      if (brandRes && Array.isArray(brandRes) && brandRes.length > 0) {
-        setBrands(brandRes);
-      }
-      if (resellerRes && Array.isArray(resellerRes) && resellerRes.length > 0) {
-        setResellers(resellerRes);
-      }
     } catch (err) {
-      console.error('Failed to load admin products or taxonomy:', err);
+      console.error('Failed to load admin products:', err);
     } finally {
       setLoading(false);
     }
@@ -118,18 +88,6 @@ export default function AdminProductsPage() {
   useEffect(() => {
     fetchData();
   }, [token]);
-
-  const openCreateModal = () => {
-    setIsEditing(false);
-    setSelectedProduct(null);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (prod: Product) => {
-    setIsEditing(true);
-    setSelectedProduct(prod);
-    setIsModalOpen(true);
-  };
 
   const handleDeleteProduct = async (id: string) => {
     if (!token) return;
@@ -418,18 +376,6 @@ export default function AdminProductsPage() {
           </table>
         </div>
       </div>
-
-      {/* 9-STEP ENTERPRISE PRODUCT MODAL */}
-      <AdminProductModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSaved={fetchData}
-        product={isEditing ? selectedProduct : null}
-        categories={categories}
-        brands={brands}
-        resellers={resellers}
-        token={token}
-      />
 
       {/* REJECT MODAL */}
       {rejectingProduct && (

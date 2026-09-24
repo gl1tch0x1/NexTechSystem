@@ -13,7 +13,6 @@ import {
   ShoppingBag,
   Tag,
   ShieldCheck,
-  Activity,
   Layers,
   Award,
   Image as ImageIcon,
@@ -22,17 +21,12 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Search,
-  Bell,
-  CheckCircle2,
   Clock,
-  Sparkles,
   Server,
   BarChart3,
-  TrendingUp,
   Menu,
   X,
-  FileText,
+  FileText
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

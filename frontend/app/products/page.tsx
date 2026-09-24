@@ -1,9 +1,9 @@
-import React from 'react';
+
 import Link from 'next/link';
 import { ProductCard } from '@/components/product/ProductCard';
 import { AdvancedCatalogFilter } from '@/components/product/AdvancedCatalogFilter';
 import { Product, Category, Brand } from '@/types';
-import { Filter, SlidersHorizontal, ArrowUpDown, Search, RotateCcw, X, Boxes, ShieldCheck, Zap } from 'lucide-react';
+import { Filter, ArrowUpDown, Search, RotateCcw, X } from 'lucide-react';
 import { getApiUrl } from '@/lib/api-client';
 
 interface ProductsPageProps {
@@ -80,17 +80,12 @@ async function getProductsData(params: Record<string, any>) {
 
 export default async function ProductsCatalogPage({ searchParams }: ProductsPageProps) {
   const resolvedParams = await searchParams;
-  const { products, total, facets, categories, brands } = await getProductsData(resolvedParams);
+  const { products, total, categories, brands } = await getProductsData(resolvedParams);
 
   const currentCategory = resolvedParams.category;
   const currentBrand = resolvedParams.brand;
   const currentSearch = resolvedParams.search;
   const currentSort = resolvedParams.sort || 'newest';
-  const inStockOnly = resolvedParams.inStock === 'true';
-  const onSaleOnly = resolvedParams.onSale === 'true';
-  const currentSellerType = resolvedParams.sellerType;
-  const currentLocation = resolvedParams.location;
-  const currentSocket = resolvedParams.socket;
   const currentMinPrice = resolvedParams.minPrice;
   const currentMaxPrice = resolvedParams.maxPrice;
 

@@ -41,7 +41,7 @@ export class PCBuilderService {
       }
     }
 
-    const { cpu, motherboard, ram, gpu, psu, cooler, case: pcCase } = slots;
+    const { cpu, motherboard, ram, gpu, psu, cooler } = slots;
 
     // 1. CPU Wattage & Socket
     let cpuSocket: string | null = null;

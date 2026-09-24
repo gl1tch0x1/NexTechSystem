@@ -11,14 +11,11 @@ import {
   Server,
   HardDrive,
   ShieldCheck,
-  CheckCircle2,
   ArrowRight,
   Layers,
   ShoppingCart,
   Clock,
   ExternalLink,
-  ChevronRight,
-  Activity,
   Check
 } from 'lucide-react';
 
@@ -77,7 +74,6 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   const displayName = matchedProduct ? matchedProduct.name : currentHighlight.name;
   const currentPrice = matchedProduct?.salePrice || matchedProduct?.price || currentHighlight.defaultPrice;
   const originalPrice = matchedProduct?.compareAtPrice || (matchedProduct?.salePrice ? matchedProduct?.price : currentPrice + 400);
-  const inStock = matchedProduct ? (matchedProduct.stock > 0) : true;
   const stockCount = matchedProduct?.stock || 25;
   const displayImage = matchedProduct?.images?.[0] || matchedProduct?.thumbnail || currentHighlight.defaultImage;
 

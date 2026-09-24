@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order } from '@/types';
-import { ShoppingBag, FileText, CheckCircle2, Clock } from 'lucide-react';
+import { ShoppingBag, FileText } from 'lucide-react';
 
 import { useParams } from 'next/navigation';
 
@@ -15,14 +15,13 @@ export default function ResellerOrdersPage() {
   const resellerCode = params.code as string;
   const { token } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (token) {
       ApiClient.get<Order[]>('/reseller/orders', { token, params: { resellerCode } })
         .then(res => setOrders(res || []))
         .catch(err => console.error(err))
-        .finally(() => setLoading(false));
+;
     }
   }, [token, resellerCode]);
 

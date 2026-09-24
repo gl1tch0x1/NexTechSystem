@@ -10,12 +10,8 @@ import {
   Flame,
   Award,
   ArrowRight,
-  Sparkles,
-  FileCheck,
   Bot,
   CheckCircle2,
-  Clock,
-  ShieldAlert,
   Zap,
   Server
 } from 'lucide-react';

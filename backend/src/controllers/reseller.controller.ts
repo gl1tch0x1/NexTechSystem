@@ -4,7 +4,6 @@ import { analyticsService } from '../services/analytics.service.js';
 import { productService } from '../services/product.service.js';
 import { resellerService } from '../services/reseller.service.js';
 import { orderService } from '../services/order.service.js';
-import { inventoryService } from '../services/inventory.service.js';
 import { excelImportService } from '../services/excel-import.service.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { importRepository } from '../repositories/import.repository.js';
@@ -230,7 +229,7 @@ export class ResellerController {
     res.json({ success: true, data: result });
   }
 
-  async downloadTemplate(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async downloadTemplate(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const buffer = excelImportService.generateSampleTemplateBuffer();
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=comnet_technology_listing_template.xlsx');

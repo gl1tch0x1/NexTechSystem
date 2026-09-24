@@ -27,7 +27,6 @@ export default function CartPage() {
     applyCoupon,
     removeCoupon,
     couponCode,
-    isCalculating,
   } = useCart();
   const { formatPrice } = useCurrency();
 

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { ApiClient } from '@/lib/api-client';
 import { useCart } from '@/lib/cart-context';
 import { formatPrice } from '@/lib/utils';
-import { Cpu, Plus, Trash2, ShoppingCart, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Plus, Trash2, ShoppingCart, CheckCircle2, XCircle, X } from 'lucide-react';
 
 export default function ComparePage() {
   const { addToCart } = useCart();

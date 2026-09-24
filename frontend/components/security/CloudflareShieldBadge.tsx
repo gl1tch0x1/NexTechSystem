@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Cloud, Zap, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ShieldCheck, Cloud, Lock } from 'lucide-react';
 import { ApiClient } from '@/lib/api-client';
 
 export default function CloudflareShieldBadge({ compact = false }: { compact?: boolean }) {

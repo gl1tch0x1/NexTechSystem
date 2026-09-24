@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -11,11 +11,9 @@ import {
   FileText,
   Printer,
   ShieldCheck,
-  Building,
   CheckCircle2,
   ArrowLeft,
   QrCode,
-  Download,
   AlertCircle
 } from 'lucide-react';
 

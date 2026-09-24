@@ -1,6 +1,6 @@
-import React from 'react';
+
 import Link from 'next/link';
-import { FileText, ShieldAlert, Scale, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Scale } from 'lucide-react';
 
 export const metadata = {
   title: 'Terms of Enterprise SLA & Service Agreement | NexTech Systems',

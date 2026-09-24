@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-export async function POST(
-  request: NextRequest,
+export async function POST(_request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

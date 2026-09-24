@@ -12,11 +12,9 @@ import {
   FileSpreadsheet,
   Boxes,
   ShoppingBag,
-  BarChart3,
   Store,
   ExternalLink,
   LogOut,
-  AlertCircle,
   ShieldCheck,
   ArrowLeft
 } from 'lucide-react';

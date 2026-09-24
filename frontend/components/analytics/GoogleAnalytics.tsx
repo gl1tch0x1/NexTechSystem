@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import Script from 'next/script';
 import { GA_TRACKING_ID } from '@/lib/analytics';
 

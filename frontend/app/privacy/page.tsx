@@ -1,6 +1,6 @@
-import React from 'react';
+
 import Link from 'next/link';
-import { Lock, ShieldCheck, FileCheck, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 export const metadata = {
   title: 'Privacy Policy & Data Protection | NexTech Systems',

@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import {
-  DollarSign,
   ShoppingBag,
   Users,
   Store,
@@ -16,10 +15,8 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  ShieldAlert,
   Boxes,
   Zap,
-  Sparkles,
   Layers,
   Award,
   Tag,
@@ -28,10 +25,6 @@ import {
   ArrowUpRight,
   BarChart3,
   RefreshCw,
-  Sliders,
-  AlertCircle,
-  Truck,
-  RotateCcw,
   Server
 } from 'lucide-react';
 import {

@@ -13,8 +13,6 @@ import {
   CreditCard,
   Wallet as WalletIcon,
   Truck,
-  ArrowRight,
-  CheckCircle2,
   AlertCircle,
   Lock,
   Sparkles
@@ -22,7 +20,7 @@ import {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, isAuthenticated, token } = useAuth();
+  const { user, token } = useAuth();
   const { cart, cartItems, cartCount, clearCart } = useCart();
   const { formatPrice } = useCurrency();
 

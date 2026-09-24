@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -13,12 +13,7 @@ import {
   FileSpreadsheet,
   Boxes,
   TrendingUp,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  ArrowRight,
   RefreshCw,
-  Zap,
   ArrowUpRight
 } from 'lucide-react';
 

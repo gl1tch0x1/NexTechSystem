@@ -37,8 +37,7 @@ export async function PUT(
   }
 }
 
-export async function GET(
-  request: NextRequest,
+export async function GET(_request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

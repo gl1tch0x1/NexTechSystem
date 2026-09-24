@@ -1,10 +1,9 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
 import { formatPrice } from '@/lib/utils';
-import { Heart, ShoppingCart, Trash2, ArrowRight } from 'lucide-react';
+import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 
 export default function WishlistPage() {
   const { wishlist, moveToCartFromWishlist, toggleWishlist } = useCart();

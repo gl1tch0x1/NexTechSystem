@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -20,10 +20,7 @@ import {
   X,
   ChevronDown,
   Sparkles,
-  ArrowRight,
   Flame,
-  CheckCircle2,
-  SlidersHorizontal,
   CreditCard,
   LogOut,
   PackageCheck,

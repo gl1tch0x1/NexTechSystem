@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order } from '@/types';
-import { ShoppingBag, FileText, ArrowRight, Store, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, FileText } from 'lucide-react';
 
 export default function CustomerOrdersPage() {
-  const { token, isAuthenticated } = useAuth();
+  const { token } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,9 @@ export default function CustomerOrdersPage() {
         </h1>
       </div>
 
-      {orders.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-20 text-slate-400">Loading your orders...</div>
+      ) : orders.length > 0 ? (
         <div className="space-y-4">
           {orders.map(order => (
             <div

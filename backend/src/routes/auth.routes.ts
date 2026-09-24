@@ -11,7 +11,7 @@ router.use(authLimiter);
 
 router.post('/register', (req, res, next) => authController.register(req, res).catch(next));
 router.post('/login', (req, res, next) => authController.login(req, res).catch(next));
-router.get('/login', (req, res) => {
+router.get('/login', (_req, res) => {
   res.json({
     success: true,
     message: 'NexTech Authentication Gateway Active. Submit a POST request with email and password to authenticate.',

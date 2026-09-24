@@ -35,7 +35,7 @@ router.use('/quotes', quoteRoutes);
 router.use('/admin/quotes', quoteRoutes);
 
 // Health check endpoint
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({
     status: 'healthy',
     platform: 'Enterprise Computer & Technology E-Commerce API',

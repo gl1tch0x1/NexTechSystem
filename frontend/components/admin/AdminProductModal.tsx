@@ -4,18 +4,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Product,
   ProductVariant,
-  WarehouseLocationStock,
   Category,
   Brand,
   SellerType,
-  Reseller,
+  Reseller
 } from '@/types';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
 import {
   SPECIFICATION_FIELDS,
   SPECIFICATION_PRESETS,
-  SPECIFICATION_GROUPS,
+  SPECIFICATION_GROUPS
 } from '@/lib/specification-presets';
 import {
   Package,
@@ -36,15 +35,7 @@ import {
   Trash2,
   RefreshCw,
   AlertTriangle,
-  Percent,
-  Store,
-  HardDrive,
-  Monitor,
-  Zap,
-  CheckSquare,
-  Square,
-  Globe,
-  FileText,
+  Percent
 } from 'lucide-react';
 
 export type AdminModalStep =
@@ -253,8 +244,6 @@ export function AdminProductModal({
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newOptionName, setNewOptionName] = useState('');
   const [newOptionValueInput, setNewOptionValueInput] = useState('');
-  const [customCondition, setCustomCondition] = useState('');
-  const [customWarranty, setCustomWarranty] = useState('');
 
   // Form Data State
   const [formData, setFormData] = useState<ProductModalFormData>({
@@ -621,21 +610,6 @@ export function AdminProductModal({
       ...prev,
       variantOptions: prev.variantOptions.filter((_, i) => i !== optIndex),
     }));
-  };
-
-  const handleAddOptionValue = (optIndex: number, val: string) => {
-    const clean = val.trim();
-    if (!clean) return;
-    setFormData(prev => {
-      const next = [...prev.variantOptions];
-      if (!next[optIndex].values.includes(clean)) {
-        next[optIndex] = {
-          ...next[optIndex],
-          values: [...next[optIndex].values, clean],
-        };
-      }
-      return { ...prev, variantOptions: next };
-    });
   };
 
   const handleRemoveOptionValue = (optIndex: number, valIndex: number) => {

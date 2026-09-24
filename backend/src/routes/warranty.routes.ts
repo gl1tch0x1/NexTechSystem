@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import { orderRepository } from '../repositories/order.repository.js';
-import { productRepository } from '../repositories/product.repository.js';
 import { apiLimiter } from '../middlewares/rate-limiter.middleware.js';
 
 const router = Router();

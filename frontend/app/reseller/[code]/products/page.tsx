@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -8,15 +8,10 @@ import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
 import { Product } from '@/types';
 import {
-  Package,
-  Plus,
   FileSpreadsheet,
   CheckCircle2,
   Clock,
   XCircle,
-  AlertTriangle,
-  Edit2,
-  Trash2,
   Search
 } from 'lucide-react';
 
@@ -25,7 +20,6 @@ export default function ResellerProductsPage() {
   const resellerCode = params.code as string;
   const { token } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchProducts = () => {
@@ -33,7 +27,7 @@ export default function ResellerProductsPage() {
       ApiClient.get<Product[]>('/reseller/products', { token, params: { resellerCode } })
         .then(res => setProducts(res || []))
         .catch(err => console.error(err))
-        .finally(() => setLoading(false));
+;
     }
   };
 

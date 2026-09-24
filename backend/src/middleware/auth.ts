@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.js';
 import { userRepository } from '../repositories/user.repository.js';
-import { User, UserRole } from '../types/index.js';
+import { UserRole } from '../types/index.js';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -61,7 +61,7 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   }
 }
 
-export function optionalAuthenticate(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+export function optionalAuthenticate(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next();

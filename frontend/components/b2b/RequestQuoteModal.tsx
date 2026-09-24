@@ -4,12 +4,10 @@ import React, { useState } from 'react';
 import {
   Building2,
   X,
-  FileText,
   CheckCircle2,
   Loader2,
   ShieldCheck,
-  Send,
-  Zap,
+  Send
 } from 'lucide-react';
 
 interface RequestQuoteModalProps {

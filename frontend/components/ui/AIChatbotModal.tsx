@@ -7,13 +7,9 @@ import {
   X,
   Send,
   Trash2,
-  Cpu,
-  ShieldCheck,
   Bot,
   User,
-  ArrowRight,
-  ExternalLink,
-  MessageSquare
+  ArrowRight
 } from 'lucide-react';
 import { ChatMessage, generateStoreAIResponse } from '@/lib/ai-assistant';
 import { ApiClient } from '@/lib/api-client';

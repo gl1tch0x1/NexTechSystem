@@ -8,39 +8,26 @@ import {
   Minus,
   ChevronDown,
   ChevronUp,
-  Filter,
   CheckCircle2,
   Clock,
   AlertCircle,
-  ArrowRight,
   TrendingUp,
   Building2,
   DollarSign,
-  ChevronRight,
-  Calendar,
-  Layers,
   X,
   Loader2,
-  ExternalLink,
   ShieldCheck,
   Send,
   Zap,
   Trash2,
   UserPlus,
   Users,
-  CreditCard,
   Truck,
-  Percent,
-  Tag,
-  HelpCircle,
-  Check,
   Briefcase,
-  Receipt,
-  RotateCcw,
   Sparkles,
-  Package,
+  Package
 } from 'lucide-react';
-import { Quote, QuoteStatus, QuoteItem, Product, User } from '@/types';
+import { Quote, QuoteStatus, Product, User } from '@/types';
 import { FALLBACK_PRODUCTS, FALLBACK_USERS } from '@/lib/fallback-data';
 
 export default function AdminQuotesPage() {

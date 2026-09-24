@@ -1,18 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Cpu,
-  Zap,
-  ShieldCheck,
   CheckCircle2,
-  AlertTriangle,
   ArrowRight,
-  Sliders,
-  Flame,
   Layers,
-  Sparkles,
   Gauge
 } from 'lucide-react';
 import { BuilderPreset } from '@/types';

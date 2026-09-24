@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getFirestore, isFirebaseLive } from './firebase.js';
+import { getFirestore } from './firebase.js';
 import { ENV } from './env.js';
 import { DbSnapshot } from '../types/index.js';
 

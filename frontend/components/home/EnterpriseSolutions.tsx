@@ -8,13 +8,10 @@ import {
   Network,
   CheckCircle2,
   ArrowRight,
-  Sparkles,
-  ShieldCheck,
   Zap,
   Cpu,
   Layers,
-  Activity,
-  Gauge
+  Activity
 } from 'lucide-react';
 import { EnterpriseSolution } from '@/types';
 

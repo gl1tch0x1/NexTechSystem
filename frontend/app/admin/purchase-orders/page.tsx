@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { getApiUrl } from '@/lib/api-client';
 import { formatPrice, formatDate, sanitizeCsvField } from '@/lib/utils';
@@ -9,22 +9,19 @@ import {
   Server,
   Sparkles,
   RefreshCw,
-  Plus,
   CheckCircle2,
-  Clock,
   Truck,
   AlertTriangle,
   FileSpreadsheet,
   ChevronDown,
   ChevronUp,
   Boxes,
-  ArrowRight,
   ShieldCheck,
   PackageCheck,
   Ban,
   X,
   Barcode,
-  Loader2,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminPurchaseOrdersPage() {

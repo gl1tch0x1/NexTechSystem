@@ -5,7 +5,6 @@ import { useAuth } from '@/lib/auth-context';
 import { getApiUrl } from '@/lib/api-client';
 import {
   ShieldCheck,
-  Download,
   Upload,
   RefreshCw,
   Database,
@@ -13,9 +12,7 @@ import {
   AlertTriangle,
   HardDrive,
   Clock,
-  FileCode,
   Layers,
-  Sparkles,
   ArrowDownToLine
 } from 'lucide-react';
 

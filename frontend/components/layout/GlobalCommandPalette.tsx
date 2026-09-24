@@ -4,26 +4,19 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
-  Command,
   Package,
   Layers,
   Award,
-  Zap,
   Tag,
-  Store,
-  ShieldCheck,
-  ChevronRight,
   Sparkles,
-  ArrowUpRight,
   CornerDownLeft,
   X,
-  SlidersHorizontal,
   LayoutDashboard,
   Cpu
 } from 'lucide-react';
 import { ApiClient } from '@/lib/api-client';
 import { Product, Category, Brand } from '@/types';
-import { formatPrice } from '@/lib/utils';
+
 import { useCurrency } from '@/lib/currency-context';
 
 export function GlobalCommandPalette() {

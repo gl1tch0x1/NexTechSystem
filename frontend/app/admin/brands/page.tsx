@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
-  Layers,
   Camera,
   RefreshCw
 } from 'lucide-react';

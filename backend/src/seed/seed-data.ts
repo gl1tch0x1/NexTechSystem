@@ -5,7 +5,6 @@ import {
   User,
   Reseller,
   Coupon,
-  Banner,
   StoreSettings,
   HeroHighlight,
   EnterpriseSolution,

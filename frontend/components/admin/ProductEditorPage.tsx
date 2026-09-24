@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
@@ -12,21 +12,19 @@ import {
   Category,
   Brand,
   SellerType,
-  Reseller,
+  Reseller
 } from '@/types';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 import {
   SPECIFICATION_FIELDS,
   SPECIFICATION_PRESETS,
-  SPECIFICATION_GROUPS,
+  SPECIFICATION_GROUPS
 } from '@/lib/specification-presets';
 import {
   Package,
   Layers,
-  Tag,
   Image as ImageIcon,
   DollarSign,
-  Boxes,
   Truck,
   Cpu,
   Sparkles,
@@ -38,37 +36,23 @@ import {
   RefreshCw,
   AlertTriangle,
   Percent,
-  Store,
-  HardDrive,
-  Monitor,
   Zap,
-  CheckSquare,
-  Globe,
-  FileText,
   ArrowLeft,
   Save,
   Barcode,
-  ExternalLink,
   ChevronRight,
-  ChevronLeft,
-  Info,
   CheckCircle2,
-  Sliders,
   Eye,
   LayoutGrid,
   ListOrdered,
-  HelpCircle,
-  Copy,
   Star,
   Warehouse,
-  Flame,
   Wand2,
   TrendingUp,
   MapPin,
   MoveLeft,
-  MoveRight,
+  MoveRight
 } from 'lucide-react';
-
 
 const WAREHOUSE_LOCATIONS = [
   { id: 'loc_dxb_main', name: 'Dubai Logistics Hub (JAFZA)', city: 'Dubai', code: 'DXB-01' },
@@ -325,32 +309,6 @@ const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
   },
 ];
 
-const POPULAR_TAGS = [
-  'Work Laptop',
-  'UAE',
-  'Silver',
-  'ProBook 460 G11',
-  'Intel Core Ultra 5',
-  'DOS',
-  'FHD',
-  'Enterprise',
-  'DDR5',
-  'NVMe SSD',
-  'Factory Sealed',
-  'Server Grade',
-];
-
-const COMMON_COLLECTIONS = [
-  'Laptops',
-  'HP',
-  'Home & Business Laptops',
-  'Enterprise Storage',
-  'Processors',
-  'Graphics Cards',
-  'Networking',
-  'Servers',
-];
-
 const CONDITION_OPTIONS = [
   'Brand New (Factory Sealed)',
   'Enterprise Refurbished (Grade A)',
@@ -485,7 +443,6 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
   // Local helper inputs
   const [tagInput, setTagInput] = useState('');
   const [collectionInput, setCollectionInput] = useState('');
-  const [newImageUrl, setNewImageUrl] = useState('');
   const [newOptionName, setNewOptionName] = useState('');
   const [previewImageError, setPreviewImageError] = useState(false);
 
@@ -1094,26 +1051,6 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
         ...prev,
         locations: list,
         stock: totalAvailable,
-      };
-    });
-  };
-
-  // Quick Hardware Photo Preset Loader
-  const handleApplyPreset = (preset: typeof HARDWARE_IMAGE_PRESETS[0]) => {
-    setPreviewImageError(false);
-    setFormData(prev => {
-      const newImages = prev.images.includes(preset.url) ? prev.images : [preset.url, ...prev.images];
-      const foundCat = categories.find(c => c.id === preset.catId);
-      const foundBrand = brands.find(b => b.name.toLowerCase() === preset.brand.toLowerCase());
-
-      return {
-        ...prev,
-        primaryImage: preset.url,
-        images: newImages,
-        categoryId: foundCat?.id || prev.categoryId,
-        categoryName: foundCat?.name || prev.categoryName,
-        brandId: foundBrand?.id || prev.brandId,
-        brandName: foundBrand?.name || preset.brand,
       };
     });
   };

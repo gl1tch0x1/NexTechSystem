@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Product, Category, Brand, HomePageContent } from '@/types';
 import { HeroShowcase } from '@/components/home/HeroShowcase';
 import { BrandMarquee } from '@/components/home/BrandMarquee';

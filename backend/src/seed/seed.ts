@@ -4,7 +4,6 @@ import { productRepository } from '../repositories/product.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 import { couponRepository } from '../repositories/coupon.repository.js';
-import { bannerRepository } from '../repositories/banner.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
 import { orderRepository } from '../repositories/order.repository.js';

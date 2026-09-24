@@ -1,18 +1,16 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import {
   Printer,
   X,
   ShieldCheck,
-  Building2,
   CheckCircle2,
   Download,
   Copy,
   Check,
-  QrCode,
   FileText,
   Mail
 } from 'lucide-react';

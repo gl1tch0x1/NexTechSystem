@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Tag, Copy, Check, Sparkles, ArrowRight, BadgePercent } from 'lucide-react';
+import { Copy, Check, Sparkles, ArrowRight, BadgePercent } from 'lucide-react';
 import { Coupon } from '@/types';
 
 interface VoucherClaimBannerProps {

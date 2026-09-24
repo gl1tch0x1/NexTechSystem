@@ -1,6 +1,6 @@
-import React from 'react';
+
 import Link from 'next/link';
-import { Shield, Truck, RefreshCw, Headphones, Lock, Sparkles } from 'lucide-react';
+import { Shield, Truck, Headphones, Lock } from 'lucide-react';
 
 export function Footer() {
   return (

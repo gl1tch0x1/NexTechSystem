@@ -9,18 +9,13 @@ import {
   Plus,
   Edit2,
   Trash2,
-  Search,
   X,
-  CheckCircle2,
-  ExternalLink,
-  Sparkles
+  CheckCircle2
 } from 'lucide-react';
 
 export default function AdminBannersPage() {
   const { token } = useAuth();
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,9 +43,7 @@ export default function AdminBannersPage() {
       setBanners(data || []);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -132,12 +125,8 @@ export default function AdminBannersPage() {
     }
   };
 
-  const filteredBanners = banners.filter(b =>
-    b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (b.subtitle && b.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  return (
+  const filteredBanners = banners;
+return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">

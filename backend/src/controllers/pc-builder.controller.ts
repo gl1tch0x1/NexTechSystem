@@ -5,7 +5,7 @@ import { walletService } from '../services/wallet.service.js';
 import { verifyAdminPin, DEFAULT_SYSTEM_ADMIN_PIN_HASH } from '../utils/admin-pin.js';
 
 export class PCBuilderController {
-  async getComponents(req: Request, res: Response): Promise<void> {
+  async getComponents(_req: Request, res: Response): Promise<void> {
     const components = await pcBuilderService.getComponentsByCategory();
     res.json({ success: true, data: components });
   }

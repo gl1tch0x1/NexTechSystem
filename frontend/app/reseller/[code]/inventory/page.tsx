@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { Product } from '@/types';
-import { Boxes, CheckCircle2, AlertTriangle, Save } from 'lucide-react';
+import { Boxes, Save } from 'lucide-react';
 
 import { useParams } from 'next/navigation';
 

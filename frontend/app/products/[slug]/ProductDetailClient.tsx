@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
@@ -9,8 +9,6 @@ import {
   Heart,
   ShieldCheck,
   Truck,
-  CheckCircle2,
-  Share2,
   Minus,
   Plus,
   Zap

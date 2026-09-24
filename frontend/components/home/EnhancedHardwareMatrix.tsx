@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/product/ProductCard';
@@ -11,10 +11,8 @@ import {
   Zap,
   Layers,
   ArrowRight,
-  Filter,
   Sparkles,
   Search,
-  SlidersHorizontal,
   Boxes,
   RotateCcw
 } from 'lucide-react';

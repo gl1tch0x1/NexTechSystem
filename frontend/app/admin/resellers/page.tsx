@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils';
 import { Reseller } from '@/types';
 import {
   Store,
@@ -13,25 +13,12 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertTriangle,
-  Boxes,
   Search,
-  Sparkles,
   Building2,
-  Hash,
   Globe,
   User,
-  Mail,
-  Phone,
-  Percent,
-  MapPin,
   X,
-  FileText,
-  Briefcase,
-  Calendar,
   Truck,
-  CreditCard,
-  Lock,
-  Tag,
   Check,
   Layers
 } from 'lucide-react';
@@ -39,7 +26,6 @@ import {
 export default function AdminResellersPage() {
   const { token } = useAuth();
   const [resellers, setResellers] = useState<Reseller[]>([]);
-  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -87,7 +73,7 @@ export default function AdminResellersPage() {
   const [resellerCode, setResellerCode] = useState('');
   const [subdomain, setSubdomain] = useState('');
   const [addressLine, setAddressLine] = useState('');
-  const [city, setCity] = useState('Dubai');
+  const city = 'Dubai';
   const [dispatchHub, setDispatchHub] = useState('Al Quoz Industrial Hub (Dubai)');
   const [dispatchHubs, setDispatchHubs] = useState<string[]>([
     'Al Quoz Industrial Hub (Dubai)',
@@ -150,7 +136,7 @@ export default function AdminResellersPage() {
       ApiClient.get<Reseller[]>('/admin/resellers', { token })
         .then(res => setResellers(res || []))
         .catch(err => console.error(err))
-        .finally(() => setLoading(false));
+;
     }
   };
 

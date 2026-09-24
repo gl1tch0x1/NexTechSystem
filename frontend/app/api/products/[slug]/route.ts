@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FALLBACK_PRODUCTS } from '@/lib/fallback-data';
 
-export async function GET(
-  request: NextRequest,
+export async function GET(_request: NextRequest,
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;

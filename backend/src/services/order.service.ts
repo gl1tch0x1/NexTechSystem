@@ -9,7 +9,7 @@ import { ebillService } from './ebill.service.js';
 import { auditService } from './audit.service.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { ENV } from '../config/env.js';
-import { Order, OrderStatus, PaymentMethod, PaymentStatus, Address, OrderItem } from '../types/index.js';
+import { Order, OrderStatus, PaymentMethod, Address, OrderItem } from '../types/index.js';
 import { dbStore } from '../config/db-store.js';
 
 export interface CreateOrderDTO {

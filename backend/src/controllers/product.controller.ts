@@ -106,17 +106,17 @@ export class ProductController {
     });
   }
 
-  async getCategories(req: Request, res: Response): Promise<void> {
+  async getCategories(_req: Request, res: Response): Promise<void> {
     const categories = await categoryRepository.findActive();
     res.json({ success: true, data: categories });
   }
 
-  async getBrands(req: Request, res: Response): Promise<void> {
+  async getBrands(_req: Request, res: Response): Promise<void> {
     const brands = await brandRepository.findActive();
     res.json({ success: true, data: brands });
   }
 
-  async getStoreConfig(req: Request, res: Response): Promise<void> {
+  async getStoreConfig(_req: Request, res: Response): Promise<void> {
     const settings = await settingsRepository.getSettings();
     const banners = await bannerRepository.findActive();
     res.json({

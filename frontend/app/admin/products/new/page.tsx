@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ProductEditorPage } from '@/components/admin/ProductEditorPage';
 
 export const metadata = {

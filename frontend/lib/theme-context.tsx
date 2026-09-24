@@ -16,7 +16,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
-  const [mounted, setMounted] = useState(false);
 
   const applyTheme = (t: Theme) => {
     if (typeof document === 'undefined') return;
@@ -58,11 +57,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       applyTheme('dark');
     }
-    setMounted(true);
 
     // Listen for system color-scheme changes if theme is 'system'
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemChange = (e: MediaQueryListEvent) => {
+    const handleSystemChange = (_e: MediaQueryListEvent) => {
       const saved = localStorage.getItem('nextech_theme');
       if (saved === 'system') {
         applyTheme('system');

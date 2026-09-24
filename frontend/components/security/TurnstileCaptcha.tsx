@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Script from 'next/script';
-import { ShieldCheck, Lock, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
 
 interface TurnstileCaptchaProps {
   onVerify?: (token: string) => void;
@@ -31,7 +31,6 @@ export default function TurnstileCaptcha({
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
-  const [token, setToken] = useState<string>('');
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
   const siteKey =
@@ -46,17 +45,14 @@ export default function TurnstileCaptcha({
           theme,
           callback: (t: string) => {
             setIsVerified(true);
-            setToken(t);
             if (onVerify) onVerify(t);
           },
           'expired-callback': () => {
             setIsVerified(false);
-            setToken('');
           },
           'error-callback': () => {
             // In demo / offline mode, auto-grant verified fallback
             setIsVerified(true);
-            setToken('demo_verified_token_2026');
             if (onVerify) onVerify('demo_verified_token_2026');
           },
         });
@@ -84,7 +80,6 @@ export default function TurnstileCaptcha({
   const handleSimulatePass = () => {
     const demoToken = 'demo_verified_token_2026';
     setIsVerified(true);
-    setToken(demoToken);
     if (onVerify) onVerify(demoToken);
   };
 

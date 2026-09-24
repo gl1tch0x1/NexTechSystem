@@ -22,7 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address } from '../types/index.js';
 
 export class AdminController {
-  async getDashboard(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getDashboard(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const metrics = await analyticsService.getAdminDashboardMetrics();
     res.json({ success: true, data: metrics });
   }
@@ -128,7 +128,7 @@ export class AdminController {
   // ==========================================
   // 2. RESELLER PARTNERS CRUD
   // ==========================================
-  async getResellers(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getResellers(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const resellers = await resellerService.getAllResellers();
     res.json({ success: true, data: resellers });
   }
@@ -192,7 +192,7 @@ export class AdminController {
   // ==========================================
   // 3. CUSTOMER ACCOUNTS & WALLET CONTROL
   // ==========================================
-  async getCustomers(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getCustomers(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const allUsers = await userRepository.find({ where: [{ field: 'role', operator: '==', value: 'CUSTOMER' }] });
     // Fetch wallet balances for each customer
     const customersWithWallets = await Promise.all(
@@ -272,7 +272,7 @@ export class AdminController {
   // ==========================================
   // 4. ORDER MANAGEMENT
   // ==========================================
-  async getOrders(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getOrders(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const orders = await orderService.getAllOrders();
     res.json({ success: true, data: orders });
   }
@@ -405,7 +405,7 @@ export class AdminController {
   // ==========================================
   // 5. CATEGORIES CRUD
   // ==========================================
-  async getCategories(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getCategories(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const categories = await categoryRepository.find();
     res.json({ success: true, data: categories });
   }
@@ -447,7 +447,7 @@ export class AdminController {
   // ==========================================
   // 6. BRANDS CRUD
   // ==========================================
-  async getBrands(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getBrands(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const brands = await brandRepository.find();
     res.json({ success: true, data: brands });
   }
@@ -489,7 +489,7 @@ export class AdminController {
   // ==========================================
   // 7. COUPONS CRUD
   // ==========================================
-  async getCoupons(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getCoupons(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const coupons = await couponRepository.find();
     res.json({ success: true, data: coupons });
   }
@@ -534,7 +534,7 @@ export class AdminController {
   // ==========================================
   // 8. BANNERS CRUD
   // ==========================================
-  async getBanners(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getBanners(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const banners = await bannerRepository.find();
     res.json({ success: true, data: banners });
   }
@@ -565,7 +565,7 @@ export class AdminController {
   // ==========================================
   // 9. SETTINGS & AUDIT LOGS
   // ==========================================
-  async getSettings(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getSettings(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const settings = await settingsRepository.getSettings();
     res.json({ success: true, data: settings });
   }
@@ -575,7 +575,7 @@ export class AdminController {
     res.json({ success: true, data: updated });
   }
 
-  async getAuditLogs(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getAuditLogs(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const logs = await auditService.getRecentLogs(150);
     res.json({ success: true, data: logs });
   }
@@ -640,7 +640,7 @@ export class AdminController {
   // ==========================================
   // 11. PURCHASE ORDERS & AUTOMATED RESTOCK
   // ==========================================
-  async getPurchaseOrders(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getPurchaseOrders(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const orders = await purchaseOrderRepository.findRecent(100);
     res.json({ success: true, data: orders });
   }
@@ -736,6 +736,10 @@ export class AdminController {
       updatedAt: new Date().toISOString(),
     };
 
+    if (receivedNotes) {
+      updates.notes = receivedNotes;
+    }
+
     if (receivedItems && Array.isArray(receivedItems) && receivedItems.length > 0) {
       updates.items = receivedItems;
     }
@@ -783,7 +787,7 @@ export class AdminController {
   // ==========================================
   // 12. STOREFRONT CMS LAYOUT ARRANGER
   // ==========================================
-  async getCmsLayout(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getCmsLayout(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const settings: any = await settingsRepository.getSettings();
     const defaultSections: StorefrontSectionConfig[] = [
       { id: 'hero', title: 'Main Hero & Visual Showcase', description: 'Enterprise hardware computing headline & direct CTAs', isVisible: true, order: 1 },
@@ -832,7 +836,7 @@ export class AdminController {
   // ==========================================
   // 13. BENTO TRUST FEATURES ("Why Tech Teams Trust NexTech")
   // ==========================================
-  async getBentoFeatures(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getBentoFeatures(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const features = await bentoFeatureRepo.find({ orderBy: { field: 'order', direction: 'asc' } });
     res.json({ success: true, data: features });
   }

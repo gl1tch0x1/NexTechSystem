@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
@@ -16,9 +16,8 @@ import {
   Building2,
   AlertTriangle,
   Loader2,
-  ExternalLink,
   Copy,
-  Check,
+  Check
 } from 'lucide-react';
 
 interface WarrantyResult {

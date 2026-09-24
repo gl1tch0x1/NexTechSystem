@@ -1,24 +1,21 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order, OrderStatus } from '@/types';
 import DigitalEBillModal from '@/components/invoice/DigitalEBillModal';
 import {
-  ShoppingBag,
   FileText,
   CheckCircle2,
   Clock,
   Truck,
-  ArrowRight,
   Search,
   X,
   MapPin,
   CreditCard,
-  Tag,
   Eye,
   Sparkles,
   Check,
@@ -34,10 +31,7 @@ import {
   User,
   Briefcase,
   RotateCcw,
-  ShieldCheck,
-  Hash,
-  UserCheck,
-  HelpCircle
+  UserCheck
 } from 'lucide-react';
 
 interface OrderItemDraft {
@@ -112,14 +106,12 @@ const getStatusBadgeConfig = (status: OrderStatus | string) => {
 export default function AdminOrdersPage() {
   const { token } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   // Inspection modal
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
-  const [statusNote, setStatusNote] = useState('');
 
   // Digital E-Bill modal state
   const [eBillOrder, setEBillOrder] = useState<Order | null>(null);
@@ -157,7 +149,6 @@ export default function AdminOrdersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [availableCustomers, setAvailableCustomers] = useState<any[]>([]);
-  const [loadingModalData, setLoadingModalData] = useState(false);
   const [creatingOrder, setCreatingOrder] = useState(false);
   const [createError, setCreateError] = useState('');
   const [createSuccess, setCreateSuccess] = useState('');
@@ -194,7 +185,6 @@ export default function AdminOrdersPage() {
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [billingAddressLine1, setBillingAddressLine1] = useState('');
   const [billingCity, setBillingCity] = useState('');
-  const [billingStateRegion, setBillingStateRegion] = useState('');
   const [billingCountry, setBillingCountry] = useState('AE');
   const [billingPostalCode, setBillingPostalCode] = useState('');
 
@@ -246,7 +236,7 @@ export default function AdminOrdersPage() {
       ApiClient.get<Order[]>('/admin/orders', { token })
         .then(res => setOrders(res || []))
         .catch(err => console.error(err))
-        .finally(() => setLoading(false));
+;
     }
   };
 
@@ -258,7 +248,7 @@ export default function AdminOrdersPage() {
     setIsCreateModalOpen(true);
     setCreateError('');
     setCreateSuccess('');
-    setLoadingModalData(true);
+    
     setProductSearchQuery('');
     setIsProductDropdownOpen(false);
 
@@ -286,7 +276,7 @@ export default function AdminOrdersPage() {
     } catch (err: any) {
       console.error('Failed to load modal data:', err);
     } finally {
-      setLoadingModalData(false);
+      
     }
   };
 
@@ -475,7 +465,7 @@ export default function AdminOrdersPage() {
         phone: customerPhone.trim() || '+971 4 800 TECH',
         addressLine1: billingAddressLine1.trim() || addressLine1.trim(),
         city: billingCity.trim() || city.trim(),
-        state: billingStateRegion.trim() || stateRegion.trim(),
+        state: stateRegion.trim(),
         country: billingCountry.trim() || country.trim(),
         postalCode: billingPostalCode.trim() || postalCode.trim(),
       };

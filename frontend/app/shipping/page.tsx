@@ -1,6 +1,6 @@
-import React from 'react';
+
 import Link from 'next/link';
-import { Truck, ShieldCheck, Clock, Globe, ArrowRight, Package, CheckCircle2 } from 'lucide-react';
+import { Truck, ShieldCheck, Clock, Globe, ArrowRight, Package } from 'lucide-react';
 
 export const metadata = {
   title: 'Enterprise Shipping & Logistics Policy | NexTech Systems',

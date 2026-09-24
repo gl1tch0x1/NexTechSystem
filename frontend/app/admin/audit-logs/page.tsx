@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatDate } from '@/lib/utils';
 import { AuditLog } from '@/types';
-import { Activity, ShieldCheck, Search, Eye, X, Terminal, Clock, Lock } from 'lucide-react';
+import { Activity, Search, Eye, X, Terminal } from 'lucide-react';
 
 export default function AdminAuditLogsPage() {
   const { token } = useAuth();
   const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
@@ -19,7 +18,7 @@ export default function AdminAuditLogsPage() {
       ApiClient.get<AuditLog[]>('/admin/audit-logs', { token })
         .then(res => setLogs(res || []))
         .catch(err => console.error(err))
-        .finally(() => setLoading(false));
+;
     }
   }, [token]);
 

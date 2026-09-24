@@ -5,13 +5,11 @@ import { useAuth } from '@/lib/auth-context';
 import { getApiUrl } from '@/lib/api-client';
 import { StorefrontSectionConfig, BentoFeature } from '@/types';
 import {
-  Sliders,
   Eye,
   EyeOff,
   ArrowUp,
   ArrowDown,
   Save,
-  RotateCcw,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
@@ -26,7 +24,6 @@ import {
   Building,
   Bot,
   Award,
-  BarChart2,
   Megaphone,
   X,
   Type,
@@ -48,11 +45,9 @@ export default function AdminCmsPage() {
 
   // Sections State
   const [sections, setSections] = useState<StorefrontSectionConfig[]>([]);
-  const [loadingSections, setLoadingSections] = useState(true);
 
   // Bento Trust Features State
   const [features, setFeatures] = useState<BentoFeature[]>([]);
-  const [loadingFeatures, setLoadingFeatures] = useState(true);
   const [editingFeature, setEditingFeature] = useState<BentoFeature | null>(null);
   const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(false);
 
@@ -71,7 +66,7 @@ export default function AdminCmsPage() {
   // Fetch Storefront Sections Layout
   const fetchLayout = async () => {
     try {
-      setLoadingSections(true);
+      
       const res = await fetch(getApiUrl('/admin/cms/layout'), {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -88,14 +83,13 @@ export default function AdminCmsPage() {
     } catch (err) {
       console.error('Error fetching layout:', err);
     } finally {
-      setLoadingSections(false);
     }
   };
 
   // Fetch Bento Features
   const fetchFeatures = async () => {
     try {
-      setLoadingFeatures(true);
+      
       const res = await fetch(getApiUrl('/admin/cms/features'), {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -106,7 +100,6 @@ export default function AdminCmsPage() {
     } catch (err) {
       console.error('Error fetching bento features:', err);
     } finally {
-      setLoadingFeatures(false);
     }
   };
 

@@ -5,7 +5,6 @@ import crypto from 'crypto';
 import { userRepository } from '../repositories/user.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 import { walletService } from '../services/wallet.service.js';
-import { auditService } from '../services/audit.service.js';
 import { ENV } from '../config/env.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { User } from '../types/index.js';
@@ -143,7 +142,7 @@ export class AuthController {
   }
 
   async login(req: Request, res: Response): Promise<void> {
-    const { email, password, roleHint, resellerCode } = req.body;
+    const { email, password, resellerCode } = req.body;
 
     if (!email || !password) {
       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Email / Username and Password are required.' } });

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
@@ -10,14 +10,9 @@ import { DirhamBadge } from '@/components/ui/DirhamSymbol';
 import {
   User,
   ShoppingBag,
-  Wallet as WalletIcon,
   Heart,
   FileText,
-  MapPin,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
-  Clock
+  ShieldCheck
 } from 'lucide-react';
 
 export default function CustomerAccountDashboard() {

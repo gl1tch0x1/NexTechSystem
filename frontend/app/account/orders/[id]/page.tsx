@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -8,13 +8,7 @@ import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order, EBill } from '@/types';
 import {
-  FileText,
   Printer,
-  ShieldCheck,
-  Store,
-  CheckCircle2,
-  Clock,
-  Truck,
   ArrowLeft
 } from 'lucide-react';
 

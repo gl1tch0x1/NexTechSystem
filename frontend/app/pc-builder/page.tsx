@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Product, PCBuilderCompatibilityResult, CompatibilityIssue } from '@/types';
+import { useState, useEffect } from 'react';
+
+import { Product, PCBuilderCompatibilityResult } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';

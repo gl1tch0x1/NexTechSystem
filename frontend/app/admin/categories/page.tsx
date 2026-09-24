@@ -11,10 +11,7 @@ import {
   Trash2,
   Search,
   X,
-  CheckCircle2,
-  Boxes,
-  Sparkles,
-  ArrowUpRight
+  CheckCircle2
 } from 'lucide-react';
 
 import { DEFAULT_CATEGORIES } from '@/lib/default-taxonomy';
@@ -22,7 +19,6 @@ import { DEFAULT_CATEGORIES } from '@/lib/default-taxonomy';
 export default function AdminCategoriesPage() {
   const { token } = useAuth();
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modal states
@@ -52,9 +48,7 @@ export default function AdminCategoriesPage() {
       }
     } catch (err) {
       console.error('Failed to fetch categories:', err);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {

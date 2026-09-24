@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/product/ProductCard';
@@ -8,13 +8,9 @@ import {
   Cpu,
   Server,
   HardDrive,
-  Monitor,
   Zap,
-  Layers,
   ArrowRight,
-  Filter,
-  Sparkles,
-  SlidersHorizontal
+  Sparkles
 } from 'lucide-react';
 
 interface HardwareMatrixShowcaseProps {
@@ -36,7 +32,6 @@ export function HardwareMatrixShowcase({ products }: HardwareMatrixShowcaseProps
     if (activeTab === 'ALL') return true;
     const name = (p.name || '').toLowerCase();
     const cat = (p.categoryName || '').toLowerCase();
-    const sku = (p.sku || '').toLowerCase();
 
     if (activeTab === 'CPU') return cat.includes('component') && (name.includes('core') || name.includes('ryzen') || name.includes('cpu') || name.includes('intel') || name.includes('amd'));
     if (activeTab === 'GPU') return name.includes('rtx') || name.includes('geforce') || name.includes('gpu') || name.includes('radeon');

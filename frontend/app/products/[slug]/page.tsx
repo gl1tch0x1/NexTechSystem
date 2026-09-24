@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -7,17 +7,14 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { ProductDetailClient } from './ProductDetailClient';
 import {
   ShieldCheck,
-  Truck,
   Cpu,
   CheckCircle2,
   Star,
   Boxes,
   Layers,
   Sparkles,
-  Activity,
   Gauge,
   Flame,
-  Database,
   Sliders,
   Award,
   Check,
@@ -26,7 +23,7 @@ import {
   Monitor,
   Laptop
 } from 'lucide-react';
-import { formatPrice } from '@/lib/utils';
+
 import { getApiUrl } from '@/lib/api-client';
 
 interface ProductDetailPageProps {

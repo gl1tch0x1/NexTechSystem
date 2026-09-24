@@ -2,27 +2,24 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient, getApiUrl } from '@/lib/api-client';
-import { ProductImportPreviewResponse, ProductImportRow } from '@/types';
+import { ProductImportPreviewResponse } from '@/types';
 import {
   FileSpreadsheet,
   Upload,
   Download,
   CheckCircle2,
-  AlertTriangle,
   XCircle,
   ArrowRight,
   RefreshCw,
-  Eye,
   Sliders,
   Sparkles
 } from 'lucide-react';
 
 export default function ResellerProductImportPage() {
   const params = useParams();
-  const router = useRouter();
   const resellerCode = params.code as string;
   const { token } = useAuth();
 

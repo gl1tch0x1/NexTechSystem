@@ -1,8 +1,6 @@
 // Resilient fallback data for standalone Next.js deployment (Vercel serverless runtime)
 import {
   Product,
-  Category,
-  Brand,
   HeroHighlight,
   EnterpriseSolution,
   HardwareBenchmarkCategory,
@@ -14,7 +12,7 @@ import {
   HomePageContent,
   User,
   Order,
-  Reseller,
+  Reseller
 } from '@/types';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from './default-taxonomy';
 

@@ -8,23 +8,16 @@ import { User } from '@/types';
 import {
   Users,
   Search,
-  CheckCircle2,
-  XCircle,
-  CreditCard,
   Plus,
   Minus,
   Sparkles,
   X,
-  ShoppingBag,
-  MapPin,
-  Eye,
-  ShieldCheck
+  Eye
 } from 'lucide-react';
 
 export default function AdminCustomersPage() {
   const { token } = useAuth();
   const [customers, setCustomers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Wallet adjustment modal state
@@ -43,7 +36,7 @@ export default function AdminCustomersPage() {
       ApiClient.get<any[]>('/admin/customers', { token })
         .then(res => setCustomers(res || []))
         .catch(err => console.error(err))
-        .finally(() => setLoading(false));
+;
     }
   };
 

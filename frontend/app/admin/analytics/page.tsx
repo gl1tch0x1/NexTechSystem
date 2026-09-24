@@ -1,38 +1,26 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice, formatDate, sanitizeCsvField } from '@/lib/utils';
+import { formatPrice, sanitizeCsvField } from '@/lib/utils';
 import CloudflareShieldBadge from '@/components/security/CloudflareShieldBadge';
 import {
   TrendingUp,
-  DollarSign,
   ShoppingBag,
-  Users,
   Activity,
-  ArrowUpRight,
-  ArrowDownRight,
   Sparkles,
   BarChart3,
   Globe,
-  Smartphone,
-  Monitor,
-  Tablet,
   RefreshCw,
   Download,
-  Filter,
   Layers,
-  Award,
   Zap,
   Package,
   CheckCircle2,
-  Clock,
-  ShieldCheck,
   Flame,
   ArrowRight,
-  Eye,
   Sliders,
   Server
 } from 'lucide-react';
@@ -110,7 +98,6 @@ export default function AdminAnalyticsPage() {
   const timeline = analytics?.revenueTimeline || [];
   const topModels = analytics?.topModels || [];
   const categories = analytics?.categoryDistribution || [];
-  const brands = analytics?.brandDistribution || [];
   const funnel = analytics?.conversionFunnel || [];
 
   const purchasesSummary = analytics?.purchasesSummary || {
@@ -507,7 +494,6 @@ export default function AdminAnalyticsPage() {
           </div>
         </div>
       </div>
-
 
       {/* 4. Top Selling Models & SKU Leaderboard */}
       <div className="rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm space-y-4 p-4 sm:p-6">

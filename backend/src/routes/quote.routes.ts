@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { quoteRepository } from '../repositories/quote.repository.js';
 import { orderRepository } from '../repositories/order.repository.js';
-import { productRepository } from '../repositories/product.repository.js';
 import { ebillService } from '../services/ebill.service.js';
 import { auditService } from '../services/audit.service.js';
 import { Quote, QuoteItem, Order, OrderItem, Address } from '../types/index.js';
@@ -161,7 +160,7 @@ router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> 
 });
 
 // 2. Get All Quotes (Admin Only with Rate Limiter & RBAC - OWASP A01 Defense)
-router.get('/', adminLimiter, authenticate, requireRole('ADMIN'), async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+router.get('/', adminLimiter, authenticate, requireRole('ADMIN'), async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const quotes = await quoteRepository.findRecent(100);
     res.json({

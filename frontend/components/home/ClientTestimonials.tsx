@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { Star, ShieldCheck, CheckCircle2, Quote, Award, Sparkles } from 'lucide-react';
+import { Star, CheckCircle2, Quote, Award } from 'lucide-react';
 import { ClientTestimonial } from '@/types';
 
 interface ClientTestimonialsProps {

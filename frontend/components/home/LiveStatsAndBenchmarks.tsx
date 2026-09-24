@@ -7,10 +7,7 @@ import {
   Zap,
   HardDrive,
   BarChart3,
-  TrendingUp,
   ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
   Activity,
   Layers
 } from 'lucide-react';

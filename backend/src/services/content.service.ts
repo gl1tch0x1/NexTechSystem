@@ -19,8 +19,7 @@ import {
   ClientTestimonial,
   BentoFeature,
   BuilderPreset,
-  Coupon,
-  StoreSettings
+  Coupon
 } from '../types/index.js';
 
 export class ContentService {

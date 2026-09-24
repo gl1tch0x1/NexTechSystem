@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useCurrency } from '@/lib/currency-context';
@@ -13,22 +13,19 @@ import {
   Plus,
   ArrowUpRight,
   ArrowDownLeft,
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
-  Clock,
   KeyRound,
   AlertCircle,
   X
 } from 'lucide-react';
 
 export default function CustomerWalletPage() {
-  const { token, isAuthenticated } = useAuth();
-  const { formatPrice, currentCurrency } = useCurrency();
+  const { token } = useAuth();
+  const { formatPrice } = useCurrency();
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [topupAmount, setTopupAmount] = useState<number>(500);
+  
   const [topupLoading, setTopupLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   
@@ -40,7 +37,7 @@ export default function CustomerWalletPage() {
 
   const fetchWallet = async () => {
     if (!token) {
-      setLoading(false);
+      
       return;
     }
     try {
@@ -50,7 +47,7 @@ export default function CustomerWalletPage() {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      
     }
   };
 

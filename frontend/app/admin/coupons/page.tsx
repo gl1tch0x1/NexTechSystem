@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Coupon, StoreSettings, Category, Brand } from '@/types';
-import { FALLBACK_COUPONS, FALLBACK_STORE_SETTINGS } from '@/lib/fallback-data';
+import { FALLBACK_COUPONS } from '@/lib/fallback-data';
 import {
   Tag,
   Plus,
@@ -13,19 +13,15 @@ import {
   Trash2,
   Search,
   X,
-  CheckCircle2,
   Sparkles,
   Percent,
-  DollarSign,
   Eye,
   EyeOff,
-  Sliders,
   Check,
   ArrowRight,
   BadgePercent,
   ShieldCheck,
   Calendar,
-  Layers,
   Copy,
   AlertCircle
 } from 'lucide-react';
@@ -35,8 +31,6 @@ export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>(FALLBACK_COUPONS);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [settings, setSettings] = useState<StoreSettings | null>(FALLBACK_STORE_SETTINGS);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Landing page banner toggle states
@@ -92,7 +86,7 @@ export default function AdminCouponsPage() {
       }
 
       if (settingsData.status === 'fulfilled' && settingsData.value) {
-        setSettings(settingsData.value);
+        
         setIsBannerActive(settingsData.value.isLandingDiscountBannerActive !== false);
         setFeaturedCode(settingsData.value.featuredLandingCouponCode || 'TECH10');
       }
@@ -107,7 +101,6 @@ export default function AdminCouponsPage() {
     } catch (err) {
       console.error('Error loading coupon admin data:', err);
     } finally {
-      setLoading(false);
     }
   };
 

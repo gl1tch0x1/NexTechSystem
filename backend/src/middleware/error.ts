@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction): void {
+export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction): void {
   console.error('[API Error]', err);
 
   const statusCode = err.statusCode || (err.name === 'ValidationError' ? 400 : 500);
