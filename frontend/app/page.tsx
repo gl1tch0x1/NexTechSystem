@@ -79,27 +79,6 @@ export default async function HomePage() {
     return s ? (s.enabled !== false && s.isVisible !== false) : true;
   };
   const getSection = (id: string) => sections?.find(s => s.id === id);
-  const hasStorefrontData = products.length > 0 || categories.length > 0 || brands.length > 0 || !!content;
-
-  if (!hasStorefrontData) {
-    return (
-      <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-400">Storefront status</p>
-          <h1 className="mt-4 text-3xl font-bold text-white">Backend API is not reachable yet</h1>
-          <p className="mt-4 text-base text-slate-300">
-            The storefront is waiting for the deployed backend service. Set <span className="font-mono text-amber-300">NEXT_PUBLIC_API_URL</span> to your live API URL, for example:
-          </p>
-          <p className="mt-3 inline-block rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 font-mono text-sm text-sky-300">
-            https://your-backend-url/api
-          </p>
-          <p className="mt-4 text-sm text-slate-400">
-            Then redeploy the frontend so the homepage can load products, categories, and content from the live database.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-16 pb-20 transition-colors duration-200">
