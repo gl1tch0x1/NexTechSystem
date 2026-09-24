@@ -26,7 +26,8 @@ import {
   SlidersHorizontal,
   CreditCard,
   LogOut,
-  PackageCheck
+  PackageCheck,
+  Cpu
 } from 'lucide-react';
 
 export function Navbar() {
@@ -101,6 +102,9 @@ export function Navbar() {
 
             <input
               type="text"
+              id="navbar-desktop-search"
+              aria-label="Search enterprise hardware, SKUs, LGA1700, RTX..."
+              suppressHydrationWarning
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search enterprise hardware, SKUs, LGA1700, RTX..."
@@ -488,6 +492,9 @@ export function Navbar() {
             <div className="relative">
               <input
                 type="text"
+                id="navbar-mobile-search"
+                aria-label="Search CPUs, GPUs, servers, SSDs"
+                suppressHydrationWarning
                 placeholder="Search CPUs, GPUs, servers, SSDs..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
