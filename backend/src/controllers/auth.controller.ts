@@ -343,3 +343,4 @@ export class AuthController {
 }
 
 export const authController = new AuthController();
+export { hashPassword, verifyPassword, sanitizeUser };

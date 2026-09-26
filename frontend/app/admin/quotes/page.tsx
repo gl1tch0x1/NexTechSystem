@@ -206,11 +206,11 @@ export default function AdminQuotesPage() {
           setSelectedQuote((prev) => (prev ? { ...prev, status: newStatus } : null));
         }
       } else {
-        alert(data.error?.message || 'Failed to update quotation status.');
+        showToast(data.error?.message || 'Failed to update quotation status.');
       }
     } catch (err) {
       console.error('Failed to update quote status:', err);
-      alert('Network error while updating quotation status.');
+      showToast('Network error while updating quotation status.');
     }
   };
 
@@ -275,11 +275,11 @@ export default function AdminQuotesPage() {
           );
         }
       } else {
-        alert(data.error?.message || 'Failed to convert quotation.');
+        showToast(data.error?.message || 'Failed to convert quotation.');
       }
     } catch (err) {
       console.error('Conversion failed:', err);
-      alert('Error during order conversion. Please try again.');
+      showToast('Error during order conversion. Please try again.');
     } finally {
       setConvertingId(null);
     }
@@ -475,15 +475,15 @@ export default function AdminQuotesPage() {
   const handleCreateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newQuoteData.companyName.trim()) {
-      alert('Please enter the Company / Organization Name.');
+      showToast('Please enter the Company / Organization Name.');
       return;
     }
     if (!newQuoteData.contactEmail.trim()) {
-      alert('Please enter a valid Contact Email.');
+      showToast('Please enter a valid Contact Email.');
       return;
     }
     if (newQuoteData.items.length === 0) {
-      alert('Please add at least one line item to the quotation.');
+      showToast('Please add at least one line item to the quotation.');
       return;
     }
 
@@ -529,11 +529,11 @@ export default function AdminQuotesPage() {
         setIsNewQuoteModalOpen(false);
         fetchQuotes();
       } else {
-        alert(data.error?.message || 'Failed to submit quote.');
+        showToast(data.error?.message || 'Failed to submit quote.');
       }
     } catch (err) {
       console.error('Failed to create quote:', err);
-      alert('Network error while creating corporate quotation.');
+      showToast('Network error while creating corporate quotation.');
     } finally {
       setSubmittingQuote(false);
     }

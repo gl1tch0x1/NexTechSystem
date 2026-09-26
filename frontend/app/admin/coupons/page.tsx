@@ -38,6 +38,12 @@ export default function AdminCouponsPage() {
   const [featuredCode, setFeaturedCode] = useState('TECH10');
   const [isSavingBannerSettings, setIsSavingBannerSettings] = useState(false);
   const [bannerSaveSuccess, setBannerSaveSuccess] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', text: string) => {
+    setToastMessage({ type, text });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,7 +92,6 @@ export default function AdminCouponsPage() {
       }
 
       if (settingsData.status === 'fulfilled' && settingsData.value) {
-        
         setIsBannerActive(settingsData.value.isLandingDiscountBannerActive !== false);
         setFeaturedCode(settingsData.value.featuredLandingCouponCode || 'TECH10');
       }
@@ -100,7 +105,6 @@ export default function AdminCouponsPage() {
       }
     } catch (err) {
       console.error('Error loading coupon admin data:', err);
-    } finally {
     }
   };
 
@@ -118,7 +122,7 @@ export default function AdminCouponsPage() {
       await ApiClient.put(
         '/admin/settings',
         {
-          isLandingDiscountBannerActive: newActiveActiveState(newActiveState),
+          isLandingDiscountBannerActive: newActiveState,
           featuredLandingCouponCode: codeToUse,
         },
         { token }
@@ -130,16 +134,15 @@ export default function AdminCouponsPage() {
       }
 
       setBannerSaveSuccess(true);
+      showToast('success', `Landing promotional banner ${newActiveState ? 'activated' : 'paused'} with code ${codeToUse}`);
       setTimeout(() => setBannerSaveSuccess(false), 2500);
     } catch (err: any) {
       console.error('Failed to update landing banner settings:', err);
-      alert(err.message || 'Failed to update landing discount banner settings.');
+      showToast('error', err.message || 'Failed to update landing discount banner settings.');
     } finally {
       setIsSavingBannerSettings(false);
     }
   };
-
-  const newActiveActiveState = (state: boolean) => state;
 
   const openCreateModal = () => {
     setIsEditing(false);
@@ -251,9 +254,10 @@ export default function AdminCouponsPage() {
     try {
       await ApiClient.delete(`/admin/coupons/${id}`, { token });
       setIsDeleting(null);
+      showToast('success', 'Coupon successfully removed from catalog.');
       fetchData();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete coupon.');
+      showToast('error', err.message || 'Failed to delete coupon.');
     }
   };
 
@@ -269,6 +273,25 @@ export default function AdminCouponsPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
+      {/* Toast Alert Banner */}
+      {toastMessage && (
+        <div
+          className={`p-4 rounded-2xl border flex items-center justify-between text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-200 ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+              : 'bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-800 text-red-800 dark:text-red-300'
+          }`}
+        >
+          <span>{toastMessage.text}</span>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold ml-3"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>

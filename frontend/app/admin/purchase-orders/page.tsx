@@ -151,7 +151,10 @@ export default function AdminPurchaseOrdersPage() {
       setReceivingPo(null);
       fetchPOs();
     } catch (err: any) {
-      alert(err.message || 'Failed to process PO receipt');
+      setStatusMessage({
+        type: 'error',
+        text: err.message || 'Failed to process PO receipt',
+      });
     } finally {
       setIsReceivingSubmit(false);
     }

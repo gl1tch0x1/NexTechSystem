@@ -833,7 +833,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
     if (!newOptionName.trim()) return;
     const name = newOptionName.trim();
     if (formData.variantOptions.some(o => o.name.toLowerCase() === name.toLowerCase())) {
-      alert('An option with this name already exists.');
+      setFormError('An option with this name already exists.');
       return;
     }
     setFormData(prev => ({
@@ -880,7 +880,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
   const handleGenerateVariants = () => {
     const validOptions = formData.variantOptions.filter(o => o.values.length > 0);
     if (validOptions.length === 0) {
-      alert('Please define at least one variant option with values (e.g. RAM, Storage).');
+      setFormError('Please define at least one variant option with values (e.g. RAM, Storage).');
       return;
     }
 

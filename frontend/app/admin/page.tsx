@@ -25,7 +25,8 @@ import {
   ArrowUpRight,
   BarChart3,
   RefreshCw,
-  Server
+  Server,
+  ChevronRight
 } from 'lucide-react';
 import {
   AreaChart,
@@ -45,6 +46,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [chartMode, setChartMode] = useState<'revenue' | 'orders'>('revenue');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [orderFilter, setOrderFilter] = useState<'ALL' | 'DELIVERED' | 'PROCESSING' | 'PENDING'>('ALL');
 
   const fetchMetrics = async () => {
     if (!token) return;
@@ -68,9 +70,9 @@ export default function AdminDashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[65vh]">
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 border-3 border-tech-blue border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-10 h-10 border-2 border-slate-900 dark:border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-mono tracking-tight">
-            Connecting to Database Telemetry & Computing Metrics...
+            Syncing Enterprise Telemetry & Ledgers...
           </p>
         </div>
       </div>
@@ -97,7 +99,7 @@ export default function AdminDashboardPage() {
   const salesSummary = metrics?.salesSummary || {
     totalSalesRevenue: revenueTotal,
     totalSalesCount: ordersTotal,
-    totalUnitsSold: recentOrders.reduce((sum: number, o: any) => sum + (o.itemsCount || 0), 0) || 12,
+    totalUnitsSold: recentOrders.reduce((sum: number, o: any) => sum + (o.itemsCount || 0), 0) || 55,
     averageSaleValue: aov,
     completedOrders: ordersDelivered,
     pendingOrders: ordersPending,
@@ -114,100 +116,102 @@ export default function AdminDashboardPage() {
     averagePOCost: 68000,
   };
 
-  const profitabilitySummary = metrics?.profitabilitySummary || {
-    grossMargin: Math.round((revenueTotal - (purchasesSummary.totalPurchaseSpend || 272000)) * 100) / 100,
-    grossMarginPercentage: 28.5,
-    salesToPurchaseRatio: 1.34,
-  };
+  // Filter low stock items to hide junk/sample reject test items if wanted
+  const rawLowStock = metrics?.inventory?.lowStockItems || [];
+  const filteredLowStock = rawLowStock.filter((item: any) => !item.name?.toLowerCase().includes('sample'));
+  const displayLowStock = filteredLowStock.length > 0 ? filteredLowStock : rawLowStock.slice(0, 3);
 
-  const recentPurchases = metrics?.recentPurchases || [];
+  // Filter orders for table
+  const displayedOrders = recentOrders.filter((ord: any) => {
+    if (orderFilter === 'ALL') return true;
+    if (orderFilter === 'DELIVERED') return ord.orderStatus === 'DELIVERED';
+    if (orderFilter === 'PROCESSING') return ord.orderStatus === 'PROCESSING' || ord.orderStatus === 'CONFIRMED';
+    if (orderFilter === 'PENDING') return ord.orderStatus === 'PENDING';
+    return true;
+  });
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto transition-colors duration-200 pb-12">
-      {/* Page Title & Quick Actions Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+    <div className="space-y-6 max-w-7xl mx-auto transition-colors duration-200 pb-12">
+      {/* Top Header & Executive Toolbar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200/80 dark:border-slate-800/80">
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-mono font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[11px] font-mono font-medium text-slate-500 dark:text-slate-400 mb-1">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Live Node.js Telemetry Connected</span>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <span>GCC Operations Hub</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-            <span>Master Operations Dashboard</span>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            Master Operations Dashboard
           </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
-            Real-time global hardware catalog telemetry, database-backed inventory valuation, fulfillment pipeline, and automated commerce ledgers.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 max-w-2xl leading-relaxed">
+            Consolidated hardware catalog metrics, multi-tenant reseller streams, and real-time inventory ledgers.
           </p>
         </div>
 
-        {/* Action Dock */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Action Toolbar */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0">
           <button
             type="button"
             onClick={fetchMetrics}
             disabled={isRefreshing}
-            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-xl text-xs flex items-center gap-2 transition-all disabled:opacity-50"
+            className="h-9 px-3.5 bg-white dark:bg-slate-800/90 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-xs border border-slate-200 dark:border-slate-700/70 flex items-center gap-2 transition-all shadow-2xs disabled:opacity-50"
             title="Refresh database metrics"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-tech-blue' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-400 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
             <span>Refresh</span>
           </button>
 
           <Link
             href="/admin/analytics"
-            className="px-4 py-2.5 bg-gradient-to-r from-tech-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-tech flex items-center gap-2 transition-all group"
+            className="h-9 px-3.5 bg-white dark:bg-slate-800/90 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-xs border border-slate-200 dark:border-slate-700/70 flex items-center gap-2 transition-all shadow-2xs group"
           >
-            <BarChart3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            <BarChart3 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>Deep Analytics</span>
           </Link>
 
           <Link
-            href="/admin/products"
-            className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold rounded-xl text-xs shadow-sm flex items-center gap-2 transition-all"
+            href="/admin/resellers"
+            className="h-9 px-3.5 bg-white dark:bg-slate-800/90 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-xs border border-slate-200 dark:border-slate-700/70 flex items-center gap-2 transition-all shadow-2xs"
           >
-            <Plus className="w-4 h-4 text-tech-cyan" />
-            <span>Add Hardware SKU</span>
+            <Store className="w-3.5 h-3.5 text-amber-500" />
+            <span>Manage Resellers</span>
           </Link>
 
           <Link
-            href="/admin/resellers"
-            className="px-4 py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold rounded-xl text-xs border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 transition-all"
+            href="/admin/products"
+            className="h-9 px-4 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold rounded-xl text-xs shadow-xs flex items-center gap-2 transition-all"
           >
-            <Store className="w-4 h-4 text-amber-500" />
-            <span>Manage Resellers</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Hardware SKU</span>
           </Link>
         </div>
       </div>
 
-      {/* 4 Core Dynamic KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* 4 Core Executive KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Gross Platform Revenue */}
-        <div className="rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-sm hover:shadow-xl hover:border-emerald-500/40 dark:hover:border-emerald-500/40 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80" />
+        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between pb-3">
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  GROSS PLATFORM REVENUE
-                </span>
-                <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                  <span>Database Ledger (AED)</span>
-                </div>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform font-bold font-mono">
-                د.إ
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
+                GROSS PLATFORM REVENUE
+              </span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-center font-bold text-xs font-mono">
+                AED
               </div>
             </div>
 
-            <div className="my-2">
-              <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight flex items-baseline gap-1.5">
-                <span className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">AED</span>
-                <span>{revenueTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <div className="my-1.5">
+              <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                <span className="text-xs text-slate-400 mr-1.5 font-normal">AED</span>
+                {revenueTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>
 
             <div className="flex items-center gap-2 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold font-mono border border-emerald-500/20">
-                <TrendingUp className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
+                <TrendingUp className="w-3 h-3" />
                 {growthPercentage > 0 ? `+${growthPercentage}%` : 'Stable'}
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
@@ -218,87 +222,75 @@ export default function AdminDashboardPage() {
 
           <Link
             href="/admin/analytics"
-            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-bold text-tech-blue dark:text-tech-cyan flex items-center justify-between group-hover:text-blue-500 transition-colors"
+            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-between transition-colors"
           >
-            <span>Deep Analytics Breakdown</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            <span>Revenue breakdown</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
         {/* Card 2: Commercial Orders Processed */}
-        <div className="rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-sm hover:shadow-xl hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-80" />
+        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between pb-3">
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  ORDERS PROCESSED
-                </span>
-                <div className="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold">
-                  <span>Fulfillment Pipeline</span>
-                </div>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                <ShoppingBag className="w-5 h-5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
+                ORDERS PROCESSED
+              </span>
+              <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/40 flex items-center justify-center">
+                <ShoppingBag className="w-3.5 h-3.5" />
               </div>
             </div>
 
-            <div className="my-2">
-              <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight flex items-baseline gap-2">
-                <span>{ordersTotal}</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">Orders in Database</span>
+            <div className="my-1.5">
+              <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                {ordersTotal}
+                <span className="text-xs text-slate-400 font-sans font-normal ml-2">Total Orders</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold font-mono border border-emerald-500/20">
+            <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
                 <CheckCircle2 className="w-3 h-3" />
                 {ordersDelivered} Delivered
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-bold font-mono border border-amber-500/20">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[11px] font-semibold font-mono border border-blue-200/60 dark:border-blue-800/40">
                 <Clock className="w-3 h-3" />
-                {ordersPending} In Progress
+                {ordersPending} Active
               </span>
             </div>
           </div>
 
           <Link
             href="/admin/orders"
-            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-bold text-tech-blue dark:text-tech-cyan flex items-center justify-between group-hover:text-blue-500 transition-colors"
+            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-between transition-colors"
           >
-            <span>Inspect Global Orders</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            <span>Fulfillment pipeline</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
-        {/* Card 3: Hardware Inventory & Valuation */}
-        <div className="rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-sm hover:shadow-xl hover:border-purple-500/40 dark:hover:border-purple-500/40 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-80" />
+        {/* Card 3: Hardware Inventory */}
+        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between pb-3">
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  HARDWARE CATALOG
-                </span>
-                <div className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold">
-                  <span>Stock Assets</span>
-                </div>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                <Package className="w-5 h-5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
+                HARDWARE CATALOG
+              </span>
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/40 flex items-center justify-center">
+                <Package className="w-3.5 h-3.5" />
               </div>
             </div>
 
-            <div className="my-2">
-              <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight flex items-baseline gap-2">
-                <span>{totalProducts}</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">Active SKUs</span>
+            <div className="my-1.5">
+              <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                {totalProducts}
+                <span className="text-xs text-slate-400 font-sans font-normal ml-2">Active SKUs</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[11px] font-bold font-mono border border-purple-500/20">
-                <Boxes className="w-3 h-3" />
+            <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold font-mono border border-slate-200 dark:border-slate-700">
+                <Boxes className="w-3 h-3 text-slate-400" />
                 Valuation: {formatPrice(totalValuation)}
               </span>
             </div>
@@ -306,40 +298,34 @@ export default function AdminDashboardPage() {
 
           <Link
             href="/admin/products"
-            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-bold text-tech-blue dark:text-tech-cyan flex items-center justify-between group-hover:text-purple-500 transition-colors"
+            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-between transition-colors"
           >
-            <span>Catalog & Inventory Control</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            <span>Catalog inventory</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
-        {/* Card 4: Verified Resellers & Partners */}
-        <div className="rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-sm hover:shadow-xl hover:border-amber-500/40 dark:hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500 opacity-80" />
+        {/* Card 4: Reseller Partners */}
+        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between pb-3">
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  RESELLER PARTNERS
-                </span>
-                <div className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold">
-                  <span>B2B Multi-Tenant</span>
-                </div>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                <Store className="w-5 h-5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
+                RESELLER PARTNERS
+              </span>
+              <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40 flex items-center justify-center">
+                <Store className="w-3.5 h-3.5" />
               </div>
             </div>
 
-            <div className="my-2">
-              <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight flex items-baseline gap-2">
-                <span>{totalResellers}</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">Partner Stores</span>
+            <div className="my-1.5">
+              <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                {totalResellers}
+                <span className="text-xs text-slate-400 font-sans font-normal ml-2">Partner Stores</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-bold font-mono border border-amber-500/20">
+            <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
                 <Zap className="w-3 h-3" />
                 {activeResellers} Verified Active
               </span>
@@ -348,147 +334,124 @@ export default function AdminDashboardPage() {
 
           <Link
             href="/admin/resellers"
-            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-bold text-tech-blue dark:text-tech-cyan flex items-center justify-between group-hover:text-amber-500 transition-colors"
+            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-between transition-colors"
           >
-            <span>Reseller Network Hub</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            <span>Partner network</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>
 
-      {/* Hardware Stock Health Alert Widget */}
+      {/* Stock Health Notification Banner */}
       {(lowStockCount > 0 || outOfStockCount > 0) && (
-        <div className="rounded-3xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 p-5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                <AlertTriangle className="w-5 h-5" />
+        <div className="rounded-2xl bg-amber-500/5 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-900/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-900 dark:text-white">
+                Inventory Threshold Notice: {outOfStockCount + lowStockCount} SKUs Require Restock
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Hardware Stock Attention Required ({outOfStockCount + lowStockCount} SKUs)
-                </h3>
-                <p className="text-xs text-amber-700 dark:text-amber-300/80">
-                  {outOfStockCount > 0 && `${outOfStockCount} items are completely out of stock. `}
-                  {lowStockCount > 0 && `${lowStockCount} items have reached low stock threshold.`}
-                </p>
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {outOfStockCount > 0 ? `${outOfStockCount} zero-stock items` : ''}
+                  {outOfStockCount > 0 && lowStockCount > 0 ? ' and ' : ''}
+                  {lowStockCount > 0 ? `${lowStockCount} low-stock SKUs` : ''}
+                </span>
+                {displayLowStock.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 pl-1">
+                    {displayLowStock.map((it: any) => (
+                      <span
+                        key={it.id}
+                        className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 font-mono text-[10px] font-semibold border border-amber-500/20"
+                      >
+                        {it.sku || it.name}: {it.stock} left
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-            <Link
-              href="/admin/products"
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shrink-0 transition-colors self-start sm:self-auto shadow-sm"
-            >
-              Restock in Product Manager
-            </Link>
           </div>
 
-          {/* Quick SKU restock list */}
-          {metrics?.inventory?.lowStockItems && metrics.inventory.lowStockItems.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-2 border-t border-amber-200/60 dark:border-amber-900/40">
-              {metrics.inventory.lowStockItems.map((item: any) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-amber-200/70 dark:border-amber-800/40 text-xs"
-                >
-                  <div className="min-w-0 pr-2">
-                    <div className="font-bold text-slate-900 dark:text-white truncate">{item.name}</div>
-                    <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400">{item.sku}</div>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded font-mono font-bold text-[11px] shrink-0 ${
-                    item.stock === 0
-                      ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
-                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                  }`}>
-                    {item.stock} left
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <Link
+            href="/admin/products"
+            className="h-8 px-3.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold shrink-0 transition-colors flex items-center justify-center gap-1.5 shadow-2xs self-start sm:self-auto"
+          >
+            <span>Manage Inventory</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
         </div>
       )}
 
-      {/* Dedicated Commercial Sales & Inbound Procurement Intelligence */}
-      <div className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-md space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+      {/* Commercial Ledgers & Financial Intelligence */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-2xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800/70">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider mb-1">
-              <span className="w-2 h-2 rounded-full bg-tech-blue animate-pulse"></span>
-              <span>Commercial Ledgers & Financial Intelligence</span>
+            <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+              <span>Financial Intelligence</span>
+              <span>•</span>
+              <span>Ledgers & Balance Flow</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-              <span>Customer Sales Data & Supplier Procurement Data</span>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+              Customer Sales vs Supplier Procurement Ledgers
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              Consolidated operational intelligence tracking customer retail & B2B sales versus wholesale supplier procurement spend.
-            </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/admin/orders"
-              className="px-3.5 py-2 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold rounded-xl text-xs border border-blue-200 dark:border-blue-800/60 flex items-center gap-1.5 transition-all"
+              className="h-8 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs border border-slate-200/70 dark:border-slate-700/60 flex items-center gap-1.5 transition-all"
             >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Sales Orders ({salesSummary.totalSalesCount})</span>
+              <ShoppingBag className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Sales ({salesSummary.totalSalesCount})</span>
             </Link>
             <Link
               href="/admin/purchase-orders"
-              className="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-bold rounded-xl text-xs border border-indigo-200 dark:border-indigo-800/60 flex items-center gap-1.5 transition-all"
+              className="h-8 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs border border-slate-200/70 dark:border-slate-700/60 flex items-center gap-1.5 transition-all"
             >
-              <Server className="w-3.5 h-3.5" />
+              <Server className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span>Purchase Orders ({purchasesSummary.totalPurchaseCount})</span>
             </Link>
           </div>
         </div>
 
-        {/* 3 Executive Pillars: Sales Data | Procurement Data | Gross Profitability */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Pillar 1: Customer Sales Data (4 cols) */}
-          <div className="lg:col-span-4 rounded-2xl bg-gradient-to-br from-blue-50/70 via-white to-cyan-50/40 dark:from-blue-950/20 dark:via-slate-900 dark:to-cyan-950/20 border border-blue-200/80 dark:border-blue-800/50 p-5 space-y-4 flex flex-col justify-between">
+        {/* 3 Unified Financial Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Pillar 1: Customer Sales */}
+          <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/80 p-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 font-mono flex items-center gap-1.5">
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>Customer Sales Data</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                  <ShoppingBag className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>Outbound Sales</span>
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[10px] font-bold font-mono">
-                  Outgoing Sales
+                <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold font-mono">
+                  Realized
                 </span>
               </div>
 
               <div>
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+                <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono">
                   {formatPrice(salesSummary.totalSalesRevenue)}
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                  Total Customer Sales Revenue
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Total Customer Sales Volume
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-blue-100 dark:border-blue-900/40 text-xs">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/50 text-xs">
                 <div>
-                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Total Sales</div>
-                  <div className="text-base font-black font-mono text-slate-900 dark:text-white">
-                    {salesSummary.totalSalesCount} <span className="text-[10px] font-normal text-slate-400">orders</span>
+                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Orders</div>
+                  <div className="text-sm font-bold font-mono text-slate-900 dark:text-white">
+                    {salesSummary.totalSalesCount}
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Units Sold</div>
-                  <div className="text-base font-black font-mono text-blue-600 dark:text-blue-400">
-                    {salesSummary.totalUnitsSold} <span className="text-[10px] font-normal text-slate-400">items</span>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Average Sale</div>
-                  <div className="text-xs font-bold font-mono text-slate-800 dark:text-slate-200">
-                    {formatPrice(salesSummary.averageSaleValue)}
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Completed</div>
-                  <div className="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                    {salesSummary.completedOrders} delivered
+                  <div className="text-sm font-bold font-mono text-blue-600 dark:text-blue-400">
+                    {salesSummary.totalUnitsSold} items
                   </div>
                 </div>
               </div>
@@ -496,58 +459,46 @@ export default function AdminDashboardPage() {
 
             <Link
               href="/admin/orders"
-              className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm mt-3"
+              className="mt-3 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/50"
             >
-              <span>Explore All Customer Sales ({salesSummary.totalSalesCount})</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Explore customer sales orders</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
-          {/* Pillar 2: Supplier Purchase Data (4 cols) */}
-          <div className="lg:col-span-4 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/20 dark:via-slate-900 dark:to-purple-950/20 border border-indigo-200/80 dark:border-indigo-800/50 p-5 space-y-4 flex flex-col justify-between">
+          {/* Pillar 2: Supplier Procurement */}
+          <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/80 p-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-400 font-mono flex items-center gap-1.5">
-                  <Server className="w-3.5 h-3.5" />
-                  <span>Supplier Purchase Data</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                  <Server className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <span>Wholesale Procurement</span>
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold font-mono">
-                  Inbound Wholesale
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold font-mono">
+                  Inbound
                 </span>
               </div>
 
               <div>
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+                <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono">
                   {formatPrice(purchasesSummary.totalPurchaseSpend)}
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                  Total Wholesale Procurement Spend
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Wholesale Procurement Spend
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-100 dark:border-indigo-900/40 text-xs">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/50 text-xs">
                 <div>
-                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Total POs</div>
-                  <div className="text-base font-black font-mono text-slate-900 dark:text-white">
-                    {purchasesSummary.totalPurchaseCount} <span className="text-[10px] font-normal text-slate-400">orders</span>
+                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Purchase Orders</div>
+                  <div className="text-sm font-bold font-mono text-slate-900 dark:text-white">
+                    {purchasesSummary.totalPurchaseCount} POs
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Procured Units</div>
-                  <div className="text-base font-black font-mono text-indigo-600 dark:text-indigo-400">
-                    {purchasesSummary.totalUnitsPurchased} <span className="text-[10px] font-normal text-slate-400">items</span>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Warehouse Stocked</div>
-                  <div className="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                    {purchasesSummary.receivedPOCount} POs ({formatPrice(purchasesSummary.receivedSpend)})
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">In-Transit / Pending</div>
-                  <div className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400">
-                    {purchasesSummary.pendingPOCount} POs ({formatPrice(purchasesSummary.pendingSpend)})
+                  <div className="text-sm font-bold font-mono text-indigo-600 dark:text-indigo-400">
+                    {purchasesSummary.totalUnitsPurchased} items
                   </div>
                 </div>
               </div>
@@ -555,188 +506,83 @@ export default function AdminDashboardPage() {
 
             <Link
               href="/admin/purchase-orders"
-              className="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm mt-3"
+              className="mt-3 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/50"
             >
-              <span>Explore All Purchase Orders ({purchasesSummary.totalPurchaseCount})</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Explore supplier purchase orders</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
-          {/* Pillar 3: Net Profitability & Spread (4 cols) */}
-          <div className="lg:col-span-4 rounded-2xl bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 dark:from-emerald-950/20 dark:via-slate-900 dark:to-teal-950/20 border border-emerald-200/80 dark:border-emerald-800/50 p-5 space-y-4 flex flex-col justify-between">
+          {/* Pillar 3: Net Capital & Operating Spread */}
+          <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/80 p-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-mono flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Merchandise Gross Margin</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>Capital Allocation</span>
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold font-mono">
-                  Sales vs Purchases P&L
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold font-mono">
+                  Catalog Assets
                 </span>
               </div>
 
               <div>
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
-                  {formatPrice(profitabilitySummary.grossMargin)}
+                <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono">
+                  {formatPrice(totalValuation)}
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                  Gross Merchandise Profit Spread
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Total Active Inventory Valuation
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-emerald-100 dark:border-emerald-900/40">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">Gross Margin Ratio:</span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-                    {profitabilitySummary.grossMarginPercentage}%
-                  </span>
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/50 text-xs">
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Stocked Warehouse</div>
+                  <div className="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400 truncate">
+                    {formatPrice(purchasesSummary.receivedSpend)}
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">Revenue / Spend Multiplier:</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white">
-                    {profitabilitySummary.salesToPurchaseRatio}x
-                  </span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mt-2">
-                  <div
-                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(10, profitabilitySummary.grossMarginPercentage))}%` }}
-                  />
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">In-Transit Buffer</div>
+                  <div className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400 truncate">
+                    {formatPrice(purchasesSummary.pendingSpend)}
+                  </div>
                 </div>
               </div>
             </div>
 
             <Link
               href="/admin/analytics"
-              className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm mt-3"
+              className="mt-3 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/50"
             >
-              <span>View Commercial Analytics</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>View balance telemetry</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
-          </div>
-        </div>
-
-        {/* Dual Stream Table: Latest Sales Orders vs Latest Purchase Orders */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-          {/* Recent Sales Orders */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <ShoppingBag className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                <span>Recent Customer Sales Transactions</span>
-              </h3>
-              <Link href="/admin/orders" className="text-[11px] font-bold text-tech-blue hover:underline">
-                View All Sales ({salesSummary.totalSalesCount}) →
-              </Link>
-            </div>
-
-            {recentOrders.length > 0 ? (
-              <div className="space-y-2">
-                {recentOrders.slice(0, 4).map((o: any) => (
-                  <div
-                    key={o.id}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between text-xs hover:border-blue-400 transition-colors"
-                  >
-                    <div className="min-w-0 pr-2">
-                      <div className="font-mono font-bold text-blue-600 dark:text-blue-400 truncate">
-                        {o.orderNumber || o.id.slice(0, 8)}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        {o.customerName} • {o.itemsCount} units
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white">
-                        {formatPrice(o.total)}
-                      </div>
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold font-mono ${
-                        o.orderStatus === 'DELIVERED'
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
-                      }`}>
-                        {o.orderStatus}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-xs text-slate-400 py-4 text-center font-mono">No sales orders registered yet.</div>
-            )}
-          </div>
-
-          {/* Recent Supplier Purchase Orders */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <Server className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                <span>Recent Supplier Purchase Orders</span>
-              </h3>
-              <Link href="/admin/purchase-orders" className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                View All POs ({purchasesSummary.totalPurchaseCount}) →
-              </Link>
-            </div>
-
-            {recentPurchases.length > 0 ? (
-              <div className="space-y-2">
-                {recentPurchases.slice(0, 4).map((po: any) => (
-                  <div
-                    key={po.id}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between text-xs hover:border-indigo-400 transition-colors"
-                  >
-                    <div className="min-w-0 pr-2">
-                      <div className="font-mono font-bold text-indigo-600 dark:text-indigo-400 truncate">
-                        {po.poNumber}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        {po.supplierName} • {po.totalUnits} units procured
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white">
-                        {formatPrice(po.totalCost)}
-                      </div>
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold font-mono ${
-                        po.status === 'RECEIVED'
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : po.status === 'ISSUED'
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-                          : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
-                      }`}>
-                        {po.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-xs text-slate-400 py-4 text-center font-mono">No purchase orders registered yet.</div>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Interactive Sales & Order Telemetry Chart */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+      {/* Telemetry Chart: Live Sales & Fulfillment Volume */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/70">
           <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-tech-blue dark:text-tech-cyan" />
-              <span>Live Sales & Fulfillment Volume Telemetry</span>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Live Sales & Order Velocity Telemetry</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Daily revenue velocity and transaction throughput computed from live orders database.
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Daily revenue velocity and transaction throughput computed from live database records.
             </p>
           </div>
 
           {/* Toggle View Mode */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 self-start sm:self-auto">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/60 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setChartMode('revenue')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 chartMode === 'revenue'
-                  ? 'bg-white dark:bg-slate-900 text-tech-blue dark:text-tech-cyan shadow-sm'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -745,9 +591,9 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={() => setChartMode('orders')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 chartMode === 'orders'
-                  ? 'bg-white dark:bg-slate-900 text-tech-blue dark:text-tech-cyan shadow-sm'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -757,14 +603,14 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Chart View */}
-        <div className="w-full h-72">
+        <div className="w-full h-64 sm:h-72">
           {salesChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               {chartMode === 'revenue' ? (
                 <AreaChart data={salesChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4} />
+                      <stop offset="5%" stopColor="#2563EB" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
@@ -799,7 +645,7 @@ export default function AdminDashboardPage() {
                     type="monotone"
                     dataKey="revenue"
                     stroke="#2563EB"
-                    strokeWidth={3}
+                    strokeWidth={2.5}
                     fillOpacity={1}
                     fill="url(#revenueGrad)"
                   />
@@ -846,42 +692,42 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Two-Column Mid Section: Category Distribution & Top Hardware SKUs */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left: Component Category Allocation */}
-        <div className="lg:col-span-6 p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 space-y-6 shadow-sm">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="lg:col-span-6 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/70">
             <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Layers className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
-                Category Volume & Allocation
+              <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <Layers className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                Category Volume Allocation
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Live SKU balance across catalog component taxonomy</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Live SKU balance across taxonomy</p>
             </div>
             <Link
               href="/admin/categories"
-              className="text-xs font-bold text-tech-blue dark:text-tech-cyan hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
             >
               <span>Manage</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <ArrowUpRight className="w-3 h-3" />
             </Link>
           </div>
 
-          <div className="space-y-3.5 max-h-[360px] overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
             {Object.keys(byCategory).length > 0 ? (
               Object.entries(byCategory).map(([catName, count]: any) => {
                 const total = totalProducts || 1;
                 const pct = Math.round((count / total) * 100);
                 return (
-                  <div key={catName} className="space-y-1.5">
+                  <div key={catName} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-800 dark:text-slate-200">{catName}</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{catName}</span>
                       <span className="text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                         {count} SKUs ({pct}%)
                       </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-tech-blue to-tech-cyan"
+                        className="h-full rounded-full bg-blue-600 dark:bg-blue-500"
                         style={{ width: `${Math.max(6, pct)}%` }}
                       />
                     </div>
@@ -895,45 +741,45 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Right: Top Performing Hardware SKUs */}
-        <div className="lg:col-span-6 p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 space-y-5 shadow-sm">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="lg:col-span-6 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/70">
             <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-500" />
+              <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <Award className="w-3.5 h-3.5 text-amber-500" />
                 Top Performing Hardware SKUs
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Ranked by revenue contribution & unit volume</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Ranked by revenue contribution</p>
             </div>
             <Link
               href="/admin/products"
-              className="text-xs font-bold text-tech-blue dark:text-tech-cyan hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
             >
               <span>Catalog</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <ArrowUpRight className="w-3 h-3" />
             </Link>
           </div>
 
-          <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
             {topProducts.length > 0 ? (
               topProducts.map((p: any, idx: number) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 hover:border-tech-blue transition-colors"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-5 h-5 rounded-md bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0">
                       {idx + 1}
                     </span>
                     <div className="min-w-0">
-                      <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                      <div className="font-semibold text-xs text-slate-900 dark:text-white truncate">
                         {p.name}
                       </div>
                       <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                        {formatPrice(p.price)} • {p.stock} units in stock
+                        {formatPrice(p.price)} • {p.stock} in stock
                       </div>
                     </div>
                   </div>
-                  <div className="text-right shrink-0 pl-3">
+                  <div className="text-right shrink-0 pl-2">
                     <div className="text-xs font-mono font-bold text-slate-900 dark:text-white">
                       {p.revenue > 0 ? formatPrice(p.revenue) : `${p.unitsSold || 0} sold`}
                     </div>
@@ -950,45 +796,55 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Recent Commercial Orders & Fulfillment Stream */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-5">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+      {/* Recent Commercial Transactions Table */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/70">
           <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Clock className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
-              <span>Recent Commercial Transactions</span>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Recent Sales Transactions</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Latest client and reseller orders logged in the database ledger.
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Live orders recorded in customer database ledger.
             </p>
           </div>
-          <Link
-            href="/admin/orders"
-            className="text-xs font-bold text-tech-blue dark:text-tech-cyan hover:underline flex items-center gap-1"
-          >
-            <span>View All Orders</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
+
+          {/* Filter Pills */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+            {(['ALL', 'DELIVERED', 'PROCESSING', 'PENDING'] as const).map((status) => (
+              <button
+                key={status}
+                onClick={() => setOrderFilter(status)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                  orderFilter === status
+                    ? 'bg-slate-900 text-white dark:bg-blue-600 dark:text-white shadow-2xs'
+                    : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {status === 'ALL' ? 'All Orders' : status.charAt(0) + status.slice(1).toLowerCase()}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {recentOrders.length > 0 ? (
+        {displayedOrders.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                  <th className="pb-3 font-bold">Order ID</th>
-                  <th className="pb-3 font-bold">Customer / Org</th>
-                  <th className="pb-3 font-bold">Items</th>
-                  <th className="pb-3 font-bold">Amount</th>
-                  <th className="pb-3 font-bold">Fulfillment Status</th>
-                  <th className="pb-3 font-bold">Date</th>
-                  <th className="pb-3 font-bold text-right">Action</th>
+                <tr className="border-b border-slate-200/80 dark:border-slate-800/80 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="pb-2.5 font-bold">Order Number</th>
+                  <th className="pb-2.5 font-bold">Customer</th>
+                  <th className="pb-2.5 font-bold">Items</th>
+                  <th className="pb-2.5 font-bold">Amount</th>
+                  <th className="pb-2.5 font-bold">Fulfillment Status</th>
+                  <th className="pb-2.5 font-bold">Date</th>
+                  <th className="pb-2.5 font-bold text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                {recentOrders.map((ord: any) => (
-                  <tr key={ord.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 font-mono font-bold text-tech-blue dark:text-tech-cyan">
+                {displayedOrders.map((ord: any) => (
+                  <tr key={ord.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 font-mono font-semibold text-blue-600 dark:text-blue-400">
                       {ord.orderNumber || ord.id.slice(0, 10)}
                     </td>
                     <td className="py-3 font-medium text-slate-900 dark:text-slate-100">
@@ -1001,7 +857,7 @@ export default function AdminDashboardPage() {
                       {formatPrice(ord.total)}
                     </td>
                     <td className="py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold ${
                         ord.orderStatus === 'DELIVERED'
                           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                           : ord.orderStatus === 'CANCELLED'
@@ -1017,7 +873,7 @@ export default function AdminDashboardPage() {
                     <td className="py-3 text-right">
                       <Link
                         href="/admin/orders"
-                        className="text-tech-blue dark:text-tech-cyan hover:underline font-bold text-[11px]"
+                        className="text-blue-600 dark:text-blue-400 hover:underline font-semibold text-[11px]"
                       >
                         Inspect →
                       </Link>
@@ -1029,87 +885,87 @@ export default function AdminDashboardPage() {
           </div>
         ) : (
           <div className="text-center py-8 text-xs text-slate-400 font-mono">
-            No transaction records found in database. Place a test order through the storefront to populate the live ledger.
+            No transaction records match the selected filter.
           </div>
         )}
       </div>
 
-      {/* Executive Quick Links Module */}
-      <div className="p-6 rounded-3xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-        <h2 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+      {/* Administrative Modules Quick Links */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80">
+        <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono mb-3">
           Administrative Modules
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
           <Link
             href="/admin/orders"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <ShoppingBag className="w-5 h-5 mx-auto mb-1.5 text-blue-600 group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Sales Orders</div>
-            <div className="text-[10px] text-slate-500">{salesSummary.totalSalesCount} orders</div>
+            <ShoppingBag className="w-4 h-4 mx-auto mb-1 text-blue-600 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Orders</div>
+            <div className="text-[10px] text-slate-400 font-mono">{salesSummary.totalSalesCount} active</div>
           </Link>
 
           <Link
             href="/admin/purchase-orders"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <Server className="w-5 h-5 mx-auto mb-1.5 text-indigo-600 group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Purchase Orders</div>
-            <div className="text-[10px] text-slate-500">{purchasesSummary.totalPurchaseCount} POs</div>
+            <Server className="w-4 h-4 mx-auto mb-1 text-indigo-600 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Purchase Orders</div>
+            <div className="text-[10px] text-slate-400 font-mono">{purchasesSummary.totalPurchaseCount} POs</div>
           </Link>
 
           <Link
             href="/admin/products"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-tech-blue text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <Package className="w-5 h-5 mx-auto mb-1.5 text-tech-blue group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Hardware SKUs</div>
-            <div className="text-[10px] text-slate-500">{totalProducts} active</div>
+            <Package className="w-4 h-4 mx-auto mb-1 text-emerald-600 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Hardware SKUs</div>
+            <div className="text-[10px] text-slate-400 font-mono">{totalProducts} SKUs</div>
           </Link>
 
           <Link
             href="/admin/categories"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-tech-blue text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <Layers className="w-5 h-5 mx-auto mb-1.5 text-blue-500 group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Taxonomy</div>
-            <div className="text-[10px] text-slate-500">13 categories</div>
+            <Layers className="w-4 h-4 mx-auto mb-1 text-blue-500 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Taxonomy</div>
+            <div className="text-[10px] text-slate-400 font-mono">13 categories</div>
           </Link>
 
           <Link
             href="/admin/brands"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-tech-blue text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <Award className="w-5 h-5 mx-auto mb-1.5 text-emerald-500 group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Vendors & Brands</div>
-            <div className="text-[10px] text-slate-500">19 brands</div>
+            <Award className="w-4 h-4 mx-auto mb-1 text-amber-500 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Vendors</div>
+            <div className="text-[10px] text-slate-400 font-mono">19 brands</div>
           </Link>
 
           <Link
             href="/admin/customers"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-tech-blue text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <Users className="w-5 h-5 mx-auto mb-1.5 text-purple-500 group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Clients & Wallets</div>
-            <div className="text-[10px] text-slate-500">Credit ledger</div>
+            <Users className="w-4 h-4 mx-auto mb-1 text-purple-500 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Clients</div>
+            <div className="text-[10px] text-slate-400 font-mono">Wallets</div>
           </Link>
 
           <Link
             href="/admin/coupons"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-tech-blue text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <Tag className="w-5 h-5 mx-auto mb-1.5 text-amber-500 group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Coupons & Promos</div>
-            <div className="text-[10px] text-slate-500">Discounts</div>
+            <Tag className="w-4 h-4 mx-auto mb-1 text-rose-500 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Coupons</div>
+            <div className="text-[10px] text-slate-400 font-mono">Discounts</div>
           </Link>
 
           <Link
             href="/admin/audit-logs"
-            className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-tech-blue text-center group transition-all"
+            className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-center group transition-all"
           >
-            <Activity className="w-5 h-5 mx-auto mb-1.5 text-pink-500 group-hover:scale-110 transition-transform" />
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Security Audit</div>
-            <div className="text-[10px] text-slate-500">Access logs</div>
+            <Activity className="w-4 h-4 mx-auto mb-1 text-slate-600 group-hover:scale-105 transition-transform" />
+            <div className="text-xs font-semibold text-slate-900 dark:text-white">Security</div>
+            <div className="text-[10px] text-slate-400 font-mono">Audit logs</div>
           </Link>
         </div>
       </div>

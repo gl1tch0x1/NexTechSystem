@@ -16,7 +16,7 @@ import {
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, convertPrice, currentCurrency } = useCurrency();
   const [justAdded, setJustAdded] = useState(false);
   const inWishlist = isInWishlist(product.id);
 
@@ -27,6 +27,12 @@ export function ProductCard({ product }: { product: Product }) {
     : 0;
 
   const isOutOfStock = product.stock === 0;
+
+  const convertedPrice = convertPrice(price);
+  const formattedPriceAmount = convertedPrice.toLocaleString('en-US', {
+    minimumFractionDigits: currentCurrency.decimals,
+    maximumFractionDigits: currentCurrency.decimals,
+  });
 
   // Extract key technical spec values with intelligent label formatting
   const specEntries = Object.entries(product.specifications || {}).slice(0, 3).map(([key, val]) => {
@@ -72,12 +78,9 @@ export function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 hover:border-tech-blue/50 dark:hover:border-cyan-500/40 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1">
-      {/* Visual Ambient Glow on Hover */}
-      <div className="absolute -top-20 -right-20 w-44 h-44 bg-tech-blue/10 dark:bg-cyan-500/10 rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity duration-500 pointer-events-none" />
-
+    <div className="group relative bg-white dark:bg-[#0B101D] rounded-2xl border border-slate-200/90 dark:border-slate-800/90 hover:border-blue-500/60 dark:hover:border-cyan-500/50 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1">
       {/* Top Image Stage Container */}
-      <div className="relative aspect-[4/3] w-full bg-gradient-to-b from-slate-900 to-slate-950 p-2.5 sm:p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
+      <div className="relative aspect-[4/3] w-full bg-gradient-to-b from-slate-900 to-slate-950 p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         {/* Top Badges (Left) */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
           {discountPercent > 0 && (
@@ -104,7 +107,7 @@ export function ProductCard({ product }: { product: Product }) {
           className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
             inWishlist
               ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-500 border border-rose-200 dark:border-rose-800 shadow-xs scale-105'
-              : 'bg-slate-900/70 hover:bg-slate-900 text-slate-300 hover:text-rose-400 border border-white/10 backdrop-blur-xs shadow-2xs'
+              : 'bg-slate-900/75 hover:bg-slate-900 text-slate-300 hover:text-rose-400 border border-white/10 backdrop-blur-xs shadow-2xs'
           }`}
           title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
@@ -116,21 +119,21 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={displayImage}
             alt={product.name}
-            className="w-full h-full object-cover filter drop-shadow-sm group-hover:scale-105 transition-transform duration-500 rounded-lg"
+            className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-104 transition-transform duration-500"
           />
         </Link>
       </div>
 
       {/* Details Container */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3.5 bg-white dark:bg-slate-900">
-        <div className="space-y-2.5">
+      <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-white dark:bg-[#0B101D]">
+        <div className="space-y-2">
           {/* Brand & Category Row */}
           <div className="flex items-center justify-between gap-2 text-[11px] h-5 leading-none">
-            <span className="font-mono font-bold text-[10px] tracking-wider text-tech-blue dark:text-cyan-400 uppercase bg-tech-blue/10 dark:bg-cyan-500/10 px-2 py-0.5 rounded-md border border-tech-blue/15 dark:border-cyan-500/20 shrink-0">
+            <span className="font-mono font-bold text-[10px] tracking-wider text-blue-600 dark:text-cyan-400 uppercase bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200/60 dark:border-blue-800/50 shrink-0">
               {cleanBrandName}
             </span>
             {product.categoryName && (
-              <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px] truncate text-right">
+              <span className="text-slate-400 dark:text-slate-400 font-medium text-[11px] truncate text-right">
                 {product.categoryName}
               </span>
             )}
@@ -139,18 +142,18 @@ export function ProductCard({ product }: { product: Product }) {
           {/* Product Name (Crisp font-heading with 2-line clamped height for perfect grid alignment) */}
           <Link
             href={`/products/${product.slug}`}
-            className="font-heading text-sm font-bold text-slate-900 dark:text-white line-clamp-2 h-10 group-hover:text-tech-blue dark:group-hover:text-cyan-400 transition-colors leading-snug block"
+            className="font-heading text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white line-clamp-2 min-h-[36px] group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors leading-snug block"
             title={product.name}
           >
             {product.name}
           </Link>
 
-          {/* Technical Specs Tags (Fixed uniform height for flawless row alignment across cards) */}
-          <div className="h-11 overflow-hidden flex flex-wrap content-start items-center gap-1.5 pt-0.5">
-            {specEntries.map(({ key, label }) => (
+          {/* Technical Specs Tags (Uniform height for row alignment across cards) */}
+          <div className="h-6 overflow-hidden flex items-center gap-1.5">
+            {specEntries.slice(0, 3).map(({ key, label }) => (
               <span
                 key={key}
-                className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate max-w-[155px] border border-slate-200/60 dark:border-slate-700/60"
+                className="text-[9.5px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 truncate max-w-[120px] border border-slate-200/60 dark:border-slate-700/60"
                 title={`${key}: ${label}`}
               >
                 {label}
@@ -158,8 +161,8 @@ export function ProductCard({ product }: { product: Product }) {
             ))}
           </div>
 
-          {/* Ratings Row */}
-          <div className="flex items-center justify-between text-xs pt-0.5">
+          {/* Ratings & Stock Row */}
+          <div className="flex items-center justify-between text-xs pt-0.5 h-5">
             <div className="flex items-center gap-1.5">
               <div className="flex items-center text-amber-400">
                 <Star className="w-3.5 h-3.5 fill-current" />
@@ -167,7 +170,7 @@ export function ProductCard({ product }: { product: Product }) {
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-mono">
                 {(product.rating || 4.9).toFixed(1)}
               </span>
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[10px] text-slate-400 font-mono">
                 ({product.reviewCount || 18})
               </span>
             </div>
@@ -177,7 +180,7 @@ export function ProductCard({ product }: { product: Product }) {
                 Sold Out
               </span>
             ) : (
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
+              <span className="text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 In Stock
               </span>
@@ -185,32 +188,39 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
-        {/* Pricing & Add to Cart Action Bar */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-end justify-between gap-2 mt-auto">
-          <div className="min-w-0">
-            <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight leading-none whitespace-nowrap">
-              {formatPrice(price)}
+        {/* Pricing & Add to Cart Action Bar - Perfectly Aligned */}
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2.5 mt-auto">
+          <div className="min-w-0 flex flex-col justify-center">
+            <div className="flex items-baseline gap-1 whitespace-nowrap">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                {currentCurrency.symbol}
+              </span>
+              <span className="text-base sm:text-[17px] font-bold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
+                {formattedPriceAmount}
+              </span>
             </div>
-            {originalPrice && originalPrice > price ? (
-              <div className="text-[11px] text-slate-400 line-through font-mono mt-1 whitespace-nowrap">
-                {formatPrice(originalPrice)}
-              </div>
-            ) : (
-              <div className="text-[10px] text-slate-400 font-medium mt-1 whitespace-nowrap">
-                Inc. 5% UAE VAT
-              </div>
-            )}
+            <div className="h-4 flex items-center mt-1">
+              {originalPrice && originalPrice > price ? (
+                <span className="text-[10.5px] text-slate-400 dark:text-slate-500 line-through font-mono leading-none">
+                  {formatPrice(originalPrice)}
+                </span>
+              ) : (
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-none">
+                  Official GCC Warranty
+                </span>
+              )}
+            </div>
           </div>
 
           <button
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
+            className={`h-9 px-3.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center gap-1.5 shadow-xs ${
               isOutOfStock
                 ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
                 : justAdded
-                ? 'bg-emerald-600 text-white shadow-emerald-500/20 scale-102'
-                : 'bg-tech-blue hover:bg-blue-600 text-white shadow-tech-blue/20 hover:shadow-md active:scale-95'
+                ? 'bg-emerald-600 text-white shadow-emerald-500/25 scale-102'
+                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-md active:scale-95'
             }`}
           >
             {justAdded ? (

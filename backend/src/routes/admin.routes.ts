@@ -67,6 +67,7 @@ router.delete('/banners/:id', (req, res, next) => adminController.deleteBanner(r
 
 // 10. Settings, Profile & Audit
 router.get('/profile', (req, res, next) => adminController.getAdminProfile(req, res).catch(next));
+router.put('/credentials', (req, res, next) => adminController.updateAdminCredentials(req, res).catch(next));
 router.get('/settings', (req, res, next) => adminController.getSettings(req, res).catch(next));
 router.put('/settings', (req, res, next) => adminController.updateSettings(req, res).catch(next));
 router.get('/audit-logs', (req, res, next) => adminController.getAuditLogs(req, res).catch(next));

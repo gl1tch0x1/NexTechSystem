@@ -86,61 +86,47 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
   return (
     <section className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-slate-200/90 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/90 dark:border-slate-800">
         <div>
-          <div className="text-xs font-mono uppercase font-bold tracking-wider text-tech-blue dark:text-cyan-400 flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 bg-tech-blue/10 dark:bg-cyan-500/10 text-tech-blue dark:text-cyan-400 px-2.5 py-1 rounded-full border border-tech-blue/20 dark:border-cyan-500/20">
-              <Boxes className="w-3.5 h-3.5" />
-              Verified Stock Matrix
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 text-[11px] font-sans font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              GCC Logistics Online
-            </span>
-          </div>
-          <h2 className="font-heading text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Enterprise Hardware & Component Catalog
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xl mt-1 leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-2xl mt-1 leading-relaxed">
             Engineered for mission-critical datacenter, high-performance computing (HPC), and workstation architectures with verified local UAE pool availability.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="text-right">
-            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Catalog Pool</div>
-            <div className="text-sm font-black text-slate-900 dark:text-white font-mono">{products.length} Active SKUs</div>
-          </div>
-          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
-          <div className="text-right">
-            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">GCC Pool</div>
-            <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">100% In-Region</div>
-          </div>
-        </div>
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-blue-600 dark:text-cyan-400 hover:text-blue-700 dark:hover:text-cyan-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/40 transition-all shrink-0 w-fit"
+        >
+          <span>View All Products</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
-      {/* Control Bar: Ant Design Segmented Tabs + Search + Sort */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800/90 shadow-lg shadow-slate-200/30 dark:shadow-2xl">
-        {/* Segmented Tab Controls */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-1 flex-1 min-w-0 bg-slate-100/70 dark:bg-slate-950/60 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
+      {/* Control Bar: Professional Category Tabs + Search + Sort */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+        {/* Category Segmented Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-2 bg-slate-100/90 dark:bg-slate-900/90 rounded-xl border border-slate-200/80 dark:border-slate-800 shrink-0">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 activeTab === id
-                  ? 'bg-tech-blue text-white shadow-xs'
+                  ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${activeTab === id ? 'text-white' : 'text-slate-400'}`} />
+              <Icon className={`w-3.5 h-3.5 shrink-0 ${activeTab === id ? 'text-white' : 'text-slate-400'}`} />
               <span>{label}</span>
             </button>
           ))}
         </div>
 
         {/* Search & Sort Widgets */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full xl:w-auto shrink-0 px-1">
+        <div className="flex items-center gap-2.5 shrink-0">
           {/* Quick Search Input */}
           <div className="relative flex-1 sm:flex-initial">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -149,7 +135,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
               placeholder="Search components..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 w-full sm:w-44 lg:w-48 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue dark:focus:border-cyan-400 transition-colors"
+              className="pl-8 pr-3 py-1.5 w-full sm:w-44 lg:w-48 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors shadow-2xs"
             />
           </div>
 
@@ -157,7 +143,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="py-1.5 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none font-medium cursor-pointer w-full sm:w-auto transition-colors"
+            className="py-1.5 px-3 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none font-semibold cursor-pointer transition-colors shadow-2xs"
           >
             <option value="FEATURED">Featured First</option>
             <option value="PRICE_ASC">Price: Low to High</option>

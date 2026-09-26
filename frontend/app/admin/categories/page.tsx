@@ -28,6 +28,12 @@ export default function AdminCategoriesPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', text: string) => {
+    setToastMessage({ type, text });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   // Form
   const [formData, setFormData] = useState({
@@ -100,8 +106,10 @@ export default function AdminCategoriesPage() {
 
       if (isEditing && selectedCategory) {
         await ApiClient.put(`/admin/categories/${selectedCategory.id}`, payload, { token });
+        showToast('success', 'Category updated successfully.');
       } else {
         await ApiClient.post('/admin/categories', payload, { token });
+        showToast('success', 'New category created successfully.');
       }
 
       setIsModalOpen(false);
@@ -118,9 +126,10 @@ export default function AdminCategoriesPage() {
     try {
       await ApiClient.delete(`/admin/categories/${id}`, { token });
       setIsDeleting(null);
+      showToast('success', 'Category deleted successfully.');
       fetchCategories();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete category.');
+      showToast('error', err.message || 'Failed to delete category.');
     }
   };
 
@@ -130,7 +139,26 @@ export default function AdminCategoriesPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Toast Alert Banner */}
+      {toastMessage && (
+        <div
+          className={`p-4 rounded-2xl border flex items-center justify-between text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-200 ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+              : 'bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-800 text-red-800 dark:text-red-300'
+          }`}
+        >
+          <span>{toastMessage.text}</span>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold ml-3"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>

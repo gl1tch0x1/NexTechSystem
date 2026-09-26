@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, sanitizeCsvField } from '@/lib/utils';
-import CloudflareShieldBadge from '@/components/security/CloudflareShieldBadge';
 import {
   TrendingUp,
   ShoppingBag,
@@ -710,9 +709,6 @@ export default function AdminAnalyticsPage() {
           </div>
         </div>
       </div>
-
-      {/* Cloudflare Edge CDN & DDoS Defense Telemetry Footer */}
-      <CloudflareShieldBadge />
     </div>
   );
 }

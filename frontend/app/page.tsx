@@ -82,7 +82,7 @@ export default async function HomePage() {
   const getSection = (id: string) => sections?.find(s => s.id === id);
 
   return (
-    <div className="space-y-16 pb-20 transition-colors duration-200">
+    <div className="space-y-10 sm:space-y-12 pb-16 transition-colors duration-200">
       {/* 1. HERO SHOWCASE WITH DYNAMIC HUD PREVIEW & SPEC RADAR */}
       {isEnabled('hero') && (
         <HeroShowcase products={products} highlights={content?.heroHighlights} />
@@ -94,7 +94,7 @@ export default async function HomePage() {
       )}
 
       {/* MAIN CONTAINER FOR STRUCTURED SECTIONS */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
         {/* 3. PROMOTIONAL VOUCHER BANNER (1-Click Copy TECH10 / Dynamic Coupon) */}
         {isEnabled('deals_banner') && content?.storeSettings?.isLandingDiscountBannerActive !== false && content?.activeCoupon && (
           <VoucherClaimBanner activeCoupon={content.activeCoupon} />
