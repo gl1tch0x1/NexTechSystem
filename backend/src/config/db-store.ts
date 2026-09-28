@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getFirestore } from './firebase.js';
+import { mongoDb } from './mongodb.js';
 import { ENV } from './env.js';
 import { DbSnapshot } from '../types/index.js';
 
@@ -38,6 +39,43 @@ function resolveDataDir(): string {
 }
 
 const DATA_DIR = resolveDataDir();
+
+function buildMongoFilter(where?: QueryFilter['where']): any {
+  if (!where || where.length === 0) return {};
+  const filter: any = {};
+  for (const cond of where) {
+    const field = cond.field as string;
+    switch (cond.operator) {
+      case '==':
+        filter[field] = cond.value;
+        break;
+      case '!=':
+        filter[field] = { $ne: cond.value };
+        break;
+      case '>':
+        filter[field] = { $gt: cond.value };
+        break;
+      case '>=':
+        filter[field] = { $gte: cond.value };
+        break;
+      case '<':
+        filter[field] = { $lt: cond.value };
+        break;
+      case '<=':
+        filter[field] = { $lte: cond.value };
+        break;
+      case 'in':
+        filter[field] = { $in: Array.isArray(cond.value) ? cond.value : [cond.value] };
+        break;
+      case 'array-contains':
+        filter[field] = cond.value;
+        break;
+      default:
+        filter[field] = cond.value;
+    }
+  }
+  return filter;
+}
 
 export class DbStore {
   private static instance: DbStore;
@@ -108,6 +146,16 @@ export class DbStore {
     } catch (err) {
       console.error('[DbStore] Error clearing collection %s:', collectionName, err);
     }
+
+    // Async clear in MongoDB if connected
+    if (mongoDb.isConnected()) {
+      const col = mongoDb.getCollection(collectionName);
+      if (col) {
+        col.deleteMany({}).catch((err: any) => {
+          console.warn(`[MongoDB] Clear error for ${collectionName}:`, err?.message);
+        });
+      }
+    }
   }
 
   private getCollectionMap(name: string): Map<string, any> {
@@ -131,23 +179,17 @@ export class DbStore {
   }
 
   // --- Firestore Cloud Synchronization Handlers ---
-
   private async syncDocToFirestore(collection: string, id: string, data: any) {
     if (!ENV.ENABLE_FIRESTORE_SYNC) return;
     try {
       const db = getFirestore();
       if (db) {
-        // Sanitize object for Firestore (remove undefined, preserve clean JSON)
         const cleanData = JSON.parse(JSON.stringify(data));
         await db.collection(collection).doc(id).set(cleanData, { merge: true });
       }
     } catch (err: any) {
-      // Non-blocking background log for Firestore sync
       if (process.env.DEBUG_FIRESTORE) {
-        const cleanCol = String(collection).replace(/[\r\n]/g, '');
-        const cleanId = String(id).replace(/[\r\n]/g, '');
-        const cleanErr = String(err?.message || err).replace(/[\r\n]/g, '');
-        console.warn('[Firestore Sync Notice] %s/%s: %s', cleanCol, cleanId, cleanErr);
+        console.warn('[Firestore Sync Notice] %s/%s: %s', collection, id, err?.message || err);
       }
     }
   }
@@ -161,24 +203,97 @@ export class DbStore {
       }
     } catch (err: any) {
       if (process.env.DEBUG_FIRESTORE) {
-        const cleanCol = String(collection).replace(/[\r\n]/g, '');
-        const cleanId = String(id).replace(/[\r\n]/g, '');
-        const cleanErr = String(err?.message || err).replace(/[\r\n]/g, '');
-        console.warn('[Firestore Delete Notice] %s/%s: %s', cleanCol, cleanId, cleanErr);
+        console.warn('[Firestore Delete Notice] %s/%s: %s', collection, id, err?.message || err);
       }
     }
   }
 
+  // --- MongoDB Operations ---
+  private async syncDocToMongo(collection: string, id: string, data: any) {
+    if (!mongoDb.isConnected()) return;
+    try {
+      const col = mongoDb.getCollection(collection);
+      if (col) {
+        const cleanData = JSON.parse(JSON.stringify(data));
+        delete cleanData._id;
+        await col.updateOne({ id }, { $set: cleanData }, { upsert: true });
+      }
+    } catch (err: any) {
+      console.warn(`[MongoDB Sync Notice] ${collection}/${id}:`, err?.message || err);
+    }
+  }
 
-  // --- Core CRUD Operations with Dual Cloud Sync ---
+  private async deleteDocFromMongo(collection: string, id: string) {
+    if (!mongoDb.isConnected()) return;
+    try {
+      const col = mongoDb.getCollection(collection);
+      if (col) {
+        await col.deleteOne({ id });
+      }
+    } catch (err: any) {
+      console.warn(`[MongoDB Delete Notice] ${collection}/${id}:`, err?.message || err);
+    }
+  }
 
+  // --- Core CRUD Operations ---
   public async findById<T = any>(collection: string, id: string): Promise<T | null> {
+    // 1. If MongoDB is connected, attempt to read directly from MongoDB
+    if (mongoDb.isConnected()) {
+      try {
+        const col = mongoDb.getCollection(collection);
+        if (col) {
+          const doc = await col.findOne({ id }, { projection: { _id: 0 } });
+          if (doc) {
+            // Keep local memory store warm with retrieved record
+            const map = this.getCollectionMap(collection);
+            map.set(id, doc);
+            return doc as T;
+          }
+        }
+      } catch (err: any) {
+        console.warn(`[DbStore MongoDB read error on ${collection}]:`, err?.message);
+      }
+    }
+
+    // 2. Resilient memory/disk fallback
     const map = this.getCollectionMap(collection);
     const item = map.get(id);
     return item ? (JSON.parse(JSON.stringify(item)) as T) : null;
   }
 
   public async find<T = any>(collection: string, query?: QueryFilter<T>): Promise<T[]> {
+    // 1. If MongoDB is connected, query MongoDB with projection, sorting & limits
+    if (mongoDb.isConnected()) {
+      try {
+        const col = mongoDb.getCollection(collection);
+        if (col) {
+          const filter = buildMongoFilter(query?.where);
+          let cursor = col.find(filter, { projection: { _id: 0 } });
+
+          if (query?.orderBy) {
+            const dir = query.orderBy.direction === 'asc' ? 1 : -1;
+            cursor = cursor.sort({ [query.orderBy.field as string]: dir });
+          }
+
+          if (query?.offset && query.offset > 0) {
+            cursor = cursor.skip(query.offset);
+          }
+
+          if (query?.limit && query.limit > 0) {
+            cursor = cursor.limit(query.limit);
+          }
+
+          const docs = await cursor.toArray();
+          if (docs && docs.length > 0) {
+            return docs as T[];
+          }
+        }
+      } catch (err: any) {
+        console.warn(`[DbStore MongoDB query error on ${collection}]:`, err?.message);
+      }
+    }
+
+    // 2. Resilient memory/disk fallback with filter pipeline
     const map = this.getCollectionMap(collection);
     let items = Array.from(map.values()).map(it => JSON.parse(JSON.stringify(it)));
 
@@ -218,11 +333,7 @@ export class DbStore {
         if (valA === valB) return 0;
         if (valA == null) return direction === 'asc' ? -1 : 1;
         if (valB == null) return direction === 'asc' ? 1 : -1;
-        if (direction === 'asc') {
-          return valA > valB ? 1 : -1;
-        } else {
-          return valA < valB ? 1 : -1;
-        }
+        return direction === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
       });
     }
 
@@ -242,8 +353,9 @@ export class DbStore {
     const copy = JSON.parse(JSON.stringify(item));
     map.set(item.id, copy);
     this.persistCollection(collection);
-    
-    // Asynchronous Cloud Firestore Sync
+
+    // Asynchronous Dual Cloud Persistence (MongoDB + Firestore)
+    this.syncDocToMongo(collection, item.id, copy).catch(() => {});
     this.syncDocToFirestore(collection, item.id, copy).catch(() => {});
 
     return item;
@@ -261,7 +373,8 @@ export class DbStore {
     map.set(id, updated);
     this.persistCollection(collection);
 
-    // Asynchronous Cloud Firestore Sync
+    // Asynchronous Dual Cloud Persistence (MongoDB + Firestore)
+    this.syncDocToMongo(collection, id, updated).catch(() => {});
     this.syncDocToFirestore(collection, id, updated).catch(() => {});
 
     return updated as T;
@@ -272,12 +385,24 @@ export class DbStore {
     const existed = map.delete(id);
     if (existed) {
       this.persistCollection(collection);
+      this.deleteDocFromMongo(collection, id).catch(() => {});
       this.deleteDocFromFirestore(collection, id).catch(() => {});
     }
     return existed;
   }
 
   public async count<T = any>(collection: string, query?: QueryFilter<T>): Promise<number> {
+    if (mongoDb.isConnected()) {
+      try {
+        const col = mongoDb.getCollection(collection);
+        if (col) {
+          const filter = buildMongoFilter(query?.where);
+          return await col.countDocuments(filter);
+        }
+      } catch (err: any) {
+        console.warn(`[DbStore MongoDB count error on ${collection}]:`, err?.message);
+      }
+    }
     const results = await this.find(collection, query);
     return results.length;
   }
@@ -286,12 +411,133 @@ export class DbStore {
     return await fn(this);
   }
 
+  // --- Enterprise MongoDB Synchronization & Seeding ---
+  public async syncAllToMongo(): Promise<{ success: boolean; collectionsSynced: number; totalRecords: number }> {
+    if (!mongoDb.isConnected()) {
+      throw new Error('MongoDB is not currently connected. Please verify cluster accessibility & IP allowlist in Atlas.');
+    }
+
+    this.loadFromDisk();
+    const db = mongoDb.getDb();
+    if (!db) throw new Error('MongoDB database instance is null.');
+
+    let collectionsSynced = 0;
+    let totalRecords = 0;
+
+    // Collect all collections from disk and memory
+    const colNames = new Set<string>();
+    if (fs.existsSync(DATA_DIR)) {
+      const files = fs.readdirSync(DATA_DIR);
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          colNames.add(file.replace(/\.json$/, ''));
+        }
+      }
+    }
+    for (const key of this.collections.keys()) {
+      colNames.add(key);
+    }
+
+    for (const colName of colNames) {
+      const map = this.getCollectionMap(colName);
+      const items = Array.from(map.values());
+      if (items.length === 0) continue;
+
+      const mongoCollection = db.collection(colName);
+
+      // Perform bulk upsert operations
+      const operations = items.map(item => {
+        const copy = JSON.parse(JSON.stringify(item));
+        delete copy._id;
+        return {
+          updateOne: {
+            filter: { id: item.id },
+            update: { $set: copy },
+            upsert: true,
+          }
+        };
+      });
+
+      if (operations.length > 0) {
+        await mongoCollection.bulkWrite(operations, { ordered: false });
+        collectionsSynced++;
+        totalRecords += items.length;
+      }
+    }
+
+    console.log(`✅ [MongoDB Sync] Synced ${collectionsSynced} collections (${totalRecords} records) to MongoDB Atlas.`);
+    return { success: true, collectionsSynced, totalRecords };
+  }
+
+  public async syncToMongoIfEmpty(): Promise<void> {
+    if (!mongoDb.isConnected()) return;
+    try {
+      const productCol = mongoDb.getCollection('products');
+      if (productCol) {
+        const count = await productCol.countDocuments({});
+        if (count === 0) {
+          console.log('📦 [MongoDB Bootstrapper] MongoDB database is currently empty. Synchronizing full enterprise catalog...');
+          await this.syncAllToMongo();
+        }
+      }
+    } catch (err: any) {
+      console.warn('[MongoDB Bootstrapper Notice]:', err?.message);
+    }
+  }
+
+  public async syncAllFromMongo(): Promise<{ success: boolean; collectionsSynced: number; totalRecords: number }> {
+    if (!mongoDb.isConnected()) {
+      throw new Error('MongoDB is not currently connected.');
+    }
+    const db = mongoDb.getDb();
+    if (!db) throw new Error('MongoDB database instance is null.');
+
+    const collections = await db.listCollections().toArray();
+    let collectionsSynced = 0;
+    let totalRecords = 0;
+
+    for (const colInfo of collections) {
+      const colName = colInfo.name;
+      const mongoCol = db.collection(colName);
+      const docs = await mongoCol.find({}, { projection: { _id: 0 } }).toArray();
+
+      const map = new Map<string, any>();
+      for (const doc of docs) {
+        if (doc && doc.id) {
+          map.set(doc.id, doc);
+        }
+      }
+
+      this.collections.set(colName, map);
+      this.persistCollection(colName);
+      collectionsSynced++;
+      totalRecords += map.size;
+    }
+
+    return { success: true, collectionsSynced, totalRecords };
+  }
+
+  public getStorageStats() {
+    this.loadFromDisk();
+    const stats: Record<string, number> = {};
+    let total = 0;
+    for (const [colName, map] of this.collections.entries()) {
+      stats[colName] = map.size;
+      total += map.size;
+    }
+    return {
+      totalRecords: total,
+      collectionsCount: this.collections.size,
+      collections: stats,
+      mongoConnected: mongoDb.isConnected(),
+    };
+  }
+
   public exportAll(): DbSnapshot {
     this.loadFromDisk();
     const allCollections: Record<string, any[]> = {};
     let totalRecords = 0;
 
-    // Discover all JSON files in DATA_DIR to ensure completeness
     try {
       if (fs.existsSync(DATA_DIR)) {
         const files = fs.readdirSync(DATA_DIR);
@@ -308,7 +554,6 @@ export class DbStore {
       console.error('Error reading DATA_DIR during backup export:', err);
     }
 
-    // Include any in-memory collections
     for (const [colName, map] of this.collections.entries()) {
       if (!allCollections[colName]) {
         const items = Array.from(map.values());
@@ -367,6 +612,13 @@ export class DbStore {
         restoredCollections.push(colName);
         totalRecords += map.size;
       }
+    }
+
+    // If MongoDB is connected, also mirror snapshot into MongoDB
+    if (mongoDb.isConnected()) {
+      this.syncAllToMongo().catch((err: any) => {
+        console.warn('[MongoDB Import Sync Notice]:', err?.message);
+      });
     }
 
     return {

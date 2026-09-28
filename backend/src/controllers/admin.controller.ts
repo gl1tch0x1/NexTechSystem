@@ -16,6 +16,7 @@ import { orderRepository } from '../repositories/order.repository.js';
 import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
 import { bentoFeatureRepo } from '../repositories/content.repository.js';
 import { dbStore } from '../config/db-store.js';
+import { mongoDb } from '../config/mongodb.js';
 import { auditService } from '../services/audit.service.js';
 import { ENV } from '../config/env.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -1030,6 +1031,65 @@ export class AdminController {
       details: { featureId: id },
     });
     res.json({ success: true, message: 'Feature deleted successfully.' });
+  }
+
+  // ==========================================
+  // 15. DATABASE & MONGODB CLOUD REPLICATION
+  // ==========================================
+  async getDatabaseStatus(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    const mongoStatus = await mongoDb.getStatus();
+    const storageStats = dbStore.getStorageStats();
+    res.json({
+      success: true,
+      data: {
+        mongo: mongoStatus,
+        storage: storageStats,
+        engine: mongoStatus.connected ? 'MongoDB Atlas Enterprise ReplicaSet' : 'Local Enterprise Fault-Tolerant Store',
+        fallbackActive: !mongoStatus.connected,
+      }
+    });
+  }
+
+  async syncToMongo(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const result = await dbStore.syncAllToMongo();
+      await auditService.log({
+        action: 'UPDATE',
+        resource: 'DATABASE',
+        userId: req.user?.id || 'admin',
+        userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+        userRole: 'ADMIN',
+        details: { action: 'SYNC_TO_MONGO', result },
+      });
+      res.json({
+        success: true,
+        message: `Successfully synchronized ${result.collectionsSynced} collections (${result.totalRecords} records) to MongoDB Atlas.`,
+        data: result,
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: { message: err?.message || 'Sync to MongoDB failed' } });
+    }
+  }
+
+  async syncFromMongo(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const result = await dbStore.syncAllFromMongo();
+      await auditService.log({
+        action: 'UPDATE',
+        resource: 'DATABASE',
+        userId: req.user?.id || 'admin',
+        userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+        userRole: 'ADMIN',
+        details: { action: 'SYNC_FROM_MONGO', result },
+      });
+      res.json({
+        success: true,
+        message: `Successfully restored ${result.collectionsSynced} collections (${result.totalRecords} records) from MongoDB Atlas.`,
+        data: result,
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: { message: err?.message || 'Sync from MongoDB failed' } });
+    }
   }
 }
 

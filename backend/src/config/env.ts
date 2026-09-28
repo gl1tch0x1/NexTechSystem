@@ -61,5 +61,11 @@ export const ENV = {
   // Admin & Security Defaults
   ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || '',
   PASSWORD_SALT: process.env.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026',
+  // MongoDB Enterprise Cloud Database
+  MONGODB_URI: process.env.MONGODB_URI || '',
+  MONGODB_USERNAME: process.env.MONGODB_USERNAME || '',
+  MONGODB_PASSWORD: process.env.MONGODB_PASSWORD || '',
+  MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || 'nextech_ecommerce',
+  ENABLE_MONGODB: Boolean(process.env.MONGODB_URI) && process.env.ENABLE_MONGODB !== 'false',
 };
 

@@ -91,4 +91,9 @@ router.post('/cms/features', (req, res, next) => adminController.createBentoFeat
 router.put('/cms/features/:id', (req, res, next) => adminController.updateBentoFeature(req, res).catch(next));
 router.delete('/cms/features/:id', (req, res, next) => adminController.deleteBentoFeature(req, res).catch(next));
 
+// 15. MongoDB Enterprise Database & Telemetry
+router.get('/database/status', (req, res, next) => adminController.getDatabaseStatus(req, res).catch(next));
+router.post('/database/sync-to-mongo', (req, res, next) => adminController.syncToMongo(req, res).catch(next));
+router.post('/database/sync-from-mongo', (req, res, next) => adminController.syncFromMongo(req, res).catch(next));
+
 export default router;
