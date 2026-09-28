@@ -43,15 +43,13 @@ const nextConfig = {
         },
       ];
     }
-    if (process.env.NODE_ENV === 'development') {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'http://localhost:5000/api/:path*',
-        },
-      ];
-    }
-    return [];
+    // Fallback to local backend in all environments (prevents 404s for any new backend routes)
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:5000/api/:path*',
+      },
+    ];
   },
   async headers() {
     return [
