@@ -224,13 +224,14 @@ export class DbStore {
     try {
       const col = mongoDb.getCollection(collection);
       if (col) {
-        const cleanDoc: Record<string, any> = JSON.parse(JSON.stringify(data || {}));
-        delete cleanDoc._id;
-        for (const k of Object.keys(cleanDoc)) {
-          if (k.startsWith('$') || k.includes('.') || k === '__proto__' || k === 'constructor' || k === 'prototype') {
-            delete cleanDoc[k];
-          }
-        }
+        const cleanDoc: Record<string, any> = JSON.parse(
+          JSON.stringify(data || {}, (key, val) => {
+            if (key && (key.startsWith('$') || key.includes('.') || key === '_id' || key === '__proto__' || key === 'constructor' || key === 'prototype')) {
+              return undefined;
+            }
+            return val;
+          })
+        );
         cleanDoc.id = safeId;
         await col.replaceOne({ id: { $eq: safeId } } as any, cleanDoc as any, { upsert: true });
       }
