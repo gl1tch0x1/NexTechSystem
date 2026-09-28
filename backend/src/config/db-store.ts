@@ -44,10 +44,15 @@ function buildMongoFilter(where?: QueryFilter['where']): any {
   if (!where || where.length === 0) return {};
   const filter: any = {};
   for (const cond of where) {
-    const field = cond.field as string;
+    const rawField = cond.field as string;
+    if (typeof rawField !== 'string') continue;
+    const field = rawField.replace(/[^a-zA-Z0-9_.-]/g, '');
+    if (!field || field.startsWith('$')) continue;
+
+    // CodeQL (CWE-89 / CWE-943): Use $eq and literal operators to prevent NoSQL query injection
     switch (cond.operator) {
       case '==':
-        filter[field] = cond.value;
+        filter[field] = { $eq: cond.value };
         break;
       case '!=':
         filter[field] = { $ne: cond.value };
@@ -68,10 +73,10 @@ function buildMongoFilter(where?: QueryFilter['where']): any {
         filter[field] = { $in: Array.isArray(cond.value) ? cond.value : [cond.value] };
         break;
       case 'array-contains':
-        filter[field] = cond.value;
+        filter[field] = { $elemMatch: { $eq: cond.value } };
         break;
       default:
-        filter[field] = cond.value;
+        filter[field] = { $eq: cond.value };
     }
   }
   return filter;
@@ -152,7 +157,7 @@ export class DbStore {
       const col = mongoDb.getCollection(collectionName);
       if (col) {
         col.deleteMany({}).catch((err: any) => {
-          console.warn(`[MongoDB] Clear error for ${collectionName}:`, err?.message);
+          console.warn('[MongoDB] Clear error for %s: %s', String(collectionName), err?.message || err);
         });
       }
     }
@@ -216,10 +221,11 @@ export class DbStore {
       if (col) {
         const cleanData = JSON.parse(JSON.stringify(data));
         delete cleanData._id;
-        await col.updateOne({ id }, { $set: cleanData }, { upsert: true });
+        const safeId = typeof id === 'string' ? id : String(id);
+        await col.updateOne({ id: { $eq: safeId } } as any, { $set: cleanData }, { upsert: true });
       }
     } catch (err: any) {
-      console.warn(`[MongoDB Sync Notice] ${collection}/${id}:`, err?.message || err);
+      console.warn('[MongoDB Sync Notice] %s/%s: %s', String(collection), String(id), err?.message || err);
     }
   }
 
@@ -228,10 +234,11 @@ export class DbStore {
     try {
       const col = mongoDb.getCollection(collection);
       if (col) {
-        await col.deleteOne({ id });
+        const safeId = typeof id === 'string' ? id : String(id);
+        await col.deleteOne({ id: { $eq: safeId } } as any);
       }
     } catch (err: any) {
-      console.warn(`[MongoDB Delete Notice] ${collection}/${id}:`, err?.message || err);
+      console.warn('[MongoDB Delete Notice] %s/%s: %s', String(collection), String(id), err?.message || err);
     }
   }
 
@@ -242,16 +249,17 @@ export class DbStore {
       try {
         const col = mongoDb.getCollection(collection);
         if (col) {
-          const doc = await col.findOne({ id }, { projection: { _id: 0 } });
+          const safeId = typeof id === 'string' ? id : String(id);
+          const doc = await col.findOne({ id: { $eq: safeId } } as any, { projection: { _id: 0 } });
           if (doc) {
             // Keep local memory store warm with retrieved record
             const map = this.getCollectionMap(collection);
-            map.set(id, doc);
+            map.set(safeId, doc);
             return doc as T;
           }
         }
       } catch (err: any) {
-        console.warn(`[DbStore MongoDB read error on ${collection}]:`, err?.message);
+        console.warn('[DbStore MongoDB read error on %s]: %s', String(collection), err?.message || err);
       }
     }
 
@@ -289,7 +297,7 @@ export class DbStore {
           }
         }
       } catch (err: any) {
-        console.warn(`[DbStore MongoDB query error on ${collection}]:`, err?.message);
+        console.warn('[DbStore MongoDB query error on %s]: %s', String(collection), err?.message || err);
       }
     }
 
@@ -400,7 +408,7 @@ export class DbStore {
           return await col.countDocuments(filter);
         }
       } catch (err: any) {
-        console.warn(`[DbStore MongoDB count error on ${collection}]:`, err?.message);
+        console.warn('[DbStore MongoDB count error on %s]: %s', String(collection), err?.message || err);
       }
     }
     const results = await this.find(collection, query);
@@ -449,9 +457,10 @@ export class DbStore {
       const operations = items.map(item => {
         const copy = JSON.parse(JSON.stringify(item));
         delete copy._id;
+        const safeId = typeof item.id === 'string' ? item.id : String(item.id);
         return {
           updateOne: {
-            filter: { id: item.id },
+            filter: { id: { $eq: safeId } },
             update: { $set: copy },
             upsert: true,
           }
@@ -465,7 +474,7 @@ export class DbStore {
       }
     }
 
-    console.log(`✅ [MongoDB Sync] Synced ${collectionsSynced} collections (${totalRecords} records) to MongoDB Atlas.`);
+    console.log('✅ [MongoDB Sync] Synced %d collections (%d records) to MongoDB Atlas.', collectionsSynced, totalRecords);
     return { success: true, collectionsSynced, totalRecords };
   }
 
@@ -481,7 +490,7 @@ export class DbStore {
         }
       }
     } catch (err: any) {
-      console.warn('[MongoDB Bootstrapper Notice]:', err?.message);
+      console.warn('[MongoDB Bootstrapper Notice]: %s', err?.message || err);
     }
   }
 
@@ -617,7 +626,7 @@ export class DbStore {
     // If MongoDB is connected, also mirror snapshot into MongoDB
     if (mongoDb.isConnected()) {
       this.syncAllToMongo().catch((err: any) => {
-        console.warn('[MongoDB Import Sync Notice]:', err?.message);
+        console.warn('[MongoDB Import Sync Notice]: %s', err?.message || err);
       });
     }
 
