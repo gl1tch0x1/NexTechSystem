@@ -157,7 +157,7 @@ export class DbStore {
       const col = mongoDb.getCollection(collectionName);
       if (col) {
         col.deleteMany({}).catch((err: any) => {
-          console.warn('[MongoDB] Clear error for %s: %s', String(collectionName), err?.message || err);
+          console.warn('[MongoDB Clear error]:', err?.message || 'Clear error');
         });
       }
     }
@@ -186,6 +186,7 @@ export class DbStore {
   // --- Firestore Cloud Synchronization Handlers ---
   private async syncDocToFirestore(collection: string, id: string, data: any) {
     if (!ENV.ENABLE_FIRESTORE_SYNC) return;
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
     try {
       const db = getFirestore();
       if (db) {
@@ -194,13 +195,14 @@ export class DbStore {
       }
     } catch (err: any) {
       if (process.env.DEBUG_FIRESTORE) {
-        console.warn('[Firestore Sync Notice] %s/%s: %s', collection, id, err?.message || err);
+        console.warn('[Firestore Sync Notice]:', err?.message || 'Sync error');
       }
     }
   }
 
   private async deleteDocFromFirestore(collection: string, id: string) {
     if (!ENV.ENABLE_FIRESTORE_SYNC) return;
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
     try {
       const db = getFirestore();
       if (db) {
@@ -208,7 +210,7 @@ export class DbStore {
       }
     } catch (err: any) {
       if (process.env.DEBUG_FIRESTORE) {
-        console.warn('[Firestore Delete Notice] %s/%s: %s', collection, id, err?.message || err);
+        console.warn('[Firestore Delete Notice]:', err?.message || 'Delete error');
       }
     }
   }
@@ -216,40 +218,54 @@ export class DbStore {
   // --- MongoDB Operations ---
   private async syncDocToMongo(collection: string, id: string, data: any) {
     if (!mongoDb.isConnected()) return;
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
+    const safeId = id;
+
     try {
       const col = mongoDb.getCollection(collection);
       if (col) {
-        const cleanData = JSON.parse(JSON.stringify(data));
-        delete cleanData._id;
-        const safeId = typeof id === 'string' ? id : String(id);
-        await col.updateOne({ id: { $eq: safeId } } as any, { $set: cleanData }, { upsert: true });
+        const cleanDoc: Record<string, any> = {};
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          for (const [key, val] of Object.entries(data)) {
+            if (key === '_id' || key.startsWith('$') || key.includes('.')) continue;
+            cleanDoc[key] = val;
+          }
+        }
+        cleanDoc.id = safeId;
+        await col.replaceOne({ id: { $eq: safeId } } as any, cleanDoc as any, { upsert: true });
       }
     } catch (err: any) {
-      console.warn('[MongoDB Sync Notice] %s/%s: %s', String(collection), String(id), err?.message || err);
+      console.warn('[MongoDB Sync Notice]:', err?.message || 'Sync error');
     }
   }
 
   private async deleteDocFromMongo(collection: string, id: string) {
     if (!mongoDb.isConnected()) return;
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
+    const safeId = id;
+
     try {
       const col = mongoDb.getCollection(collection);
       if (col) {
-        const safeId = typeof id === 'string' ? id : String(id);
         await col.deleteOne({ id: { $eq: safeId } } as any);
       }
     } catch (err: any) {
-      console.warn('[MongoDB Delete Notice] %s/%s: %s', String(collection), String(id), err?.message || err);
+      console.warn('[MongoDB Delete Notice]:', err?.message || 'Delete error');
     }
   }
 
   // --- Core CRUD Operations ---
   public async findById<T = any>(collection: string, id: string): Promise<T | null> {
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) {
+      return null;
+    }
+    const safeId = id;
+
     // 1. If MongoDB is connected, attempt to read directly from MongoDB
     if (mongoDb.isConnected()) {
       try {
         const col = mongoDb.getCollection(collection);
         if (col) {
-          const safeId = typeof id === 'string' ? id : String(id);
           const doc = await col.findOne({ id: { $eq: safeId } } as any, { projection: { _id: 0 } });
           if (doc) {
             // Keep local memory store warm with retrieved record
@@ -259,7 +275,7 @@ export class DbStore {
           }
         }
       } catch (err: any) {
-        console.warn('[DbStore MongoDB read error on %s]: %s', String(collection), err?.message || err);
+        console.warn('[DbStore MongoDB read error]:', err?.message || 'Read error');
       }
     }
 
@@ -297,7 +313,7 @@ export class DbStore {
           }
         }
       } catch (err: any) {
-        console.warn('[DbStore MongoDB query error on %s]: %s', String(collection), err?.message || err);
+        console.warn('[DbStore MongoDB query error]:', err?.message || 'Query error');
       }
     }
 
@@ -408,7 +424,7 @@ export class DbStore {
           return await col.countDocuments(filter);
         }
       } catch (err: any) {
-        console.warn('[DbStore MongoDB count error on %s]: %s', String(collection), err?.message || err);
+        console.warn('[DbStore MongoDB count error]:', err?.message || 'Count error');
       }
     }
     const results = await this.find(collection, query);
