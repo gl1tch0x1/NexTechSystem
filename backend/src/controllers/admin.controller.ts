@@ -634,41 +634,33 @@ export class AdminController {
       return;
     }
 
-    // If changing password, verify current password first
-    if (newPassword) {
-      if (!currentPassword) {
-        res.status(400).json({
-          success: false,
-          error: { code: 'BAD_REQUEST', message: 'Current password is required to set a new password.' },
-        });
-        return;
-      }
+    // Defense against CWE-807 & CWE-290 (CodeQL js/user-controlled-bypass):
+    // Unconditionally require current password verification for any sensitive administrative credential or identity change
+    if (!currentPassword || typeof currentPassword !== 'string' || !currentPassword.trim()) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'BAD_REQUEST', message: 'Current administrator password is required to verify identity before modifying credentials.' },
+      });
+      return;
+    }
 
+    // Unconditionally verify current password against cryptographically stored hash
+    const rawCurrent = String(currentPassword).trim();
+    if (!adminUser.passwordHash || !verifyPassword(rawCurrent, adminUser.passwordHash)) {
+      res.status(403).json({
+        success: false,
+        error: { code: 'INVALID_CREDENTIALS', message: 'Current password verification failed. Access denied.' },
+      });
+      return;
+    }
+
+    // If changing password, validate new password complexity
+    if (newPassword) {
       const strNew = String(newPassword).trim();
       if (strNew.length < 6) {
         res.status(400).json({
           success: false,
           error: { code: 'WEAK_PASSWORD', message: 'New password must be at least 6 characters long.' },
-        });
-        return;
-      }
-
-      const rawCurrent = String(currentPassword);
-      let isValidCurrent = false;
-      if (adminUser.passwordHash) {
-        isValidCurrent =
-          verifyPassword(rawCurrent, adminUser.passwordHash) ||
-          (adminUser.email.toLowerCase() === 'admin@nextech.com' &&
-            (rawCurrent === 'password@123' || rawCurrent === 'admin123')) ||
-          rawCurrent === 'password@123';
-      } else {
-        isValidCurrent = rawCurrent === 'admin123' || rawCurrent === 'password@123';
-      }
-
-      if (!isValidCurrent) {
-        res.status(400).json({
-          success: false,
-          error: { code: 'INVALID_CREDENTIALS', message: 'Current password is incorrect.' },
         });
         return;
       }

@@ -150,14 +150,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
 
+    if (!trimmedCurrentPass) {
+      setCredentialsToast({
+        type: 'error',
+        message: 'Current password is required to verify administrator identity before updating credentials.',
+      });
+      return;
+    }
+
     if (isUpdatingPassword) {
-      if (!trimmedCurrentPass) {
-        setCredentialsToast({
-          type: 'error',
-          message: 'Current password is required to set a new password.',
-        });
-        return;
-      }
       if (trimmedNewPass.length < 6) {
         setCredentialsToast({
           type: 'error',
@@ -544,7 +545,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {/* Current Password */}
                 <div>
                   <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                    Current Password {newPassword ? <span className="text-red-500">*</span> : ''}
+                    Current Password <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
