@@ -47,7 +47,7 @@ function buildMongoFilter(where?: QueryFilter['where']): any {
     const rawField = cond.field as string;
     if (typeof rawField !== 'string') continue;
     const field = rawField.replace(/[^a-zA-Z0-9_.-]/g, '');
-    if (!field || field.startsWith('$')) continue;
+    if (!field || field.startsWith('$') || field === '__proto__' || field === 'constructor' || field === 'prototype') continue;
 
     // CodeQL (CWE-89 / CWE-943): Use $eq and literal operators to prevent NoSQL query injection
     switch (cond.operator) {
@@ -224,11 +224,11 @@ export class DbStore {
     try {
       const col = mongoDb.getCollection(collection);
       if (col) {
-        const cleanDoc: Record<string, any> = {};
-        if (data && typeof data === 'object' && !Array.isArray(data)) {
-          for (const [key, val] of Object.entries(data)) {
-            if (key === '_id' || key.startsWith('$') || key.includes('.')) continue;
-            cleanDoc[key] = val;
+        const cleanDoc: Record<string, any> = JSON.parse(JSON.stringify(data || {}));
+        delete cleanDoc._id;
+        for (const k of Object.keys(cleanDoc)) {
+          if (k.startsWith('$') || k.includes('.') || k === '__proto__' || k === 'constructor' || k === 'prototype') {
+            delete cleanDoc[k];
           }
         }
         cleanDoc.id = safeId;
@@ -295,8 +295,12 @@ export class DbStore {
           let cursor = col.find(filter, { projection: { _id: 0 } });
 
           if (query?.orderBy) {
-            const dir = query.orderBy.direction === 'asc' ? 1 : -1;
-            cursor = cursor.sort({ [query.orderBy.field as string]: dir });
+            const rawSortField = String(query.orderBy.field);
+            const sortField = rawSortField.replace(/[^a-zA-Z0-9_.-]/g, '');
+            if (sortField && !sortField.startsWith('$') && sortField !== '__proto__' && sortField !== 'constructor' && sortField !== 'prototype') {
+              const dir = query.orderBy.direction === 'asc' ? 1 : -1;
+              cursor = cursor.sort({ [sortField]: dir });
+            }
           }
 
           if (query?.offset && query.offset > 0) {
@@ -642,7 +646,7 @@ export class DbStore {
     // If MongoDB is connected, also mirror snapshot into MongoDB
     if (mongoDb.isConnected()) {
       this.syncAllToMongo().catch((err: any) => {
-        console.warn('[MongoDB Import Sync Notice]: %s', err?.message || err);
+        console.warn('[MongoDB Import Sync Notice]:', err?.message || 'Import sync error');
       });
     }
 
