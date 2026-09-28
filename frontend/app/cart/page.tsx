@@ -124,14 +124,14 @@ export default function CartPage() {
                         <ShieldCheck className="w-3 h-3" /> NexTech Official Store
                       </span>
                     )}
-                    <span className="text-[10px] font-mono text-slate-400">SKU: {item.sku}</span>
+                    <span className="text-[10px] font-mono text-slate-400">SKU: {item.sku || 'N/A'}</span>
                   </div>
 
                   <Link
-                    href={`/products/${item.slug}`}
+                    href={`/products/${item.slug || item.productId}`}
                     className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white hover:text-tech-blue dark:hover:text-tech-cyan truncate block transition-colors"
                   >
-                    {item.productName}
+                    {item.productName || 'Hardware Product'}
                   </Link>
 
                   {item.variantTitle && (
@@ -143,7 +143,7 @@ export default function CartPage() {
                   )}
 
                   <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                    {formatPrice(item.salePrice || item.price)} each
+                    {formatPrice((item.salePrice && item.salePrice > 0) ? item.salePrice : (item.price || item.unitPrice || 0))} each
                   </div>
                 </div>
               </div>
@@ -170,7 +170,11 @@ export default function CartPage() {
 
                 <div className="text-right">
                   <div className="text-sm font-black text-slate-900 dark:text-white">
-                    {formatPrice(item.subtotal)}
+                    {formatPrice(
+                      item.subtotal && item.subtotal > 0
+                        ? item.subtotal
+                        : (((item.salePrice && item.salePrice > 0) ? item.salePrice : (item.price || item.unitPrice || 0)) * (item.quantity || 1))
+                    )}
                   </div>
                 </div>
 

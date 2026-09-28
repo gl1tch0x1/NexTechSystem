@@ -38,10 +38,26 @@ const defaultCart: Cart = {
   currency: 'AED',
 };
 
+interface LocalCartItem {
+  productId: string;
+  variantId?: string;
+  quantity: number;
+  productName?: string;
+  sku?: string;
+  slug?: string;
+  image?: string;
+  price?: number;
+  salePrice?: number;
+  unitPrice?: number;
+  sellerType?: string;
+  resellerCode?: string;
+  variantTitle?: string;
+}
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<Array<{ productId: string; variantId?: string; quantity: number }>>([]);
+  const [items, setItems] = useState<LocalCartItem[]>([]);
   const [cartData, setCartData] = useState<Cart>(defaultCart);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [couponCode, setCouponCode] = useState<string>('');
@@ -96,15 +112,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const existingIdx = prev.findIndex(
         i => i.productId === product.id && (i.variantId || undefined) === (vId || undefined)
       );
+      const effectivePrice = selectedVariant?.price ?? product.price ?? 0;
+      const effectiveSalePrice = (selectedVariant as any)?.salePrice ?? selectedVariant?.price ?? product.salePrice ?? effectivePrice;
+      const unitPrice = effectiveSalePrice > 0 ? effectiveSalePrice : effectivePrice;
+      const itemData: LocalCartItem = {
+        productId: product.id,
+        variantId: vId || undefined,
+        quantity: existingIdx >= 0 ? prev[existingIdx].quantity + quantity : quantity,
+        productName: product.name || product.title || '',
+        sku: selectedVariant?.sku || product.sku || '',
+        slug: product.slug || '',
+        image: selectedVariant?.image || product.thumbnail || product.images?.[0] || '',
+        price: effectivePrice,
+        salePrice: effectiveSalePrice,
+        unitPrice,
+        sellerType: product.sellerType || 'ADMIN',
+        resellerCode: product.resellerCode,
+        variantTitle: selectedVariant?.title,
+      };
+
       if (existingIdx >= 0) {
         const copy = [...prev];
         copy[existingIdx] = {
           ...copy[existingIdx],
-          quantity: copy[existingIdx].quantity + quantity,
+          ...itemData,
         };
         return copy;
       }
-      return [...prev, { productId: product.id, variantId: vId || undefined, quantity }];
+      return [...prev, itemData];
     });
   };
 
@@ -114,10 +149,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       for (const p of products) {
         if (!p) continue;
         const existingIdx = copy.findIndex(i => i.productId === p.id && !i.variantId);
+        const effectivePrice = p.price ?? 0;
+        const effectiveSalePrice = p.salePrice ?? effectivePrice;
+        const unitPrice = effectiveSalePrice > 0 ? effectiveSalePrice : effectivePrice;
+        const itemData: LocalCartItem = {
+          productId: p.id,
+          quantity: existingIdx >= 0 ? copy[existingIdx].quantity + 1 : 1,
+          productName: p.name || p.title || '',
+          sku: p.sku || '',
+          slug: p.slug || '',
+          image: p.thumbnail || p.images?.[0] || '',
+          price: effectivePrice,
+          salePrice: effectiveSalePrice,
+          unitPrice,
+          sellerType: p.sellerType || 'ADMIN',
+          resellerCode: p.resellerCode,
+        };
+
         if (existingIdx >= 0) {
-          copy[existingIdx].quantity += 1;
+          copy[existingIdx] = { ...copy[existingIdx], ...itemData };
         } else {
-          copy.push({ productId: p.id, quantity: 1 });
+          copy.push(itemData);
         }
       }
       return copy;
@@ -194,11 +246,58 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  const cartItems: CartItem[] =
+    cartData.items && cartData.items.length > 0
+      ? cartData.items.map(it => {
+          const local = items.find(
+            i => i.productId === it.productId && (i.variantId || undefined) === (it.variantId || undefined)
+          );
+          const price = it.price && it.price > 0 ? it.price : (local?.price || 0);
+          const salePrice = it.salePrice && it.salePrice > 0 ? it.salePrice : (local?.salePrice || price);
+          const unitPrice = it.unitPrice && it.unitPrice > 0 ? it.unitPrice : (salePrice > 0 ? salePrice : price);
+          const subtotal = it.subtotal && it.subtotal > 0 ? it.subtotal : unitPrice * (it.quantity || 1);
+
+          return {
+            ...it,
+            productName: it.productName || local?.productName || 'Hardware Product',
+            sku: it.sku || local?.sku || '',
+            slug: it.slug || local?.slug || it.productId,
+            image: it.image || local?.image || '',
+            price,
+            salePrice,
+            unitPrice,
+            subtotal,
+            variantTitle: it.variantTitle || local?.variantTitle,
+          };
+        })
+      : items.map(local => {
+          const price = local.price || 0;
+          const salePrice = local.salePrice || price;
+          const unitPrice = local.unitPrice || (salePrice > 0 ? salePrice : price);
+          return {
+            productId: local.productId,
+            variantId: local.variantId,
+            variantTitle: local.variantTitle,
+            quantity: local.quantity,
+            productName: local.productName || 'Hardware Product',
+            sku: local.sku || '',
+            slug: local.slug || local.productId,
+            image: local.image || '',
+            price,
+            salePrice,
+            unitPrice,
+            subtotal: unitPrice * local.quantity,
+            sellerType: (local.sellerType as any) || 'ADMIN',
+            resellerCode: local.resellerCode,
+            stockAvailable: 50,
+          };
+        });
+
   return (
     <CartContext.Provider
       value={{
         cart: cartData,
-        cartItems: cartData.items || [],
+        cartItems,
         cartCount,
         wishlist,
         wishlistCount: wishlist.length,

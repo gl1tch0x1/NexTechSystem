@@ -98,6 +98,8 @@ export class PricingService {
         resellerId: product.resellerId,
         resellerCode: product.resellerCode,
         subtotal: itemSubtotal,
+        unitPrice: unitPrice,
+        totalPrice: itemSubtotal,
         stockAvailable: effectiveStock,
       });
     }

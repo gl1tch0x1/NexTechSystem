@@ -45,7 +45,10 @@ export class CartController {
     const productsMap = new Map<string, any>();
 
     for (const pid of productIds) {
-      const p = await productRepository.findById(pid);
+      let p = await productRepository.findById(pid);
+      if (!p) {
+        p = await productRepository.findBySlug(pid);
+      }
       if (p) {
         productsMap.set(pid, p);
       }

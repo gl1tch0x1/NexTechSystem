@@ -12,7 +12,6 @@ import {
   Users,
   ShoppingBag,
   Tag,
-  ShieldCheck,
   Layers,
   Award,
   Image as ImageIcon,
@@ -240,23 +239,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
 
           {/* Logo & Enterprise Pill */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-900 dark:bg-blue-600 flex items-center justify-center text-white shadow-md shrink-0">
-              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-tech-cyan dark:text-white" />
+          <Link href="/admin" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform">
+              <img
+                src="/images/nextech-logo.png"
+                alt="NexTech Systems Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="block">
               <div className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-white tracking-wider flex items-center gap-1.5 sm:gap-2">
                 <span className="truncate max-w-[140px] sm:max-w-none">NEXTECH COMMAND</span>
-                <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
+                <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-800 font-mono">
                   ENTERPRISE
                 </span>
               </div>
               <div className="hidden xs:flex text-[10px] text-slate-500 dark:text-slate-400 font-mono items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="truncate max-w-[150px] sm:max-w-none">Node.js Engine • Synced</span>
+                <span className="truncate max-w-[150px] sm:max-w-none">ERP & CRM Core • Real-Time</span>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Center/Right Actions */}
@@ -373,15 +376,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-6 overflow-y-auto custom-scrollbar">
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-blue-600 flex items-center justify-center text-white shadow-md">
-                      <ShieldCheck className="w-4 h-4 text-tech-cyan dark:text-white" />
+                  <Link href="/admin" onClick={() => setMobileDrawerOpen(false)} className="flex items-center gap-2 group">
+                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center p-1 shadow-sm group-hover:scale-105 transition-transform">
+                      <img
+                        src="/images/nextech-logo.png"
+                        alt="NexTech Systems Logo"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div>
                       <div className="text-xs font-black text-slate-900 dark:text-white">NEXTECH COMMAND</div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Enterprise Portal</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Enterprise ERP & CRM</div>
                     </div>
-                  </div>
+                  </Link>
                   <button
                     onClick={() => setMobileDrawerOpen(false)}
                     className="p-1.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"

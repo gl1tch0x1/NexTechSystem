@@ -239,6 +239,8 @@ export interface CartItem {
   resellerId?: string;
   resellerCode?: string;
   subtotal: number;
+  unitPrice?: number;
+  totalPrice?: number;
   stockAvailable: number;
 }
 

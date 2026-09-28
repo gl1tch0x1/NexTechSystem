@@ -334,12 +334,18 @@ export default function CheckoutPage() {
               {cartItems.map(it => (
                 <div key={`${it.productId}_${it.variantId || 'base'}`} className="flex items-center justify-between text-xs py-1">
                   <span className="text-slate-400 truncate max-w-[180px]">
-                    {it.quantity}x {it.productName}
+                    {it.quantity}x {it.productName || 'Hardware Item'}
                     {it.variantTitle && (
                       <span className="ml-1.5 text-[10px] text-tech-cyan">({it.variantTitle})</span>
                     )}
                   </span>
-                  <span className="font-bold text-white">{formatPrice(it.subtotal)}</span>
+                  <span className="font-bold text-white">
+                    {formatPrice(
+                      it.subtotal && it.subtotal > 0
+                        ? it.subtotal
+                        : (((it.salePrice && it.salePrice > 0) ? it.salePrice : (it.price || it.unitPrice || 0)) * (it.quantity || 1))
+                    )}
+                  </span>
                 </div>
               ))}
             </div>
