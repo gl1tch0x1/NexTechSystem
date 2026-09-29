@@ -245,8 +245,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('demo_user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('demo_user');
+      localStorage.removeItem('tech_cart_items');
+      localStorage.removeItem('tech_coupon_code');
+      window.dispatchEvent(new Event('auth_logout'));
+    } else {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('demo_user');
+      localStorage.removeItem('tech_cart_items');
+      localStorage.removeItem('tech_coupon_code');
+    }
     setToken(null);
     setUser(null);
     setReseller(null);

@@ -30,7 +30,7 @@ import {
 export function Navbar() {
   const router = useRouter();
   const { user, role, reseller, logout } = useAuth();
-  const { cartCount, wishlistCount, cart } = useCart();
+  const { cartCount, wishlistCount, cart, clearCart } = useCart();
   const { currentCurrency, availableCurrencies, setCurrency, formatPrice } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -357,6 +357,7 @@ export function Navbar() {
                     <div className="border-t border-slate-100 dark:border-slate-800 mt-2 pt-2">
                       <button
                         onClick={() => {
+                          clearCart();
                           logout();
                           setUserDropdownOpen(false);
                         }}
@@ -609,6 +610,7 @@ export function Navbar() {
                 )}
                 <button
                   onClick={() => {
+                    clearCart();
                     logout();
                     setMobileMenuOpen(false);
                   }}

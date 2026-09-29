@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Product, ProductVariant, CartItem, Cart } from '@/types';
 import { ApiClient } from './api-client';
 import { useAuth } from './auth-context';
@@ -62,7 +62,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [couponCode, setCouponCode] = useState<string>('');
   const [isCalculating, setIsCalculating] = useState(false);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const prevUserRef = useRef(user);
+
+  const clearCart = useCallback(() => {
+    setItems([]);
+    setCouponCode('');
+    setCartData(defaultCart);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('tech_cart_items');
+      localStorage.removeItem('tech_coupon_code');
+    }
+  }, []);
+
+  // Listen for auth_logout event across the application
+  useEffect(() => {
+    const handleLogout = () => {
+      clearCart();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth_logout', handleLogout);
+      return () => {
+        window.removeEventListener('auth_logout', handleLogout);
+      };
+    }
+  }, [clearCart]);
+
+  // When user transitions from authenticated to logged out, clear cart
+  useEffect(() => {
+    if (prevUserRef.current && !user) {
+      clearCart();
+    }
+    prevUserRef.current = user;
+  }, [user, clearCart]);
 
   // Load from local storage
   useEffect(() => {
@@ -82,12 +114,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Recalculate with backend pricing service whenever items or coupon change
   useEffect(() => {
-    localStorage.setItem('tech_cart_items', JSON.stringify(items));
-
     if (items.length === 0) {
       setCartData(defaultCart);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('tech_cart_items');
+      }
       return;
     }
+
+    localStorage.setItem('tech_cart_items', JSON.stringify(items));
 
     setIsCalculating(true);
     ApiClient.post<Cart>('/cart/calculate', {
@@ -198,12 +233,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const clearCart = () => {
-    setItems([]);
-    setCouponCode('');
-    setCartData(defaultCart);
-    localStorage.removeItem('tech_cart_items');
-  };
 
   const applyCoupon = async (code: string): Promise<boolean> => {
     try {
