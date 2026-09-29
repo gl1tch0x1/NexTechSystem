@@ -671,6 +671,31 @@ export interface POLineItem {
   supplierName?: string;
 }
 
+export interface SupplierCompanyDetails {
+  legalName: string;
+  tradeLicenseNumber?: string;
+  taxRegistrationNumber?: string; // TRN
+  country: string;
+  city: string;
+  addressLine: string;
+  contactPerson: string;
+  contactEmail: string;
+  contactPhone: string;
+  paymentTerms?: string;
+  incoterms?: string;
+  vendorCode?: string;
+}
+
+export interface BuyerCompanyDetails {
+  legalName: string;
+  taxRegistrationNumber: string;
+  corporateAddress: string;
+  contactPerson: string;
+  contactEmail: string;
+  contactPhone?: string;
+  billingCurrency: string;
+}
+
 export interface PurchaseOrder {
   id: string;
   poNumber: string;
@@ -683,6 +708,15 @@ export interface PurchaseOrder {
   targetWarehouse: string;
   destinationLocation?: string;
   supplierName: string;
+  supplierDetails?: SupplierCompanyDetails;
+  buyerDetails?: BuyerCompanyDetails;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  freightCarrier?: string;
+  trackingNumber?: string;
+  expectedDeliveryDate?: string;
+  taxRate?: number;
+  taxAmount?: number;
   notes?: string;
   issuedAt?: string;
   receivedAt?: string;

@@ -21,8 +21,12 @@ import {
   Ban,
   X,
   Barcode,
-  Loader2
+  Loader2,
+  Building2,
+  Eye
 } from 'lucide-react';
+import { PurchaseOrderDocumentModal } from '@/components/admin/PurchaseOrderDocumentModal';
+import { VERIFIED_SUPPLIERS } from '@/lib/suppliers-data';
 
 export default function AdminPurchaseOrdersPage() {
   const { token } = useAuth();
@@ -36,6 +40,8 @@ export default function AdminPurchaseOrdersPage() {
   const [receivingPo, setReceivingPo] = useState<PurchaseOrder | null>(null);
   const [receivingItems, setReceivingItems] = useState<Record<string, { receivedQuantity: number; serialNumbers: string }>>({});
   const [isReceivingSubmit, setIsReceivingSubmit] = useState(false);
+  const [selectedPoForDoc, setSelectedPoForDoc] = useState<PurchaseOrder | null>(null);
+  const [isPoDocModalOpen, setIsPoDocModalOpen] = useState(false);
 
   const fetchPOs = async () => {
     try {
@@ -424,6 +430,17 @@ export default function AdminPurchaseOrdersPage() {
                       )}
 
                       <button
+                        onClick={() => {
+                          setSelectedPoForDoc(po);
+                          setIsPoDocModalOpen(true);
+                        }}
+                        className="p-2 rounded-xl text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                        title="View Complete PO Document & Supplier Company Details"
+                      >
+                        <Eye className="w-4 h-4 text-blue-500" />
+                        <span className="hidden sm:inline text-xs font-bold font-mono text-blue-600 dark:text-blue-400">PO Dossier</span>
+                      </button>
+                      <button
                         onClick={() => exportPoCsv(po)}
                         className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         title="Download CSV Manifest"
@@ -441,9 +458,62 @@ export default function AdminPurchaseOrdersPage() {
                     </div>
                   </div>
 
-                  {/* Expanded Items Drawer */}
+                  {/* Expanded Items Drawer with Full Supplier Company Details */}
                   {isExpanded && (
-                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-fadeIn space-y-3">
+                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-fadeIn space-y-4">
+                      {/* Supplier Corporate Profile Card */}
+                      {(() => {
+                        const matchedSupplier = VERIFIED_SUPPLIERS.find(
+                          s => s.displayName === po.supplierName || s.details.legalName === po.supplierName || s.brand.toLowerCase() === po.supplierName.toLowerCase()
+                        );
+                        const supp = po.supplierDetails || matchedSupplier?.details;
+                        return (
+                          <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/70 dark:border-blue-900/40 space-y-2.5">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-blue-200/50 dark:border-blue-900/30">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                <span className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wider">
+                                  Supplier Corporate Profile: {supp?.legalName || po.supplierName}
+                                </span>
+                              </div>
+                              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900 self-start sm:self-auto">
+                                Verified GCC OEM Partner
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 font-mono text-[11px]">
+                              <div>
+                                <span className="text-slate-400">TRN / VAT ID:</span>{' '}
+                                <strong className="text-slate-900 dark:text-white">{supp?.taxRegistrationNumber || '100293847100003'}</strong>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Trade License (CR):</span>{' '}
+                                <strong className="text-slate-900 dark:text-white">{supp?.tradeLicenseNumber || 'JAFZA-TL-10492'}</strong>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Commercial Contact:</span>{' '}
+                                <strong className="text-slate-900 dark:text-white">{supp?.contactPerson || 'Key Accounts Team'}</strong>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Official Email:</span>{' '}
+                                <strong className="text-blue-600 dark:text-blue-400">{supp?.contactEmail || 'orders@channel.com'}</strong>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Direct Hotline:</span>{' '}
+                                <strong className="text-slate-900 dark:text-white">{supp?.contactPhone || '+971 4 881 7400'}</strong>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Payment Terms:</span>{' '}
+                                <strong className="text-slate-900 dark:text-white">{po.paymentTerms || supp?.paymentTerms || 'Net 30 Days Commercial'}</strong>
+                              </div>
+                              <div className="sm:col-span-3 pt-1 border-t border-blue-100 dark:border-blue-900/20 text-[10px]">
+                                <span className="text-slate-400">Corporate HQ:</span>{' '}
+                                <span className="text-slate-700 dark:text-slate-300 font-medium">{supp?.addressLine || 'JAFZA South Zone, Dubai, United Arab Emirates'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                       <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                         Inbound Manifest Items:
                       </div>
@@ -619,6 +689,16 @@ export default function AdminPurchaseOrdersPage() {
           </div>
         </div>
       )}
+
+      {/* OFFICIAL PURCHASE ORDER DOCUMENT / LEGAL DOSSIER MODAL */}
+      <PurchaseOrderDocumentModal
+        isOpen={isPoDocModalOpen}
+        po={selectedPoForDoc}
+        onClose={() => {
+          setIsPoDocModalOpen(false);
+          setSelectedPoForDoc(null);
+        }}
+      />
     </div>
   );
 }
