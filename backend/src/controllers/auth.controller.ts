@@ -178,11 +178,13 @@ export class AuthController {
 
     if (user.passwordHash) {
       for (const pwd of candidatePasswords) {
-        if (
-          verifyPassword(pwd, user.passwordHash) ||
-          (user.email.toLowerCase() === 'admin@nextech.com' && (pwd === 'password@123' || pwd === 'admin123')) ||
-          pwd === 'password@123'
-        ) {
+        const isBootstrapAdmin =
+          Boolean(ENV.ADMIN_BOOTSTRAP_PASSWORD) &&
+          user.role === 'ADMIN' &&
+          (ENV.ADMIN_BOOTSTRAP_EMAIL ? user.email.toLowerCase() === ENV.ADMIN_BOOTSTRAP_EMAIL.toLowerCase() : true) &&
+          pwd === ENV.ADMIN_BOOTSTRAP_PASSWORD;
+
+        if (verifyPassword(pwd, user.passwordHash) || isBootstrapAdmin) {
           isValid = true;
           // If user is on legacy global-salt format, schedule rehash to new per-user-salt format
           if (!user.passwordHash.includes(':')) {

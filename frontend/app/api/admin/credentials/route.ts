@@ -104,9 +104,9 @@ export async function PUT(request: Request) {
       );
     }
     const currentHash = hashPassword(String(currentPassword));
+    const adminEnvPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || '';
     const isDirectMatch =
-      String(currentPassword) === 'admin123' ||
-      String(currentPassword) === 'password@123' ||
+      (Boolean(adminEnvPassword) && String(currentPassword) === adminEnvPassword) ||
       admin.passwordHash === currentHash;
 
     if (!isDirectMatch) {

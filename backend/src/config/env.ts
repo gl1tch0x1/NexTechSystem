@@ -58,8 +58,9 @@ export const ENV = {
   GA_MEASUREMENT_ID: process.env.GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '',
   GA_PROPERTY_ID: process.env.GA_PROPERTY_ID || '',
   GA_API_SECRET: process.env.GA_API_SECRET || '',
-  // Admin & Security Defaults
-  ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || '',
+  ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || process.env.ADMIN_BOOTSTRAP_EMAIL || '',
+  ADMIN_BOOTSTRAP_EMAIL: process.env.ADMIN_BOOTSTRAP_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || '',
+  ADMIN_BOOTSTRAP_PASSWORD: process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || '',
   PASSWORD_SALT: process.env.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026',
   // MongoDB Enterprise Cloud Database
   MONGODB_URI: process.env.MONGODB_URI || '',
