@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Check
 } from 'lucide-react';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 
 interface HeroShowcaseProps {
   products: Product[];
@@ -174,7 +175,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 href="/pc-builder"
                 className="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-2xs text-center"
               >
-                <Cpu className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
+                <NextechLogo className="w-4 h-4" size={16} alt="PC Builder" />
                 <span>Launch PC Builder Studio</span>
               </Link>
             </div>

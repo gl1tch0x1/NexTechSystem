@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth, RegisterData } from '@/lib/auth-context';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 import {
-  Cpu,
   Lock,
   Mail,
   User as UserIcon,
@@ -399,8 +399,8 @@ function AuthContent() {
     >
       {/* Brand Header */}
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-tech-blue flex items-center justify-center text-white mx-auto shadow-tech-glow">
-          <Cpu className="w-7 h-7" />
+        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60 shadow-lg shadow-blue-500/15 mx-auto p-1.5 flex items-center justify-center">
+          <NextechLogo size={48} className="w-full h-full" alt="NexTech Systems Logo" />
         </div>
         <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
           NexTech Systems Portal

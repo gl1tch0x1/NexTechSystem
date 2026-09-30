@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Product, Review } from '@/types';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductDetailClient } from './ProductDetailClient';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 import {
   ShieldCheck,
   Cpu,
@@ -294,8 +295,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-6 transition-all">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800/80">
           <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-tech-blue/10 dark:bg-cyan-500/10 flex items-center justify-center text-tech-blue dark:text-cyan-400 shrink-0 shadow-sm border border-tech-blue/20">
-              <Cpu className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center p-1.5 shrink-0 shadow-sm border border-slate-200 dark:border-slate-700">
+              <NextechLogo className="w-full h-full" size={24} alt="Specifications Matrix" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">

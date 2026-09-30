@@ -26,7 +26,6 @@ import {
   Image as ImageIcon,
   DollarSign,
   Truck,
-  Cpu,
   Sparkles,
   ShieldCheck,
   Check,
@@ -53,6 +52,7 @@ import {
   MoveLeft,
   MoveRight
 } from 'lucide-react';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 
 const WAREHOUSE_LOCATIONS = [
   { id: 'loc_dxb_main', name: 'Dubai Logistics Hub (JAFZA)', city: 'Dubai', code: 'DXB-01' },
@@ -1433,7 +1433,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
     { id: 'general' as TabKey, label: 'Overview & Media', icon: Package },
     { id: 'pricing' as TabKey, label: 'Pricing & Financials', icon: DollarSign },
     { id: 'inventory' as TabKey, label: 'Warehousing & Stock', icon: Warehouse },
-    { id: 'specs' as TabKey, label: 'Technical Specs', icon: Cpu },
+    { id: 'specs' as TabKey, label: 'Technical Specs', icon: NextechLogo },
     { id: 'variants' as TabKey, label: 'Multi-SKU Variants', icon: Sparkles },
     { id: 'logistics' as TabKey, label: 'Logistics & Compliance', icon: Truck },
   ];
@@ -2475,8 +2475,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               {/* Section Header */}
               <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-gradient-to-r from-slate-50 to-purple-50/30 dark:from-slate-900 dark:to-purple-950/10">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-xl bg-purple-600/10 border border-purple-200 dark:border-purple-800">
-                    <Cpu className="w-5 h-5 text-purple-600" />
+                  <div className="p-1.5 rounded-xl bg-purple-600/10 border border-purple-200 dark:border-purple-800 flex items-center justify-center">
+                    <NextechLogo className="w-5 h-5" size={20} alt="Specifications" />
                   </div>
                   <div>
                     <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Technical Specifications &amp; Hardware Matrix</h2>

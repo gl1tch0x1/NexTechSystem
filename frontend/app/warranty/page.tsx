@@ -10,7 +10,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Search,
-  Cpu,
   Calendar,
   Clock,
   Building2,
@@ -19,6 +18,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 
 interface WarrantyResult {
   isValid: boolean;
@@ -202,7 +202,7 @@ export default function WarrantyPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                 <div className="text-slate-400 text-[10px] uppercase font-bold flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-purple-500" />
+                  <NextechLogo className="w-3.5 h-3.5" size={14} alt="Hardware Component" />
                   <span>Hardware Component</span>
                 </div>
                 <div className="font-bold text-slate-900 dark:text-white line-clamp-2">{result.productName}</div>

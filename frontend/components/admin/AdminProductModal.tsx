@@ -24,7 +24,6 @@ import {
   DollarSign,
   Boxes,
   Truck,
-  Cpu,
   Sparkles,
   ShieldCheck,
   Check,
@@ -37,6 +36,7 @@ import {
   AlertTriangle,
   Percent
 } from 'lucide-react';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 
 export type AdminModalStep =
   | 'basic'
@@ -915,7 +915,7 @@ export function AdminProductModal({
     { id: 'pricing', label: '4. Pricing & Tax', icon: DollarSign },
     { id: 'inventory', label: '5. Inventory & Hubs', icon: Boxes },
     { id: 'shipping', label: '6. Shipping & Logistics', icon: Truck },
-    { id: 'specs', label: '7. Specifications', icon: Cpu },
+    { id: 'specs', label: '7. Specifications', icon: NextechLogo },
     { id: 'variants', label: '8. Variants Matrix', icon: Sparkles },
     { id: 'status', label: '9. Status & Publishing', icon: ShieldCheck },
   ];
@@ -1871,7 +1871,7 @@ export function AdminProductModal({
               <div className="space-y-5 animate-fadeIn">
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <Cpu className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <NextechLogo className="w-4 h-4" size={16} alt="Specifications" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Technical Specifications & Architecture
                     </h3>

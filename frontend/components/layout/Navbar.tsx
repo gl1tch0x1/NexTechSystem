@@ -24,8 +24,8 @@ import {
   CreditCard,
   LogOut,
   PackageCheck,
-  Cpu
 } from 'lucide-react';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 
 export function Navbar() {
   const router = useRouter();
@@ -420,7 +420,7 @@ export function Navbar() {
               href="/pc-builder"
               className="text-tech-blue dark:text-cyan-400 hover:underline font-bold flex items-center gap-1.5 shrink-0"
             >
-              <Cpu className="w-3.5 h-3.5" />
+              <NextechLogo className="w-3.5 h-3.5" size={14} alt="Custom PC Builder" />
               <span>Custom PC Builder</span>
             </Link>
             <Link href="/compare" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
@@ -519,7 +519,7 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 text-tech-blue dark:text-cyan-400 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
             >
-              <Cpu className="w-4 h-4 text-tech-blue dark:text-cyan-400" />
+              <NextechLogo className="w-4 h-4" size={16} alt="PC Builder" />
               <span>PC Builder</span>
             </Link>
             <Link

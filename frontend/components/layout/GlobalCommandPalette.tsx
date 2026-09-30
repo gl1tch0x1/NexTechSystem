@@ -12,8 +12,8 @@ import {
   CornerDownLeft,
   X,
   LayoutDashboard,
-  Cpu
 } from 'lucide-react';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 import { ApiClient } from '@/lib/api-client';
 import { Product, Category, Brand } from '@/types';
 
@@ -105,7 +105,7 @@ export function GlobalCommandPalette() {
   // Quick navigation shortcuts
   const staticShortcuts = [
     { label: 'Enterprise Hardware Catalog', href: '/products', icon: Package, badge: 'CATALOG' },
-    { label: 'Interactive Custom Rig Builder', href: '/pc-builder', icon: Cpu, badge: 'BUILDER' },
+    { label: 'Interactive Custom Rig Builder', href: '/pc-builder', icon: NextechLogo, badge: 'BUILDER' },
     { label: 'Storefront Promotional Vouchers', href: '/products?featured=deals', icon: Tag, badge: 'PROMO' },
     { label: 'Admin Command Center & Operations', href: '/admin', icon: LayoutDashboard, badge: 'ADMIN' },
   ];

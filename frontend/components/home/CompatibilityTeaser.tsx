@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  Cpu,
   CheckCircle2,
   ArrowRight,
   Layers,
   Gauge
 } from 'lucide-react';
+import { NextechLogo } from '@/components/ui/NextechLogo';
 import { BuilderPreset } from '@/types';
 
 interface CompatibilityTeaserProps {
@@ -37,7 +37,7 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
         {/* Left Interactive Narrative */}
         <div className="lg:col-span-7 space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 text-xs font-semibold font-mono">
-            <Cpu className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <NextechLogo className="w-3.5 h-3.5" size={14} alt="Hardware Verification Engine" />
             <span>Hardware Verification Engine</span>
           </div>
 
@@ -80,7 +80,7 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
               href="/pc-builder"
               className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-semibold transition-all shadow-md shadow-purple-600/20 flex items-center justify-center gap-2 text-center"
             >
-              <Cpu className="w-4 h-4" />
+              <NextechLogo className="w-4 h-4" size={16} alt="Launch PC Builder" />
               <span>Launch Custom PC Builder</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
