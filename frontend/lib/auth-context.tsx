@@ -12,6 +12,28 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 
+export interface RegisterData {
+  accountType?: 'CUSTOMER' | 'RESELLER';
+  name: string;
+  email: string;
+  password?: string;
+  username?: string;
+  phone?: string;
+  // Reseller specific fields:
+  businessName?: string;
+  tradeLicense?: string;
+  taxNumber?: string;
+  taxRegistrationNumber?: string;
+  licenseJurisdiction?: string;
+  businessType?: string;
+  signatoryTitle?: string;
+  website?: string;
+  resellerCode?: string;
+  addressStreet?: string;
+  addressCity?: string;
+  settlementTerms?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   reseller: Reseller | null;
@@ -20,7 +42,13 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password?: string, resellerCode?: string) => Promise<{ user: User; reseller: Reseller | null }>;
-  register: (name: string, email: string, username?: string, phone?: string, password?: string) => Promise<User>;
+  register: (
+    dataOrName: string | RegisterData,
+    email?: string,
+    username?: string,
+    phone?: string,
+    password?: string
+  ) => Promise<{ user: User; reseller: Reseller | null }>;
   loginWithGoogle: () => Promise<{ user: User; reseller: Reseller | null }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -110,30 +138,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, username?: string, phone?: string, password?: string): Promise<User> => {
+  const register = async (
+    dataOrName: string | RegisterData,
+    emailArg?: string,
+    usernameArg?: string,
+    phoneArg?: string,
+    passwordArg?: string
+  ): Promise<{ user: User; reseller: Reseller | null }> => {
     setIsLoading(true);
     try {
-      let res: { token: string; user: User };
+      const payload: RegisterData = typeof dataOrName === 'string'
+        ? {
+            accountType: 'CUSTOMER',
+            name: dataOrName,
+            email: emailArg || '',
+            username: usernameArg,
+            phone: phoneArg,
+            password: passwordArg,
+          }
+        : dataOrName;
+
+      let res: { token: string; user: User; reseller?: Reseller };
       try {
-        // 1. Register with Store Backend (Creates customer account & wallet)
-        res = await ApiClient.post<{ token: string; user: User }>('/auth/register', {
-          name,
-          email,
-          username,
-          phone,
-          password,
-        });
+        // 1. Register with Store Backend
+        res = await ApiClient.post<{ token: string; user: User; reseller?: Reseller }>('/auth/register', payload);
       } catch (backendErr: any) {
-        // If remote backend is unreachable, activate local interactive customer account
+        // If remote backend is unreachable, activate local interactive account
         const isNetworkErr = backendErr.message?.includes('fetch') || backendErr.message?.includes('Network') || backendErr.status === 0 || !backendErr.status;
         if (isNetworkErr) {
+          const isRes = payload.accountType === 'RESELLER';
           const demoUser: User = {
             id: `usr_${Date.now()}`,
-            name: name || 'Valued Customer',
-            email,
-            username: username || email.split('@')[0],
-            phone: phone || '',
-            role: 'CUSTOMER',
+            name: payload.name || (isRes ? 'Authorized Signatory' : 'Valued Customer'),
+            email: payload.email,
+            username: payload.username || payload.email.split('@')[0],
+            phone: payload.phone || '',
+            role: isRes ? 'RESELLER' : 'CUSTOMER',
             addresses: [],
             isActive: true,
             createdAt: new Date().toISOString(),
@@ -144,7 +184,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('demo_user', JSON.stringify(demoUser));
           setToken(demoToken);
           setUser(demoUser);
-          return demoUser;
+          setReseller(null);
+          return { user: demoUser, reseller: null };
         }
         throw backendErr;
       }
@@ -152,20 +193,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('auth_token', res.token);
       setToken(res.token);
       setUser(res.user);
+      if (res.reseller) {
+        setReseller(res.reseller);
+      }
 
       // 2. Register in Cloud Firebase Authentication (only if live key configured)
-      if (isLiveKey && firebaseAuth && firebaseAuth.app && password) {
+      if (isLiveKey && firebaseAuth && firebaseAuth.app && payload.password) {
         try {
-          await createUserWithEmailAndPassword(firebaseAuth, email, password);
+          await createUserWithEmailAndPassword(firebaseAuth, payload.email, payload.password);
         } catch (fbErr: any) {
           if (fbErr.code === 'auth/email-already-in-use') {
-            await signInWithEmailAndPassword(firebaseAuth, email, password).catch(() => { });
+            await signInWithEmailAndPassword(firebaseAuth, payload.email, payload.password).catch(() => { });
           }
         }
       }
 
-      await fetchCurrentUser(res.token);
-      return res.user;
+      const profile = await fetchCurrentUser(res.token);
+      return profile || { user: res.user, reseller: res.reseller || null };
     } finally {
       setIsLoading(false);
     }

@@ -7,7 +7,7 @@ import { resellerRepository } from '../repositories/reseller.repository.js';
 import { walletService } from '../services/wallet.service.js';
 import { ENV } from '../config/env.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
-import { User } from '../types/index.js';
+import { User, Reseller } from '../types/index.js';
 
 const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_KEYLEN = 64;
@@ -67,7 +67,34 @@ function sanitizeUser(user: User): User {
 
 export class AuthController {
   async register(req: Request, res: Response): Promise<void> {
-    const { name, email, username, phone, address, password } = req.body;
+    const {
+      accountType,
+      role: requestedRole,
+      name,
+      email,
+      username,
+      phone,
+      address,
+      password,
+      // Professional Reseller fields
+      businessName,
+      tradeLicense,
+      taxNumber,
+      taxRegistrationNumber,
+      licenseJurisdiction,
+      businessType,
+      signatoryTitle,
+      website,
+      resellerCode,
+      addressStreet,
+      addressCity,
+      settlementTerms,
+      creditLimitAED,
+      dispatchHub,
+      description,
+    } = req.body;
+
+    const isReseller = (accountType === 'RESELLER' || requestedRole === 'RESELLER');
 
     if (!email || !name || !password) {
       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Name, Email, and Password are required.' } });
@@ -105,9 +132,144 @@ export class AuthController {
       return;
     }
 
-    const userId = `user_${uuidv4()}`;
-    const cleanUsername = username ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) : cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '').slice(0, 30);
     const passwordHash = hashPassword(password);
+    const userId = `user_${uuidv4()}`;
+
+    // =========================================================================
+    // 1. ENTERPRISE RESELLER ACCOUNT CREATION
+    // Requires comprehensive professional registration details
+    // =========================================================================
+    if (isReseller) {
+      const cleanBusinessName = String(businessName || '').trim();
+      const cleanTradeLicense = String(tradeLicense || '').trim();
+      const effectiveTaxNumber = String(taxNumber || taxRegistrationNumber || '').trim();
+
+      if (!cleanBusinessName) {
+        res.status(400).json({ success: false, error: { code: 'MISSING_BUSINESS_NAME', message: 'Corporate legal business name is required for reseller registration.' } });
+        return;
+      }
+
+      if (!cleanTradeLicense) {
+        res.status(400).json({ success: false, error: { code: 'MISSING_TRADE_LICENSE', message: 'Official Commercial Trade License number is required for reseller registration.' } });
+        return;
+      }
+
+      // Generate or clean reseller code
+      let candidateCode = resellerCode
+        ? String(resellerCode).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30)
+        : cleanBusinessName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+
+      if (!candidateCode || candidateCode.length < 3) {
+        candidateCode = `res_${cleanEmail.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 15)}`;
+      }
+
+      // Check if reseller code already taken
+      const existingReseller = await resellerRepository.findByCode(candidateCode);
+      if (existingReseller) {
+        candidateCode = `${candidateCode}${Math.floor(100 + Math.random() * 900)}`;
+      }
+
+      const resellerId = `res_${uuidv4()}`;
+      const cleanUsername = username
+        ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30)
+        : candidateCode;
+
+      const resellerAddress = {
+        id: `addr_${uuidv4()}`,
+        fullName: cleanName,
+        phone: phone ? String(phone).trim() : '',
+        addressLine1: addressStreet ? String(addressStreet).trim() : (address?.addressLine1 || 'Commercial Business Bay'),
+        addressLine2: address?.addressLine2 || '',
+        city: addressCity ? String(addressCity).trim() : (address?.city || 'Dubai'),
+        state: addressCity ? String(addressCity).trim() : (address?.state || 'Dubai'),
+        country: address?.country || 'United Arab Emirates',
+        postalCode: address?.postalCode || '00000',
+        isDefaultShipping: true,
+        isDefaultBilling: true,
+      };
+
+      const newUser: User = {
+        id: userId,
+        email: cleanEmail,
+        role: 'RESELLER',
+        resellerId: resellerId,
+        company: cleanBusinessName,
+        tradeLicense: cleanTradeLicense,
+        taxRegistrationNumber: effectiveTaxNumber,
+        name: cleanName,
+        username: cleanUsername,
+        phone: phone ? String(phone).trim().slice(0, 30) : '',
+        addresses: [resellerAddress],
+        passwordHash,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const newReseller: Reseller = {
+        id: resellerId,
+        userId: userId,
+        resellerCode: candidateCode,
+        username: cleanUsername,
+        email: cleanEmail,
+        businessName: cleanBusinessName,
+        displayName: cleanBusinessName,
+        phone: phone ? String(phone).trim() : '',
+        subdomain: candidateCode,
+        address: resellerAddress,
+        businessInformation: {
+          taxNumber: effectiveTaxNumber,
+          tradeLicense: cleanTradeLicense,
+          licenseJurisdiction: licenseJurisdiction ? String(licenseJurisdiction).trim() : 'Dubai Economy and Tourism (DET)',
+          businessType: businessType ? String(businessType).trim() : 'IT Solutions & Hardware Distributor',
+          authorizedSignatory: cleanName,
+          signatoryTitle: signatoryTitle ? String(signatoryTitle).trim() : 'Managing Director',
+          website: website ? String(website).trim() : '',
+          settlementTerms: settlementTerms ? String(settlementTerms).trim() : 'Net 30 Days (Corporate Credit)',
+          creditLimitAED: creditLimitAED ? Number(creditLimitAED) : 50000,
+          dispatchHub: dispatchHub ? String(dispatchHub).trim() : 'Dubai Logistics City (DWC)',
+          description: description ? String(description).trim() : `Verified Enterprise Reseller Partner: ${cleanBusinessName}`,
+        },
+        status: 'ACTIVE',
+        productCount: 0,
+        salesStats: {
+          totalRevenue: 0,
+          totalOrders: 0,
+          unitsSold: 0,
+        },
+        commissionRate: 15,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await userRepository.create(newUser);
+      await resellerRepository.create(newReseller);
+      await walletService.getOrCreateWallet(userId);
+
+      const token = jwt.sign(
+        { id: newUser.id, email: newUser.email, role: newUser.role, resellerId },
+        ENV.JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+
+      res.status(201).json({
+        success: true,
+        data: {
+          token,
+          user: sanitizeUser(newUser),
+          reseller: newReseller,
+        },
+      });
+      return;
+    }
+
+    // =========================================================================
+    // 2. STANDARD CUSTOMER ACCOUNT CREATION
+    // Zero-friction registration ("just have to create the account - nothing else")
+    // =========================================================================
+    const cleanUsername = username
+      ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30)
+      : cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '').slice(0, 30);
 
     const newUser: User = {
       id: userId,
