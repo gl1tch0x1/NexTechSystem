@@ -64,16 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCurrentUser = async (authToken: string): Promise<{ user: User; reseller: Reseller | null } | null> => {
     if (authToken.startsWith('demo_token_')) {
-      const savedUser = typeof window !== 'undefined' ? localStorage.getItem('demo_user') : null;
-      if (savedUser) {
-        try {
-          const parsed = JSON.parse(savedUser);
-          setUser(parsed);
-          return { user: parsed, reseller: null };
-        } catch {
-          // ignore parsing error
-        }
-      }
       return null;
     }
 
@@ -158,37 +148,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         : dataOrName;
 
-      let res: { token: string; user: User; reseller?: Reseller };
-      try {
-        // 1. Register with Store Backend
-        res = await ApiClient.post<{ token: string; user: User; reseller?: Reseller }>('/auth/register', payload);
-      } catch (backendErr: any) {
-        // If remote backend is unreachable, activate local interactive account
-        const isNetworkErr = backendErr.message?.includes('fetch') || backendErr.message?.includes('Network') || backendErr.status === 0 || !backendErr.status;
-        if (isNetworkErr) {
-          const isRes = payload.accountType === 'RESELLER';
-          const demoUser: User = {
-            id: `usr_${Date.now()}`,
-            name: payload.name || (isRes ? 'Authorized Signatory' : 'Valued Customer'),
-            email: payload.email,
-            username: payload.username || payload.email.split('@')[0],
-            phone: payload.phone || '',
-            role: isRes ? 'RESELLER' : 'CUSTOMER',
-            addresses: [],
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          const demoToken = `demo_token_${Date.now()}`;
-          localStorage.setItem('auth_token', demoToken);
-          localStorage.setItem('demo_user', JSON.stringify(demoUser));
-          setToken(demoToken);
-          setUser(demoUser);
-          setReseller(null);
-          return { user: demoUser, reseller: null };
-        }
-        throw backendErr;
-      }
+      // 1. Register with Store Backend / Next.js API Gateway
+      const res = await ApiClient.post<{ token: string; user: User; reseller?: Reseller }>('/auth/register', payload);
 
       localStorage.setItem('auth_token', res.token);
       setToken(res.token);
@@ -278,7 +239,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         const demoToken = `demo_token_${Date.now()}`;
         localStorage.setItem('auth_token', demoToken);
-        localStorage.setItem('demo_user', JSON.stringify(demoUser));
         setToken(demoToken);
         setUser(demoUser);
         return { user: demoUser, reseller: null };

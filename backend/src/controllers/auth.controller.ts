@@ -166,7 +166,8 @@ export class AuthController {
       // Check if reseller code already taken
       const existingReseller = await resellerRepository.findByCode(candidateCode);
       if (existingReseller) {
-        candidateCode = `${candidateCode}${Math.floor(100 + Math.random() * 900)}`;
+        const secureSuffix = crypto.randomInt(100, 1000);
+        candidateCode = `${candidateCode}${secureSuffix}`;
       }
 
       const resellerId = `res_${uuidv4()}`;
