@@ -112,16 +112,15 @@ export async function GET(request: Request) {
 
       const res = await fetch(`${clean}/api/admin/resellers`, {
         headers,
-        signal: AbortSignal.timeout(2000),
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000),
       });
       if (res.ok) {
         const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-          return NextResponse.json(json);
-        }
+        return NextResponse.json(json);
       }
-    } catch {
-      // Graceful fallback to rich in-memory resellers
+    } catch (err: any) {
+      console.warn('[Admin Resellers API] Backend fetch error:', err?.message);
     }
   }
 

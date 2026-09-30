@@ -20,41 +20,24 @@ function sanitizeUser(user: any): User {
 }
 
 export async function POST(request: NextRequest) {
-  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
+  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const body = await request.json().catch(() => ({}));
   const { email, password } = body;
+  const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
-  // 1. If an external remote backend is configured, forward the request
-  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
-    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
-    try {
-      const res = await fetch(`${clean}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(5000),
-      });
+  try {
+    const res = await fetch(`${clean}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(4000),
+    });
+    if (res.ok) {
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });
-    } catch (err: any) {
-      console.warn('[Auth API] External backend unreachable, authenticating via database store:', err.message);
     }
-  }
-
-  // 2. Also try localhost backend if running in local development
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(1500),
-      });
-      const json = await res.json();
-      return NextResponse.json(json, { status: res.status });
-    } catch {
-      // Fall through to database verification
-    }
+  } catch (err: any) {
+    // Fall through to database verification
   }
 
   // 3. Resilient Database Authentication (Runs seamlessly on Vercel)

@@ -11,36 +11,22 @@ function sanitizeUser(user: any): User {
 }
 
 export async function GET(request: NextRequest) {
-  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
+  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const authHeader = request.headers.get('authorization');
+  const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
-  // Try external backend if configured
-  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
-    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
-    try {
-      const res = await fetch(`${clean}/api/auth/me`, {
-        headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
-        signal: AbortSignal.timeout(5000),
-      });
+  try {
+    const res = await fetch(`${clean}/api/auth/me`, {
+      headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(4000),
+    });
+    if (res.ok) {
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });
-    } catch {
-      // Fall through
     }
-  }
-
-  // Try local backend
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      const res = await fetch('http://localhost:5000/api/auth/me', {
-        headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
-        signal: AbortSignal.timeout(1500),
-      });
-      const json = await res.json();
-      return NextResponse.json(json, { status: res.status });
-    } catch {
-      // Fall through
-    }
+  } catch {
+    // Fall through
   }
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

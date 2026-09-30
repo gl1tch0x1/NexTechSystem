@@ -773,6 +773,49 @@ export class AdminController {
     res.json({ success: true, data: orders });
   }
 
+  async createPurchaseOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const body = req.body || {};
+    const poNumber = body.poNumber || `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const calculatedUnits = body.units || body.totalUnits || (body.items ? body.items.reduce((s: number, i: any) => s + (i.orderedQuantity || i.quantity || 0), 0) : 0);
+    const calculatedCost = body.totalCost || body.estimatedCost || body.totalEstimatedCost || 0;
+    const newPO: PurchaseOrder = {
+      id: body.id || `po_${Date.now()}`,
+      poNumber,
+      status: body.status || 'ISSUED',
+      supplierName: body.supplierName || 'Authorized OEM Distributor',
+      supplierDetails: body.supplierDetails,
+      buyerDetails: body.buyerDetails,
+      destinationLocation: body.targetHub || body.destinationLocation || 'DXB-01 (JAFZA Mega-Hub)',
+      targetWarehouse: body.targetWarehouse || body.targetHub || 'DXB-01 (JAFZA Mega-Hub)',
+      paymentTerms: body.paymentTerms || 'Net 30 Days Commercial Wire',
+      deliveryTerms: body.deliveryTerms || 'DDP - JAFZA Mega-Hub',
+      freightCarrier: body.freightCarrier || 'DHL Global Freight Logistics',
+      expectedDeliveryDate: body.expectedDeliveryDate || 'Tomorrow, 10:00 AM',
+      items: body.items || [],
+      totalUnits: calculatedUnits,
+      totalCost: calculatedCost,
+      totalEstimatedCost: calculatedCost,
+      currency: body.currency || 'AED',
+      notes: body.notes || 'Enterprise Restock Requisition Order.',
+      createdAt: body.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const created = await purchaseOrderRepository.create(newPO);
+
+    await auditService.log({
+      action: 'ADMIN_PO_CREATED',
+      resource: 'purchase_orders',
+      resourceId: created.id,
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: { poNumber: created.poNumber, totalCost: created.totalCost },
+    });
+
+    res.status(201).json({ success: true, message: 'Purchase order issued and stored in enterprise database.', data: created });
+  }
+
   async generateLowStockPO(req: AuthenticatedRequest, res: Response): Promise<void> {
     const allProducts = await productRepository.find();
     // Filter products whose current stock is at or below their lowStockThreshold

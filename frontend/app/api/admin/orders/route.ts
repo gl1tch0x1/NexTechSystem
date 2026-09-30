@@ -2,34 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { FALLBACK_ORDERS } from '@/lib/fallback-data';
 
 export async function GET(request: NextRequest) {
-  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
+  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const authHeader = request.headers.get('authorization');
+  const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
-  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
-    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
-    try {
-      const res = await fetch(`${clean}/api/admin/orders`, {
-        headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
-        signal: AbortSignal.timeout(5000),
-      });
+  try {
+    const res = await fetch(`${clean}/api/admin/orders`, {
+      headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });
-    } catch {
-      // Fall through
     }
-  }
-
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      const res = await fetch('http://localhost:5000/api/admin/orders', {
-        headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
-        signal: AbortSignal.timeout(1500),
-      });
-      const json = await res.json();
-      return NextResponse.json(json, { status: res.status });
-    } catch {
-      // Fall through
-    }
+  } catch (err: any) {
+    console.warn('[Admin Orders API] Backend proxy error, using fallback:', err?.message);
   }
 
   return NextResponse.json({

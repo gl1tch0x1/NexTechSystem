@@ -6,6 +6,7 @@ import { resellerRepository } from '../repositories/reseller.repository.js';
 import { couponRepository } from '../repositories/coupon.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { purchaseOrderRepository } from '../repositories/purchase-order.repository.js';
+import { quoteRepository } from '../repositories/quote.repository.js';
 import { orderRepository } from '../repositories/order.repository.js';
 import {
   heroHighlightRepo,
@@ -31,7 +32,8 @@ import {
   SEED_BUILDER_PRESETS,
   SEED_STORE_SETTINGS,
   SEED_PURCHASE_ORDERS,
-  SEED_ORDERS
+  SEED_ORDERS,
+  SEED_QUOTES
 } from './seed-data.js';
 
 import { ebillService } from '../services/ebill.service.js';
@@ -129,7 +131,10 @@ export async function runSeed(clean = false) {
   for (const ord of SEED_ORDERS) {
     await orderRepository.create(ord);
   }
-  console.log(`[Seed] Seeded ${SEED_PURCHASE_ORDERS.length} Purchase Orders and ${SEED_ORDERS.length} Sales Orders.`);
+  for (const q of SEED_QUOTES) {
+    await quoteRepository.create(q);
+  }
+  console.log(`[Seed] Seeded ${SEED_PURCHASE_ORDERS.length} Purchase Orders, ${SEED_ORDERS.length} Sales Orders, and ${SEED_QUOTES.length} B2B Enterprise Quotes.`);
 
   // 9. Initial Customer & Admin Digital Wallets
   await walletService.creditWallet({

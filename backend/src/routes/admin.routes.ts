@@ -78,6 +78,7 @@ router.post('/restore', (req, res, next) => adminController.restoreBackup(req, r
 
 // 12. Purchase Orders & Automated Restock
 router.get('/purchase-orders', (req, res, next) => adminController.getPurchaseOrders(req, res).catch(next));
+router.post('/purchase-orders', (req, res, next) => adminController.createPurchaseOrder(req, res).catch(next));
 router.post('/purchase-orders/generate-low-stock', (req, res, next) => adminController.generateLowStockPO(req, res).catch(next));
 router.put('/purchase-orders/:id/status', (req, res, next) => adminController.updatePOStatus(req, res).catch(next));
 

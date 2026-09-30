@@ -2,38 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { FALLBACK_USERS } from '@/lib/fallback-data';
 
 export async function GET(request: NextRequest) {
-  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
+  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const authHeader = request.headers.get('authorization');
+  const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
-  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
-    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
-    try {
-      const res = await fetch(`${clean}/api/admin/customers`, {
-        headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
-        signal: AbortSignal.timeout(5000),
-      });
+  try {
+    const res = await fetch(`${clean}/api/admin/customers`, {
+      headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
       const json = await res.json();
       return NextResponse.json(json, { status: res.status });
-    } catch {
-      // Fall through
     }
-  }
-
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      const res = await fetch('http://localhost:5000/api/admin/customers', {
-        headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
-        signal: AbortSignal.timeout(1500),
-      });
-      // Only use backend response if it was authorised
-      if (res.ok) {
-        const json = await res.json();
-        return NextResponse.json(json, { status: res.status });
-      }
-      // Non-ok (e.g. 401) → fall through to fallback below
-    } catch {
-      // Fetch error → fall through to fallback
-    }
+  } catch (err: any) {
+    console.warn('[Admin Customers API] Backend proxy error, using fallback:', err?.message);
   }
 
   const customers = FALLBACK_USERS.filter(u => u.role === 'CUSTOMER').map(u => ({
@@ -46,5 +30,6 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     success: true,
     data: customers,
+    meta: { total: customers.length },
   });
 }

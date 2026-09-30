@@ -80,14 +80,20 @@ let memoryQuotes: any[] = [
   },
 ];
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get('authorization') || '';
   try {
-    const res = await fetch(`${BACKEND_URL}/quotes`, { cache: 'no-store' });
+    const res = await fetch(`${BACKEND_URL}/quotes`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    });
     if (res.ok) {
       const data = await res.json();
-      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        return NextResponse.json(data);
-      }
+      return NextResponse.json(data);
     }
   } catch (err) {
     // backend not available, use memory
@@ -100,14 +106,19 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const authHeader = request.headers.get('authorization') || '';
   try {
     const body = await request.json();
 
     try {
       const res = await fetch(`${BACKEND_URL}/quotes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(5000),
       });
       if (res.ok) {
         const data = await res.json();
