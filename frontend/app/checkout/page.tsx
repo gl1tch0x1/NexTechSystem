@@ -20,9 +20,15 @@ import {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, token } = useAuth();
+  const { user, token, isLoading: authLoading } = useAuth();
   const { cart, cartItems, cartCount, clearCart } = useCart();
   const { formatPrice } = useCurrency();
+
+  useEffect(() => {
+    if (!user && !authLoading) {
+      router.push('/login?redirect=/checkout');
+    }
+  }, [user, authLoading, router]);
 
   const [shippingAddress, setShippingAddress] = useState<Address>({
     id: 'addr_temp',

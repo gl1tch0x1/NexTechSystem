@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import {
@@ -13,10 +14,12 @@ import {
   Store,
   Tag,
   ShoppingBag,
-  Sparkles
+  Sparkles,
+  Lock,
 } from 'lucide-react';
 
 export default function CartPage() {
+  const { user, isLoading: authLoading } = useAuth();
   const {
     cart,
     cartItems,
@@ -48,6 +51,36 @@ export default function CartPage() {
       setCouponLoading(false);
     }
   };
+
+  if (!user && !authLoading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
+        <div className="w-20 h-20 rounded-3xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900 flex items-center justify-center text-tech-blue dark:text-cyan-400 mx-auto shadow-sm">
+          <Lock className="w-10 h-10" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Sign In to Access Your Cart</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+            Your shopping cart is private and securely tied to your verified account. Please sign in or register to view your personal cart, reserve enterprise stock, and complete checkout.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <Link
+            href="/login?redirect=/cart"
+            className="px-6 py-3 bg-tech-blue text-white rounded-xl text-xs font-bold hover:bg-blue-600 transition-colors shadow-md shadow-blue-500/20"
+          >
+            Sign In / Register
+          </Link>
+          <Link
+            href="/products"
+            className="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
+          >
+            Explore Hardware
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (cartCount === 0) {
     return (

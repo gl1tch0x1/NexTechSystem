@@ -168,6 +168,11 @@ function AuthContent() {
   );
 
   const handleRoleRedirect = (authenticatedUser: any, resellerData: any) => {
+    const redirectParam = searchParams.get('redirect');
+    if (redirectParam && redirectParam.startsWith('/')) {
+      router.push(redirectParam);
+      return;
+    }
     if (authenticatedUser.role === 'ADMIN') {
       router.push('/admin');
     } else if (authenticatedUser.role === 'RESELLER' && (resellerData?.resellerCode || authenticatedUser.resellerId)) {

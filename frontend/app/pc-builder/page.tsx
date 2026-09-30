@@ -110,9 +110,11 @@ export default function PCBuilderPage() {
   const handleAddAllToCart = () => {
     const selectedProds = Object.values(slots).filter(Boolean) as Product[];
     if (selectedProds.length === 0) return;
-    addBundleToCart(selectedProds);
-    setBundleAdded(true);
-    setTimeout(() => setBundleAdded(false), 3000);
+    const added = addBundleToCart(selectedProds);
+    if (added) {
+      setBundleAdded(true);
+      setTimeout(() => setBundleAdded(false), 3000);
+    }
   };
 
   const selectedCount = Object.values(slots).filter(Boolean).length;

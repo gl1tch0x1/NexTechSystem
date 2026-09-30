@@ -72,9 +72,11 @@ export function ProductCard({ product }: { product: Product }) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isOutOfStock) return;
-    addToCart(product, 1);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1800);
+    const added = addToCart(product, 1);
+    if (added) {
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1800);
+    }
   };
 
   return (

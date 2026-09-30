@@ -247,14 +247,14 @@ export function Navbar() {
           >
             <div className="relative">
               <ShoppingCart className="w-4 h-4" />
-              {cartCount > 0 && (
+              {user && cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 w-4 h-4 bg-tech-blue text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-xs">
                   {cartCount}
                 </span>
               )}
             </div>
             <span className="hidden sm:inline font-mono text-xs">
-              {cart.total > 0 ? formatPrice(cart.total) : 'Cart'}
+              {user && cart.total > 0 ? formatPrice(cart.total) : 'Cart'}
             </span>
           </Link>
 

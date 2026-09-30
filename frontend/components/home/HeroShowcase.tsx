@@ -98,8 +98,9 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    let added = false;
     if (matchedProduct) {
-      addToCart(matchedProduct, 1);
+      added = addToCart(matchedProduct, 1);
     } else {
       const tempProduct: Product = {
         id: `prod_${currentHighlight.id}_flagship`,
@@ -128,10 +129,12 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      addToCart(tempProduct, 1);
+      added = addToCart(tempProduct, 1);
     }
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 2000);
+    if (added) {
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 2000);
+    }
   };
 
   return (

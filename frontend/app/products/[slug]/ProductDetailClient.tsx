@@ -73,14 +73,18 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const isOutOfStock = currentStock === 0 && !product.allowBackorder;
 
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedVariant);
-    setAddedMessage(true);
-    setTimeout(() => setAddedMessage(false), 2500);
+    const added = addToCart(product, quantity, selectedVariant);
+    if (added) {
+      setAddedMessage(true);
+      setTimeout(() => setAddedMessage(false), 2500);
+    }
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity, selectedVariant);
-    router.push('/checkout');
+    const added = addToCart(product, quantity, selectedVariant);
+    if (added) {
+      router.push('/checkout');
+    }
   };
 
   return (
