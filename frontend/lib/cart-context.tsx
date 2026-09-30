@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Product, ProductVariant, CartItem, Cart } from '@/types';
 import { ApiClient } from './api-client';
 import { useAuth } from './auth-context';
-import { Lock, X, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface CartContextType {
   cart: Cart;
@@ -68,8 +67,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [couponCode, setCouponCode] = useState<string>('');
   const [isCalculating, setIsCalculating] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const prevUserIdRef = useRef<string | null>(null);
 
@@ -208,14 +205,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [wishlist, user?.id]);
 
-  // Helper to trigger login prompt when unauthenticated
+  // Directly redirect unauthenticated users to login with return path
   const promptLogin = useCallback(() => {
-    setAuthModalOpen(true);
-    setToastMessage('Authentication Required: Please log in to add products to your cart.');
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4500);
-  }, []);
+    const returnUrl = typeof window !== 'undefined'
+      ? window.location.pathname + window.location.search
+      : (pathname || '/');
+    router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+  }, [router, pathname]);
 
   const addToCart = (product: Product, quantity = 1, selectedVariant?: ProductVariant | null): boolean => {
     if (!user) {
@@ -456,94 +452,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-
-      {/* Floating Authentication Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-4 right-4 z-50 max-w-sm w-full bg-slate-900/95 dark:bg-[#0E1527]/95 text-white border border-blue-500/40 rounded-2xl p-4 shadow-2xl backdrop-blur-xl flex items-start gap-3 animate-in slide-in-from-top-3 duration-300">
-          <div className="p-2 bg-blue-500/20 text-cyan-400 rounded-xl shrink-0 mt-0.5">
-            <Lock className="w-4 h-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-black tracking-wide text-white">Authentication Required</div>
-            <div className="text-[11px] text-slate-300 mt-0.5 leading-snug">{toastMessage}</div>
-            <div className="mt-2.5 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setToastMessage(null);
-                  router.push(`/login?redirect=${encodeURIComponent(pathname || '/')}`);
-                }}
-                className="px-3 py-1.5 bg-tech-blue hover:bg-blue-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all"
-              >
-                Sign In Now
-              </button>
-              <button
-                type="button"
-                onClick={() => setToastMessage(null)}
-                className="px-2.5 py-1.5 text-slate-400 hover:text-white text-[10px] font-bold transition-colors"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setToastMessage(null)}
-            className="text-slate-400 hover:text-white p-1"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* Modern High-Impact Modal for Login Prompt */}
-      {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#0B101D] border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 text-center relative overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Ambient Top Glow */}
-            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600/20 to-cyan-500/20 dark:from-blue-600/30 dark:to-cyan-400/30 border border-blue-500/30 flex items-center justify-center text-tech-blue dark:text-cyan-400 mx-auto shadow-inner">
-              <Lock className="w-7 h-7" />
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Sign In to Reserve Products
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mx-auto">
-                Hardware inventories, quotation locks, and personal carts are strictly reserved for verified users. Please sign in or create an account to add items to your cart.
-              </p>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2.5 text-left">
-              <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>Each user maintains their own dedicated hardware cart session.</span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setAuthModalOpen(false)}
-                className="w-full sm:w-1/2 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                Continue Browsing
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthModalOpen(false);
-                  router.push(`/login?redirect=${encodeURIComponent(pathname || '/')}`);
-                }}
-                className="w-full sm:w-1/2 py-3 rounded-xl bg-tech-blue hover:bg-blue-600 text-white text-xs font-black shadow-lg shadow-blue-500/25 flex items-center justify-center gap-1.5 transition-all"
-              >
-                <span>Sign In Now</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </CartContext.Provider>
   );
 }
