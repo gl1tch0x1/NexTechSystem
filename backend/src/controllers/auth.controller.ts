@@ -451,6 +451,108 @@ export class AuthController {
     });
   }
 
+  async changePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated.' } });
+      return;
+    }
+
+    const { currentPassword, newPassword } = req.body || {};
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'BAD_REQUEST', message: 'New password must be at least 8 characters long.' },
+      });
+      return;
+    }
+
+    const user = await userRepository.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User account not found.' } });
+      return;
+    }
+
+    // If user has a password set, require verifying current password
+    if (user.passwordHash) {
+      if (!currentPassword || typeof currentPassword !== 'string') {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Current password is required.' },
+        });
+        return;
+      }
+
+      const isValid = verifyPassword(currentPassword, user.passwordHash);
+      if (!isValid) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_CREDENTIALS', message: 'Current password does not match.' },
+        });
+        return;
+      }
+    }
+
+    const newHash = hashPassword(newPassword);
+    await userRepository.update(user.id, {
+      passwordHash: newHash,
+      updatedAt: new Date().toISOString(),
+    });
+
+    res.json({
+      success: true,
+      message: 'Password has been updated successfully.',
+    });
+  }
+
+  async deleteAccount(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated.' } });
+      return;
+    }
+
+    const { password, confirmation } = req.body || {};
+    const user = await userRepository.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User account not found.' } });
+      return;
+    }
+
+    // Require either correct password or confirmation phrase "DELETE"
+    if (user.passwordHash && password) {
+      const isValid = verifyPassword(password, user.passwordHash);
+      if (!isValid) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_CREDENTIALS', message: 'Incorrect password provided for deletion.' },
+        });
+        return;
+      }
+    } else if (confirmation !== 'DELETE') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'BAD_REQUEST', message: 'Please enter your password or type DELETE to confirm deletion.' },
+      });
+      return;
+    }
+
+    // Permanently remove the user
+    await userRepository.delete(user.id);
+
+    // If reseller record exists, update reseller status to SUSPENDED
+    if (user.resellerId) {
+      try {
+        await resellerRepository.update(user.resellerId, { status: 'SUSPENDED' });
+      } catch {
+        // Continue
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Account has been permanently deleted.',
+    });
+  }
+
   async googleAuth(req: Request, res: Response): Promise<void> {
     const { email, name, photoURL } = req.body;
 
