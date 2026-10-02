@@ -9,7 +9,11 @@ import { formatPrice, formatDate } from '@/lib/utils';
 import { Order, EBill } from '@/types';
 import {
   Printer,
-  ArrowLeft
+  ArrowLeft,
+  FileText,
+  Truck,
+  CheckCircle2,
+  ChevronRight
 } from 'lucide-react';
 
 export default function OrderDetailPage() {
@@ -36,69 +40,139 @@ export default function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center text-xs text-slate-400">
-        Loading invoice details...
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center text-xs text-slate-400">
+        Loading order and electronic invoice details...
       </div>
     );
   }
 
   if (!order) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Order Not Found</h2>
-        <p className="text-xs text-slate-400">The requested order was not found or belongs to another user.</p>
-        <Link href="/account/orders" className="text-xs font-bold text-tech-blue hover:underline">
-          Return to Orders
+      <div className="max-w-xl mx-auto px-4 py-24 text-center space-y-4">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Order Record Not Found</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          The requested hardware order could not be located or may belong to another account.
+        </p>
+        <Link
+          href="/account/orders"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-tech-blue text-white text-xs font-bold"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Return to Orders</span>
         </Link>
       </div>
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Top Controls Bar */}
-      <div className="no-print flex items-center justify-between pb-6 border-b border-slate-200 dark:border-tech-slate">
-        <Link
-          href="/account/orders"
-          className="text-xs text-slate-400 hover:text-tech-blue flex items-center gap-1.5 font-bold"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to All Orders</span>
-        </Link>
+  const steps = [
+    { label: 'Order Confirmed', completed: true },
+    { label: 'Quality Tested & Packed', completed: order.orderStatus !== 'PENDING' },
+    { label: 'Dispatched with Courier', completed: order.orderStatus === 'SHIPPED' || order.orderStatus === 'DELIVERED' },
+    { label: 'Delivered', completed: order.orderStatus === 'DELIVERED' },
+  ];
 
-        <button
-          onClick={() => window.print()}
-          className="px-5 py-2.5 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-tech"
-        >
-          <Printer className="w-4 h-4" />
-          <span>Print / Download PDF E-Bill</span>
-        </button>
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
+      {/* Top Action Bar (Hidden on Print) */}
+      <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <Link href="/account" className="hover:text-tech-blue">Account</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <Link href="/account/orders" className="hover:text-tech-blue">Orders</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="font-mono font-bold text-slate-900 dark:text-white">{order.orderNumber}</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/orders/${order.id}/invoice`}
+            className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
+            title="Official FTA VAT-Compliant Tax Invoice"
+          >
+            <FileText className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
+            <span>Official FTA Invoice</span>
+          </Link>
+          <button
+            onClick={() => window.print()}
+            className="px-5 py-2 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-md shadow-blue-600/20"
+          >
+            <Printer className="w-4 h-4" />
+            <span>Print E-Bill (PDF)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Real-time Order Progress Stepper (Interactive view) */}
+      <div className="no-print p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Shipment Status
+            </div>
+            <div className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Truck className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
+              <span>{order.orderStatus}</span>
+              <span className="text-xs font-normal text-slate-500">• Insured Courier Logistics</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] uppercase font-bold text-slate-400">Tracking Code</div>
+            <div className="text-xs font-mono font-bold text-slate-900 dark:text-white">
+              {(order as any).trackingNumber || `NXT-TRK-${order.id.slice(0, 8).toUpperCase()}`}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          {steps.map((st, idx) => (
+            <div key={idx} className="flex items-center gap-2.5">
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
+                  st.completed
+                    ? 'bg-tech-blue text-white shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                }`}
+              >
+                {st.completed ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
+              </div>
+              <span
+                className={`text-xs font-bold ${
+                  st.completed ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                {st.label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Printable Electronic Tax Invoice (E-Bill) Container */}
       <div
         id="printable-ebill"
-        className="p-8 sm:p-12 rounded-3xl bg-white text-slate-900 border border-slate-200 shadow-2xl space-y-8"
+        className="p-8 sm:p-12 rounded-3xl bg-white text-slate-900 border border-slate-200 shadow-xl space-y-8 print:border-none print:shadow-none print:p-0"
       >
         {/* Invoice Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b-2 border-slate-900">
           <div>
-            <div className="text-2xl font-black tracking-tight text-slate-900">
-              NEXTECH<span className="text-blue-600">SYSTEMS</span>
+            <div className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-1">
+              <span>NEXTECH</span>
+              <span className="text-blue-600">SYSTEMS</span>
             </div>
             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
-              Official Electronic Tax Invoice
+              Official Electronic Tax Invoice & E-Bill
             </div>
             <div className="text-xs text-slate-600 mt-2 space-y-0.5">
-              <div>NexTech Systems LLC • Silicon Oasis Tech Park, Dubai, UAE</div>
+              <div>NexTech Systems LLC • Silicon Oasis Technology Park, Dubai, UAE</div>
               <div>Tax Registration Number (TRN): <strong>TRN-10029384910003</strong></div>
-              <div>Support: support@nextechsystems.com • +971 4 800 TECH</div>
+              <div>Direct Dispatch Center: Dubai Industrial City, Hub 4</div>
+              <div>Customer Care: support@nextechsystems.com • +971 4 800 TECH</div>
             </div>
           </div>
 
           <div className="sm:text-right space-y-1">
             <div className="inline-block px-3 py-1 bg-slate-900 text-white font-mono text-xs font-bold rounded">
-              {ebill?.invoiceNumber || `INV-2026-${order.orderNumber.slice(-6)}`}
+              {ebill?.invoiceNumber || `INV-2026-${order.orderNumber.replace(/[^0-9]/g, '').slice(-6) || '104928'}`}
             </div>
             <div className="text-xs text-slate-600">
               Order Ref: <strong>{order.orderNumber}</strong>
@@ -120,6 +194,7 @@ export default function OrderDetailPage() {
             </div>
             <div className="font-extrabold text-sm text-slate-900">{order.customerName}</div>
             <div>{order.shippingAddress.addressLine1}</div>
+            {order.shippingAddress.addressLine2 && <div>{order.shippingAddress.addressLine2}</div>}
             <div>{order.shippingAddress.city}, {order.shippingAddress.country}</div>
             <div>Phone: {order.customerPhone || order.shippingAddress.phone}</div>
             <div>Email: {order.customerEmail}</div>
@@ -127,11 +202,11 @@ export default function OrderDetailPage() {
 
           <div>
             <div className="font-bold text-slate-400 uppercase tracking-wider text-[11px] mb-1">
-              Fulfillment & Dispatch:
+              Fulfillment & Dispatch Logistics:
             </div>
             <div>Status: <strong className="text-slate-900">{order.orderStatus}</strong></div>
-            <div>Carrier: Insured GCC Express Logistics</div>
-            <div>Estimated Delivery: 1 - 2 Business Days</div>
+            <div>Carrier: Insured GCC Express Logistics (Next-Day Priority)</div>
+            <div>Tracking Reference: <strong className="font-mono text-slate-900">{(order as any).trackingNumber || 'GCC-NXT-EXPRESS'}</strong></div>
             {order.notes && (
               <div className="mt-2 text-slate-500 italic">
                 Notes: &ldquo;{order.notes}&rdquo;
@@ -150,21 +225,30 @@ export default function OrderDetailPage() {
                 <th className="py-3">Seller Attribution</th>
                 <th className="py-3 text-center">Qty</th>
                 <th className="py-3 text-right">Unit Price</th>
-                <th className="py-3 text-right">Subtotal</th>
+                <th className="py-3 text-right">Line Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {order.items.map((item, idx) => (
                 <tr key={idx}>
                   <td className="py-3.5 pr-2 font-bold text-slate-900">
-                    {item.productName}
+                    <div className="flex items-center gap-2.5">
+                      {item.thumbnail && (
+                        <img
+                          src={item.thumbnail}
+                          alt=""
+                          className="w-9 h-9 object-contain rounded p-0.5 bg-slate-50 border border-slate-200 shrink-0 print:hidden"
+                        />
+                      )}
+                      <span>{item.productName}</span>
+                    </div>
                   </td>
                   <td className="py-3.5 font-mono text-slate-500">{item.sku}</td>
                   <td className="py-3.5">
                     {item.sellerType === 'RESELLER' ? (
-                      <span className="font-semibold text-amber-700">Reseller: {item.resellerCode}</span>
+                      <span className="font-semibold text-amber-700">Partner: {item.resellerCode}</span>
                     ) : (
-                      <span className="font-semibold text-blue-700">NexTech Official</span>
+                      <span className="font-semibold text-blue-700">NexTech Enterprise Direct</span>
                     )}
                   </td>
                   <td className="py-3.5 text-center font-bold">{item.quantity}</td>
@@ -180,7 +264,7 @@ export default function OrderDetailPage() {
 
         {/* Financial Totals Calculation Box */}
         <div className="flex justify-end pt-4 border-t-2 border-slate-200">
-          <div className="w-72 space-y-2 text-xs">
+          <div className="w-80 space-y-2 text-xs">
             <div className="flex items-center justify-between text-slate-600">
               <span>Gross Subtotal:</span>
               <span className="font-mono font-bold">{formatPrice(order.subtotal)}</span>
@@ -194,20 +278,20 @@ export default function OrderDetailPage() {
             )}
 
             <div className="flex items-center justify-between text-slate-600">
-              <span>Insured Shipping Fee:</span>
+              <span>Insured Shipping & Handling:</span>
               <span className="font-mono font-bold">
                 {order.shippingFee === 0 ? 'FREE' : formatPrice(order.shippingFee)}
               </span>
             </div>
 
             <div className="flex items-center justify-between text-slate-600">
-              <span>UAE VAT ({order.taxRate}% Included):</span>
+              <span>UAE VAT (5% Standard FTA Rate):</span>
               <span className="font-mono font-bold">{formatPrice(order.tax)}</span>
             </div>
 
             {order.walletAmountUsed > 0 && (
               <div className="flex items-center justify-between text-blue-600 font-bold">
-                <span>Customer Wallet Deduction:</span>
+                <span>Customer Digital Wallet Applied:</span>
                 <span className="font-mono">-{formatPrice(order.walletAmountUsed)}</span>
               </div>
             )}
@@ -223,12 +307,12 @@ export default function OrderDetailPage() {
 
         {/* Legal Disclaimers & Official Seal */}
         <div className="pt-6 border-t border-slate-200 text-[11px] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div>This is an official system-generated electronic tax invoice authorized under UAE VAT legislation.</div>
-            <div>All hardware serial numbers are recorded in our audit ledger for warranty validation.</div>
+          <div className="space-y-0.5">
+            <div>This document is an electronic tax invoice authorized under UAE Federal Decree Law No. 8 of 2017 on VAT.</div>
+            <div>All hardware component serial numbers are logged into the NexTech enterprise warranty registry.</div>
           </div>
           <div className="text-right font-mono font-bold text-slate-400">
-            CONFIRMATION SEAL: {order.id.slice(0, 16).toUpperCase()}
+            DIGITAL SEAL: {order.id.slice(0, 16).toUpperCase()}
           </div>
         </div>
       </div>

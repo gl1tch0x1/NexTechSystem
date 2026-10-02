@@ -544,6 +544,54 @@ function AuthContent() {
                 </>
               )}
             </button>
+
+            {/* Quick Demo Logins for Testing & Evaluation */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Demo Fast Fill
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">password@123</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginEmail('client@nextech.com');
+                    setLoginPassword('password@123');
+                    setError('');
+                  }}
+                  className="py-1.5 px-2 rounded-lg bg-blue-50 dark:bg-slate-800/80 hover:bg-blue-100 dark:hover:bg-slate-700 text-tech-blue dark:text-cyan-300 text-[10px] font-bold border border-blue-200 dark:border-slate-700 transition-colors text-center truncate"
+                  title="Fill Customer Demo (client@nextech.com)"
+                >
+                  Customer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginEmail('admin@nextech.com');
+                    setLoginPassword('password@123');
+                    setError('');
+                  }}
+                  className="py-1.5 px-2 rounded-lg bg-purple-50 dark:bg-slate-800/80 hover:bg-purple-100 dark:hover:bg-slate-700 text-purple-600 dark:text-purple-300 text-[10px] font-bold border border-purple-200 dark:border-slate-700 transition-colors text-center truncate"
+                  title="Fill Admin Demo (admin@nextech.com)"
+                >
+                  Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginEmail('partner@comnet.ae');
+                    setLoginPassword('password@123');
+                    setError('');
+                  }}
+                  className="py-1.5 px-2 rounded-lg bg-amber-50 dark:bg-slate-800/80 hover:bg-amber-100 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 text-[10px] font-bold border border-amber-200 dark:border-slate-700 transition-colors text-center truncate"
+                  title="Fill Reseller Demo (partner@comnet.ae)"
+                >
+                  Reseller
+                </button>
+              </div>
+            </div>
           </form>
         )}
 
