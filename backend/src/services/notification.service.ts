@@ -146,9 +146,9 @@ export class NotificationService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(discordPayload),
       });
-      console.log('[NotificationService] Discord embed dispatched for Order #%s', order.orderNumber);
+      console.log('[NotificationService] Discord embed dispatched for Order #%s', String(order.orderNumber).replace(/\n|\r/g, ''));
     } else {
-      console.log('[NotificationService: ChatOps Discord Mock] Webhook not configured in env. Discord Embed Generated:\n', JSON.stringify(discordPayload, null, 2));
+      console.log('[NotificationService: ChatOps Discord Mock] Webhook not configured in env.');
     }
   }
 
@@ -195,9 +195,9 @@ export class NotificationService {
           },
         }),
       });
-      console.log('[NotificationService] Telegram message dispatched for Order #%s', order.orderNumber);
+      console.log('[NotificationService] Telegram message dispatched for Order #%s', String(order.orderNumber).replace(/\n|\r/g, ''));
     } else {
-      console.log('[NotificationService: ChatOps Telegram Mock] Telegram bot token not configured. Telegram Message Formatted:\n', text);
+      console.log('[NotificationService: ChatOps Telegram Mock] Telegram bot token not configured.');
     }
   }
 
@@ -209,8 +209,10 @@ export class NotificationService {
     dashboardUrl: string
   ): Promise<void> {
     const adminEmail = ENV.ADMIN_NOTIFICATION_EMAIL || ENV.ADMIN_DEFAULT_EMAIL;
+    const safeAdminEmail = String(adminEmail).replace(/\n|\r/g, '');
+    const safeOrderNum = String(order.orderNumber).replace(/\n|\r/g, '');
     console.log(
-      `[NotificationService: Email Dispatch] Dispatched to admin [${adminEmail}] for Order #${order.orderNumber} ` +
+      `[NotificationService: Email Dispatch] Dispatched to admin [${safeAdminEmail}] for Order #${safeOrderNum} ` +
       `(Dashboard: ${dashboardUrl})`
     );
   }
