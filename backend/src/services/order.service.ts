@@ -4,7 +4,6 @@ import { productRepository } from '../repositories/product.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 import { pricingService } from './pricing.service.js';
 import { inventoryService } from './inventory.service.js';
-import { walletService } from './wallet.service.js';
 import { ebillService } from './ebill.service.js';
 import { auditService } from './audit.service.js';
 import { userRepository } from '../repositories/user.repository.js';
@@ -68,19 +67,13 @@ export class OrderService {
       productsMap.set(pid, p);
     }
 
-    // 2. Fetch customer wallet balance if requesting wallet deduction
-    let userWalletBalance = 0;
-    if (dto.walletAmountToUse && dto.walletAmountToUse > 0) {
-      userWalletBalance = await walletService.getBalance(dto.userId);
-    }
+
 
     // 3. Authoritative pricing calculation
     const pricing = await pricingService.calculateOrderTotals({
       items: dto.items,
       productsMap,
       couponCode: dto.couponCode,
-      requestedWalletDeduction: dto.walletAmountToUse,
-      userWalletBalance,
       taxTreatment: dto.taxTreatment,
     });
 
@@ -107,15 +100,7 @@ export class OrderService {
       // 5. Decrement inventory
       await inventoryService.deductStock(dto.items);
 
-      // 6. Deduct from wallet if used
-      if (pricing.walletAmountUsed > 0) {
-        await walletService.debitWallet({
-          userId: dto.userId,
-          amount: pricing.walletAmountUsed,
-          reason: `Payment for Order #${orderNumber}`,
-          referenceId: orderId,
-        });
-      }
+
 
       // 7. Format order items with seller attribution and variant specifics
       const orderItems: OrderItem[] = pricing.items.map(item => {
@@ -153,7 +138,7 @@ export class OrderService {
         subtotal: pricing.subtotal,
         discount: pricing.discount,
         couponCode: pricing.couponCode,
-        walletAmountUsed: pricing.walletAmountUsed,
+        walletAmountUsed: 0,
         tax: pricing.tax,
         taxRate: pricing.taxRate,
         shippingFee: pricing.shippingFee,
@@ -371,22 +356,9 @@ export class OrderService {
       }
     }
 
-    // 2. Refund wallet if used
-    if (order.walletAmountUsed && order.walletAmountUsed > 0) {
-      try {
-        await walletService.creditWallet({
-          userId: order.userId,
-          amount: order.walletAmountUsed,
-          reason: `Automated Refund for Rejected Order #${order.orderNumber}`,
-          referenceId: order.id,
-          type: 'CREDIT',
-        });
-      } catch (err) {
-        console.error('[OrderService] Wallet refund failed for order:', String(orderId).replace(/\n|\r/g, ''), err);
-      }
-    }
 
-    const rejectionNote = reason || `Order rejected by administrator via ${channel}. Inventory stock & wallet funds restored.`;
+
+    const rejectionNote = reason || `Order rejected by administrator via ${channel}. Reserved inventory stock restored.`;
     const newHistory = [
       ...order.statusHistory,
       {

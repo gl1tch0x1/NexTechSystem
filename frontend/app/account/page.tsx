@@ -6,10 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { Order, Address, Wallet } from '@/types';
+import { Order, Address } from '@/types';
 import { CustomerPortalHeader } from '@/components/account/CustomerPortalHeader';
 import { AddressManagementModal } from '@/components/account/AddressManagementModal';
-import { DirhamBadge } from '@/components/ui/DirhamSymbol';
 import {
   User,
   ShoppingBag,
@@ -35,7 +34,7 @@ import {
   Edit2,
   Cpu,
   PackageCheck,
-  CreditCard
+  Heart
 } from 'lucide-react';
 
 type TabType = 'overview' | 'security' | 'settings';
@@ -46,7 +45,6 @@ function CustomerAccountContent() {
   const { user, token, isAuthenticated, logout, refreshUser } = useAuth();
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Tab State synced with URL query parameter
@@ -107,19 +105,16 @@ function CustomerAccountContent() {
     }
   }, [user]);
 
-  // Load orders and customer wallet
+  // Load orders
   useEffect(() => {
     if (token) {
       setLoading(true);
-      Promise.all([
-        ApiClient.get<Order[]>('/orders/my', { token }).catch(() => []),
-        ApiClient.get<{ wallet: Wallet }>('/wallet', { token }).catch(() => null),
-      ])
-        .then(([ordRes, walRes]) => {
+      ApiClient.get<Order[]>('/orders/my', { token })
+        .then((ordRes) => {
           setOrders(ordRes || []);
-          if (walRes && walRes.wallet) {
-            setWallet(walRes.wallet);
-          }
+        })
+        .catch(() => {
+          setOrders([]);
         })
         .finally(() => setLoading(false));
     } else {
@@ -362,7 +357,7 @@ function CustomerAccountContent() {
             Customer Account Access
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-            Please sign in to securely access your hardware orders, purchase invoices, digital wallet, and delivery addresses.
+            Please sign in to securely access your hardware orders, purchase invoices, saved delivery addresses, and account security.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
@@ -402,7 +397,6 @@ function CustomerAccountContent() {
       <CustomerPortalHeader
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        walletBalance={wallet?.balance}
         totalOrdersCount={orders.length}
       />
 
@@ -466,25 +460,26 @@ function CustomerAccountContent() {
               </div>
             </Link>
 
-            {/* Card 4: Digital Wallet */}
-            <Link
-              href="/account/wallet"
-              className="group p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-cyan dark:hover:border-tech-cyan shadow-xs hover:shadow-lg transition-all"
+            {/* Card 4: Saved Delivery Addresses */}
+            <button
+              type="button"
+              onClick={() => handleTabChange('settings')}
+              className="text-left group p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-cyan dark:hover:border-tech-cyan shadow-xs hover:shadow-lg transition-all"
             >
               <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Digital Wallet</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">Saved Addresses</span>
                 <div className="p-2.5 rounded-2xl bg-cyan-50 dark:bg-slate-800 text-tech-cyan group-hover:scale-110 transition-transform">
-                  <DirhamBadge size={22} variant="glass" weight="bold" />
+                  <MapPin className="w-5 h-5" />
                 </div>
               </div>
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                {wallet?.balance !== undefined ? formatPrice(wallet.balance) : 'AED 0.00'}
+                {user?.addresses?.length || 0}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 group-hover:text-tech-cyan transition-colors">
-                <span>Instant top-up & ledger</span>
+                <span>Manage delivery locations</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
-            </Link>
+            </button>
           </div>
 
           {/* Quick Actions Hub */}
@@ -516,11 +511,11 @@ function CustomerAccountContent() {
                 <span>Manage Addresses</span>
               </button>
               <Link
-                href="/account/wallet"
+                href="/account/wishlist"
                 className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-blue text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-xs hover:shadow flex flex-col gap-2"
               >
-                <CreditCard className="w-5 h-5 text-amber-500" />
-                <span>Add Wallet Funds</span>
+                <Heart className="w-5 h-5 text-rose-500" />
+                <span>Saved Wishlist</span>
               </Link>
             </div>
           </div>

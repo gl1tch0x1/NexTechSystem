@@ -7,15 +7,14 @@ import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
-import { Order, PaymentMethod, Address, Wallet } from '@/types';
+import { Order, PaymentMethod, Address } from '@/types';
 import {
   ShieldCheck,
   CreditCard,
-  Wallet as WalletIcon,
+  Building2,
   Truck,
   AlertCircle,
   Lock,
-  Sparkles,
   CheckCircle2,
   MapPin,
   Tag,
@@ -71,8 +70,6 @@ export default function CheckoutPage() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CREDIT_CARD');
-  const [walletBalance, setWalletBalance] = useState<number>(0);
-  const [useWalletAmount, setUseWalletAmount] = useState<number>(0);
   const [orderNotes, setOrderNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -135,16 +132,7 @@ export default function CheckoutPage() {
     }
   };
 
-  // Fetch customer wallet balance
-  useEffect(() => {
-    if (token) {
-      ApiClient.get<{ wallet: Wallet }>('/wallet', { token })
-        .then(res => {
-          if (res?.wallet) setWalletBalance(res.wallet.balance);
-        })
-        .catch(() => {});
-    }
-  }, [token]);
+
 
   // If cart is empty, redirect
   useEffect(() => {
@@ -153,14 +141,7 @@ export default function CheckoutPage() {
     }
   }, [cartCount, isSubmitting, router]);
 
-  const handleWalletToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      const maxApplicable = Math.min(walletBalance, cart.total);
-      setUseWalletAmount(maxApplicable);
-    } else {
-      setUseWalletAmount(0);
-    }
-  };
+
 
   const handleApplyCouponCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,7 +201,6 @@ export default function CheckoutPage() {
         billingAddress: shippingAddress,
         paymentMethod,
         couponCode: cart.couponCode || activeCouponCode || undefined,
-        walletAmountToUse: useWalletAmount > 0 ? useWalletAmount : undefined,
         notes: orderNotes || undefined,
         customerPhone: shippingAddress.phone,
       };
@@ -235,7 +215,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const finalPayable = Math.max(0, Math.round((cart.total - useWalletAmount) * 100) / 100);
+  const finalPayable = cart.total;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
@@ -453,7 +433,7 @@ export default function CheckoutPage() {
                   2. Select Settlement Method
                 </h3>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Select payment gateway: Credit / Debit Card, Direct Customer Wallet, or Cash on Delivery.
+                  Select payment gateway: Credit / Debit Card, Bank Wire Transfer, or Cash on Delivery.
                 </p>
               </div>
             </div>
@@ -496,37 +476,37 @@ export default function CheckoutPage() {
                 </div>
               </label>
 
-              {/* Customer Wallet */}
+              {/* Bank Wire Transfer */}
               <label
                 className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all ${
-                  paymentMethod === 'WALLET'
+                  paymentMethod === 'BANK_TRANSFER'
                     ? 'border-tech-blue bg-blue-50/70 dark:bg-blue-950/40 text-slate-900 dark:text-white ring-2 ring-tech-blue/30 shadow-xs'
                     : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-950/60'
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className={`p-2 rounded-xl ${
-                    paymentMethod === 'WALLET'
-                      ? 'bg-cyan-600 text-white'
+                    paymentMethod === 'BANK_TRANSFER'
+                      ? 'bg-emerald-600 text-white'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                   }`}>
-                    <WalletIcon className="w-4 h-4" />
+                    <Building2 className="w-4 h-4" />
                   </div>
                   <input
                     type="radio"
                     name="paymentMethod"
-                    checked={paymentMethod === 'WALLET'}
-                    onChange={() => setPaymentMethod('WALLET')}
+                    checked={paymentMethod === 'BANK_TRANSFER'}
+                    onChange={() => setPaymentMethod('BANK_TRANSFER')}
                     className="w-4 h-4 text-tech-blue cursor-pointer"
                   />
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-slate-900 dark:text-white">Customer Wallet</div>
-                  <div className="text-[10px] text-tech-blue dark:text-tech-cyan font-bold mt-0.5 font-mono">
-                    Balance: {formatPrice(walletBalance)}
+                  <div className="font-bold text-xs text-slate-900 dark:text-white">Bank Wire Transfer</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Corporate / IBAN transfer
                   </div>
                   <div className="text-[9px] text-slate-500 dark:text-slate-400 mt-1">
-                    Direct ledger deduction
+                    Invoice with FTA TRN
                   </div>
                 </div>
               </label>
@@ -567,33 +547,7 @@ export default function CheckoutPage() {
               </label>
             </div>
 
-            {/* Optional Wallet Partial Deduction Banner (if not already full wallet payment and balance > 0) */}
-            {paymentMethod !== 'WALLET' && walletBalance > 0 && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 to-cyan-50/70 dark:from-blue-950/30 dark:to-cyan-950/20 border border-blue-200 dark:border-blue-900/40 flex items-center justify-between gap-3 shadow-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-tech-blue text-white flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-slate-900 dark:text-white">
-                      Redeem Customer Wallet Balance ({formatPrice(walletBalance)} available)
-                    </div>
-                    <div className="text-[11px] text-slate-600 dark:text-slate-400">
-                      Apply up to {formatPrice(Math.min(walletBalance, cart.total))} directly toward this invoice
-                    </div>
-                  </div>
-                </div>
-                <label className="flex items-center gap-2 cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={useWalletAmount > 0}
-                    onChange={handleWalletToggle}
-                    className="w-4 h-4 rounded text-tech-blue cursor-pointer"
-                  />
-                  <span className="text-xs font-bold text-tech-blue dark:text-tech-cyan">Apply</span>
-                </label>
-              </div>
-            )}
+
 
             {/* Delivery Instructions */}
             <div className="pt-2">
@@ -735,12 +689,7 @@ export default function CheckoutPage() {
                 <span className="font-bold font-mono text-slate-900 dark:text-white">{formatPrice(cart.tax)}</span>
               </div>
 
-              {useWalletAmount > 0 && (
-                <div className="flex items-center justify-between text-tech-blue dark:text-tech-cyan font-bold">
-                  <span>Wallet Balance Deduction:</span>
-                  <span className="font-mono">-{formatPrice(useWalletAmount)}</span>
-                </div>
-              )}
+
             </div>
 
             {/* Total Box */}

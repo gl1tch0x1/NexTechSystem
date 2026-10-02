@@ -4,12 +4,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
-import { formatPrice } from '@/lib/utils';
-import { DirhamBadge } from '@/components/ui/DirhamSymbol';
 import {
   LayoutDashboard,
   ShoppingBag,
-  Wallet as WalletIcon,
   Heart,
   ShieldCheck,
   MapPin,
@@ -29,7 +26,6 @@ interface CustomerPortalHeaderProps {
 export function CustomerPortalHeader({
   activeTab = 'overview',
   onTabChange,
-  walletBalance,
   totalOrdersCount = 0,
 }: CustomerPortalHeaderProps) {
   const { user, logout } = useAuth();
@@ -39,7 +35,6 @@ export function CustomerPortalHeader({
 
   const isBaseAccountPage = pathname === '/account';
   const isOrdersPage = pathname.startsWith('/account/orders');
-  const isWalletPage = pathname.startsWith('/account/wallet');
   const isWishlistPage = pathname.startsWith('/account/wishlist');
 
   const navItems = [
@@ -66,15 +61,6 @@ export function CustomerPortalHeader({
       isActive: isOrdersPage,
       badge: totalOrdersCount > 0 ? String(totalOrdersCount) : null,
       onClick: () => router.push('/account/orders'),
-    },
-    {
-      id: 'wallet',
-      label: 'Digital Wallet',
-      icon: WalletIcon,
-      href: '/account/wallet',
-      isActive: isWalletPage,
-      badge: walletBalance !== undefined && walletBalance > 0 ? formatPrice(walletBalance) : null,
-      onClick: () => router.push('/account/wallet'),
     },
     {
       id: 'wishlist',
@@ -168,18 +154,20 @@ export function CustomerPortalHeader({
 
           {/* Quick Metrics & Logout */}
           <div className="flex items-center flex-wrap gap-3 sm:gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
-            {/* Wallet quick capsule */}
+            {/* Orders quick capsule */}
             <Link
-              href="/account/wallet"
+              href="/account/orders"
               className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-blue-50/70 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-700/80 transition-all shadow-xs"
             >
-              <DirhamBadge size={28} variant="glass" weight="bold" />
+              <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-tech-blue dark:text-tech-cyan flex items-center justify-center shrink-0">
+                <ShoppingBag className="w-4 h-4" />
+              </div>
               <div className="text-left">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
-                  Wallet Balance
+                  My Orders
                 </div>
                 <div className="text-sm font-black text-slate-900 dark:text-white">
-                  {walletBalance !== undefined ? formatPrice(walletBalance) : 'AED 0.00'}
+                  {totalOrdersCount} {totalOrdersCount === 1 ? 'Order' : 'Orders'}
                 </div>
               </div>
             </Link>
