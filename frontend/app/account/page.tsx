@@ -1139,13 +1139,13 @@ function CustomerAccountContent() {
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                To confirm permanent deletion, enter your current password or type <span className="font-mono text-red-500 dark:text-red-400">DELETE</span>:
+                To confirm permanent deletion, enter your current password (or type <span className="font-mono text-red-500 dark:text-red-400">DELETE</span> if signed in with Google):
               </label>
               <input
-                type="text"
+                type="password"
                 value={deleteConfirmation}
                 onChange={e => setDeleteConfirmation(e.target.value)}
-                placeholder="Type DELETE or your password"
+                placeholder="Enter your password or DELETE"
                 className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-red-500"
               />
             </div>

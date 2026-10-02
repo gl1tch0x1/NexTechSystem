@@ -21,6 +21,6 @@ router.post('/google', (req, res, next) => authController.googleAuth(req, res).c
 router.get('/me', authenticate, (req, res, next) => authController.getCurrentUser(req, res).catch(next));
 router.put('/profile', authenticate, (req, res, next) => authController.updateProfile(req, res).catch(next));
 router.post('/change-password', authenticate, (req, res, next) => authController.changePassword(req, res).catch(next));
-router.delete('/account', authenticate, (req, res, next) => authController.deleteAccount(req, res).catch(next));
+router.delete(['/account', '/delete-account'], authenticate, (req, res, next) => authController.deleteAccount(req, res).catch(next));
 
 export default router;

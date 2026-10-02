@@ -517,8 +517,16 @@ export class AuthController {
       return;
     }
 
-    // Require either correct password or confirmation phrase "DELETE"
-    if (user.passwordHash && password) {
+    // Require password re-authentication for local password accounts
+    if (user.passwordHash) {
+      if (!password || typeof password !== 'string') {
+        res.status(400).json({
+          success: false,
+          error: { code: 'PASSWORD_REQUIRED', message: 'Current password is required to delete this account.' },
+        });
+        return;
+      }
+
       const isValid = verifyPassword(password, user.passwordHash);
       if (!isValid) {
         res.status(400).json({
@@ -527,12 +535,15 @@ export class AuthController {
         });
         return;
       }
-    } else if (confirmation !== 'DELETE') {
-      res.status(400).json({
-        success: false,
-        error: { code: 'BAD_REQUEST', message: 'Please enter your password or type DELETE to confirm deletion.' },
-      });
-      return;
+    } else {
+      // For federated OAuth accounts without a password hash (e.g. Google Sign-in)
+      if (confirmation !== 'DELETE') {
+        res.status(400).json({
+          success: false,
+          error: { code: 'CONFIRMATION_REQUIRED', message: 'Please type DELETE to confirm permanent account deletion.' },
+        });
+        return;
+      }
     }
 
     // Permanently remove the user
