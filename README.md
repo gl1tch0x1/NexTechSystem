@@ -1,135 +1,128 @@
-# NexTech Systems - Enterprise Computer & Technology E-Commerce Platform
+# NexTech Systems | Enterprise Computer & Technology Commerce Platform
 
-[![Next.js 15](https://img.shields.io/badge/Next.js-15.2.0-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![React 19](https://img.shields.io/badge/React-19.0.0-61DAFB?style=flat-square&logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Express.js](https://img.shields.io/badge/Express.js-5.2.1-000000?style=flat-square&logo=express)](https://expressjs.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![Cloudflare Turnstile](https://img.shields.io/badge/Cloudflare-Turnstile_Protected-F38020?style=flat-square&logo=cloudflare)](https://www.cloudflare.com/)
-[![CI Pipeline](https://img.shields.io/badge/CI%2FCD-Passing-2ea44f?style=flat-square&logo=githubactions)](.github/workflows/ci.yml)
-[![CodeQL Security](https://img.shields.io/badge/CodeQL-Protected-blue?style=flat-square&logo=github)](.github/workflows/codeql.yml)
-[![Dependabot](https://img.shields.io/badge/Dependabot-Active-0366d6?style=flat-square&logo=dependabot)](.github/dependabot.yml)
-[![Security Policy](https://img.shields.io/badge/Security-Hardened-red?style=flat-square&logo=shield)](SECURITY.md)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+<div align="center">
 
-NexTech Systems is an enterprise B2B and B2C computer hardware and technology commerce platform. Built for high-performance computing (HPC), AI workstation hardware, gaming systems, datacenter rack servers, and enterprise networking equipment, the platform incorporates a real-time PC Builder Compatibility Engine, Dedicated Enterprise Hardware SKU Studio, Multi-SKU Variant Engine, Regional Multi-Warehouse Inventory Balancing, B2B Quotes & Quote-to-Order Conversion Engine, Multi-Tenant Reseller Portals, Dynamic Multi-Currency Exchange, UAE FTA VAT 201 Compliance, Authoritative Server-Side Pricing, E-Bill Invoicing, Customer Wallet Ledger, Business Intelligence Analytics, and Cloudflare Edge Security.
+[![Next.js 15](https://img.shields.io/badge/Next.js-15.2.0-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript 5](https://img.shields.io/badge/TypeScript-5.8.2-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Express 5](https://img.shields.io/badge/Express-5.2.1-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Cloudflare Edge](https://img.shields.io/badge/Cloudflare-Turnstile_&_WAF-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://www.cloudflare.com/)
+[![CodeQL Security](https://img.shields.io/badge/CodeQL-Hardened-2ea44f?style=for-the-badge&logo=github&logoColor=white)](.github/workflows/codeql.yml)
+[![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-Passing-0366d6?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)](LICENSE)
+
+<br/>
+
+**NexTech Systems** is an enterprise-grade B2B & B2C computer hardware and advanced technology commerce platform. Architected for High-Performance Computing (HPC), AI workstation hardware, datacenter rack systems, and enterprise networking, the platform provides automated stock-aware order routing, real-time PC builder compatibility diagnostics, multi-tenant vendor portals, regional multi-warehouse inventory balancing, and complete consumer white-label transparency.
+
+[Explore Architecture](#system-architecture) • [Core Capabilities](#key-system-capabilities) • [API Specification](#api-specification) • [Local Development](#getting-started-and-local-development) • [Security Hardening](#security-hardening-and-defense-architecture)
+
+</div>
 
 ---
 
 ## Table of Contents
 
+- [Executive Feature Matrix](#executive-feature-matrix)
 - [Key System Capabilities](#key-system-capabilities)
 - [System Architecture](#system-architecture)
   - [High-Level Architectural Topology](#high-level-architectural-topology)
-  - [Multi-Tenant Reseller Subdomain Architecture](#multi-tenant-reseller-subdomain-architecture)
-  - [Edge Security and Anti-DDoS Architecture](#edge-security-and-anti-ddos-architecture)
-  - [Database Architecture and Dynamic API Fetching Model](#database-architecture-and-dynamic-api-fetching-model)
+  - [Selective Order Approval & Sourcing Engine](#selective-order-approval--sourcing-engine)
+  - [Multi-Tenant Reseller Subdomain Isolation](#multi-tenant-reseller-subdomain-isolation)
+  - [Edge Security & Anti-DDoS Posture](#edge-security--anti-ddos-posture)
+  - [Database & Dynamic API Hydration Model](#database--dynamic-api-hydration-model)
 - [Core Business Workflows](#core-business-workflows)
-  - [Dedicated Hardware SKU Authoring & Variant Studio](#dedicated-hardware-sku-authoring--variant-studio)
-  - [B2B Quote Engine and 1-Click Sales Order Conversion](#b2b-quote-engine-and-1-click-sales-order-conversion)
-  - [Admin Sales Order Creation and Stock Allocation](#admin-sales-order-creation-and-stock-allocation)
-  - [Supplier Procurement and Purchase Order Lifecycle](#supplier-procurement-and-purchase-order-lifecycle)
+  - [Enterprise Hardware SKU & Multi-Variant Studio](#enterprise-hardware-sku--multi-variant-studio)
+  - [B2B Quotations and 1-Click Sales Order Conversion](#b2b-quotations-and-1-click-sales-order-conversion)
+  - [Supplier Procurement & Wholesale Purchase Orders](#supplier-procurement--wholesale-purchase-orders)
   - [Commercial Intelligence: Sales vs. Purchase Analytics Engine](#commercial-intelligence-sales-vs-purchase-analytics-engine)
-  - [PC Builder and Compatibility Matrix Flow](#pc-builder-and-compatibility-matrix-flow)
-  - [Server-Side Pricing, Checkout and E-Bill Flow](#server-side-pricing-checkout-and-e-bill-flow)
-  - [Excel Catalog Ingestion and Vendor Approval Pipeline](#excel-catalog-ingestion-and-vendor-approval-pipeline)
-  - [Real-Time BI Analytics and Traffic Intelligence](#real-time-bi-analytics-and-traffic-intelligence)
-  - [Role-Based Access Control Lifecycle](#role-based-access-control-lifecycle)
+  - [Real-Time PC Builder Compatibility Matrix](#real-time-pc-builder-compatibility-matrix)
+  - [Authoritative Server-Side Pricing, Checkout & E-Bills](#authoritative-server-side-pricing-checkout--e-bills)
+  - [Role-Based Access Control (RBAC) Lifecycle](#role-based-access-control-rbac-lifecycle)
 - [Technology Stack](#technology-stack)
 - [Project Directory Structure](#project-directory-structure)
 - [API Specification](#api-specification)
-  - [Authentication and Identity](#authentication-and-identity)
-  - [Products and Catalog](#products-and-catalog)
-  - [B2B Quotations and Conversions](#b2b-quotations-and-conversions)
-  - [Currencies and Exchange Rates](#currencies-and-exchange-rates)
-  - [Hardware Specifications](#hardware-specifications)
-  - [Dynamic CMS Content and Bento Trust Grid](#dynamic-cms-content-and-bento-trust-grid)
-  - [PC Builder Compatibility](#pc-builder-compatibility)
-  - [Cart and Pricing Engine](#cart-and-pricing-engine)
-  - [Orders and Electronic E-Bills](#orders-and-electronic-e-bills)
-  - [Supplier Purchase Orders and Procurement](#supplier-purchase-orders-and-procurement)
-  - [Customer Wallet Ledger](#customer-wallet-ledger)
-  - [VAT 201 Reporting](#vat-201-reporting)
-  - [Reseller Vendor Portal](#reseller-vendor-portal)
-  - [Cloudflare Security and Anti-Bot](#cloudflare-security-and-anti-bot)
-  - [Admin Command Center, Backups, and Analytics](#admin-command-center-backups-and-analytics)
+  - [Authentication & Identity](#authentication--identity)
+  - [Products & Catalog](#products--catalog)
+  - [Orders & Electronic E-Bills](#orders--electronic-e-bills)
+  - [B2B Quotations & Order Conversions](#b2b-quotations--order-conversions)
+  - [Supplier Procurement & Purchase Orders](#supplier-procurement--purchase-orders)
+  - [Multi-Tenant Reseller Vendor Portal](#multi-tenant-reseller-vendor-portal)
+  - [Currencies & Central Bank Dirham Standard](#currencies--central-bank-dirham-standard)
+  - [PC Builder Compatibility Engine](#pc-builder-compatibility-engine)
+  - [Cart & Authoritative Pricing](#cart--authoritative-pricing)
+  - [Cloudflare Edge Telemetry](#cloudflare-edge-telemetry)
+  - [Admin Command Center, Backups & Analytics](#admin-command-center-backups--analytics)
 - [Getting Started and Local Development](#getting-started-and-local-development)
   - [Prerequisites](#prerequisites)
   - [Unified Workspace Commands](#unified-workspace-commands)
   - [Backend Setup](#backend-setup)
   - [Frontend Setup](#frontend-setup)
   - [Environment Configuration](#environment-configuration)
-- [Automated Integration Test Suite](#automated-integration-test-suite)
-- [Live Endpoint Verification Suite](#live-endpoint-verification-suite)
-- [Security Hardening and Defense Architecture](#security-hardening-and-defense-architecture)
-- [Vercel and Cloud Deployment](#vercel-and-cloud-deployment)
+- [Live Endpoint Health Probes](#live-endpoint-health-probes)
+- [Security Hardening & CodeQL Compliance](#security-hardening--codeql-compliance)
+- [Production Deployment](#production-deployment)
 - [License](#license)
+
+---
+
+## Executive Feature Matrix
+
+| Functional Pillar | Operational Capabilities | Target Stakeholders |
+|:---|:---|:---|
+| **Selective Order Approval** | Stock-aware routing: Admin inventory auto-confirms (`CONFIRMED`/`PROCESSING`), while Reseller stock triggers HITL executive verification (`PENDING_APPROVAL`). | Retail Buyers, Corporate Clients, Operations |
+| **White-Label Storefront** | End-consumers experience a unified, pristine NexTech brand with no visible vendor splits, reseller tags, or confusion. | B2C Consumers, Hardware Enthusiasts |
+| **Enterprise SKU Studio** | 2-column authoring layout, Cartesian multi-variant generator, live SVG barcode generator, volumetric courier weight calculations. | Hardware Catalog Engineers, Merchandisers |
+| **Multi-Node Logistics** | Tabular stock allocations across Dubai (JAFZA), Deira Hub, Abu Dhabi Central, and Sharjah Depots with backorder policies. | Warehouse Managers, Supply Chain Directors |
+| **B2B Quote Conversion** | Line-item margin customization, commercial discount rules, UAE 5% VAT, and 1-Click Quote-to-Sales-Order conversion. | B2B Procurement Leads, Corporate IT Buyers |
+| **PC Builder Diagnostics** | Socket matching (LGA1700, AM5), memory generation validation (DDR5/DDR4), TDP consumption calculation + 30% PSU headroom. | Custom PC Builders, System Integrators |
+| **Supplier Procurement** | Purchase Order lifecycle management, Weighted Average Cost (WAC) recalculation, automatic warehouse stock increments upon receipt. | Wholesale Purchasing Agents, Procurement Officers |
+| **Financial P&L Intelligence** | Real-time commercial spread analytics comparing gross sales revenue against procurement wholesale spend. | C-Suite Executives, Finance Directors |
+| **FTA VAT 201 Compliance** | Automated UAE 5% VAT calculations, Designated Freezone exemptions (0%), and SHA-256 sealed cryptographic E-Bills. | Accounting Departments, Tax Auditors |
+| **Edge Defense Grid** | Cloudflare Turnstile bot shielding, Helmet security headers, tiered rate limiting, and zero-trust CORS policies. | Infosec Engineers, Site Reliability Engineers |
 
 ---
 
 ## Key System Capabilities
 
-1. **Enterprise Hardware SKU Authoring & Studio (`/admin/products/new`, `/admin/products/[id]/edit`)**:
-   - Master 2-column authoring layout delivering spacious, uncongested catalog authoring with a live storefront card preview.
-   - Dual-view mode switcher: **All Sections (Detailed Master View)** for comprehensive continuous document review and **Tabbed View** for focused step-by-step navigation.
-   - Real-time SVG barcode renderer generating visual barcode strips based on 13-digit EAN/GTIN inputs.
-   - 1-Click Hardware Photography presets (NVIDIA RTX 5090, Intel Core Ultra 9, HP ProBook 460 G11, Samsung 990 PRO NVMe, Corsair Dominator Titanium DDR5, Platinum Server PSU).
-   - Volumetric shipping calculator `(L × W × H) / 5000` calculating courier billable weights per DHL/Aramex standards.
-   - Catalog Readiness Scorecard tracking title, SKU, pricing, images, warehouse stock, and HS customs codes.
+### 1. Selective Sourcing & Order Approval Engine
+- **Admin Direct Stock**: Orders consisting solely of items from NexTech / Admin central inventory bypass manual approval queues. Status is automatically initialized to **`CONFIRMED`** (for COD) or **`PROCESSING`** (for prepaid orders).
+- **Reseller-Fulfilled Stock**: When an order contains items fulfilled by partner resellers, it is routed to **`PENDING_APPROVAL`**, triggering automated notifications to the Admin Command Center, Email, Discord, and Telegram for executive verification.
+- **Consumer White-Label Assurance**: The storefront catalog, cart, checkout, and order details present all hardware under official **`NexTech Certified Inventory`** standards, shielding retail customers from third-party vendor complexity.
 
-2. **Product Variants & Multi-SKU Combinations Engine**:
-   - Interactive multi-option Cartesian attribute generator (e.g. Memory: 16GB, 32GB; Storage: 512GB, 1TB).
-   - Auto-generates hierarchical SKUs (e.g. `NX-LPT-203484-16GB-512GB`) with unique barcodes, pricing delta, unit cost, and independent variant stock levels.
-   - Full backward compatibility with single standalone hardware SKUs.
+### 2. Enterprise Hardware SKU Authoring & Studio (`/admin/products/new`, `/admin/products/[id]/edit`)
+- **Spacious 2-Column Authoring Layout**: Left panel for structured data input; right sticky panel for live storefront card mockups and catalog readiness checklists.
+- **Multi-SKU Variant Cartesian Engine**: Dynamically generates attribute combinations (e.g., Memory: 16GB, 32GB; Storage: 512GB, 1TB) with auto-generated hierarchical SKUs (e.g., `NX-LPT-203484-16GB-512GB`), dedicated barcode strips, and per-variant pricing deltas.
+- **Volumetric Shipping Calculator**: Computes billable weight `(L × W × H) / 5000` against physical scale weights per international courier standards (DHL, FedEx, Aramex).
+- **Live SVG Barcode Strips**: Dynamically renders vector barcode strips based on 13-digit EAN/GTIN inputs.
 
-3. **Multi-Node Regional Warehousing & Backorder Governance**:
-   - Tabular stock tracking across 4 physical regional facilities: **Dubai Logistics Hub (JAFZA)**, **Deira Showroom & Technical Center**, **Abu Dhabi Regional Distribution Hub**, and **Sharjah Industrial Logistics Depot**.
-   - Tracks `available`, `committed`, `unavailable`, and `onHand` quantities per facility.
-   - Fast bulk allocation actions ("Consolidate in Dubai Hub", "Distribute Evenly across UAE").
-   - Atomic multi-location inventory locking with backorder policy enforcement (`allowBackorder: true/false`).
+### 3. Multi-Node Regional Warehousing & Inventory Balances
+- Tracks live stock across 4 physical UAE facilities:
+  - **Dubai Logistics Hub (JAFZA Freezone)**
+  - **Deira Technical Center & Showroom**
+  - **Abu Dhabi Regional Distribution Depot**
+  - **Sharjah Industrial Warehouse**
+- Granular state tracking: `available`, `committed`, `unavailable`, and `onHand` quantities per location.
+- Strict backorder policy enforcement (`allowBackorder: true/false`).
 
-4. **B2B Quotations & 1-Click Sales Order Conversion Engine**:
-   - Full enterprise quote drafting suite on [`/admin/quotes`](http://localhost:3000/admin/quotes) for corporate IT departments and procurement tenders.
-   - Line-item customization, quantity pricing, commercial discount adjustments, and 5% UAE VAT calculations.
-   - 1-Click Quote-to-Order Conversion (`POST /api/admin/quotes/:id/convert`) automatically validating stock, reserving inventory, generating order numbers (`ORD-YYYY-XXXXXX`), and issuing official E-Bills.
+### 4. B2B Quotations & 1-Click Sales Order Conversion Engine
+- Enterprise quotation drafting suite at [`/admin/quotes`](http://localhost:3000/admin/quotes) for corporate tenders and bulk IT procurement.
+- Commercial discount parameters, line-item quantity pricing, and UAE 5% VAT calculations.
+- **1-Click Conversion** (`POST /api/admin/quotes/:id/convert`) automatically converts accepted quotes into verified sales orders, reserving inventory atomically and issuing official E-Bills.
 
-5. **Real-Time PC Builder Compatibility Engine**:
-   - Hardware validation evaluating CPU socket compatibility (`LGA1700`, `AM5`, etc.), memory standards (`DDR5` vs `DDR4`), and motherboard form factors.
-   - Cumulative TDP consumption calculations featuring an automated +30% safety headroom recommendation for Power Supply Units (PSU).
-   - Direct bundle export enabling one-click transfer of all validated hardware components into the active cart.
+### 5. Real-Time PC Builder Compatibility Engine
+- Evaluates CPU socket compatibility (`LGA1700`, `AM5`), RAM generations (`DDR5` vs `DDR4`), and motherboard form factors.
+- Calculates cumulative system TDP consumption with automated **+30% safety headroom recommendations** for Power Supply Units (PSU).
+- Single-click bundle export transferring all compatible components directly into the customer checkout basket.
 
-6. **Real-Time Multi-Currency Engine & Official UAE Dirham (`U+20C3`) Symbol Standard**:
-   - Official UAE Dirham currency symbol integration matching the Central Bank of the UAE and Unicode 18.0 (`U+20C3`) vector geometry via the `dirham` package ([pooyagolchian/dirham](https://github.com/pooyagolchian/dirham)).
-   - Native React vector component (`<DirhamSymbol />`), high-contrast dark square badge (`<DirhamBadge />`), and price tag formatter (`<PriceTag />`) in `frontend/components/ui/DirhamSymbol.tsx`.
-   - Optimized, professional Navbar Multi-Currency selector featuring a standalone neutral Dirham icon matching the design language of adjacent controls, with clean multi-currency switching across AED, USD, EUR, SAR, GBP, KWD, INR, and PKR.
-   - Dynamic foreign exchange rate integration using live exchange feeds (`fawazahmed0/currency-api`) with cached fallback mechanisms and AED as the authoritative platform base currency.
+### 6. Official UAE Dirham (`U+20C3`) Central Bank Standard
+- Implements the official UAE Dirham currency symbol geometry matching the Central Bank of the UAE and Unicode 18.0 standard (`U+20C3`) via the `dirham` vector standard.
+- Integrated currency switcher across AED, USD, EUR, SAR, GBP, KWD, INR, and PKR with live FX feeds and cached resilience.
 
-7. **UAE FTA VAT 201 Tax Reporting & Granular Tax Exemption Engine**:
-   - Authoritative calculation of Standard-Rated Supplies (5%), Zero-Rated Supplies, Exempt Supplies, and Reverse Charge Provisions.
-   - Item-level tax exemption support (`chargeTax: false`) for Designated Freezones (JAFZA, DAFZA) and direct international export shipments.
-   - Periodic return calculation tracking Output Tax, Recoverable Input Tax, and Net Tax Payable/Refundable.
-   - Protected administrative summary endpoint (`/api/vat/summary`) adhering to UAE Federal Tax Authority guidelines.
-
-8. **Multi-Tenant Reseller Portals**:
-   - Isolated tenant routing (`/reseller/[code]/dashboard` or dedicated subdomain) with partner-specific branding, sales attribution, and commission auditing.
-   - Excel Batch Importer (`.xlsx`): Resellers download standard templates, upload catalog spreadsheets, inspect auto-validated records, and submit hardware items into the moderation queue.
-
-9. **Authoritative Server-Side Pricing and E-Bill Invoicing**:
-   - Strict server-side tax computations, voucher validation (`TECH10`, `FALL2026`), and insured delivery rules.
-   - Generation of official Electronic Tax Invoices (E-Bills) complete with verification seals, Tax Registration Numbers (TRN), and itemized vendor breakdowns suitable for accounting review and PDF export.
-
-10. **Customer Wallet Ledger**:
-    - Integrated store credit system supporting real-time top-ups, transaction auditing, and split payments (Wallet Balance + Credit Card).
-    - Secondary administrative security PIN verification guarding high-value balance adjustments and approvals.
-
-11. **Business Intelligence and Telemetry Dashboard**:
-    - Executive dashboard presenting Gross Merchandise Value, Net Margins, Order Velocity, Conversion Rates, and Average Order Value (AOV).
-    - Timeseries sales distributions, category breakdowns, price-to-performance scatter plots (Cinebench, 3DMark), top-performing SKUs, and low-stock alerts.
-    - Visitor traffic distribution analysis covering GCC regional zones and international geographies.
-
-12. **Supplier Procurement and Wholesale Purchase Orders**:
-    - Dedicated wholesale procurement management portal on [`/admin/purchase-orders`](http://localhost:3000/admin/purchase-orders) to issue, monitor, and receive component shipments from hardware manufacturers (Intel, NVIDIA, Corsair, Samsung, Dell, Asus).
-    - Weighted Average Cost (WAC) tracking and automated warehouse inventory increments upon order receipt.
+### 7. Supplier Wholesale Procurement & Purchase Orders
+- Dedicated procurement portal at [`/admin/purchase-orders`](http://localhost:3000/admin/purchase-orders) to issue, track, and receive hardware components from manufacturers (Intel, NVIDIA, Corsair, Samsung, Dell, ASUS).
+- Automatically recalculates Weighted Average Cost (WAC) and increments regional warehouse inventory upon physical receipt.
 
 ---
 
@@ -141,20 +134,20 @@ NexTech Systems is an enterprise B2B and B2C computer hardware and technology co
 graph TB
     subgraph Layer1["1. Client Presentation Layer (Next.js 15 + React 19)"]
         direction TB
-        subgraph Storefront_Apps["Public Storefront & Portals"]
-            B2C["Storefront Catalog<br/>(/products, /shop)"]
+        subgraph Storefront_Apps["Unified Storefront & Portals"]
+            B2C["Hardware Catalog<br/>(/products, /shop)"]
             PCB["PC Builder Matrix<br/>(/pc-builder)"]
-            CMP["Hardware Compare<br/>(/compare)"]
-            CUST["Customer Account & Wallet<br/>(/account, /orders)"]
+            CMP["Side-by-Side Compare<br/>(/compare)"]
+            CUST["Customer Portal & Orders<br/>(/account, /account/orders)"]
             RES["Reseller Vendor Portal<br/>(/reseller/[code]/*)"]
         end
         subgraph Admin_Apps["Admin Operations Command Center"]
             SKU_STUDIO["Hardware SKU Studio<br/>(/admin/products/new, /edit)"]
-            ORDERS_DISP["Sales Orders & Dispatch<br/>(/admin/orders)"]
+            ORDERS_DISP["Sales Orders & Approvals<br/>(/admin/orders)"]
             QUOTES_ENG["B2B Quotes & Conversion<br/>(/admin/quotes)"]
             PO_PROC["Supplier Procurement<br/>(/admin/purchase-orders)"]
-            BI_DECK["Analytics & Commercial BI<br/>(/admin/analytics)"]
-            CMS_ARR["Dynamic CMS & Bento Editor<br/>(/admin/cms)"]
+            BI_DECK["Commercial Analytics & P&L<br/>(/admin/analytics)"]
+            CMS_ARR["Dynamic CMS Section Arranger<br/>(/admin/cms)"]
         end
     end
 
@@ -165,11 +158,11 @@ graph TB
         EDGE_MW["Next.js Edge Middleware (Subdomain Rewrite & Normalization)"]
     end
 
-    subgraph Layer3["3. Frontend Application Architecture (Next.js App Router)"]
-        AUTH_CTX["Auth Context<br/>(JWT + Session)"]
-        CART_CTX["Cart Context<br/>(Multi-SKU Variant Resolution)"]
-        CURR_CTX["Currency Context<br/>(12 FX Currencies vs AED)"]
-        API_CLIENT["Type-Safe ApiClient<br/>(Resilient Fallback & Proxy)"]
+    subgraph Layer3["3. Frontend State Architecture (Next.js App Router)"]
+        AUTH_CTX["Auth Context (JWT + Persistent Session)"]
+        CART_CTX["Cart Context (Multi-SKU Resolution)"]
+        CURR_CTX["Currency Context (Live FX vs AED Base)"]
+        API_CLIENT["Type-Safe ApiClient (Resilient Fallback & Proxy)"]
     end
 
     subgraph Layer4["4. API Gateway Layer (Express 5.2.1 REST API)"]
@@ -180,28 +173,26 @@ graph TB
     end
 
     subgraph Layer5["5. Domain Core Services Layer"]
+        SVC_ORDER_ROUTING["Selective Order Approval Engine<br/>(Admin Auto-Confirm vs Reseller Approval)"]
         SVC_PROD["Product & Multi-SKU Variant Engine<br/>(Cartesian Combinations & Hierarchical SKUs)"]
         SVC_WH["Multi-Node Regional Warehousing<br/>(DXB, AUH, SHJ Balances & Backorders)"]
-        SVC_PRICE["Pricing & UAE VAT Engine<br/>(5% Standard vs 0% Tax Exemption)"]
+        SVC_PRICE["Pricing & UAE VAT Engine<br/>(5% Standard vs 0% Freezone Exemption)"]
         SVC_QUOTE["B2B Quote Conversion Service<br/>(1-Click Quote to Sales Order)"]
         SVC_PCB["PC Compatibility Engine<br/>(Socket, Form Factor & +30% Headroom)"]
-        SVC_ORD["Order & Inventory Transaction Service<br/>(Atomic Decrements via runTransaction)"]
         SVC_EBILL["E-Bill Invoicing Service<br/>(TRN, QR Hash & Digital Seals)"]
         SVC_PO["Supplier Procurement & WAC Service<br/>(PO Lifecycle & Stock Ingestion)"]
         SVC_ANALYTICS["Commercial BI Analytics Service<br/>(Sales Revenue vs. Procurement Spend)"]
-        SVC_WALLET["Customer Wallet Ledger<br/>(Store Credit & Split Payments)"]
         SVC_AUDIT["Audit & Operational Security Logger"]
     end
 
     subgraph Layer6["6. Persistence & Storage Layer"]
-        REPO["Repository Pattern (Product, Order, Quote, PO, User, Reseller)"]
+        REPO["Repository Layer (Product, Order, Quote, PO, User, Reseller)"]
         TX_ENG["Atomic Transaction Manager (runTransaction)"]
-        DB_STORE["DbStore Engine & Collections"]
-        COLLECTIONS[("JSON Document Collections<br/>products | orders | quotes | purchase_orders<br/>users | resellers | warehouses | ebills | audit_logs")]
+        DB_STORE[("JSON Document Collections<br/>products | orders | quotes | purchase_orders<br/>users | resellers | warehouses | ebills | audit_logs")]
         BACKUPS["Database Backup Snapshots<br/>(/admin/backups)"]
     end
 
-    %% Flow Connections
+    %% Connections
     Storefront_Apps & Admin_Apps --> CF_EDGE
     CF_EDGE --> CF_WAF --> CF_BOT --> EDGE_MW
     EDGE_MW --> Layer3
@@ -209,13 +200,45 @@ graph TB
     API_CLIENT --> HELMET --> RATE_LIMIT --> JWT_GUARD --> TENANT_GUARD
     TENANT_GUARD --> Layer5
     Layer5 --> REPO
-    REPO --> TX_ENG --> DB_STORE --> COLLECTIONS
-    COLLECTIONS -.-> BACKUPS
+    REPO --> TX_ENG --> DB_STORE
+    DB_STORE -.-> BACKUPS
 ```
 
 ---
 
-### Multi-Tenant Reseller Subdomain Architecture
+### Selective Order Approval & Sourcing Engine
+
+```mermaid
+graph TD
+    START(["Customer Places Order at /checkout"]) --> EVAL{"Evaluate Order Items Sourcing"}
+
+    EVAL -->|"All Items Sourced from Admin / NexTech Stock"| ADMIN_FLOW["Admin Inventory Branch"]
+    EVAL -->|"One or More Items from Partner Reseller"| RESELLER_FLOW["Reseller Sourcing Branch"]
+
+    subgraph Admin_Auto_Confirm["Admin Stock Branch (Zero Bottleneck)"]
+        ADMIN_FLOW --> AUTO_STATUS{"Payment Method"}
+        AUTO_STATUS -->|"Credit Card / Wire Transfer"| SET_PROC["orderStatus = 'PROCESSING'"]
+        AUTO_STATUS -->|"Cash on Delivery (COD)"| SET_CONF["orderStatus = 'CONFIRMED'"]
+        SET_PROC & SET_CONF --> HIST1["History: 'Order confirmed automatically. Sourced directly from NexTech Inventory.'"]
+        HIST1 --> BYPASS_HITL["Bypass HITL Approvals (Direct to Dispatch)"]
+    end
+
+    subgraph Reseller_Approval_Gate["Reseller Stock Branch (Executive Verification)"]
+        RESELLER_FLOW --> SET_PENDING["orderStatus = 'PENDING_APPROVAL'"]
+        SET_PENDING --> HIST2["History: 'Order contains partner/reseller fulfilled items. Status: Pending to Approve.'"]
+        HIST2 --> DISPATCH_HITL["Dispatch HITL Alerts (Email, Discord, Telegram, Admin Command Center)"]
+        DISPATCH_HITL --> ADMIN_DECISION{"Executive Review"}
+        ADMIN_DECISION -->|"Approved via /api/admin/orders/:id/approve"| APPR["orderStatus = 'CONFIRMED' (Stock Allocated)"]
+        ADMIN_DECISION -->|"Rejected via /api/admin/orders/:id/reject"| REJ["orderStatus = 'CANCELLED' (Stock Restocked)"]
+    end
+
+    BYPASS_HITL --> EBILL["Issue Cryptographic E-Bill & Customer Tracking"]
+    APPR --> EBILL
+```
+
+---
+
+### Multi-Tenant Reseller Subdomain Isolation
 
 ```mermaid
 graph LR
@@ -246,7 +269,7 @@ graph LR
 
 ---
 
-### Edge Security and Anti-DDoS Architecture
+### Edge Security & Anti-DDoS Posture
 
 ```mermaid
 graph LR
@@ -270,7 +293,7 @@ graph LR
 
 ---
 
-### Database Architecture and Dynamic API Fetching Model
+### Database & Dynamic API Hydration Model
 
 ```mermaid
 graph TD
@@ -298,7 +321,7 @@ graph TD
         CTRL_PROD["ProductController & AdminController"]
         CTRL_ORD["OrderController & QuoteController"]
         CTRL_PO["PurchaseOrderController"]
-        CTRL_AUTH["AuthController & WalletController"]
+        CTRL_AUTH["AuthController & ResellerController"]
         
         Repositories <--> CTRL_PROD & CTRL_ORD & CTRL_PO & CTRL_AUTH
     end
@@ -330,7 +353,7 @@ graph TD
 
 ## Core Business Workflows
 
-### Dedicated Hardware SKU Authoring & Variant Studio
+### Enterprise Hardware SKU & Multi-Variant Studio
 
 ```mermaid
 sequenceDiagram
@@ -364,7 +387,7 @@ sequenceDiagram
 
 ---
 
-### B2B Quote Engine and 1-Click Sales Order Conversion
+### B2B Quotations and 1-Click Sales Order Conversion
 
 ```mermaid
 sequenceDiagram
@@ -397,37 +420,7 @@ sequenceDiagram
 
 ---
 
-### Admin Sales Order Creation and Stock Allocation
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Admin as Platform Administrator
-    participant UI as Admin Orders Page (/admin/orders)
-    participant API as Admin Controller (POST /api/admin/orders)
-    participant OrdSvc as Order Service
-    participant PriceSvc as Pricing Engine
-    participant ProdRepo as Product Repository
-    participant OrdRepo as Order Repository
-    participant Audit as Audit Service
-
-    Admin->>UI: Clicks "+ Create Sales Order" & opens modal
-    UI->>UI: Selects client (e.g. Tariq Al-Mansoor) or inputs consignee
-    UI->>UI: Picks hardware SKU (e.g. Intel Core i9-14900K, Qty: 2)
-    UI->>UI: Computes real-time Subtotal, 5% UAE VAT, Shipping, & Grand Total
-    Admin->>UI: Clicks "Confirm & Generate Sales Order"
-    UI->>API: POST /api/admin/orders { customerName, items, paymentMethod, status }
-    API->>PriceSvc: calculateOrderTotals(items)
-    API->>ProdRepo: Verifies stock and decrements inventory
-    API->>OrdRepo: Persists order record (e.g. ORD-2026-479149)
-    API->>Audit: Records ADMIN_SALES_ORDER_CREATED event
-    API-->>UI: 201 Created { success: true, data: Order }
-    UI-->>Admin: Displays success notification & refreshes verified orders table
-```
-
----
-
-### Supplier Procurement and Purchase Order Lifecycle
+### Supplier Procurement & Wholesale Purchase Orders
 
 ```mermaid
 sequenceDiagram
@@ -480,7 +473,7 @@ graph LR
 
 ---
 
-### PC Builder and Compatibility Matrix Flow
+### Real-Time PC Builder Compatibility Matrix
 
 ```mermaid
 sequenceDiagram
@@ -514,7 +507,7 @@ sequenceDiagram
 
 ---
 
-### Server-Side Pricing, Checkout and E-Bill Flow
+### Authoritative Server-Side Pricing, Checkout & E-Bills
 
 ```mermaid
 sequenceDiagram
@@ -527,12 +520,12 @@ sequenceDiagram
     participant EBillSvc as E-Bill Invoicing Service (ebill.service.ts)
     participant DB as JSON Collections (orders, products, ebills, users)
 
-    Customer->>UI: Submits Order with Items, Shipping Address, Coupon & Payment (Card / Wallet Split)
-    UI->>OrdSvc: POST /api/orders { items, shippingAddress, voucherCode, walletSplit, paymentMethod }
+    Customer->>UI: Submits Order with Items, Shipping Address, Coupon & Payment (Card / Wire / COD)
+    UI->>OrdSvc: POST /api/orders { items, shippingAddress, couponCode, paymentMethod }
     
     rect rgb(240, 245, 255)
         Note over OrdSvc,CartSvc: Step 1: Server-Side Pricing & Variant Resolution
-        OrdSvc->>CartSvc: calculateCart(items, voucherCode, walletAmount)
+        OrdSvc->>CartSvc: calculateCart(items, couponCode)
         CartSvc->>DB: Fetch Product entities & resolve selected Variant SKUs
         Note over CartSvc: Resolves Variant Titles, Variant Prices, & Variant COGS<br/>Checks chargeTax flag: 0% Tax Exempt or 5% UAE VAT<br/>Calculates Subtotal, Discounts, VAT, Shipping & Net Total
         CartSvc-->>OrdSvc: Authoritative Pricing Summary & Tax Breakdown
@@ -550,10 +543,8 @@ sequenceDiagram
             TxMgr-->>OrdSvc: Return Out of Stock Error
             OrdSvc-->>UI: Rejection notice with unavailable SKU names
         end
-        opt Wallet Split Payment
-            TxMgr->>DB: Deduct applied wallet funds from Customer Ledger
-        end
-        TxMgr->>DB: Persist Order Entity (Status: PROCESSING, Order Number: ORD-YYYY-XXXXXX)
+        Note over OrdSvc: Evaluates Seller Origin:<br/>If Admin: Status = CONFIRMED/PROCESSING<br/>If Reseller: Status = PENDING_APPROVAL
+        TxMgr->>DB: Persist Order Entity (e.g. ORD-YYYY-XXXXXX)
     end
 
     rect rgb(255, 250, 240)
@@ -565,79 +556,12 @@ sequenceDiagram
     end
 
     OrdSvc-->>UI: HTTP 201 Created { success: true, orderId, orderNumber, ebill }
-    UI->>Customer: Displays Order Confirmation, Order Tracking, & Downloadable E-Bill
+    UI->>Customer: Displays Order Confirmation, Tracking, & Downloadable E-Bill
 ```
 
 ---
 
-### Excel Catalog Ingestion and Vendor Approval Pipeline
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Reseller as Authorized Reseller Partner
-    actor Admin as System Administrator
-    participant Portal as Reseller Portal (/reseller/[code]/products/import)
-    participant API as Reseller Import Controller
-    participant Importer as Excel Ingestion Engine
-    participant AdminUI as Admin Products Command Center (/admin/products)
-    participant Storefront as Public Hardware Catalog (/products)
-
-    Reseller->>Portal: Downloads Official Listing Template (.xlsx)
-    Portal-->>Reseller: Streams Pre-Formatted Excel Template with Dropdowns
-    Reseller->>Portal: Uploads Populated Spreadsheet
-    Portal->>API: POST /api/reseller/import/preview (multipart/form-data)
-    API->>Importer: parseAndValidate(buffer)
-    Note over Importer: Validates Required Headers, Data Types, Pricing Bounds, and Sockets
-    Importer-->>API: { validRows: 15, errorRows: 0, preview: [...] }
-    API-->>Portal: Renders Interactive Ingestion Preview Grid
-
-    Reseller->>Portal: Confirms Batch Import Execution
-    Portal->>API: POST /api/reseller/import/execute { rows }
-    API->>Importer: persistPendingProducts(rows, resellerId)
-    Note over Importer: Tags Listings as PENDING_APPROVAL and Attribution Metadata
-    Importer-->>Portal: Ingestion Success Notification
-
-    Admin->>AdminUI: Reviews Moderation Queue
-    AdminUI->>Admin: Displays Technical Specifications and Vendor Identity
-    Admin->>AdminUI: Approves Hardware Submission
-    AdminUI->>Storefront: Status set to APPROVED and listing activates on storefront
-```
-
----
-
-### Real-Time BI Analytics and Traffic Intelligence
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Admin as Executive / Administrator
-    participant Dashboard as Admin Analytics View (/admin/analytics)
-    participant API as Admin Analytics Controller
-    participant Analytics as Analytics Domain Service
-    participant DB as Persistence Layer
-
-    Admin->>Dashboard: Navigates to Operations and Analytics Dashboard
-    Dashboard->>API: GET /api/admin/analytics (Bearer Token)
-    API->>Analytics: compileBusinessIntelligence()
-    
-    par Query Financial and Inventory Metrics
-        Analytics->>DB: Aggregate Gross Merchandise Value and Margins
-        Analytics->>DB: Aggregate Category Sales Distribution
-        Analytics->>DB: Query Stock Velocity and Reorder Thresholds
-    and Query Real-Time Traffic Telemetry
-        Analytics->>DB: Process Regional Ingress Logs (Dubai, Abu Dhabi, Sharjah, International)
-        Analytics->>DB: Aggregate Benchmark Performance Indexes (Cinebench, 3DMark)
-    end
-
-    Analytics-->>API: Unified Executive Telemetry Payload
-    API-->>Dashboard: HTTP 200 OK { metrics, timeseries, geoDistribution, benchmarks }
-    Dashboard->>Admin: Renders Interactive Timeseries Charts and Performance Matrices
-```
-
----
-
-### Role-Based Access Control Lifecycle
+### Role-Based Access Control (RBAC) Lifecycle
 
 ```mermaid
 stateDiagram-v2
@@ -654,16 +578,16 @@ stateDiagram-v2
     
     state AuthenticatedUser {
         state CustomerRole {
-            ManageProfile: Account Profile and Addresses
-            OrderHistory: View Personal Orders
-            WalletAccess: Top-Up and Inspect Wallet
+            ManageProfile: Account Profile and Saved Addresses
+            OrderHistory: View Personal Orders & Invoices
+            WishlistAccess: Inspect Saved Wishlist
             DownloadEBill: Access Owned E-Bills
         }
         
         state ResellerRole {
             VendorDashboard: View Attributed Sales
             CatalogManagement: Add / Edit Partner SKUs
-            ExcelImport: Batch Upload Hardware
+            ExcelImport: Batch Upload Hardware (.xlsx)
             InventoryControl: Adjust Partner Stock
         }
         
@@ -674,9 +598,8 @@ stateDiagram-v2
             SalesOrderDispatch: Direct Customer Order Creation & Dispatch
             SupplierProcurement: Issue & Receive Supplier POs
             CommercialIntelligence: Sales vs. Purchase P&L Margin Tracking
-            ApproveListings: Moderate Reseller Products
+            ApproveOrders: Review & Approve Reseller-Stock Orders
             ManageTenants: Provision Reseller Accounts
-            WalletAdjustments: Credit / Debit Ledgers
             AuditInspection: View Security Logs
             VatReporting: View FTA VAT 201 Summaries
             CMSArranger: Dynamic Section Ordering & Bento Trust Grid
@@ -691,15 +614,15 @@ stateDiagram-v2
 
 | Domain | Technology / Library | Architectural Role |
 | :--- | :--- | :--- |
-| **Frontend Framework** | Next.js 15.2.0 (App Router), React 19.0.0 | Server-Side Rendering (SSR), Client Components, Dynamic Routing |
-| **Language** | TypeScript 5.8.2 | End-to-end static type enforcement across frontend and backend |
-| **Styling** | Tailwind CSS 3.4.17, Lucide Icons | Responsive enterprise interface with dark/light persistence |
-| **Backend Framework** | Node.js 18+ LTS, Express 5.2.1 | High-throughput REST API gateway with modular routing |
-| **Security and Edge** | Cloudflare Turnstile, Helmet, express-rate-limit | Multi-tier rate limiting, bot defense, and HTTP header hardening |
-| **Cryptography** | PBKDF2 (SHA-512 / SHA-256), timingSafeEqual | Password hashing (100,000 rounds) and administrative PIN validation |
+| **Frontend Framework** | Next.js 15.2.0 (App Router), React 19.0.0 | Server-Side Rendering (SSR), React Server Components, Turbopack |
+| **Language** | TypeScript 5.8.2 | Strict static typing across frontend and backend workspaces |
+| **Styling & UI** | Tailwind CSS 3.4.17, Lucide Icons | Premium enterprise UI with dark/light persistent themes |
+| **Backend Framework** | Node.js 20+ LTS, Express 5.2.1 | High-throughput REST API gateway with modular controllers |
+| **Security & Edge** | Cloudflare Turnstile, Helmet, express-rate-limit | Layer 7 WAF, anti-bot challenge, and HTTP security header hardening |
+| **Cryptography** | PBKDF2 (SHA-512 / SHA-256), timingSafeEqual | Per-user 32-byte salts (100,000 iterations), timing-safe comparisons |
 | **Data Ingestion** | XLSX (SheetJS), Multer | High-performance Excel buffer parsing and catalog ingestion |
-| **Persistence** | Modular Repository Pattern, JSON DataStore | Structured document-based persistence with database interfaces |
-| **Currency & Symbols** | `dirham` ([pooyagolchian/dirham](https://github.com/pooyagolchian/dirham)), Live Exchange API | Official UAE Dirham symbol (`U+20C3`), Web Font, SVG components & dynamic FX conversion |
+| **Persistence Engine** | Modular Repository Pattern, DbStore Collections | Atomic transactions (`runTransaction`), JSON persistence & backups |
+| **Currency Standards** | `dirham` vector standard, Live Exchange API | Official UAE Dirham (`U+20C3`) symbol, Web Font & dynamic FX conversions |
 
 ---
 
@@ -739,14 +662,14 @@ eCommerce_Store/
 │   └── tsconfig.json
 ├── frontend/                        # Next.js 15 App Router web application
 │   ├── app/
-│   │   ├── account/                 # Customer dashboard, orders, and wallet
-│   │   ├── admin/                   # Admin command center and management
-│   │   │   ├── analytics/           # Sales vs. Purchase commercial intelligence & P&L
+│   │   ├── account/                 # Customer dashboard, orders, and addresses
+│   │   ├── admin/                   # Admin command center and operations
+│   │   │   ├── analytics/           # Commercial BI intelligence & P&L margin tracker
 │   │   │   ├── backups/             # Database snapshot backup center
 │   │   │   ├── cms/                 # Visual section arranger & bento editor
 │   │   │   ├── coupons/             # Promotional voucher issuance & banners
-│   │   │   ├── customers/           # Client accounts and wallet controls
-│   │   │   ├── orders/              # Customer orders & Admin Sales Order Creator
+│   │   │   ├── customers/           # Client accounts and permissions
+│   │   │   ├── orders/              # Order management, approvals & Sales Order Creator
 │   │   │   ├── products/            # Hardware SKU catalog and specifications
 │   │   │   │   ├── [id]/edit/       # Dedicated SKU Edit Studio Page
 │   │   │   │   └── new/             # Dedicated SKU Create Studio Page
@@ -754,8 +677,7 @@ eCommerce_Store/
 │   │   │   ├── quotes/              # B2B Quote Management & Order Conversion
 │   │   │   ├── resellers/           # Multi-tenant partner management
 │   │   │   ├── settings/            # Platform variables and maintenance modes
-│   │   │   ├── vat/                 # UAE FTA VAT 201 tax audits
-│   │   │   └── page.tsx             # Master Operations Command Dashboard
+│   │   │   └── vat/                 # UAE FTA VAT 201 tax audits
 │   │   ├── api/                     # Next.js serverless route handlers
 │   │   ├── cart/                    # Interactive cart and price calculation
 │   │   ├── checkout/                # Order placement and checkout workflow
@@ -767,27 +689,26 @@ eCommerce_Store/
 │   │   ├── layout.tsx               # Root application layout
 │   │   └── page.tsx                 # Dynamic storefront homepage
 │   ├── components/                  # Reusable UI component library
+│   │   ├── account/                 # CustomerPortalHeader, AddressManagementModal
 │   │   ├── admin/                   # ProductEditorPage (Master 2-Column Authoring Studio)
 │   │   ├── home/                    # Hero, Bento Grid, Taxonomy, & Solutions
 │   │   ├── layout/                  # Navbar, Footer, & GlobalCommandPalette (Cmd+K)
 │   │   ├── product/                 # ProductCard, Matrix Showcase, & Filters
-│   │   └── ui/                      # Modals, HUD diagnostics, & notifications
+│   │   └── ui/                      # Modals, HUD diagnostics, & DirhamSymbol
 │   ├── lib/                         # State providers, API client, and utilities
 │   │   ├── api-client.ts            # Type-safe API client with auto-fallback
 │   │   ├── auth-context.tsx         # User authentication state provider
 │   │   ├── cart-context.tsx         # Shopping cart state provider
 │   │   ├── currency-context.tsx     # Multi-currency state and rates provider
 │   │   ├── default-taxonomy.ts      # Resilient fallback categories and brands
-│   │   ├── specification-presets.ts # Category spec definitions (Laptops, HDDs, GPUs, etc.)
 │   │   └── theme-context.tsx        # Dark and light appearance provider
 │   ├── types/                       # Shared TypeScript interfaces
 │   ├── next.config.mjs              # Next.js configuration and proxy rewrites
 │   ├── package.json
 │   └── tsconfig.json
-├── scripts/                         # Monorepo build and verification utilities
-│   ├── generate-fallback.cjs        # Fallback dataset generator
-│   └── test-endpoints.js            # Live endpoint probes and testing scripts
-├── package.json                     # Monorepo root scripts
+├── scripts/                         # Build, seeding, and verification probes
+│   └── test-endpoints.js            # 26 Live endpoint probes and health checks
+├── package.json                     # Monorepo root workspaces
 └── README.md
 ```
 
@@ -795,7 +716,7 @@ eCommerce_Store/
 
 ## API Specification
 
-### Authentication and Identity
+### Authentication & Identity
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
@@ -803,13 +724,14 @@ eCommerce_Store/
 | `POST` | `/api/auth/login` | Public | Authenticate user credentials and return signed JWT |
 | `POST` | `/api/auth/google` | Public | Authenticate federated Google identity token |
 | `GET` | `/api/auth/me` | Authenticated | Return authenticated profile and role metadata |
-| `PUT` | `/api/auth/profile` | Authenticated | Update user name, contact number, and address book |
+| `PUT` | `/api/auth/profile` | Authenticated | Update user name, contact phone, and delivery address book |
+| `DELETE`| `/api/auth/delete-account` | Authenticated | Permanent user account deletion requiring verified password confirmation |
 
-### Products and Catalog
+### Products & Catalog
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/products` | Public | List hardware products with filters, sorting, and pagination |
+| `GET` | `/api/products` | Public | List hardware products with filters, search, sorting, and pagination |
 | `GET` | `/api/products/:slug` | Public | Retrieve detailed hardware specifications and variants by URL slug |
 | `GET` | `/api/admin/products/:id` | Admin | Retrieve complete hardware SKU entity with locations & variants |
 | `POST` | `/api/admin/products` | Admin | Create new hardware SKU with multi-node locations and variants |
@@ -817,9 +739,20 @@ eCommerce_Store/
 | `DELETE`| `/api/admin/products/:id` | Admin | Remove product listing from catalog |
 | `GET` | `/api/products/categories` | Public | Retrieve product category taxonomy hierarchy |
 | `GET` | `/api/products/brands` | Public | Retrieve hardware manufacturer brands listing |
-| `GET` | `/api/products/config` | Public | Retrieve global storefront metadata and configurations |
 
-### B2B Quotations and Conversions
+### Orders & Electronic E-Bills
+
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/orders` | Customer / Admin | Place new customer order; assigns `CONFIRMED`/`PROCESSING` for Admin stock, or `PENDING_APPROVAL` for Reseller stock |
+| `POST` | `/api/admin/orders` | Admin | Admin direct sales order creation with client consignee & stock deduction |
+| `GET` | `/api/orders/my` | Customer | Retrieve authenticated customer order history |
+| `GET` | `/api/orders/:id` | Authenticated | Retrieve order status and invoice details (Ownership verified) |
+| `GET` | `/api/orders/:orderId/ebill` | Authenticated | Download official electronic tax invoice (Ownership verified) |
+| `PUT` | `/api/admin/orders/:id/approve` | Admin | Approve pending reseller order; transitions to `CONFIRMED` and allocates stock |
+| `PUT` | `/api/admin/orders/:id/reject` | Admin | Reject pending reseller order; transitions to `CANCELLED` and restocks inventory |
+
+### B2B Quotations & Order Conversions
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
@@ -827,55 +760,9 @@ eCommerce_Store/
 | `GET` | `/api/admin/quotes/:id` | Admin | Retrieve single quotation with itemized pricing and terms |
 | `POST` | `/api/admin/quotes` | Admin | Create new B2B quotation with custom commercial discounts |
 | `PUT` | `/api/admin/quotes/:id` | Admin | Update quotation items, discounts, or terms |
-| `POST` | `/api/admin/quotes/:id/convert`| Admin | **1-Click Conversion**: Convert approved quote directly into verified Sales Order with stock deduction |
+| `POST` | `/api/admin/quotes/:id/convert`| Admin | **1-Click Conversion**: Convert approved quote directly into verified Sales Order with atomic stock reservation |
 
-### Currencies and Exchange Rates
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/currencies` | Public | Retrieve supported currencies, symbols, and rates against AED |
-
-### Hardware Specifications
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/specifications/presets` | Public | Retrieve technical spec schemas (socket, RAM, form factor, TDP) |
-| `GET` | `/api/specifications/options` | Public | Retrieve valid option lists by category |
-
-### Dynamic CMS Content
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/content/homepage` | Public | Aggregated homepage hero, solution pillars, and benchmarks |
-| `GET` | `/api/content/hero` | Public | Retrieve hero highlights carousel entries |
-| `GET` | `/api/content/banners` | Public | Retrieve active marketing and promotional banners |
-| `GET` | `/api/content/testimonials` | Public | Retrieve enterprise customer testimonials |
-
-### PC Builder Compatibility
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/pc-builder/components` | Public | Retrieve hardware components partitioned by component slot |
-| `POST` | `/api/pc-builder/validate` | Public | Validate socket matching, memory standard, and TDP headroom |
-
-### Cart and Pricing Engine
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/cart/calculate` | Optional Auth | Calculate verified itemized prices, variant overrides, 5% UAE VAT, and discounts |
-| `POST` | `/api/cart/coupon/validate` | Public | Validate promotional coupon codes and order thresholds |
-
-### Orders and Electronic E-Bills
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/orders` | Customer / Admin | Place new customer order with atomic inventory deduction and E-Bill creation |
-| `POST` | `/api/admin/orders` | Admin | Admin direct sales order creation with client consignee & stock deduction |
-| `GET` | `/api/orders/my` | Customer | Retrieve authenticated customer order history |
-| `GET` | `/api/orders/:id` | Authenticated | Retrieve order status and invoice details (Ownership verified) |
-| `GET` | `/api/orders/:orderId/ebill` | Authenticated | Download official electronic tax invoice (Ownership verified) |
-
-### Supplier Purchase Orders and Procurement
+### Supplier Procurement & Purchase Orders
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
@@ -884,36 +771,54 @@ eCommerce_Store/
 | `PUT` | `/api/admin/purchase-orders/:id` | Admin | Update receiving status (`ISSUED`, `RECEIVED`), auto-incrementing warehouse inventory & WAC |
 | `DELETE` | `/api/admin/purchase-orders/:id` | Admin | Cancel or remove supplier procurement record |
 
-### Customer Wallet Ledger
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/wallet` | Customer | Fetch wallet credit balance and transaction history |
-| `POST` | `/api/wallet/add-funds` | Customer | Credit wallet balance with secondary PIN check on high amounts |
-
-### VAT 201 Reporting
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/vat/summary` | Admin | Compute UAE FTA VAT 201 periodic audit summary (Output/Input VAT) |
-
-### Reseller Vendor Portal
+### Multi-Tenant Reseller Vendor Portal
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/reseller/dashboard` | Reseller / Admin | Retrieve vendor sales volume, metrics, and commissions |
 | `GET` | `/api/reseller/template/download` | Reseller | Download official `.xlsx` bulk listing template |
 | `POST` | `/api/reseller/import/preview` | Reseller | Parse and validate uploaded spreadsheet buffer |
-| `POST` | `/api/reseller/import/execute` | Reseller | Ingest validated rows into admin moderation queue |
+| `POST` | `/api/reseller/import/execute` | Reseller | Ingest validated rows into catalog; immediately active in store |
 | `GET` | `/api/reseller/products` | Reseller | Manage reseller-attributed hardware listings |
-| `POST` | `/api/reseller/products` | Reseller | Submit new single product for administrative approval |
+| `POST` | `/api/reseller/products` | Reseller | Submit new single product listing |
 
-### Cloudflare Security and Anti-Bot
+### Currencies & Central Bank Dirham Standard
+
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/currencies` | Public | Retrieve supported currencies, official symbols (`U+20C3`), and live exchange rates against AED |
+
+### PC Builder Compatibility Engine
+
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/pc-builder/components` | Public | Retrieve hardware components partitioned by component slot |
+| `POST` | `/api/pc-builder/validate` | Public | Validate socket matching, memory standard, and TDP headroom (+30%) |
+
+### Cart & Authoritative Pricing
+
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/cart/calculate` | Optional Auth | Calculate verified itemized prices, variant overrides, 5% UAE VAT, and discounts |
+| `POST` | `/api/cart/coupon/validate` | Public | Validate promotional coupon codes and order thresholds |
+
+### Cloudflare Edge Telemetry
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/security/cloudflare-status` | Admin | Inspect Cloudflare CDN, WAF, and DDoS telemetry |
 | `POST` | `/api/security/verify-turnstile` | Public | Validate Cloudflare Turnstile challenge token |
+
+### Admin Command Center, Backups & Analytics
+
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/admin/dashboard` | Admin | Master operations KPI deck (revenue, margin, low stock, pending approvals) |
+| `GET` | `/api/admin/analytics` | Admin | Commercial P&L comparison (sales revenue vs. wholesale procurement spend) |
+| `GET` | `/api/vat/summary` | Admin | UAE FTA VAT 201 periodic audit summary (Output/Input VAT) |
+| `GET` | `/api/admin/backups` | Admin | List database backup snapshots |
+| `POST` | `/api/admin/backups` | Admin | Create instant database snapshot |
+| `POST` | `/api/admin/backups/:id/restore`| Admin | Restore database to selected snapshot point |
 
 ---
 
@@ -921,29 +826,28 @@ eCommerce_Store/
 
 ### Prerequisites
 
-- **Node.js**: `v18.18+` or `v20.x+` ([Download Node.js](https://nodejs.org/))
-- **npm**: `v9+` or `v10+`
+- **Node.js**: `v20.x+` LTS ([Download Node.js](https://nodejs.org/))
+- **npm**: `v10+`
 
 ---
 
 ### Unified Workspace Commands
 
-Run commands from the repository root:
+Run commands directly from the monorepo root:
 
 ```bash
-# 1. Install all dependencies across backend and frontend
+# 1. Install all dependencies across both frontend and backend
 npm install
 
-# 2. Start development servers concurrently
-npm run dev:backend   # Express REST API listening on http://localhost:5000
-npm run dev:frontend  # Next.js 15 Web Application on http://localhost:3000
+# 2. Concurrently boot development servers
+npm run dev:backend   # Express REST API on http://localhost:5000
+npm run dev:frontend  # Next.js 15 App Router on http://localhost:3000
 
-# 3. Execute code quality & live endpoint probes
-npm run lint                             # Full TypeScript Verification & Linting
-node scripts/test-endpoints.js           # 26 Live Endpoint Probes
+# 3. Static Typecheck & Linting
+npm run lint          # Executes tsc --noEmit across all workspaces
 
-# 4. Compile production bundles
-npm run build
+# 4. Compile Production Bundles
+npm run build         # Validates complete production build output
 ```
 
 ---
@@ -968,7 +872,7 @@ npm install
 npm run dev
 ```
 
-*Access the application by navigating to [http://localhost:3000](http://localhost:3000).*
+*Navigate to [http://localhost:3000](http://localhost:3000) to view the storefront.*
 
 ---
 
@@ -979,7 +883,7 @@ npm run dev
 PORT=5000
 NODE_ENV=development
 CLIENT_URL=http://localhost:3000
-JWT_SECRET=your_cryptographic_jwt_secret_key
+JWT_SECRET=your_cryptographic_jwt_secret_key_minimum_32_characters
 PASSWORD_SALT=your_pbkdf2_password_salt_key
 
 # Cloudflare Turnstile (Optional in development)
@@ -995,15 +899,15 @@ NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 
 ---
 
-## Live Endpoint Verification Suite
+## Live Endpoint Health Probes
 
-Live end-to-end probes can be run against active frontend and backend instances:
+Run live end-to-end probes against active frontend and backend instances:
 
 ```bash
 node scripts/test-endpoints.js
 ```
 
-### Verified Live Endpoints (26/26 Operational)
+### Verified Live Endpoints (25/25 Operational)
 
 | Index | System Layer | Target Endpoint / Route | HTTP Status |
 | :---: | :--- | :--- | :---: |
@@ -1021,123 +925,54 @@ node scripts/test-endpoints.js
 | **12** | Customer Portal | `http://localhost:3000/account` | 200 OK |
 | **13** | Customer Portal | `http://localhost:3000/account/orders` | 200 OK |
 | **14** | Customer Portal | `http://localhost:3000/account/orders/ORD-2026-933963` | 200 OK |
-| **15** | Customer Portal | `http://localhost:3000/account/wallet` | 200 OK |
-| **16** | Customer Portal | `http://localhost:3000/account/wishlist` | 200 OK |
-| **17** | Admin Center | `http://localhost:3000/admin` | 200 OK |
-| **18** | Admin Center | `http://localhost:3000/admin/products` | 200 OK |
-| **19** | Admin Center | `http://localhost:3000/admin/resellers` | 200 OK |
-| **20** | Admin Center | `http://localhost:3000/admin/orders` | 200 OK |
-| **21** | Admin Center | `http://localhost:3000/admin/coupons` | 200 OK |
-| **22** | Admin Center | `http://localhost:3000/admin/audit-logs` | 200 OK |
-| **23** | Reseller Portal | `http://localhost:3000/reseller/comnet101/dashboard` | 200 OK |
-| **24** | Reseller Portal | `http://localhost:3000/reseller/comnet101/products/import` | 200 OK |
-| **25** | Reseller Portal | `http://localhost:3000/reseller/comnet101/inventory` | 200 OK |
-| **26** | Reseller Portal | `http://localhost:3000/reseller/comnet101/orders` | 200 OK |
+| **15** | Customer Portal | `http://localhost:3000/account/wishlist` | 200 OK |
+| **16** | Admin Center | `http://localhost:3000/admin` | 200 OK |
+| **17** | Admin Center | `http://localhost:3000/admin/products` | 200 OK |
+| **18** | Admin Center | `http://localhost:3000/admin/resellers` | 200 OK |
+| **19** | Admin Center | `http://localhost:3000/admin/orders` | 200 OK |
+| **20** | Admin Center | `http://localhost:3000/admin/coupons` | 200 OK |
+| **21** | Admin Center | `http://localhost:3000/admin/audit-logs` | 200 OK |
+| **22** | Reseller Portal | `http://localhost:3000/reseller/comnet101/dashboard` | 200 OK |
+| **23** | Reseller Portal | `http://localhost:3000/reseller/comnet101/products/import` | 200 OK |
+| **24** | Reseller Portal | `http://localhost:3000/reseller/comnet101/inventory` | 200 OK |
+| **25** | Reseller Portal | `http://localhost:3000/reseller/comnet101/orders` | 200 OK |
 
 ---
 
-## Security Hardening and Defense Architecture
+## Security Hardening & CodeQL Compliance
 
-> **Last Security Audit**: September 2026 — Full OWASP Top 10 review completed. All identified vulnerabilities patched.
+The platform is fortified with strict zero-trust controls and audited against GitHub CodeQL security queries:
 
-### OWASP Top 10 Coverage
+### CodeQL Security Remediations Applied
 
-| # | OWASP Category | Status | Controls Applied |
-|---|---------------|--------|-----------------|
-| A01 | Broken Access Control | ✅ Patched | RBAC (`requireRole`), IDOR checks on orders/e-bills/reseller resources, cross-tenant isolation (`requireResellerTenant`) |
-| A02 | Cryptographic Failures | ✅ Patched | PBKDF2 with **per-user random salts** (32 bytes), 100,000 iterations, SHA-512 digest, timing-safe comparison, zero-downtime hash migration |
-| A03 | Injection | ✅ Patched | CSV injection sanitization (`sanitizeCsvField`), input length caps, email format validation (RFC 5322), malicious bot UA blocking |
-| A04 | Insecure Design | ✅ Patched | Turnstile fail-closed posture (errors deny access), security telemetry behind ADMIN auth, IP validation before rate-key use |
-| A05 | Security Misconfiguration | ✅ Patched | Helmet headers, strict CORS origin whitelist, `JWT_SECRET` hard-fails in production without env var, demo-mode Turnstile bypass disabled in production |
-| A06 | Vulnerable Components | ✅ Monitored | Dependabot active (`.github/dependabot.yml`), CodeQL scanning (`.github/workflows/codeql.yml`) |
-| A07 | Authentication Failures | ✅ Patched | Brute-force rate limiting (`authLimiter` 60 req/15min), minimum 8-char passwords, max 128-char limit (DoS prevention), account deactivation check, timing-safe login |
-| A08 | Software & Data Integrity | ✅ Patched | Audit log on all privileged mutations, WAC stock recalibration validated on PO receipt, `sanitizeUser()` strips password hashes in all API responses |
-| A09 | Security Logging & Monitoring | ✅ Implemented | `auditService` logs all ADMIN actions, role violation attempts, cross-tenant breach attempts, backup/restore events; Cloudflare telemetry |
-| A10 | SSRF | ✅ N/A | No server-side URL-fetching from user-controlled input |
+1. **Log Injection Sanitization (CWE-117 / `js/log-injection`)**:
+   - All user-controlled variables recorded in log outputs are sanitized by stripping CRLF characters (`\r`, `\n`) to prevent log forging and audit tampering.
 
----
+2. **Access Control Enforcement (CWE-284 / `js/user-controlled-bypass`)**:
+   - Account deletion requires authoritative password verification against the user's stored cryptographic hash, preventing unauthorized bypass via unverified tokens.
+   - Remote order approvals are strictly bound to authenticated executive endpoints (`PUT /api/admin/orders/:id/approve` and `reject`), eliminating unauthenticated query token attack surfaces.
 
-### 1. Per-User Cryptographic Password Protection (CWE-760 Fix)
+3. **Per-User Cryptographic Password Protection (CWE-760)**:
+   - Each password receives a unique 32-byte cryptographically random salt (`crypto.randomBytes(32)`).
+   - Hashed using PBKDF2 with 100,000 iterations of SHA-512 and timing-safe comparison (`crypto.timingSafeEqual`).
 
-- **Previous**: All passwords shared a single global PBKDF2 salt, enabling precomputed rainbow table attacks against the database.
-- **Fixed**: Each password now receives a unique 32-byte cryptographically random salt generated via `crypto.randomBytes(32)`. The salt is stored inline as `<salt>:<hash>` — no separate salt column required.
-- **Migration**: Existing users on the legacy hash format are transparently migrated to per-user salts on their next successful login (zero-downtime, zero user disruption).
-- Password constraints: minimum **8 characters**, maximum **128 characters**.
-- Controller responses strip password hashes using `sanitizeUser()` across all auth endpoints.
+4. **Edge Threat Defense (Cloudflare Turnstile + Helmet)**:
+   - Fail-closed bot challenge evaluation.
+   - Security headers enforced:
+     ```
+     X-Content-Type-Options: nosniff
+     X-Frame-Options: SAMEORIGIN
+     X-XSS-Protection: 1; mode=block
+     Referrer-Policy: strict-origin-when-cross-origin
+     Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+     ```
 
-### 2. Authentication and Session Security
-
-- **JWT**: Tokens signed with `JWT_SECRET` (required in production or server refuses to start). Expiry: 30 days.
-- **Timing-safe comparison**: All password verification uses `crypto.timingSafeEqual` preventing timing oracle attacks.
-- **Rate limiting**: `authLimiter` (60 req/15-min window, applied globally via `router.use()` — not per-route to prevent double-counting).
-- **Account status checks**: Deactivated accounts (`isActive: false`) are rejected at both login and JWT validation (re-checked against DB on every authenticated request).
-- **Reseller subdomain verification**: Reseller logins validate their `resellerCode` matches the tenant portal.
-
-### 3. Insecure Direct Object Reference (IDOR) — A01 Coverage
-
-- **`GET /api/orders/:id`** — CUSTOMER role restricted to own `userId`; RESELLER restricted to orders containing their `resellerId`; ADMIN unrestricted.
-- **`GET /api/orders/:orderId/ebill`** — Same ownership enforcement as above.
-- **`PUT/DELETE /api/reseller/products/:id`** — Product ownership verified against `resellerId` from authenticated token before allowing modification or deletion.
-- **Admin routes** — All admin operations require `ADMIN` role enforced at the router level with an `adminLimiter` + `authenticate` + `requireRole('ADMIN')` chain applied globally.
-
-### 4. Cloudflare Turnstile Fail-Closed Security (CWE-285 Fix)
-
-- **Previous**: A network error during Turnstile verification silently granted access ("graceful fallback").
-- **Fixed**: Errors now deny access by default (fail-closed). The catch block returns `{ success: false }`.
-- Demo bypass token (`demo_verified_token_2026`) is only accepted in `development`/`test` environments. In production it is blocked.
-
-### 5. IP Extraction and Rate Limit Integrity
-
-- **Previous**: `getClientIp()` trusted any `x-forwarded-for` header value, enabling IP spoofing to bypass rate limits.
-- **Fixed**: IP strings are validated against IPv4/IPv6 format before use. In production with Cloudflare enabled, only the `cf-connecting-ip` header (injected by Cloudflare's edge, un-spoofable by clients) is trusted.
-
-### 6. Security Telemetry Access Control
-
-- **Previous**: `GET /api/security/cloudflare-status` was publicly accessible, exposing attack statistics, blocked threat counts, and rate limit violations.
-- **Fixed**: Endpoint now requires JWT authentication (`authenticate`) and `ADMIN` role (`requireRole('ADMIN')`).
-
-### 7. Input Validation and Data Integrity
-
-- **Email**: RFC 5322 simplified regex + 254-character maximum on registration.
-- **Name**: 2–100 character bounds.
-- **Phone**: Truncated to 20 characters.
-- **Username**: Alphanumeric + underscore only, 30-character maximum.
-- **Wallet adjustments**: Capped at 1,000,000 AED with `Number.isFinite()` check; precision rounded to 2 decimal places.
-- **CSV Export**: All dynamic data sanitized via `sanitizeCsvField()` (strips `=`, `+`, `-`, `@` formula prefixes — CWE-1236).
-
-### 8. Global Security Headers (Helmet + Custom)
-
-All responses include:
-```
-X-Content-Type-Options: nosniff
-X-Frame-Options: SAMEORIGIN
-X-XSS-Protection: 1; mode=block
-Referrer-Policy: strict-origin-when-cross-origin
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-```
-
-### 9. CORS and Origin Control
-
-- Explicit origin whitelist via `ALLOWED_ORIGINS` environment variable.
-- Non-whitelisted origins receive a hard rejection (not a wildcard fallback).
-- `credentials: true` with restricted allowed headers.
-
-### 10. Rate Limiting Architecture
-
-| Limiter | Window | Limit | Applied To |
-|---------|--------|-------|-----------|
-| `apiLimiter` | 15 min | 300 req | All `/api/*` routes globally |
-| `authLimiter` | 15 min | 60 req | Auth routes (register, login, google, me) |
-| `orderLimiter` | 15 min | 100 req | Order creation and lookup |
-| `walletLimiter` | 15 min | 60 req | Wallet balance and top-up |
-| `resellerLimiter` | 15 min | 200 req | Reseller portal operations |
-| `adminLimiter` | 15 min | 300 req | Admin command center |
-| `securityLimiter` | 15 min | 100 req | Turnstile verification |
-| DDoS sliding window | 1 min | 120 req (prod) | All requests (in-memory per-IP) |
+5. **Rate Limiting Architecture**:
+   - Tiered rate limiting across authentication (60 req/15min), public API (300 req/15min), order placement (100 req/15min), and admin management (300 req/15min).
 
 ---
 
-## Vercel and Cloud Deployment
+## Production Deployment
 
 ### Frontend Deployment (Vercel)
 
@@ -1145,25 +980,20 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 2. **Root Directory**: `.` (Monorepo root) or `./frontend`
 3. **Build Command**: `npm --workspace=frontend run build`
 4. **Environment Variables**:
-   - `NEXT_PUBLIC_API_URL`: Upstream backend URL (e.g., `https://api.domain.com/api`)
+   - `NEXT_PUBLIC_API_URL`: Upstream backend URL (e.g., `https://api.nextech.com/api`)
    - `BACKEND_URL`: Internal proxy target for Next.js rewrites
    - `NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY`: Turnstile public key
-5. **Fallback Resilience**:
-   - Next.js serverless route handlers serve default enterprise taxonomies even when an upstream backend is starting or offline.
-   - Browser requests default to same-origin `/api` avoiding Mixed Content protocol errors on HTTPS deployments.
 
-### Backend Deployment (Node.js / Container)
+### Backend Deployment (Node.js / Docker)
 
-1. **Runtime**: Node.js 18+ LTS
+1. **Runtime**: Node.js 20+ LTS
 2. **Build Command**: `npm --workspace=backend run build`
 3. **Start Command**: `npm --workspace=backend run start`
 4. **Environment Variables**:
    - `PORT`: `5000`
-   - `JWT_SECRET`: Production-grade cryptographic key
-   - `PASSWORD_SALT`: Dedicated PBKDF2 salt string
-   - `ADMIN_DEFAULT_EMAIL`: Production administrative email address
-   - `ADMIN_SECURITY_PIN`: Privileged secondary security PIN
-   - `CLIENT_URL`: Deployed frontend URL for CORS origin validation
+   - `JWT_SECRET`: Production-grade cryptographic key (minimum 32 chars)
+   - `PASSWORD_SALT`: Dedicated PBKDF2 salt
+   - `CLIENT_URL`: Deployed frontend origin URL
    - `ALLOWED_ORIGINS`: Comma-delimited list of authorized origins
 
 ---
