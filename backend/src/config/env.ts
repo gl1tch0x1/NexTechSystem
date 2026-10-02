@@ -68,5 +68,11 @@ export const ENV = {
   MONGODB_PASSWORD: process.env.MONGODB_PASSWORD || '',
   MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || 'nextech_ecommerce',
   ENABLE_MONGODB: Boolean(process.env.MONGODB_URI) && process.env.ENABLE_MONGODB !== 'false',
+  // ChatOps & Multi-Channel Approval Notifications
+  DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL || '',
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
+  TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || '',
+  ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || 'admin@nextech.com',
+  PUBLIC_API_URL: process.env.PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:5000',
 };
 

@@ -64,9 +64,11 @@ export default function OrderDetailPage() {
     );
   }
 
+  const isApproved = order.orderStatus !== 'PENDING_APPROVAL';
   const steps = [
-    { label: 'Order Confirmed', completed: true },
-    { label: 'Quality Tested & Packed', completed: order.orderStatus !== 'PENDING' },
+    { label: 'Order Placed', completed: true },
+    { label: 'Admin Approval', completed: isApproved, active: order.orderStatus === 'PENDING_APPROVAL' },
+    { label: 'Packed & Quality Tested', completed: isApproved && order.orderStatus !== 'PENDING' },
     { label: 'Dispatched with Courier', completed: order.orderStatus === 'SHIPPED' || order.orderStatus === 'DELIVERED' },
     { label: 'Delivered', completed: order.orderStatus === 'DELIVERED' },
   ];
@@ -102,6 +104,19 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
+      {/* Human-in-the-Loop Pending to Approve Notice */}
+      {order.orderStatus === 'PENDING_APPROVAL' && (
+        <div className="no-print p-5 rounded-3xl bg-amber-500/10 border-2 border-amber-500/30 space-y-2 shadow-sm">
+          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-bold text-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
+            <span>Order Status: Pending to Approve</span>
+          </div>
+          <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+            Your hardware order has been successfully registered and your inventory allocation has been reserved. In accordance with executive enterprise policies, all new purchase orders undergo administrator review before dispatch release. You will receive real-time notification as soon as verification completes.
+          </p>
+        </div>
+      )}
+
       {/* Real-time Order Progress Stepper (Interactive view) */}
       <div className="no-print p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-xs">
         <div className="flex items-center justify-between">
@@ -111,7 +126,7 @@ export default function OrderDetailPage() {
             </div>
             <div className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Truck className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
-              <span>{order.orderStatus}</span>
+              <span>{order.orderStatus === 'PENDING_APPROVAL' ? 'Pending to Approve' : order.orderStatus}</span>
               <span className="text-xs font-normal text-slate-500">• Insured Courier Logistics</span>
             </div>
           </div>
@@ -123,13 +138,15 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
           {steps.map((st, idx) => (
             <div key={idx} className="flex items-center gap-2.5">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
                   st.completed
                     ? 'bg-tech-blue text-white shadow-xs'
+                    : (st as any).active
+                    ? 'bg-amber-500 text-white ring-4 ring-amber-500/20 animate-pulse'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                 }`}
               >
@@ -137,7 +154,11 @@ export default function OrderDetailPage() {
               </div>
               <span
                 className={`text-xs font-bold ${
-                  st.completed ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'
+                  st.completed
+                    ? 'text-slate-900 dark:text-white'
+                    : (st as any).active
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-slate-400 dark:text-slate-500'
                 }`}
               >
                 {st.label}

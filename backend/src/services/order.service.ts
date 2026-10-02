@@ -10,6 +10,7 @@ import { auditService } from './audit.service.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { ENV } from '../config/env.js';
 import { Order, OrderStatus, PaymentMethod, Address, OrderItem } from '../types/index.js';
+import { notificationService } from './notification.service.js';
 import { dbStore } from '../config/db-store.js';
 
 export interface CreateOrderDTO {
@@ -160,7 +161,7 @@ export class OrderService {
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,
         paymentStatus: dto.paymentMethod === 'COD' ? 'PENDING' : 'PAID',
-        orderStatus: 'CONFIRMED',
+        orderStatus: 'PENDING_APPROVAL',
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
         notes: dto.notes,
@@ -176,8 +177,8 @@ export class OrderService {
         partnerTier: dto.partnerTier,
         statusHistory: [
           {
-            status: 'CONFIRMED',
-            note: 'Order placed successfully and inventory allocated.',
+            status: 'PENDING_APPROVAL',
+            note: 'Order placed by customer. Status: Pending to Approve. Awaiting executive/admin verification.',
             timestamp: new Date().toISOString(),
           },
         ],
@@ -215,7 +216,12 @@ export class OrderService {
         action: 'ORDER_CREATED',
         resource: 'orders',
         resourceId: createdOrder.id,
-        details: { orderNumber, total: pricing.total, itemCount: orderItems.length },
+        details: { orderNumber, total: pricing.total, itemCount: orderItems.length, status: 'PENDING_APPROVAL' },
+      });
+
+      // 12. Human-in-the-Loop Orchestration: Dispatch to Admin Dashboard, Email, Discord & Telegram
+      notificationService.notifyNewOrderPendingApproval(createdOrder).catch(err => {
+        console.error('[OrderService] HITL Notification dispatch error:', err);
       });
 
       return createdOrder;
@@ -276,6 +282,146 @@ export class OrderService {
         details: { previousStatus: order.orderStatus, newStatus: status, note },
       });
     }
+
+    return updated;
+  }
+
+  async approveOrder(
+    orderId: string,
+    channel: 'DASHBOARD' | 'DISCORD' | 'TELEGRAM' | 'EMAIL' | 'CHATOPS',
+    approverId?: string,
+    note?: string
+  ): Promise<Order> {
+    const order = await orderRepository.findById(orderId);
+    if (!order) {
+      throw new Error(`Order not found: ${orderId}`);
+    }
+
+    if (order.orderStatus !== 'PENDING_APPROVAL') {
+      if (order.orderStatus === 'CONFIRMED') {
+        return order; // Idempotent return if already confirmed
+      }
+      throw new Error(`Order #${order.orderNumber} is in '${order.orderStatus}' status and cannot be approved.`);
+    }
+
+    const approvalNote = note || `Order verified and approved by admin via ${channel}. Inventory allocation confirmed.`;
+    const newHistory = [
+      ...order.statusHistory,
+      {
+        status: 'CONFIRMED' as OrderStatus,
+        note: approvalNote,
+        timestamp: new Date().toISOString(),
+        updatedBy: approverId || `CHATOPS_${channel}`,
+      },
+    ];
+
+    const updated = await orderRepository.update(orderId, {
+      orderStatus: 'CONFIRMED',
+      statusHistory: newHistory,
+      updatedAt: new Date().toISOString(),
+    });
+
+    if (!updated) {
+      throw new Error(`Failed to update order status for ${orderId}`);
+    }
+
+    // Audit log
+    await auditService.log({
+      userId: approverId || 'system_chatops',
+      userEmail: approverId ? ENV.ADMIN_DEFAULT_EMAIL : 'chatops@nextech.com',
+      userRole: 'ADMIN',
+      action: 'ORDER_APPROVED_HITL',
+      resource: 'orders',
+      resourceId: orderId,
+      details: {
+        orderNumber: order.orderNumber,
+        channel,
+        approverId,
+        note: approvalNote,
+      },
+    });
+
+    return updated;
+  }
+
+  async rejectOrder(
+    orderId: string,
+    channel: 'DASHBOARD' | 'DISCORD' | 'TELEGRAM' | 'EMAIL' | 'CHATOPS',
+    approverId?: string,
+    reason?: string
+  ): Promise<Order> {
+    const order = await orderRepository.findById(orderId);
+    if (!order) {
+      throw new Error(`Order not found: ${orderId}`);
+    }
+
+    if (order.orderStatus !== 'PENDING_APPROVAL') {
+      if (order.orderStatus === 'CANCELLED') {
+        return order; // Idempotent return if already cancelled
+      }
+      throw new Error(`Order #${order.orderNumber} is in '${order.orderStatus}' status and cannot be rejected.`);
+    }
+
+    // 1. Restock inventory for items
+    for (const item of order.items) {
+      try {
+        await inventoryService.restock(item.productId, item.quantity, item.variantId);
+      } catch (err) {
+        console.error(`[OrderService] Restock failed for product ${item.productId}:`, err);
+      }
+    }
+
+    // 2. Refund wallet if used
+    if (order.walletAmountUsed && order.walletAmountUsed > 0) {
+      try {
+        await walletService.creditWallet({
+          userId: order.userId,
+          amount: order.walletAmountUsed,
+          reason: `Automated Refund for Rejected Order #${order.orderNumber}`,
+          referenceId: order.id,
+          type: 'CREDIT',
+        });
+      } catch (err) {
+        console.error(`[OrderService] Wallet refund failed for order ${orderId}:`, err);
+      }
+    }
+
+    const rejectionNote = reason || `Order rejected by administrator via ${channel}. Inventory stock & wallet funds restored.`;
+    const newHistory = [
+      ...order.statusHistory,
+      {
+        status: 'CANCELLED' as OrderStatus,
+        note: rejectionNote,
+        timestamp: new Date().toISOString(),
+        updatedBy: approverId || `CHATOPS_${channel}`,
+      },
+    ];
+
+    const updated = await orderRepository.update(orderId, {
+      orderStatus: 'CANCELLED',
+      statusHistory: newHistory,
+      updatedAt: new Date().toISOString(),
+    });
+
+    if (!updated) {
+      throw new Error(`Failed to update order status for ${orderId}`);
+    }
+
+    // Audit log
+    await auditService.log({
+      userId: approverId || 'system_chatops',
+      userEmail: approverId ? ENV.ADMIN_DEFAULT_EMAIL : 'chatops@nextech.com',
+      userRole: 'ADMIN',
+      action: 'ORDER_REJECTED_HITL',
+      resource: 'orders',
+      resourceId: orderId,
+      details: {
+        orderNumber: order.orderNumber,
+        channel,
+        approverId,
+        reason: rejectionNote,
+      },
+    });
 
     return updated;
   }

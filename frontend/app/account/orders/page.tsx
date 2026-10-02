@@ -22,7 +22,7 @@ import {
   X
 } from 'lucide-react';
 
-const STATUS_FILTERS = ['ALL', 'PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
+const STATUS_FILTERS = ['ALL', 'PENDING_APPROVAL', 'PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
 
 function CustomerOrdersContent() {
   const { token } = useAuth();
@@ -94,7 +94,14 @@ function CustomerOrdersContent() {
   }, [orders]);
 
   const getStatusBadge = (status: OrderStatus | string) => {
-    const map: Record<string, { bg: string; text: string; border: string; icon: any }> = {
+    const map: Record<string, { bg: string; text: string; border: string; icon: any; label?: string }> = {
+      PENDING_APPROVAL: {
+        bg: 'bg-amber-500/10 dark:bg-amber-500/20',
+        text: 'text-amber-700 dark:text-amber-300 font-bold',
+        border: 'border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-500/30',
+        icon: Clock,
+        label: 'Pending to Approve',
+      },
       DELIVERED: {
         bg: 'bg-emerald-50 dark:bg-emerald-950/40',
         text: 'text-emerald-700 dark:text-emerald-300',
@@ -129,18 +136,35 @@ function CustomerOrdersContent() {
 
     const config = map[status] || map.PROCESSING;
     const Icon = config.icon;
+    const displayLabel = config.label || status;
 
     return (
       <span
         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${config.bg} ${config.text} ${config.border}`}
       >
         <Icon className="w-3.5 h-3.5" />
-        <span>{status}</span>
+        <span>{displayLabel}</span>
       </span>
     );
   };
 
   const renderTimeline = (status: OrderStatus | string) => {
+    if (status === 'PENDING_APPROVAL') {
+      return (
+        <div className="py-3 px-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <Clock className="w-4 h-4 text-amber-500 shrink-0 animate-pulse" />
+            <span>
+              <strong>Awaiting Admin Review:</strong> Your order has been placed and hardware reserved. Status will transition to confirmed upon executive approval.
+            </span>
+          </div>
+          <span className="text-[10px] uppercase font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 shrink-0 self-start sm:self-center">
+            Pending to Approve
+          </span>
+        </div>
+      );
+    }
+
     const steps = [
       { id: 'placed', label: 'Order Placed' },
       { id: 'processing', label: 'Processing' },
@@ -268,7 +292,7 @@ function CustomerOrdersContent() {
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
-                  <span className="capitalize">{st.toLowerCase()}</span>
+                  <span>{st === 'PENDING_APPROVAL' ? 'Pending to Approve' : st.charAt(0) + st.slice(1).toLowerCase()}</span>
                   <span
                     className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                       active

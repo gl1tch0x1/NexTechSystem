@@ -4,6 +4,7 @@ import { analyticsService } from '../services/analytics.service.js';
 import { productService } from '../services/product.service.js';
 import { resellerService } from '../services/reseller.service.js';
 import { orderService } from '../services/order.service.js';
+import { notificationService } from '../services/notification.service.js';
 import { walletService } from '../services/wallet.service.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { couponRepository } from '../repositories/coupon.repository.js';
@@ -293,6 +294,39 @@ export class AdminController {
       details: { newStatus: status, note, itemsCount: items?.length },
     });
     res.json({ success: true, data: updated });
+  }
+
+  async approveOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const { note } = req.body || {};
+    try {
+      const updated = await orderService.approveOrder(id, 'DASHBOARD', req.user?.id, note);
+      res.json({ success: true, data: updated, message: 'Order approved successfully.' });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: { message: err.message || 'Failed to approve order.' } });
+    }
+  }
+
+  async rejectOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const { reason } = req.body || {};
+    try {
+      const updated = await orderService.rejectOrder(id, 'DASHBOARD', req.user?.id, reason);
+      res.json({ success: true, data: updated, message: 'Order rejected successfully.' });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: { message: err.message || 'Failed to reject order.' } });
+    }
+  }
+
+  async getNotifications(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    const notifications = await notificationService.getAdminNotifications();
+    res.json({ success: true, data: notifications });
+  }
+
+  async markNotificationAsRead(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    await notificationService.markNotificationAsRead(id);
+    res.json({ success: true, message: 'Notification marked as read.' });
   }
 
   async createOrder(req: AuthenticatedRequest, res: Response): Promise<void> {

@@ -36,10 +36,14 @@ router.get('/customers', (req, res, next) => adminController.getCustomers(req, r
 router.put('/customers/:id/toggle-status', (req, res, next) => adminController.toggleCustomerStatus(req, res).catch(next));
 router.post('/customers/:id/wallet-adjust', (req, res, next) => adminController.adjustCustomerWallet(req, res).catch(next));
 
-// 5. Orders (Sales Orders)
+// 5. Orders (Sales Orders) & Human-in-the-Loop Approval
 router.get('/orders', (req, res, next) => adminController.getOrders(req, res).catch(next));
 router.post('/orders', (req, res, next) => adminController.createOrder(req, res).catch(next));
 router.put('/orders/:id/status', (req, res, next) => adminController.updateOrderStatus(req, res).catch(next));
+router.put('/orders/:id/approve', (req, res, next) => adminController.approveOrder(req, res).catch(next));
+router.put('/orders/:id/reject', (req, res, next) => adminController.rejectOrder(req, res).catch(next));
+router.get('/notifications', (req, res, next) => adminController.getNotifications(req, res).catch(next));
+router.put('/notifications/:id/read', (req, res, next) => adminController.markNotificationAsRead(req, res).catch(next));
 
 // 6. Categories CRUD
 router.get('/categories', (req, res, next) => adminController.getCategories(req, res).catch(next));

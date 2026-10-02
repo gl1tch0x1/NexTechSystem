@@ -5,7 +5,10 @@ import { orderLimiter } from '../middlewares/rate-limiter.middleware.js';
 
 const router = Router();
 
-// Apply order & transaction rate limiter
+// Public cryptographically-signed ChatOps remote approval action (Discord / Telegram / Email 1-click)
+router.get('/approval/remote', orderLimiter, (req, res, next) => orderController.handleRemoteApproval(req, res).catch(next));
+
+// Apply order & transaction rate limiter & authentication for user endpoints
 router.use(orderLimiter, authenticate);
 
 router.post('/', (req, res, next) => orderController.createOrder(req, res).catch(next));

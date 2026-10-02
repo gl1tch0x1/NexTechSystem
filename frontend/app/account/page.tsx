@@ -557,6 +557,7 @@ function CustomerAccountContent() {
               <div className="space-y-4">
                 {recentOrders.map(order => {
                   const statusColors: Record<string, string> = {
+                    PENDING_APPROVAL: 'bg-amber-500/15 text-amber-700 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-700/60 ring-1 ring-amber-500/20',
                     DELIVERED: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
                     SHIPPED: 'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/50 dark:text-cyan-300 dark:border-cyan-800/60',
                     PROCESSING: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/60',
@@ -576,7 +577,7 @@ function CustomerAccountContent() {
                             {order.orderNumber}
                           </span>
                           <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${badgeClass}`}>
-                            {order.orderStatus}
+                            {order.orderStatus === 'PENDING_APPROVAL' ? 'Pending to Approve' : order.orderStatus}
                           </span>
                           <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                             via {order.paymentMethod || 'Credit Card / Wallet'}
