@@ -126,7 +126,20 @@ export class OrderService {
         };
       });
 
-      // 8. Construct Order
+      // 8. Determine approval requirement based on stock origin
+      const hasResellerStock = orderItems.some(
+        item => item.sellerType === 'RESELLER' || Boolean(item.resellerId)
+      );
+
+      const initialOrderStatus: OrderStatus = hasResellerStock
+        ? 'PENDING_APPROVAL'
+        : (dto.paymentMethod === 'COD' ? 'CONFIRMED' : 'PROCESSING');
+
+      const initialHistoryNote = hasResellerStock
+        ? 'Order contains partner/reseller fulfilled items. Status: Pending to Approve. Awaiting executive/admin verification.'
+        : 'Order confirmed automatically. Sourced directly from NexTech Inventory.';
+
+      // 9. Construct Order
       const newOrder: Order = {
         id: orderId,
         orderNumber,
@@ -146,7 +159,7 @@ export class OrderService {
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,
         paymentStatus: dto.paymentMethod === 'COD' ? 'PENDING' : 'PAID',
-        orderStatus: 'PENDING_APPROVAL',
+        orderStatus: initialOrderStatus,
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
         notes: dto.notes,
@@ -162,8 +175,8 @@ export class OrderService {
         partnerTier: dto.partnerTier,
         statusHistory: [
           {
-            status: 'PENDING_APPROVAL',
-            note: 'Order placed by customer. Status: Pending to Approve. Awaiting executive/admin verification.',
+            status: initialOrderStatus,
+            note: initialHistoryNote,
             timestamp: new Date().toISOString(),
           },
         ],
@@ -173,11 +186,11 @@ export class OrderService {
 
       const createdOrder = await orderRepository.create(newOrder);
 
-      // 9. Generate E-Bill Digital Invoice
+      // 10. Generate E-Bill Digital Invoice
       const eBill = await ebillService.generateEBill(createdOrder);
       await orderRepository.update(createdOrder.id, { eBillId: eBill.id });
 
-      // 10. Update reseller sales statistics
+      // 11. Update reseller sales statistics
       for (const item of orderItems) {
         if (item.resellerId) {
           const reseller = await resellerRepository.findById(item.resellerId);
@@ -193,7 +206,7 @@ export class OrderService {
         }
       }
 
-      // 11. Audit Log
+      // 12. Audit Log
       await auditService.log({
         userId: dto.userId,
         userEmail: dto.customerEmail,
@@ -201,13 +214,22 @@ export class OrderService {
         action: 'ORDER_CREATED',
         resource: 'orders',
         resourceId: createdOrder.id,
-        details: { orderNumber, total: pricing.total, itemCount: orderItems.length, status: 'PENDING_APPROVAL' },
+        details: {
+          orderNumber,
+          total: pricing.total,
+          itemCount: orderItems.length,
+          status: initialOrderStatus,
+          hasResellerStock,
+        },
       });
 
-      // 12. Human-in-the-Loop Orchestration: Dispatch to Admin Dashboard, Email, Discord & Telegram
-      notificationService.notifyNewOrderPendingApproval(createdOrder).catch(err => {
-        console.error('[OrderService] HITL Notification dispatch error:', err);
-      });
+      // 13. Human-in-the-Loop Orchestration: Dispatch to Admin Dashboard, Email, Discord & Telegram
+      // Only triggered when order contains reseller stock requiring executive approval
+      if (hasResellerStock) {
+        notificationService.notifyNewOrderPendingApproval(createdOrder).catch(err => {
+          console.error('[OrderService] HITL Notification dispatch error:', err);
+        });
+      }
 
       return createdOrder;
     });

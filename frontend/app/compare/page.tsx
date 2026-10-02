@@ -126,10 +126,10 @@ export default function ComparePage() {
                 ))}
               </tr>
               <tr>
-                <td className="p-4 font-bold text-slate-400 bg-slate-50/50 dark:bg-tech-darker/50">Seller Attribution</td>
+                <td className="p-4 font-bold text-slate-400 bg-slate-50/50 dark:bg-tech-darker/50">Fulfillment Store</td>
                 {comparedProducts.map(p => (
                   <td key={p.id} className="p-4 font-medium text-slate-700 dark:text-slate-300">
-                    {p.sellerType === 'RESELLER' ? `Reseller: ${p.resellerCode}` : 'Official NexTech Store'}
+                    Official NexTech Store
                   </td>
                 ))}
               </tr>

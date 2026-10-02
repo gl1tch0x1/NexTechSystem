@@ -243,7 +243,7 @@ export default function OrderDetailPage() {
               <tr className="border-b-2 border-slate-300 text-slate-500 font-bold uppercase text-[10px]">
                 <th className="py-3">Item & Technical Description</th>
                 <th className="py-3">SKU</th>
-                <th className="py-3">Seller Attribution</th>
+                <th className="py-3">Fulfillment</th>
                 <th className="py-3 text-center">Qty</th>
                 <th className="py-3 text-right">Unit Price</th>
                 <th className="py-3 text-right">Line Total</th>
@@ -266,11 +266,7 @@ export default function OrderDetailPage() {
                   </td>
                   <td className="py-3.5 font-mono text-slate-500">{item.sku}</td>
                   <td className="py-3.5">
-                    {item.sellerType === 'RESELLER' ? (
-                      <span className="font-semibold text-amber-700">Partner: {item.resellerCode}</span>
-                    ) : (
-                      <span className="font-semibold text-blue-700">NexTech Enterprise Direct</span>
-                    )}
+                    <span className="font-semibold text-blue-700">NexTech Enterprise Direct</span>
                   </td>
                   <td className="py-3.5 text-center font-bold">{item.quantity}</td>
                   <td className="py-3.5 text-right font-mono">{formatPrice(item.unitPrice)}</td>

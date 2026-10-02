@@ -11,7 +11,6 @@ import {
   Plus,
   ArrowRight,
   ShieldCheck,
-  Store,
   Tag,
   ShoppingBag,
   Sparkles,
@@ -148,15 +147,9 @@ export default function CartPage() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    {item.sellerType === 'RESELLER' ? (
-                      <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 px-1.5 py-0.5 rounded flex items-center gap-1">
-                        <Store className="w-3 h-3" /> Reseller: {item.resellerCode}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3" /> NexTech Official Store
-                      </span>
-                    )}
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" /> NexTech Certified Inventory
+                    </span>
                     <span className="text-[10px] font-mono text-slate-400">SKU: {item.sku || 'N/A'}</span>
                   </div>
 
