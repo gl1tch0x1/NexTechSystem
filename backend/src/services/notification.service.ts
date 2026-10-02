@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.js';
 import { Order } from '../types/index.js';
 import { dbStore } from '../config/db-store.js';
@@ -21,47 +20,10 @@ export interface AdminNotification {
 
 export class NotificationService {
   /**
-   * Generates a tamper-proof cryptographically-signed JWT for remote 1-click approvals
-   */
-  generateApprovalToken(orderId: string, action: 'APPROVE' | 'REJECT'): string {
-    return jwt.sign(
-      {
-        orderId,
-        action,
-        type: 'REMOTE_ORDER_APPROVAL',
-      },
-      ENV.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-  }
-
-  /**
-   * Validates the remote approval token and extracts verified orderId
-   */
-  verifyApprovalToken(token: string, action: 'APPROVE' | 'REJECT'): { orderId: string } | null {
-    try {
-      const decoded = jwt.verify(token, ENV.JWT_SECRET) as any;
-      if (decoded && decoded.type === 'REMOTE_ORDER_APPROVAL' && decoded.action === action && decoded.orderId) {
-        return { orderId: String(decoded.orderId) };
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  }
-
-  /**
    * Main Dispatcher: Fans out notifications across Discord, Telegram, Email, and Admin Dashboard
    */
   async notifyNewOrderPendingApproval(order: Order): Promise<void> {
-    const approveToken = this.generateApprovalToken(order.id, 'APPROVE');
-    const rejectToken = this.generateApprovalToken(order.id, 'REJECT');
-
-    const backendUrl = ENV.PUBLIC_API_URL.replace(/\/$/, '');
     const clientUrl = ENV.CLIENT_URL.replace(/\/$/, '');
-
-    const approveUrl = `${backendUrl}/api/orders/approval/approve?token=${approveToken}`;
-    const rejectUrl = `${backendUrl}/api/orders/approval/reject?token=${rejectToken}`;
     const dashboardUrl = `${clientUrl}/admin/orders?orderId=${order.id}`;
 
     // 1. Admin In-App Dashboard Notification Queue
@@ -86,17 +48,17 @@ export class NotificationService {
     }
 
     // 2. Transactional Email Notification (Admin Alert)
-    this.sendAdminEmailAlert(order, approveUrl, rejectUrl, dashboardUrl).catch(err =>
+    this.sendAdminEmailAlert(order, dashboardUrl).catch(err =>
       console.warn('[NotificationService] Email alert notice:', err?.message || err)
     );
 
     // 3. Discord Webhook ChatOps
-    this.sendDiscordWebhook(order, approveUrl, rejectUrl, dashboardUrl).catch(err =>
+    this.sendDiscordWebhook(order, dashboardUrl).catch(err =>
       console.warn('[NotificationService] Discord webhook notice:', err?.message || err)
     );
 
     // 4. Telegram Bot ChatOps
-    this.sendTelegramNotification(order, approveUrl, rejectUrl, dashboardUrl).catch(err =>
+    this.sendTelegramNotification(order, dashboardUrl).catch(err =>
       console.warn('[NotificationService] Telegram notification notice:', err?.message || err)
     );
 
@@ -120,8 +82,6 @@ export class NotificationService {
    */
   private async sendDiscordWebhook(
     order: Order,
-    approveUrl: string,
-    rejectUrl: string,
     dashboardUrl: string
   ): Promise<void> {
     const webhookUrl = ENV.DISCORD_WEBHOOK_URL;
@@ -167,8 +127,8 @@ export class NotificationService {
               inline: false,
             },
             {
-              name: '⚡ 1-Click ChatOps Actions',
-              value: `[✅ **Approve Order**](${approveUrl})\n[❌ **Reject Order**](${rejectUrl})\n[🖥️ **Open Admin Dashboard**](${dashboardUrl})`,
+              name: '⚡ Executive HITL Sign-Off',
+              value: `[🖥️ **Review & Sign-Off in Admin Command Center**](${dashboardUrl})`,
               inline: false,
             },
           ],
@@ -197,8 +157,6 @@ export class NotificationService {
    */
   private async sendTelegramNotification(
     order: Order,
-    approveUrl: string,
-    rejectUrl: string,
     dashboardUrl: string
   ): Promise<void> {
     const botToken = ENV.TELEGRAM_BOT_TOKEN;
@@ -217,7 +175,7 @@ export class NotificationService {
       `<b>Payment:</b> ${order.paymentMethod} (${order.paymentStatus})\n` +
       `<b>Destination:</b> ${order.shippingAddress?.city || 'Dubai'}, UAE\n\n` +
       `<b>Hardware Items:</b>\n${itemsPreview}\n\n` +
-      `<i>Status: Pending Admin Approval. Click below to approve or reject:</i>`;
+      `<i>Status: Pending Admin Approval. Click below to review and approve/reject in Admin Command Center:</i>`;
 
     if (botToken && chatId) {
       const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -231,11 +189,7 @@ export class NotificationService {
           reply_markup: {
             inline_keyboard: [
               [
-                { text: '✅ Approve Order', url: approveUrl },
-                { text: '❌ Reject Order', url: rejectUrl },
-              ],
-              [
-                { text: '🖥️ Open Admin Dashboard', url: dashboardUrl },
+                { text: '🖥️ Review & Sign-Off in Admin Command Center', url: dashboardUrl },
               ],
             ],
           },
@@ -252,14 +206,12 @@ export class NotificationService {
    */
   private async sendAdminEmailAlert(
     order: Order,
-    approveUrl: string,
-    rejectUrl: string,
     dashboardUrl: string
   ): Promise<void> {
     const adminEmail = ENV.ADMIN_NOTIFICATION_EMAIL || ENV.ADMIN_DEFAULT_EMAIL;
     console.log(
       `[NotificationService: Email Dispatch] Dispatched to admin [${adminEmail}] for Order #${order.orderNumber} ` +
-      `(Approve: ${approveUrl} | Reject: ${rejectUrl} | Dashboard: ${dashboardUrl})`
+      `(Dashboard: ${dashboardUrl})`
     );
   }
 

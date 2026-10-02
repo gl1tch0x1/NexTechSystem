@@ -1,32 +1,16 @@
 import { Router } from 'express';
 import { orderController } from '../controllers/order.controller.js';
-import { authenticate, authenticateRemoteApproval } from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 import { orderLimiter } from '../middlewares/rate-limiter.middleware.js';
+import { ENV } from '../config/env.js';
 
 const router = Router();
 
-// Public cryptographically-signed ChatOps remote approval endpoints (Discord / Telegram / Email 1-click)
-router.get(
-  '/approval/approve',
-  orderLimiter,
-  authenticateRemoteApproval('APPROVE'),
-  (req, res, next) => orderController.handleRemoteApprove(req, res).catch(next)
-);
-
-router.get(
-  '/approval/reject',
-  orderLimiter,
-  authenticateRemoteApproval('REJECT'),
-  (req, res, next) => orderController.handleRemoteReject(req, res).catch(next)
-);
-
-// Backwards-compatible redirect for legacy /approval/remote links
-router.get('/approval/remote', orderLimiter, (req, res) => {
-  const { action, token } = req.query;
-  const safeToken = encodeURIComponent(String(token || ''));
-  const isReject = String(action || '').toUpperCase() === 'REJECT';
-  const target = isReject ? 'reject' : 'approve';
-  res.redirect(307, `/api/orders/approval/${target}?token=${safeToken}`);
+// Safe navigation redirects to the authenticated Admin Command Center
+router.get(['/approval/remote', '/approval/approve', '/approval/reject'], orderLimiter, (req, res) => {
+  const orderId = encodeURIComponent(String(req.query.orderId || ''));
+  const clientUrl = ENV.CLIENT_URL.replace(/\/$/, '');
+  res.redirect(302, `${clientUrl}/admin/orders${orderId ? `?orderId=${orderId}` : ''}`);
 });
 
 // Apply order & transaction rate limiter & authentication for user endpoints

@@ -278,6 +278,24 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, [token]);
 
+  // Deep-link direct inspection for ChatOps notifications (?orderId=...)
+  useEffect(() => {
+    if (orders.length > 0 && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const targetOrderId = params.get('orderId');
+      if (targetOrderId) {
+        const found = orders.find(o => o.id === targetOrderId || o.orderNumber === targetOrderId);
+        if (found) {
+          setSelectedOrder(found);
+          const norm = getNormalizedStatus(found);
+          if (norm === 'PENDING_APPROVAL') {
+            setStatusFilter('PENDING_APPROVAL');
+          }
+        }
+      }
+    }
+  }, [orders]);
+
   const handleOpenCreateModal = async () => {
     setIsCreateModalOpen(true);
     setCreateError('');
