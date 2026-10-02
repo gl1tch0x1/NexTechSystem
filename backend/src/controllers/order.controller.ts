@@ -124,20 +124,30 @@ export class OrderController {
     res.json({ success: true, data: ebill });
   }
 
-  async handleRemoteApproval(req: Request, res: Response): Promise<void> {
-    const { orderId, action, token } = req.query as { orderId?: string; action?: string; token?: string };
-
+  private renderRemoteHtml(
+    res: Response,
+    statusCode: number,
+    title: string,
+    badgeText: string,
+    badgeBg: string,
+    message: string,
+    details?: string
+  ): void {
     const clientUrl = ENV.CLIENT_URL.replace(/\/$/, '');
-    const isJson = req.headers.accept?.includes('application/json');
+    const escapeHtml = (str: string) =>
+      String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 
-    // Helper for styled HTML response
-    const renderHtmlResponse = (statusCode: number, title: string, badgeText: string, badgeBg: string, message: string, details?: string) => {
-      const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} | NexTech Systems</title>
+  <title>${escapeHtml(title)} | NexTech Systems</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #0b1120; color: #f1f5f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
@@ -153,8 +163,8 @@ export class OrderController {
 </head>
 <body>
   <div class="card">
-    <div class="badge">${badgeText}</div>
-    <h1>${title}</h1>
+    <div class="badge">${escapeHtml(badgeText)}</div>
+    <h1>${escapeHtml(title)}</h1>
     <p>${message}</p>
     ${details ? `<div class="details-box">${details}</div>` : ''}
     <div>
@@ -164,25 +174,31 @@ export class OrderController {
   </div>
 </body>
 </html>`;
-      res.status(statusCode).setHeader('Content-Type', 'text/html').send(html);
-    };
+    res.status(statusCode).setHeader('Content-Type', 'text/html').send(html);
+  }
 
-    if (!orderId || !action || !token || (action !== 'APPROVE' && action !== 'REJECT')) {
+  async handleRemoteApprove(req: Request, res: Response): Promise<void> {
+    const isJson = Boolean(req.headers.accept?.includes('application/json'));
+    const orderId = String(req.query.orderId || '').trim();
+    const token = String(req.query.token || '').trim();
+
+    // Strict input pattern validation
+    if (!orderId || !/^[a-zA-Z0-9_-]+$/.test(orderId) || !token || !/^[a-fA-F0-9]{64}$/.test(token)) {
       if (isJson) {
         res.status(400).json({ success: false, error: { message: 'Invalid or missing remote approval parameters.' } });
         return;
       }
-      return renderHtmlResponse(400, 'Invalid Request', 'Bad Request', 'background: #ef4444; color: #ffffff;', 'The approval link parameters are malformed or missing.');
+      return this.renderRemoteHtml(res, 400, 'Invalid Request', 'Bad Request', 'background: #ef4444; color: #ffffff;', 'The approval link parameters are malformed or missing.');
     }
 
-    // Verify cryptographic HMAC token
-    const isValid = notificationService.verifyApprovalToken(orderId, action as 'APPROVE' | 'REJECT', token);
+    // Verify cryptographic HMAC token specifically bound to APPROVE
+    const isValid = notificationService.verifyApprovalToken(orderId, 'APPROVE', token);
     if (!isValid) {
       if (isJson) {
         res.status(403).json({ success: false, error: { message: 'Cryptographic signature verification failed.' } });
         return;
       }
-      return renderHtmlResponse(403, 'Unauthorized Action', 'Signature Failed', 'background: #ef4444; color: #ffffff;', 'This 1-click action link is invalid, corrupted, or has expired.');
+      return this.renderRemoteHtml(res, 403, 'Unauthorized Action', 'Signature Failed', 'background: #ef4444; color: #ffffff;', 'This 1-click action link is invalid, corrupted, or has expired.');
     }
 
     const order = await orderService.getOrderById(orderId);
@@ -191,68 +207,150 @@ export class OrderController {
         res.status(404).json({ success: false, error: { message: 'Order not found.' } });
         return;
       }
-      return renderHtmlResponse(404, 'Order Not Found', 'Not Found', 'background: #f59e0b; color: #000000;', `The requested order ${orderId} does not exist in the database.`);
+      return this.renderRemoteHtml(res, 404, 'Order Not Found', 'Not Found', 'background: #f59e0b; color: #000000;', 'The requested order does not exist in the database.');
     }
 
-    // Check if already processed
     if (order.orderStatus !== 'PENDING_APPROVAL') {
-      const isAlreadyApproved = order.orderStatus === 'CONFIRMED' && action === 'APPROVE';
-      const isAlreadyRejected = order.orderStatus === 'CANCELLED' && action === 'REJECT';
-
-      if (!isAlreadyApproved && !isAlreadyRejected) {
+      if (order.orderStatus === 'CONFIRMED') {
         if (isJson) {
-          res.status(400).json({ success: false, error: { message: `Order #${order.orderNumber} is already in status '${order.orderStatus}'.` } });
+          res.json({ success: true, data: order, message: `Order #${order.orderNumber} is already confirmed.` });
           return;
         }
-        return renderHtmlResponse(
+        return this.renderRemoteHtml(
+          res,
           200,
-          `Order #${order.orderNumber} Already Handled`,
-          order.orderStatus,
-          'background: #3b82f6; color: #ffffff;',
-          `This order is already in <strong>${order.orderStatus}</strong> state and cannot be modified again via this link.`
+          `Order #${order.orderNumber} Already Approved`,
+          'CONFIRMED',
+          'background: #10b981; color: #ffffff;',
+          'This order was already approved and is in <strong>CONFIRMED</strong> state.'
         );
       }
+      if (isJson) {
+        res.status(400).json({ success: false, error: { message: `Order #${order.orderNumber} is already in status '${order.orderStatus}'.` } });
+        return;
+      }
+      return this.renderRemoteHtml(
+        res,
+        200,
+        `Order #${order.orderNumber} Already Handled`,
+        order.orderStatus,
+        'background: #3b82f6; color: #ffffff;',
+        `This order is in <strong>${order.orderStatus}</strong> state and cannot be modified again via this link.`
+      );
     }
 
     try {
-      if (action === 'APPROVE') {
-        const updated = await orderService.approveOrder(orderId, 'CHATOPS', undefined, 'Approved via ChatOps 1-click verified link');
-        if (isJson) {
-          res.json({ success: true, data: updated, message: `Order #${order.orderNumber} approved.` });
-          return;
-        }
-        return renderHtmlResponse(
-          200,
-          `Order #${order.orderNumber} Approved!`,
-          'APPROVED & CONFIRMED',
-          'background: #10b981; color: #ffffff;',
-          `Order status transitioned to <strong>CONFIRMED</strong>. Hardware inventory allocation has been finalized, and customer fulfillment has been initiated.`,
-          `<strong>Customer:</strong> ${order.customerName} (${order.customerEmail})<br/>
-           <strong>Total Value:</strong> ${order.currency} ${(order.total || 0).toLocaleString()}<br/>
-           <strong>Payment:</strong> ${order.paymentMethod} (${order.paymentStatus})`
-        );
-      } else {
-        const updated = await orderService.rejectOrder(orderId, 'CHATOPS', undefined, 'Rejected via ChatOps 1-click verified link');
-        if (isJson) {
-          res.json({ success: true, data: updated, message: `Order #${order.orderNumber} rejected.` });
-          return;
-        }
-        return renderHtmlResponse(
-          200,
-          `Order #${order.orderNumber} Rejected`,
-          'ORDER REJECTED & CANCELLED',
-          'background: #ef4444; color: #ffffff;',
-          `Order status has been updated to <strong>CANCELLED</strong>. Any reserved inventory stock and customer wallet balances have been automatically restored.`,
-          `<strong>Customer:</strong> ${order.customerName}<br/>
-           <strong>Reason:</strong> Rejected via ChatOps remote link`
-        );
-      }
-    } catch (err: any) {
+      const updated = await orderService.approveOrder(orderId, 'CHATOPS', undefined, 'Approved via ChatOps 1-click verified link');
       if (isJson) {
-        res.status(500).json({ success: false, error: { message: err.message || 'Operation failed' } });
+        res.json({ success: true, data: updated, message: `Order #${order.orderNumber} approved.` });
         return;
       }
-      return renderHtmlResponse(500, 'Processing Error', 'Error', 'background: #ef4444; color: #ffffff;', err.message || 'An error occurred while updating the order.');
+      return this.renderRemoteHtml(
+        res,
+        200,
+        `Order #${order.orderNumber} Approved!`,
+        'APPROVED & CONFIRMED',
+        'background: #10b981; color: #ffffff;',
+        'Order status transitioned to <strong>CONFIRMED</strong>. Hardware inventory allocation has been finalized, and customer fulfillment has been initiated.',
+        `<strong>Customer:</strong> ${order.customerName} (${order.customerEmail})<br/>
+         <strong>Total Value:</strong> ${order.currency} ${(order.total || 0).toLocaleString()}<br/>
+         <strong>Payment:</strong> ${order.paymentMethod} (${order.paymentStatus})`
+      );
+    } catch (err: any) {
+      console.error('[OrderController] Remote approve failed for order:', orderId, err);
+      if (isJson) {
+        res.status(500).json({ success: false, error: { message: err?.message || 'Remote approval failed.' } });
+        return;
+      }
+      return this.renderRemoteHtml(res, 500, 'Processing Error', 'Server Error', 'background: #ef4444; color: #ffffff;', err?.message || 'Failed to process order approval.');
+    }
+  }
+
+  async handleRemoteReject(req: Request, res: Response): Promise<void> {
+    const isJson = Boolean(req.headers.accept?.includes('application/json'));
+    const orderId = String(req.query.orderId || '').trim();
+    const token = String(req.query.token || '').trim();
+
+    // Strict input pattern validation
+    if (!orderId || !/^[a-zA-Z0-9_-]+$/.test(orderId) || !token || !/^[a-fA-F0-9]{64}$/.test(token)) {
+      if (isJson) {
+        res.status(400).json({ success: false, error: { message: 'Invalid or missing remote reject parameters.' } });
+        return;
+      }
+      return this.renderRemoteHtml(res, 400, 'Invalid Request', 'Bad Request', 'background: #ef4444; color: #ffffff;', 'The rejection link parameters are malformed or missing.');
+    }
+
+    // Verify cryptographic HMAC token specifically bound to REJECT
+    const isValid = notificationService.verifyApprovalToken(orderId, 'REJECT', token);
+    if (!isValid) {
+      if (isJson) {
+        res.status(403).json({ success: false, error: { message: 'Cryptographic signature verification failed.' } });
+        return;
+      }
+      return this.renderRemoteHtml(res, 403, 'Unauthorized Action', 'Signature Failed', 'background: #ef4444; color: #ffffff;', 'This 1-click action link is invalid, corrupted, or has expired.');
+    }
+
+    const order = await orderService.getOrderById(orderId);
+    if (!order) {
+      if (isJson) {
+        res.status(404).json({ success: false, error: { message: 'Order not found.' } });
+        return;
+      }
+      return this.renderRemoteHtml(res, 404, 'Order Not Found', 'Not Found', 'background: #f59e0b; color: #000000;', 'The requested order does not exist in the database.');
+    }
+
+    if (order.orderStatus !== 'PENDING_APPROVAL') {
+      if (order.orderStatus === 'CANCELLED') {
+        if (isJson) {
+          res.json({ success: true, data: order, message: `Order #${order.orderNumber} is already cancelled.` });
+          return;
+        }
+        return this.renderRemoteHtml(
+          res,
+          200,
+          `Order #${order.orderNumber} Already Rejected`,
+          'CANCELLED',
+          'background: #ef4444; color: #ffffff;',
+          'This order was already rejected and is in <strong>CANCELLED</strong> state.'
+        );
+      }
+      if (isJson) {
+        res.status(400).json({ success: false, error: { message: `Order #${order.orderNumber} is already in status '${order.orderStatus}'.` } });
+        return;
+      }
+      return this.renderRemoteHtml(
+        res,
+        200,
+        `Order #${order.orderNumber} Already Handled`,
+        order.orderStatus,
+        'background: #3b82f6; color: #ffffff;',
+        `This order is in <strong>${order.orderStatus}</strong> state and cannot be modified again via this link.`
+      );
+    }
+
+    try {
+      const updated = await orderService.rejectOrder(orderId, 'CHATOPS', undefined, 'Rejected via ChatOps 1-click verified link');
+      if (isJson) {
+        res.json({ success: true, data: updated, message: `Order #${order.orderNumber} rejected.` });
+        return;
+      }
+      return this.renderRemoteHtml(
+        res,
+        200,
+        `Order #${order.orderNumber} Rejected`,
+        'ORDER REJECTED & CANCELLED',
+        'background: #ef4444; color: #ffffff;',
+        'Order status has been updated to <strong>CANCELLED</strong>. Any reserved inventory stock and customer wallet balances have been automatically restored.',
+        `<strong>Customer:</strong> ${order.customerName}<br/>
+         <strong>Reason:</strong> Rejected via ChatOps remote link`
+      );
+    } catch (err: any) {
+      console.error('[OrderController] Remote reject failed for order:', orderId, err);
+      if (isJson) {
+        res.status(500).json({ success: false, error: { message: err?.message || 'Remote rejection failed.' } });
+        return;
+      }
+      return this.renderRemoteHtml(res, 500, 'Processing Error', 'Server Error', 'background: #ef4444; color: #ffffff;', err?.message || 'Failed to process order rejection.');
     }
   }
 }

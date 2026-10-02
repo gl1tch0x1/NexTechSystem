@@ -367,7 +367,7 @@ export class OrderService {
       try {
         await inventoryService.restock(item.productId, item.quantity, item.variantId);
       } catch (err) {
-        console.error(`[OrderService] Restock failed for product ${item.productId}:`, err);
+        console.error('[OrderService] Restock failed for product:', item.productId, err);
       }
     }
 
@@ -382,7 +382,7 @@ export class OrderService {
           type: 'CREDIT',
         });
       } catch (err) {
-        console.error(`[OrderService] Wallet refund failed for order ${orderId}:`, err);
+        console.error('[OrderService] Wallet refund failed for order:', orderId, err);
       }
     }
 

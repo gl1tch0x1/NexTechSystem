@@ -50,8 +50,8 @@ export class NotificationService {
     const backendUrl = ENV.PUBLIC_API_URL.replace(/\/$/, '');
     const clientUrl = ENV.CLIENT_URL.replace(/\/$/, '');
 
-    const approveUrl = `${backendUrl}/api/orders/approval/remote?orderId=${order.id}&action=APPROVE&token=${approveToken}`;
-    const rejectUrl = `${backendUrl}/api/orders/approval/remote?orderId=${order.id}&action=REJECT&token=${rejectToken}`;
+    const approveUrl = `${backendUrl}/api/orders/approval/approve?orderId=${order.id}&token=${approveToken}`;
+    const rejectUrl = `${backendUrl}/api/orders/approval/reject?orderId=${order.id}&token=${rejectToken}`;
     const dashboardUrl = `${clientUrl}/admin/orders?orderId=${order.id}`;
 
     // 1. Admin In-App Dashboard Notification Queue
@@ -176,9 +176,9 @@ export class NotificationService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(discordPayload),
       });
-      console.log(`[NotificationService] Discord embed dispatched for Order #${order.orderNumber}`);
+      console.log('[NotificationService] Discord embed dispatched for Order #%s', order.orderNumber);
     } else {
-      console.log(`[NotificationService: ChatOps Discord Mock] Webhook not configured in env. Discord Embed Generated:\n`, JSON.stringify(discordPayload, null, 2));
+      console.log('[NotificationService: ChatOps Discord Mock] Webhook not configured in env. Discord Embed Generated:\n', JSON.stringify(discordPayload, null, 2));
     }
   }
 
@@ -231,9 +231,9 @@ export class NotificationService {
           },
         }),
       });
-      console.log(`[NotificationService] Telegram message dispatched for Order #${order.orderNumber}`);
+      console.log('[NotificationService] Telegram message dispatched for Order #%s', order.orderNumber);
     } else {
-      console.log(`[NotificationService: ChatOps Telegram Mock] Telegram bot token not configured. Telegram Message Formatted:\n${text}`);
+      console.log('[NotificationService: ChatOps Telegram Mock] Telegram bot token not configured. Telegram Message Formatted:\n', text);
     }
   }
 
