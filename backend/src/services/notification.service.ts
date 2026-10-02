@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.js';
 import { Order } from '../types/index.js';
 import { dbStore } from '../config/db-store.js';
@@ -21,22 +21,32 @@ export interface AdminNotification {
 
 export class NotificationService {
   /**
-   * Generates a tamper-proof HMAC signature token for remote 1-click approvals
+   * Generates a tamper-proof cryptographically-signed JWT for remote 1-click approvals
    */
   generateApprovalToken(orderId: string, action: 'APPROVE' | 'REJECT'): string {
-    const data = `${orderId}:${action}`;
-    return crypto.createHmac('sha256', ENV.JWT_SECRET).update(data).digest('hex');
+    return jwt.sign(
+      {
+        orderId,
+        action,
+        type: 'REMOTE_ORDER_APPROVAL',
+      },
+      ENV.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
   }
 
   /**
-   * Validates the remote approval token
+   * Validates the remote approval token and extracts verified orderId
    */
-  verifyApprovalToken(orderId: string, action: 'APPROVE' | 'REJECT', token: string): boolean {
-    const expected = this.generateApprovalToken(orderId, action);
+  verifyApprovalToken(token: string, action: 'APPROVE' | 'REJECT'): { orderId: string } | null {
     try {
-      return crypto.timingSafeEqual(Buffer.from(token, 'hex'), Buffer.from(expected, 'hex'));
+      const decoded = jwt.verify(token, ENV.JWT_SECRET) as any;
+      if (decoded && decoded.type === 'REMOTE_ORDER_APPROVAL' && decoded.action === action && decoded.orderId) {
+        return { orderId: String(decoded.orderId) };
+      }
+      return null;
     } catch {
-      return false;
+      return null;
     }
   }
 
@@ -50,8 +60,8 @@ export class NotificationService {
     const backendUrl = ENV.PUBLIC_API_URL.replace(/\/$/, '');
     const clientUrl = ENV.CLIENT_URL.replace(/\/$/, '');
 
-    const approveUrl = `${backendUrl}/api/orders/approval/approve?orderId=${order.id}&token=${approveToken}`;
-    const rejectUrl = `${backendUrl}/api/orders/approval/reject?orderId=${order.id}&token=${rejectToken}`;
+    const approveUrl = `${backendUrl}/api/orders/approval/approve?token=${approveToken}`;
+    const rejectUrl = `${backendUrl}/api/orders/approval/reject?token=${rejectToken}`;
     const dashboardUrl = `${clientUrl}/admin/orders?orderId=${order.id}`;
 
     // 1. Admin In-App Dashboard Notification Queue

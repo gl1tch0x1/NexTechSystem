@@ -1,9 +1,8 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { orderService } from '../services/order.service.js';
 import { ebillService } from '../services/ebill.service.js';
-import { notificationService } from '../services/notification.service.js';
 import { ENV } from '../config/env.js';
-import { AuthenticatedRequest } from '../middleware/auth.js';
+import { AuthenticatedRequest, RemoteApprovalRequest } from '../middleware/auth.js';
 
 export class OrderController {
   async createOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -177,28 +176,16 @@ export class OrderController {
     res.status(statusCode).setHeader('Content-Type', 'text/html').send(html);
   }
 
-  async handleRemoteApprove(req: Request, res: Response): Promise<void> {
+  async handleRemoteApprove(req: RemoteApprovalRequest, res: Response): Promise<void> {
     const isJson = Boolean(req.headers.accept?.includes('application/json'));
-    const orderId = String(req.query.orderId || '').trim();
-    const token = String(req.query.token || '').trim();
+    const orderId = String(req.approvalOrderId || '').trim();
 
-    // Strict input pattern validation
-    if (!orderId || !/^[a-zA-Z0-9_-]+$/.test(orderId) || !token || !/^[a-fA-F0-9]{64}$/.test(token)) {
+    if (!orderId) {
       if (isJson) {
-        res.status(400).json({ success: false, error: { message: 'Invalid or missing remote approval parameters.' } });
+        res.status(401).json({ success: false, error: { message: 'Missing verified approval order identity.' } });
         return;
       }
-      return this.renderRemoteHtml(res, 400, 'Invalid Request', 'Bad Request', 'background: #ef4444; color: #ffffff;', 'The approval link parameters are malformed or missing.');
-    }
-
-    // Verify cryptographic HMAC token specifically bound to APPROVE
-    const isValid = notificationService.verifyApprovalToken(orderId, 'APPROVE', token);
-    if (!isValid) {
-      if (isJson) {
-        res.status(403).json({ success: false, error: { message: 'Cryptographic signature verification failed.' } });
-        return;
-      }
-      return this.renderRemoteHtml(res, 403, 'Unauthorized Action', 'Signature Failed', 'background: #ef4444; color: #ffffff;', 'This 1-click action link is invalid, corrupted, or has expired.');
+      return this.renderRemoteHtml(res, 401, 'Unauthorized Request', 'Unauthorized', 'background: #ef4444; color: #ffffff;', 'No verified order identity attached to this authorization token.');
     }
 
     const order = await orderService.getOrderById(orderId);
@@ -266,28 +253,16 @@ export class OrderController {
     }
   }
 
-  async handleRemoteReject(req: Request, res: Response): Promise<void> {
+  async handleRemoteReject(req: RemoteApprovalRequest, res: Response): Promise<void> {
     const isJson = Boolean(req.headers.accept?.includes('application/json'));
-    const orderId = String(req.query.orderId || '').trim();
-    const token = String(req.query.token || '').trim();
+    const orderId = String(req.approvalOrderId || '').trim();
 
-    // Strict input pattern validation
-    if (!orderId || !/^[a-zA-Z0-9_-]+$/.test(orderId) || !token || !/^[a-fA-F0-9]{64}$/.test(token)) {
+    if (!orderId) {
       if (isJson) {
-        res.status(400).json({ success: false, error: { message: 'Invalid or missing remote reject parameters.' } });
+        res.status(401).json({ success: false, error: { message: 'Missing verified rejection order identity.' } });
         return;
       }
-      return this.renderRemoteHtml(res, 400, 'Invalid Request', 'Bad Request', 'background: #ef4444; color: #ffffff;', 'The rejection link parameters are malformed or missing.');
-    }
-
-    // Verify cryptographic HMAC token specifically bound to REJECT
-    const isValid = notificationService.verifyApprovalToken(orderId, 'REJECT', token);
-    if (!isValid) {
-      if (isJson) {
-        res.status(403).json({ success: false, error: { message: 'Cryptographic signature verification failed.' } });
-        return;
-      }
-      return this.renderRemoteHtml(res, 403, 'Unauthorized Action', 'Signature Failed', 'background: #ef4444; color: #ffffff;', 'This 1-click action link is invalid, corrupted, or has expired.');
+      return this.renderRemoteHtml(res, 401, 'Unauthorized Request', 'Unauthorized', 'background: #ef4444; color: #ffffff;', 'No verified order identity attached to this authorization token.');
     }
 
     const order = await orderService.getOrderById(orderId);
