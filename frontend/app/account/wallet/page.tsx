@@ -140,43 +140,48 @@ function CustomerWalletContent() {
         {/* Left Column: Titanium Wallet Card & Top-Up */}
         <div className="lg:col-span-5 space-y-6">
           {/* Executive Digital Wallet Card */}
-          <div className="p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 text-white space-y-6 shadow-2xl relative overflow-hidden border border-slate-700/80">
-            <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-              <WalletIcon className="w-48 h-48 text-tech-cyan" />
+          <div className="p-8 rounded-3xl bg-gradient-to-br from-white via-slate-50 to-blue-50/70 dark:from-slate-900 dark:via-slate-950 dark:to-blue-950 text-slate-900 dark:text-white space-y-6 shadow-xl dark:shadow-2xl relative overflow-hidden border border-slate-200/90 dark:border-slate-700/80">
+            <div className="absolute top-0 right-0 p-8 opacity-20 dark:opacity-10 pointer-events-none text-slate-300 dark:text-tech-cyan">
+              <WalletIcon className="w-48 h-48" />
             </div>
 
             <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-3">
-                <DirhamBadge size={42} variant="glass" weight="bold" />
+                <div className="hidden dark:block">
+                  <DirhamBadge size={42} variant="glass" weight="bold" />
+                </div>
+                <div className="block dark:hidden">
+                  <DirhamBadge size={42} variant="light" weight="bold" className="border-slate-300 shadow-xs text-tech-blue" />
+                </div>
                 <div>
-                  <span className="text-xs font-mono uppercase font-bold text-tech-cyan tracking-wider block">
+                  <span className="text-xs font-mono uppercase font-bold text-tech-blue dark:text-tech-cyan tracking-wider block">
                     NexTech Titanium Ledger
                   </span>
-                  <span className="text-[10px] text-slate-400 font-mono">Central Bank of UAE (U+20C3)</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Central Bank of UAE (U+20C3)</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
-                <ShieldCheck className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-bold">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Verified</span>
               </div>
             </div>
 
             <div className="relative z-10">
-              <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                 Available Wallet Balance
               </div>
-              <div className="text-4xl sm:text-5xl font-black tracking-tight text-white mt-2 flex items-baseline gap-2">
+              <div className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white mt-2 flex items-baseline gap-2">
                 <span>{formatPrice(wallet?.balance || 0)}</span>
               </div>
-              <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-tech-cyan" />
+              <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-tech-blue dark:text-tech-cyan" />
                 <span>100% redeemable across all GPUs, servers, and custom PC builds</span>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono relative z-10">
+            <div className="pt-4 border-t border-slate-200/90 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-mono relative z-10">
               <span className="truncate max-w-[180px]">LEDGER: {wallet?.id || 'NXT-WLT-001'}</span>
-              <span className="flex items-center gap-1.5 font-bold text-emerald-400">
+              <span className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
                 <DirhamSymbol size={13} weight="bold" />
                 <span>AED CURRENCY</span>
               </span>
@@ -231,11 +236,13 @@ function CustomerWalletContent() {
               <button
                 disabled={topupLoading}
                 onClick={() => initiateTopup(5000)}
-                className="py-3 px-3 rounded-2xl bg-gradient-to-r from-blue-600/10 to-cyan-600/10 hover:from-blue-600/20 hover:to-cyan-600/20 border border-blue-500/30 text-tech-blue dark:text-tech-cyan text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                className="py-3 px-3 rounded-2xl bg-blue-50/80 dark:bg-slate-950 border border-blue-200 dark:border-blue-900/60 hover:border-tech-blue dark:hover:border-tech-blue hover:bg-blue-100/50 dark:hover:bg-slate-900 text-tech-blue dark:text-tech-cyan text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                 title="High-Value Authorization (Admin PIN Required)"
               >
                 <KeyRound className="w-3.5 h-3.5" />
-                <span>+AED 5,000</span>
+                <span>+</span>
+                <DirhamSymbol size={13} weight="bold" className="text-tech-blue dark:text-tech-cyan" />
+                <span>5,000</span>
               </button>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
