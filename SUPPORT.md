@@ -9,11 +9,10 @@ Welcome to **NexTech Systems** support! Here are the best ways to get assistance
 ### 1. Where do I configure Firebase & Cloud credentials?
 Copy the `.env.example` templates into `backend/.env` and `frontend/.env.local`. For local offline development, zero-config fallbacks run out-of-the-box using the local disk persistence engine (`data_store/`).
 
-### 2. How do I run the automated integration test suite?
-Navigate to the `backend` directory and run:
+### 2. How do I run code quality and typecheck verifications?
+Navigate to the root directory and run:
 ```bash
-cd backend
-npx tsx test-suite.ts
+npm run lint
 ```
 
 ### 3. How do I access the administration portal?

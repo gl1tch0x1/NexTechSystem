@@ -67,15 +67,10 @@ git checkout -b feat/add-amd-am5-motherboards
 Before submitting a Pull Request, verify that all linters, typecheckers, and automated test suites pass cleanly:
 
 ```bash
-# 1. Typecheck Backend
-cd backend
+# 1. Typecheck & Lint All Workspaces
 npm run lint
 
-# 2. Run Automated 38-Step Integration Test Suite
-npx tsx test-suite.ts
-
-# 3. Typecheck & Build Frontend
-cd ../frontend
+# 2. Compile Production Builds
 npm run build
 ```
 

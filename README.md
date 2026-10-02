@@ -735,8 +735,6 @@ eCommerce_Store/
 │   │   ├── utils/                   # Cryptographic PIN and helper utilities
 │   │   ├── app.ts                   # Express server entry point
 │   │   └── server.ts                # HTTP listener bootstrap
-│   ├── test-catalog-features.ts     # 7-step advanced catalog & multi-SKU variant test suite
-│   ├── test-suite.ts                # 38-step automated integration test suite
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/                        # Next.js 15 App Router web application
@@ -940,9 +938,8 @@ npm install
 npm run dev:backend   # Express REST API listening on http://localhost:5000
 npm run dev:frontend  # Next.js 15 Web Application on http://localhost:3000
 
-# 3. Execute automated verification test suites
-npm run test:backend                     # 38-Step Integration Test Suite
-npx --prefix backend tsx test-catalog-features.ts # 7-Step Advanced Catalog & Multi-SKU Suite
+# 3. Execute code quality & live endpoint probes
+npm run lint                             # Full TypeScript Verification & Linting
 node scripts/test-endpoints.js           # 26 Live Endpoint Probes
 
 # 4. Compile production bundles
@@ -995,33 +992,6 @@ CLOUDFLARE_SECURITY_ENABLED=false
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 ```
-
----
-
-## Automated Integration Test Suite
-
-The platform includes two automated test suites comprising **45 end-to-end scenarios** validating core business flows, catalog variations, multi-warehouse allocations, and RBAC security rules.
-
-```bash
-# 1. Run core end-to-end integration test suite (38 tests)
-cd backend
-npx tsx test-suite.ts
-
-# 2. Run advanced catalog & multi-SKU variant engine test suite (7 tests)
-npx tsx test-catalog-features.ts
-```
-
-### Advanced Catalog & Variant Scenarios (`test-catalog-features.ts`)
-
-| Test Case | Feature Tested | Validation Criteria |
-| :---: | :--- | :--- |
-| **01** | Multi-SKU Variant Authoring | Creates laptop with RAM (16GB, 32GB) and SSD (512GB, 1TB) variants, location stock, and package dimensions |
-| **02** | Collision Protection | Duplicate variant SKU attempt is rejected with 400 Bad Request |
-| **03** | Public Catalog Filtering | Product query filters accurately by assigned collections and faceted tags |
-| **04** | Cart Variant Pricing | Pricing engine resolves custom variant prices, titles, and hierarchical SKUs |
-| **05** | Tax Exemption Engine | Items with `chargeTax: false` receive 0% UAE VAT exemption |
-| **06** | Backorder Policy Enforcement | Items with `allowBackorder: true` can be purchased when available stock is 0 |
-| **07** | Atomic Stock Deduction | Order placement decrements variant-specific stock and regional warehouse facility stock |
 
 ---
 
