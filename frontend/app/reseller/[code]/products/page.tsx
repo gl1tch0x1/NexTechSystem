@@ -349,14 +349,13 @@ export default function ResellerProductsPage() {
             <span>Excel Bulk Import</span>
           </Link>
 
-          <button
-            type="button"
-            onClick={openAddModal}
+          <Link
+            href={`/reseller/${resellerCode}/products/new`}
             className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Product SKU</span>
-          </button>
+            <span>Add New Hardware SKU</span>
+          </Link>
         </div>
       </div>
 
@@ -537,21 +536,29 @@ export default function ResellerProductsPage() {
                       {/* Actions */}
                       <td className="py-4 px-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <Link
+                            href={`/reseller/${resellerCode}/products/${prod.id}/edit`}
+                            className="px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Open Full Hardware SKU Studio"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Studio</span>
+                          </Link>
                           <button
                             type="button"
                             onClick={() => openEditModal(prod)}
-                            className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-                            title="Edit SKU Details"
+                            className="p-1.5 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                            title="Quick Modal Edit"
                           >
-                            <Edit3 className="w-4 h-4" />
+                            <Boxes className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(prod)}
-                            className="p-2 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
                             title="Delete SKU"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>

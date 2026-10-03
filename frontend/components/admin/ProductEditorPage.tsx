@@ -330,14 +330,14 @@ export interface TieredPrice {
 }
 
 const FX_RATES: Record<'AED' | 'USD' | 'EUR' | 'GBP' | 'SAR' | 'QAR' | 'KWD' | 'INR', { rate: number; symbol: string; label: string }> = {
-  AED: { rate: 1.0,     symbol: 'AED', label: 'AED (Base)'  },
-  USD: { rate: 0.272,   symbol: '$',   label: 'USD ($)'     },
-  EUR: { rate: 0.251,   symbol: '€',   label: 'EUR (€)'     },
-  GBP: { rate: 0.214,   symbol: '£',   label: 'GBP (£)'     },
-  SAR: { rate: 1.020,   symbol: 'SAR', label: 'SAR (ر.س)'  },
-  QAR: { rate: 0.991,   symbol: 'QAR', label: 'QAR (ر.ق)'  },
-  KWD: { rate: 0.084,   symbol: 'KWD', label: 'KWD (د.ك)'  },
-  INR: { rate: 22.78,   symbol: '₹',   label: 'INR (₹)'    },
+  AED: { rate: 1.0, symbol: 'AED', label: 'AED (Base)' },
+  USD: { rate: 0.272, symbol: '$', label: 'USD ($)' },
+  EUR: { rate: 0.251, symbol: '€', label: 'EUR (€)' },
+  GBP: { rate: 0.214, symbol: '£', label: 'GBP (£)' },
+  SAR: { rate: 1.020, symbol: 'SAR', label: 'SAR (ر.س)' },
+  QAR: { rate: 0.991, symbol: 'QAR', label: 'QAR (ر.ق)' },
+  KWD: { rate: 0.084, symbol: 'KWD', label: 'KWD (د.ك)' },
+  INR: { rate: 22.78, symbol: '₹', label: 'INR (₹)' },
 };
 
 const formatFxPrice = (amount: number, cur: keyof typeof FX_RATES): string => {
@@ -421,17 +421,20 @@ type TabKey = 'general' | 'pricing' | 'inventory' | 'specs' | 'variants' | 'logi
 interface ProductEditorPageProps {
   mode: 'create' | 'edit';
   productId?: string;
+  portal?: 'admin' | 'reseller';
+  resellerCode?: string;
 }
 
-export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
+export function ProductEditorPage({ mode, productId, portal = 'admin', resellerCode }: ProductEditorPageProps) {
   const router = useRouter();
   const { token } = useAuth();
+  const returnPath = portal === 'reseller' ? `/reseller/${resellerCode || 'comnet101'}/products` : '/admin/products';
 
   const [loading, setLoading] = useState(mode === 'edit');
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [resellers, setResellers] = useState<Reseller[]>([]);
-  
+
   // Layout View Mode: 'all' shows all sections in a master layout, 'tabs' shows single tab
   const [viewMode, setViewMode] = useState<'all' | 'tabs'>('all');
   const [activeTab, setActiveTab] = useState<TabKey>('general');
@@ -532,10 +535,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
       'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
     ],
-    sellerType: 'ADMIN',
+    sellerType: portal === 'reseller' ? 'RESELLER' : 'ADMIN',
     resellerId: '',
     resellerName: '',
-    resellerCode: '',
+    resellerCode: resellerCode || '',
     categoryId: 'cat_laptops',
     categoryName: 'Laptops',
     brandId: 'brand_hp',
@@ -625,25 +628,25 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
 
             const prodLocations = product.locations && product.locations.length > 0
               ? product.locations.map(w => ({
-                  locationId: w.locationId,
-                  locationName: w.locationName,
-                  city: w.city || 'Dubai, UAE',
-                  quantity: w.quantity || 0,
-                  available: w.available ?? w.quantity ?? 0,
-                  committed: w.committed ?? 0,
-                  unavailable: w.unavailable ?? 0,
-                  onHand: w.onHand ?? w.quantity ?? 0,
-                }))
+                locationId: w.locationId,
+                locationName: w.locationName,
+                city: w.city || 'Dubai, UAE',
+                quantity: w.quantity || 0,
+                available: w.available ?? w.quantity ?? 0,
+                committed: w.committed ?? 0,
+                unavailable: w.unavailable ?? 0,
+                onHand: w.onHand ?? w.quantity ?? 0,
+              }))
               : WAREHOUSE_LOCATIONS.map(w => ({
-                  locationId: w.id,
-                  locationName: w.name,
-                  city: w.city,
-                  quantity: w.id === 'loc_dxb_main' ? product.stock : 0,
-                  available: w.id === 'loc_dxb_main' ? product.stock : 0,
-                  committed: 0,
-                  unavailable: 0,
-                  onHand: w.id === 'loc_dxb_main' ? product.stock : 0,
-                }));
+                locationId: w.id,
+                locationName: w.name,
+                city: w.city,
+                quantity: w.id === 'loc_dxb_main' ? product.stock : 0,
+                available: w.id === 'loc_dxb_main' ? product.stock : 0,
+                committed: 0,
+                unavailable: 0,
+                onHand: w.id === 'loc_dxb_main' ? product.stock : 0,
+              }));
 
             const prodImages = product.images && product.images.length > 0
               ? product.images
@@ -1399,16 +1402,27 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
       };
 
       const authOpts = token ? { token } : {};
-      if (mode === 'edit' && productId) {
-        await ApiClient.put(`/admin/products/${productId}`, payload, authOpts);
-        setSuccessNotice('Hardware SKU successfully updated and synchronized across regional catalogs.');
+      if (portal === 'reseller') {
+        const endpoint = mode === 'edit' && productId ? `/reseller/products/${productId}` : '/reseller/products';
+        if (mode === 'edit' && productId) {
+          await ApiClient.put(endpoint, payload, authOpts);
+          setSuccessNotice('Hardware SKU successfully updated and resubmitted for Admin review.');
+        } else {
+          await ApiClient.post(endpoint, payload, authOpts);
+          setSuccessNotice('Hardware SKU successfully submitted to Admin verification queue (PENDING_APPROVAL).');
+        }
       } else {
-        await ApiClient.post('/admin/products', payload, authOpts);
-        setSuccessNotice('New Hardware SKU successfully created and activated in catalog.');
+        if (mode === 'edit' && productId) {
+          await ApiClient.put(`/admin/products/${productId}`, payload, authOpts);
+          setSuccessNotice('Hardware SKU successfully updated and synchronized across regional catalogs.');
+        } else {
+          await ApiClient.post('/admin/products', payload, authOpts);
+          setSuccessNotice('New Hardware SKU successfully created and activated in catalog.');
+        }
       }
 
       setTimeout(() => {
-        router.push('/admin/products');
+        router.push(returnPath);
       }, 1200);
     } catch (err: any) {
       setFormError(err.message || 'Failed to save hardware product.');
@@ -1457,7 +1471,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
           {/* Breadcrumbs & Title */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
-              href="/admin/products"
+              href={returnPath}
               className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors shrink-0 cursor-pointer"
               title="Return to Catalog"
             >
@@ -1465,14 +1479,16 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
             </Link>
             <div className="min-w-0 max-w-md xl:max-w-xl">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <Link href="/admin/products" className="hover:underline">Hardware Catalog</Link>
+                <Link href={returnPath} className="hover:underline">Hardware Catalog</Link>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-purple-600 dark:text-purple-400 font-bold">
-                  {mode === 'edit' ? 'SKU Configuration Studio' : 'New Hardware SKU'}
+                  {portal === 'reseller'
+                    ? (mode === 'edit' ? 'Vendor SKU Studio' : 'Submit Hardware SKU')
+                    : (mode === 'edit' ? 'SKU Configuration Studio' : 'New Hardware SKU')}
                 </span>
               </div>
               <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight truncate mt-0.5" title={formData.title}>
-                {formData.title || (mode === 'edit' ? 'Edit Hardware SKU' : 'Add New Hardware SKU')}
+                {formData.title || (mode === 'edit' ? 'Edit Hardware SKU' : (portal === 'reseller' ? 'Add New Hardware Product SKU' : 'Add New Hardware SKU'))}
               </h1>
             </div>
           </div>
@@ -1484,11 +1500,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               <button
                 type="button"
                 onClick={() => setViewMode('all')}
-                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                  viewMode === 'all'
+                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${viewMode === 'all'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  }`}
                 title="View complete document layout"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -1497,11 +1512,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               <button
                 type="button"
                 onClick={() => setViewMode('tabs')}
-                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                  viewMode === 'tabs'
+                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${viewMode === 'tabs'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  }`}
                 title="Focused step-by-step tabs"
               >
                 <ListOrdered className="w-3.5 h-3.5" />
@@ -1513,13 +1527,12 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
             <select
               value={formData.status}
               onChange={e => setFormData({ ...formData, status: e.target.value as any })}
-              className={`h-9 text-xs font-bold px-3 rounded-xl border cursor-pointer focus:outline-none transition-all whitespace-nowrap shrink-0 ${
-                formData.status === 'ACTIVE'
+              className={`h-9 text-xs font-bold px-3 rounded-xl border cursor-pointer focus:outline-none transition-all whitespace-nowrap shrink-0 ${formData.status === 'ACTIVE'
                   ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
                   : formData.status === 'DRAFT'
-                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
-              }`}
+                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                }`}
             >
               <option value="ACTIVE">● ACTIVE (Catalog Live)</option>
               <option value="DRAFT">○ DRAFT (Unpublished)</option>
@@ -1527,7 +1540,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
             </select>
 
             <Link
-              href="/admin/products"
+              href={returnPath}
               className="h-9 px-3.5 flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors whitespace-nowrap shrink-0"
             >
               Discard
@@ -1556,7 +1569,7 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               ) : (
                 <>
                   <Save className="w-3.5 h-3.5" />
-                  <span>{mode === 'edit' ? 'Save Changes' : 'Publish SKU'}</span>
+                  <span>{mode === 'edit' ? 'Save Changes' : (portal === 'reseller' ? 'Submit SKU for Review' : 'Publish SKU')}</span>
                   <span className="hidden xl:inline text-[10px] opacity-70 font-mono">⌘S</span>
                 </>
               )}
@@ -1631,11 +1644,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer min-w-[140px] ${
-                  isActive
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer min-w-[140px] ${isActive
                     ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
                 <span>{idx + 1}. {tab.label}</span>
@@ -1693,11 +1705,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                         key={idx}
                         type="button"
                         onClick={() => handleApplyFullPreset(preset)}
-                        className={`p-2.5 rounded-xl transition-all text-left group cursor-pointer ${
-                          isSelected
+                        className={`p-2.5 rounded-xl transition-all text-left group cursor-pointer ${isSelected
                             ? 'bg-purple-50/80 dark:bg-purple-950/50 border-2 border-purple-600 shadow-sm'
                             : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md'
-                        }`}
+                          }`}
                       >
                         <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-800/80 relative">
                           <img
@@ -1711,9 +1722,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                             </span>
                           )}
                         </div>
-                        <div className={`text-[11px] font-black truncate transition-colors ${
-                          isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400'
-                        }`}>
+                        <div className={`text-[11px] font-black truncate transition-colors ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400'
+                          }`}>
                           {preset.label}
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[10px]">
@@ -1928,9 +1938,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                             return (
                               <div
                                 key={imgIdx}
-                                className={`relative flex-shrink-0 w-20 rounded-xl overflow-hidden border-2 transition-all ${
-                                  isPrimary ? 'border-purple-500 shadow-lg shadow-purple-500/20' : 'border-slate-200 dark:border-slate-800'
-                                }`}
+                                className={`relative flex-shrink-0 w-20 rounded-xl overflow-hidden border-2 transition-all ${isPrimary ? 'border-purple-500 shadow-lg shadow-purple-500/20' : 'border-slate-200 dark:border-slate-800'
+                                  }`}
                               >
                                 <div className="aspect-video">
                                   <img
@@ -2126,9 +2135,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                   </div>
                   <div>
                     <span className="text-xs text-slate-400 block font-medium">Gross Margin</span>
-                    <span className={`text-sm font-mono font-black ${
-                      profitMetrics.margin >= 15 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
-                    }`}>
+                    <span className={`text-sm font-mono font-black ${profitMetrics.margin >= 15 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                      }`}>
                       {profitMetrics.margin}% {profitMetrics.margin >= 15 ? '(Healthy)' : '(Moderate)'}
                     </span>
                   </div>
@@ -2283,9 +2291,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 <div className="space-y-1">
                   <div className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
                     <span>UAE Federal Tax Authority (FTA) 5% VAT</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                      formData.chargeTax ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-slate-200 text-slate-600'
-                    }`}>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${formData.chargeTax ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-slate-200 text-slate-600'
+                      }`}>
                       {formData.chargeTax ? 'Standard 5% Rate' : 'Zero-Rated / Tax Exempt'}
                     </span>
                   </div>
@@ -2299,9 +2306,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, chargeTax: !prev.chargeTax }))}
-                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${
-                    formData.chargeTax ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-700'
-                  }`}
+                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${formData.chargeTax ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-700'
+                    }`}
                 >
                   <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${formData.chargeTax ? 'translate-x-6' : 'translate-x-0.5'}`} />
                 </button>
@@ -2513,8 +2519,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                     const filledCount = group.fields.filter(f => Boolean(formData.specifications[f.key])).length;
                     const totalCount = group.fields.length;
                     const fillPct = Math.round((filledCount / totalCount) * 100);
-                    const pillColors = ['bg-purple-600','bg-blue-600','bg-emerald-600','bg-amber-500','bg-rose-600','bg-indigo-600'];
-                    const textColors = ['text-purple-600','text-blue-600','text-emerald-600','text-amber-600','text-rose-600','text-indigo-600'];
+                    const pillColors = ['bg-purple-600', 'bg-blue-600', 'bg-emerald-600', 'bg-amber-500', 'bg-rose-600', 'bg-indigo-600'];
+                    const textColors = ['text-purple-600', 'text-blue-600', 'text-emerald-600', 'text-amber-600', 'text-rose-600', 'text-indigo-600'];
                     const pc = pillColors[gIdx % pillColors.length];
                     const tc = textColors[gIdx % textColors.length];
                     return (
@@ -2522,14 +2528,12 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                         key={group.id}
                         type="button"
                         onClick={() => setActiveSpecTab(group.id)}
-                        className={`w-full text-left p-3 rounded-xl transition-all cursor-pointer group ${
-                          isActive ? 'bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700' : 'hover:bg-white/60 dark:hover:bg-slate-900/60'
-                        }`}
+                        className={`w-full text-left p-3 rounded-xl transition-all cursor-pointer group ${isActive ? 'bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700' : 'hover:bg-white/60 dark:hover:bg-slate-900/60'
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-1 mb-2">
-                          <span className={`text-xs font-bold leading-snug ${
-                            isActive ? tc : 'text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'
-                          }`}>{group.name}</span>
+                          <span className={`text-xs font-bold leading-snug ${isActive ? tc : 'text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'
+                            }`}>{group.name}</span>
                           {filledCount > 0 && (
                             <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full text-white ${pc} shrink-0 mt-0.5`}>{filledCount}</span>
                           )}
@@ -2594,9 +2598,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                             const currentValue = formData.specifications[field.key] || '';
                             const isFilled = Boolean(currentValue);
                             return (
-                              <div key={field.key} className={`relative group rounded-2xl border transition-all p-4 space-y-2.5 ${
-                                isFilled ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm' : 'border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/40'
-                              }`}>
+                              <div key={field.key} className={`relative group rounded-2xl border transition-all p-4 space-y-2.5 ${isFilled ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm' : 'border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/40'
+                                }`}>
                                 <div className="flex items-center justify-between gap-2">
                                   <label className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
                                     {field.label}
@@ -2748,11 +2751,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 <button
                   type="button"
                   onClick={() => setFormData(p => ({ ...p, hasVariants: !p.hasVariants }))}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    formData.hasVariants
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${formData.hasVariants
                       ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   {formData.hasVariants ? '✓ Multi-SKU Matrix Enabled' : 'Enable Multi-SKU Mode'}
                 </button>
@@ -3036,9 +3038,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                 <button
                   type="button"
                   onClick={() => setFormData(p => ({ ...p, isPhysical: !p.isPhysical }))}
-                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                    formData.isPhysical ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-700'
-                  }`}
+                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${formData.isPhysical ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-700'
+                    }`}
                 >
                   <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${formData.isPhysical ? 'translate-x-6' : 'translate-x-0.5'}`} />
                 </button>
@@ -3215,11 +3216,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                       key={cur}
                       type="button"
                       onClick={() => setPreviewCurrency(cur)}
-                      className={`px-2 py-1.5 rounded-xl text-[10px] font-black transition-all cursor-pointer text-center ${
-                        isSelected
+                      className={`px-2 py-1.5 rounded-xl text-[10px] font-black transition-all cursor-pointer text-center ${isSelected
                           ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
+                        }`}
                     >
                       {displayLabel}
                     </button>
@@ -3253,9 +3253,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                     -{formData.discountPercentage}%
                   </div>
                 )}
-                <div className={`absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-lg text-[10px] font-bold backdrop-blur-md shadow-sm ${
-                  formData.stock > 0 ? 'bg-emerald-600/90 text-white' : 'bg-rose-600/90 text-white'
-                }`}>
+                <div className={`absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-lg text-[10px] font-bold backdrop-blur-md shadow-sm ${formData.stock > 0 ? 'bg-emerald-600/90 text-white' : 'bg-rose-600/90 text-white'
+                  }`}>
                   {formData.stock > 0 ? `In Stock (${formData.stock})` : 'Out of Stock'}
                 </div>
               </div>
@@ -3314,9 +3313,8 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
               <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-purple-600" /> Catalog Readiness Score
               </span>
-              <span className={`text-xs font-mono font-black ${
-                completeness.percentage >= 80 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
-              }`}>
+              <span className={`text-xs font-mono font-black ${completeness.percentage >= 80 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                }`}>
                 {completeness.percentage}%
               </span>
             </div>
@@ -3448,10 +3446,10 @@ export function ProductEditorPage({ mode, productId }: ProductEditorPageProps) {
                       } else {
                         const targetId = tab.id === 'general' ? 'section-overview'
                           : tab.id === 'pricing' ? 'section-pricing'
-                          : tab.id === 'inventory' ? 'section-warehousing'
-                          : tab.id === 'specs' ? 'section-specs'
-                          : tab.id === 'variants' ? 'section-variants'
-                          : 'section-logistics';
+                            : tab.id === 'inventory' ? 'section-warehousing'
+                              : tab.id === 'specs' ? 'section-specs'
+                                : tab.id === 'variants' ? 'section-variants'
+                                  : 'section-logistics';
                         const el = document.getElementById(targetId);
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                       }

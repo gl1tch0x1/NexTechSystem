@@ -11,18 +11,14 @@ import {
   Package,
   FileSpreadsheet,
   Boxes,
-  ShoppingBag,
   Store,
-  ExternalLink,
-  LogOut,
   ShieldCheck,
   ArrowLeft,
-  BarChart3,
-  CreditCard,
   Settings,
-  FileQuestion,
   Plus,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  LogOut
 } from 'lucide-react';
 
 export default function ResellerLayout({ children }: { children: React.ReactNode }) {
@@ -50,26 +46,18 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
 
   const navSections = [
     {
-      title: 'Catalog & Inventory',
+      title: 'Hardware Catalog',
       items: [
         { href: `/reseller/${resellerCode}/dashboard`, label: 'Command Center', icon: LayoutDashboard },
-        { href: `/reseller/${resellerCode}/products`, label: 'Hardware SKUs & Approvals', icon: Package },
+        { href: `/reseller/${resellerCode}/products`, label: 'Hardware SKUs & Matrix', icon: Package },
+        { href: `/reseller/${resellerCode}/products/new`, label: 'Add New Hardware SKU', icon: Plus, badge: 'STUDIO' },
         { href: `/reseller/${resellerCode}/products/import`, label: 'Excel Bulk Ingestion', icon: FileSpreadsheet, badge: 'XLSX' },
-        { href: `/reseller/${resellerCode}/inventory`, label: 'Warehousing & Stock', icon: Boxes },
       ]
     },
     {
-      title: 'Commercial & Sales',
+      title: 'Warehousing & Operations',
       items: [
-        { href: `/reseller/${resellerCode}/orders`, label: 'Vendor Orders', icon: ShoppingBag },
-        { href: `/reseller/${resellerCode}/quotes`, label: 'B2B Corporate Quotes', icon: FileQuestion, badge: 'RFQ' },
-        { href: `/reseller/${resellerCode}/analytics`, label: 'Performance Analytics', icon: BarChart3 },
-        { href: `/reseller/${resellerCode}/payouts`, label: 'Settlements & Payouts', icon: CreditCard },
-      ]
-    },
-    {
-      title: 'Account & Operations',
-      items: [
+        { href: `/reseller/${resellerCode}/inventory`, label: 'Warehousing & Stock Control', icon: Boxes },
         { href: `/reseller/${resellerCode}/settings`, label: 'Vendor Store & Compliance', icon: Settings },
       ]
     }
@@ -127,11 +115,11 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
 
           {/* Quick SKU Creation CTA Button */}
           <Link
-            href={`/reseller/${resellerCode}/products?action=new`}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-sm hover:shadow transition-all"
+            href={`/reseller/${resellerCode}/products/new`}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-sm hover:shadow transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Product SKU</span>
+            <span>Add Hardware Product SKU</span>
           </Link>
 
           {/* Navigation Sections */}
