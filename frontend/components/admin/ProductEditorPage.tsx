@@ -42,8 +42,6 @@ import {
   ChevronRight,
   CheckCircle2,
   Eye,
-  LayoutGrid,
-  ListOrdered,
   Star,
   Warehouse,
   Wand2,
@@ -124,7 +122,7 @@ export interface HardwarePreset {
   tags: string[];
 }
 
-const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
+export const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
   {
     label: 'HP ProBook 460 G11',
     category: 'Laptops',
@@ -435,8 +433,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [resellers, setResellers] = useState<Reseller[]>([]);
 
-  // Layout View Mode: 'all' shows all sections in a master layout, 'tabs' shows single tab
-  const [viewMode, setViewMode] = useState<'all' | 'tabs'>('all');
+  // Focused Step-by-Step Tabbed Navigation Mode
   const [activeTab, setActiveTab] = useState<TabKey>('general');
   const [activeSpecTab, setActiveSpecTab] = useState<string>(SPECIFICATION_GROUPS[0]?.id || 'core');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1058,55 +1055,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     });
   };
 
-  // Full Enterprise Architecture Blueprint Ingestion
-  const handleApplyFullPreset = (preset: HardwarePreset) => {
-    setPreviewImageError(false);
-    const foundCat = categories.find(c => c.id === preset.catId);
-    const foundBrand = brands.find(b => b.name.toLowerCase() === preset.brand.toLowerCase());
-
-    setFormData(prev => {
-      const newSku = generateRandomSku(preset.catId);
-      const newBarcode = generateRandomBarcode();
-      const discount = preset.originalPrice > preset.price
-        ? Math.round(((preset.originalPrice - preset.price) / preset.originalPrice) * 100)
-        : 0;
-
-      return {
-        ...prev,
-        title: preset.fullTitle,
-        slug: preset.fullTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-        sku: newSku,
-        barcode: newBarcode,
-        shortDescription: preset.shortDesc,
-        description: `${preset.shortDesc} Engineered with enterprise thermal stability, high-bandwidth interconnects, and strict OEM quality compliance.`,
-        price: preset.price,
-        costPrice: preset.costPrice,
-        originalPrice: preset.originalPrice,
-        discountPercentage: discount,
-        weight: preset.weight,
-        dimensions: preset.dimensions,
-        hsCode: preset.hsCode,
-        warranty: preset.warranty,
-        primaryImage: preset.url,
-        images: [preset.url],
-        categoryId: foundCat?.id || preset.catId,
-        categoryName: foundCat?.name || preset.category,
-        brandId: foundBrand?.id || (foundBrand ? foundBrand.id : prev.brandId),
-        brandName: foundBrand?.name || preset.brand,
-        collections: preset.collections,
-        tags: preset.tags,
-        specifications: { ...preset.specs },
-        tieredPricing: [
-          { minQty: 1, discountPercent: 0, unitPrice: preset.price },
-          { minQty: 5, discountPercent: 5, unitPrice: Math.round(preset.price * 0.95) },
-          { minQty: 20, discountPercent: 10, unitPrice: Math.round(preset.price * 0.9) },
-          { minQty: 50, discountPercent: 15, unitPrice: Math.round(preset.price * 0.85) },
-        ],
-      };
-    });
-    setSuccessNotice(`Ingested full architecture blueprint for "${preset.label}". All specs, logistics & pricing populated.`);
-  };
-
   // Standardized Title Auto-Constructor
   const handleGenerateStandardTitle = () => {
     const brand = formData.brandName || '';
@@ -1493,35 +1441,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             </div>
           </div>
 
-          {/* Controls: View Mode, Status & Actions */}
+          {/* Controls: Status & Actions */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end shrink-0">
-            {/* View Mode Toggle: All Sections vs Tabs */}
-            <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs font-bold shrink-0">
-              <button
-                type="button"
-                onClick={() => setViewMode('all')}
-                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${viewMode === 'all'
-                    ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                title="View complete document layout"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="whitespace-nowrap">All Sections</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('tabs')}
-                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${viewMode === 'tabs'
-                    ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                title="Focused step-by-step tabs"
-              >
-                <ListOrdered className="w-3.5 h-3.5" />
-                <span className="whitespace-nowrap">Tabbed</span>
-              </button>
-            </div>
 
             {/* Status Selector */}
             <select
@@ -1633,36 +1554,34 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         </div>
       )}
 
-      {/* Tab Bar (when viewMode === 'tabs') */}
-      {viewMode === 'tabs' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto">
-          {TABS.map((tab, idx) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer min-w-[140px] ${isActive
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span>{idx + 1}. {tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {/* 2. TABBED STEP-BY-STEP WORKSPACE NAVIGATION */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none">
+        {TABS.map((tab, idx) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer min-w-[140px] ${isActive
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                }`}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              <span>{idx + 1}. {tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-      {/* 2. MASTER 2-COLUMN ENTERPRISE WORKSPACE */}
+      {/* MASTER 2-COLUMN ENTERPRISE WORKSPACE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ===================== LEFT / MAIN COLUMN (8 COLS) ===================== */}
         <div className="lg:col-span-8 space-y-8">
           {/* SECTION 1: GENERAL PRODUCT & MEDIA STUDIO */}
-          {(viewMode === 'all' || activeTab === 'general') && (
+          {activeTab === 'general' && (
             <div id="section-overview" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
@@ -1679,67 +1598,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </span>
               </div>
 
-              {/* ── Auto-Title Builder & 1-Click Full Blueprint Presets ── */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/90 dark:border-slate-800/90 space-y-3.5 shadow-sm">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-200/80 dark:border-purple-800/80">
-                      <Wand2 className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">Rapid Blueprint Ingestion</span>
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold border border-purple-200/80 dark:border-purple-800">1-Click SKU Preset</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleGenerateStandardTitle}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold cursor-pointer transition-all shadow-sm shadow-purple-500/20"
-                  >
-                    <Wand2 className="w-3 h-3" /> Auto-Construct Title
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {HARDWARE_IMAGE_PRESETS.map((preset, idx) => {
-                    const isSelected = formData.title === preset.fullTitle || formData.primaryImage === preset.url;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleApplyFullPreset(preset)}
-                        className={`p-2.5 rounded-xl transition-all text-left group cursor-pointer ${isSelected
-                            ? 'bg-purple-50/80 dark:bg-purple-950/50 border-2 border-purple-600 shadow-sm'
-                            : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md'
-                          }`}
-                      >
-                        <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-800/80 relative">
-                          <img
-                            src={getSafeImageUrl(preset.url)}
-                            alt={preset.label}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          {isSelected && (
-                            <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-purple-600 text-[9px] font-black text-white shadow">
-                              Active
-                            </span>
-                          )}
-                        </div>
-                        <div className={`text-[11px] font-black truncate transition-colors ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400'
-                          }`}>
-                          {preset.label}
-                        </div>
-                        <div className="flex items-center justify-between mt-1 text-[10px]">
-                          <span className="text-slate-500 dark:text-slate-400 font-medium truncate pr-1">
-                            {preset.brand} · {preset.category}
-                          </span>
-                          <span className="text-purple-600 dark:text-purple-400 font-mono font-black shrink-0">
-                            AED {preset.price.toLocaleString()}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Title & Slug */}
               <div className="space-y-4">
                 <div>
@@ -1747,9 +1605,19 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                       Product Title / Commercial Model Name *
                     </label>
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      {formData.title.length} characters
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleGenerateStandardTitle}
+                        className="text-[11px] text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        title="Auto-build title from brand, category, and specifications"
+                      >
+                        <Wand2 className="w-3 h-3" /> Auto-Construct Title
+                      </button>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {formData.title.length} characters
+                      </span>
+                    </div>
                   </div>
                   <input
                     type="text"
@@ -2038,12 +1906,24 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     </div>
                   </div>
                 </div>
+
+                {/* Section 1 Footer Navigation */}
+                <div className="pt-5 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('pricing')}
+                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                  >
+                    <span>Next: Pricing & Financials</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
           {/* SECTION 2: PRICING, FINANCIALS & UAE VAT */}
-          {(viewMode === 'all' || activeTab === 'pricing') && (
+          {activeTab === 'pricing' && (
             <div id="section-pricing" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
@@ -2312,11 +2192,31 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${formData.chargeTax ? 'translate-x-6' : 'translate-x-0.5'}`} />
                 </button>
               </div>
+
+              {/* Section 2 Footer Navigation */}
+              <div className="pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('general')}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back: Overview</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('inventory')}
+                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                >
+                  <span>Next: Warehousing & Stock</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
 
           {/* SECTION 3: WAREHOUSING & REGIONAL HUBS */}
-          {(viewMode === 'all' || activeTab === 'inventory') && (
+          {activeTab === 'inventory' && (
             <div id="section-warehousing" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
                 <div>
@@ -2471,11 +2371,31 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 />
                 <span className="text-xs text-slate-400">units</span>
               </div>
+
+              {/* Section 3 Footer Navigation */}
+              <div className="pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('pricing')}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back: Pricing</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('specs')}
+                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                >
+                  <span>Next: Technical Specs</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
 
           {/* SECTION 4: TECHNICAL SPECIFICATIONS MATRIX — REDESIGNED */}
-          {(viewMode === 'all' || activeTab === 'specs') && (
+          {activeTab === 'specs' && (
             <div id="section-specs" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
 
               {/* Section Header */}
@@ -2731,12 +2651,32 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     )}
                   </div>
                 </div>
+
+                {/* Section 4 Footer Navigation */}
+                <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('inventory')}
+                    className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Back: Warehousing</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('variants')}
+                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                  >
+                    <span>Next: Multi-SKU Variants</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
           {/* SECTION 5: VARIANTS & MULTI-SKU COMBINATIONS */}
-          {(viewMode === 'all' || activeTab === 'variants') && (
+          {activeTab === 'variants' && (
             <div id="section-variants" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
                 <div>
@@ -3008,11 +2948,31 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   </button>
                 </div>
               )}
+
+              {/* Section 5 Footer Navigation */}
+              <div className="pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('specs')}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back: Specs</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('logistics')}
+                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                >
+                  <span>Next: Logistics & Compliance</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
 
           {/* SECTION 6: LOGISTICS, DIMENSIONS & COMPLIANCE */}
-          {(viewMode === 'all' || activeTab === 'logistics') && (
+          {activeTab === 'logistics' && (
             <div id="section-logistics" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
@@ -3186,6 +3146,27 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Section 6 Footer Navigation */}
+              <div className="pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('variants')}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back: Variants</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSaveProduct()}
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-sm shadow-purple-600/30 cursor-pointer disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{mode === 'edit' ? 'Save Changes' : (portal === 'reseller' ? 'Submit SKU for Review' : 'Publish Hardware SKU')}</span>
+                </button>
               </div>
             </div>
           )}
@@ -3436,31 +3417,23 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             <div className="space-y-1">
               {TABS.map((tab, idx) => {
                 const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => {
-                      if (viewMode === 'tabs') {
-                        setActiveTab(tab.id);
-                      } else {
-                        const targetId = tab.id === 'general' ? 'section-overview'
-                          : tab.id === 'pricing' ? 'section-pricing'
-                            : tab.id === 'inventory' ? 'section-warehousing'
-                              : tab.id === 'specs' ? 'section-specs'
-                                : tab.id === 'variants' ? 'section-variants'
-                                  : 'section-logistics';
-                        const el = document.getElementById(targetId);
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                    className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-purple-600 transition-colors text-left cursor-pointer"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                      isActive
+                        ? 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-purple-600'
+                    }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Icon className="w-3.5 h-3.5 text-purple-600" />
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
                       <span>{idx + 1}. {tab.label}</span>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+                    <ChevronRight className={`w-3.5 h-3.5 ${isActive ? 'text-purple-600 dark:text-purple-400 opacity-100' : 'opacity-40'}`} />
                   </button>
                 );
               })}
