@@ -135,18 +135,18 @@ export function AdvancedCatalogFilter({
   ];
 
   return (
-    <aside className="space-y-5 bg-white dark:bg-slate-900/95 p-5 sm:p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-2xl transition-all">
+    <aside className="space-y-5 bg-white dark:bg-slate-900/95 p-5 sm:p-6 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-sm transition-all">
       {/* Filter Matrix Header */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-tech-blue/10 dark:bg-cyan-500/10 flex items-center justify-center text-tech-blue dark:text-cyan-400">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-cyan-400">
             <SlidersHorizontal className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
               <span>Filter Catalog</span>
               {activeFilterCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-tech-blue text-white text-[10px] font-mono font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-mono font-bold flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -263,14 +263,14 @@ export function AdvancedCatalogFilter({
         </div>
 
         {openSections.categories && (
-          <div className="space-y-1 pt-1 max-h-56 overflow-y-auto pr-1">
+          <div className="space-y-1 pt-1 max-h-80 overflow-y-auto pr-1">
             <button
               type="button"
               onClick={() => updateFilters({ category: null })}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 !currentCategory
-                  ? 'bg-tech-blue text-white shadow-sm'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -290,10 +290,10 @@ export function AdvancedCatalogFilter({
                   key={cat.id}
                   type="button"
                   onClick={() => updateFilters({ category: isSelected ? null : cat.id })}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-tech-blue text-white shadow-sm'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
                   <div className="flex items-center gap-2 truncate">

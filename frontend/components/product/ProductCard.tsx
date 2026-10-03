@@ -80,19 +80,19 @@ export function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-[#0B101D] rounded-2xl border border-slate-200/90 dark:border-slate-800/90 hover:border-blue-500/60 dark:hover:border-cyan-500/50 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-[#0B101D] rounded-xl border border-slate-200/90 dark:border-slate-800/90 hover:border-blue-500/70 dark:hover:border-cyan-500/70 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-200 flex flex-col justify-between overflow-hidden">
       {/* Top Image Stage Container */}
-      <div className="relative aspect-[4/3] w-full bg-gradient-to-b from-slate-900 to-slate-950 p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
+      <div className="relative aspect-[4/3] w-full bg-slate-950 p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         {/* Top Badges (Left) */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
           {discountPercent > 0 && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500 text-white shadow-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9.5px] font-mono font-bold uppercase tracking-wider bg-rose-600 text-white shadow-xs">
               <Zap className="w-2.5 h-2.5 fill-current" />
               <span>-{discountPercent}%</span>
             </span>
           )}
           {product.isFeatured && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-900/85 dark:bg-slate-800/90 text-white backdrop-blur-xs shadow-xs border border-white/10">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9.5px] font-mono font-semibold uppercase tracking-wider bg-slate-900/90 text-slate-100 backdrop-blur-xs shadow-xs border border-white/10">
               <Sparkles className="w-2.5 h-2.5 text-amber-400" />
               <span>Featured</span>
             </span>
@@ -217,12 +217,12 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`h-9 px-3.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center gap-1.5 shadow-xs ${
+            className={`h-10 px-4 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center gap-1.5 shadow-xs ${
               isOutOfStock
                 ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
                 : justAdded
-                ? 'bg-emerald-600 text-white shadow-emerald-500/25 scale-102'
-                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-md active:scale-95'
+                ? 'bg-emerald-600 text-white shadow-emerald-500/25'
+                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 active:scale-95'
             }`}
           >
             {justAdded ? (

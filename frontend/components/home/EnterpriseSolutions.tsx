@@ -60,18 +60,15 @@ export function EnterpriseSolutions({ solutions }: EnterpriseSolutionsProps) {
           return (
             <div
               key={sol.id}
-              className={`group relative rounded-2xl p-5 sm:p-6 bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 ${sol.borderColor || 'hover:border-blue-500/50'} hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden hover:-translate-y-0.5`}
+              className="group relative rounded-xl p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-blue-500/70 dark:hover:border-cyan-500/70 hover:shadow-xl transition-all duration-200 flex flex-col justify-between overflow-hidden"
             >
-              {/* Background Ambient Glow */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${sol.glowColor || 'from-blue-600/10 to-transparent'} pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
               <div className="relative z-10 space-y-3.5">
                 {/* Top Card Bar */}
                 <div className="flex items-center justify-between">
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-2xs">
+                  <div className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-cyan-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${sol.badgeColor || 'bg-blue-50/80 border-blue-200/60 text-blue-600 dark:bg-blue-950/50 dark:border-blue-800/50 dark:text-cyan-400'} shadow-2xs`}>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider border ${sol.badgeColor || 'bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-950/60 dark:border-blue-900 dark:text-cyan-400'}`}>
                     {sol.badge}
                   </span>
                 </div>
@@ -119,9 +116,9 @@ export function EnterpriseSolutions({ solutions }: EnterpriseSolutionsProps) {
 
                 <Link
                   href={sol.link}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 group/btn shadow-2xs"
+                  className="w-full py-2.5 px-4 rounded-lg bg-slate-900 hover:bg-blue-600 text-white dark:bg-slate-800 dark:hover:bg-blue-600 text-xs font-bold transition-all flex items-center justify-center gap-2 group/btn shadow-xs cursor-pointer"
                 >
-                  <span>Explore Architecture Blueprint</span>
+                  <span>Configure Architecture Blueprint</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                 </Link>
               </div>

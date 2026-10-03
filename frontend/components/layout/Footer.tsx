@@ -33,8 +33,8 @@ export function Footer() {
               <Lock className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-bold text-slate-900 dark:text-white text-sm">Encrypted Escrow & Wallet</div>
-              <div className="text-slate-500 dark:text-slate-400 text-[11px]">256-Bit SSL & Instant Ledger</div>
+              <div className="font-bold text-slate-900 dark:text-white text-sm">Enterprise Settlement</div>
+              <div className="text-slate-500 dark:text-slate-400 text-[11px]">256-Bit SSL & UAE VAT Invoices</div>
             </div>
           </div>
 

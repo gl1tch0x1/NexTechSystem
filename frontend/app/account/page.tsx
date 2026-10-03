@@ -575,7 +575,7 @@ function CustomerAccountContent() {
                             {order.orderStatus === 'PENDING_APPROVAL' ? 'Pending to Approve' : order.orderStatus}
                           </span>
                           <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                            via {order.paymentMethod || 'Credit Card / Wallet'}
+                            via {order.paymentMethod || 'Credit Card / Wire Transfer'}
                           </span>
                         </div>
 

@@ -139,20 +139,27 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-[#060A13] border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-200">
-      {/* Background Radial Ambiance */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/10 dark:from-blue-600/15 via-transparent to-transparent pointer-events-none" />
-      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-tech-blue/10 dark:bg-tech-blue/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-tech-cyan/10 dark:bg-tech-cyan/10 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative overflow-hidden bg-white dark:bg-[#060A13] border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-200">
+      {/* Precision Engineered Background Grid Overlay */}
+      <div 
+        className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" 
+      />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(37,99,235,0.08),transparent_100%)] pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-9">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Enterprise Narrative */}
-          <div className="lg:col-span-6 space-y-5">
+          <div className="lg:col-span-6 space-y-6">
+            {/* Enterprise Tag */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-cyan-400 text-xs font-mono font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-cyan-400" />
+              <span>GCC AUTHORIZED ENTERPRISE HARDWARE</span>
+            </div>
+
             {/* Main Headline */}
-            <h1 className="font-heading text-[clamp(2.35rem,4.6vw,3.65rem)] font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.08]">
+            <h1 className="font-heading text-[clamp(2.4rem,4.8vw,3.85rem)] font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.06]">
               Mission-Critical <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-tech-blue to-cyan-500">
+              <span className="text-blue-600 dark:text-cyan-400">
                 Compute Infrastructure.
               </span>
             </h1>
@@ -163,17 +170,17 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
             </p>
 
             {/* Primary Action CTAs */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1">
               <Link
                 href="/products"
-                className="px-5 py-3 rounded-xl bg-blue-600 text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 transition-all group text-center"
+                className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition-all group text-center tracking-wide"
               >
                 <span>Browse Hardware Catalog</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/pc-builder"
-                className="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-2xs text-center"
+                className="px-6 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold border border-slate-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-cyan-400 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-xs text-center"
               >
                 <NextechLogo className="w-4 h-4" size={16} alt="PC Builder" />
                 <span>Launch PC Builder Studio</span>
@@ -216,10 +223,10 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
           {/* Right Column: Unified Sleek Hardware Showcase Terminal */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
-            <div className="w-full max-w-[480px] relative rounded-2xl sm:rounded-3xl p-4 sm:p-5 bg-white dark:bg-[#0B101D] border border-slate-200/90 dark:border-slate-800/90 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all space-y-3">
-              {/* Top Navigation Bar: Rounded Full Pill Segmented Switcher */}
+            <div className="w-full max-w-[480px] relative rounded-xl p-4 sm:p-5 bg-white dark:bg-[#0B101D] border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all space-y-3">
+              {/* Top Navigation Bar: Precision Architectural Segmented Switcher */}
               <div className="flex items-center justify-between gap-2 pb-0.5">
-                <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar max-w-full">
+                <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar max-w-full">
                   {activeHighlights.map(item => {
                     const ItemIcon = ICON_MAP[item.iconName] || Zap;
                     const isActive = item.id === selectedTabId;
@@ -227,8 +234,8 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                       <button
                         key={item.id}
                         onClick={() => setSelectedTabId(item.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer shrink-0 ${isActive
-                          ? 'bg-blue-600 text-white shadow-xs'
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-all cursor-pointer shrink-0 ${isActive
+                          ? 'bg-blue-600 text-white shadow-xs font-semibold'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                       >
@@ -239,14 +246,14 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   })}
                 </div>
 
-                <div className="shrink-0 flex items-center gap-1.5 ml-auto text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                <div className="shrink-0 flex items-center gap-1.5 ml-auto text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>In Stock ({stockCount})</span>
                 </div>
               </div>
 
               {/* Hardware Visual Presentation Stage */}
-              <div className="relative aspect-[16/9] max-h-[220px] rounded-xl sm:rounded-2xl bg-gradient-to-b from-slate-950 via-[#0A0F1D] to-slate-950 border border-slate-800/90 overflow-hidden group shadow-inner flex items-center justify-center">
+              <div className="relative aspect-[16/9] max-h-[220px] rounded-lg bg-slate-950 border border-slate-800 overflow-hidden group shadow-inner flex items-center justify-center">
                 {/* Ambient Radial Spotlight */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.22)_0%,_transparent_70%)] pointer-events-none" />
 

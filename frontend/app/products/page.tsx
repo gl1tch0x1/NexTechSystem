@@ -164,16 +164,16 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
         <div className="lg:col-span-3 space-y-5">
           {/* Active Filter Chips Bar */}
           {activePills.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5 mr-1">
-                <Filter className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400" />
+            <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5 mr-1">
+                <Filter className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                 Active:
               </span>
               {activePills.map((pill, idx) => (
                 <Link
                   key={idx}
                   href={{ pathname: '/products', query: pill.removeQuery }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 dark:bg-slate-800 dark:hover:bg-red-950/40 dark:text-slate-300 dark:hover:text-red-400 border border-slate-200/80 dark:border-slate-700 transition-colors group"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 dark:bg-slate-800 dark:hover:bg-red-950/40 dark:text-slate-300 dark:hover:text-red-400 border border-slate-200/80 dark:border-slate-700 transition-colors group"
                 >
                   <span>{pill.label}</span>
                   <X className="w-3 h-3 opacity-60 group-hover:opacity-100" />
@@ -191,7 +191,7 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
           )}
 
           {/* Sorting and Results Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-900/90 p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
             <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               {currentSearch ? (
                 <span>Search results for &ldquo;<strong className="text-slate-900 dark:text-white">{currentSearch}</strong>&rdquo;</span>
@@ -204,28 +204,28 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
               <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
                 <ArrowUpDown className="w-3.5 h-3.5" /> Sort:
               </span>
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-800">
                 <Link
                   href={{ pathname: '/products', query: { ...resolvedParams, sort: 'newest' } }}
-                  className={`px-2.5 py-1 rounded-lg transition-colors ${currentSort === 'newest' ? 'bg-tech-blue text-white shadow' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                  className={`px-2.5 py-1 rounded-md transition-colors ${currentSort === 'newest' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                 >
                   Newest
                 </Link>
                 <Link
                   href={{ pathname: '/products', query: { ...resolvedParams, sort: 'price_asc' } }}
-                  className={`px-2.5 py-1 rounded-lg transition-colors ${currentSort === 'price_asc' ? 'bg-tech-blue text-white shadow' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                  className={`px-2.5 py-1 rounded-md transition-colors ${currentSort === 'price_asc' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                 >
                   Price: Low to High
                 </Link>
                 <Link
                   href={{ pathname: '/products', query: { ...resolvedParams, sort: 'price_desc' } }}
-                  className={`px-2.5 py-1 rounded-lg transition-colors ${currentSort === 'price_desc' ? 'bg-tech-blue text-white shadow' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                  className={`px-2.5 py-1 rounded-md transition-colors ${currentSort === 'price_desc' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                 >
                   Price: High to Low
                 </Link>
                 <Link
                   href={{ pathname: '/products', query: { ...resolvedParams, sort: 'rating' } }}
-                  className={`px-2.5 py-1 rounded-lg transition-colors ${currentSort === 'rating' ? 'bg-tech-blue text-white shadow' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                  className={`px-2.5 py-1 rounded-md transition-colors ${currentSort === 'rating' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                 >
                   Top Rated
                 </Link>

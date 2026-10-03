@@ -152,54 +152,60 @@ export default function PCBuilderPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Slot Selectors */}
         <div className="lg:col-span-8 space-y-4">
-          {SLOT_CONFIG.map(({ key, label, icon: Icon, placeholder }) => {
+          {SLOT_CONFIG.map(({ key, label, icon: Icon, placeholder }, index) => {
             const product = slots[key];
+            const slotNum = String(index + 1).padStart(2, '0');
 
             return (
               <div
                 key={key}
-                className={`p-4 sm:p-5 rounded-2xl bg-white dark:bg-tech-card border transition-all ${
+                className={`p-4 sm:p-5 rounded-xl bg-white dark:bg-slate-900 border transition-all ${
                   product
-                    ? 'border-tech-blue/40 shadow-tech-sm'
-                    : 'border-slate-200 dark:border-tech-slate hover:border-slate-300'
+                    ? 'border-blue-500/50 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   {/* Icon & Title */}
                   <div className="flex items-center gap-3.5 flex-1">
                     <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                      className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
                         product
-                          ? 'bg-tech-blue text-white'
-                          : 'bg-slate-100 dark:bg-tech-slate text-slate-400'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                       }`}
                     >
                       <Icon className="w-6 h-6" />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold text-blue-600 dark:text-cyan-400 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-200/50 dark:border-blue-900/50">
+                          SLOT {slotNum}
+                        </span>
+                        <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</div>
+                      </div>
                       {product ? (
-                        <div className="space-y-0.5">
-                          <div className="text-sm font-black text-slate-900 dark:text-white truncate">
+                        <div className="space-y-0.5 mt-1">
+                          <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
                             {product.name}
                           </div>
                           <div className="text-xs text-slate-500 font-mono flex items-center gap-2">
                             <span>SKU: {product.sku}</span>
                             {product.specifications?.socket && (
-                              <span className="bg-slate-100 dark:bg-tech-slate px-1.5 py-0.5 rounded text-[10px] text-tech-cyan">
+                              <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-cyan-500 dark:text-cyan-400">
                                 {product.specifications.socket}
                               </span>
                             )}
                             {product.specifications?.wattage && (
-                              <span className="bg-slate-100 dark:bg-tech-slate px-1.5 py-0.5 rounded text-[10px] text-amber-400">
+                              <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-amber-500 dark:text-amber-400">
                                 {product.specifications.wattage}
                               </span>
                             )}
                           </div>
                         </div>
                       ) : (
-                        <div className="text-xs text-slate-400 font-medium italic mt-0.5">{placeholder}</div>
+                        <div className="text-xs text-slate-400 font-medium italic mt-1">{placeholder}</div>
                       )}
                     </div>
                   </div>
@@ -209,13 +215,13 @@ export default function PCBuilderPage() {
                     {product ? (
                       <>
                         <div className="text-right">
-                          <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                          <div className="text-sm font-bold font-mono text-slate-900 dark:text-white">
                             {formatPrice(product.salePrice || product.price, product.currency)}
                           </div>
                         </div>
                         <button
                           onClick={() => handleRemoveComponent(key)}
-                          className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                          className="p-2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30"
                           title="Remove component"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -224,10 +230,10 @@ export default function PCBuilderPage() {
                     ) : (
                       <button
                         onClick={() => setActiveModalSlot(key)}
-                        className="px-4 py-2 bg-tech-blue/10 hover:bg-tech-blue hover:text-white text-tech-blue dark:text-tech-cyan text-xs font-bold rounded-xl border border-tech-blue/30 transition-all flex items-center gap-1.5"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-1.5 cursor-pointer"
                       >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Choose Hardware</span>
+                        <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Select Component</span>
                       </button>
                     )}
                   </div>
@@ -240,23 +246,23 @@ export default function PCBuilderPage() {
         {/* Right Sticky Summary & Compatibility Diagnostics Panel */}
         <div className="lg:col-span-4 space-y-6 sticky top-24">
           {/* Compatibility Status Box */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-tech-card border border-slate-200 dark:border-tech-slate space-y-6 shadow-tech">
+          <div className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 font-mono">
                 Real-Time Validation Matrix
               </div>
               {errors.length > 0 ? (
-                <div className="flex items-center gap-2 p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 font-black text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 font-bold text-sm">
                   <XCircle className="w-5 h-5 shrink-0" />
                   <span>Incompatible Configuration</span>
                 </div>
               ) : warnings.length > 0 ? (
-                <div className="flex items-center gap-2 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-600 dark:text-amber-400 font-black text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-600 dark:text-amber-400 font-bold text-sm">
                   <AlertTriangle className="w-5 h-5 shrink-0" />
                   <span>Compatible with Headroom Warning</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 font-black text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                   <CheckCircle2 className="w-5 h-5 shrink-0" />
                   <span>100% Component Compatibility Verified</span>
                 </div>
@@ -269,7 +275,7 @@ export default function PCBuilderPage() {
                 {compatibility.issues.map((iss, idx) => (
                   <div
                     key={idx}
-                    className={`p-3 rounded-xl text-xs leading-relaxed ${
+                    className={`p-3 rounded-lg text-xs leading-relaxed ${
                       iss.type === 'ERROR'
                         ? 'bg-red-50/80 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200/50'
                         : 'bg-amber-50/80 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200/50'
@@ -282,7 +288,7 @@ export default function PCBuilderPage() {
             )}
 
             {/* Power & Wattage Diagnostics */}
-            <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-tech-slate">
+            <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400">Peak System Wattage:</span>
                 <span className="font-mono font-bold text-slate-800 dark:text-white">
@@ -291,7 +297,7 @@ export default function PCBuilderPage() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400">Recommended PSU Wattage:</span>
-                <span className="font-mono font-bold text-tech-cyan">
+                <span className="font-mono font-bold text-blue-600 dark:text-cyan-400">
                   {compatibility.recommendedPsuWattage}W+
                 </span>
               </div>
@@ -302,9 +308,9 @@ export default function PCBuilderPage() {
             </div>
 
             {/* Total Build Price */}
-            <div className="pt-4 border-t border-slate-100 dark:border-tech-slate">
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
               <div className="text-xs text-slate-400">Estimated Total Build Cost</div>
-              <div className="text-3xl font-black text-slate-900 dark:text-white mt-1">
+              <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
                 {formatPrice(compatibility.totalPrice)}
               </div>
               <div className="text-[11px] text-slate-400 mt-0.5">Includes 5% UAE VAT & components warranty</div>
@@ -314,10 +320,10 @@ export default function PCBuilderPage() {
             <button
               disabled={selectedCount === 0 || errors.length > 0}
               onClick={handleAddAllToCart}
-              className={`w-full py-4 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all ${
+              className={`w-full py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 selectedCount === 0 || errors.length > 0
-                  ? 'bg-slate-200 dark:bg-tech-slate text-slate-400 cursor-not-allowed'
-                  : 'bg-tech-blue text-white hover:bg-blue-600 shadow-tech-glow'
+                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-300 dark:border-slate-700'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/25 active:scale-98'
               }`}
             >
               <ShoppingCart className="w-4 h-4" />

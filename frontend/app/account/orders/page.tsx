@@ -331,7 +331,7 @@ function CustomerOrdersContent() {
                     </span>
                     {getStatusBadge(order.orderStatus)}
                     <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                      Paid via {order.paymentMethod || 'Card / Wallet'}
+                      Paid via {order.paymentMethod || 'Credit Card / Wire Transfer'}
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
