@@ -60,7 +60,7 @@ export function requireResellerTenant(req: AuthenticatedRequest, res: Response, 
   }
 
   // If resource has a specific resellerId in params or query, enforce strict equality
-  const requestedResellerId = req.params.resellerId || req.query.resellerId || req.body.resellerId;
+  const requestedResellerId = (req.params?.resellerId as string) || (req.query?.resellerId as string) || (req.body?.resellerId as string);
   if (requestedResellerId && requestedResellerId !== req.user.resellerId) {
     auditService.log({
       userId: req.user.id,

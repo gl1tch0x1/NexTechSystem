@@ -105,7 +105,7 @@ export class OrderController {
     }
 
     if (req.user.role === 'RESELLER') {
-      const hasResellerItem = order.items.some(i => i.resellerId === req.user?.resellerId);
+      const hasResellerItem = Array.isArray(order?.items) && order.items.some(i => i?.resellerId === req.user?.resellerId);
       if (!hasResellerItem) {
         res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
         return;

@@ -248,11 +248,11 @@ export class AnalyticsService {
         productSalesMap[item.productId].unitsSold += item.quantity;
         productSalesMap[item.productId].revenue += item.subtotal;
 
-        if (item.resellerId) {
+        if (item?.resellerId) {
           if (!resellerSalesMap[item.resellerId]) {
             resellerSalesMap[item.resellerId] = { revenue: 0, orders: 0 };
           }
-          resellerSalesMap[item.resellerId].revenue += item.subtotal;
+          resellerSalesMap[item.resellerId].revenue += item.subtotal || 0;
           resellerSalesMap[item.resellerId].orders += 1;
         }
 
@@ -660,7 +660,8 @@ export class AnalyticsService {
     }
 
     for (const ord of allOrders) {
-      const resellerItems = ord.items.filter(it => it.resellerId === resellerId);
+      if (!ord || !Array.isArray(ord.items)) continue;
+      const resellerItems = ord.items.filter(it => it && it.resellerId === resellerId);
       if (resellerItems.length === 0) continue;
 
       totalOrders++;

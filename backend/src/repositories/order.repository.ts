@@ -20,7 +20,7 @@ export class OrderRepository extends BaseRepository<Order> {
   async findByResellerId(resellerId: string): Promise<Order[]> {
     // Return orders containing items belonging to this reseller
     const allOrders = await this.find({ orderBy: { field: 'createdAt', direction: 'desc' } });
-    return allOrders.filter(order => order.items.some(item => item.resellerId === resellerId));
+    return allOrders.filter(order => Array.isArray(order?.items) && order.items.some(item => item?.resellerId === resellerId));
   }
 }
 

@@ -64,7 +64,7 @@ export class AdminController {
   }
 
   async createProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const sellerType = req.body.sellerType || (req.body.resellerId ? 'RESELLER' : 'ADMIN');
+    const sellerType = req.body?.sellerType || (req.body?.resellerId ? 'RESELLER' : 'ADMIN');
     const prod = await productService.createProduct({
       ...req.body,
       sellerType,
