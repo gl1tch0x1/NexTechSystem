@@ -16,6 +16,8 @@ router.get(['/approval/remote', '/approval/approve', '/approval/reject'], orderL
 // Apply order & transaction rate limiter & authentication for user endpoints
 router.use(orderLimiter, authenticate);
 
+router.post('/request-otp', (req, res, next) => orderController.requestOrderOtp(req, res).catch(next));
+router.post('/verify-otp', (req, res, next) => orderController.verifyOrderOtp(req, res).catch(next));
 router.post('/', (req, res, next) => orderController.createOrder(req, res).catch(next));
 router.get('/my', (req, res, next) => orderController.getMyOrders(req, res).catch(next));
 router.get('/:id', (req, res, next) => orderController.getOrderById(req, res).catch(next));

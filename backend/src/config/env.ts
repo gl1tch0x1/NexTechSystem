@@ -74,5 +74,9 @@ export const ENV = {
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || '',
   ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || 'admin@nextech.com',
   PUBLIC_API_URL: process.env.PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:5000',
+  // Transactional Email & Order Security
+  RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+  EMAIL_FROM: process.env.EMAIL_FROM || 'NexTech Security <no-reply@nextech.ae>',
+  REQUIRE_ORDER_EMAIL_OTP: process.env.REQUIRE_ORDER_EMAIL_OTP !== 'false',
 };
 

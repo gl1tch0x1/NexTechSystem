@@ -8,6 +8,7 @@ import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
 import { Order, PaymentMethod, Address } from '@/types';
+import OrderOtpModal from '@/components/checkout/OrderOtpModal';
 import {
   ShieldCheck,
   CreditCard,
@@ -22,6 +23,7 @@ import {
   ArrowRight,
   Shield,
   Check,
+  Mail,
   X
 } from 'lucide-react';
 
@@ -73,6 +75,14 @@ export default function CheckoutPage() {
   const [orderNotes, setOrderNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Email OTP Verification State
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [otpMaskedEmail, setOtpMaskedEmail] = useState('');
+  const [otpDevCode, setOtpDevCode] = useState<string | undefined>();
+  const [otpCooldown, setOtpCooldown] = useState(60);
+  const [otpError, setOtpError] = useState('');
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   // Coupon state in checkout
   const [couponInput, setCouponInput] = useState('');
@@ -170,16 +180,21 @@ export default function CheckoutPage() {
     setCouponError('');
   };
 
-  const handlePlaceOrder = async (e: React.FormEvent) => {
+  // 1. Initiate order: Validate inputs and request email OTP code
+  const handleInitiateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-    setIsSubmitting(true);
+    setOtpError('');
 
     try {
       if (!token) {
         setErrorMessage('Please sign in to complete your checkout.');
         router.push('/login');
-        setIsSubmitting(false);
+        return;
+      }
+
+      if (cartItems.length === 0) {
+        setErrorMessage('Your cart is empty. Please add items to checkout.');
         return;
       }
 
@@ -193,7 +208,66 @@ export default function CheckoutPage() {
         throw new Error('Street address and building/office location are required.');
       }
 
+      setIsSubmitting(true);
+
+      const res = await ApiClient.post<{
+        success: boolean;
+        maskedEmail: string;
+        expiresAt: string;
+        resendCooldownSeconds: number;
+        devCode?: string;
+      }>('/orders/request-otp', {
+        total: cart.total,
+        itemsCount: cartItems.length,
+        currency: 'AED',
+      }, { token });
+
+      setOtpMaskedEmail(res.maskedEmail || user?.email || '');
+      setOtpDevCode(res.devCode);
+      setOtpCooldown(res.resendCooldownSeconds || 60);
+      setIsOtpModalOpen(true);
+    } catch (err: any) {
+      console.error('Order verification initiation failed:', err);
+      setErrorMessage(err.message || 'Failed to dispatch verification code. Please check your network or try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 2. Resend OTP code if expired or not received
+  const handleResendOtp = async () => {
+    setOtpError('');
+    if (!token) return;
+
+    try {
+      const res = await ApiClient.post<{
+        success: boolean;
+        maskedEmail: string;
+        expiresAt: string;
+        resendCooldownSeconds: number;
+        devCode?: string;
+      }>('/orders/request-otp', {
+        total: cart.total,
+        itemsCount: cartItems.length,
+        currency: 'AED',
+      }, { token });
+
+      setOtpMaskedEmail(res.maskedEmail || user?.email || '');
+      setOtpDevCode(res.devCode);
+      setOtpCooldown(res.resendCooldownSeconds || 60);
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to resend code');
+    }
+  };
+
+  // 3. Confirm OTP and finalize order creation
+  const handleConfirmOtpAndPlaceOrder = async (otpCode: string) => {
+    setOtpError('');
+    setIsVerifyingOtp(true);
+
+    try {
       const activeToken = token;
+      if (!activeToken) throw new Error('Session expired. Please sign in again.');
 
       const orderPayload = {
         items: cartItems.map(i => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
@@ -203,15 +277,20 @@ export default function CheckoutPage() {
         couponCode: cart.couponCode || activeCouponCode || undefined,
         notes: orderNotes || undefined,
         customerPhone: shippingAddress.phone,
+        otpCode: otpCode.trim(),
       };
 
       const createdOrder = await ApiClient.post<Order>('/orders', orderPayload, { token: activeToken });
       clearCart();
+      setIsOtpModalOpen(false);
       router.push(`/account/orders/${createdOrder.id}`);
     } catch (err: any) {
-      console.error('Order submission failed:', err);
-      setErrorMessage(err.message || 'Failed to process order. Please verify details.');
-      setIsSubmitting(false);
+      console.error('Order confirmation failed:', err);
+      const msg = err.message || 'Verification failed. Please check the code and try again.';
+      setOtpError(msg);
+      throw err;
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -278,7 +357,7 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <form onSubmit={handleInitiateOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Form: Delivery Address & Payment */}
         <div className="lg:col-span-8 space-y-6">
           {/* STEP 1: DELIVERY & CONSIGNEE ADDRESS */}
@@ -723,7 +802,7 @@ export default function CheckoutPage() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing Order &amp; Allocation...</span>
+                  <span>Dispatching Secure Verification Code...</span>
                 </>
               ) : (
                 <>
@@ -733,6 +812,12 @@ export default function CheckoutPage() {
                 </>
               )}
             </button>
+
+            {/* OTP Security Notice */}
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+              <Mail className="w-3.5 h-3.5 text-tech-blue shrink-0" />
+              <span>A 6-digit confirmation code will be emailed to finalize your order</span>
+            </div>
 
             {/* Trust Features Badges */}
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
@@ -756,6 +841,21 @@ export default function CheckoutPage() {
           </div>
         </div>
       </form>
+
+      {/* Email OTP Order Verification Modal */}
+      <OrderOtpModal
+        isOpen={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
+        onConfirm={handleConfirmOtpAndPlaceOrder}
+        onResendOtp={handleResendOtp}
+        maskedEmail={otpMaskedEmail}
+        orderTotalFormatted={formatPrice(finalPayable)}
+        itemsCount={cartItems.reduce((acc, it) => acc + it.quantity, 0)}
+        initialCooldownSeconds={otpCooldown}
+        devCode={otpDevCode}
+        isSubmitting={isVerifyingOtp}
+        errorMessage={otpError}
+      />
     </div>
   );
 }
