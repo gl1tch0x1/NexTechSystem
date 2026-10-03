@@ -88,7 +88,7 @@ export default function ResellerDashboardPage() {
             type="button"
             onClick={fetchResellerMetrics}
             disabled={isRefreshing}
-            className="px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold rounded-xl text-xs flex items-center gap-2 transition-all disabled:opacity-50"
+            className="px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold rounded-xl text-xs flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
             title="Refresh vendor metrics"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-400' : ''}`} />
@@ -105,70 +105,125 @@ export default function ResellerDashboardPage() {
         </div>
       </div>
 
+      {/* Vendor Quick Actions Ribbon */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Link
+          href={`/reseller/${resellerCode}/products/import`}
+          className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/60 transition-all flex items-center gap-3 group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+            <FileSpreadsheet className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">Bulk Import</div>
+            <div className="text-[10px] text-slate-400 font-mono">Upload Excel Catalog</div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/reseller/${resellerCode}/products`}
+          className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/60 transition-all flex items-center gap-3 group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+            <Package className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">Catalog Matrix</div>
+            <div className="text-[10px] text-slate-400 font-mono">Manage SKUs & Prices</div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/reseller/${resellerCode}/orders`}
+          className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/60 transition-all flex items-center gap-3 group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+            <ShoppingBag className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">Sales Orders</div>
+            <div className="text-[10px] text-slate-400 font-mono">Fulfillment Pipeline</div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/reseller/${resellerCode}/inventory`}
+          className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/60 transition-all flex items-center gap-3 group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+            <Boxes className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">Warehousing</div>
+            <div className="text-[10px] text-slate-400 font-mono">Stock Allocation</div>
+          </div>
+        </Link>
+      </div>
+
       {/* 4 Main Dynamic KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Revenue */}
-        <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-3">
+        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-bold uppercase tracking-wider">Gross Vendor Sales</span>
-            <DollarSign className="w-5 h-5 text-amber-400" />
+            <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Gross Vendor Sales</span>
+            <DollarSign className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl font-black text-white font-mono">
             {formatPrice(revenueTotal)}
           </div>
-          <div className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="text-[10.5px] text-slate-400 flex items-center gap-1 font-mono">
+            <TrendingUp className="w-3 h-3 text-emerald-400" />
             <span>Live database order ledger</span>
           </div>
         </div>
 
         {/* Orders */}
-        <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-3">
+        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Orders</span>
-            <ShoppingBag className="w-5 h-5 text-blue-400" />
+            <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Total Orders</span>
+            <ShoppingBag className="w-4 h-4 text-blue-400" />
           </div>
           <div className="text-2xl font-black text-white font-mono">
             {ordersTotal}
           </div>
-          <div className="text-[11px] text-slate-400 font-mono">
+          <div className="text-[10.5px] text-slate-400 font-mono">
             {ordersPending} awaiting fulfillment
           </div>
         </div>
 
         {/* Products */}
-        <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-3">
+        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-bold uppercase tracking-wider">Active Listings</span>
-            <Package className="w-5 h-5 text-purple-400" />
+            <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Active Listings</span>
+            <Package className="w-4 h-4 text-purple-400" />
           </div>
           <div className="text-2xl font-black text-white font-mono">
             {activeProducts}
           </div>
-          <div className="text-[11px] text-amber-400 font-mono">
+          <div className="text-[10.5px] text-amber-400 font-mono">
             {pendingApproval} pending admin review
           </div>
         </div>
 
         {/* Inventory Value */}
-        <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-3">
+        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-bold uppercase tracking-wider">Inventory Valuation</span>
-            <Boxes className="w-5 h-5 text-emerald-400" />
+            <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Inventory Valuation</span>
+            <Boxes className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl font-black text-white font-mono">
             {formatPrice(inventoryValuation)}
           </div>
-          <div className="text-[11px] text-slate-400 font-mono">Stocked vendor hardware</div>
+          <div className="text-[10.5px] text-slate-400 font-mono">Stocked vendor hardware</div>
         </div>
       </div>
 
       {/* 7-Day Sales Trend & Top Hardware Table */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Sales Chart Box */}
-        <div className="lg:col-span-7 p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-6">
+        <div className="lg:col-span-7 p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-            <h3 className="text-sm font-black text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-amber-400" />
               <span>7-Day Sales Velocity</span>
             </h3>
@@ -188,9 +243,9 @@ export default function ResellerDashboardPage() {
                         {formatPrice(day.revenue)} ({day.orders} ord)
                       </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
+                    <div className="w-full h-2 rounded bg-slate-950 overflow-hidden border border-slate-800/50">
                       <div
-                        className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
+                        className="h-full bg-amber-400 rounded-xs transition-all duration-300"
                         style={{ width: `${Math.max(4, pct)}%` }}
                       />
                     </div>
@@ -206,24 +261,24 @@ export default function ResellerDashboardPage() {
         </div>
 
         {/* Top Products Box */}
-        <div className="lg:col-span-5 p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-4">
+        <div className="lg:col-span-5 p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-            <h3 className="text-sm font-black text-white">Top-Selling Hardware</h3>
+            <h3 className="text-sm font-bold text-white">Top-Selling Hardware</h3>
             <Link
               href={`/reseller/${resellerCode}/products`}
-              className="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
             >
               <span>Catalog</span>
               <ArrowUpRight className="w-3 h-3" />
             </Link>
           </div>
 
-          <div className="space-y-2.5 max-h-[340px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
             {topProducts.length > 0 ? (
               topProducts.map((prod: any) => (
                 <div
                   key={prod.id}
-                  className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 flex items-center justify-between text-xs"
+                  className="p-3 rounded-lg bg-slate-950 border border-slate-800/80 flex items-center justify-between text-xs hover:border-slate-700 transition-colors"
                 >
                   <div className="min-w-0 pr-2">
                     <div className="font-bold text-white truncate">{prod.name}</div>

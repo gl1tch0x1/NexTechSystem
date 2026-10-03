@@ -288,16 +288,16 @@ function CustomerOrdersContent() {
                   onClick={() => setStatusFilter(st)}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                     active
-                      ? 'bg-tech-blue text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      ? 'bg-blue-600 text-white shadow-xs font-bold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
                   <span>{st === 'PENDING_APPROVAL' ? 'Pending to Approve' : st.charAt(0) + st.slice(1).toLowerCase()}</span>
                   <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${
                       active
                         ? 'bg-white/20 text-white'
-                        : 'bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {count}
@@ -312,7 +312,7 @@ function CustomerOrdersContent() {
       {/* Orders List */}
       {loading ? (
         <div className="py-24 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-6 h-6 animate-spin text-tech-blue" />
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
           <span>Synchronizing orders and tax invoices...</span>
         </div>
       ) : filteredOrders.length > 0 ? (
@@ -320,7 +320,7 @@ function CustomerOrdersContent() {
           {filteredOrders.map(order => (
             <div
               key={order.id}
-              className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-6 shadow-xs hover:shadow-md transition-all"
+              className="p-6 sm:p-7 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-6 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all"
             >
               {/* Header row */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200 dark:border-slate-800">

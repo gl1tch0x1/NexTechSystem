@@ -106,44 +106,43 @@ export function CustomerPortalHeader({
   return (
     <div className="space-y-6">
       {/* Top Profile Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm dark:shadow-tech p-6 sm:p-8 transition-all">
-        {/* Subtle decorative background gradient glows */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-blue-500/10 dark:bg-tech-blue/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 -mb-20 w-80 h-80 bg-cyan-500/10 dark:bg-tech-cyan/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm p-6 sm:p-7 transition-all">
+        {/* Subtle architectural background grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* User Info Avatar & Monogram */}
           <div className="flex items-start sm:items-center gap-4 sm:gap-5">
             <div className="relative shrink-0">
-              <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-tr from-tech-blue to-cyan-500 text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-md ring-4 ring-blue-500/15">
-                {user?.name ? user.name.slice(0, 2).toUpperCase() : <UserIcon className="w-8 h-8" />}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center font-bold text-lg sm:text-xl border border-slate-700 shadow-sm">
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : <UserIcon className="w-7 h-7" />}
               </div>
               <span
-                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-4 ring-white dark:ring-slate-900 flex items-center justify-center"
+                className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900 flex items-center justify-center"
                 title="Active Account"
               >
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               </span>
             </div>
 
-            <div className="space-y-1.5 min-w-0">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+            <div className="space-y-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 uppercase">
                   <Sparkles className="w-3 h-3" />
                   <span>Verified Customer • GCC Dispatch</span>
                 </span>
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                <span className="text-[10px] font-mono text-slate-400">
                   ID: {user?.id?.replace(/^user_/, '').slice(0, 8) || 'NXT-CLI'}
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight truncate">
                 {user?.name || 'Valued Customer'}
               </h1>
 
               <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
                 <span className="flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-tech-blue dark:text-tech-cyan" />
+                  <Mail className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                   <span className="truncate">{user?.email}</span>
                 </span>
                 <span>•</span>
@@ -157,16 +156,16 @@ export function CustomerPortalHeader({
             {/* Orders quick capsule */}
             <Link
               href="/account/orders"
-              className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-blue-50/70 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-700/80 transition-all shadow-xs"
+              className="group flex items-center gap-3 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-blue-50/70 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-700/80 transition-all shadow-2xs"
             >
-              <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-tech-blue dark:text-tech-cyan flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
                 <ShoppingBag className="w-4 h-4" />
               </div>
               <div className="text-left">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
                   My Orders
                 </div>
-                <div className="text-sm font-black text-slate-900 dark:text-white">
+                <div className="text-sm font-bold font-mono text-slate-900 dark:text-white">
                   {totalOrdersCount} {totalOrdersCount === 1 ? 'Order' : 'Orders'}
                 </div>
               </div>
@@ -175,10 +174,10 @@ export function CustomerPortalHeader({
             {/* Logout button */}
             <button
               onClick={logout}
-              className="p-2.5 sm:px-3.5 sm:py-2.5 rounded-2xl text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/60 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 border border-slate-200 dark:border-slate-700/80 transition-all flex items-center gap-2"
+              className="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/60 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 border border-slate-200 dark:border-slate-700/80 transition-all flex items-center gap-1.5 cursor-pointer"
               title="Sign Out of Portal"
             >
-              <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-500" />
+              <LogOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500" />
               <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
@@ -195,17 +194,17 @@ export function CustomerPortalHeader({
               <button
                 key={item.id}
                 onClick={item.onClick}
-                className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                   active
-                    ? 'bg-tech-blue text-white shadow-md shadow-blue-600/20'
+                    ? 'bg-blue-600 text-white shadow-xs font-bold'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
+                <Icon className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
                 <span>{item.label}</span>
                 {item.badge && (
                   <span
-                    className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`ml-1 px-1.5 py-0.2 rounded text-[10px] font-mono font-bold ${
                       active
                         ? 'bg-white/20 text-white'
                         : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'

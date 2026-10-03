@@ -619,7 +619,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex items-center gap-2 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10.5px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
                 <TrendingUp className="w-3 h-3" />
                 +{growthPercentage}% Velocity
               </span>
@@ -636,7 +636,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 2: Accounts Receivable & Corporate Credit Exposure */}
-        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
+        <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
@@ -654,7 +654,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 text-[11px] font-semibold font-mono border border-purple-200/60 dark:border-purple-800/40">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 text-[10.5px] font-semibold font-mono border border-purple-200/60 dark:border-purple-800/40">
                 DSO: 18.2 Days
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
@@ -679,7 +679,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 3: Multi-Hub Inventory Asset Valuation */}
-        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
+        <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
@@ -697,7 +697,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold font-mono border border-slate-200 dark:border-slate-700">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10.5px] font-semibold font-mono border border-slate-200 dark:border-slate-700">
                 <Package className="w-3 h-3 text-slate-400" />
                 {totalProducts} SKUs • 3 Hubs
               </span>
@@ -716,7 +716,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 4: Net Operating Margin & Procurement COGS */}
-        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
+        <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
@@ -734,7 +734,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10.5px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
                 <TrendingUp className="w-3 h-3" />
                 24.8% Margin
               </span>

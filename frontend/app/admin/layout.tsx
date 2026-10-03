@@ -91,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: '/admin/orders', label: 'Customer Sales Orders', icon: ShoppingBag },
         { href: '/admin/quotes', label: 'B2B Quotes Engine', icon: FileText },
         { href: '/admin/purchase-orders', label: 'Supplier Purchase Orders', icon: Server },
-        { href: '/admin/customers', label: 'Customers & Wallets', icon: Users },
+        { href: '/admin/customers', label: 'Customer Directory & Accounts', icon: Users },
         { href: '/admin/resellers', label: 'Reseller Network', icon: Store },
       ],
     },

@@ -410,30 +410,30 @@ function CustomerAccountContent() {
             {/* Card 1: Completed Orders */}
             <Link
               href="/account/orders"
-              className="group p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-blue dark:hover:border-tech-blue shadow-xs hover:shadow-lg transition-all"
+              className="group p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-blue-500 dark:hover:border-cyan-500 shadow-2xs hover:shadow-md transition-all"
             >
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Total Purchases</span>
-                <div className="p-2.5 rounded-2xl bg-blue-50 dark:bg-slate-800 text-tech-blue dark:text-tech-cyan group-hover:scale-110 transition-transform">
-                  <ShoppingBag className="w-5 h-5" />
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2.5">
+                <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Total Purchases</span>
+                <div className="p-2 rounded-lg bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-cyan-400 group-hover:scale-105 transition-transform">
+                  <ShoppingBag className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-3xl font-black text-slate-900 dark:text-white">{orders.length}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 group-hover:text-tech-blue transition-colors">
+              <div className="text-2xl font-black font-mono text-slate-900 dark:text-white">{orders.length}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
                 <span>View itemized invoices</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
             {/* Card 2: Lifetime Spend */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Lifetime Spend</span>
-                <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400">
-                  <ShieldCheck className="w-5 h-5" />
+            <div className="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-2xs">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2.5">
+                <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Lifetime Spend</span>
+                <div className="p-2 rounded-lg bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400">
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-3xl font-black text-slate-900 dark:text-white">
+              <div className="text-2xl font-black font-mono text-slate-900 dark:text-white">
                 {formatPrice(totalSpent)}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -444,15 +444,15 @@ function CustomerAccountContent() {
             {/* Card 3: Active Shipments */}
             <Link
               href="/account/orders"
-              className="group p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-amber-500/50 shadow-xs hover:shadow-lg transition-all"
+              className="group p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-amber-500/50 shadow-2xs hover:shadow-md transition-all"
             >
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Active Shipments</span>
-                <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
-                  <Truck className="w-5 h-5" />
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2.5">
+                <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Active Shipments</span>
+                <div className="p-2 rounded-lg bg-amber-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
+                  <Truck className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-3xl font-black text-slate-900 dark:text-white">
+              <div className="text-2xl font-black font-mono text-slate-900 dark:text-white">
                 {activeOrders.length}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -464,18 +464,18 @@ function CustomerAccountContent() {
             <button
               type="button"
               onClick={() => handleTabChange('settings')}
-              className="text-left group p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-cyan dark:hover:border-tech-cyan shadow-xs hover:shadow-lg transition-all"
+              className="text-left group p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-blue-500 dark:hover:border-cyan-400 shadow-2xs hover:shadow-md transition-all cursor-pointer"
             >
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Saved Addresses</span>
-                <div className="p-2.5 rounded-2xl bg-cyan-50 dark:bg-slate-800 text-tech-cyan group-hover:scale-110 transition-transform">
-                  <MapPin className="w-5 h-5" />
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2.5">
+                <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider">Saved Addresses</span>
+                <div className="p-2 rounded-lg bg-cyan-50 dark:bg-slate-800 text-blue-600 dark:text-cyan-400 group-hover:scale-105 transition-transform">
+                  <MapPin className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-3xl font-black text-slate-900 dark:text-white">
+              <div className="text-2xl font-black font-mono text-slate-900 dark:text-white">
                 {user?.addresses?.length || 0}
               </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 group-hover:text-tech-cyan transition-colors">
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
                 <span>Manage delivery locations</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -483,50 +483,50 @@ function CustomerAccountContent() {
           </div>
 
           {/* Quick Actions Hub */}
-          <div className="p-6 sm:p-7 rounded-3xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-4">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <div className="p-5 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
               Quick Customer Actions
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <Link
                 href="/products"
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-blue text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-xs hover:shadow flex flex-col gap-2"
+                className="p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-500 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-2xs hover:shadow-xs flex flex-col gap-2"
               >
-                <Cpu className="w-5 h-5 text-tech-blue dark:text-tech-cyan" />
+                <Cpu className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                 <span>Browse Hardware</span>
               </Link>
               <Link
                 href="/pc-builder"
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-blue text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-xs hover:shadow flex flex-col gap-2"
+                className="p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-500 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-2xs hover:shadow-xs flex flex-col gap-2"
               >
-                <PackageCheck className="w-5 h-5 text-emerald-500" />
+                <PackageCheck className="w-4 h-4 text-emerald-500" />
                 <span>PC Builder Matrix</span>
               </Link>
               <button
                 type="button"
                 onClick={() => handleTabChange('settings')}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-blue text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-xs hover:shadow flex flex-col gap-2 text-left"
+                className="p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-500 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-2xs hover:shadow-xs flex flex-col gap-2 text-left cursor-pointer"
               >
-                <MapPin className="w-5 h-5 text-purple-500" />
+                <MapPin className="w-4 h-4 text-purple-500" />
                 <span>Manage Addresses</span>
               </button>
               <Link
                 href="/account/wishlist"
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-tech-blue text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-xs hover:shadow flex flex-col gap-2"
+                className="p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-500 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all shadow-2xs hover:shadow-xs flex flex-col gap-2"
               >
-                <Heart className="w-5 h-5 text-rose-500" />
+                <Heart className="w-4 h-4 text-rose-500" />
                 <span>Saved Wishlist</span>
               </Link>
             </div>
           </div>
 
           {/* Recent Orders Section */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-6 shadow-xs">
+          <div className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-6 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/80 dark:border-slate-800">
               <div className="space-y-1">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-tech-blue dark:text-tech-cyan" />
-                  Recent Purchases & Digital E-Bills
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
+                  <span>Recent Purchases & Digital E-Bills</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Track delivery progress, download itemized tax invoices, and review specifications
