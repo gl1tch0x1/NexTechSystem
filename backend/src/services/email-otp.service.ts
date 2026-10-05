@@ -27,13 +27,26 @@ export interface RequestOtpResult {
   expiresAt: string;
   resendCooldownSeconds: number;
   message: string;
-  devCode?: string; // Only exposed in non-production environments for automated testing/local dev
+  devCode?: string; // Only exposed in non-production environments when explicitly permitted
 }
 
 export interface VerifyOtpResult {
   valid: boolean;
   error?: string;
   remainingAttempts?: number;
+}
+
+/**
+ * Escapes unsafe characters for HTML context to prevent email template injection (XSS/HTMLi)
+ */
+function escapeHtml(str: string): string {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export class EmailOtpService {
@@ -75,7 +88,8 @@ export class EmailOtpService {
     cartSummary?: { total?: number; itemsCount?: number; currency?: string };
   }): Promise<RequestOtpResult> {
     const { userId, userEmail, userName, cartSummary } = params;
-    const normalizedEmail = userEmail.toLowerCase().trim();
+    // Sanitize email against CRLF injection and whitespace
+    const normalizedEmail = userEmail.replace(/[\r\n]/g, '').toLowerCase().trim();
     const now = new Date();
 
     // 1. Fetch existing OTP records for this user
@@ -88,9 +102,17 @@ export class EmailOtpService {
       }
     );
 
-    // 2. Enforce Resend Cooldown (e.g. 60 seconds)
-    const latestRecord = existingRecords
-      .filter(r => !r.consumed)
+    // 2. Prune stale consumed/expired records older than 24 hours to prevent memory/disk bloat
+    for (const record of existingRecords) {
+      const ageMs = now.getTime() - new Date(record.createdAt).getTime();
+      if (record.consumed || ageMs > 24 * 60 * 60 * 1000) {
+        await dbStore.delete('order_verification_otps', record.id);
+      }
+    }
+
+    // 3. Enforce Resend Cooldown (e.g. 60 seconds)
+    const activeUnconsumedRecords = existingRecords.filter(r => !r.consumed);
+    const latestRecord = activeUnconsumedRecords
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
 
     if (latestRecord) {
@@ -104,7 +126,7 @@ export class EmailOtpService {
       }
     }
 
-    // 3. Enforce Rate Limiting Window (Max requests in last 15 minutes)
+    // 4. Enforce Rate Limiting Window (Max requests in last 15 minutes)
     const windowStartTime = new Date(now.getTime() - this.REQUEST_WINDOW_MINUTES * 60 * 1000).getTime();
     const recentRequests = existingRecords.filter(
       r => new Date(r.createdAt).getTime() >= windowStartTime
@@ -116,16 +138,14 @@ export class EmailOtpService {
       );
     }
 
-    // 4. Invalidate previous active unconsumed OTPs for this user
-    for (const record of existingRecords) {
-      if (!record.consumed) {
-        await dbStore.update<OrderVerificationOtpRecord>('order_verification_otps', record.id, {
-          consumed: true,
-        });
-      }
+    // 5. Invalidate previous active unconsumed OTPs for this user
+    for (const record of activeUnconsumedRecords) {
+      await dbStore.update<OrderVerificationOtpRecord>('order_verification_otps', record.id, {
+        consumed: true,
+      });
     }
 
-    // 5. Generate cryptographically secure 6-digit number
+    // 6. Generate cryptographically secure 6-digit number
     const secureCode = crypto.randomInt(100000, 1000000).toString();
     const otpHash = this.hashOtp(userId, normalizedEmail, secureCode);
 
@@ -147,7 +167,7 @@ export class EmailOtpService {
 
     await dbStore.create<OrderVerificationOtpRecord>('order_verification_otps', newRecord);
 
-    // 6. Dispatch Email
+    // 7. Dispatch Email Notification
     await this.dispatchEmailNotification({
       recipientEmail: normalizedEmail,
       recipientName: userName,
@@ -156,7 +176,7 @@ export class EmailOtpService {
       cartSummary,
     });
 
-    // 7. Security Audit Log
+    // 8. Security Audit Log
     await auditService.log({
       userId,
       userEmail: normalizedEmail,
@@ -171,13 +191,16 @@ export class EmailOtpService {
       },
     });
 
+    const isProduction = ENV.NODE_ENV === 'production' || process.env.NODE_ENV === 'production';
+    const allowDevOtpExposure = !isProduction && (process.env.EXPOSE_DEV_OTP === 'true' || !ENV.RESEND_API_KEY);
+
     return {
       success: true,
       maskedEmail: this.maskEmail(normalizedEmail),
       expiresAt,
       resendCooldownSeconds: this.RESEND_COOLDOWN_SECONDS,
       message: `A 6-digit confirmation code was sent to ${this.maskEmail(normalizedEmail)}.`,
-      devCode: ENV.NODE_ENV !== 'production' ? secureCode : undefined,
+      devCode: allowDevOtpExposure ? secureCode : undefined,
     };
   }
 
@@ -188,10 +211,11 @@ export class EmailOtpService {
     userId: string;
     userEmail: string;
     code: string;
+    expectedTotal?: number;
     consumeOnSuccess?: boolean;
   }): Promise<VerifyOtpResult> {
-    const { userId, userEmail, code, consumeOnSuccess = true } = params;
-    const normalizedEmail = userEmail.toLowerCase().trim();
+    const { userId, userEmail, code, expectedTotal, consumeOnSuccess = true } = params;
+    const normalizedEmail = userEmail.replace(/[\r\n]/g, '').toLowerCase().trim();
     const cleanCode = (code || '').trim();
 
     if (!cleanCode || !/^\d{6}$/.test(cleanCode)) {
@@ -221,6 +245,26 @@ export class EmailOtpService {
       };
     }
 
+    // Verify email binding (in case user changed profile email)
+    if (activeRecord.email !== normalizedEmail) {
+      return {
+        valid: false,
+        error: 'The account email has changed. Please request a new verification code.',
+      };
+    }
+
+    // Verify order total integrity (prevents order amount tampering after receiving OTP)
+    if (
+      expectedTotal != null &&
+      activeRecord.cartSummary?.total != null &&
+      Math.abs(Number(activeRecord.cartSummary.total) - Number(expectedTotal)) > 0.05
+    ) {
+      return {
+        valid: false,
+        error: 'The order total has changed since your verification code was issued. Please request a fresh verification code.',
+      };
+    }
+
     const now = new Date();
     if (now.getTime() > new Date(activeRecord.expiresAt).getTime()) {
       await dbStore.update<OrderVerificationOtpRecord>('order_verification_otps', activeRecord.id, {
@@ -244,10 +288,13 @@ export class EmailOtpService {
     }
 
     const expectedHash = this.hashOtp(userId, normalizedEmail, cleanCode);
-    const isMatch = crypto.timingSafeEqual(
-      Buffer.from(expectedHash, 'hex'),
-      Buffer.from(activeRecord.otpHash, 'hex')
-    );
+    const expectedBuf = Buffer.from(expectedHash, 'hex');
+    const actualBuf = Buffer.from(activeRecord.otpHash, 'hex');
+
+    // Safe comparison: ensure equal buffer lengths before calling timingSafeEqual to prevent RangeError crash
+    const isMatch =
+      expectedBuf.length === actualBuf.length &&
+      crypto.timingSafeEqual(expectedBuf, actualBuf);
 
     if (!isMatch) {
       const updatedAttempts = activeRecord.attempts + 1;
@@ -278,6 +325,31 @@ export class EmailOtpService {
   }
 
   /**
+   * Reverts a consumed OTP if order placement fails down the pipeline (e.g. stock/pricing error)
+   */
+  async unconsumeOtp(userId: string): Promise<void> {
+    const records = await dbStore.find<OrderVerificationOtpRecord>(
+      'order_verification_otps',
+      {
+        where: [
+          { field: 'userId', operator: '==', value: userId },
+        ],
+      }
+    );
+
+    const now = new Date().getTime();
+    const latestConsumed = records
+      .filter(r => r.consumed && now < new Date(r.expiresAt).getTime())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+
+    if (latestConsumed) {
+      await dbStore.update<OrderVerificationOtpRecord>('order_verification_otps', latestConsumed.id, {
+        consumed: false,
+      });
+    }
+  }
+
+  /**
    * Dispatches the branded HTML email via Resend if available, or logs cleanly to console
    */
   private async dispatchEmailNotification(data: {
@@ -288,8 +360,10 @@ export class EmailOtpService {
     cartSummary?: { total?: number; itemsCount?: number; currency?: string };
   }): Promise<void> {
     const { recipientEmail, recipientName, code, expiresInMinutes, cartSummary } = data;
-    const currency = cartSummary?.currency || 'AED';
-    const totalFormatted = cartSummary?.total != null ? `${currency} ${cartSummary.total.toFixed(2)}` : 'Cart Order';
+    const sanitizedEmail = recipientEmail.replace(/[\r\n]/g, '').trim();
+    const safeName = escapeHtml(recipientName || 'Valued Customer');
+    const currency = escapeHtml(cartSummary?.currency || 'AED');
+    const totalFormatted = cartSummary?.total != null ? `${currency} ${Number(cartSummary.total).toFixed(2)}` : 'Cart Order';
 
     const htmlBody = `
 <!DOCTYPE html>
@@ -322,13 +396,13 @@ export class EmailOtpService {
       <div class="badge">FTA VAT Compliant &bull; Secure Checkout</div>
     </div>
     <div class="content">
-      <div class="greeting">Hello ${recipientName || 'Valued Customer'},</div>
+      <div class="greeting">Hello ${safeName},</div>
       <p class="text">
         You are confirming a technology hardware order on the NexTech Platform. Please use the one-time verification code below to authorize and confirm your order:
       </p>
 
       <div class="code-container">
-        <div class="code">${code}</div>
+        <div class="code">${escapeHtml(code)}</div>
         <div class="validity">Expires in ${expiresInMinutes} minutes &bull; Single-use only</div>
       </div>
 
@@ -360,14 +434,14 @@ export class EmailOtpService {
           },
           body: JSON.stringify({
             from: ENV.EMAIL_FROM || 'NexTech Security <no-reply@nextech.ae>',
-            to: recipientEmail,
+            to: sanitizedEmail,
             subject: `[NexTech] ${code} is your Order Verification Code`,
             html: htmlBody,
           }),
         });
 
         if (response.ok) {
-          console.log(`[EmailOtpService] Successfully dispatched OTP email to ${recipientEmail} via Resend.`);
+          console.log(`[EmailOtpService] Successfully dispatched OTP email to ${sanitizedEmail} via Resend.`);
           return;
         } else {
           const errData = await response.text();
@@ -382,8 +456,8 @@ export class EmailOtpService {
     const border = '='.repeat(68);
     console.log(`\n${border}`);
     console.log(`🔐 [NEXTECH SECURITY: ORDER VERIFICATION OTP DISPATCHED]`);
-    console.log(`Recipient Email : ${recipientEmail}`);
-    console.log(`Customer Name   : ${recipientName}`);
+    console.log(`Recipient Email : ${sanitizedEmail}`);
+    console.log(`Customer Name   : ${safeName}`);
     console.log(`Order Amount    : ${totalFormatted}`);
     console.log(`OTP Code        : >>>  ${code}  <<<`);
     console.log(`Validity        : ${expiresInMinutes} Minutes`);

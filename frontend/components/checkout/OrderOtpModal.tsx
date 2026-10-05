@@ -66,6 +66,14 @@ export default function OrderOtpModal({
     }
   }, [isOpen, initialCooldownSeconds]);
 
+  // Clear digits and focus first box when an invalid attempt occurs
+  useEffect(() => {
+    if (externalError) {
+      setDigits(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
+    }
+  }, [externalError]);
+
   // Cooldown countdown timer
   useEffect(() => {
     if (!isOpen || cooldown <= 0) return;
@@ -93,8 +101,13 @@ export default function OrderOtpModal({
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !digits[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
+    if (e.key === 'Backspace') {
+      if (!digits[index] && index > 0) {
+        const newDigits = [...digits];
+        newDigits[index - 1] = '';
+        setDigits(newDigits);
+        inputRefs.current[index - 1]?.focus();
+      }
     } else if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
     } else if (e.key === 'ArrowRight' && index < 5) {

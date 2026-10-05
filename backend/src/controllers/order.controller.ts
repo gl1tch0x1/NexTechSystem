@@ -87,8 +87,8 @@ export class OrderController {
       return;
     }
 
-    // Email OTP Verification enforcement for customer checkout
-    if (ENV.REQUIRE_ORDER_EMAIL_OTP && req.user.role === 'CUSTOMER') {
+    // Email OTP Verification enforcement for customer and reseller storefront checkout
+    if (ENV.REQUIRE_ORDER_EMAIL_OTP && req.user.role !== 'ADMIN') {
       if (!otpCode || typeof otpCode !== 'string' || otpCode.trim().length !== 6) {
         res.status(400).json({
           success: false,
@@ -137,6 +137,10 @@ export class OrderController {
 
       res.status(201).json({ success: true, data: order });
     } catch (err: any) {
+      // Revert OTP consumption so user is not locked out when addressing validation/stock issues
+      if (ENV.REQUIRE_ORDER_EMAIL_OTP && req.user.role !== 'ADMIN') {
+        await emailOtpService.unconsumeOtp(req.user.id).catch(() => {});
+      }
       res.status(400).json({ success: false, error: { code: 'ORDER_CREATION_FAILED', message: err.message } });
     }
   }
