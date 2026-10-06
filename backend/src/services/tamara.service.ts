@@ -9,10 +9,48 @@ export interface TamaraCheckoutSessionResult {
   raw?: any;
 }
 
+/**
+ * Strictly validates and sanitizes transaction/order identifiers to prevent
+ * Server-Side Request Forgery (SSRF) and Path Traversal vulnerabilities (CWE-918).
+ * Ensures only alphanumeric, hyphen, and underscore characters are present.
+ */
+function sanitizeIdentifier(id: unknown): string {
+  if (typeof id !== 'string') {
+    throw new Error('Invalid order identifier: Expected string');
+  }
+  const trimmed = id.trim();
+  if (!trimmed || !/^[a-zA-Z0-9_-]{1,128}$/.test(trimmed)) {
+    throw new Error('Invalid order identifier format: must contain only alphanumeric characters, dashes, and underscores');
+  }
+  return encodeURIComponent(trimmed);
+}
+
 export class TamaraService {
   private baseUrl = (ENV.TAMARA_API_URL || 'https://api-sandbox.tamara.co').replace(/\/$/, '');
   private apiToken = ENV.TAMARA_API_TOKEN;
   private notificationToken = ENV.TAMARA_NOTIFICATION_TOKEN;
+
+  /**
+   * Resolves and validates the target API URL against an allowlisted origin
+   */
+  private buildEndpointUrl(pathname: string): string {
+    const defaultHost = 'https://api-sandbox.tamara.co';
+    let base: URL;
+    try {
+      base = new URL(this.baseUrl || defaultHost);
+      if (!['https:', 'http:'].includes(base.protocol)) {
+        base = new URL(defaultHost);
+      }
+    } catch {
+      base = new URL(defaultHost);
+    }
+
+    const resolved = new URL(pathname, base.origin);
+    if (resolved.origin !== base.origin) {
+      throw new Error('Security Error: Target URL origin mismatch');
+    }
+    return resolved.toString();
+  }
 
   /**
    * Initializes a Tamara split-in-4 installment checkout session
@@ -102,7 +140,8 @@ export class TamaraService {
       },
     };
 
-    const response = await fetch(`${this.baseUrl}/checkout`, {
+    const endpoint = this.buildEndpointUrl('/checkout');
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -130,11 +169,13 @@ export class TamaraService {
    * Authorizes an approved Tamara order
    */
   async authoriseOrder(tamaraOrderId: string): Promise<any> {
-    if (!this.apiToken || tamaraOrderId.startsWith('tamara_sim_')) {
-      return { order_id: tamaraOrderId, status: 'AUTHORISED', isSimulated: true };
+    const cleanId = sanitizeIdentifier(tamaraOrderId);
+    if (!this.apiToken || cleanId.startsWith('tamara_sim_')) {
+      return { order_id: cleanId, status: 'AUTHORISED', isSimulated: true };
     }
 
-    const response = await fetch(`${this.baseUrl}/orders/${tamaraOrderId}/authorise`, {
+    const endpoint = this.buildEndpointUrl(`/orders/${cleanId}/authorise`);
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -149,18 +190,20 @@ export class TamaraService {
    * Captures payment for an authorized order
    */
   async capturePayment(tamaraOrderId: string, amount: number, currency = 'AED'): Promise<any> {
-    if (!this.apiToken || tamaraOrderId.startsWith('tamara_sim_')) {
+    const cleanId = sanitizeIdentifier(tamaraOrderId);
+    if (!this.apiToken || cleanId.startsWith('tamara_sim_')) {
       return { capture_id: `cap_sim_${Date.now()}`, status: 'CAPTURED', isSimulated: true };
     }
 
-    const response = await fetch(`${this.baseUrl}/payments/capture`, {
+    const endpoint = this.buildEndpointUrl('/payments/capture');
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.apiToken}`,
       },
       body: JSON.stringify({
-        order_id: tamaraOrderId,
+        order_id: cleanId,
         total_amount: {
           amount: Number(amount.toFixed(2)),
           currency,
@@ -175,18 +218,20 @@ export class TamaraService {
    * Issues a partial or full refund for a captured order
    */
   async refundPayment(tamaraOrderId: string, amount: number, comment?: string): Promise<any> {
-    if (!this.apiToken || tamaraOrderId.startsWith('tamara_sim_')) {
+    const cleanId = sanitizeIdentifier(tamaraOrderId);
+    if (!this.apiToken || cleanId.startsWith('tamara_sim_')) {
       return { refund_id: `ref_sim_${Date.now()}`, status: 'REFUNDED', isSimulated: true };
     }
 
-    const response = await fetch(`${this.baseUrl}/payments/refund`, {
+    const endpoint = this.buildEndpointUrl('/payments/refund');
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.apiToken}`,
       },
       body: JSON.stringify({
-        order_id: tamaraOrderId,
+        order_id: cleanId,
         total_amount: {
           amount: Number(amount.toFixed(2)),
           currency: 'AED',

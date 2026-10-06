@@ -139,15 +139,26 @@ export class PaymentController {
     const { event_type, order_id, order_reference_id, total_amount } = req.body;
     console.log(`[Tamara Webhook] Event "${event_type}" for order reference "${order_reference_id}" (Tamara: ${order_id})`);
 
+    // Strictly validate order identifier against SSRF / path traversal
+    let safeOrderId: string | undefined;
+    if (order_id !== undefined && order_id !== null) {
+      if (typeof order_id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(order_id.trim())) {
+        console.warn('[Tamara Webhook] Rejected invalid order identifier format:', order_id);
+        res.status(400).json({ error: 'Invalid order identifier format' });
+        return;
+      }
+      safeOrderId = encodeURIComponent(order_id.trim());
+    }
+
     try {
       if (event_type === 'order_approved' || event_type === 'order_captured') {
-        if (order_id && total_amount?.amount) {
-          await tamaraService.capturePayment(order_id, total_amount.amount, total_amount.currency || 'AED').catch(() => {});
+        if (safeOrderId && total_amount?.amount) {
+          await tamaraService.capturePayment(safeOrderId, total_amount.amount, total_amount.currency || 'AED').catch(() => {});
         }
         await orderService.updatePaymentStatus(
           order_reference_id,
           'PAID',
-          order_id,
+          safeOrderId,
           { provider: 'TAMARA', captureId: `tamara_cap_${Date.now()}` },
           'Tamara payment approved and captured via webhook'
         );
@@ -155,7 +166,7 @@ export class PaymentController {
         await orderService.updatePaymentStatus(
           order_reference_id,
           'FAILED',
-          order_id,
+          safeOrderId,
           { provider: 'TAMARA' },
           `Tamara payment status declined: ${event_type}`
         );
@@ -163,7 +174,7 @@ export class PaymentController {
         await orderService.updatePaymentStatus(
           order_reference_id,
           'REFUNDED',
-          order_id,
+          safeOrderId,
           { provider: 'TAMARA' },
           'Tamara payment refunded'
         );
@@ -191,6 +202,14 @@ export class PaymentController {
     const { id, status, order, amount } = req.body;
     console.log(`[Tabby Webhook] Payment ID "${id}", status "${status}" for order "${order?.reference_id}"`);
 
+    // Strictly validate payment identifier from webhook against SSRF and path traversal
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id.trim())) {
+      console.warn('[Tabby Webhook] Rejected invalid payment identifier format:', id);
+      res.status(400).json({ error: 'Invalid payment identifier format' });
+      return;
+    }
+    const safePaymentId = encodeURIComponent(id.trim());
+
     try {
       const orderRef = order?.reference_id;
       if (!orderRef) {
@@ -199,13 +218,13 @@ export class PaymentController {
       }
 
       if (status === 'AUTHORIZED' || status === 'CLOSED') {
-        if (id && amount) {
-          await tabbyService.capturePayment(id, Number(amount)).catch(() => {});
+        if (safePaymentId && amount) {
+          await tabbyService.capturePayment(safePaymentId, Number(amount)).catch(() => {});
         }
         await orderService.updatePaymentStatus(
           orderRef,
           'PAID',
-          id,
+          safePaymentId,
           { provider: 'TABBY', captureId: `tabby_cap_${Date.now()}` },
           `Tabby payment ${status} via webhook`
         );
@@ -213,7 +232,7 @@ export class PaymentController {
         await orderService.updatePaymentStatus(
           orderRef,
           'FAILED',
-          id,
+          safePaymentId,
           { provider: 'TABBY' },
           `Tabby payment ${status}`
         );
@@ -221,7 +240,7 @@ export class PaymentController {
         await orderService.updatePaymentStatus(
           orderRef,
           'REFUNDED',
-          id,
+          safePaymentId,
           { provider: 'TABBY' },
           'Tabby payment refunded'
         );

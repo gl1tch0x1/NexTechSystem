@@ -10,10 +10,48 @@ export interface TabbyCheckoutSessionResult {
   raw?: any;
 }
 
+/**
+ * Strictly validates and sanitizes transaction/payment identifiers to prevent
+ * Server-Side Request Forgery (SSRF) and Path Traversal vulnerabilities (CWE-918).
+ * Ensures only alphanumeric, hyphen, and underscore characters are present.
+ */
+function sanitizeIdentifier(id: unknown): string {
+  if (typeof id !== 'string') {
+    throw new Error('Invalid payment identifier: Expected string');
+  }
+  const trimmed = id.trim();
+  if (!trimmed || !/^[a-zA-Z0-9_-]{1,128}$/.test(trimmed)) {
+    throw new Error('Invalid payment identifier format: must contain only alphanumeric characters, dashes, and underscores');
+  }
+  return encodeURIComponent(trimmed);
+}
+
 export class TabbyService {
   private baseUrl = (ENV.TABBY_API_URL || 'https://api.tabby.ai').replace(/\/$/, '');
   private secretKey = ENV.TABBY_SECRET_KEY;
   private merchantCode = ENV.TABBY_MERCHANT_CODE || 'nextech_ae';
+
+  /**
+   * Resolves and validates the target API URL against an allowlisted origin
+   */
+  private buildEndpointUrl(pathname: string): string {
+    const defaultHost = 'https://api.tabby.ai';
+    let base: URL;
+    try {
+      base = new URL(this.baseUrl || defaultHost);
+      if (!['https:', 'http:'].includes(base.protocol)) {
+        base = new URL(defaultHost);
+      }
+    } catch {
+      base = new URL(defaultHost);
+    }
+
+    const resolved = new URL(pathname, base.origin);
+    if (resolved.origin !== base.origin) {
+      throw new Error('Security Error: Target URL origin mismatch');
+    }
+    return resolved.toString();
+  }
 
   /**
    * Initializes a Tabby 4-interest-free installments checkout session
@@ -76,7 +114,8 @@ export class TabbyService {
       merchant_urls: returnUrls,
     };
 
-    const response = await fetch(`${this.baseUrl}/api/v2/checkout`, {
+    const endpoint = this.buildEndpointUrl('/api/v2/checkout');
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -112,11 +151,13 @@ export class TabbyService {
    * Captures an authorized Tabby payment
    */
   async capturePayment(paymentId: string, amount: number): Promise<any> {
-    if (!this.secretKey || paymentId.startsWith('tabby_sim_')) {
+    const cleanId = sanitizeIdentifier(paymentId);
+    if (!this.secretKey || cleanId.startsWith('tabby_sim_')) {
       return { id: `cap_sim_${Date.now()}`, amount: amount.toFixed(2), status: 'CLOSED', isSimulated: true };
     }
 
-    const response = await fetch(`${this.baseUrl}/api/v1/payments/${paymentId}/captures`, {
+    const endpoint = this.buildEndpointUrl(`/api/v1/payments/${cleanId}/captures`);
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -132,11 +173,13 @@ export class TabbyService {
    * Refunds a captured Tabby payment
    */
   async refundPayment(paymentId: string, amount: number, reason?: string): Promise<any> {
-    if (!this.secretKey || paymentId.startsWith('tabby_sim_')) {
+    const cleanId = sanitizeIdentifier(paymentId);
+    if (!this.secretKey || cleanId.startsWith('tabby_sim_')) {
       return { id: `ref_sim_${Date.now()}`, amount: amount.toFixed(2), status: 'REFUNDED', isSimulated: true };
     }
 
-    const response = await fetch(`${this.baseUrl}/api/v1/payments/${paymentId}/refunds`, {
+    const endpoint = this.buildEndpointUrl(`/api/v1/payments/${cleanId}/refunds`);
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
