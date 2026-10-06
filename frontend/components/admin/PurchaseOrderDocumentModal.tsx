@@ -116,7 +116,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
         </div>
 
         {/* Printable PO Document Body */}
-        <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-800 dark:text-slate-200">
+        <div id="printable-ebill" className="printable-content printable-invoice p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-800 dark:text-slate-200">
           {/* Document Top Bar */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
             <div>

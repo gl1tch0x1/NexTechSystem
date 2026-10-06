@@ -99,7 +99,10 @@ export default function TaxInvoicePage() {
       </div>
 
       {/* Official Tax Invoice Container */}
-      <div className="max-w-4xl mx-auto bg-white text-slate-900 rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-200 print:shadow-none print:border-none print:p-0 print:m-0 print:rounded-none">
+      <div
+        id="printable-ebill"
+        className="printable-content printable-invoice max-w-4xl mx-auto bg-white text-slate-900 rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-200 print:shadow-none print:border-none print:p-0 print:m-0 print:rounded-none"
+      >
         {/* Invoice Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b-2 border-slate-900">
           <div>

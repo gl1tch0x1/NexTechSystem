@@ -135,7 +135,7 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
         )}
 
         {/* Printable Tax Invoice Surface */}
-        <div id="digital-ebill-printable" className="p-6 sm:p-10 bg-white text-slate-900 overflow-y-auto max-h-[85vh] print:max-h-none print:p-8 print:overflow-visible custom-scrollbar">
+        <div id="digital-ebill-printable" className="printable-content printable-invoice p-6 sm:p-10 bg-white text-slate-900 overflow-y-auto max-h-[85vh] print:max-h-none print:p-0 print:overflow-visible custom-scrollbar">
           {/* Top Header & Bilingual Title */}
           <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-b-2 border-slate-900 pb-6">
             <div className="space-y-1.5">

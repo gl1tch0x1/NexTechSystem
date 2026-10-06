@@ -171,7 +171,7 @@ export default function OrderDetailPage() {
       {/* Printable Electronic Tax Invoice (E-Bill) Container */}
       <div
         id="printable-ebill"
-        className="p-8 sm:p-12 rounded-3xl bg-white text-slate-900 border border-slate-200 shadow-xl space-y-8 print:border-none print:shadow-none print:p-0"
+        className="printable-content printable-invoice p-8 sm:p-12 rounded-3xl bg-white text-slate-900 border border-slate-200 shadow-xl space-y-8 print:border-none print:shadow-none print:p-0"
       >
         {/* Invoice Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b-2 border-slate-900">
