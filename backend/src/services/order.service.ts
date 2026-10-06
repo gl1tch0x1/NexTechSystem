@@ -8,7 +8,7 @@ import { ebillService } from './ebill.service.js';
 import { auditService } from './audit.service.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { ENV } from '../config/env.js';
-import { Order, OrderStatus, PaymentMethod, Address, OrderItem } from '../types/index.js';
+import { Order, OrderStatus, PaymentStatus, PaymentMethod, Address, OrderItem } from '../types/index.js';
 import { notificationService } from './notification.service.js';
 import { dbStore } from '../config/db-store.js';
 
@@ -131,13 +131,17 @@ export class OrderService {
         item => item.sellerType === 'RESELLER' || Boolean(item.resellerId)
       );
 
+      const isBnpl = dto.paymentMethod === 'TAMARA' || dto.paymentMethod === 'TABBY';
+
       const initialOrderStatus: OrderStatus = hasResellerStock
         ? 'PENDING_APPROVAL'
-        : (dto.paymentMethod === 'COD' ? 'CONFIRMED' : 'PROCESSING');
+        : (isBnpl ? 'PENDING' : (dto.paymentMethod === 'COD' ? 'CONFIRMED' : 'PROCESSING'));
 
       const initialHistoryNote = hasResellerStock
         ? 'Order contains partner/reseller fulfilled items. Status: Pending to Approve. Awaiting executive/admin verification.'
-        : 'Order confirmed automatically. Sourced directly from NexTech Inventory.';
+        : (isBnpl
+            ? `Order initiated via ${dto.paymentMethod} BNPL. Awaiting customer authorization and installment approval.`
+            : 'Order confirmed automatically. Sourced directly from NexTech Inventory.');
 
       // 9. Construct Order
       const newOrder: Order = {
@@ -158,7 +162,7 @@ export class OrderService {
         total: pricing.total,
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,
-        paymentStatus: dto.paymentMethod === 'COD' ? 'PENDING' : 'PAID',
+        paymentStatus: (dto.paymentMethod === 'COD' || isBnpl) ? 'PENDING' : 'PAID',
         orderStatus: initialOrderStatus,
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
@@ -290,6 +294,50 @@ export class OrderService {
       });
     }
 
+    return updated;
+  }
+
+  async updatePaymentStatus(
+    orderId: string,
+    status: PaymentStatus,
+    paymentReference?: string,
+    paymentMetadata?: any,
+    note?: string
+  ): Promise<Order | null> {
+    const order = await orderRepository.findById(orderId);
+    if (!order) return null;
+
+    let targetOrderStatus = order.orderStatus;
+    if (status === 'PAID') {
+      targetOrderStatus = order.orderStatus === 'PENDING' ? 'PROCESSING' : order.orderStatus;
+    } else if (status === 'FAILED') {
+      targetOrderStatus = order.orderStatus === 'PENDING' ? 'CANCELLED' : order.orderStatus;
+    }
+
+    const historyEntry = {
+      status: targetOrderStatus,
+      note: note || `Payment status updated to ${status}${paymentReference ? ` (Ref: ${paymentReference})` : ''}`,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updates: any = {
+      paymentStatus: status,
+      orderStatus: targetOrderStatus,
+      statusHistory: [...(order.statusHistory || []), historyEntry],
+    };
+
+    if (paymentReference) {
+      updates.paymentReference = paymentReference;
+    }
+
+    if (paymentMetadata) {
+      updates.paymentMetadata = {
+        ...(order.paymentMetadata || {}),
+        ...paymentMetadata,
+      };
+    }
+
+    const updated = await orderRepository.update(orderId, updates);
     return updated;
   }
 

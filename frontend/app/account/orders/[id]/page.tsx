@@ -201,8 +201,25 @@ export default function OrderDetailPage() {
             <div className="text-xs text-slate-600">
               Issue Date: <strong>{formatDate(order.createdAt)}</strong>
             </div>
-            <div className="text-xs font-bold text-emerald-600 uppercase mt-1">
-              Payment Status: {order.paymentStatus} ({order.paymentMethod})
+            <div className={`text-xs font-bold uppercase mt-1 flex items-center sm:justify-end gap-1.5 ${
+              order.paymentStatus === 'PAID' ? 'text-emerald-600' :
+              order.paymentStatus === 'FAILED' ? 'text-rose-600' :
+              order.paymentStatus === 'AUTHORIZED' ? 'text-blue-600' : 'text-amber-600'
+            }`}>
+              <span>Payment: {order.paymentStatus}</span>
+              {order.paymentMethod === 'TAMARA' && (
+                <span className="px-1.5 py-0.5 rounded bg-[#FA6651] text-white font-black text-[10px] tracking-tight lowercase inline-flex items-center">
+                  tamara &bull; split in 4
+                </span>
+              )}
+              {order.paymentMethod === 'TABBY' && (
+                <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-black text-[10px] tracking-tight lowercase inline-flex items-center">
+                  tabby &bull; pay in 4
+                </span>
+              )}
+              {order.paymentMethod !== 'TAMARA' && order.paymentMethod !== 'TABBY' && (
+                <span>({order.paymentMethod})</span>
+              )}
             </div>
           </div>
         </div>

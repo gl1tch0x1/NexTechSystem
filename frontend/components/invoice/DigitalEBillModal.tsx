@@ -183,7 +183,13 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
               </div>
               <div className="text-xs">
                 <span className="text-slate-500 font-medium">Payment Mode:</span>{' '}
-                <strong className="font-mono text-slate-800">{order.paymentMethod || 'CREDIT_CARD'}</strong>
+                <strong className="font-mono text-slate-800">
+                  {order.paymentMethod === 'TAMARA'
+                    ? 'Tamara (Split in 4)'
+                    : order.paymentMethod === 'TABBY'
+                    ? 'Tabby (Pay in 4)'
+                    : order.paymentMethod || 'CREDIT_CARD'}
+                </strong>
               </div>
               <div className="pt-1">
                 <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${

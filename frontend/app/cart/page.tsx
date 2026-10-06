@@ -16,6 +16,7 @@ import {
   Sparkles,
   Lock,
 } from 'lucide-react';
+import BnplPromoBadge from '@/components/checkout/BnplPromoBadge';
 
 export default function CartPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -303,6 +304,9 @@ export default function CartPage() {
               </div>
               <span className="text-[10px] text-slate-400">AED Currency</span>
             </div>
+
+            {/* Tamara & Tabby BNPL Widget */}
+            <BnplPromoBadge price={cart.total} compact />
 
             <Link
               href="/checkout"

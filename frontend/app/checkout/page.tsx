@@ -277,10 +277,37 @@ export default function CheckoutPage() {
         couponCode: cart.couponCode || activeCouponCode || undefined,
         notes: orderNotes || undefined,
         customerPhone: shippingAddress.phone,
-        otpCode: otpCode.trim(),
+        otpCode,
       };
-
       const createdOrder = await ApiClient.post<Order>('/orders', orderPayload, { token: activeToken });
+
+      // If Tamara or Tabby BNPL is chosen, initiate checkout session and redirect to hosted provider
+      if (paymentMethod === 'TAMARA' || paymentMethod === 'TABBY') {
+        try {
+          const paymentRes = await ApiClient.post<{
+            success: boolean;
+            data: { redirectUrl: string; orderId?: string; paymentId?: string; provider: string };
+          }>('/payments/initiate', {
+            orderId: createdOrder.id,
+            provider: paymentMethod,
+          }, { token: activeToken });
+
+          clearCart();
+          setIsOtpModalOpen(false);
+
+          if (paymentRes.data?.redirectUrl) {
+            window.location.href = paymentRes.data.redirectUrl;
+            return;
+          }
+        } catch (paymentErr: any) {
+          console.error('BNPL payment session initiation failed:', paymentErr);
+          clearCart();
+          setIsOtpModalOpen(false);
+          router.push(`/checkout/payment-status?orderId=${createdOrder.id}&status=failure&provider=${paymentMethod}`);
+          return;
+        }
+      }
+
       clearCart();
       setIsOtpModalOpen(false);
       router.push(`/account/orders/${createdOrder.id}`);
@@ -518,7 +545,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Payment Method Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {/* Credit Card */}
               <label
                 className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all ${
@@ -551,6 +578,76 @@ export default function CheckoutPage() {
                   <div className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
                     <Check className="w-3 h-3" />
                     <span>Instant Verification</span>
+                  </div>
+                </div>
+              </label>
+
+              {/* Tamara Buy Now Pay Later */}
+              <label
+                className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all ${
+                  paymentMethod === 'TAMARA'
+                    ? 'border-[#FA6651] bg-[#FA6651]/10 dark:bg-[#FA6651]/15 text-slate-900 dark:text-white ring-2 ring-[#FA6651]/40 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-950/60'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="px-2 py-1 rounded-xl bg-[#FA6651] text-white">
+                    <span className="font-black text-xs tracking-tight">tamara</span>
+                  </div>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'TAMARA'}
+                    onChange={() => setPaymentMethod('TAMARA')}
+                    className="w-4 h-4 text-[#FA6651] cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                    <span>Tamara &bull; Split in 4</span>
+                    <span className="text-[10px] font-mono text-[#FA6651] font-bold">0% APR</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    4 installments of {formatPrice(finalPayable / 4)}
+                  </div>
+                  <div className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    <span>Sharia Compliant &bull; No Fees</span>
+                  </div>
+                </div>
+              </label>
+
+              {/* Tabby Buy Now Pay Later */}
+              <label
+                className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all ${
+                  paymentMethod === 'TABBY'
+                    ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 text-slate-900 dark:text-white ring-2 ring-emerald-500/40 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-950/60'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="px-2 py-1 rounded-xl bg-emerald-600 text-white">
+                    <span className="font-black text-xs tracking-tight">tabby</span>
+                  </div>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'TABBY'}
+                    onChange={() => setPaymentMethod('TABBY')}
+                    className="w-4 h-4 text-emerald-500 cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                    <span>Tabby &bull; Pay in 4</span>
+                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">No Fees</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    4 payments of {formatPrice(finalPayable / 4)}
+                  </div>
+                  <div className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    <span>Instant UAE ID Approval</span>
                   </div>
                 </div>
               </label>

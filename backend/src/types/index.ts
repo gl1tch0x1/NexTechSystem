@@ -258,8 +258,8 @@ export interface Cart {
 }
 
 export type OrderStatus = 'PENDING' | 'PENDING_APPROVAL' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURNED' | 'REFUNDED';
-export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
-export type PaymentMethod = 'CREDIT_CARD' | 'WALLET' | 'COD' | 'BANK_TRANSFER';
+export type PaymentStatus = 'PENDING' | 'AUTHORIZED' | 'PAID' | 'FAILED' | 'REFUNDED';
+export type PaymentMethod = 'CREDIT_CARD' | 'WALLET' | 'COD' | 'BANK_TRANSFER' | 'TAMARA' | 'TABBY';
 
 export interface OrderItem {
   productId: string;
@@ -296,6 +296,17 @@ export interface OrderStatusHistoryItem {
   updatedBy?: string;
 }
 
+export interface OrderPaymentMetadata {
+  provider?: 'TAMARA' | 'TABBY';
+  checkoutId?: string;
+  orderId?: string;
+  paymentId?: string;
+  captureId?: string;
+  redirectUrl?: string;
+  installments?: number;
+  raw?: any;
+}
+
 export interface Order {
   id: string;
   orderNumber: string; // e.g. "ORD-2026-89421"
@@ -316,6 +327,7 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   paymentReference?: string;
+  paymentMetadata?: OrderPaymentMetadata;
   orderStatus: OrderStatus;
   shippingAddress: Address;
   billingAddress: Address;

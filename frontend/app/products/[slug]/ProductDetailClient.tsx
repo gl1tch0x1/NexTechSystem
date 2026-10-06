@@ -14,6 +14,7 @@ import {
   Zap
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import BnplPromoBadge from '@/components/checkout/BnplPromoBadge';
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
@@ -269,6 +270,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
               )}
             </div>
           </div>
+
+          {/* GCC Buy Now Pay Later (Tamara & Tabby) Promotional Badge */}
+          <BnplPromoBadge price={currentPrice} className="mt-3.5" />
         </div>
 
         {/* Quantity and Actions */}

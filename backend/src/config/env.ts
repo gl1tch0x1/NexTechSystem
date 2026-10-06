@@ -78,5 +78,15 @@ export const ENV = {
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   EMAIL_FROM: process.env.EMAIL_FROM || 'NexTech Security <no-reply@nextech.ae>',
   REQUIRE_ORDER_EMAIL_OTP: process.env.REQUIRE_ORDER_EMAIL_OTP !== 'false',
+  // Tamara Buy Now Pay Later (GCC / UAE)
+  TAMARA_API_URL: process.env.TAMARA_API_URL || 'https://api-sandbox.tamara.co',
+  TAMARA_API_TOKEN: process.env.TAMARA_API_TOKEN || '',
+  TAMARA_NOTIFICATION_TOKEN: process.env.TAMARA_NOTIFICATION_TOKEN || '',
+  TAMARA_PUBLIC_KEY: process.env.TAMARA_PUBLIC_KEY || '',
+  // Tabby Buy Now Pay Later (GCC / UAE)
+  TABBY_API_URL: process.env.TABBY_API_URL || 'https://api.tabby.ai',
+  TABBY_SECRET_KEY: process.env.TABBY_SECRET_KEY || '',
+  TABBY_PUBLIC_KEY: process.env.TABBY_PUBLIC_KEY || '',
+  TABBY_MERCHANT_CODE: process.env.TABBY_MERCHANT_CODE || 'nextech_ae',
 };
 
