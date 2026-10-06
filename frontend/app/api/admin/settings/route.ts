@@ -63,11 +63,14 @@ export async function PUT(request: Request) {
         method: 'PUT',
         headers,
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(3500),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (res.ok) {
         const json = await res.json();
+        if (json.data) {
+          memorySettings = { ...memorySettings, ...json.data };
+        }
         return NextResponse.json(json, { status: res.status });
       }
     } catch (err) {

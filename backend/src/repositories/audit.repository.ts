@@ -62,6 +62,18 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
     await this.create(defaultSettings);
     return defaultSettings;
   }
+
+  async updateSettings(updates: Partial<StoreSettings>): Promise<StoreSettings> {
+    const existing = await this.getSettings();
+    const merged = {
+      ...existing,
+      ...updates,
+      id: 'global_settings',
+      updatedAt: new Date().toISOString()
+    };
+    await this.update('global_settings', merged as any);
+    return merged;
+  }
 }
 
 export class BannerRepository extends BaseRepository<Banner> {

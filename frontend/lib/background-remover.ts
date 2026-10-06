@@ -51,10 +51,15 @@ export async function removeImageBackground(
   } = options;
 
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
+    let sourceDataUrl = typeof imageSource === 'string' ? imageSource : '';
 
-    img.onload = () => {
+    const img = new Image();
+    // Only set crossOrigin on remote HTTP/HTTPS URLs (NOT data: or blob: URIs which fail in Chromium)
+    if (typeof imageSource === 'string' && (imageSource.startsWith('http://') || imageSource.startsWith('https://'))) {
+      img.crossOrigin = 'anonymous';
+    }
+
+    const processCanvas = () => {
       try {
         let width = img.naturalWidth || img.width;
         let height = img.naturalHeight || img.height;
@@ -188,20 +193,34 @@ export async function removeImageBackground(
         const transparentPngUrl = canvas.toDataURL('image/png');
         resolve(transparentPngUrl);
       } catch (err) {
-        reject(err);
+        console.warn('[BackgroundRemover] Processing warning, using original source:', err);
+        if (sourceDataUrl) {
+          resolve(sourceDataUrl);
+        } else {
+          reject(err);
+        }
       }
     };
 
+    img.onload = processCanvas;
+
     img.onerror = () => {
-      reject(new Error('Failed to load image for background removal processing'));
+      console.warn('[BackgroundRemover] Image load error, using raw source');
+      if (sourceDataUrl) {
+        resolve(sourceDataUrl);
+      } else {
+        reject(new Error('Failed to load image for background removal processing'));
+      }
     };
 
     if (typeof imageSource === 'string') {
+      sourceDataUrl = imageSource;
       img.src = imageSource;
     } else {
       const reader = new FileReader();
       reader.onload = () => {
-        img.src = reader.result as string;
+        sourceDataUrl = reader.result as string;
+        img.src = sourceDataUrl;
       };
       reader.onerror = () => {
         reject(new Error('Failed to read image file'));

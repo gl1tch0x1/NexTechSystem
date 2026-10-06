@@ -607,7 +607,7 @@ export class AdminController {
   }
 
   async updateSettings(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const updated = await settingsRepository.update('global_settings', req.body);
+    const updated = await settingsRepository.updateSettings(req.body);
     res.json({ success: true, data: updated });
   }
 
