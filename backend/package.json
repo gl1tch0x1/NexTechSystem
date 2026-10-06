@@ -10,7 +10,8 @@
     "seed": "tsx src/seed/seed.ts",
     "seed:firestore": "tsx src/seed/seed-firestore.ts",
     "lint": "tsc --noEmit",
-    "test": "echo \"All backend checks passed\" && exit 0"
+    "test": "echo \"All backend checks passed\" && exit 0",
+    "test:e2e": "tsx src/test-workflow.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
