@@ -61,6 +61,7 @@ export class EBillService {
       currency: order.currency,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
+      termsAndConditions: settings.invoiceTermsAndConditions,
       createdAt: new Date().toISOString(),
     };
 
@@ -71,7 +72,7 @@ export class EBillService {
     const bill = await ebillRepository.findByOrderId(orderId);
     if (!bill) return null;
 
-    // Enrich with latest store stamp and signature settings
+    // Enrich with latest store stamp, signature, and terms settings
     const settings = await settingsRepository.getSettings();
     return {
       ...bill,
@@ -81,6 +82,7 @@ export class EBillService {
       signatoryTitle: settings.signatoryTitle || bill.signatoryTitle,
       showStamp: settings.showStampOnEBill ?? bill.showStamp ?? true,
       showSignature: settings.showSignatureOnEBill ?? bill.showSignature ?? true,
+      termsAndConditions: settings.invoiceTermsAndConditions || bill.termsAndConditions,
       sellerInfo: {
         ...bill.sellerInfo,
         stampUrl: settings.invoiceStampUrl || bill.sellerInfo?.stampUrl,
@@ -106,6 +108,7 @@ export class EBillService {
       signatoryTitle: settings.signatoryTitle || bill.signatoryTitle,
       showStamp: settings.showStampOnEBill ?? bill.showStamp ?? true,
       showSignature: settings.showSignatureOnEBill ?? bill.showSignature ?? true,
+      termsAndConditions: settings.invoiceTermsAndConditions || bill.termsAndConditions,
     };
   }
 }

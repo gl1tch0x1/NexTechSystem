@@ -16,6 +16,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import InvoiceStampSignature from '@/components/invoice/InvoiceStampSignature';
+import InvoiceTermsAndConditions from '@/components/invoice/InvoiceTermsAndConditions';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -351,6 +352,12 @@ export default function OrderDetailPage() {
           verificationDate={formatDate(order.createdAt)}
           documentRef={order.orderNumber}
           companyTrn="10029384910003"
+          className="mt-6"
+        />
+
+        {/* Commercial & Statutory Terms and Conditions */}
+        <InvoiceTermsAndConditions
+          customTerms={ebill?.termsAndConditions}
           className="mt-6"
         />
 

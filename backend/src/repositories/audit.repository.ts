@@ -57,7 +57,8 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
       signatoryName: 'Eng. Tariq Al-Mansouri',
       signatoryTitle: 'Managing Director & Authorized Signatory',
       showStampOnEBill: true,
-      showSignatureOnEBill: true
+      showSignatureOnEBill: true,
+      invoiceTermsAndConditions: ''
     };
     await this.create(defaultSettings);
     return defaultSettings;

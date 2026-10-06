@@ -1269,7 +1269,8 @@ export const FALLBACK_STORE_SETTINGS: StoreSettings = {
   "signatoryName": "Eng. Tariq Al-Mansouri",
   "signatoryTitle": "Managing Director & Authorized Signatory",
   "showStampOnEBill": true,
-  "showSignatureOnEBill": true
+  "showSignatureOnEBill": true,
+  "invoiceTermsAndConditions": ""
 };
 
 export const FALLBACK_USERS: (User & { passwordHash?: string })[] = [

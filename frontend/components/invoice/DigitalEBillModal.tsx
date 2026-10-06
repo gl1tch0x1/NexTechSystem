@@ -15,6 +15,7 @@ import {
   Mail
 } from 'lucide-react';
 import InvoiceStampSignature from './InvoiceStampSignature';
+import InvoiceTermsAndConditions from './InvoiceTermsAndConditions';
 import { ApiClient } from '@/lib/api-client';
 
 interface DigitalEBillModalProps {
@@ -466,10 +467,16 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
             className="mt-6"
           />
 
+          {/* Official Commercial Terms and Conditions */}
+          <InvoiceTermsAndConditions
+            customTerms={(order as any).ebill?.termsAndConditions || storeSettings?.invoiceTermsAndConditions}
+            className="mt-6"
+          />
+
           {/* Footer Legal Notes */}
-          <div className="mt-8 pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400 space-y-1">
+          <div className="mt-6 pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400 space-y-1">
             <div>
-              This is a computer-generated tax invoice verified under UAE Federal Decree Law. No physical signature is required.
+              Official Electronic Tax Invoice verified under UAE Federal Decree-Law No. (8) of 2017. Intact OEM factory warranty applies.
             </div>
             <div>
               For corporate returns, warranty inquiries, or business credit adjustments, contact <strong>support@nextechsystems.ae</strong>

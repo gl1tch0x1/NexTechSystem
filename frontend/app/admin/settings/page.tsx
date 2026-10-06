@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { removeImageBackground } from '@/lib/background-remover';
 import InvoiceStampSignature from '@/components/invoice/InvoiceStampSignature';
+import InvoiceTermsAndConditions, { DEFAULT_INVOICE_TERMS } from '@/components/invoice/InvoiceTermsAndConditions';
 import {
   ShieldCheck,
   PenTool,
@@ -24,7 +25,8 @@ import {
   Eraser,
   ExternalLink,
   Link2,
-  Stamp
+  Stamp,
+  Scale
 } from 'lucide-react';
 import { StoreSettings } from '@/types';
 
@@ -83,8 +85,11 @@ export default function AdminSettingsPage() {
   const [signatureTolerance, setSignatureTolerance] = useState(55);
   const [signatureProcessing, setSignatureProcessing] = useState(false);
   const [signatureAutoRemoved, setSignatureAutoRemoved] = useState(false);
-  const [signatureMode, setSignatureMode] = useState<'upload' | 'draw' | 'url' | 'presets'>('upload');
+  const [signatureMode, setSignatureMode] = useState<'upload' | 'draw' | 'presets' | 'url'>('upload');
   const [signatureUrlInput, setSignatureUrlInput] = useState('');
+
+  // Terms and conditions state
+  const [invoiceTermsAndConditions, setInvoiceTermsAndConditions] = useState('');
 
   // Signature Drawing Pad Canvas State
   const sigCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -120,6 +125,7 @@ export default function AdminSettingsPage() {
           if (res.signatoryTitle) setSignatoryTitle(res.signatoryTitle);
           if (res.showStampOnEBill !== undefined) setShowStamp(res.showStampOnEBill);
           if (res.showSignatureOnEBill !== undefined) setShowSignature(res.showSignatureOnEBill);
+          if (res.invoiceTermsAndConditions !== undefined) setInvoiceTermsAndConditions(res.invoiceTermsAndConditions || '');
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
@@ -370,6 +376,7 @@ export default function AdminSettingsPage() {
         signatoryTitle,
         showStampOnEBill: showStamp,
         showSignatureOnEBill: showSignature,
+        invoiceTermsAndConditions,
       };
 
       await ApiClient.put('/admin/settings', payload, { token: activeToken || undefined });
@@ -400,6 +407,7 @@ export default function AdminSettingsPage() {
     signatoryTitle,
     showStamp,
     showSignature,
+    invoiceTermsAndConditions,
   ]);
 
   if (loading) {
@@ -1164,6 +1172,79 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           </div>
+
+          {/* ========================================================= */}
+          {/* CARD 4: COMMERCIAL TERMS & CONDITIONS FOR E-BILLS         */}
+          {/* ========================================================= */}
+          <div className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                    <Scale className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                    Official Terms &amp; Conditions on E-Bills
+                  </h2>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Custom legal clauses, warranty terms, and return policy printed on every electronic invoice.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInvoiceTermsAndConditions(DEFAULT_INVOICE_TERMS.join('\n'));
+                    markChanged();
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-colors"
+                >
+                  Load Standard UAE Terms
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInvoiceTermsAndConditions('');
+                    markChanged();
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/40 text-[11px] font-bold text-red-600 transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5 pt-1">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                <span>Invoice Terms Clauses (One clause per line)</span>
+                <span className="text-[10px] text-slate-400 font-normal">Leave blank to use default UAE commercial terms</span>
+              </label>
+              <textarea
+                rows={5}
+                value={invoiceTermsAndConditions}
+                onChange={e => {
+                  setInvoiceTermsAndConditions(e.target.value);
+                  markChanged();
+                }}
+                placeholder={`1. Tax Compliance: Issued under UAE Federal Decree-Law No. (8) of 2017 on VAT.\n2. Warranty: All hardware components carry official OEM regional warranty...\n3. Inspection & Returns: Goods must be inspected upon delivery...`}
+                className="w-full p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono leading-relaxed text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-hidden resize-y"
+              />
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                disabled={saving}
+                className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md shadow-amber-500/20 transition-all inline-flex items-center gap-1.5"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>Save Terms to E-Bills</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Live Interactive E-Bill Document Preview */}
@@ -1237,6 +1318,12 @@ export default function AdminSettingsPage() {
               documentRef="NX-2026-90412"
               companyTrn={taxRegistrationNumber}
               className="mt-4"
+            />
+
+            {/* LIVE TERMS & CONDITIONS RENDER */}
+            <InvoiceTermsAndConditions
+              customTerms={invoiceTermsAndConditions}
+              className="mt-3"
             />
           </div>
 

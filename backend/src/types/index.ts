@@ -470,6 +470,7 @@ export interface EBill {
   paymentMethod: string;
   paymentStatus: string;
   downloadUrl?: string;
+  termsAndConditions?: string;
   createdAt: string;
 }
 
@@ -585,6 +586,7 @@ export interface StoreSettings {
   signatoryTitle?: string;
   showStampOnEBill?: boolean;
   showSignatureOnEBill?: boolean;
+  invoiceTermsAndConditions?: string;
 }
 
 export interface ApiResponse<T = any> {

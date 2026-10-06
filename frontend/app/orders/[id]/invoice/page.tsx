@@ -17,6 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import InvoiceStampSignature from '@/components/invoice/InvoiceStampSignature';
+import InvoiceTermsAndConditions from '@/components/invoice/InvoiceTermsAndConditions';
 
 export default function TaxInvoicePage() {
   const params = useParams();
@@ -285,7 +286,13 @@ export default function TaxInvoicePage() {
           verificationDate={formatDate(order.createdAt)}
           documentRef={order.orderNumber}
           companyTrn={ebill?.sellerInfo?.taxNumber || storeSettings?.taxRegistrationNumber || '10029384910003'}
-          className="mt-8"
+          className="mt-6"
+        />
+
+        {/* Commercial & Statutory Terms and Conditions */}
+        <InvoiceTermsAndConditions
+          customTerms={ebill?.termsAndConditions || storeSettings?.invoiceTermsAndConditions}
+          className="mt-6"
         />
 
         {/* Invoice Footer */}
