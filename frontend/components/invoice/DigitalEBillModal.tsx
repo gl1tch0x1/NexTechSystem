@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import {
@@ -14,6 +14,8 @@ import {
   FileText,
   Mail
 } from 'lucide-react';
+import InvoiceStampSignature from './InvoiceStampSignature';
+import { ApiClient } from '@/lib/api-client';
 
 interface DigitalEBillModalProps {
   order: Order | null;
@@ -24,6 +26,17 @@ interface DigitalEBillModalProps {
 export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBillModalProps) {
   const [copied, setCopied] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [storeSettings, setStoreSettings] = useState<any>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      ApiClient.get<any>('/content/settings')
+        .then(res => {
+          if (res) setStoreSettings(res);
+        })
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   if (!isOpen || !order) return null;
 
@@ -187,16 +200,15 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
                   {order.paymentMethod === 'TAMARA'
                     ? 'Tamara (Split in 4)'
                     : order.paymentMethod === 'TABBY'
-                    ? 'Tabby (Pay in 4)'
-                    : order.paymentMethod || 'CREDIT_CARD'}
+                      ? 'Tabby (Pay in 4)'
+                      : order.paymentMethod || 'CREDIT_CARD'}
                 </strong>
               </div>
               <div className="pt-1">
-                <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
-                  order.paymentStatus === 'PAID'
+                <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${order.paymentStatus === 'PAID'
                     ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
                     : 'bg-amber-100 text-amber-800 border-amber-300'
-                }`}>
+                  }`}>
                   <CheckCircle2 className="w-3 h-3" />
                   <span>PAYMENT: {order.paymentStatus || 'PAID'}</span>
                 </span>
@@ -272,10 +284,10 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
                     {order.taxTreatment === 'FREE_ZONE'
                       ? 'Designated Free Zone (0% VAT)'
                       : order.taxTreatment === 'EXPORT'
-                      ? 'Export Exemption (0% VAT)'
-                      : order.taxTreatment === 'EXEMPT'
-                      ? 'Tax Exempt Entity'
-                      : 'Standard Rate (5% VAT)'}
+                        ? 'Export Exemption (0% VAT)'
+                        : order.taxTreatment === 'EXEMPT'
+                          ? 'Tax Exempt Entity'
+                          : 'Standard Rate (5% VAT)'}
                   </strong>
                 </div>
               )}
@@ -439,6 +451,20 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
               </div>
             </div>
           </div>
+
+          {/* Official Stamp & Authorized Signatory Block */}
+          <InvoiceStampSignature
+            stampUrl={(order as any).ebill?.stampUrl || storeSettings?.invoiceStampUrl}
+            signatureUrl={(order as any).ebill?.signatureUrl || storeSettings?.invoiceSignatureUrl}
+            signatoryName={(order as any).ebill?.signatoryName || storeSettings?.signatoryName}
+            signatoryTitle={(order as any).ebill?.signatoryTitle || storeSettings?.signatoryTitle}
+            showStamp={(order as any).ebill?.showStamp ?? storeSettings?.showStampOnEBill ?? true}
+            showSignature={(order as any).ebill?.showSignature ?? storeSettings?.showSignatureOnEBill ?? true}
+            verificationDate={issueDate}
+            documentRef={order.orderNumber}
+            companyTrn={trnNumber}
+            className="mt-6"
+          />
 
           {/* Footer Legal Notes */}
           <div className="mt-8 pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400 space-y-1">

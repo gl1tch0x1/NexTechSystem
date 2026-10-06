@@ -51,7 +51,13 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
         twitter: 'https://twitter.com',
         instagram: 'https://instagram.com',
         linkedin: 'https://linkedin.com'
-      }
+      },
+      invoiceStampUrl: '',
+      invoiceSignatureUrl: '',
+      signatoryName: 'Eng. Tariq Al-Mansouri',
+      signatoryTitle: 'Managing Director & Authorized Signatory',
+      showStampOnEBill: true,
+      showSignatureOnEBill: true
     };
     await this.create(defaultSettings);
     return defaultSettings;

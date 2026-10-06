@@ -1263,7 +1263,13 @@ export const FALLBACK_STORE_SETTINGS: StoreSettings = {
   "announcementText": "GCC EXPRESS DISPATCH: Free Insured Shipping on Workstations, CPUs & Servers over AED 500",
   "isAnnouncementActive": true,
   "isLandingDiscountBannerActive": true,
-  "featuredLandingCouponCode": "TECH10"
+  "featuredLandingCouponCode": "TECH10",
+  "invoiceStampUrl": "",
+  "invoiceSignatureUrl": "",
+  "signatoryName": "Eng. Tariq Al-Mansouri",
+  "signatoryTitle": "Managing Director & Authorized Signatory",
+  "showStampOnEBill": true,
+  "showSignatureOnEBill": true
 };
 
 export const FALLBACK_USERS: (User & { passwordHash?: string })[] = [

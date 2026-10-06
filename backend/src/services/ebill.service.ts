@@ -21,7 +21,19 @@ export class EBillService {
         address: settings.address,
         phone: settings.supportPhone,
         email: settings.supportEmail,
+        stampUrl: settings.invoiceStampUrl,
+        signatureUrl: settings.invoiceSignatureUrl,
+        signatoryName: settings.signatoryName,
+        signatoryTitle: settings.signatoryTitle,
+        showStamp: settings.showStampOnEBill ?? true,
+        showSignature: settings.showSignatureOnEBill ?? true,
       },
+      stampUrl: settings.invoiceStampUrl,
+      signatureUrl: settings.invoiceSignatureUrl,
+      signatoryName: settings.signatoryName,
+      signatoryTitle: settings.signatoryTitle,
+      showStamp: settings.showStampOnEBill ?? true,
+      showSignature: settings.showSignatureOnEBill ?? true,
       customerInfo: {
         name: order.customerName,
         email: order.customerEmail,
@@ -56,11 +68,45 @@ export class EBillService {
   }
 
   async getEBillByOrderId(orderId: string): Promise<EBill | null> {
-    return ebillRepository.findByOrderId(orderId);
+    const bill = await ebillRepository.findByOrderId(orderId);
+    if (!bill) return null;
+
+    // Enrich with latest store stamp and signature settings
+    const settings = await settingsRepository.getSettings();
+    return {
+      ...bill,
+      stampUrl: settings.invoiceStampUrl || bill.stampUrl,
+      signatureUrl: settings.invoiceSignatureUrl || bill.signatureUrl,
+      signatoryName: settings.signatoryName || bill.signatoryName,
+      signatoryTitle: settings.signatoryTitle || bill.signatoryTitle,
+      showStamp: settings.showStampOnEBill ?? bill.showStamp ?? true,
+      showSignature: settings.showSignatureOnEBill ?? bill.showSignature ?? true,
+      sellerInfo: {
+        ...bill.sellerInfo,
+        stampUrl: settings.invoiceStampUrl || bill.sellerInfo?.stampUrl,
+        signatureUrl: settings.invoiceSignatureUrl || bill.sellerInfo?.signatureUrl,
+        signatoryName: settings.signatoryName || bill.sellerInfo?.signatoryName,
+        signatoryTitle: settings.signatoryTitle || bill.sellerInfo?.signatoryTitle,
+        showStamp: settings.showStampOnEBill ?? bill.sellerInfo?.showStamp ?? true,
+        showSignature: settings.showSignatureOnEBill ?? bill.sellerInfo?.showSignature ?? true,
+      },
+    };
   }
 
   async getEBillByInvoiceNumber(invoiceNumber: string): Promise<EBill | null> {
-    return ebillRepository.findByInvoiceNumber(invoiceNumber);
+    const bill = await ebillRepository.findByInvoiceNumber(invoiceNumber);
+    if (!bill) return null;
+
+    const settings = await settingsRepository.getSettings();
+    return {
+      ...bill,
+      stampUrl: settings.invoiceStampUrl || bill.stampUrl,
+      signatureUrl: settings.invoiceSignatureUrl || bill.signatureUrl,
+      signatoryName: settings.signatoryName || bill.signatoryName,
+      signatoryTitle: settings.signatoryTitle || bill.signatoryTitle,
+      showStamp: settings.showStampOnEBill ?? bill.showStamp ?? true,
+      showSignature: settings.showSignatureOnEBill ?? bill.showSignature ?? true,
+    };
   }
 }
 

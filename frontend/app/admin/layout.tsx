@@ -33,7 +33,8 @@ import {
   EyeOff,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  Settings
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -109,6 +110,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: '/admin/coupons', label: 'Discount Coupons', icon: Tag },
         { href: '/admin/banners', label: 'Storefront Banners', icon: ImageIcon },
         { href: '/admin/cms', label: 'Storefront CMS & Content', icon: Sliders },
+      ],
+    },
+    {
+      title: 'SYSTEM & SETTINGS',
+      items: [
+        { href: '/admin/settings', label: 'E-Bill Stamp & Store Settings', icon: Settings },
+        { href: '/admin/audit-logs', label: 'Security & Audit Logs', icon: Clock },
+        { href: '/admin/backups', label: 'Database & State Backups', icon: Server },
       ],
     },
   ];

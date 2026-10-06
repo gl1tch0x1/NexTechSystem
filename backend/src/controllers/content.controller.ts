@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { contentService } from '../services/content.service.js';
+import { settingsRepository } from '../repositories/settings.repository.js';
 
 export class ContentController {
   /**
@@ -111,6 +112,21 @@ export class ContentController {
       res.status(500).json({
         success: false,
         error: { code: 'FETCH_PRESETS_ERROR', message: err.message },
+      });
+    }
+  }
+
+  /**
+   * GET /api/content/settings
+   */
+  async getStoreSettings(_req: Request, res: Response): Promise<void> {
+    try {
+      const settings = await settingsRepository.getSettings();
+      res.json({ success: true, data: settings });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        error: { code: 'FETCH_SETTINGS_ERROR', message: err.message },
       });
     }
   }

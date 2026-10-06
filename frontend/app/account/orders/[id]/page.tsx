@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   ChevronRight
 } from 'lucide-react';
+import InvoiceStampSignature from '@/components/invoice/InvoiceStampSignature';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -339,8 +340,22 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
+        {/* Official Stamp & Authorized Signatory Block */}
+        <InvoiceStampSignature
+          stampUrl={ebill?.stampUrl || ebill?.sellerInfo?.stampUrl}
+          signatureUrl={ebill?.signatureUrl || ebill?.sellerInfo?.signatureUrl}
+          signatoryName={ebill?.signatoryName || ebill?.sellerInfo?.signatoryName}
+          signatoryTitle={ebill?.signatoryTitle || ebill?.sellerInfo?.signatoryTitle}
+          showStamp={ebill?.showStamp ?? ebill?.sellerInfo?.showStamp ?? true}
+          showSignature={ebill?.showSignature ?? ebill?.sellerInfo?.showSignature ?? true}
+          verificationDate={formatDate(order.createdAt)}
+          documentRef={order.orderNumber}
+          companyTrn="10029384910003"
+          className="mt-6"
+        />
+
         {/* Legal Disclaimers & Official Seal */}
-        <div className="pt-6 border-t border-slate-200 text-[11px] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="pt-4 border-t border-slate-200 text-[11px] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-0.5">
             <div>This document is an electronic tax invoice authorized under UAE Federal Decree Law No. 8 of 2017 on VAT.</div>
             <div>All hardware component serial numbers are logged into the NexTech enterprise warranty registry.</div>

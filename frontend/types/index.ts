@@ -419,7 +419,19 @@ export interface EBill {
     address: string;
     phone: string;
     email: string;
+    stampUrl?: string;
+    signatureUrl?: string;
+    signatoryName?: string;
+    signatoryTitle?: string;
+    showStamp?: boolean;
+    showSignature?: boolean;
   };
+  stampUrl?: string;
+  signatureUrl?: string;
+  signatoryName?: string;
+  signatoryTitle?: string;
+  showStamp?: boolean;
+  showSignature?: boolean;
   customerInfo: {
     name: string;
     email: string;
@@ -625,6 +637,13 @@ export interface StoreSettings {
     instagram?: string;
     linkedin?: string;
   };
+  // Official Tax Invoice / E-Bill Digital Stamp & Signature
+  invoiceStampUrl?: string;
+  invoiceSignatureUrl?: string;
+  signatoryName?: string;
+  signatoryTitle?: string;
+  showStampOnEBill?: boolean;
+  showSignatureOnEBill?: boolean;
 }
 
 export interface ApiResponse<T = any> {

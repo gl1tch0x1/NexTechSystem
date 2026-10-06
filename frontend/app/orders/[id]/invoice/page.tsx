@@ -16,6 +16,7 @@ import {
   QrCode,
   AlertCircle
 } from 'lucide-react';
+import InvoiceStampSignature from '@/components/invoice/InvoiceStampSignature';
 
 export default function TaxInvoicePage() {
   const params = useParams();
@@ -23,8 +24,18 @@ export default function TaxInvoicePage() {
   const { token } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [ebill, setEbill] = useState<EBill | null>(null);
+  const [storeSettings, setStoreSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch store branding settings
+    ApiClient.get<any>('/content/settings')
+      .then(res => {
+        if (res) setStoreSettings(res);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (orderId) {
@@ -262,6 +273,20 @@ export default function TaxInvoicePage() {
             </div>
           </div>
         </div>
+
+        {/* Official Stamp & Authorized Signatory Block */}
+        <InvoiceStampSignature
+          stampUrl={ebill?.stampUrl || ebill?.sellerInfo?.stampUrl || storeSettings?.invoiceStampUrl}
+          signatureUrl={ebill?.signatureUrl || ebill?.sellerInfo?.signatureUrl || storeSettings?.invoiceSignatureUrl}
+          signatoryName={ebill?.signatoryName || ebill?.sellerInfo?.signatoryName || storeSettings?.signatoryName}
+          signatoryTitle={ebill?.signatoryTitle || ebill?.sellerInfo?.signatoryTitle || storeSettings?.signatoryTitle}
+          showStamp={ebill?.showStamp ?? ebill?.sellerInfo?.showStamp ?? storeSettings?.showStampOnEBill ?? true}
+          showSignature={ebill?.showSignature ?? ebill?.sellerInfo?.showSignature ?? storeSettings?.showSignatureOnEBill ?? true}
+          verificationDate={formatDate(order.createdAt)}
+          documentRef={order.orderNumber}
+          companyTrn={ebill?.sellerInfo?.taxNumber || storeSettings?.taxRegistrationNumber || '10029384910003'}
+          className="mt-8"
+        />
 
         {/* Invoice Footer */}
         <div className="mt-8 pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400 space-y-1 font-mono">
