@@ -5,6 +5,15 @@ import { tabbyService } from '../services/tabby.service.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { ENV } from '../config/env.js';
 
+/**
+ * Sanitizes untrusted values before logging to prevent Log Injection / Log Forgery (CWE-117).
+ * Removes carriage returns, newlines, and bounds string length.
+ */
+function sanitizeLog(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value).replace(/[\r\n]/g, '').slice(0, 128);
+}
+
 export class PaymentController {
   /**
    * Initializes a BNPL payment session (Tamara or Tabby) and returns the redirect URL
@@ -118,7 +127,7 @@ export class PaymentController {
         return;
       }
     } catch (err: any) {
-      console.error(`[PaymentController] Failed to initiate ${provider} payment session:`, err);
+      console.error(`[PaymentController] Failed to initiate ${sanitizeLog(provider)} payment session:`, err);
       res.status(400).json({
         success: false,
         error: { code: 'PAYMENT_INITIATION_FAILED', message: err.message || 'Payment initiation failed' },
@@ -137,13 +146,15 @@ export class PaymentController {
     }
 
     const { event_type, order_id, order_reference_id, total_amount } = req.body;
-    console.log(`[Tamara Webhook] Event "${event_type}" for order reference "${order_reference_id}" (Tamara: ${order_id})`);
+    console.log(
+      `[Tamara Webhook] Event "${sanitizeLog(event_type)}" for order reference "${sanitizeLog(order_reference_id)}" (Tamara: ${sanitizeLog(order_id)})`
+    );
 
     // Strictly validate order identifier against SSRF / path traversal
     let safeOrderId: string | undefined;
     if (order_id !== undefined && order_id !== null) {
       if (typeof order_id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(order_id.trim())) {
-        console.warn('[Tamara Webhook] Rejected invalid order identifier format:', order_id);
+        console.warn('[Tamara Webhook] Rejected invalid order identifier format: %s', sanitizeLog(order_id));
         res.status(400).json({ error: 'Invalid order identifier format' });
         return;
       }
@@ -200,11 +211,13 @@ export class PaymentController {
     }
 
     const { id, status, order, amount } = req.body;
-    console.log(`[Tabby Webhook] Payment ID "${id}", status "${status}" for order "${order?.reference_id}"`);
+    console.log(
+      `[Tabby Webhook] Payment ID "${sanitizeLog(id)}", status "${sanitizeLog(status)}" for order "${sanitizeLog(order?.reference_id)}"`
+    );
 
     // Strictly validate payment identifier from webhook against SSRF and path traversal
     if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id.trim())) {
-      console.warn('[Tabby Webhook] Rejected invalid payment identifier format:', id);
+      console.warn('[Tabby Webhook] Rejected invalid payment identifier format: %s', sanitizeLog(id));
       res.status(400).json({ error: 'Invalid payment identifier format' });
       return;
     }
