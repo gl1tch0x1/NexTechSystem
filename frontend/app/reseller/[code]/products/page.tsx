@@ -56,6 +56,36 @@ const HARDWARE_BRANDS = [
 const DEFAULT_IMAGE_FALLBACK =
   'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
 
+/**
+ * Sanitizes image URLs to prevent DOM-based XSS (CWE-79 / CWE-116).
+ * Validates that the protocol is strictly http: or https:, strips dangerous characters,
+ * and falls back to a safe placeholder if the URL is invalid or malformed.
+ */
+function sanitizeImageUrl(url: unknown, fallback: string = DEFAULT_IMAGE_FALLBACK): string {
+  if (typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // Immediately reject dangerous pseudo-protocols or HTML injection characters
+  if (/^(javascript|data|vbscript|file|blob):/i.test(trimmed) || /[<>"'\s]/.test(trimmed)) {
+    return fallback;
+  }
+
+  // Strictly enforce http/https protocol with valid URL format
+  if (/^https?:\/\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=%]+$/i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+        return parsed.href;
+      }
+    } catch {
+      return fallback;
+    }
+  }
+
+  return fallback;
+}
+
 export default function ResellerProductsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -73,6 +103,7 @@ export default function ResellerProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [imagePreviewError, setImagePreviewError] = useState(false);
 
   // Form State for SKU Creation/Editing
   const [formData, setFormData] = useState({
@@ -133,7 +164,16 @@ export default function ResellerProductsPage() {
     }
   }, [searchParams]);
 
+  // Memoized safe preview URL to prevent DOM-based XSS (CWE-79)
+  const safePreviewSrc = useMemo(() => {
+    if (imagePreviewError || !formData.thumbnail) {
+      return DEFAULT_IMAGE_FALLBACK;
+    }
+    return sanitizeImageUrl(formData.thumbnail, DEFAULT_IMAGE_FALLBACK);
+  }, [formData.thumbnail, imagePreviewError]);
+
   const openAddModal = () => {
+    setImagePreviewError(false);
     setEditingProduct(null);
     setFormData({
       name: '',
@@ -162,6 +202,7 @@ export default function ResellerProductsPage() {
   };
 
   const openEditModal = (prod: Product) => {
+    setImagePreviewError(false);
     setEditingProduct(prod);
     setFormData({
       name: prod.name,
@@ -188,6 +229,7 @@ export default function ResellerProductsPage() {
   };
 
   const closeModal = () => {
+    setImagePreviewError(false);
     setIsModalOpen(false);
     setEditingProduct(null);
     if (searchParams.get('action')) {
@@ -233,8 +275,8 @@ export default function ResellerProductsPage() {
         costPrice: formData.costPrice ? parseFloat(formData.costPrice) : undefined,
         stock: numStock,
         lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 3,
-        thumbnail: formData.thumbnail.trim() || DEFAULT_IMAGE_FALLBACK,
-        images: [formData.thumbnail.trim() || DEFAULT_IMAGE_FALLBACK],
+        thumbnail: sanitizeImageUrl(formData.thumbnail.trim(), DEFAULT_IMAGE_FALLBACK),
+        images: [sanitizeImageUrl(formData.thumbnail.trim(), DEFAULT_IMAGE_FALLBACK)],
         description: formData.description.trim(),
         warranty: formData.warranty.trim(),
         weight: parseFloat(formData.weight) || 1.0,
@@ -457,11 +499,12 @@ export default function ResellerProductsPage() {
                       <td className="py-4 px-3">
                         <div className="flex items-center gap-3">
                           <img
-                            src={prod.thumbnail || prod.images?.[0] || DEFAULT_IMAGE_FALLBACK}
+                            src={sanitizeImageUrl(prod.thumbnail || prod.images?.[0], DEFAULT_IMAGE_FALLBACK)}
                             alt={prod.name}
                             className="w-12 h-12 rounded-xl object-cover bg-slate-100 border border-slate-200 shrink-0"
                             onError={e => {
-                              (e.target as HTMLImageElement).src = DEFAULT_IMAGE_FALLBACK;
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = DEFAULT_IMAGE_FALLBACK;
                             }}
                           />
                           <div className="min-w-0 max-w-sm">
@@ -801,12 +844,10 @@ export default function ResellerProductsPage() {
                 <div className="flex flex-col sm:flex-row gap-4 items-start">
                   <div className="w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
                     <img
-                      src={formData.thumbnail || DEFAULT_IMAGE_FALLBACK}
+                      src={safePreviewSrc}
                       alt="Preview"
                       className="w-full h-full object-cover"
-                      onError={e => {
-                        (e.target as HTMLImageElement).src = DEFAULT_IMAGE_FALLBACK;
-                      }}
+                      onError={() => setImagePreviewError(true)}
                     />
                   </div>
 
@@ -816,7 +857,11 @@ export default function ResellerProductsPage() {
                       type="url"
                       placeholder="https://images.unsplash.com/..."
                       value={formData.thumbnail}
-                      onChange={e => setFormData({ ...formData, thumbnail: e.target.value })}
+                      onChange={e => {
+                        const cleanVal = e.target.value.replace(/[<>"']/g, '').trimStart();
+                        setFormData({ ...formData, thumbnail: cleanVal });
+                        setImagePreviewError(false);
+                      }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-amber-500 font-mono"
                     />
                     <p className="text-[11px] text-slate-400">
