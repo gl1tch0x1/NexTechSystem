@@ -800,7 +800,7 @@ export class AnalyticsService {
 
     let totalRevenue = 0;
     let totalUnitsSold = 0;
-    const paymentMethodSplit: Record<string, number> = { CREDIT_CARD: 0, WALLET: 0, COD: 0, BANK_TRANSFER: 0 };
+    const paymentMethodSplit: Record<string, number> = { CREDIT_CARD: 0, WALLET: 0, COD: 0, BANK_TRANSFER: 0, TAMARA: 0, TABBY: 0, IN_STORE: 0 };
     const sellerChannelSplit: Record<string, number> = { ADMIN: 0, RESELLER: 0 };
     const productSalesMap: Record<string, { unitsSold: number; revenue: number }> = {};
     const categorySalesMap: Record<string, { unitsSold: number; revenue: number }> = {};

@@ -219,7 +219,12 @@ export default function OrderDetailPage() {
                   tabby &bull; pay in 4
                 </span>
               )}
-              {order.paymentMethod !== 'TAMARA' && order.paymentMethod !== 'TABBY' && (
+              {order.paymentMethod === 'IN_STORE' && (
+                <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] tracking-tight inline-flex items-center">
+                  In-Store Payment (5%-10% Off)
+                </span>
+              )}
+              {order.paymentMethod !== 'TAMARA' && order.paymentMethod !== 'TABBY' && order.paymentMethod !== 'IN_STORE' && (
                 <span>({order.paymentMethod})</span>
               )}
             </div>
@@ -310,6 +315,13 @@ export default function OrderDetailPage() {
               <div className="flex items-center justify-between text-emerald-600 font-bold">
                 <span>Coupon Discount ({order.couponCode || 'PROMO'}):</span>
                 <span className="font-mono">-{formatPrice(order.discount)}</span>
+              </div>
+            )}
+
+            {Boolean(order.inStoreDiscount && order.inStoreDiscount > 0) && (
+              <div className="flex items-center justify-between text-emerald-600 font-bold">
+                <span>In-Store Payment Discount ({order.inStoreDiscountRate || 5}%):</span>
+                <span className="font-mono">-{formatPrice(order.inStoreDiscount || 0)}</span>
               </div>
             )}
 

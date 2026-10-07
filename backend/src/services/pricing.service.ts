@@ -36,6 +36,8 @@ export interface PricingCalculationResult {
   couponCode?: string;
   appliedCoupon?: Coupon | null;
   couponDiscount: number;
+  inStoreDiscount?: number;
+  inStoreDiscountRate?: number;
   taxRate: number;
   tax: number;
   shippingFee: number;
@@ -159,10 +161,22 @@ export class PricingService {
       }
     }
 
-    const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
+    // In-store payment discount:
+    // Customers paying in-store receive at least 5% (up to 10%) discount on product amount
+    let inStoreDiscountRate = 0;
+    let inStoreDiscount = 0;
+    if (params.paymentMethod === 'IN_STORE') {
+      inStoreDiscountRate = 5; // Guaranteed baseline 5% discount (up to 10% in-store)
+      inStoreDiscount = Math.round((subtotal * (inStoreDiscountRate / 100)) * 100) / 100;
+    }
 
-    // Shipping calculation
-    const shippingFee = discountedSubtotal >= settings.freeShippingThreshold ? 0 : settings.standardShippingFee;
+    const totalDiscount = Math.round((couponDiscount + inStoreDiscount) * 100) / 100;
+    const discountedSubtotal = Math.max(0, subtotal - totalDiscount);
+
+    // Shipping calculation: Free for In-Store Pickup/Payment (customer picks up in store)
+    const shippingFee = params.paymentMethod === 'IN_STORE'
+      ? 0
+      : (discountedSubtotal >= settings.freeShippingThreshold ? 0 : settings.standardShippingFee);
 
     // Tax calculation (e.g. 5% UAE VAT) respecting chargeTax toggle and tax treatment
     const isZeroRated =
@@ -172,13 +186,13 @@ export class PricingService {
       params.taxTreatment === 'ZERO_RATED';
     const taxRate = isZeroRated ? 0 : (settings.taxRate || 5);
     const taxableRatio = subtotal > 0 ? (taxableItemsSubtotal / subtotal) : 1;
-    const discountedTaxableSubtotal = Math.max(0, taxableItemsSubtotal - (couponDiscount * taxableRatio));
+    const discountedTaxableSubtotal = Math.max(0, taxableItemsSubtotal - (totalDiscount * taxableRatio));
     const tax = isZeroRated ? 0 : Math.round((discountedTaxableSubtotal * (taxRate / 100)) * 100) / 100;
 
     // Payment Surcharge calculation:
     // Tabby & Tamara (BNPL): 8% extra from the product amount (subtotal)
     // Cards (Debit/Credit): 3% extra from the product amount (subtotal)
-    // Cash / COD / others: 0% extra
+    // Cash / COD / In-Store: 0% extra
     let paymentSurchargeRate = 0;
     if (params.paymentMethod === 'TABBY' || params.paymentMethod === 'TAMARA') {
       paymentSurchargeRate = 8;
@@ -214,10 +228,12 @@ export class PricingService {
     return {
       items: verifiedItems,
       subtotal: Math.round(subtotal * 100) / 100,
-      discount: Math.round(couponDiscount * 100) / 100,
+      discount: totalDiscount,
       couponCode: appliedCoupon?.code,
       appliedCoupon,
       couponDiscount: Math.round(couponDiscount * 100) / 100,
+      inStoreDiscount,
+      inStoreDiscountRate,
       taxRate,
       tax,
       shippingFee,

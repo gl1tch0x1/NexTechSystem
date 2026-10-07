@@ -260,7 +260,7 @@ export default function AdminOrdersPage() {
   });
 
   // Payment & status options
-  const [paymentMethod, setPaymentMethod] = useState<'CREDIT_CARD' | 'BANK_TRANSFER' | 'COD' | 'WALLET'>('CREDIT_CARD');
+  const [paymentMethod, setPaymentMethod] = useState<'CREDIT_CARD' | 'BANK_TRANSFER' | 'COD' | 'WALLET' | 'IN_STORE'>('CREDIT_CARD');
   const [paymentStatus, setPaymentStatus] = useState<'PAID' | 'PENDING'>('PAID');
   const [orderStatus, setOrderStatus] = useState<OrderStatus>('PROCESSING');
   const [orderNotes, setOrderNotes] = useState('Admin Direct Sales Order');
@@ -1770,6 +1770,7 @@ export default function AdminOrdersPage() {
                           <option value="BANK_TRANSFER">Bank Wire Transfer</option>
                           <option value="WALLET">Enterprise Wallet</option>
                           <option value="COD">Cash On Delivery</option>
+                          <option value="IN_STORE">In-Store Payment (5%-10% Off)</option>
                         </select>
                       </div>
 

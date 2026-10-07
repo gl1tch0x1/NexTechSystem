@@ -137,13 +137,15 @@ export class OrderService {
 
       const initialOrderStatus: OrderStatus = hasResellerStock
         ? 'PENDING_APPROVAL'
-        : (isBnpl ? 'PENDING' : (dto.paymentMethod === 'COD' ? 'CONFIRMED' : 'PROCESSING'));
+        : (isBnpl ? 'PENDING' : (dto.paymentMethod === 'COD' || dto.paymentMethod === 'IN_STORE' ? 'CONFIRMED' : 'PROCESSING'));
 
       const initialHistoryNote = hasResellerStock
         ? 'Order contains partner/reseller fulfilled items. Status: Pending to Approve. Awaiting executive/admin verification.'
         : (isBnpl
             ? `Order initiated via ${dto.paymentMethod} BNPL. Awaiting customer authorization and installment approval.`
-            : 'Order confirmed automatically. Sourced directly from NexTech Inventory.');
+            : (dto.paymentMethod === 'IN_STORE'
+                ? 'Order confirmed for In-Store Pickup & Payment. Reserved for customer at showroom.'
+                : 'Order confirmed automatically. Sourced directly from NexTech Inventory.'));
 
       // 9. Construct Order
       const newOrder: Order = {
@@ -157,6 +159,8 @@ export class OrderService {
         subtotal: pricing.subtotal,
         discount: pricing.discount,
         couponCode: pricing.couponCode,
+        inStoreDiscount: pricing.inStoreDiscount,
+        inStoreDiscountRate: pricing.inStoreDiscountRate,
         walletAmountUsed: 0,
         tax: pricing.tax,
         taxRate: pricing.taxRate,
@@ -167,7 +171,7 @@ export class OrderService {
         total: pricing.total,
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,
-        paymentStatus: (dto.paymentMethod === 'COD' || isBnpl) ? 'PENDING' : 'PAID',
+        paymentStatus: (dto.paymentMethod === 'COD' || dto.paymentMethod === 'IN_STORE' || isBnpl) ? 'PENDING' : 'PAID',
         orderStatus: initialOrderStatus,
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
@@ -276,7 +280,7 @@ export class OrderService {
 
     const updates: any = {
       orderStatus: status,
-      paymentStatus: status === 'DELIVERED' && order.paymentMethod === 'COD' ? 'PAID' : order.paymentStatus,
+      paymentStatus: status === 'DELIVERED' && (order.paymentMethod === 'COD' || order.paymentMethod === 'IN_STORE') ? 'PAID' : order.paymentStatus,
       statusHistory: newHistory,
     };
 

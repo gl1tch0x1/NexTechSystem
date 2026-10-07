@@ -25,7 +25,9 @@ import {
   Shield,
   Check,
   Mail,
-  X
+  X,
+  Store,
+  Sparkles,
 } from 'lucide-react';
 
 const UAE_EMIRATES = [
@@ -216,7 +218,7 @@ export default function CheckoutPage() {
   // Surcharges from product amount (subtotal):
   // Tabby & Tamara: 8% extra
   // Credit / Debit card: 3% extra
-  // Cash (COD, Bank Transfer): 0%
+  // Cash (COD, Bank Transfer, In-Store): 0%
   let paymentSurchargeRate = 0;
   if (paymentMethod === 'TABBY' || paymentMethod === 'TAMARA') {
     paymentSurchargeRate = 8;
@@ -228,11 +230,21 @@ export default function CheckoutPage() {
     ? Math.round((cart.subtotal * (paymentSurchargeRate / 100)) * 100) / 100
     : 0;
 
+  // In-Store Payment Discount:
+  // Customers paying in-store receive at least 5% (up to 10%) discount on product amount
+  const inStoreDiscountRate = paymentMethod === 'IN_STORE' ? 5 : 0;
+  const inStoreDiscount = inStoreDiscountRate > 0
+    ? Math.round((cart.subtotal * (inStoreDiscountRate / 100)) * 100) / 100
+    : 0;
+
+  // Effective shipping fee: Free for store pickup / in-store payment
+  const shippingDeduction = paymentMethod === 'IN_STORE' ? (cart.shippingFee ?? 0) : 0;
+
   // COD handling fee:
   // Free inside Bur Dubai, otherwise 25 AED
   const codFee = paymentMethod === 'COD' ? (isInsideBurDubai ? 0 : 25) : 0;
 
-  const finalPayable = Math.max(0, Math.round((cart.total + paymentSurcharge + codFee) * 100) / 100);
+  const finalPayable = Math.max(0, Math.round((cart.total - inStoreDiscount - shippingDeduction + paymentSurcharge + codFee) * 100) / 100);
 
   const handleSelectPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethod(method);
@@ -826,6 +838,50 @@ export default function CheckoutPage() {
                   )}
                 </div>
               </label>
+
+              {/* In-Store Payment (5% - 10% Discount) */}
+              <label
+                className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all ${
+                  paymentMethod === 'IN_STORE'
+                    ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 text-slate-900 dark:text-white ring-2 ring-emerald-500/40 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-950/60'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`p-2 rounded-xl ${
+                    paymentMethod === 'IN_STORE'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                  }`}>
+                    <Store className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'IN_STORE'}
+                    onChange={() => handleSelectPaymentMethod('IN_STORE')}
+                    className="w-4 h-4 text-emerald-600 cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                    <span>In-store Payment</span>
+                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      5% - 10% OFF
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Pay at Store &bull; Bur Dubai Showroom
+                  </div>
+                  <div className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1 font-semibold">
+                    <Sparkles className="w-3 h-3" />
+                    <span>Get 5% to 10% discount on final bill</span>
+                  </div>
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Free pickup &bull; 0% transaction fees
+                  </div>
+                </div>
+              </label>
             </div>
 
 
@@ -958,7 +1014,11 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Insured Courier Logistics:</span>
                 <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                  {cart.shippingFee === 0 ? 'FREE' : formatPrice(cart.shippingFee)}
+                  {paymentMethod === 'IN_STORE'
+                    ? 'FREE (Store Pickup)'
+                    : cart.shippingFee === 0
+                      ? 'FREE'
+                      : formatPrice(cart.shippingFee)}
                 </span>
               </div>
 
@@ -969,6 +1029,16 @@ export default function CheckoutPage() {
                 </span>
                 <span className="font-bold font-mono text-slate-900 dark:text-white">{formatPrice(cart.tax)}</span>
               </div>
+
+              {paymentMethod === 'IN_STORE' && inStoreDiscount > 0 && (
+                <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-bold">
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>In-Store Discount (5% Instant):</span>
+                  </span>
+                  <span className="font-mono">-{formatPrice(inStoreDiscount)}</span>
+                </div>
+              )}
 
               {paymentSurcharge > 0 && (
                 <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
@@ -996,6 +1066,18 @@ export default function CheckoutPage() {
                 </div>
               )}
             </div>
+
+            {paymentMethod === 'IN_STORE' && (
+              <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-xs space-y-1">
+                <div className="font-bold text-emerald-800 dark:text-emerald-200 flex items-center gap-1.5">
+                  <Store className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>In-Store Payment: 5% - 10% Discount</span>
+                </div>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-300 leading-relaxed">
+                  A guaranteed <strong>5% instant discount (-{formatPrice(inStoreDiscount)})</strong> has been deducted from your reservation. Visit our <strong>Bur Dubai Showroom</strong> to inspect your products and unlock up to <strong>10% total discount</strong> upon settling payment!
+                </p>
+              </div>
+            )}
 
             {/* Total Box */}
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-baseline justify-between shadow-inner">

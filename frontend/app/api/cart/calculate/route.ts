@@ -130,6 +130,14 @@ export async function POST(request: NextRequest) {
     couponDiscount = Math.round(subtotal * 0.1 * 100) / 100;
   }
 
+  // In-Store discount: 5% guaranteed instant discount on subtotal (up to 10% in-store)
+  let inStoreDiscountRate = 0;
+  let inStoreDiscount = 0;
+  if (paymentMethod === 'IN_STORE') {
+    inStoreDiscountRate = 5;
+    inStoreDiscount = Math.round((subtotal * (inStoreDiscountRate / 100)) * 100) / 100;
+  }
+
   let paymentSurchargeRate = 0;
   if (paymentMethod === 'TABBY' || paymentMethod === 'TAMARA') {
     paymentSurchargeRate = 8;
@@ -149,9 +157,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const taxableAmount = Math.max(0, subtotal - couponDiscount);
+  const totalDiscount = Math.round((couponDiscount + inStoreDiscount) * 100) / 100;
+  const taxableAmount = Math.max(0, subtotal - totalDiscount);
   const tax = Math.round(taxableAmount * 0.05 * 100) / 100; // UAE FTA 5% VAT
-  const shippingFee = subtotal > 500 ? 0 : 35;
+  const shippingFee = paymentMethod === 'IN_STORE' ? 0 : (subtotal > 500 ? 0 : 35);
   const totalBeforeWallet = taxableAmount + tax + shippingFee + paymentSurcharge + codFee;
   const walletAmountUsed = Math.min(Number(requestedWalletDeduction) || 0, totalBeforeWallet);
   const total = Math.max(0, totalBeforeWallet - walletAmountUsed);
@@ -161,8 +170,10 @@ export async function POST(request: NextRequest) {
     data: {
       items: calculatedItems,
       subtotal,
-      discount: 0,
+      discount: totalDiscount,
       couponDiscount,
+      inStoreDiscount,
+      inStoreDiscountRate,
       tax,
       taxRate: 5,
       shippingFee,

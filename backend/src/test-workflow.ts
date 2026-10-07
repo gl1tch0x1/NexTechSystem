@@ -68,23 +68,27 @@ async function runComprehensiveTest() {
     // 3. Ensure a product exists
     let products = await productRepository.find();
     let testProduct: Product;
-    if (products.length === 0) {
+    const approvedProducts = products.filter(p => p.isActive && p.approvalStatus === 'APPROVED');
+    if (approvedProducts.length === 0) {
       testProduct = (await productRepository.create({
         id: 'prod_fallback_123',
         name: 'Enterprise AI Server Node',
         slug: 'enterprise-ai-server-node',
         sku: 'SRV-AI-9000',
         price: 12000,
-        stock: 50,
+        stock: 100,
         categoryId: 'cat_servers',
         isActive: true,
+        approvalStatus: 'APPROVED' as any,
         images: ['/images/server.jpg'],
         currency: 'AED',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       } as unknown as Product));
     } else {
-      testProduct = products[0];
+      testProduct = approvedProducts[0];
+      await productRepository.update(testProduct.id, { stock: 100, isActive: true, approvalStatus: 'APPROVED' as any });
+      testProduct.stock = 100;
     }
     const productPrice = testProduct.salePrice || testProduct.price;
     const expectedSubtotal = productPrice;
@@ -385,12 +389,47 @@ async function runComprehensiveTest() {
       }),
     });
     const codOutsideOrder = (await codOutsideRes.json()) as any;
+    if (codOutsideRes.status !== 201) {
+      console.error('COD Outside Bur Dubai failed:', codOutsideOrder);
+    }
     const codOutsideData = codOutsideOrder.data || codOutsideOrder;
     console.log('COD Outside Bur Dubai Order Total:', codOutsideData.total, 'COD Fee:', codOutsideData.codFee, 'Surcharge:', codOutsideData.paymentSurcharge);
     if (codOutsideData.codFee !== 25 || codOutsideData.paymentSurcharge !== 0 || codOutsideData.total !== expectedCodPaidTotal) {
       throw new Error(`COD Outside Bur Dubai verification failed: Fee ${codOutsideData.codFee}, Total ${codOutsideData.total} (expected ${expectedCodPaidTotal})`);
     }
     console.log('✅ COD outside Bur Dubai verified with 25.00 AED handling fee');
+
+    // -------------------------------------------------------------
+    // TEST SECTION 3.3: IN-STORE PAYMENT & 5%-10% DISCOUNT
+    // -------------------------------------------------------------
+    console.log('\n--- [TEST 5.5] In-Store Payment Verification (5% Instant Discount & Free Store Pickup) ---');
+    const otpInStoreRes = await fetch(`${BASE_URL}/orders/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({ total: productPrice, itemsCount: 1, currency: 'AED' }),
+    });
+    const otpInStoreData = (await otpInStoreRes.json()) as any;
+
+    const inStoreRes = await fetch(`${BASE_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({
+        ...tamaraOrderPayload,
+        paymentMethod: 'IN_STORE',
+        otpCode: otpInStoreData.data?.devCode,
+      }),
+    });
+    const inStoreOrder = (await inStoreRes.json()) as any;
+    if (inStoreRes.status !== 201) {
+      console.error('In-Store Order creation failed:', inStoreOrder);
+    }
+    const inStoreData = inStoreOrder.data || inStoreOrder;
+    console.log('In-Store Order Total:', inStoreData.total, 'Discount:', inStoreData.discount, 'In-Store Discount:', inStoreData.inStoreDiscount, 'Shipping Fee:', inStoreData.shippingFee);
+
+    if (inStoreData.paymentMethod !== 'IN_STORE' || inStoreData.inStoreDiscountRate !== 5 || inStoreData.shippingFee !== 0 || inStoreData.paymentStatus !== 'PENDING') {
+      throw new Error(`In-Store payment order verification failed: paymentMethod=${inStoreData.paymentMethod}, rate=${inStoreData.inStoreDiscountRate}, shipping=${inStoreData.shippingFee}, paymentStatus=${inStoreData.paymentStatus}`);
+    }
+    console.log('✅ In-Store Payment verified with 5% instant discount, 0 AED shipping fee, and PENDING store payment status');
 
     // -------------------------------------------------------------
     // TEST SECTION 4: SECURITY & ACCESS CONTROL CHECKS

@@ -259,7 +259,7 @@ export interface Cart {
 
 export type OrderStatus = 'PENDING' | 'PENDING_APPROVAL' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURNED' | 'REFUNDED';
 export type PaymentStatus = 'PENDING' | 'AUTHORIZED' | 'PAID' | 'FAILED' | 'REFUNDED';
-export type PaymentMethod = 'CREDIT_CARD' | 'WALLET' | 'COD' | 'BANK_TRANSFER' | 'TAMARA' | 'TABBY';
+export type PaymentMethod = 'CREDIT_CARD' | 'WALLET' | 'COD' | 'BANK_TRANSFER' | 'TAMARA' | 'TABBY' | 'IN_STORE';
 
 export interface OrderItem {
   productId: string;
@@ -307,6 +307,8 @@ export interface Order {
   subtotal: number;
   discount: number;
   couponCode?: string;
+  inStoreDiscount?: number;
+  inStoreDiscountRate?: number;
   walletAmountUsed: number;
   tax: number;
   taxRate: number;

@@ -144,9 +144,17 @@ export default function TaxInvoicePage() {
             <div className="text-xs text-slate-600 font-mono">
               Issue Date: <strong>{formatDate(order.createdAt)}</strong>
             </div>
-            <div className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+            <div className={`text-xs font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 border ${
+              order.paymentStatus === 'PAID'
+                ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                : 'text-amber-700 bg-amber-50 border-amber-200'
+            }`}>
               <CheckCircle2 className="w-3 h-3" />
-              <span>PAID &amp; SETTLED ({order.paymentMethod})</span>
+              <span>
+                {order.paymentStatus === 'PAID' ? 'PAID & SETTLED' : 'PAYMENT PENDING'} (
+                {order.paymentMethod === 'IN_STORE' ? 'IN-STORE PAYMENT' : order.paymentMethod}
+                )
+              </span>
             </div>
           </div>
         </div>
@@ -266,6 +274,12 @@ export default function TaxInvoicePage() {
               <div className="flex justify-between py-1 border-b border-slate-100 text-amber-700">
                 <span>Enterprise Rebate:</span>
                 <span className="font-bold">-{formatPrice(order.discount)}</span>
+              </div>
+            )}
+            {Boolean(order.inStoreDiscount && order.inStoreDiscount > 0) && (
+              <div className="flex justify-between py-1 border-b border-slate-100 text-emerald-700">
+                <span>In-Store Discount ({order.inStoreDiscountRate || 5}%):</span>
+                <span className="font-bold">-{formatPrice(order.inStoreDiscount || 0)}</span>
               </div>
             )}
             {Boolean(order.paymentSurcharge && order.paymentSurcharge > 0) && (

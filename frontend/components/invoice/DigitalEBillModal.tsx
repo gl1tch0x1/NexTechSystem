@@ -202,7 +202,9 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
                     ? 'Tamara (Split in 4)'
                     : order.paymentMethod === 'TABBY'
                       ? 'Tabby (Pay in 4)'
-                      : order.paymentMethod || 'CREDIT_CARD'}
+                      : order.paymentMethod === 'IN_STORE'
+                        ? 'In-Store Payment (5%-10% Off)'
+                        : order.paymentMethod || 'CREDIT_CARD'}
                 </strong>
               </div>
               <div className="pt-1">
@@ -446,6 +448,12 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
                   {order.shippingFee > 0 ? formatPrice(order.shippingFee) : 'FREE (AED 0.00)'}
                 </span>
               </div>
+              {Boolean(order.inStoreDiscount && order.inStoreDiscount > 0) && (
+                <div className="flex justify-between py-1 border-b border-slate-100 text-emerald-700">
+                  <span>In-Store Payment Discount ({order.inStoreDiscountRate || 5}%):</span>
+                  <span className="font-mono font-bold">- {formatPrice(order.inStoreDiscount || 0)}</span>
+                </div>
+              )}
               {Boolean(order.paymentSurcharge && order.paymentSurcharge > 0) && (
                 <div className="flex justify-between py-1 border-b border-slate-100 text-slate-600">
                   <span>Payment Surcharge ({order.paymentSurchargeRate || (order.paymentMethod === 'TABBY' || order.paymentMethod === 'TAMARA' ? 8 : 3)}%):</span>
