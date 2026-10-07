@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from '../middleware/auth.js';
 
 export class CartController {
   async calculateCart(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const { items, couponCode, requestedWalletDeduction } = req.body;
+    const { items, couponCode, requestedWalletDeduction, paymentMethod, shippingAddress, taxTreatment } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       res.json({
@@ -20,6 +20,9 @@ export class CartController {
           tax: 0,
           taxRate: 5,
           shippingFee: 0,
+          paymentSurcharge: 0,
+          paymentSurchargeRate: 0,
+          codFee: 0,
           walletAmountUsed: 0,
           total: 0,
           currency: 'AED',
@@ -68,6 +71,9 @@ export class CartController {
           tax: 0,
           taxRate: 5,
           shippingFee: 0,
+          paymentSurcharge: 0,
+          paymentSurchargeRate: 0,
+          codFee: 0,
           walletAmountUsed: 0,
           total: 0,
           currency: 'AED',
@@ -88,6 +94,9 @@ export class CartController {
         couponCode,
         requestedWalletDeduction: requestedWalletDeduction ? parseFloat(requestedWalletDeduction) : undefined,
         userWalletBalance,
+        taxTreatment,
+        paymentMethod,
+        shippingAddress,
       });
 
       res.json({ success: true, data: result });

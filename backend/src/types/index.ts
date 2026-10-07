@@ -322,6 +322,9 @@ export interface Order {
   tax: number;
   taxRate: number;
   shippingFee: number;
+  paymentSurcharge?: number;
+  paymentSurchargeRate?: number;
+  codFee?: number;
   total: number;
   currency: string;
   paymentMethod: PaymentMethod;
@@ -464,6 +467,9 @@ export interface EBill {
   couponCode?: string;
   tax: number;
   shipping: number;
+  paymentSurcharge?: number;
+  paymentSurchargeRate?: number;
+  codFee?: number;
   walletDeduction: number;
   total: number;
   currency: string;

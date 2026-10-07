@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FALLBACK_PRODUCTS } from '@/lib/fallback-data';
 
+function isBurDubaiAddress(address?: { addressLine1?: string; city?: string; state?: string; postalCode?: string } | null): boolean {
+  if (!address) return false;
+  const combined = `${address.addressLine1 || ''} ${address.city || ''} ${address.state || ''} ${address.postalCode || ''}`.toLowerCase();
+  const burDubaiPatterns = [
+    /\bbur\s*dubai\b/i,
+    /\bal\s*mankhool\b/i,
+    /\bal\s*karama\b/i,
+    /\bal\s*fahidi\b/i,
+    /\bmeena\s*bazaar\b/i,
+    /\bal\s*raffa\b/i,
+    /\boud\s*metha\b/i,
+    /\bal\s*souq\s*al\s*kabeer\b/i,
+    /\bal\s*hudaiba\b/i,
+    /\bal\s*jafiliya\b/i,
+    /\bza'abeel\b/i,
+    /\bzaabeel\b/i,
+  ];
+  return burDubaiPatterns.some(pattern => pattern.test(combined));
+}
+
 export async function POST(request: NextRequest) {
   const backendUrl =
     process.env.API_PROXY_TARGET ||
@@ -9,7 +29,7 @@ export async function POST(request: NextRequest) {
     'http://localhost:5000';
 
   const body = await request.json().catch(() => ({}));
-  const { items = [], couponCode, requestedWalletDeduction = 0 } = body;
+  const { items = [], couponCode, requestedWalletDeduction = 0, paymentMethod, shippingAddress } = body;
 
   // 1. Forward to backend service if available
   if (backendUrl) {
@@ -110,10 +130,29 @@ export async function POST(request: NextRequest) {
     couponDiscount = Math.round(subtotal * 0.1 * 100) / 100;
   }
 
+  let paymentSurchargeRate = 0;
+  if (paymentMethod === 'TABBY') {
+    paymentSurchargeRate = 8;
+  } else if (paymentMethod === 'CREDIT_CARD') {
+    paymentSurchargeRate = 3;
+  }
+
+  const paymentSurcharge = paymentSurchargeRate > 0
+    ? Math.round((subtotal * (paymentSurchargeRate / 100)) * 100) / 100
+    : 0;
+
+  let codFee = 0;
+  if (paymentMethod === 'COD') {
+    const isInsideBurDubai = isBurDubaiAddress(shippingAddress);
+    if (!isInsideBurDubai) {
+      codFee = 25;
+    }
+  }
+
   const taxableAmount = Math.max(0, subtotal - couponDiscount);
   const tax = Math.round(taxableAmount * 0.05 * 100) / 100; // UAE FTA 5% VAT
   const shippingFee = subtotal > 500 ? 0 : 35;
-  const totalBeforeWallet = taxableAmount + tax + shippingFee;
+  const totalBeforeWallet = taxableAmount + tax + shippingFee + paymentSurcharge + codFee;
   const walletAmountUsed = Math.min(Number(requestedWalletDeduction) || 0, totalBeforeWallet);
   const total = Math.max(0, totalBeforeWallet - walletAmountUsed);
 
@@ -127,6 +166,9 @@ export async function POST(request: NextRequest) {
       tax,
       taxRate: 5,
       shippingFee,
+      paymentSurcharge,
+      paymentSurchargeRate,
+      codFee,
       walletAmountUsed,
       total,
       currency: 'AED',

@@ -446,6 +446,20 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
                   {order.shippingFee > 0 ? formatPrice(order.shippingFee) : 'FREE (AED 0.00)'}
                 </span>
               </div>
+              {Boolean(order.paymentSurcharge && order.paymentSurcharge > 0) && (
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-600">
+                  <span>Payment Surcharge ({order.paymentSurchargeRate || (order.paymentMethod === 'TABBY' ? 8 : 3)}%):</span>
+                  <span className="font-mono font-bold text-slate-900">+ {formatPrice(order.paymentSurcharge || 0)}</span>
+                </div>
+              )}
+              {order.paymentMethod === 'COD' && (
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-600">
+                  <span>Cash on Delivery Handling:</span>
+                  <span className={`font-mono font-bold ${order.codFee && order.codFee > 0 ? 'text-slate-900' : 'text-emerald-700'}`}>
+                    {order.codFee && order.codFee > 0 ? `+ ${formatPrice(order.codFee || 0)}` : 'FREE (Bur Dubai)'}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between py-2 border-t-2 border-slate-900 text-sm font-black text-slate-900">
                 <span>Net Total Settlement (Incl. VAT):</span>
                 <span className="font-mono text-base text-emerald-700">{formatPrice(order.total)}</span>

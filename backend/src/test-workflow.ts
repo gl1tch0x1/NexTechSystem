@@ -86,7 +86,18 @@ async function runComprehensiveTest() {
     } else {
       testProduct = products[0];
     }
-    console.log(`[Test Setup] Using product "${testProduct.name}" (SKU: ${testProduct.sku})`);
+    const productPrice = testProduct.salePrice || testProduct.price;
+    const expectedSubtotal = productPrice;
+    const expectedVat = Math.round(productPrice * 0.05 * 100) / 100;
+    const expectedBaseTotal = Math.round((expectedSubtotal + expectedVat) * 100) / 100;
+    const expectedTabbySurcharge = Math.round(productPrice * 0.08 * 100) / 100;
+    const expectedTabbyTotal = Math.round((expectedBaseTotal + expectedTabbySurcharge) * 100) / 100;
+    const expectedCardSurcharge = Math.round(productPrice * 0.03 * 100) / 100;
+    const expectedCardTotal = Math.round((expectedBaseTotal + expectedCardSurcharge) * 100) / 100;
+    const expectedCodFreeTotal = expectedBaseTotal;
+    const expectedCodPaidTotal = Math.round((expectedBaseTotal + 25) * 100) / 100;
+
+    console.log(`[Test Setup] Using product "${testProduct.name}" (SKU: ${testProduct.sku}, Price: AED ${productPrice})`);
 
     // -------------------------------------------------------------
     // TEST SECTION 1: EMAIL OTP WORKFLOW
@@ -95,7 +106,7 @@ async function runComprehensiveTest() {
     const otpReqRes = await fetch(`${BASE_URL}/orders/request-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
-      body: JSON.stringify({ total: 12600, itemsCount: 1, currency: 'AED' }),
+      body: JSON.stringify({ total: expectedBaseTotal, itemsCount: 1, currency: 'AED' }),
     });
     const otpReqData = (await otpReqRes.json()) as any;
     console.log('OTP Request Response Status:', otpReqRes.status, otpReqData);
@@ -208,12 +219,12 @@ async function runComprehensiveTest() {
     // -------------------------------------------------------------
     // TEST SECTION 3: TABBY BNPL ORDER & WEBHOOK
     // -------------------------------------------------------------
-    console.log('\n--- [TEST 4] Tabby BNPL Order Creation & Webhook Settlement ---');
+    console.log('\n--- [TEST 4] Tabby BNPL Order Creation & Webhook Settlement (8% Surcharge) ---');
     // Request new OTP for order 2
     const otp2ReqRes = await fetch(`${BASE_URL}/orders/request-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
-      body: JSON.stringify({ total: 12600, itemsCount: 1, currency: 'AED' }),
+      body: JSON.stringify({ total: expectedTabbyTotal, itemsCount: 1, currency: 'AED' }),
     });
     const otp2ReqData = (await otp2ReqRes.json()) as any;
     const otp2Code = otp2ReqData.data?.devCode;
@@ -230,7 +241,16 @@ async function runComprehensiveTest() {
     });
     const order2Data = (await order2Res.json()) as any;
     const tabbyOrder = order2Data.data || order2Data;
-    console.log('Tabby Order Creation Status:', order2Res.status, 'Order ID:', tabbyOrder.id);
+    console.log('Tabby Order Creation Status:', order2Res.status, 'Order ID:', tabbyOrder.id, 'Total:', tabbyOrder.total);
+
+    if (
+      tabbyOrder.paymentSurcharge !== expectedTabbySurcharge ||
+      tabbyOrder.paymentSurchargeRate !== 8 ||
+      tabbyOrder.total !== expectedTabbyTotal
+    ) {
+      throw new Error(`Tabby 8% surcharge verification failed. Surcharge: ${tabbyOrder.paymentSurcharge} (expected ${expectedTabbySurcharge}), Rate: ${tabbyOrder.paymentSurchargeRate}, Total: ${tabbyOrder.total} (expected ${expectedTabbyTotal})`);
+    }
+    console.log(`✅ Tabby 8% extra surcharge verified successfully (${expectedTabbySurcharge} AED surcharge on ${expectedSubtotal} AED subtotal)`);
 
     // Initiate Tabby session
     const initiateTabbyRes = await fetch(`${BASE_URL}/payments/initiate`, {
@@ -252,7 +272,7 @@ async function runComprehensiveTest() {
       body: JSON.stringify({
         id: 'tabby_payment_web_777',
         status: 'AUTHORIZED',
-        amount: '12600.00',
+        amount: expectedTabbyTotal.toFixed(2),
         currency: 'AED',
         order: { reference_id: tabbyOrder.id },
       }),
@@ -271,6 +291,95 @@ async function runComprehensiveTest() {
     if (tabbyStatusData.data?.paymentStatus !== 'PAID') {
       throw new Error(`Tabby order was not upgraded to PAID by webhook. Current: ${tabbyStatusData.data?.paymentStatus}`);
     }
+
+    // -------------------------------------------------------------
+    // TEST SECTION 3.5: CARD 3% SURCHARGE & COD BUR DUBAI VERIFICATION
+    // -------------------------------------------------------------
+    console.log('\n--- [TEST 5.1] Credit/Debit Card 3% Extra Surcharge Verification ---');
+    const otpCardReq = await fetch(`${BASE_URL}/orders/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({ total: expectedCardTotal, itemsCount: 1, currency: 'AED' }),
+    });
+    const otpCardData = (await otpCardReq.json()) as any;
+    const cardOrderRes = await fetch(`${BASE_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({
+        ...tamaraOrderPayload,
+        paymentMethod: 'CREDIT_CARD',
+        otpCode: otpCardData.data?.devCode,
+      }),
+    });
+    const cardOrder = (await cardOrderRes.json()) as any;
+    const cardOrderData = cardOrder.data || cardOrder;
+    console.log('Card Order Total:', cardOrderData.total, 'Surcharge:', cardOrderData.paymentSurcharge, 'Rate:', cardOrderData.paymentSurchargeRate);
+    if (
+      cardOrderData.paymentSurcharge !== expectedCardSurcharge ||
+      cardOrderData.paymentSurchargeRate !== 3 ||
+      cardOrderData.total !== expectedCardTotal
+    ) {
+      throw new Error(`Card 3% surcharge failed: Surcharge ${cardOrderData.paymentSurcharge} (expected ${expectedCardSurcharge}), Total ${cardOrderData.total} (expected ${expectedCardTotal})`);
+    }
+    console.log(`✅ Credit/Debit card 3% surcharge verified successfully (${expectedCardSurcharge} AED surcharge on ${expectedSubtotal} AED subtotal)`);
+
+    console.log('\n--- [TEST 5.2] COD in Bur Dubai (Free COD Fee) ---');
+    const otpCodBurDubaiReq = await fetch(`${BASE_URL}/orders/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({ total: expectedCodFreeTotal, itemsCount: 1, currency: 'AED' }),
+    });
+    const otpCodBurDubaiData = (await otpCodBurDubaiReq.json()) as any;
+    const codBurDubaiRes = await fetch(`${BASE_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({
+        ...tamaraOrderPayload,
+        paymentMethod: 'COD',
+        shippingAddress: {
+          ...tamaraOrderPayload.shippingAddress,
+          addressLine1: 'Al Fahidi Historic District, Meena Bazaar, Bur Dubai',
+          city: 'Dubai',
+        },
+        otpCode: otpCodBurDubaiData.data?.devCode,
+      }),
+    });
+    const codBurDubaiOrder = (await codBurDubaiRes.json()) as any;
+    const codBurDubaiData = codBurDubaiOrder.data || codBurDubaiOrder;
+    console.log('COD Bur Dubai Order Total:', codBurDubaiData.total, 'COD Fee:', codBurDubaiData.codFee, 'Surcharge:', codBurDubaiData.paymentSurcharge);
+    if (codBurDubaiData.codFee !== 0 || codBurDubaiData.paymentSurcharge !== 0 || codBurDubaiData.total !== expectedCodFreeTotal) {
+      throw new Error(`COD Bur Dubai verification failed: Fee ${codBurDubaiData.codFee}, Total ${codBurDubaiData.total} (expected ${expectedCodFreeTotal})`);
+    }
+    console.log('✅ COD inside Bur Dubai verified FREE (0.00 AED COD fee)');
+
+    console.log('\n--- [TEST 5.3] COD Outside Bur Dubai (Standard 25 AED Fee) ---');
+    const otpCodOutsideReq = await fetch(`${BASE_URL}/orders/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({ total: expectedCodPaidTotal, itemsCount: 1, currency: 'AED' }),
+    });
+    const otpCodOutsideData = (await otpCodOutsideReq.json()) as any;
+    const codOutsideRes = await fetch(`${BASE_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({
+        ...tamaraOrderPayload,
+        paymentMethod: 'COD',
+        shippingAddress: {
+          ...tamaraOrderPayload.shippingAddress,
+          addressLine1: 'Corniche Road, Sector E10',
+          city: 'Abu Dhabi',
+        },
+        otpCode: otpCodOutsideData.data?.devCode,
+      }),
+    });
+    const codOutsideOrder = (await codOutsideRes.json()) as any;
+    const codOutsideData = codOutsideOrder.data || codOutsideOrder;
+    console.log('COD Outside Bur Dubai Order Total:', codOutsideData.total, 'COD Fee:', codOutsideData.codFee, 'Surcharge:', codOutsideData.paymentSurcharge);
+    if (codOutsideData.codFee !== 25 || codOutsideData.paymentSurcharge !== 0 || codOutsideData.total !== expectedCodPaidTotal) {
+      throw new Error(`COD Outside Bur Dubai verification failed: Fee ${codOutsideData.codFee}, Total ${codOutsideData.total} (expected ${expectedCodPaidTotal})`);
+    }
+    console.log('✅ COD outside Bur Dubai verified with 25.00 AED handling fee');
 
     // -------------------------------------------------------------
     // TEST SECTION 4: SECURITY & ACCESS CONTROL CHECKS

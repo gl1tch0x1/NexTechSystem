@@ -75,6 +75,8 @@ export class OrderService {
       productsMap,
       couponCode: dto.couponCode,
       taxTreatment: dto.taxTreatment,
+      paymentMethod: dto.paymentMethod,
+      shippingAddress: dto.shippingAddress,
     });
 
     // 4. Verify stock availability (respecting variant and backorder settings)
@@ -159,6 +161,9 @@ export class OrderService {
         tax: pricing.tax,
         taxRate: pricing.taxRate,
         shippingFee: pricing.shippingFee,
+        paymentSurcharge: pricing.paymentSurcharge,
+        paymentSurchargeRate: pricing.paymentSurchargeRate,
+        codFee: pricing.codFee,
         total: pricing.total,
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,

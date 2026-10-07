@@ -37,6 +37,31 @@ const UAE_EMIRATES = [
   'Umm Al Quwain'
 ];
 
+/**
+ * Detects if a shipping destination address is within the Bur Dubai district of Dubai.
+ */
+function isBurDubaiAddress(address?: { addressLine1?: string; city?: string; state?: string; postalCode?: string } | null): boolean {
+  if (!address) return false;
+  const combined = `${address.addressLine1 || ''} ${address.city || ''} ${address.state || ''} ${address.postalCode || ''}`.toLowerCase();
+  
+  const burDubaiPatterns = [
+    /\bbur\s*dubai\b/i,
+    /\bal\s*mankhool\b/i,
+    /\bal\s*karama\b/i,
+    /\bal\s*fahidi\b/i,
+    /\bmeena\s*bazaar\b/i,
+    /\bal\s*raffa\b/i,
+    /\boud\s*metha\b/i,
+    /\bal\s*souq\s*al\s*kabeer\b/i,
+    /\bal\s*hudaiba\b/i,
+    /\bal\s*jafiliya\b/i,
+    /\bza'abeel\b/i,
+    /\bzaabeel\b/i,
+  ];
+
+  return burDubaiPatterns.some(pattern => pattern.test(combined));
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, token, isLoading: authLoading } = useAuth();
@@ -180,6 +205,30 @@ export default function CheckoutPage() {
     setCouponError('');
   };
 
+  // Bur Dubai and Payment Surcharge Calculations
+  const isInsideBurDubai = isBurDubaiAddress(shippingAddress);
+
+  // Surcharges from product amount (subtotal):
+  // Tabby: 8% extra
+  // Credit / Debit card: 3% extra
+  // Cash (COD, Bank Transfer): 0%
+  let paymentSurchargeRate = 0;
+  if (paymentMethod === 'TABBY') {
+    paymentSurchargeRate = 8;
+  } else if (paymentMethod === 'CREDIT_CARD') {
+    paymentSurchargeRate = 3;
+  }
+
+  const paymentSurcharge = paymentSurchargeRate > 0
+    ? Math.round((cart.subtotal * (paymentSurchargeRate / 100)) * 100) / 100
+    : 0;
+
+  // COD handling fee:
+  // Free inside Bur Dubai, otherwise 25 AED
+  const codFee = paymentMethod === 'COD' ? (isInsideBurDubai ? 0 : 25) : 0;
+
+  const finalPayable = Math.max(0, Math.round((cart.total + paymentSurcharge + codFee) * 100) / 100);
+
   // 1. Initiate order: Validate inputs and request email OTP code
   const handleInitiateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,7 +266,7 @@ export default function CheckoutPage() {
         resendCooldownSeconds: number;
         devCode?: string;
       }>('/orders/request-otp', {
-        total: cart.total,
+        total: finalPayable,
         itemsCount: cartItems.length,
         currency: 'AED',
       }, { token });
@@ -247,7 +296,7 @@ export default function CheckoutPage() {
         resendCooldownSeconds: number;
         devCode?: string;
       }>('/orders/request-otp', {
-        total: cart.total,
+        total: finalPayable,
         itemsCount: cartItems.length,
         currency: 'AED',
       }, { token });
@@ -320,8 +369,6 @@ export default function CheckoutPage() {
       setIsVerifyingOtp(false);
     }
   };
-
-  const finalPayable = cart.total;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
@@ -571,13 +618,15 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-slate-900 dark:text-white">Credit / Debit Card</div>
+                  <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                    <span>Credit / Debit Card</span>
+                    <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800">+3% Fee</span>
+                  </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                     Visa, Mastercard, AMEX
                   </div>
-                  <div className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
-                    <Check className="w-3 h-3" />
-                    <span>Instant Verification</span>
+                  <div className="text-[9px] font-mono text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                    <span>+3% surcharge on product amount</span>
                   </div>
                 </div>
               </label>
@@ -640,14 +689,13 @@ export default function CheckoutPage() {
                 <div>
                   <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
                     <span>Tabby &bull; Pay in 4</span>
-                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">No Fees</span>
+                    <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800">+8% Fee</span>
                   </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                     4 payments of {formatPrice(finalPayable / 4)}
                   </div>
-                  <div className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
-                    <Check className="w-3 h-3" />
-                    <span>Instant UAE ID Approval</span>
+                  <div className="text-[9px] font-mono text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                    <span>+8% surcharge on product amount</span>
                   </div>
                 </div>
               </label>
@@ -712,9 +760,16 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-slate-900 dark:text-white">Cash on Delivery (COD)</div>
+                  <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                    <span>Cash on Delivery (COD)</span>
+                    {isInsideBurDubai ? (
+                      <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">FREE in Bur Dubai</span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">+AED 25 Fee</span>
+                    )}
+                  </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Pay upon arrival in UAE
+                    {isInsideBurDubai ? 'Free delivery handling for Bur Dubai' : 'Pay upon arrival in UAE'}
                   </div>
                   <div className="text-[9px] text-slate-500 dark:text-slate-400 mt-1">
                     Courier terminal or cash
@@ -865,7 +920,31 @@ export default function CheckoutPage() {
                 <span className="font-bold font-mono text-slate-900 dark:text-white">{formatPrice(cart.tax)}</span>
               </div>
 
+              {paymentSurcharge > 0 && (
+                <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <span>Payment Surcharge ({paymentSurchargeRate}%):</span>
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                      {paymentMethod === 'TABBY' ? 'Tabby Online (8%)' : 'Cards (3%)'}
+                    </span>
+                  </span>
+                  <span className="font-bold font-mono text-amber-600 dark:text-amber-400">+{formatPrice(paymentSurcharge)}</span>
+                </div>
+              )}
 
+              {paymentMethod === 'COD' && (
+                <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <span>COD Handling Fee:</span>
+                    <span className="text-[10px] text-slate-400 font-normal">
+                      {isInsideBurDubai ? 'Bur Dubai Destination' : 'UAE Delivery'}
+                    </span>
+                  </span>
+                  <span className={`font-bold font-mono ${codFee === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
+                    {codFee === 0 ? 'FREE (Bur Dubai)' : `+${formatPrice(codFee)}`}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Total Box */}

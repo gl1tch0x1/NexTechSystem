@@ -1,6 +1,33 @@
-import { CartItem, Coupon } from '../types/index.js';
+import { CartItem, Coupon, PaymentMethod, Address } from '../types/index.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { couponRepository } from '../repositories/coupon.repository.js';
+
+/**
+ * Detects if a shipping destination address is within the Bur Dubai district of Dubai.
+ * Bur Dubai encompasses historic and commercial localities including Al Mankhool,
+ * Al Karama, Al Fahidi, Meena Bazaar, Al Raffa, Oud Metha, and Al Souq Al Kabeer.
+ */
+export function isBurDubaiAddress(address?: { addressLine1?: string; city?: string; state?: string; postalCode?: string } | null): boolean {
+  if (!address) return false;
+  const combined = `${address.addressLine1 || ''} ${address.city || ''} ${address.state || ''} ${address.postalCode || ''}`.toLowerCase();
+  
+  const burDubaiPatterns = [
+    /\bbur\s*dubai\b/i,
+    /\bal\s*mankhool\b/i,
+    /\bal\s*karama\b/i,
+    /\bal\s*fahidi\b/i,
+    /\bmeena\s*bazaar\b/i,
+    /\bal\s*raffa\b/i,
+    /\boud\s*metha\b/i,
+    /\bal\s*souq\s*al\s*kabeer\b/i,
+    /\bal\s*hudaiba\b/i,
+    /\bal\s*jafiliya\b/i,
+    /\bza'abeel\b/i,
+    /\bzaabeel\b/i,
+  ];
+
+  return burDubaiPatterns.some(pattern => pattern.test(combined));
+}
 
 export interface PricingCalculationResult {
   items: CartItem[];
@@ -12,6 +39,9 @@ export interface PricingCalculationResult {
   taxRate: number;
   tax: number;
   shippingFee: number;
+  paymentSurcharge: number;
+  paymentSurchargeRate: number;
+  codFee: number;
   walletAmountUsed: number;
   total: number;
   currency: string;
@@ -25,6 +55,8 @@ export class PricingService {
     requestedWalletDeduction?: number;
     userWalletBalance?: number;
     taxTreatment?: string;
+    paymentMethod?: PaymentMethod;
+    shippingAddress?: Address;
   }): Promise<PricingCalculationResult> {
     const settings = await settingsRepository.getSettings();
     const verifiedItems: CartItem[] = [];
@@ -143,7 +175,32 @@ export class PricingService {
     const discountedTaxableSubtotal = Math.max(0, taxableItemsSubtotal - (couponDiscount * taxableRatio));
     const tax = isZeroRated ? 0 : Math.round((discountedTaxableSubtotal * (taxRate / 100)) * 100) / 100;
 
-    const preWalletTotal = Math.round((discountedSubtotal + tax + shippingFee) * 100) / 100;
+    // Payment Surcharge calculation:
+    // Tabby: 8% extra from the product amount (subtotal)
+    // Cards (Debit/Credit): 3% extra from the product amount (subtotal)
+    // Cash / COD / others: 0% extra
+    let paymentSurchargeRate = 0;
+    if (params.paymentMethod === 'TABBY') {
+      paymentSurchargeRate = 8;
+    } else if (params.paymentMethod === 'CREDIT_CARD') {
+      paymentSurchargeRate = 3;
+    }
+
+    const paymentSurcharge = paymentSurchargeRate > 0
+      ? Math.round((subtotal * (paymentSurchargeRate / 100)) * 100) / 100
+      : 0;
+
+    // COD handling fee:
+    // If COD is inside Bur Dubai -> Free (0 AED), else COD charges included accordingly (default 25 AED)
+    let codFee = 0;
+    if (params.paymentMethod === 'COD') {
+      const isInsideBurDubai = isBurDubaiAddress(params.shippingAddress);
+      if (!isInsideBurDubai) {
+        codFee = (settings as any).codFee !== undefined ? Number((settings as any).codFee) : 25;
+      }
+    }
+
+    const preWalletTotal = Math.round((discountedSubtotal + tax + shippingFee + paymentSurcharge + codFee) * 100) / 100;
 
     // Wallet deduction verification
     let walletAmountUsed = 0;
@@ -164,6 +221,9 @@ export class PricingService {
       taxRate,
       tax,
       shippingFee,
+      paymentSurcharge,
+      paymentSurchargeRate,
+      codFee,
       walletAmountUsed: Math.round(walletAmountUsed * 100) / 100,
       total,
       currency: settings.defaultCurrency || 'AED',

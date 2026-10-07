@@ -325,6 +325,22 @@ export default function OrderDetailPage() {
               <span className="font-mono font-bold">{formatPrice(order.tax)}</span>
             </div>
 
+            {Boolean(order.paymentSurcharge && order.paymentSurcharge > 0) && (
+              <div className="flex items-center justify-between text-slate-600">
+                <span>Payment Surcharge ({order.paymentSurchargeRate || (order.paymentMethod === 'TABBY' ? 8 : 3)}%):</span>
+                <span className="font-mono font-bold">+{formatPrice(order.paymentSurcharge || 0)}</span>
+              </div>
+            )}
+
+            {order.paymentMethod === 'COD' && (
+              <div className="flex items-center justify-between text-slate-600">
+                <span>Cash on Delivery Handling:</span>
+                <span className={`font-mono font-bold ${order.codFee && order.codFee > 0 ? 'text-slate-900' : 'text-emerald-600'}`}>
+                  {order.codFee && order.codFee > 0 ? `+${formatPrice(order.codFee || 0)}` : 'FREE (Bur Dubai)'}
+                </span>
+              </div>
+            )}
+
             {order.walletAmountUsed > 0 && (
               <div className="flex items-center justify-between text-blue-600 font-bold">
                 <span>Customer Digital Wallet Applied:</span>
