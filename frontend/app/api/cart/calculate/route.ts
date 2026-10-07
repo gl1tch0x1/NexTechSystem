@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
   }
 
   let paymentSurchargeRate = 0;
-  if (paymentMethod === 'TABBY') {
+  if (paymentMethod === 'TABBY' || paymentMethod === 'TAMARA') {
     paymentSurchargeRate = 8;
   } else if (paymentMethod === 'CREDIT_CARD') {
     paymentSurchargeRate = 3;

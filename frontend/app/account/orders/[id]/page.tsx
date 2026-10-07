@@ -327,7 +327,7 @@ export default function OrderDetailPage() {
 
             {Boolean(order.paymentSurcharge && order.paymentSurcharge > 0) && (
               <div className="flex items-center justify-between text-slate-600">
-                <span>Payment Surcharge ({order.paymentSurchargeRate || (order.paymentMethod === 'TABBY' ? 8 : 3)}%):</span>
+                <span>Payment Surcharge ({order.paymentSurchargeRate || (order.paymentMethod === 'TABBY' || order.paymentMethod === 'TAMARA' ? 8 : 3)}%):</span>
                 <span className="font-mono font-bold">+{formatPrice(order.paymentSurcharge || 0)}</span>
               </div>
             )}

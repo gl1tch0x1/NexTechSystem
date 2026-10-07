@@ -92,6 +92,8 @@ async function runComprehensiveTest() {
     const expectedBaseTotal = Math.round((expectedSubtotal + expectedVat) * 100) / 100;
     const expectedTabbySurcharge = Math.round(productPrice * 0.08 * 100) / 100;
     const expectedTabbyTotal = Math.round((expectedBaseTotal + expectedTabbySurcharge) * 100) / 100;
+    const expectedTamaraSurcharge = Math.round(productPrice * 0.08 * 100) / 100;
+    const expectedTamaraTotal = Math.round((expectedBaseTotal + expectedTamaraSurcharge) * 100) / 100;
     const expectedCardSurcharge = Math.round(productPrice * 0.03 * 100) / 100;
     const expectedCardTotal = Math.round((expectedBaseTotal + expectedCardSurcharge) * 100) / 100;
     const expectedCodFreeTotal = expectedBaseTotal;
@@ -106,7 +108,7 @@ async function runComprehensiveTest() {
     const otpReqRes = await fetch(`${BASE_URL}/orders/request-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
-      body: JSON.stringify({ total: expectedBaseTotal, itemsCount: 1, currency: 'AED' }),
+      body: JSON.stringify({ total: expectedTamaraTotal, itemsCount: 1, currency: 'AED' }),
     });
     const otpReqData = (await otpReqRes.json()) as any;
     console.log('OTP Request Response Status:', otpReqRes.status, otpReqData);
@@ -131,9 +133,9 @@ async function runComprehensiveTest() {
     }
 
     // -------------------------------------------------------------
-    // TEST SECTION 2: TAMARA BNPL ORDER & CHECKOUT SESSION
+    // TEST SECTION 2: TAMARA BNPL ORDER & CHECKOUT SESSION (8% SURCHARGE)
     // -------------------------------------------------------------
-    console.log('\n--- [TEST 2] Tamara BNPL Order Creation & Checkout Session ---');
+    console.log('\n--- [TEST 2] Tamara BNPL Order Creation & Checkout Session (8% Surcharge) ---');
     const tamaraOrderPayload = {
       items: [{ productId: testProduct.id, quantity: 1 }],
       shippingAddress: {
@@ -168,6 +170,15 @@ async function runComprehensiveTest() {
     if (!tamaraOrder?.id) {
       throw new Error(`Tamara order creation failed: ${JSON.stringify(orderData)}`);
     }
+
+    if (
+      tamaraOrder.paymentSurcharge !== expectedTamaraSurcharge ||
+      tamaraOrder.paymentSurchargeRate !== 8 ||
+      tamaraOrder.total !== expectedTamaraTotal
+    ) {
+      throw new Error(`Tamara 8% surcharge verification failed. Surcharge: ${tamaraOrder.paymentSurcharge} (expected ${expectedTamaraSurcharge}), Rate: ${tamaraOrder.paymentSurchargeRate}, Total: ${tamaraOrder.total} (expected ${expectedTamaraTotal})`);
+    }
+    console.log(`✅ Tamara 8% extra surcharge verified successfully (${expectedTamaraSurcharge} AED surcharge on ${expectedSubtotal} AED subtotal)`);
 
     // Verify initial payment status is PENDING for BNPL
     if (tamaraOrder.paymentStatus !== 'PENDING') {

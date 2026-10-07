@@ -9,6 +9,7 @@ import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
 import { Order, PaymentMethod, Address } from '@/types';
 import OrderOtpModal from '@/components/checkout/OrderOtpModal';
+import CodLocationModal from '@/components/checkout/CodLocationModal';
 import {
   ShieldCheck,
   CreditCard,
@@ -108,6 +109,10 @@ export default function CheckoutPage() {
   const [otpCooldown, setOtpCooldown] = useState(60);
   const [otpError, setOtpError] = useState('');
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
+  // COD Location Confirmation State
+  const [isCodLocationModalOpen, setIsCodLocationModalOpen] = useState(false);
+  const [isCodLocationConfirmed, setIsCodLocationConfirmed] = useState(false);
 
   // Coupon state in checkout
   const [couponInput, setCouponInput] = useState('');
@@ -209,11 +214,11 @@ export default function CheckoutPage() {
   const isInsideBurDubai = isBurDubaiAddress(shippingAddress);
 
   // Surcharges from product amount (subtotal):
-  // Tabby: 8% extra
+  // Tabby & Tamara: 8% extra
   // Credit / Debit card: 3% extra
   // Cash (COD, Bank Transfer): 0%
   let paymentSurchargeRate = 0;
-  if (paymentMethod === 'TABBY') {
+  if (paymentMethod === 'TABBY' || paymentMethod === 'TAMARA') {
     paymentSurchargeRate = 8;
   } else if (paymentMethod === 'CREDIT_CARD') {
     paymentSurchargeRate = 3;
@@ -228,6 +233,19 @@ export default function CheckoutPage() {
   const codFee = paymentMethod === 'COD' ? (isInsideBurDubai ? 0 : 25) : 0;
 
   const finalPayable = Math.max(0, Math.round((cart.total + paymentSurcharge + codFee) * 100) / 100);
+
+  const handleSelectPaymentMethod = (method: PaymentMethod) => {
+    setPaymentMethod(method);
+    if (method === 'COD') {
+      setIsCodLocationModalOpen(true);
+    }
+  };
+
+  const handleConfirmCodLocation = (updatedAddress: Address) => {
+    setShippingAddress(updatedAddress);
+    setIsCodLocationConfirmed(true);
+    setIsCodLocationModalOpen(false);
+  };
 
   // 1. Initiate order: Validate inputs and request email OTP code
   const handleInitiateOrder = async (e: React.FormEvent) => {
@@ -255,6 +273,12 @@ export default function CheckoutPage() {
       }
       if (!shippingAddress.addressLine1.trim()) {
         throw new Error('Street address and building/office location are required.');
+      }
+
+      // If COD is selected, ensure customer confirmed their exact location for reliable dispatch
+      if (paymentMethod === 'COD' && !isCodLocationConfirmed) {
+        setIsCodLocationModalOpen(true);
+        return;
       }
 
       setIsSubmitting(true);
@@ -647,21 +671,20 @@ export default function CheckoutPage() {
                     type="radio"
                     name="paymentMethod"
                     checked={paymentMethod === 'TAMARA'}
-                    onChange={() => setPaymentMethod('TAMARA')}
+                    onChange={() => handleSelectPaymentMethod('TAMARA')}
                     className="w-4 h-4 text-[#FA6651] cursor-pointer"
                   />
                 </div>
                 <div>
                   <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
                     <span>Tamara &bull; Split in 4</span>
-                    <span className="text-[10px] font-mono text-[#FA6651] font-bold">0% APR</span>
+                    <span className="text-[10px] font-mono text-[#FA6651] font-bold bg-[#FA6651]/10 px-1.5 py-0.5 rounded border border-[#FA6651]/30">+8% Fee</span>
                   </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                     4 installments of {formatPrice(finalPayable / 4)}
                   </div>
-                  <div className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
-                    <Check className="w-3 h-3" />
-                    <span>Sharia Compliant &bull; No Fees</span>
+                  <div className="text-[9px] font-mono text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                    <span>+8% surcharge on product amount</span>
                   </div>
                 </div>
               </label>
@@ -682,7 +705,7 @@ export default function CheckoutPage() {
                     type="radio"
                     name="paymentMethod"
                     checked={paymentMethod === 'TABBY'}
-                    onChange={() => setPaymentMethod('TABBY')}
+                    onChange={() => handleSelectPaymentMethod('TABBY')}
                     className="w-4 h-4 text-emerald-500 cursor-pointer"
                   />
                 </div>
@@ -720,7 +743,7 @@ export default function CheckoutPage() {
                     type="radio"
                     name="paymentMethod"
                     checked={paymentMethod === 'BANK_TRANSFER'}
-                    onChange={() => setPaymentMethod('BANK_TRANSFER')}
+                    onChange={() => handleSelectPaymentMethod('BANK_TRANSFER')}
                     className="w-4 h-4 text-tech-blue cursor-pointer"
                   />
                 </div>
@@ -755,7 +778,7 @@ export default function CheckoutPage() {
                     type="radio"
                     name="paymentMethod"
                     checked={paymentMethod === 'COD'}
-                    onChange={() => setPaymentMethod('COD')}
+                    onChange={() => handleSelectPaymentMethod('COD')}
                     className="w-4 h-4 text-tech-blue cursor-pointer"
                   />
                 </div>
@@ -774,6 +797,33 @@ export default function CheckoutPage() {
                   <div className="text-[9px] text-slate-500 dark:text-slate-400 mt-1">
                     Courier terminal or cash
                   </div>
+
+                  {paymentMethod === 'COD' && (
+                    <div className="mt-2.5 pt-2 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-[10px]">
+                      {isCodLocationConfirmed ? (
+                        <span className="font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          <span>Location Verified</span>
+                        </span>
+                      ) : (
+                        <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          <span>Location Check Needed</span>
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsCodLocationModalOpen(true);
+                        }}
+                        className="font-bold text-tech-blue dark:text-tech-cyan hover:underline cursor-pointer"
+                      >
+                        {isCodLocationConfirmed ? 'Review / Edit' : 'Verify Location'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </label>
             </div>
@@ -925,7 +975,7 @@ export default function CheckoutPage() {
                   <span className="flex items-center gap-1">
                     <span>Payment Surcharge ({paymentSurchargeRate}%):</span>
                     <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
-                      {paymentMethod === 'TABBY' ? 'Tabby Online (8%)' : 'Cards (3%)'}
+                      {paymentMethod === 'TABBY' ? 'Tabby Online (8%)' : paymentMethod === 'TAMARA' ? 'Tamara Online (8%)' : 'Cards (3%)'}
                     </span>
                   </span>
                   <span className="font-bold font-mono text-amber-600 dark:text-amber-400">+{formatPrice(paymentSurcharge)}</span>
@@ -1031,6 +1081,15 @@ export default function CheckoutPage() {
         devCode={otpDevCode}
         isSubmitting={isVerifyingOtp}
         errorMessage={otpError}
+      />
+
+      {/* Cash on Delivery Location Confirmation Modal */}
+      <CodLocationModal
+        isOpen={isCodLocationModalOpen}
+        onClose={() => setIsCodLocationModalOpen(false)}
+        onConfirm={handleConfirmCodLocation}
+        initialAddress={shippingAddress}
+        isBurDubaiChecker={isBurDubaiAddress}
       />
     </div>
   );

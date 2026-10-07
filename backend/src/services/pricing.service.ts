@@ -176,11 +176,11 @@ export class PricingService {
     const tax = isZeroRated ? 0 : Math.round((discountedTaxableSubtotal * (taxRate / 100)) * 100) / 100;
 
     // Payment Surcharge calculation:
-    // Tabby: 8% extra from the product amount (subtotal)
+    // Tabby & Tamara (BNPL): 8% extra from the product amount (subtotal)
     // Cards (Debit/Credit): 3% extra from the product amount (subtotal)
     // Cash / COD / others: 0% extra
     let paymentSurchargeRate = 0;
-    if (params.paymentMethod === 'TABBY') {
+    if (params.paymentMethod === 'TABBY' || params.paymentMethod === 'TAMARA') {
       paymentSurchargeRate = 8;
     } else if (params.paymentMethod === 'CREDIT_CARD') {
       paymentSurchargeRate = 3;

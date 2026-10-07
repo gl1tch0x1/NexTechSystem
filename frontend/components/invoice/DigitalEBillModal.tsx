@@ -448,7 +448,7 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
               </div>
               {Boolean(order.paymentSurcharge && order.paymentSurcharge > 0) && (
                 <div className="flex justify-between py-1 border-b border-slate-100 text-slate-600">
-                  <span>Payment Surcharge ({order.paymentSurchargeRate || (order.paymentMethod === 'TABBY' ? 8 : 3)}%):</span>
+                  <span>Payment Surcharge ({order.paymentSurchargeRate || (order.paymentMethod === 'TABBY' || order.paymentMethod === 'TAMARA' ? 8 : 3)}%):</span>
                   <span className="font-mono font-bold text-slate-900">+ {formatPrice(order.paymentSurcharge || 0)}</span>
                 </div>
               )}
