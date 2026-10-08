@@ -12,7 +12,6 @@ import { productRepository } from './repositories/product.repository.js';
 import { ENV } from './config/env.js';
 
 
-import cookieParser from 'cookie-parser';
 import { csrfProtection } from './middlewares/csrf-protection.middleware.js';
 
 export function createApp(): Express {
@@ -106,10 +105,6 @@ export function createApp(): Express {
     maxAge: 86400,
   };
   app.use(cors(corsOptions));
-
-  // Parse cookies for secure httpOnly authentication
-  app.use(cookieParser());
-
   app.use(morgan('dev'));
   app.use(express.json({ limit: '15mb' }));
   app.use(express.urlencoded({ extended: true, limit: '15mb' }));

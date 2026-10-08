@@ -16,14 +16,21 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+function getCookieToken(req: Request): string | undefined {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return undefined;
+  const match = cookieHeader.match(/(?:^|;\s*)auth_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
 export async function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
   let token: string | undefined;
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.split(' ')[1];
-  } else if (req.cookies && typeof req.cookies.auth_token === 'string') {
-    token = req.cookies.auth_token;
+  } else {
+    token = getCookieToken(req);
   }
 
   if (!token) {
@@ -72,8 +79,8 @@ export function optionalAuthenticate(req: AuthenticatedRequest, _res: Response, 
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.split(' ')[1];
-  } else if (req.cookies && typeof req.cookies.auth_token === 'string') {
-    token = req.cookies.auth_token;
+  } else {
+    token = getCookieToken(req);
   }
 
   if (!token) {
