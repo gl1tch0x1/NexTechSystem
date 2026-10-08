@@ -822,24 +822,25 @@ export class AuthController {
       return;
     }
 
-    const { password, code } = req.body;
+    const { password } = req.body;
+    if (!password || typeof password !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'PASSWORD_REQUIRED', message: 'Current account password is required to disable 2FA.' },
+      });
+      return;
+    }
+
     const user = await userRepository.findById(req.user.id);
     if (!user) {
       res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User not found.' } });
       return;
     }
 
-    let authorized = false;
-    if (password && user.passwordHash && verifyPassword(String(password), user.passwordHash)) {
-      authorized = true;
-    } else if (code && user.mfaSecret && verifyTotp(user.mfaSecret, String(code).trim())) {
-      authorized = true;
-    }
-
-    if (!authorized) {
+    if (!user.passwordHash || !verifyPassword(String(password), user.passwordHash)) {
       res.status(401).json({
         success: false,
-        error: { code: 'INVALID_CREDENTIALS', message: 'Current password or valid authenticator code is required to disable 2FA.' },
+        error: { code: 'INVALID_CREDENTIALS', message: 'Invalid password.' },
       });
       return;
     }
