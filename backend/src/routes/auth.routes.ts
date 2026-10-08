@@ -24,6 +24,11 @@ router.put('/profile', authenticate, (req, res, next) => authController.updatePr
 router.post('/change-password', authenticate, (req, res, next) => authController.changePassword(req, res).catch(next));
 router.delete(['/account', '/delete-account'], authenticate, (req, res, next) => authController.deleteAccount(req, res).catch(next));
 
+// Password Reset & OTP Authorization routes
+router.post('/forgot-password', (req, res, next) => authController.forgotPassword(req, res).catch(next));
+router.post('/verify-reset-otp', (req, res, next) => authController.verifyResetOtp(req, res).catch(next));
+router.post('/reset-password', (req, res, next) => authController.resetPassword(req, res).catch(next));
+
 // Multi-Factor Authentication routes
 router.post('/mfa/setup', authenticate, (req, res, next) => authController.setupMfa(req, res).catch(next));
 router.post('/mfa/verify', authenticate, (req, res, next) => authController.verifyAndEnableMfa(req, res).catch(next));

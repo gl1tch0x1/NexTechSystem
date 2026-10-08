@@ -8,6 +8,8 @@ import { walletService } from '../services/wallet.service.js';
 import { ENV } from '../config/env.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { User, Reseller } from '../types/index.js';
+import { passwordResetService } from '../services/password-reset.service.js';
+import { auditService } from '../services/audit.service.js';
 
 const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_KEYLEN = 64;
@@ -865,6 +867,148 @@ export class AuthController {
       path: '/',
     });
     res.json({ success: true, message: 'Logged out successfully.' });
+  }
+
+  /**
+   * Request password reset 6-digit OTP
+   */
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_EMAIL', message: 'A valid email address is required.' },
+      });
+      return;
+    }
+
+    try {
+      const result = await passwordResetService.requestResetOtp(email);
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (err: any) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'RESET_REQUEST_FAILED', message: err.message || 'Failed to dispatch password reset code.' },
+      });
+    }
+  }
+
+  /**
+   * Validate password reset 6-digit OTP and issue single-use resetToken
+   */
+  async verifyResetOtp(req: Request, res: Response): Promise<void> {
+    const { email, code } = req.body;
+    if (!email || !code || typeof code !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_INPUT', message: 'Email and 6-digit verification code are required.' },
+      });
+      return;
+    }
+
+    const result = await passwordResetService.verifyResetOtp(String(email), String(code));
+    if (!result.valid) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_OTP',
+          message: result.error || 'Invalid or expired verification code.',
+          remainingAttempts: result.remainingAttempts,
+        },
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        resetToken: result.resetToken,
+        message: 'Verification code confirmed. You may now set your new password.',
+      },
+    });
+  }
+
+  /**
+   * Set new password with validated resetToken
+   */
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    const { resetToken, newPassword } = req.body;
+    if (!resetToken || typeof resetToken !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'TOKEN_REQUIRED', message: 'Password reset authorization token is required.' },
+      });
+      return;
+    }
+
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'WEAK_PASSWORD', message: 'New password must be at least 8 characters long.' },
+      });
+      return;
+    }
+
+    if (newPassword.length > 128) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_PASSWORD', message: 'Password must not exceed 128 characters.' },
+      });
+      return;
+    }
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(resetToken, ENV.JWT_SECRET, { algorithms: ['HS256'] });
+    } catch {
+      res.status(401).json({
+        success: false,
+        error: { code: 'INVALID_RESET_TOKEN', message: 'The reset authorization token has expired or is invalid. Please request a new code.' },
+      });
+      return;
+    }
+
+    if (decoded.purpose !== 'PASSWORD_RESET' || !decoded.userId) {
+      res.status(401).json({
+        success: false,
+        error: { code: 'INVALID_TOKEN_PURPOSE', message: 'Invalid authorization token.' },
+      });
+      return;
+    }
+
+    const user = await userRepository.findById(decoded.userId);
+    if (!user || !user.isActive) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'Account not found or inactive.' },
+      });
+      return;
+    }
+
+    const newPasswordHash = hashPassword(newPassword);
+    await userRepository.update(user.id, {
+      passwordHash: newPasswordHash,
+      updatedAt: new Date().toISOString(),
+    });
+
+    await auditService.log({
+      userId: user.id,
+      userEmail: user.email,
+      userRole: user.role,
+      action: 'PASSWORD_RESET_SUCCESS',
+      resource: 'auth/reset-password',
+      details: {
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Your password has been successfully reset. Please log in with your new password.',
+    });
   }
 }
 
