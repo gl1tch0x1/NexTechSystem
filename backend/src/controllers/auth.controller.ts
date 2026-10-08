@@ -61,8 +61,96 @@ function verifyPassword(candidate: string, stored: string): boolean {
 }
 
 function sanitizeUser(user: User): User {
-  const { passwordHash, ...safeUser } = user;
+  const { passwordHash, adminPinHash, mfaSecret, mfaBackupCodes, ...safeUser } = user;
   return safeUser as User;
+}
+
+function setAuthCookie(res: Response, token: string): void {
+  res.cookie('auth_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+}
+
+function generateTotpSecret(): string {
+  const bytes = crypto.randomBytes(20);
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = 0;
+  let value = 0;
+  let output = '';
+  for (let i = 0; i < bytes.length; i++) {
+    value = (value << 8) | bytes[i];
+    bits += 8;
+    while (bits >= 5) {
+      output += alphabet[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) {
+    output += alphabet[(value << (5 - bits)) & 31];
+  }
+  return output;
+}
+
+function base32Decode(input: string): Buffer {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = 0;
+  let value = 0;
+  const bytes: number[] = [];
+  for (let i = 0; i < input.length; i++) {
+    const idx = alphabet.indexOf(input[i].toUpperCase());
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((value >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(bytes);
+}
+
+function verifyTotp(secret: string, token: string, window = 1): boolean {
+  if (!secret || !token || !/^\d{6}$/.test(token.trim())) return false;
+  const key = base32Decode(secret);
+  if (key.length === 0) return false;
+  const currentTime = Math.floor(Date.now() / 1000 / 30);
+  const targetCode = parseInt(token.trim(), 10);
+
+  for (let step = -window; step <= window; step++) {
+    const timeStep = currentTime + step;
+    const timeBuf = Buffer.alloc(8);
+    timeBuf.writeBigUInt64BE(BigInt(timeStep));
+
+    const hmac = crypto.createHmac('sha1', key).update(timeBuf).digest();
+    const offset = hmac[hmac.length - 1] & 0x0f;
+    const binary =
+      ((hmac[offset] & 0x7f) << 24) |
+      ((hmac[offset + 1] & 0xff) << 16) |
+      ((hmac[offset + 2] & 0xff) << 8) |
+      (hmac[offset + 3] & 0xff);
+    const otp = binary % 1000000;
+
+    if (otp === targetCode) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function generateBackupCodes(count = 8): { plainCodes: string[]; hashedCodes: string[] } {
+  const plainCodes: string[] = [];
+  const hashedCodes: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+    const formatted = `${code.slice(0, 4)}-${code.slice(4, 8)}`;
+    plainCodes.push(formatted);
+    hashedCodes.push(crypto.createHash('sha256').update(formatted).digest('hex'));
+  }
+  return { plainCodes, hashedCodes };
 }
 
 export class AuthController {
@@ -253,6 +341,8 @@ export class AuthController {
         { expiresIn: '30d' }
       );
 
+      setAuthCookie(res, token);
+
       res.status(201).json({
         success: true,
         data: {
@@ -294,6 +384,8 @@ export class AuthController {
       ENV.JWT_SECRET,
       { expiresIn: '30d' }
     );
+
+    setAuthCookie(res, token);
 
     res.status(201).json({
       success: true,
@@ -390,11 +482,56 @@ export class AuthController {
     }
     await userRepository.update(user.id, loginUpdate);
 
+    // Multi-factor authentication enforcement
+    if (user.mfaEnabled) {
+      const { mfaCode } = req.body;
+      if (!mfaCode) {
+        const mfaTicket = jwt.sign(
+          { id: user.id, email: user.email, mfaPending: true },
+          ENV.JWT_SECRET,
+          { expiresIn: '5m' }
+        );
+        res.json({
+          success: true,
+          data: {
+            requiresMfa: true,
+            mfaTicket,
+          },
+        });
+        return;
+      }
+
+      const cleanMfaCode = String(mfaCode).trim();
+      let mfaPassed = false;
+      if (user.mfaSecret && verifyTotp(user.mfaSecret, cleanMfaCode)) {
+        mfaPassed = true;
+      } else if (user.mfaBackupCodes && Array.isArray(user.mfaBackupCodes)) {
+        const hashedCandidate = crypto.createHash('sha256').update(cleanMfaCode).digest('hex');
+        const idx = user.mfaBackupCodes.indexOf(hashedCandidate);
+        if (idx !== -1) {
+          mfaPassed = true;
+          const updatedCodes = [...user.mfaBackupCodes];
+          updatedCodes.splice(idx, 1);
+          await userRepository.update(user.id, { mfaBackupCodes: updatedCodes });
+        }
+      }
+
+      if (!mfaPassed) {
+        res.status(401).json({
+          success: false,
+          error: { code: 'INVALID_MFA_CODE', message: 'Invalid multi-factor authentication code or backup recovery code.' },
+        });
+        return;
+      }
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, resellerId: user.resellerId },
       ENV.JWT_SECRET,
       { expiresIn: '30d' }
     );
+
+    setAuthCookie(res, token);
 
     res.json({
       success: true,
@@ -610,6 +747,8 @@ export class AuthController {
       { expiresIn: '30d' }
     );
 
+    setAuthCookie(res, token);
+
     res.json({
       success: true,
       data: {
@@ -617,6 +756,114 @@ export class AuthController {
         user: sanitizeUser(user),
       },
     });
+  }
+
+  async setupMfa(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated.' } });
+      return;
+    }
+
+    const secret = generateTotpSecret();
+    const { plainCodes, hashedCodes } = generateBackupCodes();
+
+    // Temporarily save secret and backup codes on user record until verified
+    await userRepository.update(req.user.id, {
+      mfaSecret: secret,
+      mfaBackupCodes: hashedCodes,
+    });
+
+    const otpauthUrl = `otpauth://totp/NexTech:${encodeURIComponent(req.user.email)}?secret=${secret}&issuer=NexTech`;
+
+    res.json({
+      success: true,
+      data: {
+        secret,
+        otpauthUrl,
+        backupCodes: plainCodes,
+      },
+    });
+  }
+
+  async verifyAndEnableMfa(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated.' } });
+      return;
+    }
+
+    const { code } = req.body;
+    if (!code) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Verification code is required.' } });
+      return;
+    }
+
+    const user = await userRepository.findById(req.user.id);
+    if (!user || !user.mfaSecret) {
+      res.status(400).json({ success: false, error: { code: 'MFA_NOT_INITIALIZED', message: 'Please initialize MFA setup first.' } });
+      return;
+    }
+
+    if (!verifyTotp(user.mfaSecret, String(code).trim())) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_CODE', message: 'Invalid verification code.' } });
+      return;
+    }
+
+    await userRepository.update(user.id, { mfaEnabled: true });
+
+    res.json({
+      success: true,
+      message: 'Two-factor authentication enabled successfully.',
+    });
+  }
+
+  async disableMfa(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated.' } });
+      return;
+    }
+
+    const { password, code } = req.body;
+    const user = await userRepository.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User not found.' } });
+      return;
+    }
+
+    let authorized = false;
+    if (password && user.passwordHash && verifyPassword(String(password), user.passwordHash)) {
+      authorized = true;
+    } else if (code && user.mfaSecret && verifyTotp(user.mfaSecret, String(code).trim())) {
+      authorized = true;
+    }
+
+    if (!authorized) {
+      res.status(401).json({
+        success: false,
+        error: { code: 'INVALID_CREDENTIALS', message: 'Current password or valid authenticator code is required to disable 2FA.' },
+      });
+      return;
+    }
+
+    await userRepository.update(user.id, {
+      mfaEnabled: false,
+      mfaSecret: undefined,
+      mfaBackupCodes: undefined,
+    });
+
+    res.json({
+      success: true,
+      message: 'Two-factor authentication has been disabled.',
+    });
+  }
+
+  async logout(_req: Request, res: Response): Promise<void> {
+    res.clearCookie('auth_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+    res.json({ success: true, message: 'Logged out successfully.' });
   }
 }
 

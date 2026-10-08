@@ -18,9 +18,15 @@ router.get('/login', (_req, res) => {
   });
 });
 router.post('/google', (req, res, next) => authController.googleAuth(req, res).catch(next));
+router.post('/logout', (req, res, next) => authController.logout(req, res).catch(next));
 router.get('/me', authenticate, (req, res, next) => authController.getCurrentUser(req, res).catch(next));
 router.put('/profile', authenticate, (req, res, next) => authController.updateProfile(req, res).catch(next));
 router.post('/change-password', authenticate, (req, res, next) => authController.changePassword(req, res).catch(next));
 router.delete(['/account', '/delete-account'], authenticate, (req, res, next) => authController.deleteAccount(req, res).catch(next));
+
+// Multi-Factor Authentication routes
+router.post('/mfa/setup', authenticate, (req, res, next) => authController.setupMfa(req, res).catch(next));
+router.post('/mfa/verify', authenticate, (req, res, next) => authController.verifyAndEnableMfa(req, res).catch(next));
+router.post('/mfa/disable', authenticate, (req, res, next) => authController.disableMfa(req, res).catch(next));
 
 export default router;

@@ -5,9 +5,30 @@ import { authenticate } from '../middleware/auth.js';
 import { requireRole, requireResellerTenant } from '../middleware/rbac.js';
 import { resellerLimiter } from '../middlewares/rate-limiter.middleware.js';
 
+const ALLOWED_MIME_TYPES = new Set([
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+  'text/csv',
+  'text/plain',
+  'application/csv',
+  'application/octet-stream',
+]);
+
+const ALLOWED_EXTENSIONS = new Set(['.xlsx', '.xls', '.csv', '.tsv']);
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
+  fileFilter: (_req, file, cb) => {
+    const ext = '.' + (file.originalname.split('.').pop() || '').toLowerCase();
+    if (!ALLOWED_EXTENSIONS.has(ext)) {
+      return cb(new Error('Invalid file type. Only .xlsx, .xls, and .csv files are supported.'));
+    }
+    if (file.mimetype && !ALLOWED_MIME_TYPES.has(file.mimetype.toLowerCase())) {
+      return cb(new Error('Invalid MIME type. Only Excel and CSV formats are allowed.'));
+    }
+    cb(null, true);
+  },
 });
 
 const router = Router();

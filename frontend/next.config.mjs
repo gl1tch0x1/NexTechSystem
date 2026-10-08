@@ -5,6 +5,7 @@ const nextConfig = {
   // no custom webpack alias needed. Setting turbopack: {} silences
   // the "webpack config with no turbopack config" build error.
   turbopack: {},
+  productionBrowserSourceMaps: false,
 
   images: {
     remotePatterns: [
@@ -61,6 +62,7 @@ const nextConfig = {
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'X-Protected-By', value: 'Cloudflare-Enterprise-Anti-DDoS' },
         ],

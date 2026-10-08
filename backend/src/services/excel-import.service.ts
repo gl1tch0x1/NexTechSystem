@@ -88,6 +88,31 @@ export class ExcelImportService {
       throw new Error('Only .xlsx, .xls, and .csv files are supported.');
     }
 
+    // Verify magic bytes / file signatures to block polyglots and executable payloads
+    if (buffer.length < 4) {
+      throw new Error('Uploaded file is corrupted or empty.');
+    }
+
+    if (extension === 'xlsx') {
+      const isZip = buffer[0] === 0x50 && buffer[1] === 0x4b;
+      if (!isZip) {
+        throw new Error('File content does not match .xlsx format (invalid file signature).');
+      }
+    } else if (extension === 'xls') {
+      const isOle = buffer[0] === 0xd0 && buffer[1] === 0xcf && buffer[2] === 0x11 && buffer[3] === 0xe0;
+      const snippet = buffer.subarray(0, 100).toString('utf8').toLowerCase();
+      const isHtmlTable = snippet.includes('<html') || snippet.includes('<table');
+      if (!isOle && !isHtmlTable) {
+        throw new Error('File content does not match .xls format (invalid file signature).');
+      }
+    } else if (extension === 'csv' || extension === 'tsv') {
+      const isMz = buffer[0] === 0x4d && buffer[1] === 0x5a;
+      const isElf = buffer[0] === 0x7f && buffer[1] === 0x45 && buffer[2] === 0x4c && buffer[3] === 0x46;
+      if (isMz || isElf) {
+        throw new Error('Executable binaries disguised as CSV are strictly prohibited.');
+      }
+    }
+
     const workbook = new ExcelJS.Workbook();
     if (extension === 'csv' || extension === 'tsv') {
       try {

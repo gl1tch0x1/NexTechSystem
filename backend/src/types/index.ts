@@ -30,6 +30,9 @@ export interface User {
   taxRegistrationNumber?: string;
   passwordHash?: string;
   adminPinHash?: string; // Secondary Admin Security PIN (PBKDF2 120,000 iterations)
+  mfaEnabled?: boolean;
+  mfaSecret?: string;
+  mfaBackupCodes?: string[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

@@ -198,10 +198,19 @@ export class TabbyService {
    * Verifies Tabby webhook signature header
    */
   verifyWebhookSignature(headerSignature?: string, rawPayload?: string): boolean {
-    if (!this.secretKey || !headerSignature || !rawPayload) return true;
+    if (!this.secretKey) {
+      if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+        return true;
+      }
+      return false;
+    }
+    if (!headerSignature || !rawPayload) return false;
     try {
       const computed = crypto.createHmac('sha256', this.secretKey).update(rawPayload).digest('hex');
-      return computed === headerSignature;
+      const sigBuf = Buffer.from(headerSignature.trim());
+      const compBuf = Buffer.from(computed.trim());
+      if (sigBuf.length !== compBuf.length) return false;
+      return crypto.timingSafeEqual(sigBuf, compBuf);
     } catch {
       return false;
     }

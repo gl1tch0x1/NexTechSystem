@@ -28,6 +28,7 @@ export interface User {
   tradeLicense?: string;
   taxRegistrationNumber?: string;
   isActive: boolean;
+  mfaEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;

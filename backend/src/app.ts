@@ -12,18 +12,74 @@ import { productRepository } from './repositories/product.repository.js';
 import { ENV } from './config/env.js';
 
 
+import cookieParser from 'cookie-parser';
+import { csrfProtection } from './middlewares/csrf-protection.middleware.js';
+
 export function createApp(): Express {
   const app = express();
 
   // Trust first proxy hop (Cloudflare / NGINX reverse proxy)
   app.set('trust proxy', 1);
 
+  // Disable X-Powered-By header
+  app.disable('x-powered-by');
+
   // 1. Initialize Firebase / Cloud components
   initializeFirebase();
 
   // 2. Global Cloudflare CDN, Anti-DDoS, Security & Logging Middleware
   app.use(cloudflareSecurityMiddleware);
-  app.use(helmet({ crossOriginResourcePolicy: false }));
+
+  // Enhanced Helmet Security Headers with strict Content-Security-Policy & Frameguard
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'",
+            'https://challenges.cloudflare.com',
+            'https://*.google-analytics.com',
+            'https://*.googletagmanager.com',
+          ],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+          imgSrc: [
+            "'self'",
+            'data:',
+            'blob:',
+            'https://images.unsplash.com',
+            'https://*.firebasestorage.app',
+            'https://challenges.cloudflare.com',
+            'https://res.cloudinary.com',
+          ],
+          connectSrc: [
+            "'self'",
+            'https:',
+            'http://localhost:*',
+            'ws://localhost:*',
+          ],
+          frameSrc: [
+            "'self'",
+            'https://challenges.cloudflare.com',
+            'https://checkout.tamara.co',
+            'https://checkout.tabby.ai',
+          ],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+        },
+      },
+      frameguard: { action: 'sameorigin' },
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    })
+  );
 
   // Strict CORS policy with explicit origin whitelist validation (CWE-942)
   const corsOptions: cors.CorsOptions = {
@@ -39,20 +95,27 @@ export function createApp(): Express {
       'Content-Type',
       'Authorization',
       'X-Requested-With',
+      'X-CSRF-Token',
       'Accept',
       'Origin',
       'cf-connecting-ip',
       'cf-ray',
       'cf-ipcountry',
+      'x-admin-pin',
     ],
     maxAge: 86400,
   };
   app.use(cors(corsOptions));
 
+  // Parse cookies for secure httpOnly authentication
+  app.use(cookieParser());
+
   app.use(morgan('dev'));
   app.use(express.json({ limit: '15mb' }));
   app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
+  // CSRF Protection against unauthorized cross-site mutating requests
+  app.use(csrfProtection);
 
   // 3. Mount Master REST API Routes with standard Rate Limiting
   app.use('/api', apiLimiter, routes);

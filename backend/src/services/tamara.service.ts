@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { ENV } from '../config/env.js';
 import { Order } from '../types/index.js';
 
@@ -247,8 +248,30 @@ export class TamaraService {
    * Validates webhook notification token if configured
    */
   verifyNotificationToken(tokenHeader?: string): boolean {
-    if (!this.notificationToken) return true; // If not configured in test, pass through
-    return tokenHeader === `Bearer ${this.notificationToken}` || tokenHeader === this.notificationToken;
+    if (!this.notificationToken) {
+      if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+        return true;
+      }
+      return false;
+    }
+    if (!tokenHeader) return false;
+    try {
+      const trimmed = tokenHeader.trim();
+      const bearerExpected = `Bearer ${this.notificationToken}`;
+      const bufA = Buffer.from(trimmed);
+      const bufBearer = Buffer.from(bearerExpected);
+      const bufRaw = Buffer.from(this.notificationToken);
+
+      if (bufA.length === bufBearer.length && crypto.timingSafeEqual(bufA, bufBearer)) {
+        return true;
+      }
+      if (bufA.length === bufRaw.length && crypto.timingSafeEqual(bufA, bufRaw)) {
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
   }
 }
 

@@ -22,12 +22,21 @@ export async function proxyToBackend(
 ) {
   const backendBase = getBackendApiUrl();
   const search = request.nextUrl.search || '';
-  const cleanSubpath = targetSubpath.startsWith('/') ? targetSubpath : `/${targetSubpath}`;
+  
+  // Normalize and strictly prevent path traversal / SSRF
+  const normalizedPath = targetSubpath.replace(/\\/g, '/');
+  if (normalizedPath.includes('..') || /^\/\//.test(normalizedPath)) {
+    return NextResponse.json({ success: false, error: { message: 'Invalid target path' } }, { status: 400 });
+  }
+  const cleanSubpath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
   const targetUrl = `${backendBase}/api${cleanSubpath}${search}`;
 
   const headers: Record<string, string> = {};
   const authHeader = request.headers.get('authorization');
   if (authHeader) headers['Authorization'] = authHeader;
+
+  const cookieHeader = request.headers.get('cookie');
+  if (cookieHeader) headers['Cookie'] = cookieHeader;
 
   const contentType = request.headers.get('content-type');
   if (contentType) headers['Content-Type'] = contentType;

@@ -169,10 +169,18 @@ export class OrderController {
       return;
     }
 
-    // Role check: customer can only view own order; admin can view all; reseller can view if contains their items
+    // Role check: customer can only view own order; reseller can view if contains their items; admin can view all
     if (req.user.role === 'CUSTOMER' && order.userId !== req.user.id) {
       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
       return;
+    }
+
+    if (req.user.role === 'RESELLER') {
+      const hasResellerItem = Array.isArray(order?.items) && order.items.some(i => i?.resellerId === req.user?.resellerId);
+      if (!hasResellerItem) {
+        res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
+        return;
+      }
     }
 
     const ebill = await ebillService.getEBillByOrderId(order.id);

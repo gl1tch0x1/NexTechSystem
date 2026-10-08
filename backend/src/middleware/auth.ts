@@ -18,8 +18,15 @@ export interface AuthenticatedRequest extends Request {
 
 export async function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
+  let token: string | undefined;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies && typeof req.cookies.auth_token === 'string') {
+    token = req.cookies.auth_token;
+  }
+
+  if (!token) {
     res.status(401).json({
       success: false,
       error: { code: 'UNAUTHORIZED', message: 'Authentication token missing or invalid format.' },
@@ -27,11 +34,9 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
     return;
   }
 
-  const token = authHeader.split(' ')[1];
-
   try {
-    // 1. Try JWT verification (standard backend token)
-    const decoded = jwt.verify(token, ENV.JWT_SECRET) as any;
+    // 1. Try JWT verification with explicit HS256 algorithm restriction
+    const decoded = jwt.verify(token, ENV.JWT_SECRET, { algorithms: ['HS256'] }) as any;
     const user = await userRepository.findById(decoded.id);
 
     if (!user || !user.isActive) {
@@ -63,13 +68,20 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
 
 export function optionalAuthenticate(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  let token: string | undefined;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies && typeof req.cookies.auth_token === 'string') {
+    token = req.cookies.auth_token;
+  }
+
+  if (!token) {
     return next();
   }
 
-  const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, ENV.JWT_SECRET) as any;
+    const decoded = jwt.verify(token, ENV.JWT_SECRET, { algorithms: ['HS256'] }) as any;
     userRepository.findById(decoded.id).then(user => {
       if (user && user.isActive) {
         req.user = {
