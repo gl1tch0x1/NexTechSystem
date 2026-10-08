@@ -43,6 +43,7 @@ router.put('/orders/:id/status', (req, res, next) => adminController.updateOrder
 router.put('/orders/:id/approve', (req, res, next) => adminController.approveOrder(req, res).catch(next));
 router.put('/orders/:id/reject', (req, res, next) => adminController.rejectOrder(req, res).catch(next));
 router.get('/notifications', (req, res, next) => adminController.getNotifications(req, res).catch(next));
+router.put('/notifications/read-all', (req, res, next) => adminController.markAllNotificationsAsRead(req, res).catch(next));
 router.put('/notifications/:id/read', (req, res, next) => adminController.markNotificationAsRead(req, res).catch(next));
 
 // 6. Categories CRUD

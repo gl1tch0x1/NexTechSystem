@@ -873,3 +873,38 @@ export interface DbSnapshot {
   collections: Record<string, any[]>;
 }
 
+export type NotificationCategory =
+  | 'ORDERS'
+  | 'INVENTORY'
+  | 'RESELLERS'
+  | 'PRODUCTS'
+  | 'QUOTES'
+  | 'PURCHASE_ORDERS'
+  | 'SYSTEM';
+
+export type NotificationSeverity = 'CRITICAL' | 'WARNING' | 'INFO';
+
+export interface AdminNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  category: NotificationCategory;
+  severity: NotificationSeverity;
+  actionRequired: boolean;
+  actionUrl: string;
+  actionLabel: string;
+  isRead: boolean;
+  createdAt: string;
+  metadata?: Record<string, any>;
+}
+
+export interface AdminNotificationsResponse {
+  notifications: AdminNotification[];
+  unreadCount: number;
+  actionRequiredCount: number;
+  criticalCount: number;
+  lastSyncedAt: string;
+}
+
+

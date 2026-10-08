@@ -34,7 +34,10 @@ import {
   ShieldCheck,
   Warehouse,
   Eye,
+  BellRing,
+  Store,
 } from 'lucide-react';
+import { AdminNotificationsResponse } from '@/types';
 import { PurchaseOrderDocumentModal } from '@/components/admin/PurchaseOrderDocumentModal';
 import { VERIFIED_SUPPLIERS, NEXTECH_BUYER_DETAILS } from '@/lib/suppliers-data';
 import {
@@ -57,6 +60,7 @@ export default function AdminDashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [orderFilter, setOrderFilter] = useState<'ALL' | 'DELIVERED' | 'PROCESSING' | 'PENDING'>('ALL');
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [notificationsData, setNotificationsData] = useState<AdminNotificationsResponse | null>(null);
 
   // Quick Action Modals
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -149,15 +153,24 @@ export default function AdminDashboardPage() {
     if (!token) return;
     try {
       setIsRefreshing(true);
-      const [res, posRes, quotesRes, resellersRes] = await Promise.allSettled([
+      const [res, posRes, quotesRes, resellersRes, notifsRes] = await Promise.allSettled([
         ApiClient.get('/admin/dashboard', { token }),
         ApiClient.get('/admin/purchase-orders', { token }),
         ApiClient.get('/quotes', { token }),
         ApiClient.get('/admin/resellers', { token }),
+        ApiClient.get('/admin/notifications', { token }),
       ]);
 
       if (res.status === 'fulfilled' && res.value) {
         setMetrics(res.value);
+      }
+
+      if (notifsRes.status === 'fulfilled' && notifsRes.value) {
+        const notifPayload = notifsRes.value;
+        const nData = notifPayload?.data || notifPayload;
+        if (nData?.notifications) {
+          setNotificationsData(nData);
+        }
       }
 
       if (posRes.status === 'fulfilled' && posRes.value) {
@@ -594,6 +607,82 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* SECTION 1.5: REAL-TIME ADMIN ACTION & NOTIFICATION SYNCHRONIZATION BANNER */}
+      {/* ========================================================================= */}
+      {notificationsData && notificationsData.actionRequiredCount > 0 && (
+        <div className="rounded-2xl border border-amber-300 dark:border-amber-800/80 bg-gradient-to-r from-amber-500/10 via-rose-500/5 to-amber-500/10 p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+              <BellRing className="w-5 h-5 animate-bounce" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
+                  Administrative Action Required
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white font-mono shadow-xs">
+                  {notificationsData.actionRequiredCount} Action{notificationsData.actionRequiredCount > 1 ? 's' : ''} Pending
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                Critical items require immediate admin clearance. Verified across orders, partner onboardings, quotations, and warehouse inventories.
+              </p>
+
+              {/* Quick links ribbon */}
+              <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                {notificationsData.notifications.some(n => n.category === 'ORDERS' && !n.isRead && n.actionRequired) && (
+                  <Link
+                    href="/admin/orders"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-400 transition-colors shadow-2xs"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5 text-blue-500" />
+                    <span>Orders Pending Clearance</span>
+                  </Link>
+                )}
+                {notificationsData.notifications.some(n => n.category === 'INVENTORY' && !n.isRead && n.actionRequired) && (
+                  <Link
+                    href="/admin/purchase-orders"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-amber-400 transition-colors shadow-2xs"
+                  >
+                    <Boxes className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Stock Shortages / PO Reorder</span>
+                  </Link>
+                )}
+                {notificationsData.notifications.some(n => n.category === 'RESELLERS' && !n.isRead && n.actionRequired) && (
+                  <Link
+                    href="/admin/resellers"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-purple-400 transition-colors shadow-2xs"
+                  >
+                    <Store className="w-3.5 h-3.5 text-purple-500" />
+                    <span>Partner Approvals</span>
+                  </Link>
+                )}
+                {notificationsData.notifications.some(n => n.category === 'QUOTES' && !n.isRead && n.actionRequired) && (
+                  <Link
+                    href="/admin/quotes"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-cyan-400 transition-colors shadow-2xs"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-cyan-500" />
+                    <span>RFQs Pending Review</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="shrink-0 flex items-center gap-2 self-end md:self-center">
+            <Link
+              href="/admin/orders"
+              className="h-8 px-3.5 rounded-xl bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+            >
+              <span>Review Urgent Queue</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* SECTION 2: WORKING CAPITAL & EXECUTIVE FINANCIAL HEALTH RIBBON */}

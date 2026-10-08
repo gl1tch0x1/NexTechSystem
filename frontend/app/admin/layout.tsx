@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AdminNotificationCenter } from '@/components/admin/AdminNotificationCenter';
 import {
   LayoutDashboard,
   Package,
@@ -274,6 +275,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Center/Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Admin Real-Time Action & Notification Center */}
+          <AdminNotificationCenter />
+
           {/* Theme Toggle Button */}
           <ThemeToggle />
 

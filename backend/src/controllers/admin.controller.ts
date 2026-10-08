@@ -329,6 +329,11 @@ export class AdminController {
     res.json({ success: true, message: 'Notification marked as read.' });
   }
 
+  async markAllNotificationsAsRead(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    await notificationService.markAllNotificationsAsRead();
+    res.json({ success: true, message: 'All notifications marked as read.' });
+  }
+
   async createOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
     const {
       customerId,

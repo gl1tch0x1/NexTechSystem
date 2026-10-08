@@ -1,22 +1,17 @@
 import { ENV } from '../config/env.js';
-import { Order } from '../types/index.js';
+import {
+  Order,
+  AdminNotification,
+  AdminNotificationsResponse,
+} from '../types/index.js';
 import { dbStore } from '../config/db-store.js';
 import { auditService } from './audit.service.js';
+import { orderRepository } from '../repositories/order.repository.js';
+import { productRepository } from '../repositories/product.repository.js';
+import { resellerRepository } from '../repositories/reseller.repository.js';
+import { quoteRepository } from '../repositories/quote.repository.js';
 
-export interface AdminNotification {
-  id: string;
-  type: 'ORDER_PENDING_APPROVAL' | 'ORDER_APPROVED' | 'ORDER_REJECTED';
-  orderId: string;
-  orderNumber: string;
-  customerName: string;
-  customerEmail: string;
-  total: number;
-  currency: string;
-  itemsCount: number;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-}
+export { AdminNotification };
 
 export class NotificationService {
   /**
@@ -29,18 +24,26 @@ export class NotificationService {
     // 1. Admin In-App Dashboard Notification Queue
     try {
       const notification: AdminNotification = {
-        id: `notif_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        id: `notif_order_${order.id}`,
         type: 'ORDER_PENDING_APPROVAL',
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        customerName: order.customerName,
-        customerEmail: order.customerEmail,
-        total: order.total,
-        currency: order.currency || 'AED',
-        itemsCount: order.items?.length || 1,
+        title: `Order #${order.orderNumber} Pending Approval`,
         message: `Order #${order.orderNumber} placed by ${order.customerName} awaits admin verification.`,
+        category: 'ORDERS',
+        severity: 'CRITICAL',
+        actionRequired: true,
+        actionUrl: `/admin/orders?orderId=${order.id}`,
+        actionLabel: 'Review Order',
         isRead: false,
         createdAt: new Date().toISOString(),
+        metadata: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          total: order.total,
+          currency: order.currency || 'AED',
+          itemsCount: order.items?.length || 1,
+        },
       };
       await dbStore.create('admin_notifications', notification);
     } catch (err) {
@@ -218,19 +221,310 @@ export class NotificationService {
   }
 
   /**
-   * Retrieves active in-app notifications for Admin Dashboard
+   * Retrieves active, synchronized notifications across the entire ERP/Storefront system
    */
-  async getAdminNotifications(): Promise<AdminNotification[]> {
-    const all = await dbStore.find<AdminNotification>('admin_notifications');
-    return all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  async getAdminNotifications(): Promise<AdminNotificationsResponse> {
+    // 1. Fetch read records
+    let readRecords: Array<{ id: string; readAt: string }> = [];
+    try {
+      readRecords = await dbStore.find<{ id: string; readAt: string }>('admin_notifications_read');
+    } catch {
+      readRecords = [];
+    }
+    const readIds = new Set(readRecords.map(r => r.id));
+
+    const notifications: AdminNotification[] = [];
+
+    // 2. Scan Orders for actionable items
+    try {
+      const orders = await orderRepository.find({ orderBy: { field: 'createdAt', direction: 'desc' }, limit: 100 });
+      for (const order of orders) {
+        // A. Orders pending admin approval
+        if (order.orderStatus === 'PENDING_APPROVAL') {
+          const id = `order_approval_${order.id}`;
+          notifications.push({
+            id,
+            type: 'ORDER_PENDING_APPROVAL',
+            title: `Order #${order.orderNumber} Awaits Approval`,
+            message: `${order.customerName} placed order for ${order.currency || 'AED'} ${(order.total || 0).toLocaleString()} requiring verification.`,
+            category: 'ORDERS',
+            severity: 'CRITICAL',
+            actionRequired: true,
+            actionUrl: `/admin/orders?orderId=${order.id}`,
+            actionLabel: 'Review Order',
+            isRead: readIds.has(id),
+            createdAt: order.statusHistory?.[0]?.timestamp || new Date().toISOString(),
+            metadata: { orderId: order.id, orderNumber: order.orderNumber, total: order.total },
+          });
+        }
+
+        // B. In-Store Payment pickup orders awaiting showroom collection
+        if (order.paymentMethod === 'IN_STORE' && (order.paymentStatus === 'PENDING' || order.orderStatus === 'PENDING')) {
+          const id = `order_instore_${order.id}`;
+          notifications.push({
+            id,
+            type: 'ORDER_INSTORE_PENDING',
+            title: `In-Store Payment: #${order.orderNumber}`,
+            message: `Showroom pickup reservation awaiting customer payment (${order.currency || 'AED'} ${(order.total || 0).toLocaleString()}).`,
+            category: 'ORDERS',
+            severity: 'WARNING',
+            actionRequired: true,
+            actionUrl: `/admin/orders?orderId=${order.id}`,
+            actionLabel: 'View Showroom Order',
+            isRead: readIds.has(id),
+            createdAt: order.statusHistory?.[0]?.timestamp || new Date().toISOString(),
+            metadata: { orderId: order.id, orderNumber: order.orderNumber, total: order.total },
+          });
+        }
+
+        // C. COD orders ready for dispatch
+        if (order.paymentMethod === 'COD' && (order.orderStatus === 'PROCESSING' || order.orderStatus === 'PENDING')) {
+          const id = `order_cod_${order.id}`;
+          notifications.push({
+            id,
+            type: 'ORDER_COD_DISPATCH',
+            title: `COD Order #${order.orderNumber} Ready to Dispatch`,
+            message: `Cash on Delivery order for ${order.customerName} (${order.shippingAddress?.city || 'UAE'}) ready for courier handover.`,
+            category: 'ORDERS',
+            severity: 'WARNING',
+            actionRequired: true,
+            actionUrl: `/admin/orders?orderId=${order.id}`,
+            actionLabel: 'Dispatch Order',
+            isRead: readIds.has(id),
+            createdAt: order.statusHistory?.[0]?.timestamp || new Date().toISOString(),
+            metadata: { orderId: order.id, orderNumber: order.orderNumber, total: order.total },
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[NotificationService] Error querying orders for notifications:', err);
+    }
+
+    // 3. Scan Inventory for Low Stock and Out of Stock
+    try {
+      const products = await productRepository.find({ limit: 300 });
+      for (const prod of products) {
+        if (!prod.isActive) continue;
+
+        if (prod.stock === 0) {
+          const id = `stock_out_${prod.id}`;
+          notifications.push({
+            id,
+            type: 'PRODUCT_OUT_OF_STOCK',
+            title: `Out of Stock: ${prod.name}`,
+            message: `SKU ${prod.sku} stock is depleted (0 units). Reorder via Purchase Order immediately.`,
+            category: 'INVENTORY',
+            severity: 'CRITICAL',
+            actionRequired: true,
+            actionUrl: `/admin/purchase-orders`,
+            actionLabel: 'Generate PO',
+            isRead: readIds.has(id),
+            createdAt: prod.updatedAt || prod.createdAt || new Date().toISOString(),
+            metadata: { productId: prod.id, sku: prod.sku, stock: 0 },
+          });
+        } else if (prod.stock > 0 && prod.stock <= 5) {
+          const id = `stock_low_${prod.id}`;
+          notifications.push({
+            id,
+            type: 'PRODUCT_LOW_STOCK',
+            title: `Low Stock Alert: ${prod.name}`,
+            message: `SKU ${prod.sku} has only ${prod.stock} unit(s) remaining in warehouse.`,
+            category: 'INVENTORY',
+            severity: 'WARNING',
+            actionRequired: true,
+            actionUrl: `/admin/purchase-orders`,
+            actionLabel: 'Restock Item',
+            isRead: readIds.has(id),
+            createdAt: prod.updatedAt || prod.createdAt || new Date().toISOString(),
+            metadata: { productId: prod.id, sku: prod.sku, stock: prod.stock },
+          });
+        }
+
+        // Reseller product listing approval pending
+        if (prod.approvalStatus === 'PENDING_APPROVAL') {
+          const id = `prod_approval_${prod.id}`;
+          notifications.push({
+            id,
+            type: 'PRODUCT_APPROVAL_PENDING',
+            title: `Listing Awaiting Review: ${prod.name}`,
+            message: `Reseller product submitted for catalog listing approval (SKU ${prod.sku}).`,
+            category: 'PRODUCTS',
+            severity: 'CRITICAL',
+            actionRequired: true,
+            actionUrl: `/admin/products`,
+            actionLabel: 'Review Listing',
+            isRead: readIds.has(id),
+            createdAt: prod.createdAt || new Date().toISOString(),
+            metadata: { productId: prod.id, sku: prod.sku, resellerId: prod.resellerId },
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[NotificationService] Error querying products for notifications:', err);
+    }
+
+    // 4. Scan Resellers for pending partner vetting
+    try {
+      const resellers = await resellerRepository.find({ limit: 100 });
+      for (const res of resellers) {
+        if (res.status === 'PENDING_APPROVAL') {
+          const id = `reseller_pending_${res.id}`;
+          notifications.push({
+            id,
+            type: 'RESELLER_PENDING_APPROVAL',
+            title: `Partner Application: ${res.businessName || res.displayName}`,
+            message: `New reseller application from ${res.email} (${res.resellerCode}) awaiting vetting.`,
+            category: 'RESELLERS',
+            severity: 'CRITICAL',
+            actionRequired: true,
+            actionUrl: `/admin/resellers`,
+            actionLabel: 'Vet Partner',
+            isRead: readIds.has(id),
+            createdAt: res.createdAt || new Date().toISOString(),
+            metadata: { resellerId: res.id, email: res.email, code: res.resellerCode },
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[NotificationService] Error querying resellers for notifications:', err);
+    }
+
+    // 5. Scan B2B Quotes for pending quotation RFQs
+    try {
+      const quotes = await quoteRepository.findRecent(50);
+      for (const q of quotes) {
+        if (q.status === 'PENDING_REVIEW' || (q.status as any) === 'DRAFT') {
+          const id = `quote_pending_${q.id}`;
+          notifications.push({
+            id,
+            type: 'QUOTE_PENDING_REVIEW',
+            title: `B2B RFQ Quote #${q.quoteNumber || q.id}`,
+            message: `Enterprise quote request from ${q.companyName || q.contactName || q.contactEmail} awaiting pricing & terms.`,
+            category: 'QUOTES',
+            severity: 'WARNING',
+            actionRequired: true,
+            actionUrl: `/admin/quotes`,
+            actionLabel: 'Review RFQ',
+            isRead: readIds.has(id),
+            createdAt: q.createdAt || new Date().toISOString(),
+            metadata: { quoteId: q.id, quoteNumber: q.quoteNumber },
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[NotificationService] Error querying quotes for notifications:', err);
+    }
+
+    // 6. Add persistent in-app notifications
+    try {
+      const persisted = await dbStore.find<any>('admin_notifications');
+      for (const p of persisted) {
+        const id = p.id;
+        // Avoid duplicate if synthesized above
+        if (notifications.some(n => n.id === id)) continue;
+
+        notifications.push({
+          id,
+          type: p.type || 'SYSTEM_ALERT',
+          title: p.title || (p.type === 'ORDER_PENDING_APPROVAL' ? `Order #${p.orderNumber} Verification` : 'System Notification'),
+          message: p.message || `Notification regarding ${p.orderNumber || 'system'}`,
+          category: p.category || (p.orderId ? 'ORDERS' : 'SYSTEM'),
+          severity: p.severity || (p.type === 'ORDER_PENDING_APPROVAL' ? 'CRITICAL' : 'INFO'),
+          actionRequired: p.actionRequired !== undefined ? p.actionRequired : (p.type === 'ORDER_PENDING_APPROVAL'),
+          actionUrl: p.actionUrl || (p.orderId ? `/admin/orders?orderId=${p.orderId}` : '/admin'),
+          actionLabel: p.actionLabel || (p.orderId ? 'View Order' : 'Open'),
+          isRead: Boolean(p.isRead) || readIds.has(id),
+          createdAt: p.createdAt || new Date().toISOString(),
+          metadata: p.metadata || { orderId: p.orderId, orderNumber: p.orderNumber },
+        });
+      }
+    } catch (err) {
+      console.warn('[NotificationService] Error querying persistent notifications:', err);
+    }
+
+    // Sort by createdAt descending
+    const sorted = notifications.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    const unreadCount = sorted.filter(n => !n.isRead).length;
+    const actionRequiredCount = sorted.filter(n => n.actionRequired && !n.isRead).length;
+    const criticalCount = sorted.filter(n => n.severity === 'CRITICAL' && !n.isRead).length;
+
+    return {
+      notifications: sorted,
+      unreadCount,
+      actionRequiredCount,
+      criticalCount,
+      lastSyncedAt: new Date().toISOString(),
+    };
   }
 
   /**
-   * Marks notification as read
+   * Marks a specific notification as read
    */
   async markNotificationAsRead(id: string): Promise<boolean> {
-    await dbStore.update('admin_notifications', id, { isRead: true });
-    return true;
+    try {
+      // 1. If present in persistent notifications table, mark read
+      try {
+        await dbStore.update('admin_notifications', id, { isRead: true });
+      } catch {
+        // Ignore if synthesized
+      }
+
+      // 2. Add to read tracking collection
+      const existing = await dbStore.findById<{ id: string }>('admin_notifications_read', id);
+      if (!existing) {
+        await dbStore.create('admin_notifications_read', {
+          id,
+          readAt: new Date().toISOString(),
+        });
+      }
+      return true;
+    } catch (err) {
+      console.error('[NotificationService] Failed to mark notification read:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Marks all active notifications as read
+   */
+  async markAllNotificationsAsRead(): Promise<boolean> {
+    try {
+      const { notifications } = await this.getAdminNotifications();
+      const now = new Date().toISOString();
+
+      for (const n of notifications) {
+        if (!n.isRead) {
+          try {
+            await dbStore.create('admin_notifications_read', {
+              id: n.id,
+              readAt: now,
+            });
+          } catch {
+            // Already read or error
+          }
+        }
+      }
+
+      // Also bulk update persistent notifications
+      const persisted = await dbStore.find<any>('admin_notifications');
+      for (const p of persisted) {
+        if (!p.isRead) {
+          try {
+            await dbStore.update('admin_notifications', p.id, { isRead: true });
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      return true;
+    } catch (err) {
+      console.error('[NotificationService] Failed to mark all notifications read:', err);
+      return false;
+    }
   }
 }
 
