@@ -117,8 +117,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       title: 'SYSTEM & SETTINGS',
       items: [
         { href: '/admin/settings', label: 'E-Bill Stamp & Store Settings', icon: Settings },
-        { href: '/admin/audit-logs', label: 'Security & Audit Logs', icon: Clock },
-        { href: '/admin/backups', label: 'Database & State Backups', icon: Server },
       ],
     },
   ];

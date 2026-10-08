@@ -575,14 +575,6 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
               >
                 Stock Reorders
               </Link>
-              <span className="text-slate-300 dark:text-slate-700">•</span>
-              <Link
-                href="/admin/audit-logs"
-                onClick={() => setIsOpen(false)}
-                className="hover:text-blue-600 dark:hover:text-blue-400 font-semibold"
-              >
-                Audit Logs
-              </Link>
             </div>
           </div>
         </div>
