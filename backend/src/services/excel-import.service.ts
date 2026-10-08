@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import ExcelJS from 'exceljs';
+import * as XLSX from 'xlsx';
 import { Readable } from 'node:stream';
 import { productRepository } from '../repositories/product.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
@@ -80,15 +81,36 @@ export class ExcelImportService {
     columnMappings: Record<string, string>;
     rows: ProductImportRow[];
   }> {
-    const extension = fileName.toLowerCase().split('.').pop();
-    if (extension !== 'xlsx' && extension !== 'csv') {
-      throw new Error('Only .xlsx and .csv files are supported.');
+    const cleanFileName = (fileName || '').trim();
+    const extension = cleanFileName.toLowerCase().split('.').pop() || '';
+    const allowedExtensions = ['xlsx', 'xls', 'csv', 'tsv'];
+    if (!allowedExtensions.includes(extension)) {
+      throw new Error('Only .xlsx, .xls, and .csv files are supported.');
     }
+
     const workbook = new ExcelJS.Workbook();
-    if (extension === 'csv') {
-      await workbook.csv.read(Readable.from([buffer]));
+    if (extension === 'csv' || extension === 'tsv') {
+      try {
+        await workbook.csv.read(Readable.from([buffer]));
+      } catch {
+        const wb = XLSX.read(buffer, { type: 'buffer' });
+        const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        await workbook.xlsx.load(xlsxBuffer);
+      }
+    } else if (extension === 'xls') {
+      // Legacy Excel (.xls / BIFF8 / HTML table): parse via SheetJS and normalize to xlsx buffer
+      const wb = XLSX.read(buffer, { type: 'buffer' });
+      const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+      await workbook.xlsx.load(xlsxBuffer);
     } else {
-      await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
+      // Modern Excel (.xlsx) with resilient SheetJS fallback
+      try {
+        await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
+      } catch {
+        const wb = XLSX.read(buffer, { type: 'buffer' });
+        const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        await workbook.xlsx.load(xlsxBuffer);
+      }
     }
     const worksheet = workbook.worksheets[0];
     if (!worksheet) throw new Error('The uploaded file contains no worksheet.');

@@ -34,7 +34,14 @@ export default function ResellerProductImportPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      const ext = selectedFile.name.toLowerCase().split('.').pop() || '';
+      if (!['xlsx', 'xls', 'csv', 'tsv'].includes(ext)) {
+        setErrorMessage('Only .xlsx, .xls, and .csv files are supported. Please select a valid spreadsheet file.');
+        setFile(null);
+        return;
+      }
+      setFile(selectedFile);
       setPreviewData(null);
       setImportResult(null);
       setErrorMessage('');

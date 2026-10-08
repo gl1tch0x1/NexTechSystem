@@ -185,7 +185,7 @@ export class ResellerController {
 
     const file = req.file;
     if (!file) {
-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Excel file (.xlsx or .csv) is required.' } });
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Excel file (.xlsx, .xls or .csv) is required.' } });
       return;
     }
 
