@@ -16,6 +16,8 @@
     "build:backend": "npm --workspace=backend run build",
     "start": "npm --workspace=frontend run start",
     "test:backend": "npm --workspace=backend test",
+    "test:e2e": "npm --workspace=backend run test:e2e",
+    "test:all-flows": "node scripts/test-all-flows.mjs",
     "test:endpoints": "node scripts/test-endpoints.js",
     "lint": "npm --workspace=frontend run lint && npm --workspace=backend run lint",
     "lint:frontend": "npm --workspace=frontend run lint",

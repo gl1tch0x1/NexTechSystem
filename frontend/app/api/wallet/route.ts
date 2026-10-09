@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
+  const backendUrl =
+    process.env.API_PROXY_TARGET ||
+    process.env.BACKEND_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:5000';
   const authHeader = request.headers.get('authorization');
 
-  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
+  if (backendUrl) {
     const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
     try {
       const res = await fetch(`${clean}/api/wallet`, {
         headers: { ...(authHeader ? { Authorization: authHeader } : {}) },
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(3500),
       });
-      const json = await res.json();
-      return NextResponse.json(json, { status: res.status });
+      if (res.ok) {
+        const json = await res.json();
+        return NextResponse.json(json, { status: res.status });
+      }
     } catch {
       // Fall through
     }
