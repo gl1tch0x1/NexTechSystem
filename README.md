@@ -563,37 +563,31 @@ sequenceDiagram
     Customer->>UI: Submits Order with Items, Shipping Address, Coupon & Payment (Card / Wire / COD)
     UI->>OrdSvc: POST /api/orders { items, shippingAddress, couponCode, paymentMethod }
     
-    rect rgb(240, 245, 255)
-        Note over OrdSvc,CartSvc: Step 1: Server-Side Pricing & Variant Resolution
-        OrdSvc->>CartSvc: calculateCart(items, couponCode)
-        CartSvc->>DB: Fetch Product entities & resolve selected Variant SKUs
-        Note over CartSvc: Resolves Variant Titles, Variant Prices, & Variant COGS<br/>Checks chargeTax flag: 0% Tax Exempt or 5% UAE VAT<br/>Calculates Subtotal, Discounts, VAT, Shipping & Net Total
-        CartSvc-->>OrdSvc: Authoritative Pricing Summary & Tax Breakdown
-    end
+    Note over OrdSvc,CartSvc: Step 1: Server-Side Pricing & Variant Resolution
+    OrdSvc->>CartSvc: calculateCart(items, couponCode)
+    CartSvc->>DB: Fetch Product entities & resolve selected Variant SKUs
+    Note over CartSvc: Resolves Variant Titles, Variant Prices, & Variant COGS<br/>Checks chargeTax flag: 0% Tax Exempt or 5% UAE VAT<br/>Calculates Subtotal, Discounts, VAT, Shipping & Net Total
+    CartSvc-->>OrdSvc: Authoritative Pricing Summary & Tax Breakdown
 
-    rect rgb(245, 255, 245)
-        Note over OrdSvc,TxMgr: Step 2: Atomic Inventory & Multi-Warehouse Reservation
-        OrdSvc->>TxMgr: runTransaction() atomic execution
-        TxMgr->>DB: Check Stock across Warehouse Nodes (Dubai, Deira, Abu Dhabi, Sharjah)
-        alt Stock Available
-            TxMgr->>DB: Decrement variant.stock and location quantities atomically
-        else Stock is Zero and allowBackorder is enabled
-            TxMgr->>DB: Accept backorder and record allocation
-        else Stock Insufficient and backorders disallowed
-            TxMgr-->>OrdSvc: Return Out of Stock Error
-            OrdSvc-->>UI: Rejection notice with unavailable SKU names
-        end
-        Note over OrdSvc: Evaluates Seller Origin:<br/>If Admin: Status = CONFIRMED/PROCESSING<br/>If Reseller: Status = PENDING_APPROVAL
-        TxMgr->>DB: Persist Order Entity (e.g. ORD-YYYY-XXXXXX)
+    Note over OrdSvc,TxMgr: Step 2: Atomic Inventory & Multi-Warehouse Reservation
+    OrdSvc->>TxMgr: runTransaction() atomic execution
+    TxMgr->>DB: Check Stock across Warehouse Nodes (Dubai, Deira, Abu Dhabi, Sharjah)
+    alt Stock Available
+        TxMgr->>DB: Decrement variant.stock and location quantities atomically
+    else Stock is Zero and allowBackorder is enabled
+        TxMgr->>DB: Accept backorder and record allocation
+    else Stock Insufficient and backorders disallowed
+        TxMgr-->>OrdSvc: Return Out of Stock Error
+        OrdSvc-->>UI: Rejection notice with unavailable SKU names
     end
+    Note over OrdSvc: Evaluates Seller Origin:<br/>If Admin: Status = CONFIRMED/PROCESSING<br/>If Reseller: Status = PENDING_APPROVAL
+    TxMgr->>DB: Persist Order Entity (e.g. ORD-YYYY-XXXXXX)
 
-    rect rgb(255, 250, 240)
-        Note over OrdSvc,EBillSvc: Step 3: Electronic Tax Invoicing (E-Bill) Generation
-        OrdSvc->>EBillSvc: generateEBill(savedOrder)
-        Note over EBillSvc: Assigns Official Tax Registration Number (TRN 100492817200003)<br/>Computes Cryptographic SHA-256 Verification Seal<br/>Itemizes Standard 5% Tax and 0% Tax-Exempt Line Items
-        EBillSvc->>DB: Persist E-Bill Entity to ebills.json
-        EBillSvc-->>OrdSvc: Verified E-Bill Object with Download Token
-    end
+    Note over OrdSvc,EBillSvc: Step 3: Electronic Tax Invoicing (E-Bill) Generation
+    OrdSvc->>EBillSvc: generateEBill(savedOrder)
+    Note over EBillSvc: Assigns Official Tax Registration Number (TRN 100492817200003)<br/>Computes Cryptographic SHA-256 Verification Seal<br/>Itemizes Standard 5% Tax and 0% Tax-Exempt Line Items
+    EBillSvc->>DB: Persist E-Bill Entity to ebills.json
+    EBillSvc-->>OrdSvc: Verified E-Bill Object with Download Token
 
     OrdSvc-->>UI: HTTP 201 Created { success: true, orderId, orderNumber, ebill }
     UI->>Customer: Displays Order Confirmation, Tracking, & Downloadable E-Bill
