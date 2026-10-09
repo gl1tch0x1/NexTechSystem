@@ -75,7 +75,14 @@ export class PasswordResetService {
    */
   async requestResetOtp(rawEmail: string): Promise<RequestResetOtpResult> {
     const normalizedEmail = (rawEmail || '').replace(/[\r\n]/g, '').toLowerCase().trim();
-    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    // Guard against ReDoS: Limit input length per RFC 5321 (max 254 chars)
+    if (!normalizedEmail || normalizedEmail.length < 5 || normalizedEmail.length > 254) {
+      throw new Error('A valid email address is required.');
+    }
+
+    // Linear-time O(n) email pattern with disjoint character classes to prevent polynomial backtracking (CWE-1333)
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
       throw new Error('A valid email address is required.');
     }
 

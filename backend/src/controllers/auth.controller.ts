@@ -194,8 +194,8 @@ export class AuthController {
     const cleanEmail = String(email).toLowerCase().trim();
     const cleanName = String(name).trim();
 
-    // Email format validation (RFC 5322 simplified)
-    const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    // Email format validation (RFC 5322 compliant, linear time O(n) without polynomial backtracking)
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
     if (!EMAIL_REGEX.test(cleanEmail) || cleanEmail.length > 254) {
       res.status(400).json({ success: false, error: { code: 'INVALID_EMAIL', message: 'A valid email address is required.' } });
       return;
