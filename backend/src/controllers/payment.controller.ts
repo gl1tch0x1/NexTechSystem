@@ -338,22 +338,60 @@ export class PaymentController {
       return;
     }
 
-    const isSuccess =
-      status === 'success' ||
-      status === 'approved' ||
-      status === 'authorized' ||
-      isSimulated === true ||
-      isSimulated === 'true';
+    // Authoritative check: Was this order created in a simulated test/sandbox session?
+    const isOrderActuallySimulated = Boolean(order.paymentMetadata?.isSimulated);
+    const clientClaimsSimulation = isSimulated === true || isSimulated === 'true';
 
-    if (isSuccess) {
-      const refId = paymentId || order.paymentReference || `${order.paymentMethod.toLowerCase()}_ref_${Date.now()}`;
+    // Prevent simulation forgery: Reject client claims of simulation if the order was not marked simulated by server
+    if (clientClaimsSimulation && !isOrderActuallySimulated && process.env.NODE_ENV === 'production') {
+      res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Simulated payment settlement is not permitted for live production orders.' },
+      });
+      return;
+    }
+
+    const refId = paymentId || order.paymentReference || `${order.paymentMethod.toLowerCase()}_ref_${Date.now()}`;
+    let isSettlementVerified = false;
+
+    if (isOrderActuallySimulated || (!ENV.TAMARA_API_TOKEN && !ENV.TABBY_SECRET_KEY)) {
+      // In local development sandbox / automated mock suites where provider credentials are intentionally absent
+      isSettlementVerified =
+        status === 'success' ||
+        status === 'approved' ||
+        status === 'authorized' ||
+        clientClaimsSimulation;
+    } else {
+      // Production or configured gateway: strictly verify server-to-server with payment provider
+      try {
+        if (order.paymentMethod === 'TAMARA' && ENV.TAMARA_API_TOKEN) {
+          const authResult = await tamaraService.authoriseOrder(refId);
+          if (authResult?.status === 'AUTHORISED' || authResult?.status === 'APPROVED' || authResult?.isSimulated) {
+            await tamaraService.capturePayment(refId, order.total).catch(() => {});
+            isSettlementVerified = true;
+          }
+        } else if (order.paymentMethod === 'TABBY' && ENV.TABBY_SECRET_KEY) {
+          const captureResult = await tabbyService.capturePayment(refId, order.total);
+          if (captureResult?.status === 'CLOSED' || captureResult?.status === 'AUTHORIZED' || captureResult?.isSimulated) {
+            isSettlementVerified = true;
+          }
+        } else {
+          isSettlementVerified = status === 'success' || status === 'approved';
+        }
+      } catch (err: any) {
+        console.error(`[PaymentController] Server-to-server payment verification failed for order ${order.id}:`, err);
+        isSettlementVerified = false;
+      }
+    }
+
+    if (isSettlementVerified) {
       const updated = await orderService.updatePaymentStatus(
         order.id,
         'PAID',
         refId,
         {
           provider: order.paymentMethod as any,
-          isSimulated: !!isSimulated,
+          isSimulated: isOrderActuallySimulated,
           verifiedAt: new Date().toISOString(),
         },
         `${order.paymentMethod} installment payment verified and approved.`

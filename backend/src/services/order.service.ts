@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { orderRepository } from '../repositories/order.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
+import { couponRepository } from '../repositories/coupon.repository.js';
 import { pricingService } from './pricing.service.js';
 import { inventoryService } from './inventory.service.js';
 import { ebillService } from './ebill.service.js';
@@ -77,6 +78,7 @@ export class OrderService {
       taxTreatment: dto.taxTreatment,
       paymentMethod: dto.paymentMethod,
       shippingAddress: dto.shippingAddress,
+      userId: dto.userId,
     });
 
     // 4. Verify stock availability (respecting variant and backorder settings)
@@ -101,6 +103,13 @@ export class OrderService {
 
       // 5. Decrement inventory
       await inventoryService.deductStock(dto.items);
+
+      // 6. Increment coupon usage if applied
+      if (pricing.appliedCoupon) {
+        await couponRepository.update(pricing.appliedCoupon.id, {
+          usageCount: (pricing.appliedCoupon.usageCount || 0) + 1,
+        });
+      }
 
 
 
@@ -172,6 +181,9 @@ export class OrderService {
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,
         paymentStatus: (dto.paymentMethod === 'COD' || dto.paymentMethod === 'IN_STORE' || isBnpl) ? 'PENDING' : 'PAID',
+        inStoreReservationExpiry: dto.paymentMethod === 'IN_STORE'
+          ? new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+          : undefined,
         orderStatus: initialOrderStatus,
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
@@ -475,6 +487,63 @@ export class OrderService {
     });
 
     return updated;
+  }
+
+  async releaseExpiredInStoreReservations(): Promise<number> {
+    const nowIso = new Date().toISOString();
+    const orders = await orderRepository.find({
+      where: [
+        { field: 'paymentMethod', operator: '==', value: 'IN_STORE' },
+        { field: 'paymentStatus', operator: '==', value: 'PENDING' },
+      ],
+    });
+
+    let releasedCount = 0;
+    for (const order of orders) {
+      if (
+        order.inStoreReservationExpiry &&
+        order.inStoreReservationExpiry < nowIso &&
+        order.orderStatus !== 'CANCELLED' &&
+        order.orderStatus !== 'DELIVERED'
+      ) {
+        for (const item of order.items) {
+          try {
+            await inventoryService.restock(item.productId, item.quantity, item.variantId);
+          } catch (err) {
+            console.error('[OrderService] Restock failed for expired hold:', item.productId, err);
+          }
+        }
+
+        const newHistory = [
+          ...order.statusHistory,
+          {
+            status: 'CANCELLED' as OrderStatus,
+            note: 'In-store showroom pickup reservation expired after 48 hours. Inventory hold released automatically.',
+            timestamp: nowIso,
+            updatedBy: 'SYSTEM_EXPIRY_CRON',
+          },
+        ];
+
+        await orderRepository.update(order.id, {
+          orderStatus: 'CANCELLED',
+          statusHistory: newHistory,
+          updatedAt: nowIso,
+        });
+
+        await auditService.log({
+          userId: 'system',
+          userEmail: 'system@nextech.com',
+          userRole: 'ADMIN',
+          action: 'ORDER_EXPIRED_RESTOCKED',
+          resource: 'orders',
+          resourceId: order.id,
+          details: { orderNumber: order.orderNumber, reason: '48h In-store hold window expired' },
+        });
+
+        releasedCount++;
+      }
+    }
+    return releasedCount;
   }
 }
 

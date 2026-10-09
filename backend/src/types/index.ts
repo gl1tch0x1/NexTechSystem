@@ -307,6 +307,7 @@ export interface OrderPaymentMetadata {
   captureId?: string;
   redirectUrl?: string;
   installments?: number;
+  isSimulated?: boolean;
   raw?: any;
 }
 
@@ -352,6 +353,7 @@ export interface Order {
   paymentTerms?: string;
   taxTreatment?: string;
   partnerTier?: string;
+  inStoreReservationExpiry?: string;
   createdAt: string;
   updatedAt: string;
 }

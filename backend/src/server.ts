@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { ENV } from './config/env.js';
 import { mongoDb } from './config/mongodb.js';
 import { dbStore } from './config/db-store.js';
+import { orderService } from './services/order.service.js';
 
 const app = createApp();
 
@@ -24,6 +25,16 @@ const server = app.listen(ENV.PORT, async () => {
       console.warn('⚠️ [MongoDB Startup Notice]:', err?.message || err);
     }
   }
+
+  // Periodic in-store reservation cleanup (every 15 mins)
+  const reservationInterval = setInterval(async () => {
+    try {
+      await orderService.releaseExpiredInStoreReservations();
+    } catch (err: any) {
+      console.error('⚠️ [ReservationCleanup Error]:', err?.message || err);
+    }
+  }, 15 * 60 * 1000);
+  reservationInterval.unref();
 });
 
 const handleShutdown = async (signal: string) => {

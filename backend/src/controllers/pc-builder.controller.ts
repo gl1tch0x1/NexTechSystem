@@ -47,6 +47,17 @@ export class WalletController {
       return;
     }
 
+    if (req.user.role !== 'ADMIN') {
+      res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Direct wallet balance injections are restricted to administrative authorization or verified payment gateway settlement.',
+        },
+      });
+      return;
+    }
+
     const { amount, adminPin } = req.body;
     const num = parseFloat(amount);
     if (!Number.isFinite(num) || num <= 0 || num > 50000) {
@@ -54,20 +65,18 @@ export class WalletController {
       return;
     }
 
-    // Two-tier secondary security check for high-value administrative wallet injections (> 2,500 AED or when PIN is supplied)
-    if (adminPin || num > 2500) {
-      const pinToVerify = adminPin || (req.headers['x-admin-pin'] as string);
-      const userPinHash = req.user.adminPinHash || DEFAULT_SYSTEM_ADMIN_PIN_HASH;
-      if (!pinToVerify || !verifyAdminPin(pinToVerify, userPinHash)) {
-        res.status(403).json({
-          success: false,
-          error: {
-            code: 'INVALID_ADMIN_PIN',
-            message: 'Secondary Security PIN verification failed. Please enter the valid authorization PIN.',
-          },
-        });
-        return;
-      }
+    // Administrative secondary security check: Require valid secondary Admin PIN for all manual wallet credits
+    const pinToVerify = adminPin || (req.headers['x-admin-pin'] as string);
+    const userPinHash = req.user.adminPinHash || DEFAULT_SYSTEM_ADMIN_PIN_HASH;
+    if (!pinToVerify || !verifyAdminPin(pinToVerify, userPinHash)) {
+      res.status(403).json({
+        success: false,
+        error: {
+          code: 'INVALID_ADMIN_PIN',
+          message: 'Secondary Security PIN verification failed. Please enter the valid authorization PIN.',
+        },
+      });
+      return;
     }
 
     const cleanAmount = Math.round(num * 100) / 100;
@@ -75,8 +84,8 @@ export class WalletController {
     const result = await walletService.creditWallet({
       userId: req.user.id,
       amount: cleanAmount,
-      reason: num > 2500 ? 'Authorized High-Value Wallet Injection (PIN Verified)' : 'Direct Customer Wallet Top-up (Demo Sandbox)',
-      referenceId: 'topup_card',
+      reason: 'Authorized Administrative Wallet Credit (PIN Verified)',
+      referenceId: 'admin_topup',
     });
 
     res.json({

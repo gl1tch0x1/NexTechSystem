@@ -1,6 +1,7 @@
 import { CartItem, Coupon, PaymentMethod, Address } from '../types/index.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { couponRepository } from '../repositories/coupon.repository.js';
+import { orderRepository } from '../repositories/order.repository.js';
 
 /**
  * Detects if a shipping destination address is within the Bur Dubai district of Dubai.
@@ -9,6 +10,19 @@ import { couponRepository } from '../repositories/coupon.repository.js';
  */
 export function isBurDubaiAddress(address?: { addressLine1?: string; city?: string; state?: string; postalCode?: string } | null): boolean {
   if (!address) return false;
+
+  const city = (address.city || '').toLowerCase().trim();
+  const state = (address.state || '').toLowerCase().trim();
+
+  // If city or state is explicitly specified and does not correspond to Dubai (e.g. Abu Dhabi, Sharjah, Ajman),
+  // it cannot be within Bur Dubai
+  if (city && !city.includes('dubai')) {
+    return false;
+  }
+  if (state && !state.includes('dubai')) {
+    return false;
+  }
+
   const combined = `${address.addressLine1 || ''} ${address.city || ''} ${address.state || ''} ${address.postalCode || ''}`.toLowerCase();
   
   const burDubaiPatterns = [
@@ -54,6 +68,7 @@ export class PricingService {
     items: Array<{ productId: string; quantity: number }>;
     productsMap: Map<string, any>;
     couponCode?: string;
+    userId?: string;
     requestedWalletDeduction?: number;
     userWalletBalance?: number;
     taxTreatment?: string;
@@ -146,7 +161,25 @@ export class PricingService {
       if (coupon && coupon.isActive) {
         const now = new Date().toISOString();
         if (coupon.startDate <= now && coupon.endDate >= now) {
-          if (subtotal >= coupon.minOrderAmount) {
+          // 1. Enforce global coupon usage limit
+          const isUnderUsageLimit = !coupon.usageLimit || (coupon.usageCount || 0) < coupon.usageLimit;
+
+          // 2. Enforce per-user coupon redemption limit if userId is specified
+          let isUnderUserLimit = true;
+          if (params.userId && coupon.perUserLimit && coupon.perUserLimit > 0) {
+            const userPreviousOrders = await orderRepository.find({
+              where: [
+                { field: 'userId', operator: '==', value: params.userId },
+                { field: 'couponCode', operator: '==', value: coupon.code },
+              ],
+            });
+            const activeOrders = userPreviousOrders.filter((o: any) => o.orderStatus !== 'CANCELLED');
+            if (activeOrders.length >= coupon.perUserLimit) {
+              isUnderUserLimit = false;
+            }
+          }
+
+          if (isUnderUsageLimit && isUnderUserLimit && subtotal >= coupon.minOrderAmount) {
             if (coupon.discountType === 'PERCENTAGE') {
               couponDiscount = (subtotal * coupon.discountValue) / 100;
               if (coupon.maxDiscountAmount && couponDiscount > coupon.maxDiscountAmount) {

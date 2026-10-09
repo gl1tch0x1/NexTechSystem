@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { pricingService } from '../services/pricing.service.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { couponRepository } from '../repositories/coupon.repository.js';
+import { orderRepository } from '../repositories/order.repository.js';
 import { walletService } from '../services/wallet.service.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 
@@ -97,6 +98,7 @@ export class CartController {
         taxTreatment,
         paymentMethod,
         shippingAddress,
+        userId: req.user?.id,
       });
 
       res.json({ success: true, data: result });
@@ -105,7 +107,7 @@ export class CartController {
     }
   }
 
-  async validateCoupon(req: Request, res: Response): Promise<void> {
+  async validateCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
     const { code } = req.body;
     const subtotal = req.body.subtotal ?? req.body.cartSubtotal;
     if (!code) {
@@ -123,6 +125,25 @@ export class CartController {
     if (coupon.startDate > now || coupon.endDate < now) {
       res.status(400).json({ success: false, error: { code: 'COUPON_EXPIRED', message: 'This coupon has expired.' } });
       return;
+    }
+
+    if (coupon.usageLimit && (coupon.usageCount || 0) >= coupon.usageLimit) {
+      res.status(400).json({ success: false, error: { code: 'COUPON_LIMIT_REACHED', message: 'This coupon has reached its maximum total usage limit.' } });
+      return;
+    }
+
+    if (req.user?.id && coupon.perUserLimit && coupon.perUserLimit > 0) {
+      const userOrders = await orderRepository.find({
+        where: [
+          { field: 'userId', operator: '==', value: req.user.id },
+          { field: 'couponCode', operator: '==', value: coupon.code },
+        ],
+      });
+      const activeOrders = userOrders.filter((o: any) => o.orderStatus !== 'CANCELLED');
+      if (activeOrders.length >= coupon.perUserLimit) {
+        res.status(400).json({ success: false, error: { code: 'COUPON_USER_LIMIT_REACHED', message: 'You have reached the maximum allowed uses for this coupon.' } });
+        return;
+      }
     }
 
     let discountAmount = 0;

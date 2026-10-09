@@ -80,8 +80,8 @@ export class PasswordResetService {
       throw new Error('A valid email address is required.');
     }
 
-    // Linear-time O(n) email pattern with disjoint character classes to prevent polynomial backtracking (CWE-1333)
-    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+    // Linear-time O(n) email pattern without nested repetitions to prevent polynomial backtracking (CWE-1333)
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!EMAIL_REGEX.test(normalizedEmail)) {
       throw new Error('A valid email address is required.');
     }
