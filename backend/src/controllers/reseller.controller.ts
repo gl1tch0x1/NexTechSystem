@@ -230,10 +230,16 @@ export class ResellerController {
   }
 
   async downloadTemplate(_req: AuthenticatedRequest, res: Response): Promise<void> {
-    const buffer = excelImportService.generateSampleTemplateBuffer();
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=comnet_technology_listing_template.xlsx');
-    res.send(buffer);
+    try {
+      const buffer = await excelImportService.generateSampleTemplateBuffer();
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=nextech_hardware_sku_listing_template.xlsx');
+      res.setHeader('Content-Length', buffer.length.toString());
+      res.send(buffer);
+    } catch (err: any) {
+      console.error('[ResellerController] Error generating Excel template:', err);
+      res.status(500).json({ success: false, error: { code: 'TEMPLATE_ERROR', message: err.message || 'Failed to generate template' } });
+    }
   }
 
   async getImportHistory(req: AuthenticatedRequest, res: Response): Promise<void> {

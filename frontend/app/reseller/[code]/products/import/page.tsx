@@ -31,6 +31,7 @@ export default function ResellerProductImportPage() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [importResult, setImportResult] = useState<{ importedCount: number; updatedCount: number; skippedCount: number } | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -96,8 +97,29 @@ export default function ResellerProductImportPage() {
     }
   };
 
-  const handleDownloadTemplate = () => {
-    window.open(getApiUrl('/reseller/template/download'), '_blank');
+  const handleDownloadTemplate = async () => {
+    try {
+      setIsDownloadingTemplate(true);
+      const downloadEndpoint = getApiUrl('/reseller/template/download');
+      const response = await fetch(downloadEndpoint);
+      if (!response.ok) {
+        throw new Error(`Failed to download template (HTTP ${response.status})`);
+      }
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'nextech_hardware_sku_listing_template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err: any) {
+      console.error('Direct download error, falling back to window navigation:', err);
+      window.location.href = getApiUrl('/reseller/template/download');
+    } finally {
+      setIsDownloadingTemplate(false);
+    }
   };
 
   return (
@@ -120,10 +142,15 @@ export default function ResellerProductImportPage() {
 
         <button
           onClick={handleDownloadTemplate}
-          className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-800 font-bold rounded-xl text-xs flex items-center gap-2 border border-slate-200 shadow-xs hover:shadow transition-all cursor-pointer"
+          disabled={isDownloadingTemplate}
+          className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-800 font-bold rounded-xl text-xs flex items-center gap-2 border border-slate-200 shadow-xs hover:shadow transition-all cursor-pointer disabled:opacity-60"
         >
-          <Download className="w-4 h-4 text-amber-600" />
-          <span>Download Excel Template (.xlsx)</span>
+          {isDownloadingTemplate ? (
+            <RefreshCw className="w-4 h-4 text-amber-600 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4 text-amber-600" />
+          )}
+          <span>{isDownloadingTemplate ? 'Downloading Template...' : 'Download Excel Template (.xlsx)'}</span>
         </button>
       </div>
 
