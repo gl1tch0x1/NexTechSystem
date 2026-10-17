@@ -5,8 +5,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { Order, OrderStatus } from '@/types';
+import { Order, OrderStatus, CargoDetails } from '@/types';
 import DigitalEBillModal from '@/components/invoice/DigitalEBillModal';
+import CargoWaybillModal from '@/components/admin/CargoWaybillModal';
+import CargoLogisticsView from '@/components/admin/CargoLogisticsView';
 import {
   FileText,
   CheckCircle2,
@@ -124,6 +126,34 @@ export default function AdminOrdersPage() {
 
   // Digital E-Bill modal state
   const [eBillOrder, setEBillOrder] = useState<Order | null>(null);
+
+  // Cargo Waybill modal state
+  const [cargoWaybillOrder, setCargoWaybillOrder] = useState<Order | null>(null);
+
+  const handleUpdateCargo = async (orderId: string, cargoDetails: CargoDetails) => {
+    if (!token) return;
+    try {
+      await ApiClient.put(`/admin/orders/${orderId}/cargo`, {
+        cargoDetails,
+        carrier: cargoDetails.carrier,
+        trackingNumber: cargoDetails.trackingNumber,
+      }, { token });
+      showOrderToast('success', 'Air Waybill & Cargo dispatch details updated successfully.');
+      fetchOrders();
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder(prev => prev ? {
+          ...prev,
+          cargoDetails,
+          carrier: cargoDetails.carrier,
+          trackingNumber: cargoDetails.trackingNumber
+        } : null);
+      }
+    } catch (err: any) {
+      console.error('Failed to update cargo details:', err);
+      showOrderToast('error', 'Failed to update cargo details: ' + (err?.message || 'Unknown error'));
+      throw err;
+    }
+  };
 
   // Serial Number Modal State
   const [serialModal, setSerialModal] = useState<{
@@ -627,6 +657,12 @@ export default function AdminOrdersPage() {
     }
   };
 
+  // Cargo & Logistics Consignments (Processing, Shipped, Pending or active waybills)
+  const cargoOrders = orders.filter(o => {
+    const norm = getNormalizedStatus(o);
+    return norm === 'PROCESSING' || norm === 'SHIPPED' || norm === 'PENDING' || !!o.cargoDetails || !!o.trackingNumber;
+  });
+
   const filteredOrders = orders.filter(o => {
     const normStatus = getNormalizedStatus(o);
     const matchesSearch =
@@ -661,8 +697,10 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <div className="text-xs text-purple-600 dark:text-purple-400 font-mono uppercase font-bold tracking-wider mb-1">
-            Global Fulfillment & Logistics Pipeline
+          <div className="text-xs text-purple-600 dark:text-purple-400 font-mono uppercase font-bold tracking-wider mb-1 flex items-center gap-2">
+            <span>Global Fulfillment & Logistics Pipeline</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Air & Ground Freight Active</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Customer Orders & Verified E-Bills
@@ -728,7 +766,7 @@ export default function AdminOrdersPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
 
-        {/* Status Filter Tabs */}
+        {/* Status Filter Tabs (with Cargo tab placed right after Processing) */}
         <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs w-full md:w-auto overflow-x-auto">
           {[
             { id: 'ALL', label: 'All Orders' },
@@ -739,40 +777,63 @@ export default function AdminOrdersPage() {
             },
             { id: 'PENDING', label: 'Pending' },
             { id: 'PROCESSING', label: 'Processing' },
+            {
+              id: 'CARGO',
+              label: 'Cargo',
+              icon: Truck,
+              count: cargoOrders.length,
+            },
             { id: 'SHIPPED', label: 'Shipped' },
             { id: 'DELIVERED', label: 'Delivered' },
             { id: 'CANCELLED', label: 'Cancelled' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setStatusFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                statusFilter === tab.id
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <span>{tab.label}</span>
-              {typeof tab.count === 'number' && tab.count > 0 && (
-                <span
-                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
-                    statusFilter === tab.id
-                      ? 'bg-white text-purple-700'
-                      : 'bg-amber-500 text-white animate-pulse'
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  statusFilter === tab.id
+                    ? tab.id === 'CARGO'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-purple-600 text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {Icon && <Icon className="w-3.5 h-3.5" />}
+                <span>{tab.label}</span>
+                {typeof tab.count === 'number' && tab.count > 0 && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
+                      statusFilter === tab.id
+                        ? 'bg-white text-slate-900'
+                        : tab.id === 'CARGO'
+                        ? 'bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300'
+                        : 'bg-amber-500 text-white animate-pulse'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full min-w-[950px] text-left text-xs text-slate-700 dark:text-slate-300">
+      {/* Main Content Area: Dedicated Cargo View OR Standard Orders Table */}
+      {statusFilter === 'CARGO' ? (
+        <CargoLogisticsView
+          orders={cargoOrders}
+          onSelectCargoOrder={setSelectedOrder}
+          onOpenWaybill={setCargoWaybillOrder}
+          searchQuery={searchQuery}
+        />
+      ) : (
+        /* Orders Table */
+        <div className="rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full min-w-[950px] text-left text-xs text-slate-700 dark:text-slate-300">
             <thead className="bg-slate-50 dark:bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="py-3.5 px-4 font-bold min-w-[180px]">Order # & Timestamp</th>
@@ -876,6 +937,15 @@ export default function AdminOrdersPage() {
 
                         <button
                           type="button"
+                          onClick={() => setCargoWaybillOrder(order)}
+                          className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors cursor-pointer border border-blue-200/60 dark:border-blue-800/60"
+                          title="Open Air Waybill & Freight Details"
+                        >
+                          <Truck className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          type="button"
                           onClick={() => setEBillOrder(order)}
                           className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                           title="Open Digital Tax E-Bill"
@@ -897,6 +967,7 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       </div>
+      )}
 
       {/* CREATE SALES ORDER MODAL */}
       {isCreateModalOpen && (
@@ -2261,6 +2332,15 @@ export default function AdminOrdersPage() {
         isOpen={!!eBillOrder}
         onClose={() => setEBillOrder(null)}
       />
+
+      {/* CARGO WAYBILL & AIR FREIGHT MANIFEST MODAL */}
+      {cargoWaybillOrder && (
+        <CargoWaybillModal
+          order={cargoWaybillOrder}
+          onClose={() => setCargoWaybillOrder(null)}
+          onUpdateCargo={handleUpdateCargo}
+        />
+      )}
     </div>
   );
 }

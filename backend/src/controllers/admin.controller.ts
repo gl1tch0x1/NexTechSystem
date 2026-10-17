@@ -282,8 +282,8 @@ export class AdminController {
 
   async updateOrderStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
-    const { status, note, items } = req.body;
-    const updated = await orderService.updateOrderStatus(id, status, note, req.user?.id, items);
+    const { status, note, items, cargoDetails, trackingNumber, carrier } = req.body;
+    const updated = await orderService.updateOrderStatus(id, status, note, req.user?.id, items, cargoDetails, trackingNumber, carrier);
     await auditService.log({
       userId: req.user?.id || 'admin',
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
@@ -291,9 +291,20 @@ export class AdminController {
       action: 'ADMIN_ORDER_STATUS_UPDATED',
       resource: 'order',
       resourceId: id,
-      details: { newStatus: status, note, itemsCount: items?.length },
+      details: { newStatus: status, note, itemsCount: items?.length, carrier, trackingNumber },
     });
     res.json({ success: true, data: updated });
+  }
+
+  async updateOrderCargo(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const { carrier, trackingNumber, cargoDetails, note } = req.body;
+    const updated = await orderService.updateOrderCargo(id, { carrier, trackingNumber, cargoDetails, note }, req.user?.id);
+    if (!updated) {
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Order not found' } });
+      return;
+    }
+    res.json({ success: true, data: updated, message: 'Order cargo details updated successfully.' });
   }
 
   async approveOrder(req: AuthenticatedRequest, res: Response): Promise<void> {

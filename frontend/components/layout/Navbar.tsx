@@ -45,7 +45,7 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0A0E1A]/95 backdrop-blur-xl border-b border-slate-200/90 dark:border-slate-800/90 transition-colors duration-200 shadow-sm">
+    <>
       {/* 1. TOP ANNOUNCEMENT BAR (Centered GCC Dispatch Highlight) */}
       <div className="bg-slate-900 dark:bg-slate-950 text-slate-300 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto flex items-center justify-center text-center">
@@ -64,8 +64,10 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* 2. MAIN HEADER BAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 lg:gap-8">
+      {/* 2. STICKY MAIN HEADER & SUB-NAVIGATION BAR (Sticks to top on scroll) */}
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0A0E1A]/95 backdrop-blur-xl border-b border-slate-200/90 dark:border-slate-800/90 transition-colors duration-200 shadow-sm">
+        {/* MAIN HEADER BAR */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 lg:gap-8">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-0">
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60 shadow-md shadow-slate-200/60 dark:shadow-black/30 group-hover:scale-105 group-hover:shadow-blue-500/20 transition-all duration-300 shrink-0 flex items-center justify-center p-0.5">
@@ -631,5 +633,6 @@ export function Navbar() {
         </div>
       )}
     </header>
+    </>
   );
 }

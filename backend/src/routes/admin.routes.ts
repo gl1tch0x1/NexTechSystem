@@ -40,6 +40,7 @@ router.post('/customers/:id/wallet-adjust', (req, res, next) => adminController.
 router.get('/orders', (req, res, next) => adminController.getOrders(req, res).catch(next));
 router.post('/orders', (req, res, next) => adminController.createOrder(req, res).catch(next));
 router.put('/orders/:id/status', (req, res, next) => adminController.updateOrderStatus(req, res).catch(next));
+router.put('/orders/:id/cargo', (req, res, next) => adminController.updateOrderCargo(req, res).catch(next));
 router.put('/orders/:id/approve', (req, res, next) => adminController.approveOrder(req, res).catch(next));
 router.put('/orders/:id/reject', (req, res, next) => adminController.rejectOrder(req, res).catch(next));
 router.get('/notifications', (req, res, next) => adminController.getNotifications(req, res).catch(next));

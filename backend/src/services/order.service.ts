@@ -276,7 +276,16 @@ export class OrderService {
     return orderRepository.find({ orderBy: { field: 'createdAt', direction: 'desc' } });
   }
 
-  async updateOrderStatus(orderId: string, status: OrderStatus, note?: string, adminUserId?: string, items?: OrderItem[]): Promise<Order | null> {
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    note?: string,
+    adminUserId?: string,
+    items?: OrderItem[],
+    cargoDetails?: any,
+    trackingNumber?: string,
+    carrier?: string
+  ): Promise<Order | null> {
     const order = await orderRepository.findById(orderId);
     if (!order) return null;
 
@@ -299,6 +308,15 @@ export class OrderService {
     if (items && Array.isArray(items) && items.length > 0) {
       updates.items = items;
     }
+    if (cargoDetails) {
+      updates.cargoDetails = { ...(order.cargoDetails || {}), ...cargoDetails };
+    }
+    if (trackingNumber) {
+      updates.trackingNumber = trackingNumber;
+    }
+    if (carrier) {
+      updates.carrier = carrier;
+    }
 
     const updated = await orderRepository.update(orderId, updates);
 
@@ -311,7 +329,63 @@ export class OrderService {
         action: `ORDER_STATUS_${status}`,
         resource: 'orders',
         resourceId: orderId,
-        details: { previousStatus: order.orderStatus, newStatus: status, note },
+        details: { previousStatus: order.orderStatus, newStatus: status, note, carrier, trackingNumber },
+      });
+    }
+
+    return updated;
+  }
+
+  async updateOrderCargo(
+    orderId: string,
+    cargoPayload: {
+      carrier?: string;
+      trackingNumber?: string;
+      cargoDetails?: any;
+      note?: string;
+    },
+    adminUserId?: string
+  ): Promise<Order | null> {
+    const order = await orderRepository.findById(orderId);
+    if (!order) return null;
+
+    const mergedCargo = {
+      ...(order.cargoDetails || {}),
+      ...(cargoPayload.cargoDetails || {}),
+      carrier: cargoPayload.carrier || cargoPayload.cargoDetails?.carrier || order.carrier,
+      trackingNumber: cargoPayload.trackingNumber || cargoPayload.cargoDetails?.trackingNumber || order.trackingNumber,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updates: any = {
+      cargoDetails: mergedCargo,
+      carrier: mergedCargo.carrier,
+      trackingNumber: mergedCargo.trackingNumber,
+    };
+
+    const newHistory = [
+      ...order.statusHistory,
+      {
+        status: order.orderStatus,
+        note: cargoPayload.note || `Cargo manifest & dispatch details updated (${mergedCargo.carrier || 'Carrier'} - ${mergedCargo.trackingNumber || mergedCargo.waybillNumber || 'AWB'})`,
+        timestamp: new Date().toISOString(),
+        updatedBy: adminUserId,
+      },
+    ];
+    updates.statusHistory = newHistory;
+
+    const updated = await orderRepository.update(orderId, updates);
+
+    if (adminUserId) {
+      const actingAdmin = await userRepository.findById(adminUserId);
+      await auditService.log({
+        userId: adminUserId,
+        userEmail: actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL,
+        userRole: 'ADMIN',
+        action: 'ORDER_CARGO_UPDATED',
+        resource: 'orders',
+        resourceId: orderId,
+        details: { carrier: mergedCargo.carrier, trackingNumber: mergedCargo.trackingNumber },
       });
     }
 

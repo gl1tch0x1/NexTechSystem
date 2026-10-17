@@ -311,6 +311,36 @@ export interface OrderPaymentMetadata {
   raw?: any;
 }
 
+export interface CargoMilestone {
+  stage: string;
+  location: string;
+  timestamp: string;
+  completed: boolean;
+  notes?: string;
+}
+
+export interface CargoDetails {
+  waybillNumber?: string;
+  trackingNumber?: string;
+  carrier?: string;
+  cargoType?: string;
+  weightKg?: number;
+  packageCount?: number;
+  dimensions?: string;
+  volumetricWeightKg?: number;
+  originHub?: string;
+  destinationHub?: string;
+  customsStatus?: 'CLEARED' | 'IN_INSPECTION' | 'DOCUMENTATION_REQUIRED' | 'EXEMPT';
+  customsDeclarationNumber?: string;
+  driverName?: string;
+  driverPhone?: string;
+  vehiclePlate?: string;
+  estimatedDeliveryDate?: string;
+  dispatchedAt?: string;
+  milestones?: CargoMilestone[];
+  notes?: string;
+}
+
 export interface Order {
   id: string;
   orderNumber: string; // e.g. "ORD-2026-89421"
@@ -354,6 +384,9 @@ export interface Order {
   taxTreatment?: string;
   partnerTier?: string;
   inStoreReservationExpiry?: string;
+  carrier?: string;
+  trackingNumber?: string;
+  cargoDetails?: CargoDetails;
   createdAt: string;
   updatedAt: string;
 }

@@ -85,7 +85,7 @@
 | **PC Builder Diagnostics** | Socket matching (LGA1700, AM5), memory generation validation (DDR5/DDR4), TDP consumption calculation + 30% PSU headroom. | Custom PC Builders, System Integrators |
 | **Supplier Procurement** | Purchase Order lifecycle management, Weighted Average Cost (WAC) recalculation, automatic warehouse stock increments upon receipt. | Wholesale Purchasing Agents, Procurement Officers |
 | **Financial P&L Intelligence** | Real-time commercial spread analytics comparing gross sales revenue against procurement wholesale spend. | C-Suite Executives, Finance Directors |
-| **FTA VAT 201 Compliance** | Automated UAE 5% VAT calculations, Designated Freezone exemptions (0%), and SHA-256 sealed cryptographic E-Bills. | Accounting Departments, Tax Auditors |
+| **Global Freight & Cargo** | Dedicated Cargo Command Deck (`/admin/orders` -> `Cargo`), Air Waybill (AWB) generation, volumetric tare/gross calculations, 5-stage milestone pipelines, physical route ribbons, and deep inspector drawers. | Freight Forwarders, Logistics Leads, Supply Chain |
 | **Edge Defense Grid** | Cloudflare Turnstile bot shielding, Helmet security headers, tiered rate limiting, and zero-trust CORS policies. | Infosec Engineers, Site Reliability Engineers |
 
 ---
@@ -129,6 +129,22 @@
 ### 7. Supplier Wholesale Procurement & Purchase Orders
 - Dedicated procurement portal at [`/admin/purchase-orders`](http://localhost:3000/admin/purchase-orders) to issue, track, and receive hardware components from manufacturers (Intel, NVIDIA, Corsair, Samsung, Dell, ASUS).
 - Automatically recalculates Weighted Average Cost (WAC) and increments regional warehouse inventory upon physical receipt.
+
+### 8. Global Freight & Air Waybill Cargo Logistics Command Deck (`/admin/orders` -> `Cargo` Tab)
+- **Executive Logistics KPI Command Deck**: Real-time operational oversight including Active Global Consignments, Gross Freight Tonnage (calibrated scale verification), Units Manifested (ESD Class II protection), and 100% GCC Customs Green Channel BOE clearance compliance.
+- **Two-Tier High-Density Control Deck**:
+  - Full-width instant search across AWBs, consignees, cities, and order references.
+  - Hub routing selector: `DXB Air Cargo Village (Terminal 2)`, `AUH Khalifa Port (KIZAD Hub)`, `RUH Cargo Dry Port Terminal 4`, and `SHJ Freight Hub`.
+  - Transit stage filter (`Depot Palletized`, `Line-Haul In-Transit`, `Consignee Delivered`) and package type filters (`Pallet Freight`, `Electronic Parcel`, `Express Courier`).
+  - Segmented carrier filter chips with live counts (`All Carriers`, `DHL Express`, `Aramex GCC`, `FedEx Freight`, `NexTech Fleet`) with 1-click active reset.
+  - Manifest export to CSV and consolidated print sheet commands.
+- **Physical Multi-Modal Logistics Transit Route Ribbon**: Real-time visual route mapping from `1. Central Origin Depot (Dubai South DWC Hub)` ➔ `2. Air Gateway Hub (DXB Terminal 2)` ➔ `3. Final Consignee Destination` with live telemetry indicators.
+- **Inline Deep Freight Inspector Drawer**:
+  - **Fleet & Dispatch Details**: Carrier assignment, lead driver details, direct dispatch hotline (`tel:`), commercial fleet license plate, and tamper security seal (`SEAL-AE-XXXX-ESD`).
+  - **Freight & Volumetric Specs**: Side-by-side Gross Weight vs Volumetric Weight, **Chargeable Billable Weight** calculation (`Higher of Gross vs Volumetric`), dimensions (`L × W × H`), cubic volume, GCC Customs Bill of Entry (BOE), and handling compliance tags (`⚡ ESD Sensitive`, `📦 Double Boxed`, `🛡️ Tamper Sealed`).
+  - **Consignment Line Items**: Enriched manifest table showing product title, quantity pill (`×1`), unit price, line subtotal, hardware serial numbers (`S/N: NX-XXXX-XX`), and transit protection insurance (`Shield AED 50,000 Verified`).
+- **5-Stage Discrete Milestone Progress Pipeline**: Discrete 5-stage progress segments (`[===] [===] [---] [---] [---]`) tracking order confirmation, depot palletization, customs clearance, line-haul in-transit, and consignee delivery with ETA and `On Schedule` telemetry.
+- **Official Printable Air Waybill (AWB) Modal**: Standardized IATA-style Air Waybill document with dynamic vector barcodes, consignor/consignee address blocks, flight/vehicle routing, line items manifest, and live carrier tracking status updates.
 
 ---
 
@@ -736,13 +752,14 @@ eCommerce_Store/
 │   │   └── page.tsx                 # Dynamic storefront homepage
 │   ├── components/                  # Reusable UI component library
 │   │   ├── account/                 # CustomerPortalHeader, AddressManagementModal
-│   │   ├── admin/                   # AdminNotificationCenter, ProductEditorPage
+│   │   ├── admin/                   # AdminNotificationCenter, ProductEditorPage, CargoLogisticsView, CargoWaybillModal
 │   │   ├── home/                    # Hero, Bento Grid, Taxonomy, & Solutions
 │   │   ├── layout/                  # Navbar, Footer, & GlobalCommandPalette (Cmd+K)
 │   │   ├── product/                 # ProductCard, Matrix Showcase, & Filters
 │   │   └── ui/                      # Modals, HUD diagnostics, & DirhamSymbol
 │   ├── lib/                         # State providers, API client, and utilities
 │   │   ├── api-client.ts            # Type-safe API client with auto-fallback
+│   │   ├── cargo-utils.ts           # Volumetric weights, carrier routing, & milestone pipelines
 │   │   ├── proxy-helper.ts          # Universal Next.js API proxy with timeout & fallback
 │   │   ├── auth-context.tsx         # User authentication state provider
 │   │   ├── cart-context.tsx         # Shopping cart state provider
@@ -800,6 +817,7 @@ eCommerce_Store/
 | `GET` | `/api/orders/:orderId/ebill` | Authenticated | Download official electronic tax invoice (Ownership verified) |
 | `PUT` | `/api/admin/orders/:id/approve` | Admin | Approve pending reseller order; transitions to `CONFIRMED` and allocates stock |
 | `PUT` | `/api/admin/orders/:id/reject` | Admin | Reject pending reseller order; transitions to `CANCELLED` and restocks inventory |
+| `PUT` | `/api/admin/orders/:id/cargo` | Admin | Update cargo dispatch logistics, carrier assignment, AWB, weights, dimensions, hubs, driver, and customs status |
 
 ### B2B Quotations & Order Conversions
 
