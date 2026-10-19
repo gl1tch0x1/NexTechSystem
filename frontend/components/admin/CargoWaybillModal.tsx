@@ -20,6 +20,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
+import { printDocumentElement } from '@/lib/print-document';
 
 interface CargoWaybillModalProps {
   order: Order;
@@ -83,14 +84,20 @@ export default function CargoWaybillModal({ order, onClose, onUpdateCargo }: Car
   };
 
   const handlePrint = () => {
-    window.print();
+    printDocumentElement('printable-cargo-waybill', `Cargo_Manifest_${cargo.waybillNumber || order.orderNumber}`);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto">
+    <div
+      data-printable-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200 print:static print:inset-auto print:block print:p-0 print:m-0 print:bg-white print:overflow-visible print:w-full print:h-auto"
+    >
+      <div
+        data-printable-card="true"
+        className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto print:static print:w-full print:max-w-none print:m-0 print:p-0 print:border-none print:shadow-none print:rounded-none print:overflow-visible print:max-h-none print:h-auto print:bg-white print:block"
+      >
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 shrink-0">
+        <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 shrink-0 print:hidden no-print">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/25">
               <Truck className="w-6 h-6" />
@@ -149,7 +156,7 @@ export default function CargoWaybillModal({ order, onClose, onUpdateCargo }: Car
         )}
 
         {/* Modal Scrollable Body */}
-        <div className="p-5 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+        <div id="printable-cargo-waybill" className="printable-content p-5 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1 print:p-0 print:overflow-visible">
           {/* Printable AWB Visual Barcode Header */}
           <div className="p-5 rounded-3xl bg-slate-50 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 relative overflow-hidden shadow-sm">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

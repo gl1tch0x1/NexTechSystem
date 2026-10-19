@@ -239,7 +239,8 @@ export default function AdminPurchaseOrdersPage() {
   const pendingCount = orders.filter(o => o.status === 'DRAFT' || o.status === 'ISSUED').length;
 
   return (
-    <div className="p-6 sm:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-6 sm:p-8 space-y-8 max-w-7xl mx-auto print:p-0 print:m-0 print:max-w-none print:space-y-0">
+      <div className="space-y-8 print:hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -689,6 +690,8 @@ export default function AdminPurchaseOrdersPage() {
           </div>
         </div>
       )}
+
+      </div>
 
       {/* OFFICIAL PURCHASE ORDER DOCUMENT / LEGAL DOSSIER MODAL */}
       <PurchaseOrderDocumentModal

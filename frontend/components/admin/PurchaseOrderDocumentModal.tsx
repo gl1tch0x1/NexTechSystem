@@ -17,6 +17,7 @@ import {
   Package
 } from 'lucide-react';
 import { NEXTECH_BUYER_DETAILS, VERIFIED_SUPPLIERS } from '@/lib/suppliers-data';
+import { printDocumentElement } from '@/lib/print-document';
 
 interface PurchaseOrderDocumentModalProps {
   po: PurchaseOrder | null;
@@ -67,14 +68,20 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
   const grandTotal = subtotal + vatAmount;
 
   const handlePrint = () => {
-    window.print();
+    printDocumentElement('printable-ebill', `NexTech_PO_${po.poNumber}`);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
-        {/* Header Action Bar */}
-        <div className="p-4 sm:px-6 sm:py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-800/40 flex items-center justify-between shrink-0">
+    <div
+      data-printable-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200 print:static print:inset-auto print:block print:p-0 print:m-0 print:bg-white print:backdrop-blur-none print:overflow-visible print:w-full print:h-auto print:z-auto"
+    >
+      <div
+        data-printable-card="true"
+        className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col print:static print:w-full print:max-w-none print:m-0 print:p-0 print:border-none print:shadow-none print:rounded-none print:overflow-visible print:max-h-none print:h-auto print:bg-white print:block"
+      >
+        {/* Header Action Bar (Hidden on Print) */}
+        <div className="p-4 sm:px-6 sm:py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-800/40 flex items-center justify-between shrink-0 print:hidden no-print">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <FileText className="w-4 h-4" />
@@ -100,7 +107,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
             <button
               type="button"
               onClick={handlePrint}
-              className="h-8 px-3 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="h-8 px-3 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Print PO Dossier</span>
@@ -108,7 +115,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -116,7 +123,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
         </div>
 
         {/* Printable PO Document Body */}
-        <div id="printable-ebill" className="printable-content printable-invoice p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-800 dark:text-slate-200">
+        <div id="printable-ebill" className="printable-content printable-invoice p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-800 dark:text-slate-200 print:p-0 print:m-0 print:overflow-visible print:max-h-none print:h-auto print:space-y-5 print:text-slate-900 print:bg-white print:block">
           {/* Document Top Bar */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
             <div>
@@ -154,7 +161,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
           </div>
 
           {/* TWO-COLUMN COMPANY DETAILS SECTION (BUYER & SUPPLIER) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 avoid-break">
             {/* 1. SELLER / SUPPLIER COMPANY DETAILS (Where goods are purchased) */}
             <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/40 space-y-3">
               <div className="flex items-center justify-between">
@@ -261,7 +268,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
           </div>
 
           {/* LOGISTICS, WAREHOUSE HUB & COMMERCIAL TERMS STRIP */}
-          <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+          <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono avoid-break">
             <div>
               <div className="text-[10px] text-slate-400 uppercase tracking-wider flex items-center gap-1 font-bold">
                 <Warehouse className="w-3.5 h-3.5 text-blue-500" />
@@ -352,7 +359,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
           </div>
 
           {/* FINANCIAL SUMMARY & VAT RECONCILIATION */}
-          <div className="flex flex-col sm:flex-row justify-between gap-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row justify-between gap-6 pt-4 border-t border-slate-200 dark:border-slate-800 avoid-break">
             <div className="text-xs space-y-2 max-w-sm">
               <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider font-mono">
                 Commercial Requisition Notes & Compliance
@@ -387,7 +394,7 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
           </div>
 
           {/* SIGNATURE & LEGAL RATIFICATION SECTION */}
-          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-mono">
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-mono avoid-break">
             <div className="p-3.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 space-y-2">
               <span className="text-[10px] uppercase text-slate-400 font-bold">Authorized By (Buyer Requisition Desk)</span>
               <div className="font-bold text-slate-900 dark:text-white pt-3">
@@ -406,15 +413,15 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
           </div>
         </div>
 
-        {/* Modal Footer */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex items-center justify-between shrink-0">
+        {/* Modal Footer (Hidden on Print) */}
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex items-center justify-between shrink-0 print:hidden no-print">
           <span className="text-[11px] font-mono text-slate-400">
             Document ID: NX-PO-{po.id}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="h-9 px-5 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-colors"
+            className="h-9 px-5 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
           >
             Close Document
           </button>

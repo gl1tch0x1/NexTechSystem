@@ -17,6 +17,7 @@ import {
 import InvoiceStampSignature from './InvoiceStampSignature';
 import InvoiceTermsAndConditions from './InvoiceTermsAndConditions';
 import { ApiClient } from '@/lib/api-client';
+import { printDocumentElement } from '@/lib/print-document';
 
 interface DigitalEBillModalProps {
   order: Order | null;
@@ -50,7 +51,7 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
   const trnNumber = '100482910300003';
 
   const handlePrint = () => {
-    window.print();
+    printDocumentElement('digital-ebill-printable', `NexTech_Invoice_${invoiceNumber}`);
   };
 
   const handleCopyLink = () => {
