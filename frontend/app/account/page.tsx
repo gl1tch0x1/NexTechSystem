@@ -57,6 +57,12 @@ function CustomerAccountContent() {
     }
   }, [tabParam]);
 
+  useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      router.replace('/admin');
+    }
+  }, [user, router]);
+
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     const params = new URLSearchParams(window.location.search);

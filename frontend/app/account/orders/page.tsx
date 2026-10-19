@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
@@ -25,7 +26,8 @@ import {
 const STATUS_FILTERS = ['ALL', 'PENDING_APPROVAL', 'PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
 
 function CustomerOrdersContent() {
-  const { token } = useAuth();
+  const router = useRouter();
+  const { user, token } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +35,12 @@ function CustomerOrdersContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
+
+  useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      router.replace('/admin/orders');
+    }
+  }, [user, router]);
 
   useEffect(() => {
     if (token) {

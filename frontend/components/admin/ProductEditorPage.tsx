@@ -527,11 +527,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     isPhysical: true,
     collections: ['Laptops', 'Home & Business Laptops'],
     tags: ['Work Laptop', 'UAE', 'ProBook 460 G11'],
-    primaryImage: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
-    ],
+    primaryImage: '',
+    images: [],
     sellerType: portal === 'reseller' ? 'RESELLER' : 'ADMIN',
     resellerId: '',
     resellerName: '',
@@ -1066,7 +1063,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       formData.specifications['RAM Capacity'] ||
       '';
     const series = formData.tags[0] || '';
-    const built = [brand, series, modelSpec, cat].filter(Boolean).join(' ');
+    const built = [brand, series, modelSpec, cat].filter(Boolean).join(' ').slice(0, 80);
     if (built) {
       setFormData(prev => ({
         ...prev,
@@ -1099,7 +1096,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       const newImages = prev.images.filter((_, i) => i !== indexToRemove);
       let newPrimary = prev.primaryImage;
       if (newPrimary === targetUrl) {
-        newPrimary = newImages[0] || DEFAULT_FALLBACK_IMAGE;
+        newPrimary = newImages[0] || '';
       }
       return {
         ...prev,
@@ -1610,21 +1607,30 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         type="button"
                         onClick={handleGenerateStandardTitle}
                         className="text-[11px] text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                        title="Auto-build title from brand, category, and specifications"
+                        title="Auto-build title from brand, category, and specifications (max 80 chars)"
                       >
                         <Wand2 className="w-3 h-3" /> Auto-Construct Title
                       </button>
-                      <span className="text-[10px] text-slate-400 font-mono">
-                        {formData.title.length} characters
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-md transition-colors ${
+                          formData.title.length >= 80
+                            ? 'bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-900'
+                            : formData.title.length >= 70
+                            ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-900'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        {formData.title.length} / 80 characters
                       </span>
                     </div>
                   </div>
                   <input
                     type="text"
+                    maxLength={80}
                     placeholder="e.g. HP ProBook 460 G11 Intel Core Ultra 5 16.1 FHD BL ENG DOS"
                     value={formData.title}
                     onChange={e => {
-                      const val = e.target.value;
+                      const val = e.target.value.slice(0, 80);
                       setFormData(prev => ({
                         ...prev,
                         title: val,
@@ -1781,25 +1787,66 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   {/* Primary Cover Preview */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Primary Cover Asset</label>
-                      <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 border-purple-500/60 relative shadow-md group">
-                        <img
-                          src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
-                          alt="Primary Cover"
-                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                          onError={() => setPreviewImageError(true)}
-                        />
-                        <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-purple-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1">
-                          <Check className="w-3 h-3 text-white" /> Cover
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                          Primary Cover Asset
+                        </label>
+                        {formData.primaryImage && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, primaryImage: '' }));
+                              setPreviewImageError(false);
+                            }}
+                            className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
+                          >
+                            Clear Cover
+                          </button>
+                        )}
+                      </div>
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 relative shadow-sm group flex items-center justify-center">
+                        {formData.primaryImage && !previewImageError ? (
+                          <>
+                            <img
+                              src={getSafeImageUrl(formData.primaryImage)}
+                              alt="Primary Cover"
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              onError={() => setPreviewImageError(true)}
+                            />
+                            <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-purple-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
+                              <Check className="w-3 h-3 text-white" /> Cover
+                            </div>
+                          </>
+                        ) : (
+                          <div className="p-4 text-center space-y-1.5 text-slate-400">
+                            <div className="w-9 h-9 rounded-xl bg-slate-200/60 dark:bg-slate-800/80 flex items-center justify-center mx-auto text-slate-500 dark:text-slate-400">
+                              <ImageIcon className="w-5 h-5" />
+                            </div>
+                            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">No Cover Asset Selected</div>
+                            <p className="text-[10px] text-slate-400">Paste an image URL below or select from the gallery queue</p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     {/* Gallery Thumbnails + Add URL */}
                     <div className="md:col-span-2 space-y-3">
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Gallery Queue</label>
+                      <div className="flex items-center justify-between">
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                          Gallery Queue ({formData.images.length})
+                        </label>
+                        {formData.images.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, images: [] }))}
+                            className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
                       {/* Thumbnail Strip */}
-                      {formData.images.length > 0 && (
+                      {formData.images.length > 0 ? (
                         <div className="flex gap-2 overflow-x-auto pb-1">
                           {formData.images.map((imgUrl, imgIdx) => {
                             const isPrimary = imgUrl === formData.primaryImage;
@@ -1863,12 +1910,17 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             );
                           })}
                         </div>
+                      ) : (
+                        <div className="p-3.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-center text-slate-400 space-y-0.5">
+                          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">Gallery queue is empty</p>
+                          <p className="text-[10px] text-slate-400">Paste image URLs below to upload hardware photography angles.</p>
+                        </div>
                       )}
                       {/* Add Asset URL Input */}
                       <div className="flex gap-2">
                         <input
                           type="url"
-                          placeholder="Paste image URL to add to gallery..."
+                          placeholder="Paste image URL (PNG, WEBP, JPG) to add to gallery..."
                           value={galleryUrlInput}
                           onChange={e => setGalleryUrlInput(e.target.value.replace(/[<>'"]/g, ''))}
                           onKeyDown={e => {
@@ -1882,7 +1934,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <button
                           type="button"
                           onClick={() => handleAddGalleryImage(galleryUrlInput)}
-                          className="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+                          className="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
                         >
                           <Plus className="w-3.5 h-3.5" /> Add
                         </button>
@@ -1893,7 +1945,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <label className="block text-[10px] font-bold text-slate-500 mb-1">Cover Asset URL</label>
                         <input
                           type="url"
-                          placeholder="https://..."
+                          placeholder="e.g. https://domain.com/hardware-cover.webp"
                           value={formData.primaryImage}
                           onChange={e => {
                             const sanitized = e.target.value.replace(/[<>'"]/g, '');
@@ -2477,7 +2529,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <div className="space-y-6">
 
                         {/* Group Header Banner — Theme Adaptive (Light & Dark) */}
-                        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50/80 via-slate-50 to-slate-100/60 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 flex items-center justify-between gap-4 shadow-sm border border-purple-100/90 dark:border-slate-800">
+                        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50/80 via-slate-50 to-slate-100/60 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm border border-purple-100/90 dark:border-slate-800">
                           <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                               <span className="w-2.5 h-2.5 rounded-full bg-purple-600 shrink-0"></span>
@@ -2512,7 +2564,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         </div>
 
                         {/* Spec Fields Grid — Clean 2-Column Professional Layout */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                           {currentGroup.fields.map(field => {
                             const presets = field.presetKey ? (SPECIFICATION_PRESETS[field.presetKey] || []) : (SPECIFICATION_PRESETS[field.key as keyof typeof SPECIFICATION_PRESETS] || []);
                             const currentValue = formData.specifications[field.key] || '';
@@ -2651,26 +2703,26 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     )}
                   </div>
                 </div>
+              </div>
 
-                {/* Section 4 Footer Navigation */}
-                <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('inventory')}
-                    className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back: Warehousing</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('variants')}
-                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
-                  >
-                    <span>Next: Multi-SKU Variants</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* Section 4 Footer Navigation */}
+              <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('inventory')}
+                  className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back: Warehousing</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('variants')}
+                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                >
+                  <span>Next: Multi-SKU Variants</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
           )}
@@ -3219,13 +3271,21 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
 
             {/* The Actual Mock Product Card — Automatically Theme Adaptive */}
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm hover:shadow-md transition-all">
-              <div className="aspect-video relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <img
-                  src={previewImageError ? DEFAULT_FALLBACK_IMAGE : getSafeImageUrl(formData.primaryImage)}
-                  alt={formData.title ? formData.title.replace(/[<>'"]/g, '') : 'Product Preview'}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={() => setPreviewImageError(true)}
-                />
+              <div className="aspect-video relative overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                {formData.primaryImage && !previewImageError ? (
+                  <img
+                    src={getSafeImageUrl(formData.primaryImage)}
+                    alt={formData.title ? formData.title.replace(/[<>'"]/g, '') : 'Product Preview'}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={() => setPreviewImageError(true)}
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 text-slate-400 gap-1.5 p-4 text-center">
+                    <ImageIcon className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Asset preview pending</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">Provide cover image to preview storefront card</span>
+                  </div>
+                )}
                 <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-slate-900/80 dark:bg-slate-900/90 text-white text-[10px] font-black tracking-wider uppercase backdrop-blur-md border border-white/10 shadow-sm">
                   {formData.brandName || 'Brand'}
                 </div>

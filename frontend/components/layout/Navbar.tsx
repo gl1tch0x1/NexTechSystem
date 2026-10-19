@@ -14,7 +14,6 @@ import {
   Heart,
   User,
   Layers,
-  ShieldCheck,
   Store,
   Menu,
   X,
@@ -23,6 +22,9 @@ import {
   Flame,
   LogOut,
   PackageCheck,
+  LayoutDashboard,
+  Truck,
+  Settings,
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
 
@@ -281,7 +283,11 @@ export function Navbar() {
                   <>
                     <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 mb-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-sm">
+                        <div className={`w-9 h-9 rounded-xl ${
+                          role === 'ADMIN'
+                            ? 'bg-gradient-to-tr from-purple-600 to-indigo-600'
+                            : 'bg-gradient-to-tr from-blue-600 to-indigo-600'
+                        } text-white flex items-center justify-center font-black text-sm shadow-sm`}>
                           {user.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -292,31 +298,66 @@ export function Navbar() {
                             {user.email}
                           </div>
                           <div className="mt-1 flex items-center gap-1.5">
-                            <span className="inline-block text-[9px] font-black px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 uppercase tracking-wider">
-                              {user.role}
+                            <span className={`inline-block text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                              role === 'ADMIN'
+                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60'
+                                : role === 'RESELLER'
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60'
+                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
+                            }`}>
+                              {role === 'ADMIN' ? 'SYSTEM ADMIN' : user.role}
                             </span>
-                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-                              Wallet: {formatPrice((user as any).walletBalance || 0)}
-                            </span>
+                            {role !== 'ADMIN' && (
+                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                                Wallet: {formatPrice((user as any).walletBalance || 0)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Role Specific Shortcuts */}
-                    <div className="space-y-1">
-                      {role === 'ADMIN' && (
+                    {role === 'ADMIN' ? (
+                      <div className="space-y-1">
                         <Link
                           href="/admin"
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors"
                         >
-                          <ShieldCheck className="w-4 h-4 shrink-0" />
+                          <LayoutDashboard className="w-4 h-4 shrink-0 text-purple-600 dark:text-purple-400" />
                           <span>Admin Command Center</span>
                         </Link>
-                      )}
 
-                      {role === 'RESELLER' && (
+                        <Link
+                          href="/admin/orders"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <Truck className="w-4 h-4 text-purple-500 shrink-0" />
+                          <span>Order Verification & Cargo Desk</span>
+                        </Link>
+
+                        <Link
+                          href="/admin/purchase-orders"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <PackageCheck className="w-4 h-4 text-purple-500 shrink-0" />
+                          <span>Purchase Orders & Inventory</span>
+                        </Link>
+
+                        <Link
+                          href="/admin/settings"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <Settings className="w-4 h-4 text-purple-500 shrink-0" />
+                          <span>System & Audit Settings</span>
+                        </Link>
+                      </div>
+                    ) : role === 'RESELLER' ? (
+                      <div className="space-y-1">
                         <Link
                           href={`/reseller/${reseller?.resellerCode || 'comnet101'}/dashboard`}
                           onClick={() => setUserDropdownOpen(false)}
@@ -325,35 +366,55 @@ export function Navbar() {
                           <Store className="w-4 h-4 shrink-0" />
                           <span>Reseller Portal ({reseller?.resellerCode || 'Vendor'})</span>
                         </Link>
-                      )}
 
-                      <Link
-                        href="/account"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <User className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>Customer Profile & Address</span>
-                      </Link>
+                        <Link
+                          href={`/reseller/${reseller?.resellerCode || 'comnet101'}/orders`}
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <PackageCheck className="w-4 h-4 text-amber-500 shrink-0" />
+                          <span>Client Wholesale Orders</span>
+                        </Link>
 
-                      <Link
-                        href="/account/orders"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <PackageCheck className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>Orders & Verified E-Bills</span>
-                      </Link>
+                        <Link
+                          href="/account"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span>Commercial Profile</span>
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Link
+                          href="/account"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span>Customer Profile & Address</span>
+                        </Link>
 
-                      <Link
-                        href="/account/wishlist"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <Heart className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>Saved Wishlist ({wishlistCount})</span>
-                      </Link>
-                    </div>
+                        <Link
+                          href="/account/orders"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <PackageCheck className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span>Orders & Verified E-Bills</span>
+                        </Link>
+
+                        <Link
+                          href="/account/wishlist"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <Heart className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span>Saved Wishlist ({wishlistCount})</span>
+                        </Link>
+                      </div>
+                    )}
 
                     <div className="border-t border-slate-100 dark:border-slate-800 mt-2 pt-2">
                       <button
@@ -362,7 +423,7 @@ export function Navbar() {
                           logout();
                           setUserDropdownOpen(false);
                         }}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                        className="w-full flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Sign Out</span>
@@ -579,35 +640,70 @@ export function Navbar() {
             {user ? (
               <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-slate-900 dark:text-white">{user.name}</div>
-                  <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                    Wallet: {formatPrice((user as any).walletBalance || 0)}
-                  </span>
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>{user.name}</span>
+                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${
+                      role === 'ADMIN'
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300'
+                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'
+                    }`}>
+                      {role === 'ADMIN' ? 'Admin' : user.role}
+                    </span>
+                  </div>
+                  {role !== 'ADMIN' && (
+                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                      Wallet: {formatPrice((user as any).walletBalance || 0)}
+                    </span>
+                  )}
                 </div>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Link
-                    href="/account"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-300"
-                  >
-                    My Account
-                  </Link>
-                  <Link
-                    href="/account/orders"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-300"
-                  >
-                    Orders & Bills
-                  </Link>
-                </div>
-                {role === 'ADMIN' && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block p-2 rounded-xl bg-purple-600 text-white text-center font-bold"
-                  >
-                    Admin Command Center
-                  </Link>
+                {role === 'ADMIN' ? (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-xl bg-purple-600 text-white text-center font-bold text-xs shadow-xs"
+                    >
+                      Admin Center
+                    </Link>
+                    <Link
+                      href="/admin/orders"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-center font-bold text-xs"
+                    >
+                      Cargo & Orders
+                    </Link>
+                    <Link
+                      href="/admin/purchase-orders"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-center font-bold text-xs"
+                    >
+                      Purchase Orders
+                    </Link>
+                    <Link
+                      href="/admin/settings"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-center font-bold text-xs"
+                    >
+                      Settings
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <Link
+                      href="/account"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-300 text-xs"
+                    >
+                      My Account
+                    </Link>
+                    <Link
+                      href="/account/orders"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-300 text-xs"
+                    >
+                      Orders & Bills
+                    </Link>
+                  </div>
                 )}
                 <button
                   onClick={() => {

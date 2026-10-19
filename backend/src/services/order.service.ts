@@ -261,7 +261,10 @@ export class OrderService {
   }
 
   async getOrderById(id: string): Promise<Order | null> {
-    return orderRepository.findById(id);
+    if (!id) return null;
+    const order = await orderRepository.findById(id);
+    if (order) return order;
+    return orderRepository.findByOrderNumber(id);
   }
 
   async getOrdersByUser(userId: string): Promise<Order[]> {
@@ -286,7 +289,7 @@ export class OrderService {
     trackingNumber?: string,
     carrier?: string
   ): Promise<Order | null> {
-    const order = await orderRepository.findById(orderId);
+    const order = await this.getOrderById(orderId);
     if (!order) return null;
 
     const newHistory = [
@@ -318,7 +321,7 @@ export class OrderService {
       updates.carrier = carrier;
     }
 
-    const updated = await orderRepository.update(orderId, updates);
+    const updated = await orderRepository.update(order.id, updates);
 
     if (adminUserId) {
       const actingAdmin = await userRepository.findById(adminUserId);
@@ -328,7 +331,7 @@ export class OrderService {
         userRole: 'ADMIN',
         action: `ORDER_STATUS_${status}`,
         resource: 'orders',
-        resourceId: orderId,
+        resourceId: order.id,
         details: { previousStatus: order.orderStatus, newStatus: status, note, carrier, trackingNumber },
       });
     }
@@ -346,7 +349,7 @@ export class OrderService {
     },
     adminUserId?: string
   ): Promise<Order | null> {
-    const order = await orderRepository.findById(orderId);
+    const order = await this.getOrderById(orderId);
     if (!order) return null;
 
     const mergedCargo = {
@@ -374,7 +377,7 @@ export class OrderService {
     ];
     updates.statusHistory = newHistory;
 
-    const updated = await orderRepository.update(orderId, updates);
+    const updated = await orderRepository.update(order.id, updates);
 
     if (adminUserId) {
       const actingAdmin = await userRepository.findById(adminUserId);
@@ -384,7 +387,7 @@ export class OrderService {
         userRole: 'ADMIN',
         action: 'ORDER_CARGO_UPDATED',
         resource: 'orders',
-        resourceId: orderId,
+        resourceId: order.id,
         details: { carrier: mergedCargo.carrier, trackingNumber: mergedCargo.trackingNumber },
       });
     }
@@ -399,7 +402,7 @@ export class OrderService {
     paymentMetadata?: any,
     note?: string
   ): Promise<Order | null> {
-    const order = await orderRepository.findById(orderId);
+    const order = await this.getOrderById(orderId);
     if (!order) return null;
 
     let targetOrderStatus = order.orderStatus;
@@ -432,7 +435,7 @@ export class OrderService {
       };
     }
 
-    const updated = await orderRepository.update(orderId, updates);
+    const updated = await orderRepository.update(order.id, updates);
     return updated;
   }
 
@@ -442,7 +445,7 @@ export class OrderService {
     approverId?: string,
     note?: string
   ): Promise<Order> {
-    const order = await orderRepository.findById(orderId);
+    const order = await this.getOrderById(orderId);
     if (!order) {
       throw new Error(`Order not found: ${orderId}`);
     }
@@ -465,7 +468,7 @@ export class OrderService {
       },
     ];
 
-    const updated = await orderRepository.update(orderId, {
+    const updated = await orderRepository.update(order.id, {
       orderStatus: 'CONFIRMED',
       statusHistory: newHistory,
       updatedAt: new Date().toISOString(),
@@ -482,7 +485,7 @@ export class OrderService {
       userRole: 'ADMIN',
       action: 'ORDER_APPROVED_HITL',
       resource: 'orders',
-      resourceId: orderId,
+      resourceId: order.id,
       details: {
         orderNumber: order.orderNumber,
         channel,
@@ -500,7 +503,7 @@ export class OrderService {
     approverId?: string,
     reason?: string
   ): Promise<Order> {
-    const order = await orderRepository.findById(orderId);
+    const order = await this.getOrderById(orderId);
     if (!order) {
       throw new Error(`Order not found: ${orderId}`);
     }
@@ -534,7 +537,7 @@ export class OrderService {
       },
     ];
 
-    const updated = await orderRepository.update(orderId, {
+    const updated = await orderRepository.update(order.id, {
       orderStatus: 'CANCELLED',
       statusHistory: newHistory,
       updatedAt: new Date().toISOString(),
@@ -551,7 +554,7 @@ export class OrderService {
       userRole: 'ADMIN',
       action: 'ORDER_REJECTED_HITL',
       resource: 'orders',
-      resourceId: orderId,
+      resourceId: order.id,
       details: {
         orderNumber: order.orderNumber,
         channel,
