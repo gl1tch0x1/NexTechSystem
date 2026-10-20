@@ -214,10 +214,26 @@ export async function POST(request: Request) {
 
   inMemoryResellers.unshift(newReseller);
 
+  const fallbackPassword = body.password && String(body.password).trim()
+    ? String(body.password).trim()
+    : `NexTech#${Math.random().toString(36).slice(-5)}!99`;
+
   return NextResponse.json({
     success: true,
     data: {
       reseller: newReseller,
+      user: {
+        id: newReseller.userId,
+        email: newReseller.email,
+        username: newReseller.username,
+        name: newReseller.displayName,
+        role: 'RESELLER',
+      },
+      credentials: {
+        username: newReseller.username,
+        email: newReseller.email,
+        temporaryPassword: fallbackPassword,
+      },
       message: `Technology Reseller ${newReseller.businessName} provisioned successfully.`,
     },
   });

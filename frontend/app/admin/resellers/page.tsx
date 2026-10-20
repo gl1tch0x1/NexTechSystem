@@ -20,7 +20,12 @@ import {
   X,
   Truck,
   Check,
-  Layers
+  Layers,
+  Copy,
+  RefreshCw,
+  KeyRound,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 export default function AdminResellersPage() {
@@ -28,6 +33,20 @@ export default function AdminResellersPage() {
   const [resellers, setResellers] = useState<Reseller[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Auto-generated credentials modal and inspect state
+  const [provisionedCredentials, setProvisionedCredentials] = useState<{
+    businessName: string;
+    resellerCode: string;
+    subdomain: string;
+    username: string;
+    email: string;
+    temporaryPassword: string;
+  } | null>(null);
+
+  const [inspectReseller, setInspectReseller] = useState<Reseller | null>(null);
+  const [showPasswordInForm, setShowPasswordInForm] = useState(true);
+  const [copiedState, setCopiedState] = useState(false);
 
   // Section 1: Corporate Legal & KYC
   const [businessName, setBusinessName] = useState('');
@@ -136,12 +155,36 @@ export default function AdminResellersPage() {
     );
   };
 
+  const generateTemporaryPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let rand = '';
+    for (let i = 0; i < 6; i++) {
+      rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const num = Math.floor(10 + Math.random() * 90);
+    return `NexTech#${rand}!${num}`;
+  };
+
+  const handleRegeneratePassword = () => {
+    const newPass = generateTemporaryPassword();
+    setPassword(newPass);
+    showToast('success', 'Generated new temporary passphrase.');
+  };
+
+  const handleCopyCredentials = (text: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedState(true);
+      setTimeout(() => setCopiedState(false), 2500);
+      showToast('success', 'Credentials copied to clipboard!');
+    }
+  };
+
   const fetchResellers = () => {
     if (token) {
       ApiClient.get<Reseller[]>('/admin/resellers', { token })
         .then(res => setResellers(res || []))
-        .catch(err => console.error(err))
-;
+        .catch(err => console.error(err));
     }
   };
 
@@ -154,22 +197,28 @@ export default function AdminResellersPage() {
     setFormError('');
     setIsSubmitting(true);
 
+    const autoCode = (resellerCode || businessName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) || 'partner').toLowerCase();
+    const autoSub = (subdomain || autoCode).toLowerCase();
+    const finalPassword = password && password.trim() ? password.trim() : generateTemporaryPassword();
+    const finalUsername = (username || `${autoCode}_admin`).toLowerCase().replace(/[^a-z0-9_]/g, '');
+    const finalEmail = (email || `sales@${autoSub}.ae`).toLowerCase().trim();
+
     try {
-      await ApiClient.post(
+      const res: any = await ApiClient.post(
         '/admin/resellers',
         {
           businessName,
           displayName: displayName || businessName,
-          username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
-          email: email.toLowerCase().trim(),
-          phone,
-          password: password || undefined,
-          resellerCode: resellerCode.toLowerCase().replace(/[^a-z0-9]/g, ''),
-          subdomain: (subdomain || resellerCode).toLowerCase().replace(/[^a-z0-9]/g, ''),
+          username: finalUsername,
+          email: finalEmail,
+          phone: phone || '+971 4 000 0000',
+          password: finalPassword,
+          resellerCode: autoCode,
+          subdomain: autoSub,
           commissionRate: Number(commissionRate),
           address: {
             fullName: displayName || businessName,
-            phone,
+            phone: phone || '+971 4 000 0000',
             addressLine1: addressLine || 'Al Quoz Industrial Hub',
             city,
             state: 'Dubai',
@@ -194,6 +243,22 @@ export default function AdminResellersPage() {
         { token: token || undefined }
       );
 
+      const createdData = res?.data || res || {};
+      const creds = createdData.credentials || {
+        username: finalUsername,
+        email: finalEmail,
+        temporaryPassword: finalPassword,
+      };
+
+      setProvisionedCredentials({
+        businessName: createdData.reseller?.businessName || businessName,
+        resellerCode: createdData.reseller?.resellerCode || autoCode,
+        subdomain: createdData.reseller?.subdomain || autoSub,
+        username: creds.username,
+        email: creds.email,
+        temporaryPassword: creds.temporaryPassword,
+      });
+
       setModalOpen(false);
       // Reset form
       setBusinessName('');
@@ -209,7 +274,7 @@ export default function AdminResellersPage() {
       setAddressLine('');
       setWebsite('');
       setDescription('');
-      showToast('success', `Reseller account "${businessName}" provisioned successfully!`);
+      showToast('success', `Reseller account "${businessName}" provisioned successfully! Credentials ready.`);
       fetchResellers();
     } catch (err: any) {
       setFormError(err.message || 'Failed to create reseller account.');
@@ -392,12 +457,23 @@ export default function AdminResellersPage() {
                   </td>
                   <td className="py-4 px-3 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setInspectReseller(r)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                        title="View Account Credentials & Direct Master Access Details"
+                      >
+                        <KeyRound className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                        <span>Account</span>
+                      </button>
                       <Link
                         href={`/reseller/${r.resellerCode}/dashboard`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 shadow-sm transition-all hover:shadow cursor-pointer"
+                        target="_blank"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-600 hover:bg-purple-700 text-white shadow-xs transition-all hover:shadow cursor-pointer"
+                        title="Open Reseller Portal (Admin Master Access - No Password Required)"
                       >
-                        <span>Open Portal</span>
-                        <ExternalLink className="w-3.5 h-3.5 text-purple-500" />
+                        <span>Access Portal</span>
+                        <ExternalLink className="w-3.5 h-3.5 text-purple-200" />
                       </Link>
                       <button
                         onClick={() => handleStatusToggle(r)}
@@ -480,12 +556,23 @@ export default function AdminResellersPage() {
                       placeholder="e.g. Apex Hardware Technologies LLC"
                       value={businessName}
                       onChange={e => {
-                        setBusinessName(e.target.value);
-                        if (!resellerCode) {
-                          setResellerCode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8));
+                        const val = e.target.value;
+                        setBusinessName(val);
+                        const base = val.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+                        if (!resellerCode || resellerCode.length <= 8) {
+                          setResellerCode(base);
                         }
-                        if (!subdomain) {
-                          setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8));
+                        if (!subdomain || subdomain.length <= 8) {
+                          setSubdomain(base);
+                        }
+                        if (!username || username.endsWith('_admin')) {
+                          setUsername(`${base || 'reseller'}_admin`);
+                        }
+                        if (!email || email.includes('@')) {
+                          setEmail(`sales@${base || 'partner'}.ae`);
+                        }
+                        if (!password) {
+                          setPassword(generateTemporaryPassword());
                         }
                       }}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
@@ -759,13 +846,23 @@ export default function AdminResellersPage() {
                 </div>
               </div>
 
-              {/* SECTION 3: AUTHORIZED SIGNATORY & ADMIN ACCESS */}
+              {/* SECTION 3: AUTHORIZED SIGNATORY & AUTO-GENERATED ACCESS CREDENTIALS */}
               <div className="space-y-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2 pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
-                  <User className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
-                    3. Authorized Corporate Signatory &amp; Admin Access
-                  </span>
+                <div className="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                      3. Authorized Signatory &amp; Auto-Generated Access Credentials
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRegeneratePassword}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/80 dark:hover:bg-purple-900/80 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer"
+                  >
+                    <RefreshCw className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                    <span>Regenerate Passphrase</span>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -798,20 +895,6 @@ export default function AdminResellersPage() {
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                      Corporate Business Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="e.g. sales@apextech.ae"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
                       Direct Contact Phone *
                     </label>
                     <input
@@ -825,9 +908,33 @@ export default function AdminResellersPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                      Vendor Portal Admin Username *
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                        Portal Login Email *
+                      </label>
+                      <span className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+                        Auto-Suggested
+                      </span>
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. sales@apextech.ae"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                        Portal Admin Username *
+                      </label>
+                      <span className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+                        Auto-Created
+                      </span>
+                    </div>
                     <input
                       type="text"
                       required
@@ -839,16 +946,48 @@ export default function AdminResellersPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                      Initial Passphrase (Optional)
-                    </label>
-                    <input
-                      type="password"
-                      placeholder="Leave blank for auto-passphrase"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                    />
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                        Temporary Passphrase *
+                      </label>
+                      <span className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                        Auto-Generated
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPasswordInForm ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full pl-3.5 pr-16 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                      />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswordInForm(!showPasswordInForm)}
+                          className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                          title={showPasswordInForm ? 'Hide passphrase' : 'Show passphrase'}
+                        >
+                          {showPasswordInForm ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyCredentials(password)}
+                          className="p-1 text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 cursor-pointer"
+                          title="Copy passphrase"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200/90 dark:border-purple-900/60 text-xs text-purple-950 dark:text-purple-200 flex items-start gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                  <div className="leading-relaxed">
+                    <strong>Automated Credentials &amp; Admin Master Access SLA:</strong> Username, corporate email, and a secure initial passphrase are automatically assigned upon creation. The reseller can later change their password at any time via their portal settings. As Administrator, you retain permanent master access to this vendor portal regardless of password changes.
                   </div>
                 </div>
               </div>
@@ -1084,6 +1223,216 @@ export default function AdminResellersPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* PROVISIONED CREDENTIALS SUCCESS MODAL */}
+      {provisionedCredentials && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 space-y-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    Reseller Account Provisioned!
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Credentials have been automatically generated for this vendor account.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setProvisionedCredentials(null)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Entity Information */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Business Entity:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{provisionedCredentials.businessName}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Reseller Code:</span>
+                <span className="font-mono font-bold text-amber-600 dark:text-amber-400">{provisionedCredentials.resellerCode}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Vendor Portal URL:</span>
+                <span className="font-mono font-bold text-purple-600 dark:text-purple-400">
+                  /reseller/{provisionedCredentials.resellerCode}/dashboard
+                </span>
+              </div>
+            </div>
+
+            {/* Generated Credentials Card */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50/50 dark:from-purple-950/40 dark:to-indigo-950/30 border border-purple-200 dark:border-purple-800/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <span>Auto-Generated Vendor Credentials</span>
+                </span>
+                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                  Ready to Share
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-900/40">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">Username</div>
+                  <div className="font-mono font-bold text-slate-900 dark:text-white mt-0.5 select-all">
+                    {provisionedCredentials.username}
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-900/40">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">Login Email</div>
+                  <div className="font-mono font-bold text-slate-900 dark:text-white mt-0.5 select-all truncate">
+                    {provisionedCredentials.email}
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-900/40 flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">Temporary Passphrase</div>
+                    <div className="font-mono font-black text-purple-600 dark:text-purple-400 text-sm mt-0.5 select-all">
+                      {provisionedCredentials.temporaryPassword}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyCredentials(provisionedCredentials.temporaryPassword)}
+                    className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors cursor-pointer"
+                    title="Copy passphrase"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Administrative Oversight Guarantee */}
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/90 dark:border-amber-900/50 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <strong>Admin Master Access Guarantee:</strong> The reseller can update their password at any time via their portal settings. Even if the reseller changes their password, you always retain master administrator access to inspect, monitor, and manage their portal at any time from this dashboard.
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const text = `NexTech Technology Reseller Access:\nEntity: ${provisionedCredentials.businessName}\nPortal: ${window.location.origin}/reseller/${provisionedCredentials.resellerCode}/dashboard\nUsername: ${provisionedCredentials.username}\nEmail: ${provisionedCredentials.email}\nTemporary Password: ${provisionedCredentials.temporaryPassword}\n\nNote: You can update your password upon first login via Settings.`;
+                  handleCopyCredentials(text);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>{copiedState ? 'Copied to Clipboard!' : 'Copy Credentials Package'}</span>
+              </button>
+
+              <Link
+                href={`/reseller/${provisionedCredentials.resellerCode}/dashboard`}
+                target="_blank"
+                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/25 transition-all cursor-pointer"
+              >
+                <span>Launch Portal (Admin SSO)</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INSPECT RESELLER ACCOUNT MODAL */}
+      {inspectReseller && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-5">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <Store className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    Reseller Account &amp; Access Details
+                  </h3>
+                  <div className="text-[11px] font-mono text-amber-600 dark:text-amber-400 font-bold">
+                    Code: {inspectReseller.resellerCode}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setInspectReseller(null)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Business Name:</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{inspectReseller.businessName}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Authorized Signatory:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {inspectReseller.businessInformation?.authorizedSignatory || inspectReseller.displayName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Portal Username:</span>
+                  <span className="font-mono font-bold text-purple-600 dark:text-purple-400">
+                    {inspectReseller.username}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Registered Email:</span>
+                  <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
+                    {inspectReseller.email}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Direct Phone:</span>
+                  <span className="font-mono text-slate-700 dark:text-slate-300">
+                    {inspectReseller.phone}
+                  </span>
+                </div>
+              </div>
+
+              {/* Master Admin Guarantee */}
+              <div className="p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/90 dark:border-emerald-900/50 text-xs text-emerald-950 dark:text-emerald-200 flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <div className="leading-relaxed">
+                  <strong>Master Administrator Portal Access Active:</strong> You have continuous supervisory access to this vendor portal. Even if this reseller changes their password, your administrator credentials allow direct sign-in and full catalog/order inspection.
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setInspectReseller(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
+              >
+                Close
+              </button>
+              <Link
+                href={`/reseller/${inspectReseller.resellerCode}/dashboard`}
+                target="_blank"
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <span>Launch Portal (Admin SSO)</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         </div>
       )}

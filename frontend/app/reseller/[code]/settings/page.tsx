@@ -11,16 +11,28 @@ import {
   MapPin,
   Save,
   CheckCircle2,
-  Mail
+  Mail,
+  Lock,
+  KeyRound,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 
 export default function ResellerSettingsPage() {
   const params = useParams();
   const resellerCode = params.code as string;
-  const { token } = useAuth();
+  const { token, role } = useAuth();
 
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const [form, setForm] = useState({
     businessName: 'ComNet Solutions Middle East LLC',
@@ -101,6 +113,42 @@ export default function ResellerSettingsPage() {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+
+    if (newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match. Please verify.');
+      return;
+    }
+
+    setPasswordSaving(true);
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    try {
+      await ApiClient.post(
+        '/auth/change-password',
+        { currentPassword, newPassword },
+        { token }
+      );
+      setPasswordSuccess('Your vendor portal password has been successfully updated! You can use this new password for subsequent logins.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordSuccess(''), 6000);
+    } catch (err: any) {
+      console.error(err);
+      setPasswordError(err.message || 'Failed to update password. Please check your current password.');
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-16">
       {/* Header */}
@@ -117,6 +165,19 @@ export default function ResellerSettingsPage() {
           Maintain your verified UAE commercial trade license, VAT tax registration, and physical dispatch coordinates.
         </p>
       </div>
+
+      {/* Admin Supervisory Access Notice */}
+      {role === 'ADMIN' && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-3 shadow-xs">
+          <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <div className="font-black text-slate-900">Master Administrator Direct Portal Access Active</div>
+            <p className="text-slate-600 mt-0.5 leading-relaxed">
+              As a platform administrator, you have full supervisory authority over this vendor portal. Reseller password changes do not affect your ability to inspect, monitor, or manage this account from the admin console.
+            </p>
+          </div>
+        </div>
+      )}
 
       {successMsg && (
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-2 animate-in fade-in">
@@ -257,7 +318,7 @@ export default function ResellerSettingsPage() {
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit Button for Profile */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             type="submit"
@@ -269,6 +330,95 @@ export default function ResellerSettingsPage() {
           </button>
         </div>
       </form>
+
+      {/* 4. Portal Access & Security (Update Password) */}
+      <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-emerald-600" />
+            <span>Portal Access & Security (Change Password)</span>
+          </h3>
+          <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1">
+            <Lock className="w-3.5 h-3.5" />
+            <span>End-to-End Encrypted</span>
+          </span>
+        </div>
+
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Update the password for your vendor portal login. You may change this credential at any time. Platform administrators maintain independent supervisory access in accordance with enterprise SLAs.
+        </p>
+
+        {passwordSuccess && (
+          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{passwordSuccess}</span>
+          </div>
+        )}
+
+        {passwordError && (
+          <div className="p-3.5 rounded-2xl bg-red-50 border border-red-300 text-red-900 text-xs font-bold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{passwordError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handlePasswordChange} className="space-y-4 text-xs pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <label className="font-bold text-slate-700">Current Password *</label>
+              <input
+                type="password"
+                required
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-slate-700">New Password (min 8 chars) *</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Enter new secure password"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-slate-700">Confirm New Password *</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                placeholder="Repeat new password"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Password updates take effect immediately on next login.</span>
+            </div>
+            <button
+              type="submit"
+              disabled={passwordSaving || !newPassword || !currentPassword}
+              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{passwordSaving ? 'Updating Password...' : 'Update Portal Password'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

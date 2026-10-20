@@ -8,8 +8,8 @@ import { auditService } from './audit.service.js';
 import { ENV } from '../config/env.js';
 
 export interface CreateResellerDTO {
-  username: string;
-  email: string;
+  username?: string;
+  email?: string;
   password?: string;
   businessName: string;
   displayName: string;
@@ -47,12 +47,11 @@ export class ResellerService {
     return code;
   }
 
-  async createReseller(dto: CreateResellerDTO, adminUserId: string): Promise<{ reseller: Reseller; user: User }> {
-    const existingUser = await userRepository.findByEmail(dto.email);
-    if (existingUser) {
-      throw new Error(`User with email ${dto.email} already exists`);
-    }
-
+  async createReseller(dto: CreateResellerDTO, adminUserId: string): Promise<{
+    reseller: Reseller;
+    user: User;
+    credentials: { username: string; email: string; temporaryPassword: string };
+  }> {
     const code = dto.resellerCode
       ? dto.resellerCode.toLowerCase().replace(/[^a-z0-9]/g, '')
       : await this.generateUniqueResellerCode(dto.businessName);
@@ -68,20 +67,48 @@ export class ResellerService {
       throw new Error(`Subdomain "${subdomain}" is already assigned to another reseller`);
     }
 
+    // Auto-generate username if not provided
+    let finalUsername = dto.username
+      ? dto.username.toLowerCase().replace(/[^a-z0-9_]/g, '')
+      : '';
+    if (!finalUsername) {
+      const baseUser = dto.businessName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10);
+      finalUsername = `${baseUser || 'reseller'}_admin`;
+      let userCount = 1;
+      while (await userRepository.findByUsername(finalUsername)) {
+        finalUsername = `${baseUser || 'reseller'}_admin${userCount}`;
+        userCount++;
+      }
+    }
+
+    // Auto-generate email if not provided
+    const finalEmail = dto.email
+      ? dto.email.toLowerCase().trim()
+      : `admin@${subdomain}.nextech.ae`;
+
+    const existingUser = await userRepository.findByEmail(finalEmail);
+    if (existingUser) {
+      throw new Error(`User with email ${finalEmail} already exists`);
+    }
+
+    // Auto-generate secure temporary password
+    const rawPassword = dto.password && dto.password.trim().length >= 6
+      ? dto.password.trim()
+      : `NexTech#${Math.random().toString(36).slice(-5)}!${Math.floor(10 + Math.random() * 90)}`;
+
+    const salt = crypto.randomBytes(32).toString('hex');
+    const hash = crypto.pbkdf2Sync(rawPassword, salt, 100000, 64, 'sha512').toString('hex');
+    const passwordHash = `${salt}:${hash}`;
+
     const resellerId = `reseller_${uuidv4()}`;
     const userId = `user_${uuidv4()}`;
 
-    // Create User record with RESELLER role
-    const passwordHash = dto.password
-      ? crypto.pbkdf2Sync(dto.password, ENV.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026', 100000, 64, 'sha512').toString('hex')
-      : undefined;
-
     const newUser: User = {
       id: userId,
-      email: dto.email.toLowerCase(),
+      email: finalEmail,
       role: 'RESELLER',
-      name: dto.displayName,
-      username: dto.username.toLowerCase(),
+      name: dto.displayName || dto.businessName,
+      username: finalUsername,
       phone: dto.phone,
       addresses: [{ ...dto.address, id: `addr_${uuidv4()}`, isDefaultShipping: true, isDefaultBilling: true }],
       resellerId,
@@ -97,10 +124,10 @@ export class ResellerService {
       id: resellerId,
       userId,
       resellerCode: code,
-      username: dto.username.toLowerCase(),
-      email: dto.email.toLowerCase(),
+      username: finalUsername,
+      email: finalEmail,
       businessName: dto.businessName,
-      displayName: dto.displayName,
+      displayName: dto.displayName || dto.businessName,
       phone: dto.phone,
       subdomain,
       address: { ...dto.address, id: `addr_${uuidv4()}` },
@@ -127,10 +154,18 @@ export class ResellerService {
       action: 'RESELLER_CREATED',
       resource: 'resellers',
       resourceId: resellerId,
-      details: { resellerCode: code, businessName: dto.businessName, email: dto.email },
+      details: { resellerCode: code, businessName: dto.businessName, email: finalEmail, username: finalUsername },
     });
 
-    return { reseller: createdReseller, user: newUser };
+    return {
+      reseller: createdReseller,
+      user: newUser,
+      credentials: {
+        username: finalUsername,
+        email: finalEmail,
+        temporaryPassword: rawPassword,
+      },
+    };
   }
 
   async getResellerByCode(resellerCode: string): Promise<Reseller | null> {
