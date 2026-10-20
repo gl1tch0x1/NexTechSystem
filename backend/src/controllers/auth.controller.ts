@@ -179,7 +179,6 @@ export class AuthController {
       addressStreet,
       addressCity,
       settlementTerms,
-      creditLimitAED,
       dispatchHub,
       description,
     } = req.body;
@@ -316,8 +315,7 @@ export class AuthController {
           authorizedSignatory: cleanName,
           signatoryTitle: signatoryTitle ? String(signatoryTitle).trim() : 'Managing Director',
           website: website ? String(website).trim() : '',
-          settlementTerms: settlementTerms ? String(settlementTerms).trim() : 'Net 30 Days (Corporate Credit)',
-          creditLimitAED: creditLimitAED ? Number(creditLimitAED) : 50000,
+          settlementTerms: settlementTerms ? String(settlementTerms).trim() : 'Net 30 Days Commercial',
           dispatchHub: dispatchHub ? String(dispatchHub).trim() : 'Dubai Logistics City (DWC)',
           description: description ? String(description).trim() : `Verified Enterprise Reseller Partner: ${cleanBusinessName}`,
         },

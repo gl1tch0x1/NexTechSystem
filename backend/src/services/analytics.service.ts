@@ -105,9 +105,6 @@ export class AnalyticsService {
     };
     enterpriseAccounts: {
       totalAccounts: number;
-      totalCreditLimit: number;
-      usedCredit: number;
-      creditUtilizationPct: number;
       topAccounts: Array<{
         id: string;
         companyName: string;
@@ -116,8 +113,6 @@ export class AnalyticsService {
         terms: string;
         lifetimeSpend: number;
         orderCount: number;
-        creditLimit: number;
-        creditUsed: number;
         healthScore: number;
         riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
       }>;
@@ -449,35 +444,25 @@ export class AnalyticsService {
           })),
       };
 
-      // Enterprise CRM Accounts & Credit Health (Dynamically derived from database resellers)
+      // Enterprise CRM Accounts & Commercial Health (Dynamically derived from database resellers)
       const topAccounts = resellers.slice(0, 10).map((r, idx) => {
-        const creditLimit = Number(r.businessInformation?.creditLimitAED || 150000);
         const lifetimeSpend = Number(r.salesStats?.totalRevenue || Math.max(15000, 185000 - idx * 25000));
         const orderCount = Number(r.salesStats?.totalOrders || Math.max(1, 12 - idx));
-        const creditUsed = Math.min(creditLimit, Math.round(creditLimit * (0.2 + (idx * 0.1))));
         return {
           id: r.id,
           companyName: r.displayName || r.businessName,
           contactName: r.businessInformation?.authorizedSignatory || r.displayName || 'Authorized Signatory',
           tier: r.businessInformation?.businessType || 'Value-Added Reseller (VAR)',
-          terms: r.businessInformation?.settlementTerms || 'Net-30 Commercial',
+          terms: r.businessInformation?.settlementTerms || 'Direct Settlement',
           lifetimeSpend,
           orderCount,
-          creditLimit,
-          creditUsed,
           healthScore: Math.min(100, Math.max(75, 98 - idx * 3)),
           riskLevel: idx > 3 ? ('MEDIUM' as const) : ('LOW' as const),
         };
       });
 
-      const totalCreditLimit = topAccounts.reduce((sum, a) => sum + a.creditLimit, 0);
-      const usedCredit = topAccounts.reduce((sum, a) => sum + a.creditUsed, 0);
-
       const enterpriseAccounts = {
         totalAccounts: resellers.length,
-        totalCreditLimit,
-        usedCredit,
-        creditUtilizationPct: totalCreditLimit > 0 ? Math.round((usedCredit / totalCreditLimit) * 1000) / 10 : 0,
         topAccounts,
       };
 

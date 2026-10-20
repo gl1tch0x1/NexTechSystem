@@ -53,7 +53,6 @@ export interface ResellerBusinessInformation {
   website?: string;
   description?: string;
   settlementTerms?: string;
-  creditLimitAED?: number;
   dispatchHub?: string;
 }
 

@@ -253,7 +253,7 @@ export class AdminController {
       result = await walletService.creditWallet({
         userId: id,
         amount: cleanAmount,
-        reason: reason || 'Administrative Credit Adjustment',
+        reason: reason || 'Administrative Balance Adjustment',
         referenceId: `admin_adj_${uuidv4().substring(0, 8)}`,
         type: 'CREDIT',
       });

@@ -65,7 +65,7 @@ export class WalletController {
       return;
     }
 
-    // Administrative secondary security check: Require valid secondary Admin PIN for all manual wallet credits
+    // Administrative secondary security check: Require valid secondary Admin PIN for all manual wallet deposits
     const pinToVerify = adminPin || (req.headers['x-admin-pin'] as string);
     const userPinHash = req.user.adminPinHash || DEFAULT_SYSTEM_ADMIN_PIN_HASH;
     if (!pinToVerify || !verifyAdminPin(pinToVerify, userPinHash)) {
@@ -84,7 +84,7 @@ export class WalletController {
     const result = await walletService.creditWallet({
       userId: req.user.id,
       amount: cleanAmount,
-      reason: 'Authorized Administrative Wallet Credit (PIN Verified)',
+      reason: 'Authorized Administrative Wallet Deposit (PIN Verified)',
       referenceId: 'admin_topup',
     });
 

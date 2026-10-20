@@ -1446,7 +1446,7 @@ export default function AdminOrdersPage() {
                         </div>
                       </div>
 
-                      {/* Sub-section 3: Commercial Credit Terms & VAT Treatment */}
+                      {/* Sub-section 3: Commercial Settlement & VAT Treatment */}
                       <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
                         <div className="text-[11px] font-bold text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
                           <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
@@ -1459,7 +1459,7 @@ export default function AdminOrdersPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                              Commercial Payment / Credit Terms
+                              Commercial Payment Terms
                             </label>
                             <select
                               value={paymentTerms}
@@ -1468,9 +1468,9 @@ export default function AdminOrdersPage() {
                             >
                               <option value="PREPAID">Prepaid / Wire Advance (Immediate)</option>
                               <option value="NET_15">Net 15 Days (Commercial Terms)</option>
-                              <option value="NET_30">Net 30 Days (Standard Corporate Credit)</option>
-                              <option value="NET_60">Net 60 Days (Enterprise Approved Line)</option>
-                              <option value="LC">Letter of Credit (L/C Confirmed)</option>
+                              <option value="NET_30">Net 30 Days (Standard Corporate Terms)</option>
+                              <option value="NET_60">Net 60 Days (Enterprise Approved Terms)</option>
+                              <option value="WIRE">Bank Wire Transfer (SWIFT / IBAN)</option>
                             </select>
                           </div>
 

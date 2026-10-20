@@ -1236,7 +1236,7 @@ export default function AdminQuotesPage() {
                       <option value="NET_15">Net 15 Days</option>
                       <option value="NET_60">Net 60 Days (Enterprise Approved)</option>
                       <option value="ADVANCE">100% Advance Payment</option>
-                      <option value="LC">Letter of Credit (L/C at Sight)</option>
+                      <option value="WIRE">Bank Wire Transfer (SWIFT / IBAN)</option>
                     </select>
                   </div>
 

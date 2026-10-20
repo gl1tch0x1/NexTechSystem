@@ -1037,7 +1037,7 @@ export const SEED_BENTO_FEATURES: BentoFeature[] = [
   },
   {
     id: 'feat_credit',
-    title: 'Net-30 Enterprise Credit & Digital Wallet Settlement',
+    title: 'Net-30 Enterprise Commercial & Digital Wallet Settlement',
     subtitle: 'Corporate Billing',
     description: 'Streamlined procurement for system integrators with automated Zakat/VAT compliant invoices, escrow settlement, and instant wallet balance margin top-ups.',
     tag: '💼 RESELLER TERMS',

@@ -24,7 +24,7 @@ export default function AdminCustomersPage() {
   const [walletModalCustomer, setWalletModalCustomer] = useState<any | null>(null);
   const [walletAmount, setWalletAmount] = useState<number>(500);
   const [walletType, setWalletType] = useState<'CREDIT' | 'DEBIT'>('CREDIT');
-  const [walletReason, setWalletReason] = useState<string>('Administrative Promotional Credit');
+  const [walletReason, setWalletReason] = useState<string>('Administrative Balance Deposit');
   const [isSubmittingWallet, setIsSubmittingWallet] = useState(false);
   const [walletError, setWalletError] = useState('');
 
@@ -299,7 +299,7 @@ export default function AdminCustomersPage() {
                   }`}
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Credit (Top Up)</span>
+                  <span>Deposit (Top Up)</span>
                 </button>
                 <button
                   type="button"
