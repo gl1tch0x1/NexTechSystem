@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { Reseller } from '@/types';
 
 let inMemoryResellers: Reseller[] = [
@@ -216,7 +217,7 @@ export async function POST(request: Request) {
 
   const fallbackPassword = body.password && String(body.password).trim()
     ? String(body.password).trim()
-    : `NexTech#${Math.random().toString(36).slice(-5)}!99`;
+    : `NexTech#${crypto.randomBytes(3).toString('hex')}!${crypto.randomInt(10, 100)}`;
 
   return NextResponse.json({
     success: true,

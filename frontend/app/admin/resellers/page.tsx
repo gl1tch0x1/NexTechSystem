@@ -158,11 +158,17 @@ export default function AdminResellersPage() {
   const generateTemporaryPassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
     let rand = '';
-    for (let i = 0; i < 6; i++) {
-      rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const buffer = new Uint32Array(8);
+      window.crypto.getRandomValues(buffer);
+      for (let i = 0; i < 6; i++) {
+        rand += chars.charAt(buffer[i] % chars.length);
+      }
+      const num = 10 + (buffer[6] % 90);
+      return `NexTech#${rand}!${num}`;
     }
-    const num = Math.floor(10 + Math.random() * 90);
-    return `NexTech#${rand}!${num}`;
+    // Deterministic safe fallback when window.crypto is unavailable during SSR
+    return `NexTech#K9mP2!74`;
   };
 
   const handleRegeneratePassword = () => {

@@ -94,7 +94,7 @@ export class ResellerService {
     // Auto-generate secure temporary password
     const rawPassword = dto.password && dto.password.trim().length >= 6
       ? dto.password.trim()
-      : `NexTech#${Math.random().toString(36).slice(-5)}!${Math.floor(10 + Math.random() * 90)}`;
+      : `NexTech#${crypto.randomBytes(3).toString('hex')}!${crypto.randomInt(10, 100)}`;
 
     const salt = crypto.randomBytes(32).toString('hex');
     const hash = crypto.pbkdf2Sync(rawPassword, salt, 100000, 64, 'sha512').toString('hex');
