@@ -345,6 +345,17 @@ export class AdminController {
     res.json({ success: true, message: 'All notifications marked as read.' });
   }
 
+  async clearNotification(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    await notificationService.clearNotification(id);
+    res.json({ success: true, message: 'Notification cleared.' });
+  }
+
+  async clearAllNotifications(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    await notificationService.clearAllNotifications();
+    res.json({ success: true, message: 'All notifications cleared.' });
+  }
+
   async createOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
     const {
       customerId,

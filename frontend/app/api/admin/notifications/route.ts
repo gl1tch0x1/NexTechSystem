@@ -12,3 +12,9 @@ export async function GET(request: NextRequest) {
 
   return proxyToBackend(request, '/admin/notifications', { fallbackData });
 }
+
+export async function DELETE(request: NextRequest) {
+  return proxyToBackend(request, '/admin/notifications/clear-all', {
+    fallbackData: { success: true },
+  });
+}

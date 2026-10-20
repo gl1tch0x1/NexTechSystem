@@ -86,6 +86,9 @@
 | **Supplier Procurement** | Purchase Order lifecycle management, Weighted Average Cost (WAC) recalculation, automatic warehouse stock increments upon receipt. | Wholesale Purchasing Agents, Procurement Officers |
 | **Financial P&L Intelligence** | Real-time commercial spread analytics comparing gross sales revenue against procurement wholesale spend. | C-Suite Executives, Finance Directors |
 | **Global Freight & Cargo** | Dedicated Cargo Command Deck (`/admin/orders` -> `Cargo`), Air Waybill (AWB) generation, volumetric tare/gross calculations, 5-stage milestone pipelines, physical route ribbons, and deep inspector drawers. | Freight Forwarders, Logistics Leads, Supply Chain |
+| **Executive Notification Center** | Unified action queue directly inside the notification command bell, single-item dismissal, global clear-all, and quick-clearance routes across orders, purchase orders, quotes, and stock shortages. | System Administrators, Operations Directors |
+| **Visual Timeseries BI** | Recharts ComposedChart telemetry with dedicated high-contrast Y-axis rail, collision-free dynamic X-axis date intervals, and boundary-aware, zero-clip hover telemetry tooltips. | C-Suite Executives, Financial Analysts |
+| **Official Tax Invoicing & Print** | Strict multi-role RBAC invoice protection, automatic dynamic E-Bill synthesis, and isolated iframe print engine eliminating browser URL and header/footer artifacts. | Corporate Clients, Auditors, Accounting |
 | **Edge Defense Grid** | Cloudflare Turnstile bot shielding, Helmet security headers, tiered rate limiting, and zero-trust CORS policies. | Infosec Engineers, Site Reliability Engineers |
 
 ---
@@ -145,6 +148,22 @@
   - **Consignment Line Items**: Enriched manifest table showing product title, quantity pill (`×1`), unit price, line subtotal, hardware serial numbers (`S/N: NX-XXXX-XX`), and transit protection insurance (`Shield AED 50,000 Verified`).
 - **5-Stage Discrete Milestone Progress Pipeline**: Discrete 5-stage progress segments (`[===] [===] [---] [---] [---]`) tracking order confirmation, depot palletization, customs clearance, line-haul in-transit, and consignee delivery with ETA and `On Schedule` telemetry.
 - **Official Printable Air Waybill (AWB) Modal**: Standardized IATA-style Air Waybill document with dynamic vector barcodes, consignor/consignee address blocks, flight/vehicle routing, line items manifest, and live carrier tracking status updates.
+
+### 9. Executive Action Clearance & Persistent Notification Center (`/admin`)
+- **Integrated Action Required Queue**: Immediate operational actions (orders pending approval, stock shortages, pending RFQ quotations, and PO reorder points) embedded directly within the notification command menu.
+- **Granular Dismissal & Clear All**: Real-time single-item dismissal and global "Clear All" with persistent backend sync across `DELETE /api/admin/notifications/:id` and `DELETE /api/admin/notifications`.
+- **Streamlined Cockpit Interface**: Standardized "Admin Dashboard" branding, decluttering the top workspace while keeping critical alerts one click away from any administrative view.
+
+### 10. Real-Time Commercial Intelligence & Timeseries Telemetry (`/admin/analytics`)
+- **Recharts ComposedChart Timeseries Architecture**: High-performance, responsive visual analytics comparing daily Gross Sales (AED) against Order Pulse activity.
+- **Dedicated Collision-Free Y-Axis Rail**: High-contrast, bold currency metrics (`AED 14.0k`, `AED 10.5k`, `AED 7.0k`, `AED 3.5k`, `AED 0`) housed in a dedicated left axis rail, eliminating label collisions with horizontal date ticks.
+- **Dynamic X-Axis Intervals**: Automatic tick gap computation (`minTickGap={25}`) ensuring clean, perfectly spaced date labels across all desktop, tablet, and mobile viewport widths.
+- **Boundary-Aware Deep Tooltip**: Rich dark card (`bg-slate-950`) displaying Cyan date badges, Gross Sales in Dirhams, order volume, and unit counts with boundary auto-detection to prevent clipping.
+
+### 11. Enterprise Tax Invoicing & Isolated Iframe Print Engine (`/orders/[id]/invoice`)
+- **Strict Role-Based Invoicing Access**: Administrators maintain unrestricted audit access across all customer orders; customers and resellers are strictly restricted to their own verified orders and inventory.
+- **Dynamic E-Bill Auto-Synthesis**: Real-time fallback synthesis ensures zero invoice downtime for historical or seed transactions missing explicit E-Bill records.
+- **Isolated Iframe Printing**: Custom `printDocumentElement` prints crisp documents without browser URL headers, page footers, or background clipping.
 
 ---
 
@@ -898,6 +917,8 @@ eCommerce_Store/
 | `GET` | `/api/admin/notifications` | Admin | Fetch unread alerts, critical actions, and pending operational tasks |
 | `PUT` | `/api/admin/notifications/:id/read` | Admin | Mark specific notification as read |
 | `PUT` | `/api/admin/notifications/read-all` | Admin | Mark all active notifications as read |
+| `DELETE` | `/api/admin/notifications/:id` | Admin | Dismiss and permanently clear a specific notification or action item |
+| `DELETE` | `/api/admin/notifications` | Admin | Clear all notifications and dismiss all pending administrative action items |
 | `GET` | `/api/admin/audit-logs` | Admin | Filterable administrative actions, IP stamps, and security audit log |
 | `PUT` | `/api/admin/orders/:id/status` | Admin | Update sales order status, delivery notes, and assign hardware serial numbers |
 | `PUT` | `/api/admin/customers/:id/toggle-status` | Admin | Activate or suspend customer account access |

@@ -24,6 +24,9 @@ import {
   ShieldAlert,
   Sparkles,
   Info,
+  ShoppingBag,
+  Trash2,
+  X,
 } from 'lucide-react';
 
 interface NotificationCenterProps {
@@ -90,23 +93,44 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
     async (showLoading = false) => {
       if (showLoading) setLoading(true);
       try {
-        const res = await ApiClient.get<{ success: boolean; data: AdminNotificationsResponse }>(
+        const res = await ApiClient.get<any>(
           '/admin/notifications',
           { token: token || undefined }
         );
 
-        if (res?.success && res.data) {
-          const newPayload = res.data;
+        const newPayload: AdminNotificationsResponse | null =
+          res?.notifications ? res :
+          res?.data?.notifications ? res.data :
+          res?.data ? res.data :
+          null;
+
+        if (newPayload && (Array.isArray(newPayload.notifications) || typeof newPayload.unreadCount === 'number')) {
+          let payloadToUse = newPayload;
+          if (typeof window !== 'undefined' && Array.isArray(newPayload.notifications)) {
+            const clearedLocal = JSON.parse(localStorage.getItem('nextech_cleared_notifs') || '[]');
+            if (clearedLocal.length > 0) {
+              const clearedSet = new Set(clearedLocal);
+              const filtered = newPayload.notifications.filter(n => !clearedSet.has(n.id));
+              payloadToUse = {
+                ...newPayload,
+                notifications: filtered,
+                unreadCount: filtered.filter(n => !n.isRead).length,
+                actionRequiredCount: filtered.filter(n => n.actionRequired && !n.isRead).length,
+                criticalCount: filtered.filter(n => n.severity === 'CRITICAL' && !n.isRead).length,
+              };
+            }
+          }
+
           // Trigger audio if unread items increased
           if (
             prevUnreadCountRef.current !== null &&
-            newPayload.unreadCount > prevUnreadCountRef.current &&
-            newPayload.actionRequiredCount > 0
+            payloadToUse.unreadCount > prevUnreadCountRef.current &&
+            payloadToUse.actionRequiredCount > 0
           ) {
             playAlertChime();
           }
-          prevUnreadCountRef.current = newPayload.unreadCount;
-          setData(newPayload);
+          prevUnreadCountRef.current = payloadToUse.unreadCount;
+          setData(payloadToUse);
           setLastSyncText(new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
         }
       } catch (err) {
@@ -195,6 +219,73 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
       await ApiClient.put('/admin/notifications/read-all', {}, { token: token || undefined });
     } catch (err) {
       console.warn('[AdminNotificationCenter] Failed to mark all read:', err);
+      fetchNotifications(false);
+    }
+  };
+
+  // Clear / Dismiss single notification
+  const handleClearNotification = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      const target = data?.notifications.find(n => n.id === id);
+      const isUnread = target ? !target.isRead : false;
+      const isAction = target ? (target.actionRequired && !target.isRead) : false;
+      const isCritical = target ? (target.severity === 'CRITICAL' && !target.isRead) : false;
+
+      // Optimistic remove
+      setData(prev => {
+        if (!prev) return prev;
+        const updated = prev.notifications.filter(n => n.id !== id);
+        return {
+          ...prev,
+          notifications: updated,
+          unreadCount: isUnread ? Math.max(0, prev.unreadCount - 1) : prev.unreadCount,
+          actionRequiredCount: isAction ? Math.max(0, prev.actionRequiredCount - 1) : prev.actionRequiredCount,
+          criticalCount: isCritical ? Math.max(0, prev.criticalCount - 1) : prev.criticalCount,
+        };
+      });
+
+      // Persist in localStorage as backup
+      if (typeof window !== 'undefined') {
+        const clearedLocal = JSON.parse(localStorage.getItem('nextech_cleared_notifs') || '[]');
+        if (!clearedLocal.includes(id)) {
+          clearedLocal.push(id);
+          localStorage.setItem('nextech_cleared_notifs', JSON.stringify(clearedLocal));
+        }
+      }
+
+      await ApiClient.delete(`/admin/notifications/${id}`, { token: token || undefined });
+    } catch (err) {
+      console.warn('[AdminNotificationCenter] Failed to clear notification:', err);
+      fetchNotifications(false);
+    }
+  };
+
+  // Clear / Dismiss all notifications
+  const handleClearAll = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      const allIds = data?.notifications.map(n => n.id) || [];
+      setData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          notifications: [],
+          unreadCount: 0,
+          actionRequiredCount: 0,
+          criticalCount: 0,
+        };
+      });
+
+      if (typeof window !== 'undefined') {
+        const clearedLocal = JSON.parse(localStorage.getItem('nextech_cleared_notifs') || '[]');
+        const combined = Array.from(new Set([...clearedLocal, ...allIds]));
+        localStorage.setItem('nextech_cleared_notifs', JSON.stringify(combined));
+      }
+
+      await ApiClient.delete('/admin/notifications/clear-all', { token: token || undefined });
+    } catch (err) {
+      console.warn('[AdminNotificationCenter] Failed to clear all notifications:', err);
       fetchNotifications(false);
     }
   };
@@ -288,13 +379,13 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
         )}
 
         {/* Dynamic Badge */}
-        {unreadCount > 0 && (
+        {(unreadCount > 0 || actionRequiredCount > 0) && (
           <span
             className={`absolute -top-1.5 -right-1.5 px-1.5 py-0.2 min-w-[18px] h-[18px] rounded-full text-[10px] font-black font-mono flex items-center justify-center text-white border-2 border-white dark:border-slate-900 shadow-sm ${
-              criticalCount > 0 ? 'bg-rose-500 animate-pulse' : 'bg-blue-600'
+              criticalCount > 0 ? 'bg-rose-500 animate-pulse' : actionRequiredCount > 0 ? 'bg-amber-500' : 'bg-blue-600'
             }`}
           >
-            {unreadCount > 99 ? '99+' : unreadCount}
+            {(unreadCount || actionRequiredCount) > 99 ? '99+' : (unreadCount || actionRequiredCount)}
           </span>
         )}
 
@@ -365,6 +456,19 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
                   >
                     <CheckCheck className="w-3.5 h-3.5" />
                     <span className="hidden xs:inline">Mark All Read</span>
+                  </button>
+                )}
+
+                {/* Clear All Notifications */}
+                {notifications.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleClearAll}
+                    title="Clear all notifications"
+                    className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 px-2 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ml-0.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden xs:inline">Clear All</span>
                   </button>
                 )}
               </div>
@@ -440,6 +544,78 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
           </div>
 
           {/* ========================================================================= */}
+          {/* URGENT ADMINISTRATIVE ACTION CLEARANCE BANNER */}
+          {/* ========================================================================= */}
+          {actionRequiredCount > 0 && (
+            <div className="p-3.5 bg-gradient-to-r from-amber-500/15 via-rose-500/10 to-amber-500/15 border-b border-amber-300/70 dark:border-amber-800/60 shrink-0">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                  <BellRing className="w-4 h-4 animate-bounce" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                      Administrative Action Required
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white font-mono shadow-xs">
+                      {actionRequiredCount} Action{actionRequiredCount > 1 ? 's' : ''} Pending
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                    Critical items require immediate admin clearance. Verified across orders, partner onboardings, quotations, and warehouse inventories.
+                  </p>
+
+                  {/* Quick links ribbon */}
+                  <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                    <Link
+                      href="/admin/orders"
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-400 transition-colors shadow-2xs"
+                    >
+                      <ShoppingBag className="w-3 h-3 text-blue-500" />
+                      <span>Orders Pending Clearance</span>
+                    </Link>
+                    <Link
+                      href="/admin/purchase-orders"
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-amber-400 transition-colors shadow-2xs"
+                    >
+                      <Boxes className="w-3 h-3 text-amber-500" />
+                      <span>Stock Shortages / PO Reorder</span>
+                    </Link>
+                    {notifications.some(n => n.category === 'RESELLERS' && !n.isRead && n.actionRequired) && (
+                      <Link
+                        href="/admin/resellers"
+                        onClick={() => setIsOpen(false)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-purple-400 transition-colors shadow-2xs"
+                      >
+                        <Store className="w-3 h-3 text-purple-500" />
+                        <span>Partner Approvals</span>
+                      </Link>
+                    )}
+                    <Link
+                      href="/admin/quotes"
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-cyan-400 transition-colors shadow-2xs"
+                    >
+                      <FileText className="w-3 h-3 text-cyan-500" />
+                      <span>RFQs Pending Review</span>
+                    </Link>
+                    <Link
+                      href="/admin/orders"
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] font-bold bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white transition-colors shadow-2xs"
+                    >
+                      <span>Review Urgent Queue</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
           {/* 3. NOTIFICATION LIST */}
           {/* ========================================================================= */}
           <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2 max-h-[55vh] custom-scrollbar">
@@ -499,9 +675,19 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
                             )}
                           </div>
 
-                          <span className="text-[10px] font-mono text-slate-400 whitespace-nowrap shrink-0">
-                            {formatRelativeTime(item.createdAt)}
-                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] font-mono text-slate-400 whitespace-nowrap">
+                              {formatRelativeTime(item.createdAt)}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={e => handleClearNotification(item.id, e)}
+                              title="Dismiss and clear"
+                              className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors opacity-70 group-hover:opacity-100"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
 
                         <p className="text-[11.5px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
@@ -532,17 +718,29 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
                             </span>
                           )}
 
-                          {!item.isRead && (
+                          <div className="flex items-center gap-1.5 ml-auto">
+                            {!item.isRead && (
+                              <button
+                                type="button"
+                                onClick={e => handleMarkAsRead(item.id, e)}
+                                title="Mark as read"
+                                className="text-[11px] font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1 px-2 py-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors"
+                              >
+                                <Check className="w-3 h-3 text-emerald-500" />
+                                <span>Done</span>
+                              </button>
+                            )}
+
                             <button
                               type="button"
-                              onClick={e => handleMarkAsRead(item.id, e)}
-                              title="Mark as read"
-                              className="text-[11px] font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1 px-2 py-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors"
+                              onClick={e => handleClearNotification(item.id, e)}
+                              title="Clear notification"
+                              className="text-[11px] font-medium text-slate-400 hover:text-rose-600 dark:text-slate-500 dark:hover:text-rose-400 flex items-center gap-1 px-2 py-0.5 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                             >
-                              <Check className="w-3 h-3 text-emerald-500" />
-                              <span>Done</span>
+                              <Trash2 className="w-3 h-3" />
+                              <span>Clear</span>
                             </button>
-                          )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -557,9 +755,20 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
           {/* ========================================================================= */}
           <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
             <span className="font-mono text-[10.5px]">
-              {actionRequiredCount} urgent item{actionRequiredCount === 1 ? '' : 's'}
+              {actionRequiredCount} urgent • {notifications.length} total
             </span>
             <div className="flex items-center gap-3">
+              {notifications.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="font-medium text-[11px] text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 transition-colors hover:underline"
+                >
+                  <Trash2 className="w-3 h-3 text-rose-500" />
+                  <span>Clear All</span>
+                </button>
+              )}
+              <span className="text-slate-300 dark:text-slate-700">•</span>
               <Link
                 href="/admin/orders"
                 onClick={() => setIsOpen(false)}

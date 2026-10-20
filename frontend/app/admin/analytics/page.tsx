@@ -23,6 +23,16 @@ import {
   Sliders,
   Server
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid
+} from 'recharts';
 
 export default function AdminAnalyticsPage() {
   const { token } = useAuth();
@@ -121,9 +131,6 @@ export default function AdminAnalyticsPage() {
     grossMarginPercentage: kpis.grossMarginPercentage || 28.5,
     salesToPurchaseRatio: purchasesSummary.totalPurchaseSpend > 0 ? Math.round(((kpis.grossRevenue || 0) / purchasesSummary.totalPurchaseSpend) * 100) / 100 : 1.34,
   };
-
-  // Calculate maximum revenue in timeline for relative bar height
-  const maxTimelineRev = Math.max(...timeline.map((t: any) => t.revenue || 0), 1);
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto transition-colors duration-200">
@@ -400,96 +407,121 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* 3. Sales & Revenue Timeseries Chart */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 space-y-6 shadow-sm overflow-hidden">
+      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               <span>Revenue & Order Volume Timeseries</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Commercial billing telemetry segmented by interval ({timeRange.toUpperCase()})</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Commercial billing telemetry segmented by interval ({timeRange.toUpperCase()})</p>
           </div>
           <div className="flex items-center gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-md bg-gradient-to-t from-purple-600 to-indigo-500" />
-              <span className="text-slate-700 dark:text-slate-300 font-semibold">Gross Sales (AED)</span>
+              <span className="text-slate-800 dark:text-slate-200 font-bold">Gross Sales (AED)</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-tech-blue dark:bg-tech-cyan" />
-              <span className="text-slate-700 dark:text-slate-300 font-semibold">Order Pulse</span>
+              <span className="text-slate-800 dark:text-slate-200 font-bold">Order Pulse</span>
             </div>
           </div>
         </div>
 
-        {/* Visual Bar Chart with Y-Axis and Contained Grid */}
-        <div className="relative w-full rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 p-4 border border-slate-100 dark:border-slate-800/80 overflow-hidden">
-          {/* Y-Axis Reference Grid Lines */}
-          <div className="absolute inset-x-4 top-4 bottom-10 flex flex-col justify-between pointer-events-none opacity-40">
-            <div className="border-b border-dashed border-slate-300 dark:border-slate-700 w-full flex items-center justify-between">
-              <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">{formatPrice(maxTimelineRev)}</span>
-            </div>
-            <div className="border-b border-dashed border-slate-300 dark:border-slate-700 w-full flex items-center justify-between">
-              <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">{formatPrice(maxTimelineRev * 0.75)}</span>
-            </div>
-            <div className="border-b border-dashed border-slate-300 dark:border-slate-700 w-full flex items-center justify-between">
-              <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">{formatPrice(maxTimelineRev * 0.5)}</span>
-            </div>
-            <div className="border-b border-dashed border-slate-300 dark:border-slate-700 w-full flex items-center justify-between">
-              <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">{formatPrice(maxTimelineRev * 0.25)}</span>
-            </div>
-            <div className="border-b border-slate-300 dark:border-slate-700 w-full flex items-center justify-between">
-              <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">AED 0</span>
-            </div>
-          </div>
-
-          {/* Scrollable / Auto-fitting Bars Container */}
-          <div className="w-full overflow-x-auto pb-2 relative z-10 custom-scrollbar">
-            <div className="h-64 flex items-end gap-1.5 sm:gap-2 pt-6 min-w-full" style={{ minWidth: timeline.length > 15 ? `${timeline.length * 32}px` : '100%' }}>
-              {timeline.length > 0 ? (
-                timeline.map((t: any, idx: number) => {
-                  const revRatio = maxTimelineRev > 0 ? t.revenue / maxTimelineRev : 0;
-                  const heightPct = t.revenue > 0 ? Math.max(12, Math.min(100, Math.round(revRatio * 100))) : 4;
-                  const showLabel = timeline.length <= 14 || idx % Math.ceil(timeline.length / 14) === 0 || idx === timeline.length - 1;
-
-                  return (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group relative min-w-[20px] max-w-[48px]">
-                      {/* Tooltip on Hover */}
-                      <div className="opacity-0 group-hover:opacity-100 absolute -top-14 bg-slate-900 dark:bg-slate-800 text-white text-[10px] font-mono p-2 rounded-xl pointer-events-none transition-all shadow-2xl z-30 whitespace-nowrap border border-slate-700">
-                        <div className="font-bold text-tech-cyan">{t.label}</div>
-                        <div className="font-semibold text-white">Gross Sales: {formatPrice(t.revenue)}</div>
-                        <div className="text-slate-400">{t.orders} Orders • {t.units} Units Sold</div>
-                      </div>
-
-                      {/* Order Count Pulse Dot */}
-                      {t.orders > 0 && (
-                        <div className="w-2 h-2 rounded-full bg-tech-blue dark:bg-tech-cyan animate-pulse shadow-sm shadow-tech-cyan/50 mb-0.5" />
-                      )}
-
-                      {/* Bar */}
-                      <div
-                        className={`w-full rounded-t-lg transition-all duration-300 cursor-pointer ${
-                          t.revenue > 0
-                            ? 'bg-gradient-to-t from-purple-600 via-indigo-600 to-purple-400 hover:from-purple-500 hover:to-indigo-300 shadow-md shadow-purple-600/20'
-                            : 'bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700'
-                        }`}
-                        style={{ height: `${heightPct}%` }}
-                      />
-
-                      {/* X-Axis Date Label */}
-                      <div className="h-5 flex items-center justify-center">
-                        <span className={`text-[10px] font-mono text-center truncate ${showLabel ? 'text-slate-600 dark:text-slate-400 font-medium' : 'text-transparent group-hover:text-slate-600 dark:group-hover:text-slate-400'}`}>
-                          {t.label}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs text-slate-500 font-mono">
-                  No timeseries telemetry available for this range.
-                </div>
-              )}
-            </div>
+        {/* Visual Bar Chart with High-Contrast Axes and Responsive Tooltip */}
+        <div className="w-full rounded-2xl bg-slate-50/90 dark:bg-slate-950/80 p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-inner">
+          <div className="w-full h-72 sm:h-80">
+            {timeline.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={timeline}
+                  margin={{ top: 20, right: 16, left: 10, bottom: 10 }}
+                >
+                  <defs>
+                    <linearGradient id="revenueBarGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#9333ea" stopOpacity={0.95} />
+                      <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.8} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="rgba(148, 163, 184, 0.2)"
+                  />
+                  <XAxis
+                    dataKey="label"
+                    stroke="#64748b"
+                    fontSize={11}
+                    fontWeight={600}
+                    tickLine={false}
+                    axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                    interval="preserveStartEnd"
+                    minTickGap={25}
+                    dy={8}
+                  />
+                  <YAxis
+                    yAxisId="revenue"
+                    stroke="#64748b"
+                    fontSize={11}
+                    fontWeight={600}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(val) => {
+                      if (val >= 1000000) return `AED ${(val / 1000000).toFixed(1)}M`;
+                      if (val >= 1000) return `AED ${(val / 1000).toFixed(1)}k`;
+                      return `AED ${val}`;
+                    }}
+                    width={85}
+                  />
+                  <YAxis
+                    yAxisId="orders"
+                    orientation="right"
+                    hide={true}
+                    domain={[0, 'auto']}
+                  />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(147, 51, 234, 0.08)' }}
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-slate-950 text-white p-3 rounded-xl shadow-2xl border border-slate-700 ring-1 ring-white/10 z-50 text-xs">
+                            <div className="font-extrabold text-cyan-400 mb-1">{data.label || label}</div>
+                            <div className="font-black text-white text-sm">
+                              Gross Sales: {formatPrice(data.revenue || 0)}
+                            </div>
+                            <div className="text-slate-300 text-[11px] font-semibold mt-1">
+                              {data.orders || 0} Orders • {data.units || 0} Units Sold
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar
+                    yAxisId="revenue"
+                    dataKey="revenue"
+                    fill="url(#revenueBarGrad)"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={36}
+                  />
+                  <Line
+                    yAxisId="orders"
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#06b6d4"
+                    strokeWidth={2.5}
+                    dot={{ r: 3.5, fill: '#06b6d4', stroke: '#0891b2', strokeWidth: 1 }}
+                    activeDot={{ r: 6, fill: '#22d3ee' }}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-slate-500 font-mono">
+                No timeseries telemetry available for this range.
+              </div>
+            )}
           </div>
         </div>
       </div>

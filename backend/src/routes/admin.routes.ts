@@ -46,6 +46,8 @@ router.put('/orders/:id/reject', (req, res, next) => adminController.rejectOrder
 router.get('/notifications', (req, res, next) => adminController.getNotifications(req, res).catch(next));
 router.put('/notifications/read-all', (req, res, next) => adminController.markAllNotificationsAsRead(req, res).catch(next));
 router.put('/notifications/:id/read', (req, res, next) => adminController.markNotificationAsRead(req, res).catch(next));
+router.delete('/notifications/clear-all', (req, res, next) => adminController.clearAllNotifications(req, res).catch(next));
+router.delete('/notifications/:id', (req, res, next) => adminController.clearNotification(req, res).catch(next));
 
 // 6. Categories CRUD
 router.get('/categories', (req, res, next) => adminController.getCategories(req, res).catch(next));

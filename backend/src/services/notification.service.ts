@@ -224,7 +224,7 @@ export class NotificationService {
    * Retrieves active, synchronized notifications across the entire ERP/Storefront system
    */
   async getAdminNotifications(): Promise<AdminNotificationsResponse> {
-    // 1. Fetch read records
+    // 1. Fetch read and cleared records
     let readRecords: Array<{ id: string; readAt: string }> = [];
     try {
       readRecords = await dbStore.find<{ id: string; readAt: string }>('admin_notifications_read');
@@ -232,6 +232,14 @@ export class NotificationService {
       readRecords = [];
     }
     const readIds = new Set(readRecords.map(r => r.id));
+
+    let clearedRecords: Array<{ id: string; clearedAt?: string }> = [];
+    try {
+      clearedRecords = await dbStore.find<{ id: string; clearedAt?: string }>('admin_notifications_cleared');
+    } catch {
+      clearedRecords = [];
+    }
+    const clearedIds = new Set(clearedRecords.map(c => c.id));
 
     const notifications: AdminNotification[] = [];
 
@@ -442,8 +450,11 @@ export class NotificationService {
       console.warn('[NotificationService] Error querying persistent notifications:', err);
     }
 
+    // Filter out cleared/dismissed notifications
+    const activeNotifications = notifications.filter(n => !clearedIds.has(n.id));
+
     // Sort by createdAt descending
-    const sorted = notifications.sort(
+    const sorted = activeNotifications.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
@@ -523,6 +534,70 @@ export class NotificationService {
       return true;
     } catch (err) {
       console.error('[NotificationService] Failed to mark all notifications read:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Clears/dismisses a single notification
+   */
+  async clearNotification(id: string): Promise<boolean> {
+    try {
+      try {
+        await dbStore.delete('admin_notifications', id);
+      } catch {
+        // Ignore if not present in persistent table
+      }
+
+      const existing = await dbStore.findById<{ id: string }>('admin_notifications_cleared', id);
+      if (!existing) {
+        await dbStore.create('admin_notifications_cleared', {
+          id,
+          clearedAt: new Date().toISOString(),
+        });
+      }
+      return true;
+    } catch (err) {
+      console.error('[NotificationService] Failed to clear notification:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Clears/dismisses all active notifications
+   */
+  async clearAllNotifications(): Promise<boolean> {
+    try {
+      const { notifications } = await this.getAdminNotifications();
+      const now = new Date().toISOString();
+
+      for (const n of notifications) {
+        try {
+          const existing = await dbStore.findById<{ id: string }>('admin_notifications_cleared', n.id);
+          if (!existing) {
+            await dbStore.create('admin_notifications_cleared', {
+              id: n.id,
+              clearedAt: now,
+            });
+          }
+        } catch {
+          // Ignore
+        }
+      }
+
+      // Also delete from persistent notifications
+      const persisted = await dbStore.find<any>('admin_notifications');
+      for (const p of persisted) {
+        try {
+          await dbStore.delete('admin_notifications', p.id);
+        } catch {
+          // ignore
+        }
+      }
+
+      return true;
+    } catch (err) {
+      console.error('[NotificationService] Failed to clear all notifications:', err);
       return false;
     }
   }
