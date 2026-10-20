@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatDate, formatPrice } from '@/lib/utils';
@@ -8,25 +8,17 @@ import { User } from '@/types';
 import {
   Users,
   Search,
-  Plus,
-  Minus,
-  Sparkles,
+  ShoppingBag,
+  TrendingUp,
   X,
-  Eye
+  Eye,
 } from 'lucide-react';
 
 export default function AdminCustomersPage() {
   const { token } = useAuth();
   const [customers, setCustomers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Wallet adjustment modal state
-  const [walletModalCustomer, setWalletModalCustomer] = useState<any | null>(null);
-  const [walletAmount, setWalletAmount] = useState<number>(500);
-  const [walletType, setWalletType] = useState<'CREDIT' | 'DEBIT'>('CREDIT');
-  const [walletReason, setWalletReason] = useState<string>('Administrative Balance Deposit');
-  const [isSubmittingWallet, setIsSubmittingWallet] = useState(false);
-  const [walletError, setWalletError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Customer detail modal
   const [detailCustomer, setDetailCustomer] = useState<any | null>(null);
@@ -39,9 +31,11 @@ export default function AdminCustomersPage() {
 
   const fetchCustomers = () => {
     if (token) {
+      setIsLoading(true);
       ApiClient.get<any[]>('/admin/customers', { token })
         .then(res => setCustomers(res || []))
-        .catch(err => console.error(err));
+        .catch(err => console.error(err))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -61,37 +55,27 @@ export default function AdminCustomersPage() {
     }
   };
 
-  const handleAdjustWallet = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token || !walletModalCustomer) return;
-    setIsSubmittingWallet(true);
-    setWalletError('');
+  const filtered = useMemo(() => {
+    return customers.filter(c =>
+      c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.username?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [customers, searchQuery]);
 
-    try {
-      await ApiClient.post(
-        `/admin/customers/${walletModalCustomer.id}/wallet-adjust`,
-        {
-          amount: Number(walletAmount),
-          type: walletType,
-          reason: walletReason,
-        },
-        { token }
-      );
-      showToast('success', `Successfully adjusted wallet balance for ${walletModalCustomer.name}.`);
-      setWalletModalCustomer(null);
-      fetchCustomers();
-    } catch (err: any) {
-      setWalletError(err.message || 'Failed to adjust wallet balance.');
-    } finally {
-      setIsSubmittingWallet(false);
-    }
-  };
+  // Aggregate metrics
+  const totalPurchasedAllTime = useMemo(() => {
+    return customers.reduce((sum, c) => sum + (Number(c.totalSpent) || 0), 0);
+  }, [customers]);
 
-  const filtered = customers.filter(c =>
-    c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.username?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const totalOrdersAllTime = useMemo(() => {
+    return customers.reduce((sum, c) => sum + (Number(c.orderCount) || 0), 0);
+  }, [customers]);
+
+  const avgLifetimeSpend = useMemo(() => {
+    if (customers.length === 0) return 0;
+    return totalPurchasedAllTime / customers.length;
+  }, [customers, totalPurchasedAllTime]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -121,15 +105,63 @@ export default function AdminCustomersPage() {
             Enterprise Client Registry & Accounts
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Customer Directory & Wallet Balances
+            Customer Directory & Lifetime Purchasing
           </h1>
           <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-            Inspect verified customer accounts, monitor total spend, and execute direct hardware wallet balance adjustments.
+            Inspect verified customer accounts, monitor all-time total purchase volumes, and analyze individual client spending history.
           </p>
         </div>
       </div>
 
-      {/* Search */}
+      {/* KPI Overview Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Registered Clients</span>
+            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-2 font-mono">
+            {customers.length}
+          </div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+            {customers.filter(c => c.isActive).length} active customer profiles
+          </div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">All-Time Cumulative Purchases</span>
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2 font-mono">
+            {formatPrice(totalPurchasedAllTime)}
+          </div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+            Across {totalOrdersAllTime} fulfilled orders
+          </div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Average Lifetime Spend (LTV)</span>
+            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-2 font-mono">
+            {formatPrice(avgLifetimeSpend)}
+          </div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+            Per registered customer account
+          </div>
+        </div>
+      </div>
+
+      {/* Search Bar */}
       <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 shadow-sm">
         <div className="relative flex-1 max-w-md">
           <input
@@ -142,7 +174,7 @@ export default function AdminCustomersPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
         <div className="text-xs text-slate-600 dark:text-slate-400 font-mono font-bold">
-          {customers.length} Registered Customers
+          Showing {filtered.length} of {customers.length} Accounts
         </div>
       </div>
 
@@ -153,93 +185,100 @@ export default function AdminCustomersPage() {
             <thead className="bg-slate-50 dark:bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="py-3.5 px-4 font-bold min-w-[220px]">Customer Profile</th>
-                <th className="py-3.5 px-4 font-bold min-w-[180px]">Contact Details</th>
-                <th className="py-3.5 px-4 font-bold min-w-[130px] whitespace-nowrap">Wallet Balance</th>
-                <th className="py-3.5 px-4 font-bold min-w-[100px] whitespace-nowrap">Orders Placed</th>
+                <th className="py-3.5 px-4 font-bold min-w-[180px]">Contact & Registration</th>
+                <th className="py-3.5 px-4 font-bold min-w-[160px] whitespace-nowrap">All-Time Total Purchased</th>
+                <th className="py-3.5 px-4 font-bold min-w-[140px] whitespace-nowrap">Orders History</th>
                 <th className="py-3.5 px-4 font-bold min-w-[90px] whitespace-nowrap">Status</th>
-                <th className="py-3.5 px-4 font-bold text-right min-w-[130px] whitespace-nowrap">Actions</th>
+                <th className="py-3.5 px-4 font-bold text-right min-w-[110px] whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {filtered.length > 0 ? (
-                filtered.map(cust => (
-                  <tr key={cust.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900 dark:text-white text-sm">{cust.name}</div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">{cust.email}</div>
-                      <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-semibold">@{cust.username || 'user'}</span>
-                    </td>
+                filtered.map(cust => {
+                  const spent = Number(cust.totalSpent) || 0;
+                  const orders = Number(cust.orderCount) || 0;
+                  const avgOrderValue = orders > 0 ? spent / orders : 0;
 
-                    <td className="py-3.5 px-4">
-                      <div className="text-slate-700 dark:text-slate-300">{cust.phone || 'No phone'}</div>
-                      <div className="text-[10px] text-slate-500">Joined {formatDate(cust.createdAt)}</div>
-                    </td>
+                  return (
+                    <tr key={cust.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-slate-900 dark:text-white text-sm">{cust.name}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">{cust.email}</div>
+                        <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-semibold">@{cust.username || 'user'}</span>
+                      </td>
 
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-slate-900 dark:text-white font-mono text-sm">
-                          {formatPrice(cust.walletBalance || 0)}
-                        </span>
-                        <button
-                          onClick={() => {
-                            setWalletModalCustomer(cust);
-                            setWalletAmount(500);
-                            setWalletType('CREDIT');
-                            setWalletError('');
-                          }}
-                          className="px-2 py-0.5 rounded-lg bg-tech-blue/10 hover:bg-tech-blue text-tech-blue hover:text-white text-[10px] font-bold border border-tech-blue/30 transition-colors flex items-center gap-1 cursor-pointer"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          <span>Adjust</span>
-                        </button>
-                      </div>
-                    </td>
+                      <td className="py-3.5 px-4">
+                        <div className="text-slate-700 dark:text-slate-300">{cust.phone || 'No phone'}</div>
+                        <div className="text-[10px] text-slate-500">Joined {formatDate(cust.createdAt)}</div>
+                      </td>
 
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-800 dark:text-slate-200">{cust.orderCount || 0} Orders</div>
-                      <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{formatPrice(cust.totalSpent || 0)} spent</div>
-                    </td>
+                      <td className="py-3.5 px-4">
+                        <div>
+                          <div className="font-black text-slate-900 dark:text-white font-mono text-sm text-emerald-600 dark:text-emerald-400">
+                            {formatPrice(spent)}
+                          </div>
+                          <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            {spent >= 10000 ? (
+                              <span className="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
+                                Tier 1 Client
+                              </span>
+                            ) : spent > 0 ? (
+                              <span className="text-slate-500">Active Purchaser</span>
+                            ) : (
+                              <span className="text-slate-400">No purchases yet</span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
 
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                          cust.isActive
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                            : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
-                        }`}
-                      >
-                        {cust.isActive ? 'ACTIVE' : 'DEACTIVATED'}
-                      </span>
-                    </td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-slate-800 dark:text-slate-200">{orders} Orders Placed</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                          {orders > 0 ? `Avg: ${formatPrice(avgOrderValue)} / order` : 'Zero order volume'}
+                        </div>
+                      </td>
 
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => setDetailCustomer(cust)}
-                          className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                          title="View Details"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
-
-                        <button
-                          onClick={() => handleToggleStatus(cust)}
-                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer ${
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
                             cust.isActive
-                              ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30'
-                              : 'bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                              : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
                           }`}
                         >
-                          {cust.isActive ? 'Deactivate' : 'Activate'}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {cust.isActive ? 'ACTIVE' : 'DEACTIVATED'}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setDetailCustomer(cust)}
+                            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                            title="View Spending Profile"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            onClick={() => handleToggleStatus(cust)}
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer ${
+                              cust.isActive
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30'
+                                : 'bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white'
+                            }`}
+                          >
+                            {cust.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-500">
-                    No customer accounts found.
+                    {isLoading ? 'Loading customer accounts...' : 'No customer accounts found.'}
                   </td>
                 </tr>
               )}
@@ -248,159 +287,72 @@ export default function AdminCustomersPage() {
         </div>
       </div>
 
-      {/* WALLET ADJUSTMENT MODAL */}
-      {walletModalCustomer && (
+      {/* CUSTOMER DETAILS MODAL */}
+      {detailCustomer && (
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-tech-blue" />
-                Adjust Customer Wallet
-              </h2>
-              <button onClick={() => setWalletModalCustomer(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
-              <div className="text-xs font-bold text-slate-900 dark:text-white">{walletModalCustomer.name}</div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400">{walletModalCustomer.email}</div>
-              <div className="flex items-center justify-between text-xs font-bold pt-1">
-                <span className="text-slate-500 dark:text-slate-400">Current Balance:</span>
-                <span className="font-mono text-slate-900 dark:text-white">{formatPrice(walletModalCustomer.walletBalance || 0)}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold pt-0.5">
-                <span className="text-slate-500 dark:text-slate-400">Projected Balance:</span>
-                <span className="font-mono text-tech-blue dark:text-cyan-400">
-                  {formatPrice(
-                    walletType === 'CREDIT'
-                      ? (walletModalCustomer.walletBalance || 0) + Number(walletAmount || 0)
-                      : Math.max(0, (walletModalCustomer.walletBalance || 0) - Number(walletAmount || 0))
-                  )}
-                </span>
-              </div>
-            </div>
-
-            {walletError && (
-              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs border border-red-200 dark:border-red-900/50">
-                {walletError}
-              </div>
-            )}
-
-            <form onSubmit={handleAdjustWallet} className="space-y-4">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setWalletType('CREDIT')}
-                  className={`py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                    walletType === 'CREDIT'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Deposit (Top Up)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setWalletType('DEBIT')}
-                  className={`py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                    walletType === 'DEBIT'
-                      ? 'bg-red-600 text-white shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Minus className="w-3.5 h-3.5" />
-                  <span>Debit (Deduct)</span>
-                </button>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-400 mb-1">Adjustment Amount (د.إ) *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  min={1}
-                  value={walletAmount}
-                  onChange={e => setWalletAmount(Number(e.target.value))}
-                  className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono transition-all font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-400 mb-1">Reason / Note for Ledger *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Promotional Bonus, Hardware Refund..."
-                  value={walletReason}
-                  onChange={e => setWalletReason(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setWalletModalCustomer(null)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingWallet}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold disabled:opacity-50 cursor-pointer shadow-md shadow-purple-600/20 transition-all"
-                >
-                  {isSubmittingWallet ? 'Processing...' : 'Apply Wallet Adjustment'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* CUSTOMER DETAILS MODAL */}
-      {detailCustomer && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                Customer Account Profile
+                Customer Account & Spend Profile
               </h2>
-              <button onClick={() => setDetailCustomer(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+              <button
+                onClick={() => setDetailCustomer(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
                 <X className="w-5 h-5" />
               </button>
+            </div>
+
+            {/* Lifetime Purchasing Highlights */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <div className="text-[10px] uppercase font-bold text-slate-400">All-Time Purchased</div>
+                <div className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+                  {formatPrice(detailCustomer.totalSpent || 0)}
+                </div>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <div className="text-[10px] uppercase font-bold text-slate-400">Total Orders</div>
+                <div className="text-base font-black text-slate-900 dark:text-white font-mono mt-0.5">
+                  {detailCustomer.orderCount || 0} Orders
+                </div>
+              </div>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div>
-                <span className="text-slate-500 dark:text-slate-400">Full Name:</span>
-                <div className="font-bold text-slate-900 dark:text-white">{detailCustomer.name}</div>
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400">Full Name:</span>
+                  <div className="font-bold text-slate-900 dark:text-white">{detailCustomer.name}</div>
+                </div>
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400">Email Address:</span>
+                  <div className="font-mono text-purple-600 dark:text-purple-300">{detailCustomer.email}</div>
+                </div>
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400">Phone:</span>
+                  <div className="text-slate-700 dark:text-slate-200">{detailCustomer.phone || 'Not provided'}</div>
+                </div>
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400">Account Created:</span>
+                  <div className="text-slate-700 dark:text-slate-200">{formatDate(detailCustomer.createdAt)}</div>
+                </div>
               </div>
+
               <div>
-                <span className="text-slate-500 dark:text-slate-400">Email Address:</span>
-                <div className="font-mono text-purple-600 dark:text-purple-300">{detailCustomer.email}</div>
-              </div>
-              <div>
-                <span className="text-slate-500 dark:text-slate-400">Phone:</span>
-                <div className="text-slate-700 dark:text-slate-200">{detailCustomer.phone || 'Not provided'}</div>
-              </div>
-              <div>
-                <span className="text-slate-500 dark:text-slate-400">Addresses ({detailCustomer.addresses?.length || 0}):</span>
+                <span className="text-slate-500 dark:text-slate-400 font-semibold">Registered Delivery Addresses ({detailCustomer.addresses?.length || 0}):</span>
                 {detailCustomer.addresses && detailCustomer.addresses.length > 0 ? (
-                  <div className="mt-1 space-y-1">
+                  <div className="mt-1.5 space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar">
                     {detailCustomer.addresses.map((a: any, i: number) => (
-                      <div key={i} className="p-2 rounded-xl bg-slate-50 dark:bg-slate-950 text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
-                        <div>{a.addressLine1}</div>
-                        <div>{a.city}, {a.country} ({a.postalCode})</div>
+                      <div key={i} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">{a.addressLine1}</div>
+                        <div className="text-slate-500">{a.city}, {a.country} ({a.postalCode})</div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-slate-500 italic mt-0.5">No registered addresses</div>
+                  <div className="text-slate-500 italic mt-1 text-xs">No registered addresses found.</div>
                 )}
               </div>
             </div>
@@ -419,4 +371,3 @@ export default function AdminCustomersPage() {
     </div>
   );
 }
-
