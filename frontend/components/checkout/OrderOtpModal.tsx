@@ -280,7 +280,7 @@ export default function OrderOtpModal({
             )}
 
             {/* Development Mode Tip */}
-            {devCode && (
+            {devCode && process.env.NODE_ENV !== 'production' && (
               <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-[11px] text-amber-800 dark:text-amber-300 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />

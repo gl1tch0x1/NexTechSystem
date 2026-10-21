@@ -8,6 +8,7 @@ import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
 import { Order, PaymentMethod, Address } from '@/types';
+import { getSecureRandomHex } from '@/lib/utils';
 import OrderOtpModal from '@/components/checkout/OrderOtpModal';
 import CodLocationModal from '@/components/checkout/CodLocationModal';
 import {
@@ -111,6 +112,7 @@ export default function CheckoutPage() {
   const [otpCooldown, setOtpCooldown] = useState(60);
   const [otpError, setOtpError] = useState('');
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [checkoutIdempotencyKey, setCheckoutIdempotencyKey] = useState<string>('');
 
   // COD Location Confirmation State
   const [isCodLocationModalOpen, setIsCodLocationModalOpen] = useState(false);
@@ -294,6 +296,8 @@ export default function CheckoutPage() {
       }
 
       setIsSubmitting(true);
+      const newIdempKey = `idemp_${Date.now()}_${getSecureRandomHex(4)}`;
+      setCheckoutIdempotencyKey(newIdempKey);
 
       const res = await ApiClient.post<{
         success: boolean;
@@ -347,6 +351,7 @@ export default function CheckoutPage() {
 
   // 3. Confirm OTP and finalize order creation
   const handleConfirmOtpAndPlaceOrder = async (otpCode: string) => {
+    if (isVerifyingOtp) return;
     setOtpError('');
     setIsVerifyingOtp(true);
 
@@ -354,6 +359,7 @@ export default function CheckoutPage() {
       const activeToken = token;
       if (!activeToken) throw new Error('Session expired. Please sign in again.');
 
+      const currentKey = checkoutIdempotencyKey || `idemp_${Date.now()}_${getSecureRandomHex(4)}`;
       const orderPayload = {
         items: cartItems.map(i => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
         shippingAddress,
@@ -363,8 +369,14 @@ export default function CheckoutPage() {
         notes: orderNotes || undefined,
         customerPhone: shippingAddress.phone,
         otpCode,
+        idempotencyKey: currentKey,
       };
-      const createdOrder = await ApiClient.post<Order>('/orders', orderPayload, { token: activeToken });
+      const createdOrder = await ApiClient.post<Order>('/orders', orderPayload, {
+        token: activeToken,
+        headers: {
+          'Idempotency-Key': currentKey,
+        },
+      });
 
       // If Tamara or Tabby BNPL is chosen, initiate checkout session and redirect to hosted provider
       if (paymentMethod === 'TAMARA' || paymentMethod === 'TABBY') {

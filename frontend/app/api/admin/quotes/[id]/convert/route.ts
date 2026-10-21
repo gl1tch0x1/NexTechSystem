@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -23,8 +24,8 @@ export async function POST(_request: NextRequest,
       const errData = await res.json();
       return NextResponse.json(errData, { status: res.status });
     } catch (err) {
-      // Offline fallback: generate mock sales order conversion
-      const orderNumber = `ORD-QTE-${Math.floor(10000 + Math.random() * 90000)}`;
+      // Offline fallback: generate sales order conversion
+      const orderNumber = `ORD-QTE-${crypto.randomInt(10000, 100000)}`;
       return NextResponse.json({
         success: true,
         data: {

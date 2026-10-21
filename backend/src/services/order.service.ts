@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { orderRepository } from '../repositories/order.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
@@ -81,33 +82,58 @@ export class OrderService {
       userId: dto.userId,
     });
 
-    // 4. Verify stock availability (respecting variant and backorder settings)
-    for (const item of dto.items) {
-      const { available, currentStock, allowsBackorder } = await inventoryService.checkStock(
-        item.productId,
-        item.quantity,
-        item.variantId
-      );
-      if (!available && !allowsBackorder) {
-        const prod = productsMap.get(item.productId);
-        const variantName = item.variantId && prod?.variants
-          ? ` (${prod.variants.find((v: any) => v.id === item.variantId)?.title || 'Variant'})`
-          : '';
-        throw new Error(`Insufficient stock for "${prod?.name}${variantName}". Only ${currentStock} remaining.`);
-      }
-    }
-
     return dbStore.runTransaction(async () => {
-      const orderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+      // 4. Atomic verify stock availability under transaction lock (eliminates TOCTOU race conditions)
+      for (const item of dto.items) {
+        const { available, currentStock, allowsBackorder } = await inventoryService.checkStock(
+          item.productId,
+          item.quantity,
+          item.variantId
+        );
+        if (!available && !allowsBackorder) {
+          const prod = productsMap.get(item.productId);
+          const variantName = item.variantId && prod?.variants
+            ? ` (${prod.variants.find((v: any) => v.id === item.variantId)?.title || 'Variant'})`
+            : '';
+          throw new Error(`Insufficient stock for "${prod?.name}${variantName}". Only ${currentStock} remaining.`);
+        }
+      }
+
+      // 5. Atomic coupon quota verification under transaction lock
+      if (pricing.appliedCoupon) {
+        const freshCoupon = await couponRepository.findById(pricing.appliedCoupon.id);
+        if (!freshCoupon || !freshCoupon.isActive) {
+          throw new Error('Applied promotional coupon is no longer valid or active.');
+        }
+        if (freshCoupon.usageLimit && freshCoupon.usageCount >= freshCoupon.usageLimit) {
+          throw new Error(`Promotional coupon "${freshCoupon.code}" usage limit has been reached.`);
+        }
+      }
+
+      // 6. Cryptographically secure collision-free order number generation (CWE-338 compliant)
+      let orderNumber = '';
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const randInt = crypto.randomInt(100000, 1000000);
+        const candidate = `ORD-${new Date().getFullYear()}-${randInt}`;
+        const existing = await orderRepository.findByOrderNumber(candidate);
+        if (!existing) {
+          orderNumber = candidate;
+          break;
+        }
+      }
+      if (!orderNumber) {
+        orderNumber = `ORD-${new Date().getFullYear()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+      }
       const orderId = `order_${uuidv4()}`;
 
-      // 5. Decrement inventory
+      // 7. Decrement inventory
       await inventoryService.deductStock(dto.items);
 
-      // 6. Increment coupon usage if applied
+      // 8. Increment coupon usage if applied
       if (pricing.appliedCoupon) {
+        const freshCoupon = await couponRepository.findById(pricing.appliedCoupon.id);
         await couponRepository.update(pricing.appliedCoupon.id, {
-          usageCount: (pricing.appliedCoupon.usageCount || 0) + 1,
+          usageCount: ((freshCoupon?.usageCount ?? pricing.appliedCoupon.usageCount) || 0) + 1,
         });
       }
 

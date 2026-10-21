@@ -1,9 +1,38 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { getFirestore } from './firebase.js';
 import { mongoDb } from './mongodb.js';
 import { ENV } from './env.js';
 import { DbSnapshot } from '../types/index.js';
+
+class AsyncLock {
+  private queue: Promise<void> = Promise.resolve();
+
+  async acquire<T>(fn: () => Promise<T>): Promise<T> {
+    let release: () => void;
+    const nextLock = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    const currentLock = this.queue;
+    this.queue = currentLock.then(() => nextLock, () => nextLock);
+
+    await currentLock;
+    try {
+      return await fn();
+    } finally {
+      release!();
+    }
+  }
+}
+
+interface TxContext {
+  txId: string;
+}
+
+const txStorage = new AsyncLocalStorage<TxContext>();
 
 export interface QueryFilter<T = any> {
   where?: Array<{
@@ -86,6 +115,7 @@ export class DbStore {
   private static instance: DbStore;
   private collections: Map<string, Map<string, any>> = new Map();
   private loaded: boolean = false;
+  private transactionLock = new AsyncLock();
 
   private constructor() {
     this.loadFromDisk();
@@ -133,7 +163,14 @@ export class DbStore {
     try {
       const map = this.getCollectionMap(collectionName);
       const items = Array.from(map.values());
-      fs.writeFileSync(this.getFilePath(collectionName), JSON.stringify(items, null, 2), 'utf-8');
+      const filePath = this.getFilePath(collectionName);
+      const randSuffix = crypto.randomBytes(4).toString('hex');
+      const tmpPath = `${filePath}.tmp.${Date.now()}_${randSuffix}`;
+      const data = JSON.stringify(items, null, 2);
+
+      // Write atomically: write to temp file then atomic rename to prevent file corruption
+      fs.writeFileSync(tmpPath, data, 'utf-8');
+      fs.renameSync(tmpPath, filePath);
     } catch (err) {
       console.error('[DbStore] Error persisting %s:', collectionName, err);
     }
@@ -147,7 +184,10 @@ export class DbStore {
     }
     try {
       const filePath = this.getFilePath(collectionName);
-      fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf-8');
+      const randSuffix = crypto.randomBytes(4).toString('hex');
+      const tmpPath = `${filePath}.tmp.${Date.now()}_${randSuffix}`;
+      fs.writeFileSync(tmpPath, JSON.stringify([], null, 2), 'utf-8');
+      fs.renameSync(tmpPath, filePath);
     } catch (err) {
       console.error('[DbStore] Error clearing collection %s:', collectionName, err);
     }
@@ -437,7 +477,18 @@ export class DbStore {
   }
 
   public async runTransaction<R>(fn: (db: DbStore) => Promise<R>): Promise<R> {
-    return await fn(this);
+    if (txStorage.getStore()) {
+      return await fn(this);
+    }
+
+    return await this.transactionLock.acquire(async () => {
+      const txId = typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : crypto.randomBytes(16).toString('hex');
+      return await txStorage.run({ txId }, async () => {
+        return await fn(this);
+      });
+    });
   }
 
   // --- Enterprise MongoDB Synchronization & Seeding ---
@@ -633,7 +684,7 @@ export class DbStore {
           if (item && item.id) {
             map.set(item.id, item);
           } else {
-            const fallbackId = `rec_${Math.random().toString(36).substring(2, 9)}`;
+            const fallbackId = `rec_${crypto.randomBytes(6).toString('hex')}`;
             map.set(fallbackId, { ...item, id: fallbackId });
           }
         }

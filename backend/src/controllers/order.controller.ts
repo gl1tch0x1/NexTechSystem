@@ -4,6 +4,7 @@ import { ebillService } from '../services/ebill.service.js';
 import { emailOtpService } from '../services/email-otp.service.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { ENV } from '../config/env.js';
+import { idempotencyService } from '../services/idempotency.service.js';
 
 export class OrderController {
   async requestOrderOtp(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -76,13 +77,35 @@ export class OrderController {
     }
 
     const { items, shippingAddress, billingAddress, paymentMethod, couponCode, walletAmountToUse, notes, customerPhone, otpCode } = req.body;
+    const rawIdempotencyKey = (req.headers['idempotency-key'] || req.headers['x-idempotency-key'] || req.body?.idempotencyKey) as string | undefined;
+    const idempotencyKey = typeof rawIdempotencyKey === 'string' && rawIdempotencyKey.trim().length > 0 ? rawIdempotencyKey.trim() : undefined;
+
+    if (idempotencyKey) {
+      const idempResult = idempotencyService.acquire(req.user.id, idempotencyKey);
+      if (idempResult.status === 'IN_FLIGHT') {
+        res.status(409).json({
+          success: false,
+          error: {
+            code: 'ORDER_IN_PROGRESS',
+            message: 'A checkout order request with this idempotency key is currently processing. Please wait a moment.',
+          },
+        });
+        return;
+      }
+      if (idempResult.status === 'COMPLETED') {
+        res.status(200).json({ success: true, data: idempResult.response, idempotentReplay: true });
+        return;
+      }
+    }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
+      if (idempotencyKey) idempotencyService.release(req.user.id, idempotencyKey);
       res.status(400).json({ success: false, error: { code: 'EMPTY_ORDER', message: 'Cart items cannot be empty.' } });
       return;
     }
 
     if (!shippingAddress) {
+      if (idempotencyKey) idempotencyService.release(req.user.id, idempotencyKey);
       res.status(400).json({ success: false, error: { code: 'MISSING_ADDRESS', message: 'Shipping address is required.' } });
       return;
     }
@@ -90,6 +113,7 @@ export class OrderController {
     // Email OTP Verification enforcement for customer and reseller storefront checkout
     if (ENV.REQUIRE_ORDER_EMAIL_OTP && req.user.role !== 'ADMIN') {
       if (!otpCode || typeof otpCode !== 'string' || otpCode.trim().length !== 6) {
+        if (idempotencyKey) idempotencyService.release(req.user.id, idempotencyKey);
         res.status(400).json({
           success: false,
           error: {
@@ -108,6 +132,7 @@ export class OrderController {
       });
 
       if (!otpResult.valid) {
+        if (idempotencyKey) idempotencyService.release(req.user.id, idempotencyKey);
         res.status(400).json({
           success: false,
           error: {
@@ -135,8 +160,15 @@ export class OrderController {
         notes,
       });
 
+      if (idempotencyKey) {
+        idempotencyService.complete(req.user.id, idempotencyKey, order);
+      }
+
       res.status(201).json({ success: true, data: order });
     } catch (err: any) {
+      if (idempotencyKey) {
+        idempotencyService.release(req.user.id, idempotencyKey);
+      }
       // Revert OTP consumption so user is not locked out when addressing validation/stock issues
       if (ENV.REQUIRE_ORDER_EMAIL_OTP && req.user.role !== 'ADMIN') {
         await emailOtpService.unconsumeOtp(req.user.id).catch(() => {});

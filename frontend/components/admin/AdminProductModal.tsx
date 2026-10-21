@@ -10,7 +10,7 @@ import {
   Reseller
 } from '@/types';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getSecureRandomInt } from '@/lib/utils';
 import {
   SPECIFICATION_FIELDS,
   SPECIFICATION_PRESETS,
@@ -327,12 +327,12 @@ export function AdminProductModal({
       cat_monitors: 'MON',
     };
     const code = prefixMap[catId || 'cat_laptops'] || 'SKU';
-    const rand = Math.floor(100000 + Math.random() * 900000);
+    const rand = getSecureRandomInt(100000, 1000000);
     return `NX-${code}-${rand}`;
   };
 
   const generateRandomBarcode = () => {
-    return `729${Math.floor(100000000 + Math.random() * 900000000)}`;
+    return `729${getSecureRandomInt(100000000, 1000000000)}`;
   };
 
   // Populate form on open / edit

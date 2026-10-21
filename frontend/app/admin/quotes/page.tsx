@@ -28,6 +28,7 @@ import {
   Package
 } from 'lucide-react';
 import { Quote, QuoteStatus, Product, User } from '@/types';
+import { getSecureRandomHex } from '@/lib/utils';
 
 export default function AdminQuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -338,7 +339,7 @@ export default function AdminQuotesPage() {
       setNewQuoteData({ ...newQuoteData, items: updated });
     } else {
       const newItem = {
-        id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+        id: `item-${Date.now()}-${getSecureRandomHex(3)}`,
         productId: prod.id,
         productName: prod.name,
         sku: prod.sku,

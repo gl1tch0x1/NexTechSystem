@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { analyticsService } from '../services/analytics.service.js';
@@ -836,7 +837,7 @@ export class AdminController {
 
   async createPurchaseOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
     const body = req.body || {};
-    const poNumber = body.poNumber || `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const poNumber = body.poNumber || `PO-${new Date().getFullYear()}-${crypto.randomInt(1000, 10000)}`;
     const calculatedUnits = body.units || body.totalUnits || (body.items ? body.items.reduce((s: number, i: any) => s + (i.orderedQuantity || i.quantity || 0), 0) : 0);
     const calculatedCost = body.totalCost || body.estimatedCost || body.totalEstimatedCost || 0;
     const newPO: PurchaseOrder = {
@@ -916,7 +917,7 @@ export class AdminController {
 
     const totalUnits = items.reduce((sum, item) => sum + item.orderedQuantity, 0);
     const totalEstimatedCost = items.reduce((sum, item) => sum + item.totalCost, 0);
-    const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const poNumber = `PO-${new Date().getFullYear()}-${crypto.randomInt(1000, 10000)}`;
 
     const newPO: PurchaseOrder = {
       id: `po_${Date.now()}`,

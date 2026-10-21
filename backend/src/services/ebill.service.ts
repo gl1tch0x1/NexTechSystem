@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { ebillRepository } from '../repositories/ebill.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
@@ -6,7 +7,7 @@ import { EBill, Order } from '../types/index.js';
 export class EBillService {
   async generateEBill(order: Order): Promise<EBill> {
     const settings = await settingsRepository.getSettings();
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+    const invoiceNumber = `INV-${new Date().getFullYear()}-${crypto.randomInt(100000, 1000000)}`;
 
     const eBill: EBill = {
       id: `ebill_${uuidv4()}`,

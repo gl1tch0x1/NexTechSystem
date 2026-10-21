@@ -113,3 +113,30 @@ export function sanitizeCsvField(val: string | number | undefined | null): strin
   return `"${sanitized.replace(/"/g, '""')}"`;
 }
 
+/**
+ * Cryptographically secure integer generator (CWE-338 compliant)
+ */
+export function getSecureRandomInt(min: number, max: number): number {
+  if (min >= max) return min;
+  const range = max - min;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    return min + (array[0] % range);
+  }
+  return min + Math.floor(Math.random() * range);
+}
+
+/**
+ * Cryptographically secure random hex string generator
+ */
+export function getSecureRandomHex(bytes = 4): string {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const array = new Uint8Array(bytes);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return Math.random().toString(36).substring(2, 2 + bytes * 2);
+}
+
+

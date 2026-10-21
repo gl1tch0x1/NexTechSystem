@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { PurchaseOrderDocumentModal } from '@/components/admin/PurchaseOrderDocumentModal';
 import { VERIFIED_SUPPLIERS, NEXTECH_BUYER_DETAILS } from '@/lib/suppliers-data';
+import { getSecureRandomInt } from '@/lib/utils';
 import {
   AreaChart,
   Area,
@@ -290,7 +291,7 @@ export default function AdminDashboardPage() {
 
       const newDeal = {
         id: `qte_${Date.now()}`,
-        quoteNumber: `QTE-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        quoteNumber: `QTE-2026-${getSecureRandomInt(1000, 10000)}`,
         companyName: quoteForm.companyName,
         contactName: quoteForm.contactName,
         itemsSummary: 'Custom Enterprise Deep Learning Compute Rig (2x Units)',
@@ -329,7 +330,7 @@ export default function AdminDashboardPage() {
     setSubmittingAction(true);
     try {
       const generatedPoId = `po_${Date.now()}`;
-      const generatedPoNumber = `PO-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const generatedPoNumber = `PO-2026-${getSecureRandomInt(1000, 10000)}`;
 
       const newPoPayload = {
         id: generatedPoId,

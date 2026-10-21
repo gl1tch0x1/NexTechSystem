@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getSecureRandomInt } from '@/lib/utils';
 import {
   Product,
   ProductVariant,
@@ -887,7 +887,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         .map(c => c.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())
         .join('-');
       const variantSku = `${cleanBaseSku}-${cleanComboSlug}`;
-      const barcodeRand = `729${Math.floor(100000000 + Math.random() * 900000000)}`;
+      const barcodeRand = `729${getSecureRandomInt(100000000, 1000000000)}`;
 
       return {
         id: `var_${Date.now()}_${idx}`,

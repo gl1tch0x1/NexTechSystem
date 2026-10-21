@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { orderRepository } from '../repositories/order.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
@@ -938,14 +939,14 @@ export class AnalyticsService {
     }));
 
     // Real-Time Traffic & Telemetry (Simulated Google Analytics Live Stream)
-    const baseVisitors = 38 + Math.floor(Math.random() * 25);
+    const baseVisitors = 38 + crypto.randomInt(0, 25);
     const livePulseMinutes = Array.from({ length: 30 }).map((_, idx) => {
       const minAgo = 29 - idx;
-      const count = Math.max(12, Math.floor(baseVisitors * 0.7 + Math.sin(idx * 0.5) * 15 + Math.random() * 8));
+      const count = Math.max(12, Math.floor(baseVisitors * 0.7 + Math.sin(idx * 0.5) * 15 + crypto.randomInt(0, 8)));
       return {
         minute: `${minAgo}m ago`,
         activeUsers: count,
-        pageviews: count * 3 + Math.floor(Math.random() * 10),
+        pageviews: count * 3 + crypto.randomInt(0, 10),
       };
     });
 

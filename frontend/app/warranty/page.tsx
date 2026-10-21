@@ -19,6 +19,7 @@ import {
   Check
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
+import { getSecureRandomInt } from '@/lib/utils';
 
 interface WarrantyResult {
   isValid: boolean;
@@ -276,7 +277,7 @@ export default function WarrantyPage() {
               {claimSubmitted ? (
                 <div className="px-4 py-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>RMA Ticket #RMA-2026-{Math.floor(1000 + Math.random() * 9000)} Created</span>
+                  <span>RMA Ticket #RMA-2026-{getSecureRandomInt(1000, 10000)} Created</span>
                 </div>
               ) : (
                 <button

@@ -91,8 +91,8 @@ export class PasswordResetService {
 
     // Prevent user enumeration: If user does not exist or is inactive, simulate delay and return standard response
     if (!user || !user.isActive) {
-      // Artificial delay to prevent timing analysis attacks
-      await new Promise(r => setTimeout(r, 180 + Math.random() * 80));
+      // Artificial delay to prevent timing analysis attacks (CWE-338 compliant)
+      await new Promise(r => setTimeout(r, 180 + crypto.randomInt(0, 80)));
       return {
         success: true,
         maskedEmail: this.maskEmail(normalizedEmail),

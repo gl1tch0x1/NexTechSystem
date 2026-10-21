@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { quoteRepository } from '../repositories/quote.repository.js';
@@ -113,7 +114,7 @@ router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> 
     const total = Math.max(0, Math.round((taxableAmount + tax + shipping) * 100) / 100);
 
     const quoteId = uuidv4();
-    const randomSuffix = Math.floor(10000 + Math.random() * 90000);
+    const randomSuffix = crypto.randomInt(10000, 100000);
     const quoteNumber = `QTE-2026-${randomSuffix}`;
 
     const validDays = parseInt(validityDays, 10) || 30;
