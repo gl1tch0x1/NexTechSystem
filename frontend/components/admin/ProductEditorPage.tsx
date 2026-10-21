@@ -743,7 +743,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       { id: 'title', label: 'Product Model Name', passed: formData.title.trim().length >= 4 },
       { id: 'sku', label: 'Unique Base SKU', passed: Boolean(formData.sku.trim()) },
       { id: 'price', label: 'Commercial Price & Cost', passed: formData.price > 0 && formData.costPrice > 0 },
-      { id: 'stock', label: 'Regional Stock Allocation', passed: formData.stock > 0 || !formData.inventoryTracked },
+      ...(portal !== 'admin'
+        ? [{ id: 'stock', label: 'Regional Stock Allocation', passed: formData.stock > 0 || !formData.inventoryTracked }]
+        : []),
       { id: 'image', label: 'High-Res Product Asset', passed: Boolean(formData.primaryImage) },
       { id: 'specs', label: 'Hardware Specifications', passed: configuredSpecsCount >= 4 },
       { id: 'shipping', label: 'Dimensions & HS Code', passed: Boolean(formData.hsCode) && formData.dimensions.length > 0 },
@@ -751,7 +753,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     const passedCount = checks.filter(c => c.passed).length;
     const percentage = Math.round((passedCount / checks.length) * 100);
     return { checks, passedCount, total: checks.length, percentage };
-  }, [formData, configuredSpecsCount]);
+  }, [formData, configuredSpecsCount, portal]);
 
   // Tag & Collection Helpers
   const handleAddTag = (tagToAdd: string) => {
@@ -1388,10 +1390,19 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [formData]);
 
+  // Prevent admin from being stuck on inventory tab
+  useEffect(() => {
+    if (portal === 'admin' && activeTab === 'inventory') {
+      setActiveTab('general');
+    }
+  }, [portal, activeTab]);
+
   const TABS = [
     { id: 'general' as TabKey, label: 'Overview & Media', icon: Package },
     { id: 'pricing' as TabKey, label: 'Pricing & Financials', icon: DollarSign },
-    { id: 'inventory' as TabKey, label: 'Warehousing & Stock', icon: Warehouse },
+    ...(portal !== 'admin'
+      ? [{ id: 'inventory' as TabKey, label: 'Warehousing & Stock', icon: Warehouse }]
+      : []),
     { id: 'specs' as TabKey, label: 'Technical Specs', icon: NextechLogo },
     { id: 'variants' as TabKey, label: 'Multi-SKU Variants', icon: Sparkles },
     { id: 'logistics' as TabKey, label: 'Logistics & Compliance', icon: Truck },
@@ -1511,10 +1522,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               {profitMetrics.margin}% (+{profitMetrics.profit} AED)
             </span>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-400">Stock:</span>
-            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{formData.stock} units</span>
-          </div>
+          {portal !== 'admin' && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-slate-400">Stock:</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{formData.stock} units</span>
+            </div>
+          )}
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-slate-400">VAT:</span>
             <span className="font-bold text-indigo-600 dark:text-indigo-400">{formData.chargeTax ? '5% Standard' : 'Tax Exempt'}</span>
@@ -2257,18 +2270,18 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('inventory')}
+                  onClick={() => setActiveTab(portal === 'admin' ? 'specs' : 'inventory')}
                   className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
                 >
-                  <span>Next: Warehousing & Stock</span>
+                  <span>{portal === 'admin' ? 'Next: Technical Specs' : 'Next: Warehousing & Stock'}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* SECTION 3: WAREHOUSING & REGIONAL HUBS */}
-          {activeTab === 'inventory' && (
+          {/* SECTION 3: WAREHOUSING & REGIONAL HUBS (Reseller Only) */}
+          {portal !== 'admin' && activeTab === 'inventory' && (
             <div id="section-warehousing" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
                 <div>
@@ -2709,11 +2722,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={() => setActiveTab('inventory')}
+                  onClick={() => setActiveTab(portal === 'admin' ? 'pricing' : 'inventory')}
                   className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Back: Warehousing</span>
+                  <span>{portal === 'admin' ? 'Back: Pricing & Financials' : 'Back: Warehousing'}</span>
                 </button>
                 <button
                   type="button"
