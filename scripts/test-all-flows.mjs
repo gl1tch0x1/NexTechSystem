@@ -236,7 +236,7 @@ async function runTests() {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       const d = await r.json();
-      record('Frontend Admin Notifications Proxy', r.ok, `Status: ${r.status}`);
+      record('Frontend Admin Notifications Proxy', r.ok && d.success, `Status: ${r.status}`);
     } catch (e) {
       record('Frontend Admin Notifications Proxy', false, e.message);
     }
@@ -247,7 +247,7 @@ async function runTests() {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       const d = await r.json();
-      record('Frontend Admin Products Proxy', r.ok, `Status: ${r.status}`);
+      record('Frontend Admin Products Proxy', r.ok && Array.isArray(d.data), `Status: ${r.status}`);
     } catch (e) {
       record('Frontend Admin Products Proxy', false, e.message);
     }
@@ -257,7 +257,7 @@ async function runTests() {
   try {
     const r = await fetch(`${BASE_FRONTEND}/warranty/verify/SN-TEST-12345`);
     const d = await r.json();
-    record('Warranty Verification API', r.ok, `Status: ${r.status}`);
+    record('Warranty Verification API', r.ok && d.success !== undefined, `Status: ${r.status}`);
   } catch (e) {
     record('Warranty Verification API', false, e.message);
   }
