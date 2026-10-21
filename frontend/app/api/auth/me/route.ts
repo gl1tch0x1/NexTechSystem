@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJwt } from '@/lib/token';
-import { FALLBACK_USERS, FALLBACK_RESELLERS } from '@/lib/fallback-data';
 import { User } from '@/types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_insecure_local_jwt_secret_change_in_env';
@@ -39,20 +38,20 @@ export async function GET(request: NextRequest) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = verifyJwt(token, JWT_SECRET) as any;
-    const user: User = (FALLBACK_USERS.find(u => u.id === decoded.id || u.email === decoded.email) || {
+    const user: User = {
       id: decoded.id,
       email: decoded.email,
       role: decoded.role || 'CUSTOMER',
-      name: decoded.email?.split('@')[0] || 'User',
-      username: decoded.email?.split('@')[0] || 'user',
+      name: decoded.name || decoded.email?.split('@')[0] || 'User',
+      username: decoded.username || decoded.email?.split('@')[0] || 'user',
       addresses: [],
       resellerId: decoded.resellerId,
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }) as User;
+    } as User;
 
-    const reseller = user.resellerId ? FALLBACK_RESELLERS.find(r => r.id === user.resellerId) || null : null;
+    const reseller = null;
 
     return NextResponse.json({
       success: true,

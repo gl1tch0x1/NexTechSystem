@@ -362,10 +362,15 @@ export class AuthController {
       ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30)
       : cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '').slice(0, 30);
 
+    // Auto-promote first registered user to master ADMIN when database is empty
+    const totalUsers = await userRepository.count();
+    const isFirstUser = totalUsers === 0;
+    const assignedRole = isFirstUser ? 'ADMIN' : 'CUSTOMER';
+
     const newUser: User = {
       id: userId,
       email: cleanEmail,
-      role: 'CUSTOMER',
+      role: assignedRole,
       name: cleanName,
       username: cleanUsername,
       phone: phone ? String(phone).trim().slice(0, 20) : '',

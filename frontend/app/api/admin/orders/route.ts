@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FALLBACK_ORDERS } from '@/lib/fallback-data';
 
 export async function GET(request: NextRequest) {
   const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -22,6 +21,6 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    data: FALLBACK_ORDERS,
+    data: [],
   });
 }

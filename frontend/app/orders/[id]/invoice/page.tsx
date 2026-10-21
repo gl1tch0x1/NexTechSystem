@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import InvoiceStampSignature from '@/components/invoice/InvoiceStampSignature';
 import InvoiceTermsAndConditions from '@/components/invoice/InvoiceTermsAndConditions';
-import { FALLBACK_ORDERS } from '@/lib/fallback-data';
 import { printDocumentElement } from '@/lib/print-document';
 
 export default function TaxInvoicePage() {
@@ -58,14 +57,6 @@ export default function TaxInvoicePage() {
 
         if (!orderData) {
           // If Admin, resolve from resilient fallback data as secondary safety
-          if (role === 'ADMIN') {
-            const fallback = FALLBACK_ORDERS.find(o => o.id === orderId || o.orderNumber === orderId);
-            if (fallback) {
-              setOrder(fallback);
-              setError(null);
-              return;
-            }
-          }
           setError('Order record not found.');
           return;
         }
@@ -105,17 +96,6 @@ export default function TaxInvoicePage() {
       })
       .catch(err => {
         console.error('[TaxInvoicePage] Error fetching order:', err);
-
-        // If user is ADMIN, guarantee immediate access to any order (including seed orders)
-        if (role === 'ADMIN' || activeToken) {
-          const fallback = FALLBACK_ORDERS.find(o => o.id === orderId || o.orderNumber === orderId);
-          if (fallback) {
-            setOrder(fallback);
-            setError(null);
-            return;
-          }
-        }
-
         setError(err?.message || 'Unable to load official tax invoice. Authentication may be required.');
       })
       .finally(() => setLoading(false));

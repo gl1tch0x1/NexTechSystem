@@ -14,7 +14,6 @@ import {
   SellerType,
   Reseller
 } from '@/types';
-import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 import {
   SPECIFICATION_FIELDS,
   SPECIFICATION_PRESETS,
@@ -429,8 +428,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const returnPath = portal === 'reseller' ? `/reseller/${resellerCode || 'comnet101'}/products` : '/admin/products';
 
   const [loading, setLoading] = useState(mode === 'edit');
-  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
-  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [resellers, setResellers] = useState<Reseller[]>([]);
 
   // Focused Step-by-Step Tabbed Navigation Mode
@@ -448,7 +447,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
 
   // Studio 2.0 State Enhancements
   const [previewCurrency, setPreviewCurrency] = useState<keyof typeof FX_RATES>('AED');
-  const [targetMarginInput, setTargetMarginInput] = useState<number>(25);
+  const [targetMarginInput, setTargetMarginInput] = useState<number>(20);
   const [galleryUrlInput, setGalleryUrlInput] = useState<string>('');
 
   const generateRandomSku = useCallback((catId?: string) => {
@@ -465,109 +464,92 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       cat_monitors: 'MON',
     };
     const code = prefixMap[catId || ''] || 'SKU';
-    const rand = Math.floor(100000 + Math.random() * 900000);
+    const randBuf = new Uint32Array(1);
+    if (typeof window !== 'undefined' && window.crypto) {
+      window.crypto.getRandomValues(randBuf);
+    }
+    const rand = 100000 + (randBuf[0] % 900000);
     return `NX-${code}-${rand}`;
   }, []);
 
-  const generateRandomBarcode = () => {
-    return `729${Math.floor(100000000 + Math.random() * 900000000)}`;
-  };
+  const generateRandomBarcode = useCallback(() => {
+    const randBuf = new Uint32Array(1);
+    if (typeof window !== 'undefined' && window.crypto) {
+      window.crypto.getRandomValues(randBuf);
+    }
+    const rand = 100000000 + (randBuf[0] % 900000000);
+    return `729${rand}`;
+  }, []);
 
-  // Form State
+  // Form State: Clean, production initial state without hardcoded mock/seed data
   const [formData, setFormData] = useState<ProductFormData>({
     title: '',
     slug: '',
-    sku: 'NX-LPT-999274',
-    barcode: '729160341853',
+    sku: '',
+    barcode: '',
     shortDescription: '',
     description: '',
     condition: 'Brand New (Factory Sealed)',
-    warrantyYears: 3,
-    warranty: '3 Years Official Manufacturer Warranty',
-    price: 3499,
-    originalPrice: 3899,
-    costPrice: 2899,
-    discountPercentage: 10,
+    warrantyYears: 1,
+    warranty: '1 Year Manufacturer Warranty',
+    price: 0,
+    originalPrice: 0,
+    costPrice: 0,
+    discountPercentage: 0,
     chargeTax: true,
-    unitPrice: 3499,
+    unitPrice: 0,
     unitMeasure: 'unit',
-    stock: 25,
+    stock: 0,
     lowStockThreshold: 5,
     inventoryTracked: true,
     allowBackorder: false,
-    warehouseLocation: 'loc_dxb_main',
-    locations: WAREHOUSE_LOCATIONS.map(w => ({
-      locationId: w.id,
-      locationName: w.name,
-      city: w.city,
-      binLocation: w.id === 'loc_dxb_main' ? 'DXB-A-04-18' : w.id === 'loc_deira_tech' ? 'DEI-SH-02-05' : w.id === 'loc_auh_hub' ? 'AUH-WH-01-12' : 'SHJ-RK-03-09',
-      safetyStock: 5,
-      quantity: w.id === 'loc_dxb_main' ? 25 : 0,
-      available: w.id === 'loc_dxb_main' ? 25 : 0,
-      committed: 0,
-      unavailable: 0,
-      onHand: w.id === 'loc_dxb_main' ? 25 : 0,
-    })),
-    tieredPricing: [
-      { minQty: 1, discountPercent: 0, unitPrice: 3499 },
-      { minQty: 5, discountPercent: 5, unitPrice: 3324 },
-      { minQty: 20, discountPercent: 10, unitPrice: 3149 },
-      { minQty: 50, discountPercent: 15, unitPrice: 2974 },
-    ],
-    targetMargin: 25,
-    mapPrice: 3199,
-    weight: 1.74,
+    warehouseLocation: '',
+    locations: [],
+    tieredPricing: [],
+    targetMargin: 20,
+    mapPrice: 0,
+    weight: 0,
     dimensions: {
-      length: 35.9,
-      width: 25.1,
-      height: 1.9,
+      length: 0,
+      width: 0,
+      height: 0,
       unit: 'cm',
     },
-    hsCode: '8471.30.01',
+    hsCode: '',
     isPhysical: true,
-    collections: ['Laptops', 'Home & Business Laptops'],
-    tags: ['Work Laptop', 'UAE', 'ProBook 460 G11'],
+    collections: [],
+    tags: [],
     primaryImage: '',
     images: [],
     sellerType: portal === 'reseller' ? 'RESELLER' : 'ADMIN',
     resellerId: '',
     resellerName: '',
     resellerCode: resellerCode || '',
-    categoryId: 'cat_laptops',
-    categoryName: 'Laptops',
-    brandId: 'brand_hp',
-    brandName: 'HP',
-    socket: 'BGA-FC1851',
-    tdp: 28,
-    formFactor: 'Clamshell',
-    specifications: {
-      Condition: 'Brand New (Factory Sealed)',
-      'Product Category': 'Laptops',
-      'Processor Brand': 'Intel',
-      'Processor Model': 'Core Ultra 5 125U',
-      'Processor Cores': 'Dodeca-Core (12 Cores)',
-      'RAM Capacity': '16GB',
-      'RAM Type': 'DDR5 5600MHz',
-      'Storage Capacity': '512GB SSD',
-      'Storage Type': 'NVMe PCIe 4.0 SSD',
-      'Screen Size': '16.0" WUXGA',
-      'Display Technology': 'IPS Antiglare LED',
-      'Operating System': 'FreeDOS',
-      'Keyboard Language': 'English / Arabic',
-      'Backlit Keyboard': 'Yes',
-      'Fingerprint Reader': 'Yes',
-      Color: 'Pike Silver',
-      Warranty: '3 Years Official Manufacturer Warranty',
-    },
+    categoryId: '',
+    categoryName: '',
+    brandId: '',
+    brandName: '',
+    socket: '',
+    tdp: 0,
+    formFactor: '',
+    specifications: {},
     customSpecs: [],
     hasVariants: false,
-    variantOptions: [
-      { name: 'RAM', values: ['16GB', '32GB'] },
-      { name: 'Storage', values: ['512GB SSD', '1TB SSD'] },
-    ],
+    variantOptions: [],
     variants: [],
     status: 'ACTIVE',
   });
+
+  // Automatically initialize clean unique SKU & Barcode for new hardware SKU
+  useEffect(() => {
+    if (mode === 'create' && !formData.sku) {
+      setFormData(prev => ({
+        ...prev,
+        sku: generateRandomSku(),
+        barcode: generateRandomBarcode(),
+      }));
+    }
+  }, [mode, generateRandomSku, generateRandomBarcode]);
 
   // Load taxonomies & product
   useEffect(() => {
@@ -576,16 +558,16 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         const fetchOpts = token ? { token } : {};
         const [catRes, brandRes, resellerRes] = await Promise.all([
           ApiClient.get<Category[]>('/admin/categories', fetchOpts)
-            .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => DEFAULT_CATEGORIES)),
+            .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => [])),
           ApiClient.get<Brand[]>('/admin/brands', fetchOpts)
-            .catch(() => ApiClient.get<Brand[]>('/products/brands').catch(() => DEFAULT_BRANDS)),
+            .catch(() => ApiClient.get<Brand[]>('/products/brands').catch(() => [])),
           token
             ? ApiClient.get<Reseller[]>('/admin/resellers', { token }).catch(() => [])
             : Promise.resolve([]),
         ]);
 
-        if (catRes && Array.isArray(catRes) && catRes.length > 0) setCategories(catRes);
-        if (brandRes && Array.isArray(brandRes) && brandRes.length > 0) setBrands(brandRes);
+        if (catRes && Array.isArray(catRes)) setCategories(catRes);
+        if (brandRes && Array.isArray(brandRes)) setBrands(brandRes);
         if (resellerRes && Array.isArray(resellerRes)) setResellers(resellerRes);
       } catch (err) {
         console.warn('Failed to load taxonomies:', err);
@@ -3331,7 +3313,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </div>
 
                 <div className="text-xs font-black text-slate-900 dark:text-white line-clamp-2 leading-snug">
-                  {formData.title || 'HP ProBook 460 G11 Business Laptop'}
+                  {formData.title || 'Hardware Product Title'}
                 </div>
 
                 <div className="flex items-baseline gap-2 flex-wrap pt-0.5">

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FALLBACK_PRODUCTS, FALLBACK_ORDERS, FALLBACK_USERS, FALLBACK_RESELLERS } from '@/lib/fallback-data';
 
 export async function GET(request: NextRequest) {
   const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -17,35 +16,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(json, { status: res.status });
     }
   } catch (err: any) {
-    console.warn('[Dashboard API] Backend proxy error, using resilient database snapshot:', err?.message);
+    console.warn('[Dashboard API] Backend proxy error:', err?.message);
   }
-
-  const totalRevenue = FALLBACK_ORDERS.reduce((sum, o) => sum + (o.total || 0), 0);
-  const totalOrders = FALLBACK_ORDERS.length;
-  const totalProducts = FALLBACK_PRODUCTS.length;
-  const totalCustomers = FALLBACK_USERS.filter(u => u.role === 'CUSTOMER').length;
 
   return NextResponse.json({
     success: true,
     data: {
       metrics: {
-        totalRevenue,
-        totalOrders,
-        totalProducts,
-        totalCustomers,
-        activeResellers: FALLBACK_RESELLERS.length,
-        pendingApprovals: FALLBACK_PRODUCTS.filter(p => p.approvalStatus === 'PENDING_APPROVAL').length,
-        lowStockItems: FALLBACK_PRODUCTS.filter(p => p.stock <= (p.lowStockThreshold || 5)).length,
+        totalRevenue: 0,
+        totalOrders: 0,
+        totalProducts: 0,
+        totalCustomers: 0,
+        activeResellers: 0,
+        pendingApprovals: 0,
+        lowStockItems: 0,
       },
-      revenueOverview: [
-        { month: 'Jan', revenue: 145000 },
-        { month: 'Feb', revenue: 182000 },
-        { month: 'Mar', revenue: 215000 },
-        { month: 'Apr', revenue: 268000 },
-        { month: 'May', revenue: 310000 },
-        { month: 'Jun', revenue: 385000 },
-      ],
-      recentOrders: FALLBACK_ORDERS.slice(0, 5),
+      revenueOverview: [],
+      recentOrders: [],
     },
   });
 }

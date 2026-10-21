@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { FALLBACK_COUPONS } from '@/lib/fallback-data';
 
 export async function GET(request: Request) {
   const backendUrl =
@@ -32,8 +31,8 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     success: true,
-    data: FALLBACK_COUPONS,
-    meta: { total: FALLBACK_COUPONS.length },
+    data: [],
+    meta: { total: 0 },
   });
 }
 

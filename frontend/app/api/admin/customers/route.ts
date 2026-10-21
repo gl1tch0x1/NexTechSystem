@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FALLBACK_USERS } from '@/lib/fallback-data';
 
 export async function GET(request: NextRequest) {
   const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -17,19 +16,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(json, { status: res.status });
     }
   } catch (err: any) {
-    console.warn('[Admin Customers API] Backend proxy error, using fallback:', err?.message);
+    console.warn('[Admin Customers API] Backend proxy error:', err?.message);
   }
-
-  const customers = FALLBACK_USERS.filter(u => u.role === 'CUSTOMER').map(u => ({
-    ...u,
-    walletBalance: 2500,
-    orderCount: 2,
-    totalSpent: 4200,
-  }));
 
   return NextResponse.json({
     success: true,
-    data: customers,
-    meta: { total: customers.length },
+    data: [],
+    meta: { total: 0 },
   });
 }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { signJwt } from '@/lib/token';
-import { FALLBACK_USERS } from '@/lib/fallback-data';
 import { User } from '@/types';
 
 const PBKDF2_SALT = process.env.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026';
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
   const rawPassword = String(password);
 
   // Load registered users from disk database store if available, otherwise use seed catalog
-  let dbUsers = FALLBACK_USERS;
+  let dbUsers: any[] = [];
   try {
     const fs = await import('fs');
     const path = await import('path');

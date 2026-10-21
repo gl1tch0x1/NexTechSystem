@@ -11,8 +11,6 @@ import { EnterpriseBentoGrid } from '@/components/home/EnterpriseBentoGrid';
 import { TaxonomyExplorer } from '@/components/home/TaxonomyExplorer';
 import { ClientTestimonials } from '@/components/home/ClientTestimonials';
 import { getApiUrl } from '@/lib/api-client';
-import { FALLBACK_PRODUCTS, FALLBACK_HOMEPAGE_CONTENT } from '@/lib/fallback-data';
-import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 
 async function getHomeData(): Promise<{
   products: Product[];
@@ -54,18 +52,18 @@ async function getHomeData(): Promise<{
     }
 
     return {
-      products: products.length > 0 ? products : FALLBACK_PRODUCTS,
-      categories: categories.length > 0 ? categories : DEFAULT_CATEGORIES,
-      brands: brands.length > 0 ? brands : DEFAULT_BRANDS,
-      content: content || FALLBACK_HOMEPAGE_CONTENT,
+      products,
+      categories,
+      brands,
+      content,
     };
   } catch (err) {
-    console.warn('[Home] Using fallback data:', err);
+    console.warn('[Home] Failed to load dynamic home data:', err);
     return {
-      products: FALLBACK_PRODUCTS,
-      categories: DEFAULT_CATEGORIES,
-      brands: DEFAULT_BRANDS,
-      content: FALLBACK_HOMEPAGE_CONTENT,
+      products: [],
+      categories: [],
+      brands: [],
+      content: null,
     };
   }
 }

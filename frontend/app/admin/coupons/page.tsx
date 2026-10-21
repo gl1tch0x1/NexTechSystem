@@ -5,7 +5,6 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Coupon, StoreSettings, Category, Brand } from '@/types';
-import { FALLBACK_COUPONS } from '@/lib/fallback-data';
 import {
   Tag,
   Plus,
@@ -28,7 +27,7 @@ import {
 
 export default function AdminCouponsPage() {
   const { token } = useAuth();
-  const [coupons, setCoupons] = useState<Coupon[]>(FALLBACK_COUPONS);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,7 +87,7 @@ export default function AdminCouponsPage() {
       if (couponsData.status === 'fulfilled' && couponsData.value && Array.isArray(couponsData.value) && couponsData.value.length > 0) {
         setCoupons(couponsData.value);
       } else {
-        setCoupons(prev => (prev && prev.length > 0 ? prev : FALLBACK_COUPONS));
+        setCoupons(prev => (prev && prev.length > 0 ? prev : []));
       }
 
       if (settingsData.status === 'fulfilled' && settingsData.value) {
@@ -266,7 +265,7 @@ export default function AdminCouponsPage() {
     (c.title && c.title.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const displayCoupons = coupons.length > 0 ? coupons : FALLBACK_COUPONS;
+  const displayCoupons = coupons;
 
   // Active coupon currently featured in preview
   const currentFeaturedCoupon = displayCoupons.find(c => c.code === featuredCode) || displayCoupons[0];
