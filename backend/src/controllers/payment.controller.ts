@@ -352,29 +352,46 @@ export class PaymentController {
     }
 
     const refId = paymentId || order.paymentReference || `${order.paymentMethod.toLowerCase()}_ref_${Date.now()}`;
+    const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
     let isSettlementVerified = false;
 
-    if (isOrderActuallySimulated || (!ENV.TAMARA_API_TOKEN && !ENV.TABBY_SECRET_KEY)) {
-      // In local development sandbox / automated mock suites where provider credentials are intentionally absent
+    if (!isProd && (isOrderActuallySimulated || (!ENV.TAMARA_API_TOKEN && !ENV.TABBY_SECRET_KEY))) {
+      // In local development sandbox / automated mock test suites where provider credentials are intentionally absent
       isSettlementVerified =
         status === 'success' ||
         status === 'approved' ||
         status === 'authorized' ||
         clientClaimsSimulation;
     } else {
-      // Production or configured gateway: strictly verify server-to-server with payment provider
+      // Production or live gateway: strictly verify server-to-server with payment provider
       try {
-        if (order.paymentMethod === 'TAMARA' && ENV.TAMARA_API_TOKEN) {
+        if (order.paymentMethod === 'TAMARA') {
+          if (!ENV.TAMARA_API_TOKEN) {
+            res.status(503).json({
+              success: false,
+              error: { code: 'GATEWAY_UNAVAILABLE', message: 'Tamara payment gateway credentials are not configured in production.' },
+            });
+            return;
+          }
           const authResult = await tamaraService.authoriseOrder(refId);
-          if (authResult?.status === 'AUTHORISED' || authResult?.status === 'APPROVED' || authResult?.isSimulated) {
+          if (authResult?.status === 'AUTHORISED' || authResult?.status === 'APPROVED' || (!isProd && authResult?.isSimulated)) {
             await tamaraService.capturePayment(refId, order.total).catch(() => {});
             isSettlementVerified = true;
           }
-        } else if (order.paymentMethod === 'TABBY' && ENV.TABBY_SECRET_KEY) {
+        } else if (order.paymentMethod === 'TABBY') {
+          if (!ENV.TABBY_SECRET_KEY) {
+            res.status(503).json({
+              success: false,
+              error: { code: 'GATEWAY_UNAVAILABLE', message: 'Tabby payment gateway credentials are not configured in production.' },
+            });
+            return;
+          }
           const captureResult = await tabbyService.capturePayment(refId, order.total);
-          if (captureResult?.status === 'CLOSED' || captureResult?.status === 'AUTHORIZED' || captureResult?.isSimulated) {
+          if (captureResult?.status === 'CLOSED' || captureResult?.status === 'AUTHORIZED' || (!isProd && captureResult?.isSimulated)) {
             isSettlementVerified = true;
           }
+        } else if (order.paymentMethod === 'CREDIT_CARD') {
+          isSettlementVerified = Boolean(paymentId && (status === 'success' || status === 'approved'));
         } else {
           isSettlementVerified = status === 'success' || status === 'approved';
         }

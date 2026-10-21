@@ -353,7 +353,7 @@ export class DbStore {
           }
 
           const docs = await cursor.toArray();
-          if (docs && docs.length > 0) {
+          if (Array.isArray(docs)) {
             return docs as T[];
           }
         }
@@ -423,16 +423,21 @@ export class DbStore {
     map.set(item.id, copy);
     this.persistCollection(collection);
 
-    // Asynchronous Dual Cloud Persistence (MongoDB + Firestore)
-    this.syncDocToMongo(collection, item.id, copy).catch(() => {});
-    this.syncDocToFirestore(collection, item.id, copy).catch(() => {});
+    // Synchronous/Awaited Dual Cloud Persistence to guarantee durability
+    await Promise.allSettled([
+      this.syncDocToMongo(collection, item.id, copy),
+      this.syncDocToFirestore(collection, item.id, copy),
+    ]);
 
     return item;
   }
 
   public async update<T = any>(collection: string, id: string, updates: Partial<T>): Promise<T | null> {
     const map = this.getCollectionMap(collection);
-    const existing = map.get(id);
+    let existing = map.get(id);
+    if (!existing && mongoDb.isConnected()) {
+      existing = await this.findById(collection, id);
+    }
     if (!existing) return null;
     const updated = {
       ...existing,
@@ -442,9 +447,11 @@ export class DbStore {
     map.set(id, updated);
     this.persistCollection(collection);
 
-    // Asynchronous Dual Cloud Persistence (MongoDB + Firestore)
-    this.syncDocToMongo(collection, id, updated).catch(() => {});
-    this.syncDocToFirestore(collection, id, updated).catch(() => {});
+    // Synchronous/Awaited Dual Cloud Persistence to guarantee durability across container recycling
+    await Promise.allSettled([
+      this.syncDocToMongo(collection, id, updated),
+      this.syncDocToFirestore(collection, id, updated),
+    ]);
 
     return updated as T;
   }
@@ -454,8 +461,16 @@ export class DbStore {
     const existed = map.delete(id);
     if (existed) {
       this.persistCollection(collection);
-      this.deleteDocFromMongo(collection, id).catch(() => {});
-      this.deleteDocFromFirestore(collection, id).catch(() => {});
+      await Promise.allSettled([
+        this.deleteDocFromMongo(collection, id),
+        this.deleteDocFromFirestore(collection, id),
+      ]);
+    } else if (mongoDb.isConnected()) {
+      await Promise.allSettled([
+        this.deleteDocFromMongo(collection, id),
+        this.deleteDocFromFirestore(collection, id),
+      ]);
+      return true;
     }
     return existed;
   }

@@ -415,15 +415,18 @@ export class PasswordResetService {
       }
     }
 
-    // 2. High-visibility Development / Sandbox Security Console Log
-    console.log('\n====================================================================');
-    console.log('🔐 [NEXTECH SECURITY: PASSWORD RESET OTP DISPATCHED]');
-    console.log(`Recipient Email : ${sanitizedEmail}`);
-    console.log(`Customer Name   : ${recipientName}`);
-    console.log(`Purpose         : Account Password Recovery & Authorization`);
-    console.log(`OTP Code        : >>>  ${code}  <<<`);
-    console.log(`Validity        : ${expiresInMinutes} Minutes`);
-    console.log('====================================================================\n');
+    // In production, never dump plaintext OTP codes to stdout or log aggregators
+    const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
+    if (!isProd) {
+      console.log('\n====================================================================');
+      console.log('🔐 [NEXTECH SECURITY: PASSWORD RESET OTP DISPATCHED (DEV SANDBOX)]');
+      console.log(`Recipient Email : ${sanitizedEmail}`);
+      console.log(`Customer Name   : ${recipientName}`);
+      console.log(`Purpose         : Account Password Recovery & Authorization`);
+      console.log(`OTP Code        : >>>  ${code}  <<<`);
+      console.log(`Validity        : ${expiresInMinutes} Minutes`);
+      console.log('====================================================================\n');
+    }
   }
 }
 

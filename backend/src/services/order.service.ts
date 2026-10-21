@@ -11,8 +11,9 @@ import { auditService } from './audit.service.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { ENV } from '../config/env.js';
 import { Order, OrderStatus, PaymentStatus, PaymentMethod, Address, OrderItem } from '../types/index.js';
-import { notificationService } from './notification.service.js';
 import { dbStore } from '../config/db-store.js';
+import { walletService } from './wallet.service.js';
+import { notificationService } from './notification.service.js';
 
 export interface CreateOrderDTO {
   userId: string;
@@ -71,6 +72,12 @@ export class OrderService {
 
 
 
+    let userWalletBalance = 0;
+    if (dto.walletAmountToUse && dto.walletAmountToUse > 0) {
+      const wallet = await walletService.getOrCreateWallet(dto.userId);
+      userWalletBalance = wallet.balance || 0;
+    }
+
     // 3. Authoritative pricing calculation
     const pricing = await pricingService.calculateOrderTotals({
       items: dto.items,
@@ -80,6 +87,8 @@ export class OrderService {
       paymentMethod: dto.paymentMethod,
       shippingAddress: dto.shippingAddress,
       userId: dto.userId,
+      requestedWalletDeduction: dto.walletAmountToUse,
+      userWalletBalance,
     });
 
     return dbStore.runTransaction(async () => {
@@ -108,6 +117,18 @@ export class OrderService {
         if (freshCoupon.usageLimit && freshCoupon.usageCount >= freshCoupon.usageLimit) {
           throw new Error(`Promotional coupon "${freshCoupon.code}" usage limit has been reached.`);
         }
+        if (dto.userId && freshCoupon.perUserLimit && freshCoupon.perUserLimit > 0) {
+          const userOrders = await orderRepository.find({
+            where: [
+              { field: 'userId', operator: '==', value: dto.userId },
+              { field: 'couponCode', operator: '==', value: freshCoupon.code },
+            ],
+          });
+          const activeOrders = userOrders.filter(o => o.orderStatus !== 'CANCELLED');
+          if (activeOrders.length >= freshCoupon.perUserLimit) {
+            throw new Error(`You have already reached the maximum redemption limit for coupon "${freshCoupon.code}".`);
+          }
+        }
       }
 
       // 6. Cryptographically secure collision-free order number generation (CWE-338 compliant)
@@ -134,6 +155,16 @@ export class OrderService {
         const freshCoupon = await couponRepository.findById(pricing.appliedCoupon.id);
         await couponRepository.update(pricing.appliedCoupon.id, {
           usageCount: ((freshCoupon?.usageCount ?? pricing.appliedCoupon.usageCount) || 0) + 1,
+        });
+      }
+
+      // 9. Debit digital wallet balance atomically if wallet discount was applied
+      if (pricing.walletAmountUsed && pricing.walletAmountUsed > 0) {
+        await walletService.debitWallet({
+          userId: dto.userId,
+          amount: pricing.walletAmountUsed,
+          referenceId: orderId,
+          reason: `Payment deduction for order #${orderNumber}`,
         });
       }
 
@@ -196,7 +227,7 @@ export class OrderService {
         couponCode: pricing.couponCode,
         inStoreDiscount: pricing.inStoreDiscount,
         inStoreDiscountRate: pricing.inStoreDiscountRate,
-        walletAmountUsed: 0,
+        walletAmountUsed: pricing.walletAmountUsed || 0,
         tax: pricing.tax,
         taxRate: pricing.taxRate,
         shippingFee: pricing.shippingFee,
@@ -209,7 +240,9 @@ export class OrderService {
         paymentStatus: (dto.paymentMethod === 'COD' || dto.paymentMethod === 'IN_STORE' || isBnpl) ? 'PENDING' : 'PAID',
         inStoreReservationExpiry: dto.paymentMethod === 'IN_STORE'
           ? new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-          : undefined,
+          : ((isBnpl || dto.paymentMethod === 'CREDIT_CARD')
+              ? new Date(Date.now() + 60 * 60 * 1000).toISOString() // 60-minute reservation hold for digital checkouts
+              : undefined),
         orderStatus: initialOrderStatus,
         shippingAddress: dto.shippingAddress,
         billingAddress: dto.billingAddress,
@@ -592,23 +625,110 @@ export class OrderService {
     return updated;
   }
 
+  /**
+   * General-purpose order cancellation with automatic multi-warehouse inventory restocking
+   */
+  async cancelOrder(
+    orderId: string,
+    reason?: string,
+    cancelledBy: string = 'system',
+    actorRole: string = 'ADMIN'
+  ): Promise<Order> {
+    const order = await this.getOrderById(orderId);
+    if (!order) {
+      throw new Error(`Order not found: ${orderId}`);
+    }
+
+    if (order.orderStatus === 'CANCELLED') {
+      return order; // Idempotent return
+    }
+
+    if (order.orderStatus === 'SHIPPED' || order.orderStatus === 'DELIVERED') {
+      throw new Error(`Order #${order.orderNumber} is already '${order.orderStatus}' and cannot be cancelled.`);
+    }
+
+    return dbStore.runTransaction(async () => {
+      // 1. Restock inventory for items atomically
+      for (const item of order.items) {
+        try {
+          await inventoryService.restock(item.productId, item.quantity, item.variantId);
+        } catch (err) {
+          console.error('[OrderService] Restock failed for product:', String(item.productId).replace(/\n|\r/g, ''), err);
+        }
+      }
+
+      // 2. Refund wallet deduction if wallet was used
+      if (order.walletAmountUsed && order.walletAmountUsed > 0) {
+        await walletService.creditWallet({
+          userId: order.userId,
+          amount: order.walletAmountUsed,
+          referenceId: order.id,
+          reason: `Wallet refund for cancelled order #${order.orderNumber}`,
+        }).catch(() => {});
+      }
+
+      const cancellationNote = reason || `Order cancelled by ${actorRole.toLowerCase()}. Reserved warehouse inventory restored.`;
+      const newHistory = [
+        ...order.statusHistory,
+        {
+          status: 'CANCELLED' as OrderStatus,
+          note: cancellationNote,
+          timestamp: new Date().toISOString(),
+          updatedBy: cancelledBy,
+        },
+      ];
+
+      const updated = await orderRepository.update(order.id, {
+        orderStatus: 'CANCELLED',
+        statusHistory: newHistory,
+        updatedAt: new Date().toISOString(),
+      });
+
+      if (!updated) {
+        throw new Error(`Failed to update order status for ${orderId}`);
+      }
+
+      await auditService.log({
+        userId: cancelledBy,
+        userEmail: actorRole === 'ADMIN' ? ENV.ADMIN_DEFAULT_EMAIL : 'customer@nextech.com',
+        userRole: (actorRole as any) || 'ADMIN',
+        action: 'ORDER_CANCELLED_RESTOCKED',
+        resource: 'orders',
+        resourceId: order.id,
+        details: {
+          orderNumber: order.orderNumber,
+          cancelledBy,
+          reason: cancellationNote,
+          restockedItems: order.items.length,
+        },
+      });
+
+      return updated;
+    });
+  }
+
   async releaseExpiredInStoreReservations(): Promise<number> {
     const nowIso = new Date().toISOString();
+    const nowMs = Date.now();
     const orders = await orderRepository.find({
       where: [
-        { field: 'paymentMethod', operator: '==', value: 'IN_STORE' },
         { field: 'paymentStatus', operator: '==', value: 'PENDING' },
       ],
     });
 
     let releasedCount = 0;
     for (const order of orders) {
-      if (
-        order.inStoreReservationExpiry &&
-        order.inStoreReservationExpiry < nowIso &&
-        order.orderStatus !== 'CANCELLED' &&
-        order.orderStatus !== 'DELIVERED'
-      ) {
+      if (order.orderStatus === 'CANCELLED' || order.orderStatus === 'DELIVERED' || order.orderStatus === 'SHIPPED') {
+        continue;
+      }
+
+      const isInStoreExpired = Boolean(order.inStoreReservationExpiry && order.inStoreReservationExpiry < nowIso);
+      const isOnlineExpired = Boolean(
+        (order.paymentMethod === 'TAMARA' || order.paymentMethod === 'TABBY' || order.paymentMethod === 'CREDIT_CARD') &&
+        (nowMs - new Date(order.createdAt).getTime() > 60 * 60 * 1000) // 60 minutes hold timeout
+      );
+
+      if (isInStoreExpired || isOnlineExpired) {
         for (const item of order.items) {
           try {
             await inventoryService.restock(item.productId, item.quantity, item.variantId);
@@ -617,11 +737,15 @@ export class OrderService {
           }
         }
 
+        const expiryReason = isInStoreExpired
+          ? 'In-store showroom pickup reservation expired after 48 hours. Inventory hold released automatically.'
+          : 'Online checkout session expired after 60 minutes without payment authorization. Inventory hold released.';
+
         const newHistory = [
           ...order.statusHistory,
           {
             status: 'CANCELLED' as OrderStatus,
-            note: 'In-store showroom pickup reservation expired after 48 hours. Inventory hold released automatically.',
+            note: expiryReason,
             timestamp: nowIso,
             updatedBy: 'SYSTEM_EXPIRY_CRON',
           },
@@ -640,7 +764,7 @@ export class OrderService {
           action: 'ORDER_EXPIRED_RESTOCKED',
           resource: 'orders',
           resourceId: order.id,
-          details: { orderNumber: order.orderNumber, reason: '48h In-store hold window expired' },
+          details: { orderNumber: order.orderNumber, reason: expiryReason },
         });
 
         releasedCount++;

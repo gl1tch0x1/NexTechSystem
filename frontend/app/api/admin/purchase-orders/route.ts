@@ -18,14 +18,14 @@ export async function GET(request: NextRequest) {
       const data = await res.json();
       return NextResponse.json(data);
     }
-  } catch {
-    // Backend offline / standby
+    const errData = await res.json().catch(() => ({ success: false, message: 'Backend error' }));
+    return NextResponse.json(errData, { status: res.status });
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, error: { message: err?.message || 'Backend purchase orders service unreachable.' } },
+      { status: 503 }
+    );
   }
-
-  return NextResponse.json({
-    success: true,
-    data: [],
-  });
 }
 
 export async function POST(request: NextRequest) {

@@ -362,10 +362,12 @@ export class AuthController {
       ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30)
       : cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '').slice(0, 30);
 
-    // Auto-promote first registered user to master ADMIN when database is empty
-    const totalUsers = await userRepository.count();
-    const isFirstUser = totalUsers === 0;
-    const assignedRole = isFirstUser ? 'ADMIN' : 'CUSTOMER';
+    // Public self-registration is strictly CUSTOMER role unless matching explicitly configured ADMIN_BOOTSTRAP_EMAIL
+    const isBootstrapAdmin = Boolean(
+      ENV.ADMIN_BOOTSTRAP_EMAIL &&
+      cleanEmail === ENV.ADMIN_BOOTSTRAP_EMAIL.toLowerCase().trim()
+    );
+    const assignedRole = isBootstrapAdmin ? 'ADMIN' : 'CUSTOMER';
 
     const newUser: User = {
       id: userId,
@@ -637,6 +639,7 @@ export class AuthController {
     const newHash = hashPassword(newPassword);
     await userRepository.update(user.id, {
       passwordHash: newHash,
+      passwordChangedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
 
@@ -994,6 +997,7 @@ export class AuthController {
     const newPasswordHash = hashPassword(newPassword);
     await userRepository.update(user.id, {
       passwordHash: newPasswordHash,
+      passwordChangedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
 

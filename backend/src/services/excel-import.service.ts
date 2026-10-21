@@ -157,7 +157,10 @@ export class ExcelImportService {
     const headerRow = worksheet.getRow(1);
     const headers = Array.from({ length: headerRow.cellCount }, (_, index) => headerRow.getCell(index + 1).text.trim());
     const rawData: { rowNumber: number; data: Record<string, string> }[] = [];
-    for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
+    const MAX_IMPORT_ROWS = 5000;
+    const maxRowNumber = Math.min(worksheet.rowCount, MAX_IMPORT_ROWS + 1);
+
+    for (let rowNumber = 2; rowNumber <= maxRowNumber; rowNumber++) {
       const row = worksheet.getRow(rowNumber);
       const data = Object.fromEntries(headers.flatMap((header, index) =>
         header && !['__proto__', 'constructor', 'prototype'].includes(header)
@@ -175,8 +178,25 @@ export class ExcelImportService {
 
     const categories = await categoryRepository.find();
     const brands = await brandRepository.find();
-    const existingProducts = await productRepository.find();
-    const existingSkus = new Set(existingProducts.map(p => p.sku.toLowerCase()));
+
+    // Memory-bounded SKU collision check: only query for SKUs present in this import batch
+    const candidateSkus = rawData
+      .map(r => {
+        const rawSku = r.data['sku'] || r.data['SKU'] || r.data['item code'] || r.data['part number'] || '';
+        return String(rawSku).toLowerCase().trim();
+      })
+      .filter(Boolean);
+
+    const existingSkus = new Set<string>();
+    for (let i = 0; i < candidateSkus.length; i += 200) {
+      const chunk = candidateSkus.slice(i, i + 200);
+      const matches = await productRepository.find({
+        where: [{ field: 'sku', operator: 'in', value: chunk }],
+      });
+      for (const m of matches) {
+        if (m.sku) existingSkus.add(m.sku.toLowerCase());
+      }
+    }
 
     const rows: ProductImportRow[] = [];
     let validRowsCount = 0;

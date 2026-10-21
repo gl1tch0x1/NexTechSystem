@@ -81,7 +81,7 @@ export class OrderController {
     const idempotencyKey = typeof rawIdempotencyKey === 'string' && rawIdempotencyKey.trim().length > 0 ? rawIdempotencyKey.trim() : undefined;
 
     if (idempotencyKey) {
-      const idempResult = idempotencyService.acquire(req.user.id, idempotencyKey);
+      const idempResult = await idempotencyService.acquireAsync(req.user.id, idempotencyKey);
       if (idempResult.status === 'IN_FLIGHT') {
         res.status(409).json({
           success: false,
@@ -291,6 +291,37 @@ export class OrderController {
     }
 
     res.json({ success: true, data: ebill });
+  }
+
+  async cancelOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } });
+      return;
+    }
+
+    const orderId = req.params.id as string;
+    const { reason } = req.body || {};
+
+    const order = await orderService.getOrderById(orderId);
+    if (!order) {
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Order not found.' } });
+      return;
+    }
+
+    if (req.user.role === 'CUSTOMER') {
+      const isOwner = order.userId === req.user.id || (order.customerEmail && order.customerEmail.toLowerCase() === req.user.email.toLowerCase());
+      if (!isOwner) {
+        res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied. You can only cancel your own orders.' } });
+        return;
+      }
+    }
+
+    try {
+      const updated = await orderService.cancelOrder(orderId, reason, req.user.id, req.user.role);
+      res.json({ success: true, data: updated, message: `Order #${order.orderNumber} cancelled successfully and stock restored.` });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: { code: 'CANCEL_FAILED', message: err.message } });
+    }
   }
 }
 

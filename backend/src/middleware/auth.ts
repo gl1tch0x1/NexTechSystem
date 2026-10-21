@@ -54,6 +54,18 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
       return;
     }
 
+    // Invalidate active JWT sessions issued before the most recent password reset/change
+    if (user.passwordChangedAt && decoded.iat) {
+      const changedAtSec = Math.floor(new Date(user.passwordChangedAt).getTime() / 1000);
+      if (decoded.iat < changedAtSec) {
+        res.status(401).json({
+          success: false,
+          error: { code: 'TOKEN_REVOKED', message: 'Password was recently updated. Please log in again with your new credentials.' },
+        });
+        return;
+      }
+    }
+
     req.user = {
       id: user.id,
       email: user.email,

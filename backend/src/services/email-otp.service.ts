@@ -452,16 +452,19 @@ export class EmailOtpService {
       }
     }
 
-    // 2. High-visibility Development & Staging Console Dispatch
-    const border = '='.repeat(68);
-    console.log(`\n${border}`);
-    console.log(`🔐 [NEXTECH SECURITY: ORDER VERIFICATION OTP DISPATCHED]`);
-    console.log(`Recipient Email : ${sanitizedEmail}`);
-    console.log(`Customer Name   : ${safeName}`);
-    console.log(`Order Amount    : ${totalFormatted}`);
-    console.log(`OTP Code        : >>>  ${code}  <<<`);
-    console.log(`Validity        : ${expiresInMinutes} Minutes`);
-    console.log(`${border}\n`);
+    // In production, never dump plaintext OTP codes to stdout or log aggregators
+    const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
+    if (!isProd) {
+      const border = '='.repeat(68);
+      console.log(`\n${border}`);
+      console.log(`🔐 [NEXTECH SECURITY: ORDER VERIFICATION OTP DISPATCHED (DEV SANDBOX)]`);
+      console.log(`Recipient Email : ${sanitizedEmail}`);
+      console.log(`Customer Name   : ${safeName}`);
+      console.log(`Order Amount    : ${totalFormatted}`);
+      console.log(`OTP Code        : >>>  ${code}  <<<`);
+      console.log(`Validity        : ${expiresInMinutes} Minutes`);
+      console.log(`${border}\n`);
+    }
   }
 }
 

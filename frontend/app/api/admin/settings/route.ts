@@ -23,19 +23,22 @@ export async function GET(request: Request) {
       });
       if (res.ok) {
         const json = await res.json();
-        if (json.data) {
-          return NextResponse.json(json);
-        }
+        return NextResponse.json(json);
       }
-    } catch (err) {
-      console.warn('Backend admin settings fetch failed, using fallbacks:', err);
+      const errJson = await res.json().catch(() => ({ success: false, message: 'Backend error' }));
+      return NextResponse.json(errJson, { status: res.status });
+    } catch (err: any) {
+      return NextResponse.json(
+        { success: false, error: { message: err?.message || 'Backend settings service unreachable.' } },
+        { status: 503 }
+      );
     }
   }
 
-  return NextResponse.json({
-    success: true,
-    data: memorySettings,
-  });
+  return NextResponse.json(
+    { success: false, error: { message: 'Backend proxy not configured.' } },
+    { status: 503 }
+  );
 }
 
 export async function PUT(request: Request) {

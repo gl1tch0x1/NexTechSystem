@@ -21,6 +21,7 @@ router.post('/verify-otp', (req, res, next) => orderController.verifyOrderOtp(re
 router.post('/', (req, res, next) => orderController.createOrder(req, res).catch(next));
 router.get('/my', (req, res, next) => orderController.getMyOrders(req, res).catch(next));
 router.get('/:id', (req, res, next) => orderController.getOrderById(req, res).catch(next));
+router.post('/:id/cancel', (req, res, next) => orderController.cancelOrder(req, res).catch(next));
 router.get('/:orderId/ebill', (req, res, next) => orderController.getEBill(req, res).catch(next));
 
 export default router;

@@ -37,6 +37,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
+  passwordChangedAt?: string;
 }
 
 export type ResellerStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING_APPROVAL' | 'INACTIVE';

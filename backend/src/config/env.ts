@@ -2,13 +2,11 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 
-// Try loading environment files in order of precedence: .env.local, .env, root .env, and frontend envs
+// Try loading environment files in order of precedence: backend .env.local, backend .env, and workspace root .env
 const candidateEnvPaths = [
   path.resolve(process.cwd(), '.env.local'),
   path.resolve(process.cwd(), '.env'),
   path.resolve(process.cwd(), '../.env'),
-  path.resolve(process.cwd(), '../frontend/.env.local'),
-  path.resolve(process.cwd(), '../frontend/.env'),
 ];
 
 for (const envPath of candidateEnvPaths) {
