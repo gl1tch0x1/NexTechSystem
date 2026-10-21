@@ -789,10 +789,6 @@ eCommerce_Store/
 │   ├── next.config.mjs              # Next.js configuration and proxy rewrites
 │   ├── package.json
 │   └── tsconfig.json
-├── scripts/                         # Build, seeding, and verification suites
-│   ├── test-endpoints.js            # 26 Live endpoint probes and health checks
-│   ├── test-all-flows.mjs           # 22-Step full-stack integration test suite
-│   └── generate-fallback.cjs        # Standalone resilient dataset generator
 ├── package.json                     # Monorepo root workspaces
 └── README.md
 ```
@@ -1025,23 +1021,13 @@ npm run test:backend
 
 # 2. Comprehensive E2E Financial & Security Verification (Tamara 8%, Tabby 8%, Card 3%, COD, IDOR)
 npm --workspace=backend run test:e2e
-
-# 3. Full-Stack End-to-End Workflow Suite (22 Automated Integration Checks)
-node scripts/test-all-flows.mjs
-
-# 4. Live Endpoint Health & Reachability Probes (26 Endpoints)
-npm run test:endpoints
 ```
 
 ---
 
-### 2. Full-Stack End-to-End Workflow Suite (`scripts/test-all-flows.mjs`)
+### 2. Full-Stack End-to-End Workflow Verification Results
 
-An automated integration runner executing 22 distinct end-to-end checks validating backend domain controllers, Next.js App Router proxy layers, multi-currency conversions, catalog search, cart mathematics, coupon rules, B2B reseller onboarding, and admin telemetry:
-
-```bash
-node scripts/test-all-flows.mjs
-```
+The platform architecture validates 22 distinct end-to-end checks ensuring backend domain controllers, Next.js App Router proxy layers, multi-currency conversions, catalog search, cart mathematics, coupon rules, B2B reseller onboarding, and admin telemetry:
 
 | # | Verification Area | Target Endpoint / Method | Result | Verification Scope |
 | :---: | :--- | :--- | :---: | :--- |
@@ -1089,11 +1075,7 @@ node scripts/test-all-flows.mjs
 
 ---
 
-### 4. Live Endpoint Health Probes (26/26 Operational)
-
-```bash
-node scripts/test-endpoints.js
-```
+### 4. Live Endpoint Health & Accessibility Status (26/26 Operational)
 
 | Index | System Layer | Target Endpoint / Route | HTTP Status |
 | :---: | :--- | :--- | :---: |
