@@ -82,7 +82,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group relative bg-white dark:bg-[#0B101D] rounded-xl border border-slate-200/90 dark:border-slate-800/90 hover:border-blue-500/70 dark:hover:border-cyan-500/70 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-200 flex flex-col justify-between overflow-hidden">
       {/* Top Image Stage Container */}
-      <div className="relative aspect-[4/3] w-full bg-slate-950 p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
+      <div className="relative aspect-[4/3] w-full bg-slate-100/80 dark:bg-slate-950 p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         {/* Top Badges (Left) */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
           {discountPercent > 0 && (

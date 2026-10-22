@@ -141,34 +141,39 @@ export function cloudflareSecurityMiddleware(req: Request, res: Response, next: 
   }
 
   // 3. Sliding Window Anti-DDoS Rate Limiter
-
   const now = Date.now();
-  const windowMs = Number(process.env.DDOS_RATE_LIMIT_WINDOW_MS) || 60000; // 1 minute
-  const isDevOrTest = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
-  const maxRequests = Number(process.env.DDOS_RATE_LIMIT_MAX_REQUESTS) || (isDevOrTest ? 2000 : 120); // 2000 req/min in dev/test, 120 in prod
+  const isDevOrTest = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+  const isLoopback = clientIp === '127.0.0.1' || clientIp === '::1' || clientIp.includes('127.0.0.1') || clientIp === 'localhost';
 
-  const record = ipRequestWindow.get(clientIp);
-  if (!record || now > record.expiresAt) {
-    ipRequestWindow.set(clientIp, { count: 1, expiresAt: now + windowMs });
-  } else {
-    record.count++;
-    if (record.count > maxRequests) {
-      securityTelemetry.rateLimitViolations++;
-      securityTelemetry.blockedAttacks++;
-      securityTelemetry.lastAttackTimestamp = new Date().toISOString();
+  if (!isDevOrTest || !isLoopback) {
+    const windowMs = Number(process.env.DDOS_RATE_LIMIT_WINDOW_MS) || 60000; // 1 minute
+    const maxRequests = Number(process.env.DDOS_RATE_LIMIT_MAX_REQUESTS) || (isDevOrTest ? 2000 : 120);
 
-      res.setHeader('Retry-After', '60');
-      res.status(429).json({
-        success: false,
-        error: {
-          code: 'CLOUDFLARE_DDOS_RATE_LIMIT_EXCEEDED',
-          message: 'Cloudflare Anti-DDoS Defense: Request burst threshold exceeded. Please retry in 60 seconds.',
-          rayId: cfRay,
-          clientIp,
-          country: cfCountry,
-        },
-      });
-      return;
+    const record = ipRequestWindow.get(clientIp);
+    if (!record || now > record.expiresAt) {
+      ipRequestWindow.set(clientIp, { count: 1, expiresAt: now + windowMs });
+    } else {
+      record.count++;
+      if (record.count > maxRequests) {
+        securityTelemetry.rateLimitViolations++;
+        securityTelemetry.blockedAttacks++;
+        securityTelemetry.lastAttackTimestamp = new Date().toISOString();
+
+        res.setHeader('Retry-After', '60');
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('CF-Cache-Status', 'DYNAMIC');
+        res.status(429).json({
+          success: false,
+          error: {
+            code: 'CLOUDFLARE_DDOS_RATE_LIMIT_EXCEEDED',
+            message: 'Cloudflare Anti-DDoS Defense: Request burst threshold exceeded. Please retry in 60 seconds.',
+            rayId: cfRay,
+            clientIp,
+            country: cfCountry,
+          },
+        });
+        return;
+      }
     }
   }
 

@@ -4,7 +4,7 @@
   "description": "Enterprise Technology E-Commerce & Reseller Platform Backend API",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch --exclude \"data_store/**\" src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "tsx src/seed/seed.ts",

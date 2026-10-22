@@ -2,6 +2,8 @@ import { rateLimit, RateLimitRequestHandler } from 'express-rate-limit';
 import { Request } from 'express';
 import { getClientIp } from './cloudflare-security.middleware.js';
 
+const isDevOrTest = process.env.NODE_ENV === 'test' || process.env.NODE_ENV !== 'production';
+
 /**
  * Standard key generator utilizing Cloudflare real client IP
  */
@@ -9,13 +11,18 @@ const customKeyGenerator = (req: Request): string => {
   return getClientIp(req);
 };
 
+const isLocalhost = (req: Request): boolean => {
+  const ip = getClientIp(req);
+  return ip === '127.0.0.1' || ip === '::1' || ip === 'localhost' || ip.includes('127.0.0.1');
+};
+
 /**
  * Global REST API rate limiter
- * Allows 300 requests per 15 minutes window
  */
 export const apiLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: process.env.NODE_ENV === 'test' ? 10000 : 300,
+  limit: isDevOrTest ? 50000 : 300,
+  skip: (req) => isDevOrTest && isLocalhost(req),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: customKeyGenerator,
@@ -34,7 +41,8 @@ export const apiLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const authLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: process.env.NODE_ENV === 'test' ? 5000 : 60,
+  limit: isDevOrTest ? 10000 : 60,
+  skip: (req) => isDevOrTest && isLocalhost(req),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: customKeyGenerator,
@@ -53,7 +61,8 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const walletLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: process.env.NODE_ENV === 'test' ? 5000 : 60,
+  limit: isDevOrTest ? 10000 : 60,
+  skip: (req) => isDevOrTest && isLocalhost(req),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: customKeyGenerator,
@@ -72,7 +81,8 @@ export const walletLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const securityLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: process.env.NODE_ENV === 'test' ? 5000 : 100,
+  limit: isDevOrTest ? 10000 : 100,
+  skip: (req) => isDevOrTest && isLocalhost(req),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: customKeyGenerator,
@@ -90,7 +100,8 @@ export const securityLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const orderLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: process.env.NODE_ENV === 'test' ? 5000 : 100,
+  limit: isDevOrTest ? 10000 : 100,
+  skip: (req) => isDevOrTest && isLocalhost(req),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: customKeyGenerator,
@@ -108,7 +119,8 @@ export const orderLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const resellerLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: process.env.NODE_ENV === 'test' ? 5000 : 200,
+  limit: isDevOrTest ? 10000 : 200,
+  skip: (req) => isDevOrTest && isLocalhost(req),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: customKeyGenerator,
@@ -126,7 +138,8 @@ export const resellerLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const adminLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: process.env.NODE_ENV === 'test' ? 5000 : 300,
+  limit: isDevOrTest ? 10000 : 300,
+  skip: (req) => isDevOrTest && isLocalhost(req),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: customKeyGenerator,

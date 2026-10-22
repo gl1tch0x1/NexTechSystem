@@ -160,19 +160,32 @@ export class DbStore {
   }
 
   public persistCollection(collectionName: string) {
+    const filePath = this.getFilePath(collectionName);
+    const randSuffix = crypto.randomBytes(4).toString('hex');
+    const tmpPath = `${filePath}.tmp.${Date.now()}_${randSuffix}`;
     try {
       const map = this.getCollectionMap(collectionName);
       const items = Array.from(map.values());
-      const filePath = this.getFilePath(collectionName);
-      const randSuffix = crypto.randomBytes(4).toString('hex');
-      const tmpPath = `${filePath}.tmp.${Date.now()}_${randSuffix}`;
       const data = JSON.stringify(items, null, 2);
 
-      // Write atomically: write to temp file then atomic rename to prevent file corruption
+      // Write atomically: write to temp file then atomic rename
       fs.writeFileSync(tmpPath, data, 'utf-8');
-      fs.renameSync(tmpPath, filePath);
+      try {
+        fs.renameSync(tmpPath, filePath);
+      } catch (renameErr) {
+        // Fallback for Windows if destination file is locked/open
+        fs.copyFileSync(tmpPath, filePath);
+        try { fs.unlinkSync(tmpPath); } catch {}
+      }
     } catch (err) {
       console.error('[DbStore] Error persisting %s:', collectionName, err);
+    } finally {
+      // Ensure temp file is cleaned up if it still exists
+      try {
+        if (fs.existsSync(tmpPath)) {
+          fs.unlinkSync(tmpPath);
+        }
+      } catch {}
     }
   }
 
@@ -182,14 +195,25 @@ export class DbStore {
     } else {
       this.collections.set(collectionName, new Map());
     }
+    const filePath = this.getFilePath(collectionName);
+    const randSuffix = crypto.randomBytes(4).toString('hex');
+    const tmpPath = `${filePath}.tmp.${Date.now()}_${randSuffix}`;
     try {
-      const filePath = this.getFilePath(collectionName);
-      const randSuffix = crypto.randomBytes(4).toString('hex');
-      const tmpPath = `${filePath}.tmp.${Date.now()}_${randSuffix}`;
       fs.writeFileSync(tmpPath, JSON.stringify([], null, 2), 'utf-8');
-      fs.renameSync(tmpPath, filePath);
+      try {
+        fs.renameSync(tmpPath, filePath);
+      } catch (renameErr) {
+        fs.copyFileSync(tmpPath, filePath);
+        try { fs.unlinkSync(tmpPath); } catch {}
+      }
     } catch (err) {
       console.error('[DbStore] Error clearing collection %s:', collectionName, err);
+    } finally {
+      try {
+        if (fs.existsSync(tmpPath)) {
+          fs.unlinkSync(tmpPath);
+        }
+      } catch {}
     }
 
     // Async clear in MongoDB if connected

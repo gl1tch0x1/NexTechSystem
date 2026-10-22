@@ -203,8 +203,9 @@ export class AdminController {
       allUsers.map(async (u) => {
         const wallet = await walletService.getOrCreateWallet(u.id);
         const orders = await orderService.getOrdersByUser(u.id);
+        const safeUser = sanitizeUser(u);
         return {
-          ...u,
+          ...safeUser,
           walletBalance: wallet.balance,
           orderCount: orders.length,
           totalSpent: orders.reduce((sum, o) => sum + o.total, 0),
@@ -222,7 +223,7 @@ export class AdminController {
       return;
     }
     const updated = await userRepository.update(id, { isActive: !user.isActive });
-    res.json({ success: true, data: updated });
+    res.json({ success: true, data: updated ? sanitizeUser(updated) : null });
   }
 
   async adjustCustomerWallet(req: AuthenticatedRequest, res: Response): Promise<void> {

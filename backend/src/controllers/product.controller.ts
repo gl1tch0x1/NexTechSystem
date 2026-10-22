@@ -6,6 +6,25 @@ import { bannerRepository } from '../repositories/banner.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { reviewRepository } from '../repositories/review.repository.js';
 
+export function sanitizePublicProduct(prod: any): any {
+  if (!prod) return prod;
+  const { costPrice, resellerId, resellerCode, hsCode, rejectionReason, ...safeProd } = prod;
+  if (Array.isArray(safeProd.variants)) {
+    safeProd.variants = safeProd.variants.map((v: any) => {
+      const { costPrice: _c, ...safeVariant } = v;
+      return safeVariant;
+    });
+  }
+  if (Array.isArray(safeProd.locations)) {
+    safeProd.locations = safeProd.locations.map((loc: any) => ({
+      locationName: loc.locationName,
+      city: loc.city,
+      available: loc.available ?? loc.quantity,
+    }));
+  }
+  return safeProd;
+}
+
 export class ProductController {
   async getProducts(req: Request, res: Response): Promise<void> {
     const {
@@ -68,9 +87,11 @@ export class ProductController {
       specifications: Object.keys(specifications).length > 0 ? specifications : undefined,
     });
 
+    const sanitizedProducts = result.products.map(sanitizePublicProduct);
+
     res.json({
       success: true,
-      data: result.products,
+      data: sanitizedProducts,
       meta: {
         total: result.total,
         page: result.page,
@@ -99,9 +120,11 @@ export class ProductController {
     res.json({
       success: true,
       data: {
-        product,
+        product: sanitizePublicProduct(product),
         reviews,
-        relatedProducts: relatedProducts.products.filter(p => p.id !== product.id),
+        relatedProducts: relatedProducts.products
+          .filter(p => p.id !== product.id)
+          .map(sanitizePublicProduct),
       },
     });
   }

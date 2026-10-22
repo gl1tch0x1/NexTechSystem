@@ -68,7 +68,13 @@ const nextConfig = {
       },
     ];
   },
+  poweredByHeader: false,
   async headers() {
+    const isDev = process.env.NODE_ENV !== 'production';
+    const scriptSrc = isDev
+      ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://lh3.googleusercontent.com https://firebasestorage.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' http://localhost:5000 http://127.0.0.1:5000 ws://localhost:* ws://127.0.0.1:* https://nextechsystem.vercel.app https://api.tamara.co https://api-sandbox.tamara.co https://api.tabby.ai https://*.firebaseio.com https://*.googleapis.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+      : "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://lh3.googleusercontent.com https://firebasestorage.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' http://localhost:5000 https://nextechsystem.vercel.app https://api.tamara.co https://api-sandbox.tamara.co https://api.tabby.ai https://*.firebaseio.com https://*.googleapis.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';";
+
     return [
       {
         source: '/:path*',
@@ -80,10 +86,9 @@ const nextConfig = {
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          { key: 'X-Protected-By', value: 'Cloudflare-Enterprise-Anti-DDoS' },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://lh3.googleusercontent.com https://firebasestorage.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' http://localhost:5000 https://nextechsystem.vercel.app https://api.tamara.co https://api-sandbox.tamara.co https://api.tabby.ai https://*.firebaseio.com https://*.googleapis.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';",
+            value: scriptSrc,
           },
         ],
       },
