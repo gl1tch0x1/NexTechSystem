@@ -1,12 +1,31 @@
 @import "tailwindcss";
-@config "../tailwind.config.ts";
 
 @theme {
   --font-sans: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-heading: var(--font-heading), var(--font-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
   --color-tech-blue: #2563EB;
   --color-tech-cyan: #06B6D4;
+  --color-tech-dark: #0F172A;
+  --color-tech-darker: #090D16;
+  --color-tech-slate: #1E293B;
+  --color-tech-card: #0F172A;
+  --color-tech-surface: #1E293B;
+  --color-tech-light: #F8FAFC;
+  --color-tech-muted: #94A3B8;
+  --color-tech-border: #1E293B;
+  --color-tech-accent: #3B82F6;
+
+  --color-status-success: #16A34A;
+  --color-status-warning: #F59E0B;
+  --color-status-error: #DC2626;
+  --color-status-info: #0284C7;
+
+  --shadow-tech-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-tech: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-tech-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-tech-glow: 0 0 20px -3px rgba(37, 99, 235, 0.25);
 }
 
 :root {
