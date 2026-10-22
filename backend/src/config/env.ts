@@ -15,13 +15,17 @@ for (const envPath of candidateEnvPaths) {
   }
 }
 
+import crypto from 'crypto';
+
 const nodeEnv = process.env.NODE_ENV || 'development';
-const jwtSecret = process.env.JWT_SECRET;
+let jwtSecret = process.env.JWT_SECRET;
 
 if (!jwtSecret && nodeEnv === 'production') {
   throw new Error('FATAL SECURITY ERROR: JWT_SECRET environment variable must be set in production mode.');
 } else if (!jwtSecret) {
-  console.warn('⚠️ [Security Warning] JWT_SECRET is not set in environment. Using development fallback. Please define JWT_SECRET in .env.');
+  // Generate high-entropy 256-bit random key for local development to prevent static secret forgery
+  jwtSecret = crypto.randomBytes(32).toString('hex');
+  console.warn('⚠️ [Security Warning] JWT_SECRET was not set in environment. Generated ephemeral 256-bit development key.');
 }
 
 const rawAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
@@ -41,7 +45,7 @@ export const ENV = {
   NODE_ENV: nodeEnv,
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
   ALLOWED_ORIGINS: rawAllowedOrigins.length > 0 ? rawAllowedOrigins : defaultAllowedOrigins,
-  JWT_SECRET: jwtSecret || 'dev_insecure_local_jwt_secret_change_in_env',
+  JWT_SECRET: jwtSecret,
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
   FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY || '',
@@ -58,7 +62,6 @@ export const ENV = {
   GA_API_SECRET: process.env.GA_API_SECRET || '',
   ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || process.env.ADMIN_BOOTSTRAP_EMAIL || '',
   ADMIN_BOOTSTRAP_EMAIL: process.env.ADMIN_BOOTSTRAP_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || '',
-  ADMIN_BOOTSTRAP_PASSWORD: process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || '',
   PASSWORD_SALT: process.env.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026',
   // MongoDB Enterprise Cloud Database
   MONGODB_URI: process.env.MONGODB_URI || '',

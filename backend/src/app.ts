@@ -86,7 +86,10 @@ export function createApp(): Express {
       if (!origin || ENV.ALLOWED_ORIGINS.includes(origin)) {
         return callback(null, true);
       }
-      return callback(new Error(`CORS Error: Origin '${origin}' is not permitted by NexTech Security Policy.`));
+      const corsErr: any = new Error(`CORS Error: Origin '${origin}' is not permitted by NexTech Security Policy.`);
+      corsErr.statusCode = 403;
+      corsErr.code = 'CORS_FORBIDDEN';
+      return callback(corsErr);
     },
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],

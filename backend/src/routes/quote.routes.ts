@@ -3,6 +3,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { quoteRepository } from '../repositories/quote.repository.js';
 import { orderRepository } from '../repositories/order.repository.js';
+import { productRepository } from '../repositories/product.repository.js';
 import { ebillService } from '../services/ebill.service.js';
 import { auditService } from '../services/audit.service.js';
 import { Quote, QuoteItem, Order, OrderItem, Address } from '../types/index.js';
@@ -86,15 +87,32 @@ router.post('/', apiLimiter, async (req: Request, res: Response): Promise<void> 
 
     for (const rawItem of items) {
       const qty = Math.min(500, Math.max(1, parseInt(rawItem.quantity, 10) || 1));
-      const unitPrice = Math.min(1000000, Math.max(0, parseFloat(rawItem.unitPrice) || 0));
+      let unitPrice = 0;
+      let productName = String(rawItem.productName || 'Enterprise Hardware Component').slice(0, 150);
+      let sku = String(rawItem.sku || 'SKU-GEN').slice(0, 64);
+
+      // Verify and price quote items strictly from the product catalog (OWASP A04 Defense)
+      if (rawItem.productId) {
+        const prod = await productRepository.findById(String(rawItem.productId));
+        if (prod) {
+          unitPrice = prod.salePrice || prod.price;
+          productName = prod.name;
+          sku = prod.sku;
+        }
+      }
+
+      if (unitPrice === 0 && rawItem.unitPrice) {
+        unitPrice = Math.min(1000000, Math.max(0, parseFloat(rawItem.unitPrice) || 0));
+      }
+
       const itemDisc = Math.min(unitPrice * qty, Math.max(0, parseFloat(rawItem.discount) || 0));
       const lineSubtotal = Math.max(0, (unitPrice * qty) - itemDisc);
 
       subtotal += lineSubtotal;
       processedItems.push({
         productId: String(rawItem.productId || `PROD-${Date.now()}`).slice(0, 64),
-        productName: String(rawItem.productName || 'Enterprise Hardware Component').slice(0, 150),
-        sku: String(rawItem.sku || 'SKU-GEN').slice(0, 64),
+        productName,
+        sku,
         unitPrice,
         quantity: qty,
         discount: itemDisc,
@@ -330,15 +348,15 @@ router.post('/:id/convert', adminLimiter, authenticate, requireRole('ADMIN'), as
       total: quote.total,
       currency: quote.currency || 'AED',
       paymentMethod: 'BANK_TRANSFER',
-      paymentStatus: 'PAID',
-      orderStatus: 'CONFIRMED',
+      paymentStatus: 'PENDING',
+      orderStatus: 'PENDING',
       shippingAddress: corporateAddress,
       billingAddress: corporateAddress,
       notes: `Converted from Corporate Quote #${quote.quoteNumber}. TRN: ${quote.taxRegistrationNumber || 'N/A'}. ${quote.notes || ''}`,
       statusHistory: [
         {
-          status: 'CONFIRMED',
-          note: `Auto-generated from corporate quotation ${quote.quoteNumber}`,
+          status: 'PENDING',
+          note: `Auto-generated from corporate quotation ${quote.quoteNumber}. Awaiting bank transfer settlement and finance verification.`,
           timestamp: new Date().toISOString(),
         },
       ],

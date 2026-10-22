@@ -210,12 +210,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        // Authenticate with Store Backend (creates Customer if new, or logs in if existing)
+        const idToken = typeof fbUser?.getIdToken === 'function' ? await fbUser.getIdToken() : undefined;
+        if (!idToken) {
+          throw new Error('Google Sign-In requires an active, verified Firebase ID token.');
+        }
+
+        // Authenticate with Store Backend via cryptographically verified Google ID token (F-01 defense)
         const res = await ApiClient.post<{ token: string; user: User }>('/auth/google', {
-          email: fbUser.email,
-          name: fbUser.displayName || fbUser.email?.split('@')[0],
-          photoURL: fbUser.photoURL || undefined,
-          uid: fbUser.uid,
+          idToken,
         });
 
         localStorage.setItem('auth_token', res.token);

@@ -52,35 +52,7 @@ router.get('/verify/:serial', async (req: Request, res: Response): Promise<void>
       if (matchedItem) break;
     }
 
-    // Support verified hardware serial patterns for demo/testing
     if (!matchedItem) {
-      if (cleanSerial.includes('14900') || cleanSerial.includes('4090') || cleanSerial.startsWith('SN-')) {
-        const prod = cleanSerial.includes('4090')
-          ? { name: 'ASUS ROG Strix GeForce RTX 4090 OC Edition 24GB GDDR6X', sku: 'ROG-STRIX-RTX4090-O24G-GAMING' }
-          : { name: 'Intel Core i9-14900K 24-Core Desktop Processor', sku: 'BX8071514900K' };
-
-        const purchaseDate = '2026-03-15T10:00:00.000Z';
-        const expiryDate = '2028-03-15T10:00:00.000Z';
-        res.json({
-          success: true,
-          data: {
-            isValid: true,
-            status: 'ACTIVE',
-            serialNumber: cleanSerial,
-            productName: prod.name,
-            sku: prod.sku,
-            purchaseDate,
-            warrantyPeriodMonths: 24,
-            warrantyExpiryDate: expiryDate,
-            daysRemaining: Math.max(0, Math.ceil((new Date(expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
-            authorizedPartner: 'NexTech Systems FZ-LLC (Official GCC Distributor)',
-            coverageType: 'Direct Manufacturer Replacement & Technical RMA',
-            orderNumberMasked: 'ORD-2026-***154',
-          },
-        });
-        return;
-      }
-
       res.status(404).json({
         success: false,
         error: {

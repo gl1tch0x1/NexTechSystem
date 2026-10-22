@@ -192,7 +192,7 @@ export class EmailOtpService {
     });
 
     const isProduction = ENV.NODE_ENV === 'production' || process.env.NODE_ENV === 'production';
-    const allowDevOtpExposure = !isProduction && (process.env.EXPOSE_DEV_OTP === 'true' || !ENV.RESEND_API_KEY);
+    const allowDevOtpExposure = !isProduction && (process.env.ALLOW_DEV_OTP === 'true' || process.env.NODE_ENV === 'test');
 
     return {
       success: true,

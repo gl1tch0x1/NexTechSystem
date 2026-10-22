@@ -10,6 +10,11 @@ import { AuthenticatedRequest } from '../middleware/auth.js';
 import { User, Reseller } from '../types/index.js';
 import { passwordResetService } from '../services/password-reset.service.js';
 import { auditService } from '../services/audit.service.js';
+import { getFirebaseAuth } from '../config/firebase.js';
+import { dbStore } from '../config/db-store.js';
+
+// In-memory failed login tracking for brute-force defense
+const failedLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
 
 const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_KEYLEN = 64;
@@ -362,12 +367,8 @@ export class AuthController {
       ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30)
       : cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '').slice(0, 30);
 
-    // Public self-registration is strictly CUSTOMER role unless matching explicitly configured ADMIN_BOOTSTRAP_EMAIL
-    const isBootstrapAdmin = Boolean(
-      ENV.ADMIN_BOOTSTRAP_EMAIL &&
-      cleanEmail === ENV.ADMIN_BOOTSTRAP_EMAIL.toLowerCase().trim()
-    );
-    const assignedRole = isBootstrapAdmin ? 'ADMIN' : 'CUSTOMER';
+    // Public self-registration is strictly CUSTOMER role (OWASP A01 Access Control Defense)
+    const assignedRole = 'CUSTOMER';
 
     const newUser: User = {
       id: userId,
@@ -427,6 +428,21 @@ export class AuthController {
       return;
     }
 
+    // Check brute-force lockout
+    const lockKey = cleanIdentifier;
+    const lockRecord = failedLoginAttempts.get(lockKey);
+    if (lockRecord && lockRecord.lockedUntil > Date.now()) {
+      const waitSeconds = Math.ceil((lockRecord.lockedUntil - Date.now()) / 1000);
+      res.status(429).json({
+        success: false,
+        error: {
+          code: 'ACCOUNT_LOCKED',
+          message: `Too many failed login attempts. Please try again in ${waitSeconds} seconds.`,
+        },
+      });
+      return;
+    }
+
     // Verify password against stored hash in the database
     const rawPassword = String(password);
     const trimmedPassword = rawPassword.trim();
@@ -440,13 +456,7 @@ export class AuthController {
 
     if (user.passwordHash) {
       for (const pwd of candidatePasswords) {
-        const isBootstrapAdmin =
-          Boolean(ENV.ADMIN_BOOTSTRAP_PASSWORD) &&
-          user.role === 'ADMIN' &&
-          (ENV.ADMIN_BOOTSTRAP_EMAIL ? user.email.toLowerCase() === ENV.ADMIN_BOOTSTRAP_EMAIL.toLowerCase() : true) &&
-          pwd === ENV.ADMIN_BOOTSTRAP_PASSWORD;
-
-        if (verifyPassword(pwd, user.passwordHash) || isBootstrapAdmin) {
+        if (verifyPassword(pwd, user.passwordHash)) {
           isValid = true;
           // If user is on legacy global-salt format, schedule rehash to new per-user-salt format
           if (!user.passwordHash.includes(':')) {
@@ -458,9 +468,18 @@ export class AuthController {
     }
 
     if (!isValid) {
+      const currentAttempts = (lockRecord?.count || 0) + 1;
+      if (currentAttempts >= 5) {
+        failedLoginAttempts.set(lockKey, { count: currentAttempts, lockedUntil: Date.now() + 15 * 60 * 1000 });
+      } else {
+        failedLoginAttempts.set(lockKey, { count: currentAttempts, lockedUntil: 0 });
+      }
       res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } });
       return;
     }
+
+    // Reset failed attempts on successful authentication
+    failedLoginAttempts.delete(lockKey);
 
 
     // If logging into a Reseller Subdomain, verify resellerCode match
@@ -710,18 +729,48 @@ export class AuthController {
   }
 
   async googleAuth(req: Request, res: Response): Promise<void> {
-    const { email, name, photoURL } = req.body;
+    const { idToken } = req.body;
 
-    if (!email) {
-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Google account email is required.' } });
+    if (!idToken || typeof idToken !== 'string') {
+      res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Cryptographically signed Google/Firebase ID token is required.' },
+      });
       return;
     }
 
-    const cleanEmail = email.toLowerCase().trim();
+    let decoded: any;
+    try {
+      const auth = getFirebaseAuth();
+      decoded = await auth.verifyIdToken(idToken);
+    } catch {
+      res.status(401).json({
+        success: false,
+        error: { code: 'INVALID_ID_TOKEN', message: 'Google authentication token verification failed or expired.' },
+      });
+      return;
+    }
+
+    if (!decoded || !decoded.email || !decoded.email_verified) {
+      res.status(403).json({
+        success: false,
+        error: { code: 'UNVERIFIED_EMAIL', message: 'Google account email must be verified.' },
+      });
+      return;
+    }
+
+    const cleanEmail = String(decoded.email).toLowerCase().trim();
     let user = await userRepository.findByEmail(cleanEmail);
 
+    if (user && user.role === 'ADMIN') {
+      res.status(403).json({
+        success: false,
+        error: { code: 'ADMIN_AUTH_REQUIRED', message: 'Administrative accounts must authenticate via dedicated admin credentials and MFA.' },
+      });
+      return;
+    }
+
     if (!user) {
-      // Any new account created via Google is strictly a CUSTOMER
       const userId = `user_${uuidv4()}`;
       const cleanUsername = cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '');
 
@@ -729,11 +778,11 @@ export class AuthController {
         id: userId,
         email: cleanEmail,
         role: 'CUSTOMER',
-        name: name ? name.trim() : cleanEmail.split('@')[0],
+        name: decoded.name ? String(decoded.name).trim() : cleanEmail.split('@')[0],
         username: cleanUsername,
         phone: '',
         addresses: [],
-        avatar: photoURL || undefined,
+        avatar: decoded.picture || undefined,
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -894,10 +943,14 @@ export class AuthController {
         success: true,
         data: result,
       });
-    } catch (err: any) {
-      res.status(400).json({
-        success: false,
-        error: { code: 'RESET_REQUEST_FAILED', message: err.message || 'Failed to dispatch password reset code.' },
+    } catch {
+      // Uniform response preventing user enumeration oracles (OWASP A07 Defense)
+      res.status(200).json({
+        success: true,
+        data: {
+          success: true,
+          message: 'If an account exists with this email address, a verification code has been dispatched.',
+        },
       });
     }
   }
@@ -977,13 +1030,28 @@ export class AuthController {
       return;
     }
 
-    if (decoded.purpose !== 'PASSWORD_RESET' || !decoded.userId) {
+    if (decoded.purpose !== 'PASSWORD_RESET' || !decoded.userId || !decoded.otpId) {
       res.status(401).json({
         success: false,
         error: { code: 'INVALID_TOKEN_PURPOSE', message: 'Invalid authorization token.' },
       });
       return;
     }
+
+    // Verify token single-use against database
+    const otpRecord = await dbStore.findById<any>('password_reset_otps', decoded.otpId);
+    if (!otpRecord || otpRecord.usedForReset) {
+      res.status(401).json({
+        success: false,
+        error: { code: 'TOKEN_ALREADY_USED', message: 'This password reset token has already been consumed or revoked.' },
+      });
+      return;
+    }
+
+    await dbStore.update('password_reset_otps', decoded.otpId, {
+      usedForReset: true,
+      consumed: true,
+    });
 
     const user = await userRepository.findById(decoded.userId);
     if (!user || !user.isActive) {

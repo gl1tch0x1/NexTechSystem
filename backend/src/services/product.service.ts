@@ -46,10 +46,10 @@ export class ProductService {
   }> {
     let allProducts = await productRepository.find();
 
-    // Public storefront catalog: return active products (both Admin and Reseller listed products reflect in the catalog)
+    // Public storefront catalog: strictly return active and admin-approved products
     if (!filter.approvalStatus && !filter.resellerId) {
       allProducts = allProducts.filter(
-        p => p.isActive && (p.approvalStatus === 'APPROVED' || p.approvalStatus === 'PENDING_APPROVAL' || p.approvalStatus === 'ACTIVE')
+        p => p.isActive && (p.approvalStatus === 'APPROVED' || p.approvalStatus === 'ACTIVE')
       );
     }
 

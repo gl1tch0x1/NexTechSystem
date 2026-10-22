@@ -74,30 +74,22 @@ function isValidIp(ip: string): boolean {
  * to prevent IP spoofing attacks in Cloudflare-protected deployments.
  */
 export function getClientIp(req: Request): string {
-  // Cloudflare injects this header and it cannot be spoofed by clients
-  const cfIp = req.headers['cf-connecting-ip'];
-  if (typeof cfIp === 'string') {
-    const clean = cfIp.trim();
-    if (clean && isValidIp(clean)) return clean;
+  // Only trust cf-connecting-ip when express trust proxy is active and TRUST_CLOUDFLARE_HEADERS is enabled
+  const trustProxy = Boolean(req.app?.get('trust proxy'));
+  const peerIp = req.socket?.remoteAddress || '';
+  const isLocalOrInternal = peerIp === '127.0.0.1' || peerIp === '::1' || peerIp.startsWith('::ffff:127.0.0.1');
+
+  if ((trustProxy || isLocalOrInternal) && process.env.TRUST_CLOUDFLARE_HEADERS === 'true') {
+    const cfIp = req.headers['cf-connecting-ip'];
+    if (typeof cfIp === 'string') {
+      const clean = cfIp.trim();
+      if (clean && isValidIp(clean)) return clean;
+    }
   }
 
-  // In production behind Cloudflare, we do NOT fall back to user-controlled headers
-  // to prevent rate limit bypass via IP spoofing.
-  if (process.env.NODE_ENV === 'production' && process.env.CLOUDFLARE_SECURITY_ENABLED !== 'false') {
-    return req.socket.remoteAddress || '127.0.0.1';
-  }
-
-  // Development / staging: allow standard proxy headers
-  const xRealIp = req.headers['x-real-ip'];
-  if (typeof xRealIp === 'string') {
-    const clean = xRealIp.trim();
-    if (clean && isValidIp(clean)) return clean;
-  }
-
-  const xForwardedFor = req.headers['x-forwarded-for'];
-  if (typeof xForwardedFor === 'string' && xForwardedFor.trim()) {
-    const firstIp = xForwardedFor.split(',')[0].trim();
-    if (isValidIp(firstIp)) return firstIp;
+  // Express trusted proxy resolution
+  if (trustProxy && req.ip && isValidIp(req.ip)) {
+    return req.ip;
   }
 
   return req.socket.remoteAddress || '127.0.0.1';

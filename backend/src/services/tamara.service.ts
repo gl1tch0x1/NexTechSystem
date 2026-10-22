@@ -249,7 +249,7 @@ export class TamaraService {
    */
   verifyNotificationToken(tokenHeader?: string): boolean {
     if (!this.notificationToken) {
-      if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+      if ((process.env.NODE_ENV === 'test' || process.env.ALLOW_DEV_WEBHOOK_BYPASS === 'true') && process.env.NODE_ENV !== 'production') {
         return true;
       }
       return false;

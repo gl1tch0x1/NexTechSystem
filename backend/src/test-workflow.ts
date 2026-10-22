@@ -1,3 +1,6 @@
+process.env.ALLOW_DEV_OTP = 'true';
+process.env.ALLOW_DEV_WEBHOOK_BYPASS = 'true';
+
 import http from 'http';
 import jwt from 'jsonwebtoken';
 import { createApp } from './app.js';

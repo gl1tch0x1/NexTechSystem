@@ -8,6 +8,7 @@ import { excelImportService } from '../services/excel-import.service.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { importRepository } from '../repositories/import.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
+import { Reseller, Product } from '../types/index.js';
 
 export class ResellerController {
   private async resolveResellerId(req: AuthenticatedRequest): Promise<string | null> {
@@ -69,7 +70,24 @@ export class ResellerController {
       return;
     }
 
-    const updated = await resellerService.updateResellerProfile(resellerId, req.body);
+    // Mass-assignment protection: allowlist only safe editable profile fields (OWASP A01 Defense)
+    const { businessName, displayName, phone, logo, address, businessInformation } = req.body;
+    const safeUpdates: Partial<Reseller> = {};
+    if (businessName !== undefined) safeUpdates.businessName = String(businessName).slice(0, 100);
+    if (displayName !== undefined) safeUpdates.displayName = String(displayName).slice(0, 100);
+    if (phone !== undefined) safeUpdates.phone = String(phone).slice(0, 30);
+    if (logo !== undefined) safeUpdates.logo = String(logo).slice(0, 500);
+    if (address !== undefined && typeof address === 'object') safeUpdates.address = address;
+    if (businessInformation !== undefined && typeof businessInformation === 'object') {
+      safeUpdates.businessInformation = {
+        taxNumber: businessInformation.taxNumber ? String(businessInformation.taxNumber).slice(0, 50) : undefined,
+        tradeLicense: businessInformation.tradeLicense ? String(businessInformation.tradeLicense).slice(0, 50) : undefined,
+        website: businessInformation.website ? String(businessInformation.website).slice(0, 200) : undefined,
+        description: businessInformation.description ? String(businessInformation.description).slice(0, 500) : undefined,
+      };
+    }
+
+    const updated = await resellerService.updateResellerProfile(resellerId, safeUpdates);
     res.json({ success: true, data: updated });
   }
 
@@ -123,11 +141,24 @@ export class ResellerController {
       return;
     }
 
-    const updated = await productService.updateProduct(id, {
-      ...req.body,
-      approvalStatus: 'PENDING_APPROVAL', // Edits require re-approval
-    });
+    const { name, description, categoryId, brandId, price, salePrice, stock, images, specs, tags, sku } = req.body;
+    const safeUpdates: Partial<Product> = {
+      ...(name !== undefined ? { name: String(name).slice(0, 200) } : {}),
+      ...(description !== undefined ? { description: String(description).slice(0, 5000) } : {}),
+      ...(categoryId !== undefined ? { categoryId: String(categoryId) } : {}),
+      ...(brandId !== undefined ? { brandId: String(brandId) } : {}),
+      ...(price !== undefined ? { price: Math.max(0, Number(price)) } : {}),
+      ...(salePrice !== undefined ? { salePrice: Math.max(0, Number(salePrice)) } : {}),
+      ...(stock !== undefined ? { stock: Math.max(0, Math.floor(Number(stock))) } : {}),
+      ...(Array.isArray(images) ? { images } : {}),
+      ...(specs && typeof specs === 'object' ? { specs } : {}),
+      ...(Array.isArray(tags) ? { tags } : {}),
+      ...(sku !== undefined ? { sku: String(sku).slice(0, 50) } : {}),
+      isActive: false, // Edits unpublish the product until approved by admin
+      approvalStatus: 'PENDING_APPROVAL',
+    };
 
+    const updated = await productService.updateProduct(id, safeUpdates);
     res.json({ success: true, data: updated });
   }
 

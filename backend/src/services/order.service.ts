@@ -203,15 +203,21 @@ export class OrderService {
 
       const initialOrderStatus: OrderStatus = hasResellerStock
         ? 'PENDING_APPROVAL'
-        : (isBnpl ? 'PENDING' : (dto.paymentMethod === 'COD' || dto.paymentMethod === 'IN_STORE' ? 'CONFIRMED' : 'PROCESSING'));
+        : (pricing.total === 0
+            ? 'PROCESSING'
+            : (dto.paymentMethod === 'COD' || dto.paymentMethod === 'IN_STORE' ? 'CONFIRMED' : 'PENDING'));
 
       const initialHistoryNote = hasResellerStock
         ? 'Order contains partner/reseller fulfilled items. Status: Pending to Approve. Awaiting executive/admin verification.'
-        : (isBnpl
-            ? `Order initiated via ${dto.paymentMethod} BNPL. Awaiting customer authorization and installment approval.`
-            : (dto.paymentMethod === 'IN_STORE'
-                ? 'Order confirmed for In-Store Pickup & Payment. Reserved for customer at showroom.'
-                : 'Order confirmed automatically. Sourced directly from NexTech Inventory.'));
+        : (pricing.total === 0
+            ? 'Order paid in full via digital wallet ledger balance. Processing order for dispatch.'
+            : (isBnpl
+                ? `Order initiated via ${dto.paymentMethod} BNPL. Awaiting customer authorization and installment approval.`
+                : (dto.paymentMethod === 'IN_STORE'
+                    ? 'Order confirmed for In-Store Pickup & Payment. Reserved for customer at showroom.'
+                    : (dto.paymentMethod === 'COD'
+                        ? 'Order confirmed for Cash on Delivery. Sourced directly from NexTech Inventory.'
+                        : `Order created. Awaiting verified settlement via ${dto.paymentMethod}.`))));
 
       // 9. Construct Order
       const newOrder: Order = {
@@ -237,7 +243,7 @@ export class OrderService {
         total: pricing.total,
         currency: pricing.currency,
         paymentMethod: dto.paymentMethod,
-        paymentStatus: (dto.paymentMethod === 'COD' || dto.paymentMethod === 'IN_STORE' || isBnpl) ? 'PENDING' : 'PAID',
+        paymentStatus: (pricing.total === 0) ? 'PAID' : 'PENDING',
         inStoreReservationExpiry: dto.paymentMethod === 'IN_STORE'
           ? new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
           : ((isBnpl || dto.paymentMethod === 'CREDIT_CARD')

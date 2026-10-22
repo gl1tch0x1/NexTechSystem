@@ -199,7 +199,7 @@ export class TabbyService {
    */
   verifyWebhookSignature(headerSignature?: string, rawPayload?: string): boolean {
     if (!this.secretKey) {
-      if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+      if ((process.env.NODE_ENV === 'test' || process.env.ALLOW_DEV_WEBHOOK_BYPASS === 'true') && process.env.NODE_ENV !== 'production') {
         return true;
       }
       return false;
