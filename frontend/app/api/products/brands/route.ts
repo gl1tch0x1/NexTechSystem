@@ -7,12 +7,17 @@ export async function GET() {
     process.env.BACKEND_URL ||
     process.env.NEXT_PUBLIC_API_URL;
 
+  const isSelf = backendUrl && (
+    backendUrl.includes('vercel.app') ||
+    backendUrl.includes('nextechsystem')
+  );
+
   // Try remote backend if configured
-  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
+  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1') && !isSelf) {
     const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
     try {
       const res = await fetch(`${clean}/api/products/brands`, {
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(2500),
         cache: 'no-store',
       });
       if (res.ok) {

@@ -69,8 +69,13 @@ export async function GET(request: NextRequest) {
   const safeParams = getSafeProductSearchParams(searchParams);
   const safeQuery = safeParams.toString();
 
-  // If a valid external remote backend is configured, attempt to query it
-  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1')) {
+  // If a valid external remote backend is configured (and NOT pointing to this Vercel deployment itself)
+  const isSelf = backendUrl && (
+    backendUrl.includes('vercel.app') ||
+    backendUrl.includes(url.hostname)
+  );
+
+  if (backendUrl && !backendUrl.includes('localhost') && !backendUrl.includes('127.0.0.1') && !isSelf) {
     try {
       const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
       const remoteTarget = new URL(`${clean}/api/products`);
@@ -78,7 +83,7 @@ export async function GET(request: NextRequest) {
         remoteTarget.search = safeQuery;
       }
       const res = await fetch(remoteTarget.toString(), {
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(3000),
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
       });
