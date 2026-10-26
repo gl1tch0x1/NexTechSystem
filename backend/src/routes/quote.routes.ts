@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { Router, Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { quoteRepository } from '../repositories/quote.repository.js';
 import { orderRepository } from '../repositories/order.repository.js';
 import { productRepository } from '../repositories/product.repository.js';

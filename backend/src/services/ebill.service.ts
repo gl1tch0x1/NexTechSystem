@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { ebillRepository } from '../repositories/ebill.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { EBill, Order } from '../types/index.js';

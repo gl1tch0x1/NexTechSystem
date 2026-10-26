@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { dbStore } from '../config/db-store.js';
 import { ENV } from '../config/env.js';
 import { auditService } from './audit.service.js';

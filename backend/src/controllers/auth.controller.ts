@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import crypto from 'crypto';
 import { userRepository } from '../repositories/user.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';

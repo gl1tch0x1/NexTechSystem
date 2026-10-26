@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { dbStore } from '../config/db-store.js';
 import { ENV } from '../config/env.js';
 import { userRepository } from '../repositories/user.repository.js';

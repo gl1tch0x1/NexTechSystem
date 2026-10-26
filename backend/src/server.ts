@@ -48,3 +48,12 @@ const handleShutdown = async (signal: string) => {
 
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 process.on('SIGINT', () => handleShutdown('SIGINT'));
+process.on('uncaughtException', (err) => {
+  console.error('[Uncaught Exception]:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[Unhandled Rejection]:', reason);
+});
+
+export default app;
+export { app, server };

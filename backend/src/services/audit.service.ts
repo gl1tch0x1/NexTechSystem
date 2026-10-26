@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { auditRepository } from '../repositories/audit.repository.js';
 import { AuditLog, UserRole } from '../types/index.js';
 

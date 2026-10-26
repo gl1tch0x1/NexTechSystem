@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { walletRepository } from '../repositories/wallet.repository.js';
 import { Wallet, WalletTransaction, WalletTransactionType } from '../types/index.js';
 import { dbStore } from '../config/db-store.js';

@@ -21,7 +21,7 @@ import { dbStore } from '../config/db-store.js';
 import { mongoDb } from '../config/mongodb.js';
 import { auditService } from '../services/audit.service.js';
 import { ENV } from '../config/env.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address, User } from '../types/index.js';
 import { hashPassword, verifyPassword, sanitizeUser } from './auth.controller.js';
 

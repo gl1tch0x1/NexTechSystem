@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Readable } from 'node:stream';

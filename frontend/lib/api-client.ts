@@ -1,7 +1,8 @@
 export const getBaseApiUrl = (): string => {
   // If an external non-localhost backend API is provided explicitly
   if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost') && !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1')) {
-    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+    const clean = process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+    return clean.endsWith('/api') ? clean : `${clean}/api`;
   }
   if (process.env.BACKEND_URL && !process.env.BACKEND_URL.includes('localhost') && !process.env.BACKEND_URL.includes('127.0.0.1')) {
     const clean = process.env.BACKEND_URL.replace(/\/$/, '').replace(/\/api$/, '');

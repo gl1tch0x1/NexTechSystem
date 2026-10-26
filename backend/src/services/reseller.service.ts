@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
