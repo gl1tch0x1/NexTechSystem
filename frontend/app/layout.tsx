@@ -63,8 +63,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} dark`}>
-      <body suppressHydrationWarning className="font-sans min-h-screen flex flex-col bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 antialiased selection:bg-tech-blue selection:text-white transition-colors duration-200 w-full max-w-full overflow-x-clip">
+    <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} light`}>
+      <body suppressHydrationWarning className="font-sans min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-tech-blue selection:text-white transition-colors duration-200 w-full max-w-full overflow-x-clip">
         <GoogleAnalytics />
         <ThemeProvider>
           <AuthProvider>
