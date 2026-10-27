@@ -1273,87 +1273,8 @@ export const FALLBACK_STORE_SETTINGS: StoreSettings = {
   "invoiceTermsAndConditions": ""
 };
 
-export const FALLBACK_USERS: (User & { passwordHash?: string })[] = [
-  {
-    "id": "user_admin_1",
-    "email": "admin@nextech.com",
-    "role": "ADMIN",
-    "name": "NexTech Systems Administrator",
-    "username": "admin@nextech.com",
-    "phone": "+971 4 399 1000",
-    "addresses": [
-      {
-        "id": "addr_adm_1",
-        "fullName": "NexTech Admin HQ",
-        "phone": "+971 4 399 1000",
-        "addressLine1": "Silicon Oasis Tech Tower, Suite 400",
-        "city": "Dubai",
-        "state": "Dubai",
-        "country": "United Arab Emirates",
-        "postalCode": "00000",
-        "isDefaultShipping": true,
-        "isDefaultBilling": true
-      }
-    ],
-    "isActive": true,
-    "createdAt": "2026-08-16T17:59:39.794Z",
-    "updatedAt": "2026-09-15T17:59:39.794Z",
-    "passwordHash": "df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9"
-  },
-  {
-    "id": "user_reseller_1",
-    "email": "partner@comnet.ae",
-    "role": "RESELLER",
-    "name": "ComNet Solutions Partner",
-    "username": "comnet101",
-    "resellerId": "reseller_comnet_101",
-    "phone": "+971 4 399 2211",
-    "addresses": [
-      {
-        "id": "addr_res_1",
-        "fullName": "ComNet Distribution Logistics Center",
-        "phone": "+971 4 399 2211",
-        "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
-        "city": "Dubai",
-        "state": "Dubai",
-        "country": "United Arab Emirates",
-        "postalCode": "11223",
-        "isDefaultShipping": true,
-        "isDefaultBilling": true
-      }
-    ],
-    "isActive": true,
-    "createdAt": "2026-08-16T17:59:39.794Z",
-    "updatedAt": "2026-09-15T17:59:39.794Z",
-    "passwordHash": "df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9"
-  },
-  {
-    "id": "user_customer_1",
-    "email": "client@nextech.com",
-    "role": "CUSTOMER",
-    "name": "Rashid Al-Maktoum",
-    "username": "client@nextech.com",
-    "phone": "+971 4 332 9901",
-    "addresses": [
-      {
-        "id": "addr_cust_1",
-        "fullName": "Rashid Al-Maktoum",
-        "phone": "+971 4 332 9901",
-        "addressLine1": "Level 42, Al Saada Tower, DIFC",
-        "city": "Dubai",
-        "state": "Dubai",
-        "country": "United Arab Emirates",
-        "postalCode": "00000",
-        "isDefaultShipping": true,
-        "isDefaultBilling": true
-      }
-    ],
-    "isActive": true,
-    "createdAt": "2026-08-16T17:59:39.794Z",
-    "updatedAt": "2026-09-15T17:59:39.794Z",
-    "passwordHash": "df6a0ee35341715d88d10412c2d128646e451996a32138bc53aefcb602d967a3d1e5e4acb9afc2d71529c11de66665675a92020249632735cb6550631dc91fd9"
-  }
-];
+export const FALLBACK_USERS: (User & { passwordHash?: string })[] = [];
+
 
 export const FALLBACK_ORDERS: Order[] = [
   {
@@ -1623,43 +1544,7 @@ export const FALLBACK_ORDERS: Order[] = [
   }
 ];
 
-export const FALLBACK_RESELLERS: Reseller[] = [
-  {
-    "id": "reseller_comnet_101",
-    "userId": "user_reseller_1",
-    "resellerCode": "comnet101",
-    "username": "comnet101",
-    "email": "partner@comnet.ae",
-    "businessName": "ComNet Solutions LLC",
-    "displayName": "ComNet Enterprise Systems",
-    "phone": "+971 4 399 2211",
-    "subdomain": "comnet101",
-    "address": {
-      "id": "addr_res_comnet_1",
-      "fullName": "ComNet Distribution Logistics Center",
-      "phone": "+971 4 399 2211",
-      "addressLine1": "Al Quoz Industrial Area 3, Warehouse 18",
-      "city": "Dubai",
-      "state": "Dubai",
-      "country": "United Arab Emirates",
-      "postalCode": "11223"
-    },
-    "businessInformation": {
-      "taxNumber": "TRN-100492819200003",
-      "tradeLicense": "DED-849201"
-    },
-    "status": "ACTIVE",
-    "productCount": 2,
-    "salesStats": {
-      "totalRevenue": 24500,
-      "totalOrders": 12,
-      "unitsSold": 28
-    },
-    "commissionRate": 8,
-    "createdAt": "2026-08-16T17:59:39.794Z",
-    "updatedAt": "2026-09-15T17:59:39.794Z"
-  }
-];
+export const FALLBACK_RESELLERS: Reseller[] = [];
 
 export const FALLBACK_HOMEPAGE_CONTENT: HomePageContent = {
   heroHighlights: FALLBACK_HERO_HIGHLIGHTS,

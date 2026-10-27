@@ -367,8 +367,11 @@ export class AuthController {
       ? String(username).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30)
       : cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '').slice(0, 30);
 
-    // Public self-registration is strictly CUSTOMER role (OWASP A01 Access Control Defense)
-    const assignedRole = 'CUSTOMER';
+    // Public self-registration: When starting with a fresh clean database (0 users),
+    // the first user to register automatically becomes the platform Administrator.
+    const existingUsersCount = await userRepository.count();
+    const isBootstrapAdmin = existingUsersCount === 0 || (Boolean(ENV.ADMIN_DEFAULT_EMAIL) && cleanEmail === ENV.ADMIN_DEFAULT_EMAIL.toLowerCase().trim());
+    const assignedRole: 'ADMIN' | 'CUSTOMER' = isBootstrapAdmin ? 'ADMIN' : 'CUSTOMER';
 
     const newUser: User = {
       id: userId,

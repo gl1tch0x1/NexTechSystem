@@ -306,7 +306,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <div className="hidden xl:block text-left">
               <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate max-w-[120px] transition-colors">{user?.username || user?.name || 'Administrator'}</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-[120px]">{user?.email || 'admin@nextech.com'}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-[120px]">{user?.email || ''}</div>
             </div>
             <button
               onClick={(e) => {
