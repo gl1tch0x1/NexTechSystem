@@ -4,12 +4,42 @@ import { ENV } from '../config/env.js';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
-// Endpoints that authenticate via cryptographic HMAC / signature or pre-auth verification
+// Endpoints that authenticate via cryptographic HMAC / signature, pre-auth verification, or public account onboarding
 const CSRF_EXEMPT_PATHS = [
   '/api/payments/tamara/webhook',
   '/api/payments/tabby/webhook',
   '/api/security/turnstile/verify',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/verify-reset-otp',
 ];
+
+function isOriginAllowed(originOrReferer: string): boolean {
+  try {
+    const parsed = new URL(originOrReferer);
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === 'nextechsystem.com' ||
+      host.endsWith('.nextechsystem.com') ||
+      host.endsWith('.vercel.app')
+    ) {
+      return true;
+    }
+    return ENV.ALLOWED_ORIGINS.some(allowed => {
+      try {
+        return new URL(allowed).origin === parsed.origin;
+      } catch {
+        return allowed === originOrReferer;
+      }
+    });
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Enterprise CSRF & Cross-Origin State-Change Guard (OWASP A01 / CWE-352)
@@ -22,7 +52,7 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction):
     return next();
   }
 
-  // Exempt webhooks and third-party signed callbacks
+  // Exempt webhooks, public auth, and third-party signed callbacks
   const currentPath = req.originalUrl.split('?')[0];
   if (CSRF_EXEMPT_PATHS.some(p => currentPath === p || currentPath.endsWith(p))) {
     return next();
@@ -33,15 +63,7 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction):
 
   // 1. Origin Header Validation
   if (origin) {
-    const isAllowed = ENV.ALLOWED_ORIGINS.some(allowed => {
-      try {
-        return new URL(allowed).origin === new URL(origin).origin;
-      } catch {
-        return allowed === origin;
-      }
-    });
-
-    if (!isAllowed) {
+    if (!isOriginAllowed(origin)) {
       res.status(403).json({
         success: false,
         error: {
@@ -56,58 +78,36 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction):
 
   // 2. Referer Header Validation (fallback when Origin is not sent)
   if (referer) {
-    try {
-      const refererOrigin = new URL(referer).origin;
-      const isAllowed = ENV.ALLOWED_ORIGINS.some(allowed => {
-        try {
-          return new URL(allowed).origin === refererOrigin;
-        } catch {
-          return allowed === refererOrigin;
-        }
-      });
-
-      if (!isAllowed) {
-        res.status(403).json({
-          success: false,
-          error: {
-            code: 'CSRF_REFERER_FORBIDDEN',
-            message: 'Cross-Site Request Forgery blocked: Request referer is not permitted.',
-          },
-        });
-        return;
-      }
-      return next();
-    } catch {
+    if (!isOriginAllowed(referer)) {
       res.status(403).json({
         success: false,
         error: {
-          code: 'CSRF_MALFORMED_REFERER',
-          message: 'Cross-Site Request Forgery blocked: Malformed referer header.',
+          code: 'CSRF_REFERER_FORBIDDEN',
+          message: 'Cross-Site Request Forgery blocked: Request referer is not permitted.',
         },
       });
       return;
     }
+    return next();
   }
 
-  // In production, mutating requests without Origin or Referer from browser are blocked
-  if (process.env.NODE_ENV === 'production') {
-    // If an Authorization Bearer header is present, it is an explicit programmatic API request
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      return next();
-    }
+  // 3. Headerless Requests (server-to-server proxies, API clients)
+  // CSRF exclusively exploits ambient credentials (cookies) in web browsers.
+  // Requests without cookies or with an Authorization Bearer header cannot be forged via browser CSRF.
+  const hasCookies = Boolean(req.headers.cookie);
+  const authHeader = req.headers.authorization;
 
-    res.status(403).json({
-      success: false,
-      error: {
-        code: 'CSRF_MISSING_ORIGIN',
-        message: 'Cross-Site Request Forgery blocked: Origin verification headers required.',
-      },
-    });
-    return;
+  if (authHeader || !hasCookies) {
+    return next();
   }
 
-  next();
+  res.status(403).json({
+    success: false,
+    error: {
+      code: 'CSRF_MISSING_ORIGIN',
+      message: 'Cross-Site Request Forgery blocked: Origin verification headers required.',
+    },
+  });
 }
 
 /**

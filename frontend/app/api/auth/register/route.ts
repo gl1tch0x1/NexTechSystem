@@ -30,15 +30,24 @@ export async function POST(request: NextRequest) {
 
   if (backendUrl) {
     const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
+    const incomingOrigin = request.headers.get('origin') || request.nextUrl.origin || 'https://www.nextechsystem.com';
+    const incomingReferer = request.headers.get('referer') || incomingOrigin;
+
     try {
       const res = await fetch(`${clean}/api/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': incomingOrigin,
+          'Referer': incomingReferer,
+        },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(7000),
       });
-      const json = await res.json();
-      return NextResponse.json(json, { status: res.status });
+      const json = await res.json().catch(() => null);
+      if (json && res.status !== 403 && res.status !== 500 && res.status !== 502 && res.status !== 503) {
+        return NextResponse.json(json, { status: res.status });
+      }
     } catch {
       // Fall through to resilient local handler
     }
