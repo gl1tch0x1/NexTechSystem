@@ -1,9 +1,12 @@
 export const getBaseApiUrl = (): string => {
-  // If an external non-localhost backend API is provided explicitly
-  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost') && !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1')) {
-    const clean = process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
-    return clean.endsWith('/api') ? clean : `${clean}/api`;
+  // In browser runtime, always route through relative /api.
+  // This routes through Next.js server proxy handlers on the same origin,
+  // completely eliminating cross-origin CORS preflight issues and domain blocking.
+  if (typeof window !== 'undefined') {
+    return '/api';
   }
+
+  // Server-side (Node.js runtime / Vercel Serverless SSR)
   if (process.env.BACKEND_URL && !process.env.BACKEND_URL.includes('localhost') && !process.env.BACKEND_URL.includes('127.0.0.1')) {
     const clean = process.env.BACKEND_URL.replace(/\/$/, '').replace(/\/api$/, '');
     return `${clean}/api`;
@@ -12,11 +15,9 @@ export const getBaseApiUrl = (): string => {
     const clean = process.env.API_PROXY_TARGET.replace(/\/$/, '').replace(/\/api$/, '');
     return `${clean}/api`;
   }
-
-  if (typeof window !== 'undefined') {
-    // In browser runtime, always route through Next.js /api to leverage internal Next.js API routes,
-    // session cookies, and resilient fallback mocks without direct localhost:5000 port connection failures
-    return '/api';
+  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost') && !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1')) {
+    const clean = process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+    return clean.endsWith('/api') ? clean : `${clean}/api`;
   }
 
   // Server-side (Node.js runtime / Vercel Serverless SSR)

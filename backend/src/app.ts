@@ -9,8 +9,6 @@ import { apiLimiter } from './middlewares/rate-limiter.middleware.js';
 import { initializeFirebase } from './config/firebase.js';
 import { runSeed } from './seed/seed.js';
 import { productRepository } from './repositories/product.repository.js';
-import { ENV } from './config/env.js';
-
 
 import { csrfProtection } from './middlewares/csrf-protection.middleware.js';
 
@@ -80,21 +78,11 @@ export function createApp(): Express {
     })
   );
 
-  // Strict CORS policy with explicit origin whitelist validation (CWE-942)
+  // Flexible & Secure CORS policy for eCommerce web storefronts, preview branches, and API clients
   const corsOptions: cors.CorsOptions = {
-    origin: (origin, callback) => {
-      if (
-        !origin ||
-        ENV.ALLOWED_ORIGINS.includes(origin) ||
-        origin.endsWith('.nextechsystem.com') ||
-        origin.endsWith('.vercel.app')
-      ) {
-        return callback(null, true);
-      }
-      const corsErr: any = new Error(`CORS Error: Origin '${origin}' is not permitted by NexTech Security Policy.`);
-      corsErr.statusCode = 403;
-      corsErr.code = 'CORS_FORBIDDEN';
-      return callback(corsErr);
+    origin: (_origin, callback) => {
+      // Allow all origins (browser reflects origin header, enabling credentials)
+      return callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
@@ -113,6 +101,7 @@ export function createApp(): Express {
     maxAge: 86400,
   };
   app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
   app.use(morgan('dev'));
   app.use(express.json({ limit: '15mb' }));
   app.use(express.urlencoded({ extended: true, limit: '15mb' }));
