@@ -83,7 +83,12 @@ export function createApp(): Express {
   // Strict CORS policy with explicit origin whitelist validation (CWE-942)
   const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
-      if (!origin || ENV.ALLOWED_ORIGINS.includes(origin)) {
+      if (
+        !origin ||
+        ENV.ALLOWED_ORIGINS.includes(origin) ||
+        origin.endsWith('.nextechsystem.com') ||
+        origin.endsWith('.vercel.app')
+      ) {
         return callback(null, true);
       }
       const corsErr: any = new Error(`CORS Error: Origin '${origin}' is not permitted by NexTech Security Policy.`);

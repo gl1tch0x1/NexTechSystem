@@ -35,6 +35,8 @@ const defaultAllowedOrigins = [
   'http://localhost:3001',
   'https://api.nextechsystem.com',
   'https://nextechsystem.com',
+  'https://www.nextechsystem.com',
+  'https://nextechsystem.vercel.app',
 ];
 
 const rawPort = process.env.PORT;
