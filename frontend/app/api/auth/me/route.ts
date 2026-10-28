@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyJwt } from '@/lib/token';
 import { User } from '@/types';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_insecure_local_jwt_secret_change_in_env';
+const JWT_SECRET = process.env.JWT_SECRET || '';
 
 function sanitizeUser(user: any): User {
   const { passwordHash, ...safeUser } = user;
@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
 
   const token = authHeader.split(' ')[1];
   try {
+    if (!JWT_SECRET) throw new Error('JWT_SECRET is not configured');
     const decoded = verifyJwt(token, JWT_SECRET) as any;
     const user: User = {
       id: decoded.id,

@@ -59,7 +59,7 @@ function verifyPassword(candidate: string, stored: string): boolean {
     return storedBuf.length === candidateBuf.length && crypto.timingSafeEqual(storedBuf, candidateBuf);
   } else {
     // Legacy format: global static salt (migration path)
-    const legacySalt = ENV.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026';
+    const legacySalt = ENV.PASSWORD_SALT || '';
     const candidateHash = crypto.pbkdf2Sync(candidate, legacySalt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
     const storedBuf = Buffer.from(stored, 'hex');
     const candidateBuf = Buffer.from(candidateHash, 'hex');

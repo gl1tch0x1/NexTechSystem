@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { signJwt } from '@/lib/token';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_insecure_local_jwt_secret_change_in_env';
+const JWT_SECRET = process.env.JWT_SECRET || '';
 
 export async function POST(request: NextRequest) {
   const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || 'http://localhost:5000';
@@ -127,6 +127,13 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     };
 
+    if (!JWT_SECRET) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SERVER_CONFIGURATION_ERROR', message: 'Authentication service configuration error.' } },
+        { status: 500 }
+      );
+    }
+
     const token = signJwt(
       { id: newResellerUser.id, email: newResellerUser.email, role: 'RESELLER', resellerId },
       JWT_SECRET,
@@ -155,6 +162,13 @@ export async function POST(request: NextRequest) {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+
+  if (!JWT_SECRET) {
+    return NextResponse.json(
+      { success: false, error: { code: 'SERVER_CONFIGURATION_ERROR', message: 'Authentication service configuration error.' } },
+      { status: 500 }
+    );
+  }
 
   const token = signJwt(
     { id: newUser.id, email: newUser.email, role: newUser.role },

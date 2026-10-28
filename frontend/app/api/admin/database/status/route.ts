@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
       mongo: {
         connected: false,
         connecting: false,
-        dbName: 'nextech_ecommerce',
-        cluster: 'nextechsystems.jd7k9ew.mongodb.net',
+        dbName: process.env.MONGODB_DB_NAME || '',
+        cluster: process.env.MONGODB_URI ? (process.env.MONGODB_URI.split('@')[1] || '').split('/')[0] : '',
         lastConnectedAt: null,
         lastError: 'Local resilient dual-store active (awaiting Atlas IP whitelist 0.0.0.0/0).',
         totalCollections: 22,

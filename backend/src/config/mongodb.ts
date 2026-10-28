@@ -59,7 +59,7 @@ class MongoDbManager {
       });
 
       await this.client.connect();
-      const dbName = ENV.MONGODB_DB_NAME || 'nextech_ecommerce';
+      const dbName = ENV.MONGODB_DB_NAME || undefined;
       this.db = this.client.db(dbName);
 
       // Verify connection with ping
@@ -130,8 +130,8 @@ class MongoDbManager {
     return {
       connected: this.connected,
       connecting: this.isConnecting,
-      dbName: ENV.MONGODB_DB_NAME || 'nextech_ecommerce',
-      cluster: 'nextechsystems.jd7k9ew.mongodb.net',
+      dbName: ENV.MONGODB_DB_NAME || (this.db?.databaseName ?? ''),
+      cluster: ENV.MONGODB_URI ? (ENV.MONGODB_URI.split('@')[1] || '').split('/')[0] : '',
       lastConnectedAt: this.lastConnectedAt,
       lastError: this.lastError,
       totalCollections,

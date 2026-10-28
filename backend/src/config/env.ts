@@ -16,11 +16,10 @@ for (const envPath of candidateEnvPaths) {
 }
 
 const nodeEnv = process.env.NODE_ENV || 'development';
-let jwtSecret = process.env.JWT_SECRET;
+let jwtSecret = process.env.JWT_SECRET || '';
 
 if (!jwtSecret) {
-  jwtSecret = 'nextech_enterprise_prod_jwt_secret_token_default_2026_x89';
-  console.warn('⚠️ [Notice] JWT_SECRET was not explicitly passed. Using secure fallback key.');
+  console.warn('⚠️ [Notice] JWT_SECRET is not configured in environment variables.');
 }
 
 const rawAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
@@ -64,12 +63,12 @@ export const ENV = {
   GA_API_SECRET: process.env.GA_API_SECRET || '',
   ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || process.env.ADMIN_BOOTSTRAP_EMAIL || '',
   ADMIN_BOOTSTRAP_EMAIL: process.env.ADMIN_BOOTSTRAP_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || '',
-  PASSWORD_SALT: process.env.PASSWORD_SALT || 'nextech_enterprise_salt_v2_2026',
+  PASSWORD_SALT: process.env.PASSWORD_SALT || '',
   // MongoDB Enterprise Cloud Database
   MONGODB_URI: process.env.MONGODB_URI || '',
   MONGODB_USERNAME: process.env.MONGODB_USERNAME || '',
   MONGODB_PASSWORD: process.env.MONGODB_PASSWORD || '',
-  MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || 'nextech_ecommerce',
+  MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || '',
   ENABLE_MONGODB: Boolean(process.env.MONGODB_URI) && process.env.ENABLE_MONGODB !== 'false',
   // ChatOps & Multi-Channel Approval Notifications
   DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL || '',

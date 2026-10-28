@@ -63,7 +63,7 @@ export class PasswordResetService {
   }
 
   private hashOtp(userId: string, email: string, code: string): string {
-    const salt = ENV.JWT_SECRET || 'nextech_reset_salt_2026';
+    const salt = ENV.JWT_SECRET || '';
     return crypto
       .createHmac('sha256', salt)
       .update(`${userId.trim()}:${email.toLowerCase().trim()}:${code.trim()}`)
