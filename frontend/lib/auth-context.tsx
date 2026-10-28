@@ -108,17 +108,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(res.user);
 
       // 2. Synchronize Cloud Firebase Authentication session (only if live key configured)
-      // Firebase sync is optional – any failure must be swallowed so the backend JWT login is unaffected.
-      if (isLiveKey && firebaseAuth && firebaseAuth.app && password) {
-        try {
-          await signInWithEmailAndPassword(firebaseAuth, email, password);
-        } catch (fbErr: any) {
-          // Try to create the account if it doesn't exist yet
-          if (fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') {
-            await createUserWithEmailAndPassword(firebaseAuth, email, password).catch(() => { });
-          }
-          // All other Firebase errors (403 API key, domain restriction, etc.) are silently ignored
+      // Firebase sync is strictly non-blocking – any failure is safely caught so the primary JWT login is never failed.
+      try {
+        if (isLiveKey && firebaseAuth && firebaseAuth.app && password) {
+          await signInWithEmailAndPassword(firebaseAuth, email, password).catch(async (fbErr: any) => {
+            if (fbErr?.code === 'auth/user-not-found' || fbErr?.code === 'auth/invalid-credential') {
+              await createUserWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
+            }
+          });
         }
+      } catch (fbSyncErr) {
+        console.warn('[Firebase Auth Sync Notice]:', fbSyncErr);
       }
 
       const profile = await fetchCurrentUser(res.token);

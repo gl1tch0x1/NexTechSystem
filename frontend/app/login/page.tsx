@@ -400,11 +400,24 @@ function AuthContent() {
     }
   };
 
+  const loginEmailRef = useRef<HTMLInputElement>(null);
+  const loginPasswordRef = useRef<HTMLInputElement>(null);
+
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Ensure state is synchronized even if the browser autofilled credentials without synthetic onChange
+    const emailToSubmit = (loginEmail || loginEmailRef.current?.value || '').trim();
+    const passToSubmit = loginPassword || loginPasswordRef.current?.value || '';
+
+    if (!emailToSubmit || !passToSubmit) {
+      setError('Please provide your email and password to sign in.');
+      return;
+    }
+
     try {
-      const { user: authedUser, reseller: resData } = await login(loginEmail.trim(), loginPassword);
+      const { user: authedUser, reseller: resData } = await login(emailToSubmit, passToSubmit);
       handleRoleRedirect(authedUser, resData);
     } catch (err: any) {
       setError(err.message || 'Invalid email or password. Please try again.');
@@ -638,6 +651,7 @@ function AuthContent() {
               <label className="block text-[11px] md:text-xs font-bold text-slate-400 mb-1">Email or Username</label>
               <div className="relative">
                 <input
+                  ref={loginEmailRef}
                   type="text"
                   required
                   autoComplete="username"
@@ -664,6 +678,7 @@ function AuthContent() {
               </div>
               <div className="relative">
                 <input
+                  ref={loginPasswordRef}
                   type={showLoginPassword ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
