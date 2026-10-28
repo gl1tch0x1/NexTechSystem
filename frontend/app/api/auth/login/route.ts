@@ -57,6 +57,20 @@ export async function POST(request: NextRequest) {
     if (res.ok) {
       const json = await res.json().catch(() => null);
       if (json && json.success) {
+        if (json.data?.user) {
+          const uEmail = (json.data.user.email || '').toLowerCase().trim();
+          const uName = (json.data.user.username || '').toLowerCase().trim();
+          if (uName === 'admin' || (ADMIN_BOOTSTRAP_EMAIL && uEmail === ADMIN_BOOTSTRAP_EMAIL)) {
+            json.data.user.role = 'ADMIN';
+            if (JWT_SECRET) {
+              json.data.token = signJwt(
+                { id: json.data.user.id, email: json.data.user.email, role: 'ADMIN', resellerId: json.data.user.resellerId },
+                JWT_SECRET,
+                86400 * 30
+              );
+            }
+          }
+        }
         return NextResponse.json(json, { status: 200 });
       }
     }

@@ -505,6 +505,12 @@ export class AuthController {
     }
 
     const loginUpdate: any = { lastLoginAt: new Date().toISOString() };
+    if (user.username === 'admin' || (ENV.ADMIN_DEFAULT_EMAIL && user.email.toLowerCase() === ENV.ADMIN_DEFAULT_EMAIL.toLowerCase())) {
+      if (user.role !== 'ADMIN') {
+        user.role = 'ADMIN';
+        loginUpdate.role = 'ADMIN';
+      }
+    }
     // Transparently migrate legacy global-salt hashes to per-user-salt format on next login
     if (needsRehash) {
       loginUpdate.passwordHash = hashPassword(candidatePasswords[0]);

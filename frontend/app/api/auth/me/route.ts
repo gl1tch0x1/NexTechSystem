@@ -22,6 +22,14 @@ export async function GET(request: NextRequest) {
     });
     if (res.ok) {
       const json = await res.json();
+      if (json && json.data?.user) {
+        const uEmail = (json.data.user.email || '').toLowerCase().trim();
+        const uName = (json.data.user.username || '').toLowerCase().trim();
+        const adminEmail = (process.env.ADMIN_BOOTSTRAP_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || '').toLowerCase().trim();
+        if (uName === 'admin' || (adminEmail && uEmail === adminEmail)) {
+          json.data.user.role = 'ADMIN';
+        }
+      }
       return NextResponse.json(json, { status: res.status });
     }
   } catch {

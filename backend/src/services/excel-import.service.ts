@@ -167,7 +167,7 @@ export class ExcelImportService {
           ? [[header, row.getCell(index + 1).text]]
           : []
       ));
-      if (Object.values(data).some(value => value.trim())) rawData.push({ rowNumber, data });
+      if (Object.values(data).some((value: any) => typeof value === 'string' && value.trim().length > 0)) rawData.push({ rowNumber, data });
     }
     if (rawData.length === 0) {
       throw new Error('The uploaded Excel file contains no data rows.');
@@ -544,7 +544,7 @@ export class ExcelImportService {
     // Header Row Styling: Dark Slate background (#0F172A), bold white text, amber accent border
     const headerRow = worksheet.getRow(1);
     headerRow.height = 32;
-    headerRow.eachCell((cell) => {
+    headerRow.eachCell((cell: any) => {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -801,7 +801,7 @@ export class ExcelImportService {
       const row = worksheet.addRow(sampleHardwareProducts[i]);
       row.height = 24;
       const isEven = i % 2 === 0;
-      row.eachCell((cell, colNum) => {
+      row.eachCell((cell: any, colNum: number) => {
         cell.font = { name: 'Segoe UI', size: 9.5 };
         cell.alignment = { vertical: 'middle', horizontal: colNum >= 9 && colNum <= 13 ? 'right' : 'left' };
         if (isEven) {
@@ -835,7 +835,7 @@ export class ExcelImportService {
 
     const refHeader = refSheet.getRow(1);
     refHeader.height = 30;
-    refHeader.eachCell((cell) => {
+    refHeader.eachCell((cell: any) => {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -900,7 +900,7 @@ export class ExcelImportService {
 
     for (const ref of referenceTaxonomy) {
       const r = refSheet.addRow(ref);
-      r.eachCell((cell) => {
+      r.eachCell((cell: any) => {
         cell.font = { name: 'Segoe UI', size: 9.5 };
         cell.alignment = { vertical: 'middle', wrapText: true };
         cell.border = {
