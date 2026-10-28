@@ -164,8 +164,8 @@ export async function runSeed(clean = false) {
 
   // 11. Initial System Bootstrap Audit Log
   await auditService.log({
-    userId: 'user_admin_1',
-    userEmail: 'admin@nextech.com',
+    userId: 'system',
+    userEmail: 'system_bootstrap',
     userRole: 'ADMIN',
     action: 'SYSTEM_BOOTSTRAP',
     resource: 'system',

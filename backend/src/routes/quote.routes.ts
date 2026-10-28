@@ -265,7 +265,7 @@ router.put('/:id', adminLimiter, authenticate, requireRole('ADMIN'), async (req:
     try {
       await auditService.log({
         userId: req.user?.id || 'admin',
-        userEmail: req.user?.email || 'admin@nextechsystems.ae',
+        userEmail: req.user?.email || 'admin',
         userRole: 'ADMIN',
         action: 'UPDATE_QUOTE',
         resource: 'quotes',
@@ -384,8 +384,8 @@ router.post('/:id/convert', adminLimiter, authenticate, requireRole('ADMIN'), as
     // Audit Log
     try {
       await auditService.log({
-        userId: req.user?.id || 'admin_super',
-        userEmail: req.user?.email || 'admin@nextechsystems.ae',
+        userId: req.user?.id || 'admin',
+        userEmail: req.user?.email || 'admin',
         userRole: 'ADMIN',
         action: 'CONVERT_QUOTE_TO_ORDER',
         resource: 'quotes',

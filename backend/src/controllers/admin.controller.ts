@@ -1215,6 +1215,110 @@ export class AdminController {
       res.status(500).json({ success: false, error: { message: err?.message || 'Sync from MongoDB failed' } });
     }
   }
+
+  // ==========================================
+  // 16. PRODUCT EDITORS (STAFF MANAGEMENT)
+  // ==========================================
+  async getProductEditors(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    const editors = await userRepository.find({ where: [{ field: 'role', operator: '==', value: 'PRODUCT_EDITOR' }] });
+    const safeEditors = editors.map(e => sanitizeUser(e));
+    res.json({ success: true, data: safeEditors });
+  }
+
+  async createProductEditor(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { name, email, username, password, phone } = req.body;
+    if (!name || !email || !password) {
+      res.status(400).json({ success: false, error: { message: 'Name, email, and password are required.' } });
+      return;
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanName = String(name).trim();
+    const cleanUsername = (username ? String(username).trim().toLowerCase() : cleanEmail.split('@')[0])
+      .replace(/[^a-z0-9_]/g, '')
+      .slice(0, 30);
+
+    const existingEmail = await userRepository.findByEmail(cleanEmail);
+    if (existingEmail) {
+      res.status(400).json({ success: false, error: { message: 'An account with this email already exists.' } });
+      return;
+    }
+
+    const passwordHash = hashPassword(String(password));
+    const newEditor: User = {
+      id: `user_editor_${uuidv4().substring(0, 8)}`,
+      name: cleanName,
+      email: cleanEmail,
+      username: cleanUsername,
+      role: 'PRODUCT_EDITOR',
+      phone: phone ? String(phone).trim() : '',
+      addresses: [],
+      passwordHash,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await userRepository.create(newEditor);
+
+    await auditService.log({
+      action: 'CREATE',
+      resource: 'PRODUCT_EDITOR',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL || 'admin',
+      userRole: 'ADMIN',
+      details: { editorId: newEditor.id, editorEmail: newEditor.email, editorName: newEditor.name },
+    });
+
+    res.status(201).json({ success: true, data: sanitizeUser(newEditor), message: 'Product Editor created successfully.' });
+  }
+
+  async toggleProductEditorStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const user = await userRepository.findById(id);
+    if (!user || user.role !== 'PRODUCT_EDITOR') {
+      res.status(404).json({ success: false, error: { message: 'Product Editor not found.' } });
+      return;
+    }
+
+    const updated = await userRepository.update(id, {
+      isActive: !user.isActive,
+      updatedAt: new Date().toISOString(),
+    });
+
+    await auditService.log({
+      action: 'UPDATE',
+      resource: 'PRODUCT_EDITOR',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL || 'admin',
+      userRole: 'ADMIN',
+      details: { editorId: id, isActive: !user.isActive },
+    });
+
+    res.json({ success: true, data: updated ? sanitizeUser(updated) : null });
+  }
+
+  async deleteProductEditor(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const user = await userRepository.findById(id);
+    if (!user || user.role !== 'PRODUCT_EDITOR') {
+      res.status(404).json({ success: false, error: { message: 'Product Editor not found.' } });
+      return;
+    }
+
+    await userRepository.delete(id);
+
+    await auditService.log({
+      action: 'DELETE',
+      resource: 'PRODUCT_EDITOR',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL || 'admin',
+      userRole: 'ADMIN',
+      details: { editorId: id, editorEmail: user.email },
+    });
+
+    res.json({ success: true, message: 'Product Editor removed successfully.' });
+  }
 }
 
 export const adminController = new AdminController();

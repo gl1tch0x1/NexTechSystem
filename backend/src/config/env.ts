@@ -75,7 +75,7 @@ export const ENV = {
   DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL || '',
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || '',
-  ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || 'admin@nextech.com',
+  ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_DEFAULT_EMAIL || '',
   PUBLIC_API_URL: process.env.PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:5000',
   // Transactional Email & Order Security
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',

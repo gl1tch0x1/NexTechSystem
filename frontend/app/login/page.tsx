@@ -391,6 +391,8 @@ function AuthContent() {
     }
     if (authenticatedUser.role === 'ADMIN') {
       router.push('/admin');
+    } else if (authenticatedUser.role === 'PRODUCT_EDITOR') {
+      router.push('/admin/products');
     } else if (authenticatedUser.role === 'RESELLER' && (resellerData?.resellerCode || authenticatedUser.resellerId)) {
       router.push(`/reseller/${resellerData?.resellerCode || authenticatedUser.username}/dashboard`);
     } else {

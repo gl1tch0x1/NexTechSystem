@@ -78,6 +78,27 @@ export async function POST(request: NextRequest) {
     // Retain fallback users
   }
 
+  // If dbUsers has no admin loaded, allow dynamic bootstrap from environment variables if defined in .env
+  if (
+    ADMIN_BOOTSTRAP_EMAIL &&
+    ADMIN_BOOTSTRAP_PASSWORD &&
+    !dbUsers.some((u: any) => u.email?.toLowerCase() === ADMIN_BOOTSTRAP_EMAIL.toLowerCase() || u.role === 'ADMIN')
+  ) {
+    dbUsers.push({
+      id: 'user_admin_bootstrap',
+      email: ADMIN_BOOTSTRAP_EMAIL.toLowerCase(),
+      role: 'ADMIN',
+      name: 'System Administrator',
+      username: 'admin',
+      phone: '',
+      addresses: [],
+      passwordHash: hashPassword(ADMIN_BOOTSTRAP_PASSWORD),
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
   const matchedUser = dbUsers.find(
     (u: any) => u.email?.toLowerCase() === cleanIdentifier || u.username?.toLowerCase() === cleanIdentifier
   );
@@ -89,12 +110,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Verify password using PBKDF2 hash from database or environment-configured bootstrap credentials
+  // Verify password using PBKDF2 hash (supporting salt:hash and legacy formats)
   let isPasswordValid = false;
   if (matchedUser.passwordHash) {
-    const inputHash = hashPassword(rawPassword);
-    if (matchedUser.passwordHash === inputHash) {
-      isPasswordValid = true;
+    if (matchedUser.passwordHash.includes(':')) {
+      const [salt, expectedHash] = matchedUser.passwordHash.split(':');
+      const actualHash = crypto.pbkdf2Sync(rawPassword, salt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
+      isPasswordValid = (actualHash === expectedHash);
+    } else {
+      const inputHash = hashPassword(rawPassword);
+      isPasswordValid = (matchedUser.passwordHash === inputHash);
     }
   }
 

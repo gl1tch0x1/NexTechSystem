@@ -58,11 +58,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [savingCredentials, setSavingCredentials] = useState(false);
   const [credentialsToast, setCredentialsToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  const isProductEditor = role === 'PRODUCT_EDITOR';
+
   useEffect(() => {
-    if (!isLoading && (!user || role !== 'ADMIN')) {
-      router.push('/login');
+    if (!isLoading) {
+      if (!user || (role !== 'ADMIN' && role !== 'PRODUCT_EDITOR')) {
+        router.push('/login');
+        return;
+      }
+      if (role === 'PRODUCT_EDITOR') {
+        const allowed =
+          pathname === '/admin/products' ||
+          pathname.startsWith('/admin/products/') ||
+          pathname === '/admin/categories' ||
+          pathname.startsWith('/admin/categories/') ||
+          pathname === '/admin/brands' ||
+          pathname.startsWith('/admin/brands/');
+        if (!allowed) {
+          router.replace('/admin/products');
+        }
+      }
     }
-  }, [isLoading, user, role, router]);
+  }, [isLoading, user, role, pathname, router]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -79,47 +96,59 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setMobileDrawerOpen(false);
   }, [pathname]);
 
-  const navSections = [
-    {
-      title: 'OVERVIEW & CORE',
-      items: [
-        { href: '/admin', label: 'Command Center', icon: LayoutDashboard },
-        { href: '/admin/analytics', label: 'Sales & Purchase Analytics', icon: BarChart3 },
-      ],
-    },
-    {
-      title: 'SALES & PROCUREMENT',
-      items: [
-        { href: '/admin/orders', label: 'Customer Sales Orders', icon: ShoppingBag },
-        { href: '/admin/quotes', label: 'B2B Quotes Engine', icon: FileText },
-        { href: '/admin/purchase-orders', label: 'Supplier Purchase Orders', icon: Server },
-        { href: '/admin/customers', label: 'Customer Directory & Accounts', icon: Users },
-        { href: '/admin/resellers', label: 'Reseller Network', icon: Store },
-      ],
-    },
-    {
-      title: 'CATALOG & INVENTORY',
-      items: [
-        { href: '/admin/products', label: 'Hardware Products', icon: Package },
-        { href: '/admin/categories', label: 'Categories Taxonomy', icon: Layers },
-        { href: '/admin/brands', label: 'Brands & Vendors', icon: Award },
-      ],
-    },
-    {
-      title: 'MARKETING & CMS',
-      items: [
-        { href: '/admin/coupons', label: 'Discount Coupons', icon: Tag },
-        { href: '/admin/banners', label: 'Storefront Banners', icon: ImageIcon },
-        { href: '/admin/cms', label: 'Storefront CMS & Content', icon: Sliders },
-      ],
-    },
-    {
-      title: 'SYSTEM & SETTINGS',
-      items: [
-        { href: '/admin/settings', label: 'E-Bill Stamp & Store Settings', icon: Settings },
-      ],
-    },
-  ];
+  const navSections = isProductEditor
+    ? [
+        {
+          title: 'CATALOG & INVENTORY',
+          items: [
+            { href: '/admin/products', label: 'Hardware Products', icon: Package },
+            { href: '/admin/categories', label: 'Categories Taxonomy', icon: Layers },
+            { href: '/admin/brands', label: 'Brands & Vendors', icon: Award },
+          ],
+        },
+      ]
+    : [
+        {
+          title: 'OVERVIEW & CORE',
+          items: [
+            { href: '/admin', label: 'Command Center', icon: LayoutDashboard },
+            { href: '/admin/analytics', label: 'Sales & Purchase Analytics', icon: BarChart3 },
+          ],
+        },
+        {
+          title: 'SALES & PROCUREMENT',
+          items: [
+            { href: '/admin/orders', label: 'Customer Sales Orders', icon: ShoppingBag },
+            { href: '/admin/quotes', label: 'B2B Quotes Engine', icon: FileText },
+            { href: '/admin/purchase-orders', label: 'Supplier Purchase Orders', icon: Server },
+            { href: '/admin/customers', label: 'Customer Directory & Accounts', icon: Users },
+            { href: '/admin/resellers', label: 'Reseller Network', icon: Store },
+          ],
+        },
+        {
+          title: 'CATALOG & INVENTORY',
+          items: [
+            { href: '/admin/products', label: 'Hardware Products', icon: Package },
+            { href: '/admin/categories', label: 'Categories Taxonomy', icon: Layers },
+            { href: '/admin/brands', label: 'Brands & Vendors', icon: Award },
+          ],
+        },
+        {
+          title: 'MARKETING & CMS',
+          items: [
+            { href: '/admin/coupons', label: 'Discount Coupons', icon: Tag },
+            { href: '/admin/banners', label: 'Storefront Banners', icon: ImageIcon },
+            { href: '/admin/cms', label: 'Storefront CMS & Content', icon: Sliders },
+          ],
+        },
+        {
+          title: 'SYSTEM & SETTINGS',
+          items: [
+            { href: '/admin/editors', label: 'Product Editors & Staff', icon: Users },
+            { href: '/admin/settings', label: 'E-Bill Stamp & Store Settings', icon: Settings },
+          ],
+        },
+      ];
 
   const handleOpenCredentialsModal = () => {
     setNewUsername(user?.username || '');
@@ -248,7 +277,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
 
           {/* Logo & Enterprise Pill */}
-          <Link href="/admin" className="flex items-center gap-2.5 group">
+          <Link href={isProductEditor ? "/admin/products" : "/admin"} className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform">
               <img
                 src="/images/nextech-logo.png"
@@ -260,12 +289,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-white tracking-wider flex items-center gap-1.5 sm:gap-2">
                 <span className="truncate max-w-[140px] sm:max-w-none">NEXTECH COMMAND</span>
                 <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-800 font-mono">
-                  ENTERPRISE
+                  {isProductEditor ? 'PRODUCT EDITOR' : 'ENTERPRISE'}
                 </span>
               </div>
               <div className="hidden xs:flex text-[10px] text-slate-500 dark:text-slate-400 font-mono items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="truncate max-w-[150px] sm:max-w-none">ERP & CRM Core • Real-Time</span>
+                <span className="truncate max-w-[150px] sm:max-w-none">
+                  {isProductEditor ? 'Catalog Management Desk' : 'ERP & CRM Core • Real-Time'}
+                </span>
               </div>
             </div>
           </Link>
@@ -274,7 +305,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Center/Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Admin Real-Time Action & Notification Center */}
-          <AdminNotificationCenter />
+          {!isProductEditor && <AdminNotificationCenter />}
 
           {/* Theme Toggle Button */}
           <ThemeToggle />
@@ -295,18 +326,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span>Storefront</span>
           </Link>
 
-          {/* Admin Profile Pill (Clickable) */}
+          {/* Profile Pill */}
           <div
-            onClick={handleOpenCredentialsModal}
-            className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-800 cursor-pointer group"
-            title="Click to update username & password"
+            onClick={isProductEditor ? undefined : handleOpenCredentialsModal}
+            className={`flex items-center gap-2 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-800 ${
+              isProductEditor ? '' : 'cursor-pointer group'
+            }`}
+            title={isProductEditor ? 'Product Editor Account' : 'Click to update username & password'}
           >
-            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 text-slate-800 dark:text-white flex items-center justify-center font-bold text-xs shrink-0 transition-colors">
-              AD
+            <div className={`w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white flex items-center justify-center font-bold text-xs shrink-0 transition-colors ${
+              !isProductEditor ? 'group-hover:bg-blue-50 dark:group-hover:bg-blue-950/40 group-hover:border-blue-400 dark:group-hover:border-blue-500' : ''
+            }`}>
+              {isProductEditor ? 'PE' : 'AD'}
             </div>
             <div className="hidden xl:block text-left">
-              <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate max-w-[120px] transition-colors">{user?.username || user?.name || 'Administrator'}</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-[120px]">{user?.email || ''}</div>
+              <div className={`text-xs font-bold text-slate-900 dark:text-white truncate max-w-[120px] transition-colors ${
+                !isProductEditor ? 'group-hover:text-blue-600 dark:group-hover:text-blue-400' : ''
+              }`}>{user?.username || user?.name || (isProductEditor ? 'Product Editor' : 'Administrator')}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-[120px]">{isProductEditor ? 'Catalog Editor' : (user?.email || '')}</div>
             </div>
             <button
               onClick={(e) => {
@@ -388,7 +425,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-6 overflow-y-auto custom-scrollbar">
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <Link href="/admin" onClick={() => setMobileDrawerOpen(false)} className="flex items-center gap-2 group">
+                  <Link href={isProductEditor ? "/admin/products" : "/admin"} onClick={() => setMobileDrawerOpen(false)} className="flex items-center gap-2 group">
                     <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center p-1 shadow-sm group-hover:scale-105 transition-transform">
                       <img
                         src="/images/nextech-logo.png"
@@ -398,7 +435,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
                     <div>
                       <div className="text-xs font-black text-slate-900 dark:text-white">NEXTECH COMMAND</div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Enterprise ERP & CRM</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                        {isProductEditor ? 'Catalog Management Desk' : 'Enterprise ERP & CRM'}
+                      </div>
                     </div>
                   </Link>
                   <button
@@ -438,18 +477,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
 
               {/* Mobile Credentials Button */}
-              <div className="pt-2">
-                <button
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    handleOpenCredentialsModal();
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
-                >
-                  <KeyRound className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
-                  <span>Security & Credentials</span>
-                </button>
-              </div>
+              {!isProductEditor && (
+                <div className="pt-2">
+                  <button
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      handleOpenCredentialsModal();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                  >
+                    <KeyRound className="w-4 h-4 text-tech-blue dark:text-tech-cyan" />
+                    <span>Security & Credentials</span>
+                  </button>
+                </div>
+              )}
 
               {/* Drawer Footer */}
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
