@@ -1238,9 +1238,19 @@ export class AdminController {
       .replace(/[^a-z0-9_]/g, '')
       .slice(0, 30);
 
+    if (!cleanName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) || !cleanUsername || typeof password !== 'string' || password.length < 8) {
+      res.status(400).json({ success: false, error: { message: 'Provide a name, valid email, username, and password of at least 8 characters.' } });
+      return;
+    }
+
     const existingEmail = await userRepository.findByEmail(cleanEmail);
     if (existingEmail) {
       res.status(400).json({ success: false, error: { message: 'An account with this email already exists.' } });
+      return;
+    }
+
+    if (await userRepository.findByUsername(cleanUsername)) {
+      res.status(409).json({ success: false, error: { message: 'An account with this username already exists.' } });
       return;
     }
 

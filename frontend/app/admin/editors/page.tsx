@@ -76,7 +76,7 @@ export default function AdminEditorsPage() {
         setEditors([]);
       }
     } catch (err: any) {
-      console.warn('Failed to fetch editors:', err);
+      showToast('error', err.message || 'Could not load product editors. Please retry.');
       setEditors([]);
     } finally {
       setLoading(false);

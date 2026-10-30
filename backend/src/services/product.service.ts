@@ -244,11 +244,7 @@ export class ProductService {
       }
       const existingWithSku = await productRepository.findBySku(data.sku.trim());
       if (existingWithSku && existingWithSku.id !== currentId) {
-        if (existingWithSku.name === data.name && existingWithSku.sellerType === (data.sellerType || 'RESELLER')) {
-          await productRepository.delete(existingWithSku.id);
-        } else {
-          throw new Error(`SKU "${data.sku}" is already in use by another product ("${existingWithSku.name}").`);
-        }
+        throw Object.assign(new Error(`SKU "${data.sku}" is already in use by another product ("${existingWithSku.name}").`), { statusCode: 409, code: 'DUPLICATE_SKU' });
       }
     }
 

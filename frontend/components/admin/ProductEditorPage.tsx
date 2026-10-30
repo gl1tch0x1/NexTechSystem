@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
+import { productImageUrl } from '@/lib/product-image-url';
 import { formatPrice, getSecureRandomInt } from '@/lib/utils';
 import {
   Product,
@@ -61,43 +62,8 @@ const WAREHOUSE_LOCATIONS = [
 const DEFAULT_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
 
-/**
- * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
- * Strictly complies with CodeQL's MetacharEscapeSanitizer and UriEncodingSanitizer by escaping
- * meta-characters with global regexp replacement and calling encodeURI.
- */
 function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE): string {
-  if (typeof url !== 'string') return fallback;
-  const trimmed = url.trim();
-  if (!trimmed) return fallback;
-
-  // Explicitly block dangerous pseudo-protocols
-  if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
-    return fallback;
-  }
-
-  // Strictly validate HTTP, HTTPS, or safe relative paths
-  if (
-    trimmed.startsWith('https://') ||
-    trimmed.startsWith('http://') ||
-    (trimmed.startsWith('/') && !trimmed.startsWith('//'))
-  ) {
-    try {
-      const parsed = new URL(trimmed, 'https://nextech.local');
-      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-        // Global meta-character escape (satisfies MetacharEscapeSanitizer) and URI encoding (satisfies UriEncodingSanitizer)
-        const escaped = trimmed.replace(/[<>'"]/g, '');
-        return encodeURI(escaped);
-      }
-    } catch {
-      if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
-        const escaped = trimmed.replace(/[<>'"]/g, '');
-        return encodeURI(escaped);
-      }
-    }
-  }
-
-  return fallback;
+  return productImageUrl(url) || fallback;
 }
 
 export interface HardwarePreset {
@@ -443,7 +409,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const [tagInput, setTagInput] = useState('');
   const [collectionInput, setCollectionInput] = useState('');
   const [newOptionName, setNewOptionName] = useState('');
-  const [previewImageError, setPreviewImageError] = useState(false);
+  const [failedPreviewUrl, setFailedPreviewUrl] = useState<string | null>(null);
+  const [imageUrlError, setImageUrlError] = useState('');
+  const [taxonomyError, setTaxonomyError] = useState('');
+  const [taxonomyLoading, setTaxonomyLoading] = useState(true);
+  const [taxonomyRetry, setTaxonomyRetry] = useState(0);
 
   // Studio 2.0 State Enhancements
   const [previewCurrency, setPreviewCurrency] = useState<keyof typeof FX_RATES>('AED');
@@ -553,29 +523,36 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
 
   // Load taxonomies & product
   useEffect(() => {
+    let cancelled = false;
     const fetchTaxonomies = async () => {
+      setTaxonomyLoading(true);
+      setTaxonomyError('');
       try {
         const fetchOpts = token ? { token } : {};
         const [catRes, brandRes, resellerRes] = await Promise.all([
           ApiClient.get<Category[]>('/admin/categories', fetchOpts)
-            .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => [])),
+            .catch(() => ApiClient.get<Category[]>('/products/categories')),
           ApiClient.get<Brand[]>('/admin/brands', fetchOpts)
-            .catch(() => ApiClient.get<Brand[]>('/products/brands').catch(() => [])),
+            .catch(() => ApiClient.get<Brand[]>('/products/brands')),
           token
             ? ApiClient.get<Reseller[]>('/admin/resellers', { token }).catch(() => [])
             : Promise.resolve([]),
         ]);
 
+        if (cancelled) return;
         if (catRes && Array.isArray(catRes)) setCategories(catRes);
         if (brandRes && Array.isArray(brandRes)) setBrands(brandRes);
         if (resellerRes && Array.isArray(resellerRes)) setResellers(resellerRes);
       } catch (err) {
-        console.warn('Failed to load taxonomies:', err);
+        if (!cancelled) setTaxonomyError('Could not load categories and brands. Please retry.');
+      } finally {
+        if (!cancelled) setTaxonomyLoading(false);
       }
     };
 
     fetchTaxonomies();
-  }, [token]);
+    return () => { cancelled = true; };
+  }, [token, taxonomyRetry]);
 
   useEffect(() => {
     if (mode === 'edit' && productId) {
@@ -1059,9 +1036,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
 
   // Multi-Asset Gallery Handlers (Strictly Sanitized via getSafeImageUrl)
   const handleAddGalleryImage = (urlToAdd: string) => {
-    const sanitized = urlToAdd.trim().replace(/[<>'"]/g, '');
-    if (!sanitized) return;
-    const safe = getSafeImageUrl(sanitized);
+    const safe = productImageUrl(urlToAdd);
+    if (!safe) {
+      setImageUrlError('Enter a direct HTTPS image URL or a site-relative image path.');
+      return;
+    }
+    setImageUrlError('');
     setFormData(prev => {
       const existing = prev.images.filter(img => img !== safe);
       const newImages = [...existing, safe];
@@ -1231,6 +1211,15 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     }
     if (Number(formData.price) <= 0) {
       setFormError('Please provide a valid commercial selling price greater than 0.');
+      return;
+    }
+
+    if (!categories.some(c => c.id === formData.categoryId)) {
+      setFormError('Select a hardware category before saving.');
+      return;
+    }
+    if (formData.primaryImage && !productImageUrl(formData.primaryImage)) {
+      setFormError('The cover image must use a valid HTTPS image URL.');
       return;
     }
 
@@ -1692,6 +1681,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   </div>
                 )}
 
+                {taxonomyError && <div role="alert" className="text-sm text-red-600">{taxonomyError} <button type="button" onClick={() => setTaxonomyRetry(n => n + 1)} className="underline">Retry</button></div>}
+                {!taxonomyLoading && !taxonomyError && categories.length === 0 && <p className="text-sm text-amber-700">No hardware categories are configured. <Link href="/admin/categories" className="underline">Manage categories</Link></p>}
                 {/* Category & Brand Dropdowns */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                   <div>
@@ -1699,6 +1690,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       Hardware Category
                     </label>
                     <select
+                      aria-label="Hardware Category"
+                      disabled={taxonomyLoading || categories.length === 0}
                       value={formData.categoryId}
                       onChange={e => {
                         const cat = categories.find(c => c.id === e.target.value);
@@ -1711,6 +1704,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       }}
                       className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-bold cursor-pointer"
                     >
+                      <option value="">{taxonomyLoading ? 'Loading categories…' : categories.length ? 'Select a hardware category' : 'No categories configured'}</option>
                       {categories.map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
@@ -1722,6 +1716,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       Brand / Manufacturer
                     </label>
                     <select
+                      aria-label="Brand / Manufacturer"
                       value={formData.brandId}
                       onChange={e => {
                         const b = brands.find(brand => brand.id === e.target.value);
@@ -1733,6 +1728,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       }}
                       className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-bold cursor-pointer"
                     >
+                      <option value="">Select a manufacturer</option>
                       {brands.map(b => (
                         <option key={b.id} value={b.id}>{b.name}</option>
                       ))}
@@ -1791,7 +1787,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             type="button"
                             onClick={() => {
                               setFormData(prev => ({ ...prev, primaryImage: '' }));
-                              setPreviewImageError(false);
+                              setFailedPreviewUrl(null);
                             }}
                             className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
                           >
@@ -1800,13 +1796,14 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         )}
                       </div>
                       <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 relative shadow-sm group flex items-center justify-center">
-                        {formData.primaryImage && !previewImageError ? (
+                        {formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
                           <>
                             <img
                               src={getSafeImageUrl(formData.primaryImage)}
                               alt="Primary Cover"
                               className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                              onError={() => setPreviewImageError(true)}
+                              key={getSafeImageUrl(formData.primaryImage)}
+                              onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
                             />
                             <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-purple-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
                               <Check className="w-3 h-3 text-white" /> Cover
@@ -1817,8 +1814,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             <div className="w-9 h-9 rounded-xl bg-slate-200/60 dark:bg-slate-800/80 flex items-center justify-center mx-auto text-slate-500 dark:text-slate-400">
                               <ImageIcon className="w-5 h-5" />
                             </div>
-                            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">No Cover Asset Selected</div>
-                            <p className="text-[10px] text-slate-400">Paste an image URL below or select from the gallery queue</p>
+                            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">{formData.primaryImage ? 'Image could not be loaded' : 'No Cover Asset Selected'}</div>
+                            <p className="text-[10px] text-slate-400">Use a direct, publicly accessible HTTPS image URL. Page links and private links cannot display as images.</p>
                           </div>
                         )}
                       </div>
@@ -1917,7 +1914,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           type="url"
                           placeholder="Paste image URL (PNG, WEBP, JPG) to add to gallery..."
                           value={galleryUrlInput}
-                          onChange={e => setGalleryUrlInput(e.target.value.replace(/[<>'"]/g, ''))}
+                          onChange={e => { setGalleryUrlInput(e.target.value); setImageUrlError(''); }}
                           onKeyDown={e => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
@@ -1935,6 +1932,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         </button>
                       </div>
 
+                      {imageUrlError && <p role="alert" className="text-xs text-red-600">{imageUrlError}</p>}
                       {/* Primary Image URL Direct Edit */}
                       <div>
                         <label className="block text-[10px] font-bold text-slate-500 mb-1">Cover Asset URL</label>
@@ -1943,9 +1941,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           placeholder="e.g. https://domain.com/hardware-cover.webp"
                           value={formData.primaryImage}
                           onChange={e => {
-                            const sanitized = e.target.value.replace(/[<>'"]/g, '');
+                            const sanitized = e.target.value;
                             setFormData({ ...formData, primaryImage: sanitized });
-                            setPreviewImageError(false);
+                            setFailedPreviewUrl(null);
                           }}
                           className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
                         />
@@ -3267,12 +3265,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             {/* The Actual Mock Product Card — Automatically Theme Adaptive */}
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm hover:shadow-md transition-all">
               <div className="aspect-video relative overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
-                {formData.primaryImage && !previewImageError ? (
+                {formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
                   <img
                     src={getSafeImageUrl(formData.primaryImage)}
                     alt={formData.title ? formData.title.replace(/[<>'"]/g, '') : 'Product Preview'}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={() => setPreviewImageError(true)}
+                    key={getSafeImageUrl(formData.primaryImage)}
+                              onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 text-slate-400 gap-1.5 p-4 text-center">

@@ -14,11 +14,11 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-import { DEFAULT_CATEGORIES } from '@/lib/default-taxonomy';
+
 
 export default function AdminCategoriesPage() {
   const { token } = useAuth();
-  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modal states
@@ -48,13 +48,13 @@ export default function AdminCategoriesPage() {
     try {
       const fetchOpts = token ? { token } : {};
       const data = await ApiClient.get<Category[]>('/admin/categories', fetchOpts)
-        .catch(() => ApiClient.get<Category[]>('/products/categories').catch(() => []));
-      if (data && Array.isArray(data) && data.length > 0) {
+        .catch(() => ApiClient.get<Category[]>('/products/categories'));
+      if (Array.isArray(data)) {
         setCategories(data);
       }
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
-    } 
+      showToast('error', 'Could not load categories. Please refresh and try again.');
+    }
   };
 
   useEffect(() => {
