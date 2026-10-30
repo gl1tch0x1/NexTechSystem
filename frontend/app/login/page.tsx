@@ -163,6 +163,8 @@ function AuthContent() {
   // Sign In state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [requiresMfa, setRequiresMfa] = useState(false);
+  const [mfaCode, setMfaCode] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Forgot Password Modal state
@@ -417,9 +419,19 @@ function AuthContent() {
     }
 
     try {
-      const { user: authedUser, reseller: resData } = await login(emailToSubmit, passToSubmit);
+      const { user: authedUser, reseller: resData } = await login(emailToSubmit, passToSubmit, undefined, requiresMfa ? mfaCode.trim() : undefined);
+      setLoginPassword('');
+      setMfaCode('');
+      setRequiresMfa(false);
       handleRoleRedirect(authedUser, resData);
     } catch (err: any) {
+      if (err.code === 'MFA_REQUIRED') {
+        setLoginEmail(emailToSubmit);
+        setLoginPassword(passToSubmit);
+        setRequiresMfa(true);
+        setMfaCode('');
+        return;
+      }
       setError(err.message || 'Invalid email or password. Please try again.');
     }
   };
@@ -657,7 +669,7 @@ function AuthContent() {
                   autoComplete="username"
                   placeholder="Enter your email or username"
                   value={loginEmail}
-                  onChange={e => setLoginEmail(e.target.value)}
+                  onChange={e => { setLoginEmail(e.target.value); setRequiresMfa(false); setMfaCode(''); }}
                   className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
                 <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
@@ -684,7 +696,7 @@ function AuthContent() {
                   autoComplete="current-password"
                   placeholder="••••••••"
                   value={loginPassword}
-                  onChange={e => setLoginPassword(e.target.value)}
+                  onChange={e => { setLoginPassword(e.target.value); setRequiresMfa(false); setMfaCode(''); }}
                   className="w-full bg-slate-50 dark:bg-tech-slate p-2.5 md:p-3 pl-8 md:pl-10 pr-10 rounded-xl text-[11px] md:text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-tech-blue"
                 />
                 <Lock className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 absolute left-2.5 md:left-3.5 top-1/2 -translate-y-1/2" />
@@ -703,6 +715,25 @@ function AuthContent() {
               </div>
             </div>
 
+            {requiresMfa && (
+              <div>
+                <label htmlFor="login-mfa-code" className="block text-xs font-bold text-slate-500 mb-1">
+                  Authenticator or backup recovery code
+                </label>
+                <input
+                  id="login-mfa-code"
+                  type="text"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  required
+                  value={mfaCode}
+                  onChange={e => setMfaCode(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-tech-slate p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-700"
+                />
+                <p className="mt-1 text-xs text-slate-500">Enter your code to finish signing in.</p>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isLoading}
@@ -712,7 +743,7 @@ function AuthContent() {
                 <span>Authenticating...</span>
               ) : (
                 <>
-                  <span>Sign In to Account</span>
+                  <span>{requiresMfa ? 'Verify and Sign In' : 'Sign In to Account'}</span>
                   <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </>
               )}

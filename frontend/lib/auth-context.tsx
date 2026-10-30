@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { User, Reseller, UserRole } from '@/types';
 import { ApiClient } from './api-client';
 import { auth as firebaseAuth, isLiveKey } from './firebase';
@@ -41,7 +41,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password?: string, resellerCode?: string) => Promise<{ user: User; reseller: Reseller | null }>;
+  login: (email: string, password?: string, resellerCode?: string, mfaCode?: string) => Promise<{ user: User; reseller: Reseller | null }>;
   register: (
     dataOrName: string | RegisterData,
     email?: string,
@@ -61,20 +61,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [reseller, setReseller] = useState<Reseller | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const sessionRevision = useRef(0);
+  const pendingLogout = useRef<Promise<unknown>>(Promise.resolve());
+  const pendingAuthentication = useRef<Promise<unknown>>(Promise.resolve());
 
-  const fetchCurrentUser = async (authToken: string): Promise<{ user: User; reseller: Reseller | null } | null> => {
+  const fetchCurrentUser = async (authToken: string, revision = sessionRevision.current): Promise<{ user: User; reseller: Reseller | null } | null> => {
+    if (revision !== sessionRevision.current) return null;
     if (authToken.startsWith('demo_token_')) {
       return null;
     }
 
     try {
       const data = await ApiClient.get<{ user: User; reseller: Reseller | null }>('/auth/me', { token: authToken });
+      if (revision !== sessionRevision.current) return null;
       setUser(data.user);
       setReseller(data.reseller || null);
       return data;
     } catch {
       // Stale or expired token from previous database session: cleanly reset to guest state
-      logout();
+      if (revision === sessionRevision.current) logout();
       return null;
     }
   };
@@ -91,40 +96,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, password?: string, resellerCode?: string): Promise<{ user: User; reseller: Reseller | null }> => {
+  const login = async (email: string, password?: string, resellerCode?: string, mfaCode?: string): Promise<{ user: User; reseller: Reseller | null }> => {
     const cleanEmail = email ? email.trim() : '';
     setIsLoading(true);
+    const revision = ++sessionRevision.current;
     try {
-      let res: { token: string; user: User };
-      // 1. Authenticate with Store Backend
-      res = await ApiClient.post<{ token: string; user: User }>('/auth/login', {
+      await pendingLogout.current;
+      if (revision !== sessionRevision.current) throw new Error('Sign-in was cancelled.');
+      // Only a completed backend login may establish a session.
+      const authentication = ApiClient.post<{ token: string; user: User; requiresMfa?: boolean; mfaTicket?: string }>('/auth/login', {
         email: cleanEmail,
         password,
         resellerCode,
+        mfaCode,
       });
+
+      pendingAuthentication.current = authentication;
+      const res = await authentication;
+      if (revision !== sessionRevision.current) throw new Error('Sign-in was cancelled.');
+
+      if (res.requiresMfa) {
+        throw Object.assign(new Error('Multi-factor authentication is required to complete sign-in.'), {
+          code: 'MFA_REQUIRED', details: { requiresMfa: true, mfaTicket: res.mfaTicket },
+        });
+      }
+      if (!res.token || !res.user) {
+        throw new Error('Authentication service returned an incomplete session.');
+      }
 
       localStorage.setItem('auth_token', res.token);
       setToken(res.token);
       setUser(res.user);
 
-      // 2. Synchronize Cloud Firebase Authentication session (only if live key configured)
-      // Firebase sync is strictly non-blocking – any failure is safely caught so the primary JWT login is never failed.
-      try {
-        if (isLiveKey && firebaseAuth && firebaseAuth.app && password) {
-          await signInWithEmailAndPassword(firebaseAuth, email, password).catch(async (fbErr: any) => {
-            if (fbErr?.code === 'auth/user-not-found' || fbErr?.code === 'auth/invalid-credential') {
-              await createUserWithEmailAndPassword(firebaseAuth, email, password).catch(() => {});
-            }
-          });
-        }
-      } catch (fbSyncErr) {
-        console.warn('[Firebase Auth Sync Notice]:', fbSyncErr);
-      }
-
-      const profile = await fetchCurrentUser(res.token);
-      return profile || { user: res.user, reseller: null };
+      // Password sessions belong solely to the backend; Firebase is used for Google Sign-In.
+      const profile = await fetchCurrentUser(res.token, revision);
+      if (!profile) throw new Error('Unable to verify your session. Please sign in again.');
+      return profile;
     } finally {
-      setIsLoading(false);
+      if (revision === sessionRevision.current) setIsLoading(false);
     }
   };
 
@@ -136,7 +145,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     passwordArg?: string
   ): Promise<{ user: User; reseller: Reseller | null }> => {
     setIsLoading(true);
+    const revision = ++sessionRevision.current;
     try {
+      await pendingLogout.current;
+      if (revision !== sessionRevision.current) throw new Error('Sign-in was cancelled.');
       const payload: RegisterData = typeof dataOrName === 'string'
         ? {
             accountType: 'CUSTOMER',
@@ -149,7 +161,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         : dataOrName;
 
       // 1. Register with Store Backend / Next.js API Gateway
-      const res = await ApiClient.post<{ token: string; user: User; reseller?: Reseller }>('/auth/register', payload);
+      const authentication = ApiClient.post<{ token: string; user: User; reseller?: Reseller }>('/auth/register', payload);
+      pendingAuthentication.current = authentication;
+      const res = await authentication;
+      if (revision !== sessionRevision.current) throw new Error('Sign-in was cancelled.');
 
       localStorage.setItem('auth_token', res.token);
       setToken(res.token);
@@ -169,88 +184,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      const profile = await fetchCurrentUser(res.token);
-      return profile || { user: res.user, reseller: res.reseller || null };
+      const profile = await fetchCurrentUser(res.token, revision);
+      if (!profile) throw new Error('Unable to verify your session. Please sign in again.');
+      return profile;
     } finally {
-      setIsLoading(false);
+      if (revision === sessionRevision.current) setIsLoading(false);
     }
   };
 
   const loginWithGoogle = async (): Promise<{ user: User; reseller: Reseller | null }> => {
     setIsLoading(true);
+    const revision = ++sessionRevision.current;
     try {
-      let fbUser: any;
-      if (isLiveKey && firebaseAuth && firebaseAuth.app) {
-        try {
-          const provider = new GoogleAuthProvider();
-          provider.setCustomParameters({ prompt: 'select_account' });
-          const fbResult = await signInWithPopup(firebaseAuth, provider);
-          fbUser = fbResult.user;
-        } catch (popupErr: any) {
-          if (popupErr.code === 'auth/popup-closed-by-user') {
-            throw popupErr;
-          }
-          console.warn('Firebase Google Auth encountered configuration/key issue, activating instant demo session:', popupErr);
-          const dynamicEmail = `guest_${Date.now().toString(36)}@client.local`;
-          fbUser = {
-            uid: `demo_google_${Date.now()}`,
-            displayName: 'Verified Customer',
-            email: dynamicEmail,
-            photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
-          };
-        }
-      } else {
-        const dynamicEmail = `guest_${Date.now().toString(36)}@client.local`;
-        fbUser = {
-          uid: `demo_google_${Date.now()}`,
-          displayName: 'Verified Customer',
-          email: dynamicEmail,
-          photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
-        };
+      await pendingLogout.current;
+      if (revision !== sessionRevision.current) throw new Error('Sign-in was cancelled.');
+      if (!isLiveKey || !firebaseAuth || !firebaseAuth.app) {
+        throw new Error('Google Sign-In is currently unavailable. Please use your email and password.');
       }
-
-      try {
-        const idToken = typeof fbUser?.getIdToken === 'function' ? await fbUser.getIdToken() : undefined;
-        if (!idToken) {
-          throw new Error('Google Sign-In requires an active, verified Firebase ID token.');
-        }
-
-        // Authenticate with Store Backend via cryptographically verified Google ID token (F-01 defense)
-        const res = await ApiClient.post<{ token: string; user: User }>('/auth/google', {
-          idToken,
-        });
-
-        localStorage.setItem('auth_token', res.token);
-        setToken(res.token);
-        setUser(res.user);
-
-        const profile = await fetchCurrentUser(res.token);
-        return profile || { user: res.user, reseller: null };
-      } catch (backendErr: any) {
-        const fallbackEmail = fbUser.email || `user_${Date.now().toString(36)}@client.local`;
-        const demoUser: User = {
-          id: `usr_${Date.now()}`,
-          name: fbUser.displayName || 'Customer',
-          email: fallbackEmail,
-          username: fallbackEmail.split('@')[0] || 'customer',
-          role: 'CUSTOMER',
-          addresses: [],
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        const demoToken = `demo_token_${Date.now()}`;
-        localStorage.setItem('auth_token', demoToken);
-        setToken(demoToken);
-        setUser(demoUser);
-        return { user: demoUser, reseller: null };
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const fbResult = await signInWithPopup(firebaseAuth, provider);
+      const idToken = await fbResult.user.getIdToken();
+      if (revision !== sessionRevision.current) throw new Error('Sign-in was cancelled.');
+      const authentication = ApiClient.post<{ token: string; user: User }>('/auth/google', { idToken });
+      pendingAuthentication.current = authentication;
+      const res = await authentication;
+      if (revision !== sessionRevision.current) throw new Error('Sign-in was cancelled.');
+      if (!res.token || !res.user) {
+        throw new Error('Authentication service returned an incomplete session.');
       }
+      localStorage.setItem('auth_token', res.token);
+      setToken(res.token);
+      setUser(res.user);
+      const profile = await fetchCurrentUser(res.token, revision);
+      if (!profile) throw new Error('Unable to verify your session. Please sign in again.');
+      return profile;
     } finally {
-      setIsLoading(false);
+      if (revision === sessionRevision.current) setIsLoading(false);
     }
   };
 
   const logout = () => {
+    ++sessionRevision.current;
+    pendingLogout.current = Promise.allSettled([pendingLogout.current, pendingAuthentication.current])
+      .then(() => ApiClient.post('/auth/logout'))
+      .catch(() => {});
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('demo_user');
@@ -263,6 +241,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('tech_cart_items');
       localStorage.removeItem('tech_coupon_code');
     }
+    setIsLoading(false);
     setToken(null);
     setUser(null);
     setReseller(null);

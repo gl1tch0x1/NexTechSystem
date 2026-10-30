@@ -44,6 +44,7 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   try {
     // 1. Try JWT verification with explicit HS256 algorithm restriction
     const decoded = jwt.verify(token, ENV.JWT_SECRET, { algorithms: ['HS256'] }) as any;
+    if (decoded.mfaPending) throw new Error('MFA challenge is not an access token');
     const user = await userRepository.findById(decoded.id);
 
     if (!user || !user.isActive) {
@@ -101,6 +102,7 @@ export function optionalAuthenticate(req: AuthenticatedRequest, _res: Response, 
 
   try {
     const decoded = jwt.verify(token, ENV.JWT_SECRET, { algorithms: ['HS256'] }) as any;
+    if (decoded.mfaPending) return next();
     userRepository.findById(decoded.id).then(user => {
       if (user && user.isActive) {
         req.user = {

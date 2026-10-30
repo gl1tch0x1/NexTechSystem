@@ -123,7 +123,7 @@ export class ApiClient {
 
       if (!response.ok || !json.success) {
         // If 401 Unauthorized, automatically clear stale / expired token from client storage
-        if (response.status === 401 && typeof window !== 'undefined') {
+        if (response.status === 401 && typeof window !== 'undefined' && localStorage.getItem('auth_token') === token) {
           localStorage.removeItem('auth_token');
         }
 

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import { ENV } from '../config/env.js';
+import { isAllowedOrigin } from '../config/origins.js';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -17,28 +17,7 @@ const CSRF_EXEMPT_PATHS = [
 ];
 
 function isOriginAllowed(originOrReferer: string): boolean {
-  try {
-    const parsed = new URL(originOrReferer);
-    const host = parsed.hostname.toLowerCase();
-    if (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === 'nextechsystem.com' ||
-      host.endsWith('.nextechsystem.com') ||
-      host.endsWith('.vercel.app')
-    ) {
-      return true;
-    }
-    return ENV.ALLOWED_ORIGINS.some(allowed => {
-      try {
-        return new URL(allowed).origin === parsed.origin;
-      } catch {
-        return allowed === originOrReferer;
-      }
-    });
-  } catch {
-    return false;
-  }
+  return isAllowedOrigin(originOrReferer);
 }
 
 /**
@@ -54,7 +33,7 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction):
 
   // Exempt webhooks, public auth, and third-party signed callbacks
   const currentPath = req.originalUrl.split('?')[0];
-  if (CSRF_EXEMPT_PATHS.some(p => currentPath === p || currentPath.endsWith(p))) {
+  if (CSRF_EXEMPT_PATHS.includes(currentPath)) {
     return next();
   }
 

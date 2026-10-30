@@ -11,6 +11,7 @@ import { runSeed } from './seed/seed.js';
 import { productRepository } from './repositories/product.repository.js';
 
 import { csrfProtection } from './middlewares/csrf-protection.middleware.js';
+import { isAllowedOrigin } from './config/origins.js';
 
 export function createApp(): Express {
   const app = express();
@@ -78,11 +79,14 @@ export function createApp(): Express {
     })
   );
 
-  // Flexible & Secure CORS policy for eCommerce web storefronts, preview branches, and API clients
+  // Permit only explicitly trusted storefront origins. Server-to-server requests have no Origin.
   const corsOptions: cors.CorsOptions = {
-    origin: (_origin, callback) => {
-      // Allow all origins (browser reflects origin header, enabling credentials)
-      return callback(null, true);
+    origin: (origin, callback) => {
+      if (!origin || isAllowedOrigin(origin)) return callback(null, true);
+      const error = Object.assign(new Error('Request origin is not permitted.'), {
+        statusCode: 403, code: 'CORS_FORBIDDEN',
+      });
+      return callback(error);
     },
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
@@ -101,7 +105,7 @@ export function createApp(): Express {
     maxAge: 86400,
   };
   app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
+  // cors() already handles preflight requests; Express 5 rejects an unnamed '*' route.
   app.use(morgan('dev'));
   app.use(express.json({ limit: '15mb' }));
   app.use(express.urlencoded({ extended: true, limit: '15mb' }));
