@@ -60,11 +60,12 @@ const nextConfig = {
         },
       ];
     }
-    // Fallback to local backend in all environments (prevents 404s for any new backend routes)
+    const isProd = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
+    const fallback = isProd ? 'https://api.nextechsystem.com/api/:path*' : 'http://localhost:5000/api/:path*';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:5000/api/:path*',
+        destination: fallback,
       },
     ];
   },

@@ -84,6 +84,10 @@ test('catalog and editor API lifecycle in an isolated disk store', async t => {
   } finally {
     await new Promise<void>((resolve, reject) => server.close(e => e ? reject(e) : resolve()));
     process.chdir(cwd);
-    rmSync(dir, { recursive: true, force: true });
+    try {
+      rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+    } catch {
+      // Ignore transient Windows EBUSY locking during temp test cleanup
+    }
   }
 });

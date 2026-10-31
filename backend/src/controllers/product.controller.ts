@@ -5,6 +5,7 @@ import { brandRepository } from '../repositories/brand.repository.js';
 import { bannerRepository } from '../repositories/banner.repository.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
 import { reviewRepository } from '../repositories/review.repository.js';
+import { serviceAvailability } from '../config/service-availability.js';
 
 export function sanitizePublicProduct(prod: any): any {
   if (!prod) return prod;
@@ -104,9 +105,13 @@ export class ProductController {
 
   async getProductBySlug(req: Request, res: Response): Promise<void> {
     const slug = req.params.slug as string;
-    const product = await productService.getProductBySlug(slug);
+    let product = await productService.getProductBySlug(slug);
 
     if (!product) {
+      product = await productService.getProductById(slug);
+    }
+
+    if (!product || !product.isActive || !['APPROVED', 'ACTIVE'].includes(product.approvalStatus)) {
       res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Product not found.' } });
       return;
     }
@@ -147,6 +152,7 @@ export class ProductController {
       data: {
         settings,
         banners,
+        services: serviceAvailability(),
       },
     });
   }

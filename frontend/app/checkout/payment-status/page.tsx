@@ -68,48 +68,23 @@ function PaymentStatusContent() {
       try {
         setIsLoading(true);
 
-        // 1. Verify with backend
+        setErrorMessage('');
+        // A URL parameter is a gateway hint, never proof that an order was paid.
         try {
-          const verifyRes = await ApiClient.post<{
-            success: boolean;
-            data: PaymentStatusDetails;
-          }>('/payments/verify', {
-            orderId,
-            status: statusParam,
-            paymentId,
-            isSimulated: isSimulatedParam,
+          await ApiClient.post<PaymentStatusDetails>('/payments/verify', {
+            orderId, status: statusParam, paymentId, isSimulated: isSimulatedParam,
           }, { token: token || undefined });
-
-          if (isMounted && verifyRes.data) {
-            setOrderDetails(verifyRes.data);
-            setIsSuccess(verifyRes.data.paymentStatus === 'PAID');
-          }
         } catch {
-          // If verify had an issue or user refreshed, fetch status directly
-          const statusRes = await ApiClient.get<{
-            success: boolean;
-            data: PaymentStatusDetails;
-          }>(`/payments/status/${orderId}`, { token: token || undefined });
-
-          if (isMounted && statusRes.data) {
-            setOrderDetails(statusRes.data);
-            const approved =
-              statusRes.data.paymentStatus === 'PAID' ||
-              statusParam === 'success' ||
-              statusParam === 'approved' ||
-              isSimulatedParam;
-            setIsSuccess(approved);
-          }
+          // Read authoritative state even when verification is still pending.
+        }
+        const details = await ApiClient.get<PaymentStatusDetails>(`/payments/status/${encodeURIComponent(orderId)}`, { token: token || undefined });
+        if (isMounted) {
+          setOrderDetails(details);
+          setIsSuccess(details.paymentStatus === 'PAID');
         }
       } catch (err: any) {
         if (isMounted) {
-          console.error('Payment verification failed:', err);
-          // If statusParam indicates success (e.g. redirected directly from gateway)
-          const fallbackApproved =
-            statusParam === 'success' ||
-            statusParam === 'approved' ||
-            isSimulatedParam;
-          setIsSuccess(fallbackApproved);
+          setIsSuccess(false);
           setErrorMessage(err.message || 'Unable to confirm live settlement status.');
         }
       } finally {

@@ -84,6 +84,8 @@ router.post('/restore', requireRole('ADMIN'), (req, res, next) => adminControlle
 
 // 12. Purchase Orders & Automated Restock (Strictly ADMIN only)
 router.get('/purchase-orders', requireRole('ADMIN'), (req, res, next) => adminController.getPurchaseOrders(req, res).catch(next));
+router.get('/purchase-orders/:id', requireRole('ADMIN'), (req, res, next) => adminController.getPurchaseOrder(req, res).catch(next));
+router.delete('/purchase-orders/:id', requireRole('ADMIN'), (req, res, next) => adminController.deletePurchaseOrder(req, res).catch(next));
 router.post('/purchase-orders', requireRole('ADMIN'), (req, res, next) => adminController.createPurchaseOrder(req, res).catch(next));
 router.post('/purchase-orders/generate-low-stock', requireRole('ADMIN'), (req, res, next) => adminController.generateLowStockPO(req, res).catch(next));
 router.put('/purchase-orders/:id/status', requireRole('ADMIN'), (req, res, next) => adminController.updatePOStatus(req, res).catch(next));

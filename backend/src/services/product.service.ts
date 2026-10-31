@@ -386,7 +386,10 @@ export class ProductService {
   }
 
   async getProductById(id: string): Promise<Product | null> {
-    const prod = await productRepository.findById(id);
+    let prod = await productRepository.findById(id);
+    if (!prod) {
+      prod = await productRepository.findBySlug(id);
+    }
     return prod ? this.attachLocations(prod) : null;
   }
 
@@ -444,7 +447,18 @@ export class ProductService {
   }
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
-    await this.validateProductData(updates, id);
+    let targetId = id;
+    const existing = await productRepository.findById(id);
+    if (!existing) {
+      const bySlug = await productRepository.findBySlug(id);
+      if (bySlug) {
+        targetId = bySlug.id;
+      } else {
+        return null;
+      }
+    }
+
+    await this.validateProductData(updates, targetId);
 
     if (updates.tags && Array.isArray(updates.tags)) {
       updates.tags = Array.from(new Set(updates.tags.map(t => String(t).trim()).filter(Boolean)));
@@ -457,7 +471,7 @@ export class ProductService {
     }
     updates.updatedAt = new Date().toISOString();
 
-    return productRepository.update(id, updates);
+    return productRepository.update(targetId, updates);
   }
 
   async deleteProduct(id: string): Promise<boolean> {

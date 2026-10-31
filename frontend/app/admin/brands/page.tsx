@@ -178,26 +178,10 @@ export default function AdminBrandsPage() {
         }
       }
 
-      // Fallback: use FileReader data URL
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result;
-        if (typeof result === 'string') {
-          setFormData(prev => ({ ...prev, logo: result }));
-          setFormSuccess('Image loaded as local data URL');
-        }
-      };
-      reader.readAsDataURL(file);
+      const error = await res.json().catch(() => null);
+      throw new Error(error?.error?.message || 'Image upload failed. Please try again.');
     } catch (err: any) {
-      console.warn('Upload route fallback to data URL:', err);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result;
-        if (typeof result === 'string') {
-          setFormData(prev => ({ ...prev, logo: result }));
-        }
-      };
-      reader.readAsDataURL(file);
+      setFormError(err.message || 'Image upload failed. Please try again.');
     } finally {
       setUploadingImage(false);
     }

@@ -78,3 +78,7 @@ frontend/AGENTS.md
 frontend/CLAUDE.md
 
 .npm-cache/
+
+# Deployment & distribution archives
+backend-cpanel.tar.gz
+backend-cpanel.zip

@@ -74,6 +74,9 @@ export class PasswordResetService {
    * Generates and dispatches a 6-digit password reset OTP to user's registered email
    */
   async requestResetOtp(rawEmail: string): Promise<RequestResetOtpResult> {
+    if ((ENV.NODE_ENV === 'production' || process.env.NODE_ENV === 'production') && !ENV.RESEND_API_KEY) {
+      throw Object.assign(new Error('Password-reset email delivery is temporarily unavailable. Please contact support.'), { statusCode: 503 });
+    }
     const normalizedEmail = (rawEmail || '').replace(/[\r\n]/g, '').toLowerCase().trim();
     // Guard against ReDoS: Limit input length per RFC 5321 (max 254 chars)
     if (!normalizedEmail || normalizedEmail.length < 5 || normalizedEmail.length > 254) {

@@ -1,99 +1,58 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export function getBackendApiUrl(): string {
-  const url =
+  const isProd = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
+  const candidate =
     process.env.API_PROXY_TARGET ||
     process.env.BACKEND_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:5000';
-  return url.replace(/\/$/, '').replace(/\/api$/, '');
+    process.env.NEXT_PUBLIC_API_URL;
+
+  if (candidate) {
+    const isLocal = candidate.includes('localhost') || candidate.includes('127.0.0.1');
+    if (!isLocal || !isProd) {
+      return candidate.replace(/\/$/, '').replace(/\/api$/, '');
+    }
+  }
+
+  return isProd ? 'https://api.nextechsystem.com' : 'http://localhost:5000';
 }
 
-/**
- * Universal Next.js API proxy helper that forwards requests directly
- * to the authoritative Express backend API service.
- */
+/** Forward authoritative responses, including binary exports and error statuses. */
 export async function proxyToBackend(
   request: NextRequest,
   targetSubpath: string,
-  options?: {
-    fallbackData?: any;
-  }
-) {
-  const backendBase = getBackendApiUrl();
-  const search = request.nextUrl.search || '';
-  
-  // Normalize and strictly prevent path traversal / SSRF
+  _options?: { fallbackData?: unknown },
+): Promise<Response> {
   const normalizedPath = targetSubpath.replace(/\\/g, '/');
-  if (normalizedPath.includes('..') || /^\/\//.test(normalizedPath)) {
-    return NextResponse.json({ success: false, error: { message: 'Invalid target path' } }, { status: 400 });
+  let decodedPath: string;
+  try { decodedPath = decodeURIComponent(normalizedPath); } catch {
+    return Response.json({ success: false, error: { message: 'Invalid target path' } }, { status: 400 });
   }
-  const cleanSubpath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
-  const targetUrl = `${backendBase}/api${cleanSubpath}${search}`;
-
-  const headers: Record<string, string> = {};
-  const authHeader = request.headers.get('authorization');
-  if (authHeader) headers['Authorization'] = authHeader;
-
-  const cookieHeader = request.headers.get('cookie');
-  if (cookieHeader) headers['Cookie'] = cookieHeader;
-
-  const contentType = request.headers.get('content-type');
-  if (contentType) headers['Content-Type'] = contentType;
-
-  const method = request.method;
-  let body: any = undefined;
-
-  if (method !== 'GET' && method !== 'HEAD') {
-    try {
-      body = await request.text();
-    } catch {
-      body = undefined;
-    }
+  if (decodedPath.split('/').includes('..') || decodedPath.startsWith('//') || decodedPath.includes('\\')) {
+    return Response.json({ success: false, error: { message: 'Invalid target path' } }, { status: 400 });
   }
-
+  const cleanPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+  const target = `${getBackendApiUrl()}/api${cleanPath}${request.nextUrl.search || ''}`;
+  const headers = new Headers();
+  for (const name of ['authorization', 'cookie', 'content-type', 'origin', 'referer', 'x-csrf-token', 'accept']) {
+    const value = request.headers.get(name);
+    if (value !== null) headers.set(name, value);
+  }
   try {
-    const res = await fetch(targetUrl, {
-      method,
-      headers,
-      body,
-      signal: AbortSignal.timeout(8000),
+    const upstream = await fetch(target, {
+      method: request.method, headers,
+      body: ['GET', 'HEAD'].includes(request.method) ? undefined : await request.arrayBuffer(),
+      cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(15000),
     });
-
-    const resContentType = res.headers.get('content-type') || '';
-    if (resContentType.includes('application/json')) {
-      const data = await res.json();
-      return NextResponse.json(data, { status: res.status });
-    } else {
-      const text = await res.text();
-      return new NextResponse(text, {
-        status: res.status,
-        headers: { 'Content-Type': resContentType || 'text/plain' },
-      });
+    const responseHeaders = new Headers({ 'Cache-Control': 'no-store' });
+    for (const name of ['content-type', 'content-disposition', 'retry-after', 'www-authenticate', 'location']) {
+      const value = upstream.headers.get(name);
+      if (value !== null) responseHeaders.set(name, value);
     }
-  } catch (err: any) {
-    console.warn(`[Proxy Notice] Backend at ${targetUrl} unavailable:`, err?.message || err);
-
-    if (options?.fallbackData !== undefined) {
-      return NextResponse.json(
-        {
-          success: true,
-          data: options.fallbackData,
-          _meta: { source: 'resilient_local_cache' },
-        },
-        { status: 200 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'BACKEND_SERVICE_UNAVAILABLE',
-          message: 'Unable to connect to the backend service. Please verify server is running on port 5000.',
-        },
-      },
-      { status: 503 }
-    );
+    for (const cookie of upstream.headers.getSetCookie()) responseHeaders.append('set-cookie', cookie);
+    const empty = request.method === 'HEAD' || [204, 205, 304].includes(upstream.status);
+    return new Response(empty ? null : await upstream.arrayBuffer(), { status: upstream.status, headers: responseHeaders });
+  } catch {
+    return Response.json({ success: false, error: { code: 'BACKEND_SERVICE_UNAVAILABLE', message: 'The service is temporarily unavailable. Please try again.' } }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
 }

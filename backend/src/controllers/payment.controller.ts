@@ -49,8 +49,18 @@ export class PaymentController {
     }
 
     // Role security check: customer can only initiate payment for their own order
-    if (req.user.role === 'CUSTOMER' && order.userId !== req.user.id) {
+    if (req.user.role !== 'ADMIN' && order.userId !== req.user.id) {
       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
+      return;
+    }
+
+    if (order.paymentMethod !== provider || order.paymentStatus === 'PAID' || ['CANCELLED', 'DELIVERED'].includes(order.orderStatus)) {
+      res.status(409).json({ success: false, error: { code: 'INVALID_PAYMENT_STATE', message: 'This order is not eligible for a new session with that payment provider.' } });
+      return;
+    }
+    if ((process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production') &&
+        ((provider === 'TAMARA' && !ENV.TAMARA_API_TOKEN) || (provider === 'TABBY' && !ENV.TABBY_SECRET_KEY))) {
+      res.status(503).json({ success: false, error: { code: 'GATEWAY_UNAVAILABLE', message: 'This payment provider is not configured. Please choose another payment method.' } });
       return;
     }
 
@@ -283,7 +293,7 @@ export class PaymentController {
     }
 
     // Role security check
-    if (req.user && req.user.role === 'CUSTOMER' && order.userId !== req.user.id) {
+    if (req.user && req.user.role !== 'ADMIN' && order.userId !== req.user.id) {
       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } });
       return;
     }
@@ -320,7 +330,7 @@ export class PaymentController {
       return;
     }
 
-    if (req.user && req.user.role === 'CUSTOMER' && order.userId !== req.user.id) {
+    if (req.user && req.user.role !== 'ADMIN' && order.userId !== req.user.id) {
       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } });
       return;
     }
@@ -351,7 +361,11 @@ export class PaymentController {
       return;
     }
 
-    const refId = paymentId || order.paymentReference || `${order.paymentMethod.toLowerCase()}_ref_${Date.now()}`;
+    if (paymentId && order.paymentReference && paymentId !== order.paymentReference) {
+      res.status(400).json({ success: false, error: { code: 'PAYMENT_REFERENCE_MISMATCH', message: 'Payment reference does not match this order.' } });
+      return;
+    }
+    const refId = order.paymentReference || paymentId;
     const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
     let isSettlementVerified = false;
 
@@ -363,7 +377,11 @@ export class PaymentController {
         status === 'authorized' ||
         clientClaimsSimulation;
     } else {
-      // Production or live gateway: strictly verify server-to-server with payment provider
+      // Only an implemented server-to-server gateway may settle an online payment.
+      if (!['TAMARA', 'TABBY'].includes(order.paymentMethod) || !refId) {
+        res.status(503).json({ success: false, error: { code: 'PAYMENT_VERIFICATION_UNAVAILABLE', message: 'This payment requires server-side verification or manual reconciliation.' } });
+        return;
+      }
       try {
         if (order.paymentMethod === 'TAMARA') {
           if (!ENV.TAMARA_API_TOKEN) {
@@ -390,10 +408,6 @@ export class PaymentController {
           if (captureResult?.status === 'CLOSED' || captureResult?.status === 'AUTHORIZED' || (!isProd && captureResult?.isSimulated)) {
             isSettlementVerified = true;
           }
-        } else if (order.paymentMethod === 'CREDIT_CARD') {
-          isSettlementVerified = Boolean(paymentId && (status === 'success' || status === 'approved'));
-        } else {
-          isSettlementVerified = status === 'success' || status === 'approved';
         }
       } catch (err: any) {
         console.error(`[PaymentController] Server-to-server payment verification failed for order ${order.id}:`, err);

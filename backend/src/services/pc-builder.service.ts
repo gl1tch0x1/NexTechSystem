@@ -170,8 +170,8 @@ export class PCBuilderService {
     };
 
     for (const p of products) {
-      const name = p.name.toLowerCase();
-      const cat = p.categoryName.toLowerCase();
+      const name = String(p.name || '').toLowerCase();
+      const cat = String(p.categoryName || '').toLowerCase();
 
       if (cat.includes('processor') || cat.includes('cpu') || name.includes('core i') || name.includes('ryzen')) {
         grouped.cpu.push(p);

@@ -11,7 +11,7 @@
     "seed:firestore": "tsx src/seed/seed-firestore.ts",
     "lint": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
-    "test:e2e": "tsx src/test-workflow.ts"
+    "test:e2e": "node --import tsx scripts/run-isolated-workflow.mts"
   },
   "dependencies": {
     "cors": "^2.8.5",

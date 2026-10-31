@@ -20,6 +20,7 @@ import {
   SPECIFICATION_PRESETS,
   SPECIFICATION_GROUPS
 } from '@/lib/specification-presets';
+import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 import {
   Package,
   Layers,
@@ -390,12 +391,12 @@ interface ProductEditorPageProps {
 
 export function ProductEditorPage({ mode, productId, portal = 'admin', resellerCode }: ProductEditorPageProps) {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const returnPath = portal === 'reseller' ? `/reseller/${resellerCode || 'comnet101'}/products` : '/admin/products';
 
   const [loading, setLoading] = useState(mode === 'edit');
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [resellers, setResellers] = useState<Reseller[]>([]);
 
   // Focused Step-by-Step Tabbed Navigation Mode
@@ -414,6 +415,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const [taxonomyError, setTaxonomyError] = useState('');
   const [taxonomyLoading, setTaxonomyLoading] = useState(true);
   const [taxonomyRetry, setTaxonomyRetry] = useState(0);
+  const [productLoadRetry, setProductLoadRetry] = useState(0);
 
   // Studio 2.0 State Enhancements
   const [previewCurrency, setPreviewCurrency] = useState<keyof typeof FX_RATES>('AED');
@@ -556,118 +558,154 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
 
   useEffect(() => {
     if (mode === 'edit' && productId) {
+      // Resolve auth token — prefer context token, fall back to localStorage
+      const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
+      // If auth is still loading and no token is in storage yet, wait for hydration
+      if (!effectiveToken && authLoading) {
+        setLoading(true);
+        return;
+      }
+
+      let cancelled = false;
       const loadProduct = async () => {
         setLoading(true);
+        setFormError('');
         try {
-          const fetchOpts = token ? { token } : {};
-          const product = await ApiClient.get<Product>(`/admin/products/${productId}`, fetchOpts)
-            .catch(() => ApiClient.get<Product>(`/products/${productId}`).catch(() => null));
+          const fetchOpts = effectiveToken ? { token: effectiveToken } : {};
 
-          if (product) {
-            const loadedSpecs: Record<string, string> = { ...(product.specifications || {}) };
-            const standardKeys = new Set<string>(SPECIFICATION_FIELDS as readonly string[]);
-            const customSpecsList: { key: string; value: string }[] = [];
-
-            Object.entries(loadedSpecs).forEach(([k, v]) => {
-              if (!standardKeys.has(k)) {
-                customSpecsList.push({ key: k, value: String(v) });
-              }
-            });
-
-            const origP = product.originalPrice || product.compareAtPrice || product.price;
-            const computedDiscount = origP > product.price ? Math.round(((origP - product.price) / origP) * 100) : 0;
-            const cond = loadedSpecs['Condition'] || product.specs?.condition || 'Brand New (Factory Sealed)';
-            const war = product.warranty || loadedSpecs['Warranty'] || '3 Years Official Manufacturer Warranty';
-
-            const prodLocations = product.locations && product.locations.length > 0
-              ? product.locations.map(w => ({
-                locationId: w.locationId,
-                locationName: w.locationName,
-                city: w.city || 'Dubai, UAE',
-                quantity: w.quantity || 0,
-                available: w.available ?? w.quantity ?? 0,
-                committed: w.committed ?? 0,
-                unavailable: w.unavailable ?? 0,
-                onHand: w.onHand ?? w.quantity ?? 0,
-              }))
-              : WAREHOUSE_LOCATIONS.map(w => ({
-                locationId: w.id,
-                locationName: w.name,
-                city: w.city,
-                quantity: w.id === 'loc_dxb_main' ? product.stock : 0,
-                available: w.id === 'loc_dxb_main' ? product.stock : 0,
-                committed: 0,
-                unavailable: 0,
-                onHand: w.id === 'loc_dxb_main' ? product.stock : 0,
-              }));
-
-            const prodImages = product.images && product.images.length > 0
-              ? product.images
-              : [product.primaryImage || product.thumbnail || DEFAULT_FALLBACK_IMAGE];
-
-            setFormData({
-              title: product.title || product.name || '',
-              slug: product.slug || '',
-              sku: product.sku || generateRandomSku(product.categoryId),
-              barcode: product.barcode || generateRandomBarcode(),
-              shortDescription: product.shortDescription || '',
-              description: product.description || '',
-              condition: cond,
-              warrantyYears: product.specs?.warrantyYears || 3,
-              warranty: war,
-              price: product.price,
-              originalPrice: origP,
-              costPrice: product.costPrice || Math.round(product.price * 0.8),
-              discountPercentage: product.discountPercentage || computedDiscount,
-              chargeTax: product.chargeTax !== false,
-              unitPrice: product.unitPrice || product.price,
-              unitMeasure: product.unitMeasure || 'unit',
-              stock: product.stock,
-              lowStockThreshold: product.lowStockThreshold || 5,
-              inventoryTracked: product.inventoryTracked !== false,
-              allowBackorder: Boolean(product.allowBackorder),
-              warehouseLocation: product.locations?.[0]?.locationId || 'loc_dxb_main',
-              locations: prodLocations,
-              weight: product.weight || 1.5,
-              dimensions: product.dimensions || { length: 30, width: 20, height: 5, unit: 'cm' },
-              hsCode: product.hsCode || '8471.30.01',
-              isPhysical: product.isPhysical !== false,
-              collections: product.collections || (product.categoryName ? [product.categoryName] : ['Laptops']),
-              tags: product.tags || ['Hardware'],
-              primaryImage: product.primaryImage || product.thumbnail || prodImages[0],
-              images: prodImages,
-              sellerType: product.sellerType || 'ADMIN',
-              resellerId: product.resellerId || '',
-              resellerName: product.resellerName || '',
-              resellerCode: product.resellerCode || '',
-              categoryId: product.categoryId || categories[0]?.id || '',
-              categoryName: product.categoryName || categories[0]?.name || '',
-              brandId: product.brandId || brands[0]?.id || '',
-              brandName: product.brandName || brands[0]?.name || '',
-              socket: product.specs?.socket || loadedSpecs['Socket Type'] || 'LGA1700',
-              tdp: product.specs?.tdp || 125,
-              formFactor: product.specs?.formFactor || loadedSpecs['Form Factor'] || 'ATX',
-              specifications: loadedSpecs,
-              customSpecs: customSpecsList,
-              hasVariants: Boolean(product.hasVariants),
-              variantOptions: product.variantOptions || [
-                { name: 'RAM', values: ['16GB', '32GB'] },
-                { name: 'Storage', values: ['512GB SSD', '1TB SSD'] },
-              ],
-              variants: product.variants || [],
-              status: ((product as any).status as any) || (product.isActive ? 'ACTIVE' : 'DRAFT'),
-            });
+          let rawData: any = null;
+          try {
+            rawData = await ApiClient.get(`/admin/products/${productId}`, fetchOpts);
+          } catch (adminErr) {
+            console.warn('[ProductEditor] /admin/products lookup failed, attempting fallback to public endpoint:', adminErr);
+            try {
+              rawData = await ApiClient.get(`/products/${productId}`, fetchOpts);
+            } catch (pubErr) {
+              console.error('[ProductEditor] Both admin and public lookups failed:', pubErr);
+            }
           }
+
+          if (cancelled) return;
+
+          // Unpack product: handles { product: ... }, { data: ... }, or direct Product object
+          const product: Product | null = rawData?.product
+            ? rawData.product
+            : (rawData?.data?.product ? rawData.data.product : (rawData?.data ? rawData.data : rawData));
+
+          if (!product || (!product.title && !product.name)) {
+            setFormError('Failed to load product details. The SKU may not exist or the service is temporarily unavailable.');
+            return;
+          }
+
+          const loadedSpecs: Record<string, string> = { ...(product.specifications || product.specs || {}) };
+          const standardKeys = new Set<string>(SPECIFICATION_FIELDS as readonly string[]);
+          const customSpecsList: { key: string; value: string }[] = [];
+
+          Object.entries(loadedSpecs).forEach(([k, v]) => {
+            if (!standardKeys.has(k) && typeof v === 'string') {
+              customSpecsList.push({ key: k, value: String(v) });
+            }
+          });
+
+          const origP = product.originalPrice || product.compareAtPrice || product.price || 0;
+          const computedDiscount = (origP > (product.price || 0) && origP > 0)
+            ? Math.round(((origP - product.price) / origP) * 100)
+            : 0;
+          const cond = loadedSpecs['Condition'] || (product as any).condition || product.specs?.condition || 'Brand New (Factory Sealed)';
+          const war = product.warranty || loadedSpecs['Warranty'] || '3 Years Official Manufacturer Warranty';
+
+          const prodLocations = product.locations && product.locations.length > 0
+            ? product.locations.map(w => ({
+              locationId: w.locationId,
+              locationName: w.locationName,
+              city: w.city || 'Dubai, UAE',
+              quantity: w.quantity || 0,
+              available: w.available ?? w.quantity ?? 0,
+              committed: w.committed ?? 0,
+              unavailable: w.unavailable ?? 0,
+              onHand: w.onHand ?? w.quantity ?? 0,
+            }))
+            : WAREHOUSE_LOCATIONS.map(w => ({
+              locationId: w.id,
+              locationName: w.name,
+              city: w.city,
+              quantity: w.id === 'loc_dxb_main' ? (product.stock || 0) : 0,
+              available: w.id === 'loc_dxb_main' ? (product.stock || 0) : 0,
+              committed: 0,
+              unavailable: 0,
+              onHand: w.id === 'loc_dxb_main' ? (product.stock || 0) : 0,
+            }));
+
+          const prodImages = product.images && product.images.length > 0
+            ? product.images
+            : [product.primaryImage || product.thumbnail || DEFAULT_FALLBACK_IMAGE].filter(Boolean);
+
+          const effectiveImages = prodImages.length > 0 ? prodImages : [DEFAULT_FALLBACK_IMAGE];
+          const primaryImg = product.primaryImage || product.thumbnail || effectiveImages[0] || DEFAULT_FALLBACK_IMAGE;
+
+          setFormData({
+            title: product.title || product.name || '',
+            slug: product.slug || '',
+            sku: product.sku || '',
+            barcode: product.barcode || '',
+            shortDescription: product.shortDescription || '',
+            description: product.description || '',
+            condition: cond,
+            warrantyYears: product.specs?.warrantyYears || 3,
+            warranty: war,
+            price: Number(product.price) || 0,
+            originalPrice: Number(origP) || 0,
+            costPrice: product.costPrice ? Number(product.costPrice) : Math.round((Number(product.price) || 0) * 0.8),
+            discountPercentage: product.discountPercentage !== undefined ? Number(product.discountPercentage) : computedDiscount,
+            chargeTax: product.chargeTax !== false,
+            unitPrice: product.unitPrice ? Number(product.unitPrice) : Number(product.price) || 0,
+            unitMeasure: product.unitMeasure || 'unit',
+            stock: Number(product.stock) || 0,
+            lowStockThreshold: product.lowStockThreshold ? Number(product.lowStockThreshold) : 5,
+            inventoryTracked: product.inventoryTracked !== false,
+            allowBackorder: Boolean(product.allowBackorder),
+            warehouseLocation: product.locations?.[0]?.locationId || 'loc_dxb_main',
+            locations: prodLocations,
+            weight: product.weight ? Number(product.weight) : 1.5,
+            dimensions: product.dimensions || { length: 30, width: 20, height: 5, unit: 'cm' },
+            hsCode: product.hsCode || '8471.30.01',
+            isPhysical: product.isPhysical !== false,
+            collections: product.collections && product.collections.length > 0 ? product.collections : (product.categoryName ? [product.categoryName] : ['Laptops']),
+            tags: product.tags && product.tags.length > 0 ? product.tags : ['Hardware'],
+            primaryImage: primaryImg,
+            images: effectiveImages,
+            sellerType: product.sellerType || 'ADMIN',
+            resellerId: product.resellerId || '',
+            resellerName: product.resellerName || '',
+            resellerCode: product.resellerCode || '',
+            categoryId: product.categoryId || '',
+            categoryName: product.categoryName || '',
+            brandId: product.brandId || '',
+            brandName: product.brandName || '',
+            socket: product.specs?.socket || loadedSpecs['Socket Type'] || 'LGA1700',
+            tdp: product.specs?.tdp || 125,
+            formFactor: product.specs?.formFactor || loadedSpecs['Form Factor'] || 'ATX',
+            specifications: loadedSpecs,
+            customSpecs: customSpecsList,
+            hasVariants: Boolean(product.hasVariants),
+            variantOptions: product.variantOptions || [
+              { name: 'RAM', values: ['16GB', '32GB'] },
+              { name: 'Storage', values: ['512GB SSD', '1TB SSD'] },
+            ],
+            variants: product.variants || [],
+            status: ((product as any).status as any) || (product.isActive ? 'ACTIVE' : 'DRAFT'),
+          });
         } catch (err: any) {
-          setFormError(err.message || 'Failed to load product details.');
+          if (!cancelled) setFormError(err.message || 'Failed to load product details.');
         } finally {
-          setLoading(false);
+          if (!cancelled) setLoading(false);
         }
       };
 
       loadProduct();
+      return () => { cancelled = true; };
     }
-  }, [mode, productId, token, categories, brands, generateRandomSku]);
+  }, [mode, productId, token, authLoading, productLoadRetry]);
 
   // Margin & Markup calculations
   const profitMetrics = useMemo(() => {
@@ -1214,7 +1252,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       return;
     }
 
-    if (!categories.some(c => c.id === formData.categoryId)) {
+    if (!formData.categoryId?.trim()) {
       setFormError('Select a hardware category before saving.');
       return;
     }
@@ -1319,7 +1357,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         isActive: finalStatus === 'ACTIVE',
       };
 
-      const authOpts = token ? { token } : {};
+      const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
+      const authOpts = effectiveToken ? { token: effectiveToken } : {};
       if (portal === 'reseller') {
         const endpoint = mode === 'edit' && productId ? `/reseller/products/${productId}` : '/reseller/products';
         if (mode === 'edit' && productId) {
@@ -1385,6 +1424,37 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
         <div className="text-sm font-bold text-slate-600 dark:text-slate-400">
           Loading Hardware SKU Specifications...
+        </div>
+      </div>
+    );
+  }
+
+  // If in edit mode and product failed to load (blank title = data not populated), show error state
+  if (mode === 'edit' && formError && !formData.title && !formData.sku) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-6 max-w-lg mx-auto text-center px-4">
+        <div className="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
+          <AlertTriangle className="w-8 h-8 text-red-500" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Failed to Load Product</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{formError}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.push(returnPath)}
+            className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          >
+            ← Back to Catalog
+          </button>
+          <button
+            type="button"
+            onClick={() => { setFormError(''); setProductLoadRetry(r => r + 1); }}
+            className="px-4 py-2 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -1691,7 +1761,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     </label>
                     <select
                       aria-label="Hardware Category"
-                      disabled={taxonomyLoading || categories.length === 0}
+                      disabled={taxonomyLoading && categories.length === 0}
                       value={formData.categoryId}
                       onChange={e => {
                         const cat = categories.find(c => c.id === e.target.value);
@@ -1699,12 +1769,15 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           ...prev,
                           categoryId: e.target.value,
                           categoryName: cat?.name || prev.categoryName,
-                          sku: prev.sku.startsWith('NX-') ? generateRandomSku(e.target.value) : prev.sku,
+                          sku: mode === 'create' && prev.sku.startsWith('NX-') ? generateRandomSku(e.target.value) : prev.sku,
                         }));
                       }}
                       className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-bold cursor-pointer"
                     >
-                      <option value="">{taxonomyLoading ? 'Loading categories…' : categories.length ? 'Select a hardware category' : 'No categories configured'}</option>
+                      <option value="">{taxonomyLoading && categories.length === 0 ? 'Loading categories…' : 'Select a hardware category'}</option>
+                      {formData.categoryId && !categories.some(c => c.id === formData.categoryId) && (
+                        <option value={formData.categoryId}>{formData.categoryName || formData.categoryId}</option>
+                      )}
                       {categories.map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
@@ -1729,6 +1802,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-bold cursor-pointer"
                     >
                       <option value="">Select a manufacturer</option>
+                      {formData.brandId && !brands.some(b => b.id === formData.brandId) && (
+                        <option value={formData.brandId}>{formData.brandName || formData.brandId}</option>
+                      )}
                       {brands.map(b => (
                         <option key={b.id} value={b.id}>{b.name}</option>
                       ))}

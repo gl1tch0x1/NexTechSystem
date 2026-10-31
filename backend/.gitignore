@@ -21,3 +21,7 @@ dist/
 *.log
 npm-debug.log*
 yarn-debug.log*
+
+# Deployment & distribution archives
+backend-cpanel.tar.gz
+backend-cpanel.zip

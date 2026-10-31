@@ -224,18 +224,11 @@ function AuthContent() {
         method: 'POST',
         body: JSON.stringify({ email: clean }),
       });
-      if (res.success) {
-        setForgotMaskedEmail(res.data?.maskedEmail || clean);
-        setForgotCooldown(res.data?.resendCooldownSeconds || 60);
-        if (res.data?.devCode) {
-          setForgotDevCode(res.data.devCode);
-          setForgotOtp(res.data.devCode);
-        }
-        setForgotStep('verify');
-        setForgotSuccess(res.data?.message || 'Verification code sent to your email.');
-      } else {
-        setForgotError(res.error?.message || 'Failed to dispatch verification code.');
-      }
+      setForgotMaskedEmail(res.maskedEmail || clean);
+      setForgotCooldown(res.resendCooldownSeconds || 60);
+      if (res.devCode) { setForgotDevCode(res.devCode); setForgotOtp(res.devCode); }
+      setForgotStep('verify');
+      setForgotSuccess(res.message || 'Verification code sent to your email.');
     } catch (err: any) {
       setForgotError(err.message || 'Unable to request password reset. Please try again.');
     } finally {
@@ -257,8 +250,8 @@ function AuthContent() {
         method: 'POST',
         body: JSON.stringify({ email: forgotEmail.trim(), code: cleanOtp }),
       });
-      if (res.success && res.data?.resetToken) {
-        setForgotResetToken(res.data.resetToken);
+      if (res.resetToken) {
+        setForgotResetToken(res.resetToken);
         setForgotStep('new-password');
         setForgotSuccess('Code verified successfully! Please enter your new password.');
       } else {
@@ -288,20 +281,16 @@ function AuthContent() {
     setForgotError('');
     setForgotLoading(true);
     try {
-      const res = await ApiClient.request('/auth/reset-password', {
+      await ApiClient.request('/auth/reset-password', {
         method: 'POST',
         body: JSON.stringify({
           resetToken: forgotResetToken,
           newPassword: forgotNewPassword,
         }),
       });
-      if (res.success) {
-        setForgotStep('success');
-        setLoginEmail(forgotEmail.trim());
-        setLoginPassword('');
-      } else {
-        setForgotError(res.error?.message || 'Failed to update password.');
-      }
+      setForgotStep('success');
+      setLoginEmail(forgotEmail.trim());
+      setLoginPassword('');
     } catch (err: any) {
       setForgotError(err.message || 'Password update failed. Please try again.');
     } finally {

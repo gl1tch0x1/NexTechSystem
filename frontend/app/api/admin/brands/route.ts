@@ -1,74 +1,13 @@
-import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { proxyToBackend } from '@/lib/proxy-helper';
+import { DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 
-export async function GET(request: Request) {
-  const backendUrl =
-    process.env.API_PROXY_TARGET ||
-    process.env.BACKEND_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:5000';
-
-  if (backendUrl) {
-    try {
-      const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
-      const authHeader = request.headers.get('authorization');
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (authHeader) headers['Authorization'] = authHeader;
-
-      let res = await fetch(`${clean}/api/admin/brands`, {
-        headers,
-        signal: AbortSignal.timeout(3500),
-      });
-      if (!res.ok) {
-        res = await fetch(`${clean}/api/products/brands`, {
-          signal: AbortSignal.timeout(3500),
-        });
-      }
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-          return NextResponse.json(json);
-        }
-      }
-    } catch (err) {
-      console.warn('Backend admin brands endpoint fetch failed:', err);
-    }
-  }
-
-  const { DEFAULT_BRANDS } = await import('@/lib/default-taxonomy');
-
-  return NextResponse.json({
-    success: true,
-    data: DEFAULT_BRANDS,
-    meta: { total: DEFAULT_BRANDS.length },
+export async function GET(request: NextRequest) {
+  return proxyToBackend(request, '/admin/brands', {
+    fallbackData: DEFAULT_BRANDS,
   });
 }
 
-export async function POST(request: Request) {
-  const backendUrl =
-    process.env.API_PROXY_TARGET ||
-    process.env.BACKEND_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:5000';
-
-  try {
-    const clean = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
-    const body = await request.json();
-    const authHeader = request.headers.get('authorization');
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (authHeader) headers['Authorization'] = authHeader;
-
-    const res = await fetch(`${clean}/api/admin/brands`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    const json = await res.json();
-    return NextResponse.json(json, { status: res.status });
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: { message: err.message || 'Failed to create brand' } },
-      { status: 500 }
-    );
-  }
+export async function POST(request: NextRequest) {
+  return proxyToBackend(request, '/admin/brands');
 }

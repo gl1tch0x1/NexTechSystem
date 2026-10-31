@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import { googleAnalyticsService } from './google-analytics.service.js';
 import { orderRepository } from '../repositories/order.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
@@ -938,48 +938,14 @@ export class AnalyticsService {
       cardRevenue: Math.round(data.card * 100) / 100,
     }));
 
-    // Real-Time Traffic & Telemetry (Simulated Google Analytics Live Stream)
-    const baseVisitors = 38 + crypto.randomInt(0, 25);
-    const livePulseMinutes = Array.from({ length: 30 }).map((_, idx) => {
-      const minAgo = 29 - idx;
-      const count = Math.max(12, Math.floor(baseVisitors * 0.7 + Math.sin(idx * 0.5) * 15 + crypto.randomInt(0, 8)));
-      return {
-        minute: `${minAgo}m ago`,
-        activeUsers: count,
-        pageviews: count * 3 + crypto.randomInt(0, 10),
-      };
-    });
-
-    const trafficSources = [
-      { source: 'Google Organic Search (SEO)', percentage: 38, visitors: 4820, bounceRate: '24.2%', conversionRate: '4.8%' },
-      { source: 'Direct / Bookmarks / Enterprise HUD', percentage: 32, visitors: 4060, bounceRate: '18.1%', conversionRate: '8.4%' },
-      { source: 'Tech Review Portals & Reddit (r/hardware)', percentage: 18, visitors: 2280, bounceRate: '31.5%', conversionRate: '3.6%' },
-      { source: 'Tier-1 Reseller & System Integrator Referrals', percentage: 12, visitors: 1520, bounceRate: '12.0%', conversionRate: '14.2%' },
-    ];
-
-    const geoDistribution = [
-      { country: 'United Arab Emirates', code: 'AE', cities: 'Dubai, Abu Dhabi, Sharjah', percentage: 54, sessions: 6860, revenueShare: '58%' },
-      { country: 'Saudi Arabia', code: 'SA', cities: 'Riyadh, Jeddah, Dammam', percentage: 26, sessions: 3300, revenueShare: '28%' },
-      { country: 'Qatar', code: 'QA', cities: 'Doha, Lusail', percentage: 8, sessions: 1010, revenueShare: '7%' },
-      { country: 'Kuwait', code: 'KW', cities: 'Kuwait City, Hawalli', percentage: 5, sessions: 635, revenueShare: '4%' },
-      { country: 'Oman & Bahrain', code: 'OM/BH', cities: 'Muscat, Manama', percentage: 4, sessions: 508, revenueShare: '2%' },
-      { country: 'International / EU & US', code: 'GLOBAL', cities: 'London, Singapore, Frankfurt', percentage: 3, sessions: 380, revenueShare: '1%' },
-    ];
-
-    const deviceBreakdown = [
-      { device: 'High-End Workstation / Desktop (Chrome/Edge)', percentage: 68, sessions: 8640, icon: 'Monitor' },
-      { device: 'Mobile Smartphone (iOS Safari / Android)', percentage: 24, sessions: 3050, icon: 'Smartphone' },
-      { device: 'Enterprise Tablet / iPad Pro', percentage: 8, sessions: 1010, icon: 'Tablet' },
-    ];
-
-    const conversionFunnel = [
-      { stage: '1. Storefront & Catalog Discovery', users: 12700, percentage: 100, dropoff: '0%' },
-      { stage: '2. Product Datasheet & Spec Radar View', users: 9400, percentage: 74.0, dropoff: '26.0%' },
-      { stage: '3. PC Builder Studio Configuration', users: 5800, percentage: 45.7, dropoff: '38.3%' },
-      { stage: '4. Hardware Added to Cart', users: 3200, percentage: 25.2, dropoff: '44.8%' },
-      { stage: '5. Initiated Checkout & VAT Review', users: 2100, percentage: 16.5, dropoff: '34.4%' },
-      { stage: '6. Verified Order & E-Bill Generated', users: 1680, percentage: 13.2, dropoff: '20.0%' },
-    ];
+    // Missing analytics credentials must not produce invented traffic or conversion figures.
+    const gaData = await googleAnalyticsService.getRealtimeActiveUsers();
+    const baseVisitors = gaData?.activeUsers ?? 0;
+    const livePulseMinutes = (gaData?.minutes || []).map(m => ({ minute: m.minute, activeUsers: m.activeUsers }));
+    const trafficSources: unknown[] = [];
+    const geoDistribution: unknown[] = [];
+    const deviceBreakdown: unknown[] = [];
+    const conversionFunnel: unknown[] = [];
 
     const avgOrderValue = paidOrders.length > 0 ? Math.round((totalRevenue / paidOrders.length) * 100) / 100 : 0;
     const grossProfit = Math.round((totalRevenue - totalProcurementSpend) * 100) / 100;
@@ -993,7 +959,7 @@ export class AnalyticsService {
         totalOrders: paidOrders.length,
         totalUnitsSold,
         averageOrderValue: avgOrderValue,
-        conversionRate: 13.2,
+        conversionRate: null,
         activeCustomersCount: users.filter(u => u.role === 'CUSTOMER' && u.isActive).length,
         activeResellersCount: resellers.filter(r => r.status === 'ACTIVE').length,
         totalCatalogItems: products.length,
@@ -1036,6 +1002,8 @@ export class AnalyticsService {
       paymentMethodSplit,
       sellerChannelSplit,
       trafficAnalytics: {
+        available: gaData !== null,
+        message: gaData ? 'Realtime active users are available. Acquisition and conversion reports are not configured.' : 'Traffic analytics are unavailable. Configure the Analytics property and authorized service account.',
         realTimeActiveUsers: baseVisitors,
         livePulseMinutes,
         trafficSources,

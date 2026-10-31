@@ -134,6 +134,7 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto transition-colors duration-200">
+      {analytics?.trafficAnalytics?.message && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{analytics.trafficAnalytics.message}</p>}
       {/* Header & Controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -228,7 +229,7 @@ export default function AdminAnalyticsPage() {
                     key={idx}
                     className="flex-1 bg-gradient-to-t from-purple-600 to-tech-cyan rounded-t-sm transition-all duration-300 hover:opacity-80 group relative cursor-pointer"
                     style={{ height: `${heightPct}%` }}
-                    title={`${m.minute}: ${m.activeUsers} active visitors (${m.pageviews} views)`}
+                    title={`${m.minute}: ${m.activeUsers} active visitors`}
                   />
                 );
               })}
@@ -299,7 +300,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
-            {kpis.conversionRate || 13.2}%
+            {kpis.conversionRate == null ? 'Unavailable' : `${kpis.conversionRate}%`}
           </div>
           <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />

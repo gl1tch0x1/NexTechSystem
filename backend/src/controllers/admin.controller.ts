@@ -86,15 +86,18 @@ export class AdminController {
 
   async updateProduct(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
-    const updated = await productService.updateProduct(id, req.body);
+    const body = { ...req.body };
+    if (body.title && !body.name) body.name = body.title;
+    if (body.name && !body.title) body.title = body.name;
+    const updated = await productService.updateProduct(id, body);
     await auditService.log({
       userId: req.user?.id || 'admin',
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
-      userRole: 'ADMIN',
+      userRole: req.user?.role || 'ADMIN',
       action: 'ADMIN_PRODUCT_UPDATED',
       resource: 'product',
       resourceId: id,
-      details: req.body,
+      details: body,
     });
     res.json({ success: true, data: updated });
   }
@@ -836,6 +839,27 @@ export class AdminController {
     res.json({ success: true, data: orders });
   }
 
+  async getPurchaseOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = String(req.params.id);
+    const order = await purchaseOrderRepository.findById(id) || await purchaseOrderRepository.findByPoNumber(id);
+    if (!order) { res.status(404).json({ success: false, error: { message: 'Purchase order not found.' } }); return; }
+    res.json({ success: true, data: order });
+  }
+  
+  async deletePurchaseOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const order = await purchaseOrderRepository.findById(String(req.params.id));
+    if (!order) { res.status(404).json({ success: false, error: { message: 'Purchase order not found.' } }); return; }
+    if (order.status !== 'DRAFT' && order.status !== 'CANCELLED') {
+      res.status(409).json({ success: false, error: { message: 'Only draft or cancelled purchase orders can be deleted.' } }); return;
+    }
+    await purchaseOrderRepository.delete(order.id);
+    await auditService.log({
+      action: 'DELETE', resource: 'PURCHASE_ORDER', resourceId: order.id,
+      userId: req.user!.id, userEmail: req.user!.email, userRole: 'ADMIN', details: { poNumber: order.poNumber }
+    });
+    res.json({ success: true, message: 'Purchase order deleted.' });
+  }
+
   async createPurchaseOrder(req: AuthenticatedRequest, res: Response): Promise<void> {
     const body = req.body || {};
     const poNumber = body.poNumber || `PO-${new Date().getFullYear()}-${crypto.randomInt(1000, 10000)}`;
@@ -956,84 +980,87 @@ export class AdminController {
   }
 
   async updatePOStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const id = req.params.id as string;
-    const { status, receivedNotes, items: receivedItems } = req.body;
+    await dbStore.runTransaction(async () => {
+      const id = req.params.id as string;
+      const { status, receivedNotes, items: receivedItems } = req.body;
 
-    let existing = await purchaseOrderRepository.findById(id);
-    if (!existing) {
-      existing = await purchaseOrderRepository.findByPoNumber(id);
-    }
-    if (!existing) {
-      const fallbackPoNumber = id.toUpperCase().startsWith('PO-') ? id.toUpperCase() : `PO-2026-00${id.replace(/\D/g, '') || '41'}`;
-      const newPO: PurchaseOrder = {
-        id,
-        poNumber: fallbackPoNumber,
-        supplierName: 'ASUS MENA Distribution Hub',
-        status: status || 'RECEIVED',
-        items: receivedItems || [],
-        totalUnits: 12,
-        totalEstimatedCost: 89400,
-        currency: 'AED',
-        targetWarehouse: 'DXB-01 (JAFZA Mega-Hub)',
-        createdAt: new Date().toISOString(),
+      let existing = await purchaseOrderRepository.findById(id);
+      if (!existing) {
+        existing = await purchaseOrderRepository.findByPoNumber(id);
+      }
+      if (!existing) {
+        res.status(404).json({ success: false, error: { message: 'Purchase order not found.' } });
+        return;
+      }
+      if (!['DRAFT', 'ISSUED', 'RECEIVED', 'CANCELLED'].includes(status)) {
+        res.status(400).json({ success: false, error: { message: 'Invalid purchase order status.' } });
+        return;
+      }
+      if (existing.receivedAt && status !== 'RECEIVED') {
+        res.status(409).json({ success: false, error: { message: 'Received inventory must be reconciled before changing this purchase order.' } });
+        return;
+      }
+      const itemsToValidate = receivedItems || existing.items;
+      if (!Array.isArray(itemsToValidate) || itemsToValidate.some((item: any) => {
+        const quantity = item.receivedQuantity ?? item.orderedQuantity ?? item.quantity ?? 0;
+        return !Number.isInteger(quantity) || quantity < 0 || !Number.isFinite(item.unitCost) || item.unitCost < 0;
+      })) {
+        res.status(400).json({ success: false, error: { message: 'Received items require non-negative integer quantities and valid unit costs.' } });
+        return;
+      }
+
+      const updates: Partial<PurchaseOrder> = {
+        status,
         updatedAt: new Date().toISOString(),
       };
-      await purchaseOrderRepository.create(newPO);
-      res.json({ success: true, data: newPO });
-      return;
-    }
 
-    const updates: Partial<PurchaseOrder> = {
-      status,
-      updatedAt: new Date().toISOString(),
-    };
+      if (receivedNotes) {
+        updates.notes = receivedNotes;
+      }
 
-    if (receivedNotes) {
-      updates.notes = receivedNotes;
-    }
+      if (receivedItems && Array.isArray(receivedItems) && receivedItems.length > 0) {
+        updates.items = receivedItems;
+      }
 
-    if (receivedItems && Array.isArray(receivedItems) && receivedItems.length > 0) {
-      updates.items = receivedItems;
-    }
+      if (status === 'ISSUED' && !existing.issuedAt) {
+        updates.issuedAt = new Date().toISOString();
+      }
 
-    if (status === 'ISSUED' && !existing.issuedAt) {
-      updates.issuedAt = new Date().toISOString();
-    }
+      if (status === 'RECEIVED' && !existing.receivedAt) {
+        updates.receivedAt = new Date().toISOString();
+        const activeItems = (receivedItems && receivedItems.length > 0) ? receivedItems : existing.items;
 
-    if (status === 'RECEIVED' && !existing.receivedAt) {
-      updates.receivedAt = new Date().toISOString();
-      const activeItems = (receivedItems && receivedItems.length > 0) ? receivedItems : existing.items;
+        // Automatically increment stock and recalculate Weighted Average Cost (WAC)
+        for (const item of activeItems) {
+          try {
+            const prod = await productRepository.findById(item.productId);
+            if (prod) {
+              const currentStock = Math.max(0, prod.stock || 0);
+              const currentCost = prod.costPrice || Math.round(prod.price * 0.75);
+              const incomingQty = item.receivedQuantity !== undefined ? item.receivedQuantity : (item.orderedQuantity || item.quantity || 0);
+              const incomingCost = item.unitCost || 0;
+              const newStock = currentStock + incomingQty;
 
-      // Automatically increment stock and recalculate Weighted Average Cost (WAC)
-      for (const item of activeItems) {
-        try {
-          const prod = await productRepository.findById(item.productId);
-          if (prod) {
-            const currentStock = Math.max(0, prod.stock || 0);
-            const currentCost = prod.costPrice || Math.round(prod.price * 0.75);
-            const incomingQty = item.receivedQuantity !== undefined ? item.receivedQuantity : (item.orderedQuantity || item.quantity || 0);
-            const incomingCost = item.unitCost || 0;
-            const newStock = currentStock + incomingQty;
+              // Weighted Average Cost Formula: ((Current Stock * Current Cost) + (Incoming Qty * Unit Cost)) / New Total Stock
+              const newCostPrice = newStock > 0
+                ? Math.round(((currentStock * currentCost) + (incomingQty * incomingCost)) / newStock)
+                : incomingCost;
 
-            // Weighted Average Cost Formula: ((Current Stock * Current Cost) + (Incoming Qty * Unit Cost)) / New Total Stock
-            const newCostPrice = newStock > 0
-              ? Math.round(((currentStock * currentCost) + (incomingQty * incomingCost)) / newStock)
-              : incomingCost;
-
-            await productRepository.update(item.productId, {
-              stock: newStock,
-              costPrice: newCostPrice,
-            });
+              await productRepository.update(item.productId, {
+                stock: newStock,
+                costPrice: newCostPrice,
+              });
+            }
+          } catch (err) {
+            const sanitizedProductId = String(item.productId || '').replace(/\n|\r/g, '');
+            console.error('Failed to update stock and WAC for product %s:', sanitizedProductId, err);
           }
-        } catch (err) {
-          const sanitizedProductId = String(item.productId || '').replace(/\n|\r/g, '');
-          console.error('Failed to update stock and WAC for product %s:', sanitizedProductId, err);
         }
       }
-    }
 
-    const updated = await purchaseOrderRepository.update(id, updates);
-    res.json({ success: true, data: updated });
+      const updated = await purchaseOrderRepository.update(existing.id, updates);
+      res.json({ success: true, data: updated });
+    });
   }
 
   // ==========================================
@@ -1042,13 +1069,55 @@ export class AdminController {
   async getCmsLayout(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const settings: any = await settingsRepository.getSettings();
     const defaultSections: StorefrontSectionConfig[] = [
-      { id: 'hero', title: 'Main Hero & Visual Showcase', description: 'Enterprise hardware computing headline & direct CTAs', isVisible: true, order: 1 },
-      { id: 'voucher_banner', title: 'Landing Promotional Discount Banner', description: 'Interactive discount code & margin deduction promo', isVisible: settings?.isLandingDiscountBannerActive !== false, order: 2 },
-      { id: 'enterprise_bento', title: 'Enterprise Solutions Grid (Bento)', description: 'Workstation deployment, AI clusters, and rack units', isVisible: true, order: 3 },
-      { id: 'catalog_matrix', title: 'Hardware Catalog & Live Filters', description: 'Featured component matrix with multi-attribute filtering', isVisible: true, order: 4 },
-      { id: 'benchmarks', title: 'Hardware Benchmark & Performance Ratings', description: 'Cinebench, compute ratings & benchmark metrics', isVisible: true, order: 5 },
-      { id: 'partner_stores', title: 'Authorized GCC Partner Reseller Network', description: 'ComNet, Al-Falasi, and licensed partner store highlights', isVisible: true, order: 6 },
-      { id: 'testimonials', title: 'Enterprise Client Testimonials', description: 'Verified procurement testimonials from IT leaders', isVisible: true, order: 7 },
+      { 
+        id: 'hero', 
+        title: 'Main Hero & Visual Showcase', 
+        description: 'Enterprise hardware computing headline & direct CTAs', 
+        isVisible: true, 
+        order: 1 
+      },
+      { 
+        id: 'voucher_banner', 
+        title: 'Landing Promotional Discount Banner', 
+        description: 'Interactive discount code & margin deduction promo', 
+        isVisible: settings?.isLandingDiscountBannerActive !== false, 
+        order: 2 
+      },
+      { 
+        id: 'enterprise_bento', 
+        title: 'Enterprise Solutions Grid (Bento)', 
+        description: 'Workstation deployment, AI clusters, and rack units', 
+        isVisible: true, 
+        order: 3 
+      },
+      { 
+        id: 'catalog_matrix', 
+        title: 'Hardware Catalog & Live Filters', 
+        description: 'Featured component matrix with multi-attribute filtering', 
+        isVisible: true, 
+        order: 4 
+      },
+      { 
+        id: 'benchmarks', 
+        title: 'Hardware Benchmark & Performance Ratings', 
+        description: 'Cinebench, compute ratings & benchmark metrics', 
+        isVisible: true, 
+        order: 5 
+      },
+      { 
+        id: 'partner_stores', 
+        title: 'Authorized GCC Partner Reseller Network', 
+        description: 'ComNet, Al-Falasi, and licensed partner store highlights', 
+        isVisible: true, 
+        order: 6 
+      },
+      { 
+        id: 'testimonials', 
+        title: 'Enterprise Client Testimonials', 
+        description: 'Verified procurement testimonials from IT leaders', 
+        isVisible: true, 
+        order: 7 
+      },
     ];
 
     const sections = settings?.storefrontSections && Array.isArray(settings.storefrontSections) && settings.storefrontSections.length > 0

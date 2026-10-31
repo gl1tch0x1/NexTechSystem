@@ -213,7 +213,7 @@ async function runComprehensiveTest() {
       body: JSON.stringify({
         orderId: tamaraOrder.id,
         status: 'success',
-        paymentId: 'tamara_test_pay_999',
+        paymentId: initiateData.data.orderId,
         isSimulated: true,
       }),
     });

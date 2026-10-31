@@ -382,8 +382,7 @@ export default function CheckoutPage() {
       if (paymentMethod === 'TAMARA' || paymentMethod === 'TABBY') {
         try {
           const paymentRes = await ApiClient.post<{
-            success: boolean;
-            data: { redirectUrl: string; orderId?: string; paymentId?: string; provider: string };
+            redirectUrl: string; orderId?: string; paymentId?: string; provider: string;
           }>('/payments/initiate', {
             orderId: createdOrder.id,
             provider: paymentMethod,
@@ -392,8 +391,8 @@ export default function CheckoutPage() {
           clearCart();
           setIsOtpModalOpen(false);
 
-          if (paymentRes.data?.redirectUrl) {
-            window.location.href = paymentRes.data.redirectUrl;
+          if (paymentRes.redirectUrl) {
+            window.location.href = paymentRes.redirectUrl;
             return;
           }
         } catch (paymentErr: any) {

@@ -1,7 +1,8 @@
+import { getBackendApiUrl } from './proxy-helper';
+
 /** Authentication is decided exclusively by the backend, including rejections and MFA. */
 export async function proxyAuth(request: Request, endpoint: 'login' | 'me' | 'logout'): Promise<Response> {
-  const backendUrl = process.env.API_PROXY_TARGET || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-  const base = backendUrl.replace(/\/$/, '').replace(/\/api$/, '');
+  const base = getBackendApiUrl();
   const headers = new Headers();
   for (const name of ['content-type', 'authorization', 'cookie', 'origin', 'referer', 'x-csrf-token']) {
     const value = request.headers.get(name);

@@ -1,49 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+import type { NextRequest } from 'next/server';
+import { proxyToBackend } from '@/lib/proxy-helper';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+type RouteContext = { params: Promise<{ id: string }> };
 
-export async function POST(_request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    if (!id || !/^[a-zA-Z0-9_\-]{1,64}$/.test(id)) {
-      return NextResponse.json({ success: false, error: { message: 'Invalid quotation identifier format.' } }, { status: 400 });
-    }
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/quotes/${encodeURIComponent(id)}/convert`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return NextResponse.json(data);
-      }
-      const errData = await res.json();
-      return NextResponse.json(errData, { status: res.status });
-    } catch (err) {
-      // Offline fallback: generate sales order conversion
-      const orderNumber = `ORD-QTE-${crypto.randomInt(10000, 100000)}`;
-      return NextResponse.json({
-        success: true,
-        data: {
-          order: {
-            orderNumber,
-            status: 'CONFIRMED',
-            paymentStatus: 'PAID',
-          },
-          quote: {
-            id,
-            status: 'CONVERTED',
-            convertedOrderId: orderNumber,
-          },
-        },
-        message: `Quotation successfully converted to verified Sales Order #${orderNumber}!`,
-      });
-    }
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: { message: err.message || 'Failed to convert quote.' } }, { status: 500 });
-  }
+export async function POST(request: NextRequest, { params }: RouteContext) {
+  const { id } = await params;
+  return proxyToBackend(request, `/admin/quotes/${encodeURIComponent(id)}/convert`);
 }

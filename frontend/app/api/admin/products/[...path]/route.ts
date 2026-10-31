@@ -13,6 +13,16 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
   return proxyToBackend(request, `/admin/products/${path.join('/')}`);
 }
 
+export async function PATCH(request: NextRequest, { params }: RouteContext) {
+  const { path } = await params;
+  return proxyToBackend(request, `/admin/products/${path.join('/')}`);
+}
+
+export async function POST(request: NextRequest, { params }: RouteContext) {
+  const { path } = await params;
+  return proxyToBackend(request, `/admin/products/${path.join('/')}`);
+}
+
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
   const { path } = await params;
   return proxyToBackend(request, `/admin/products/${path.join('/')}`);

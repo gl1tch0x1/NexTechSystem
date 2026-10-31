@@ -15,6 +15,7 @@ import vatRoutes from './vat.routes.js';
 import warrantyRoutes from './warranty.routes.js';
 import quoteRoutes from './quote.routes.js';
 import paymentRoutes from './payment.routes.js';
+import uploadRoutes from './upload.routes.js';
 
 const router = Router();
 
@@ -23,6 +24,7 @@ router.use('/products', productRoutes);
 router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/upload', uploadRoutes);
 router.use('/pc-builder', pcBuilderRoutes);
 router.use('/wallet', walletRoutes);
 router.use('/admin', adminRoutes);
