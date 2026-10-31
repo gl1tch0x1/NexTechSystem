@@ -5,24 +5,12 @@ import { notFound } from 'next/navigation';
 import { Product, Review } from '@/types';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductDetailClient } from './ProductDetailClient';
-import { NextechLogo } from '@/components/ui/NextechLogo';
+import { TechnicalSpecificationsMatrix } from '@/components/product/TechnicalSpecificationsMatrix';
 import {
   ShieldCheck,
-  Cpu,
   CheckCircle2,
   Star,
-  Boxes,
-  Layers,
-  Sparkles,
-  Gauge,
-  Flame,
-  Sliders,
-  Award,
-  Check,
   ArrowRight,
-  HardDrive,
-  Monitor,
-  Laptop
 } from 'lucide-react';
 
 import { getApiUrl } from '@/lib/api-client';
@@ -83,112 +71,6 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   };
 }
 
-// Spec Key Formatter & Icon Resolver
-function formatSpecKey(key: string): string {
-  const normalized = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-
-  const dictionary: Record<string, string> = {
-    condition: 'Item Condition',
-    productcategory: 'Product Category',
-    category: 'Product Category',
-    processorbrand: 'Processor Brand',
-    processormodel: 'Processor Model',
-    processorcores: 'Processor Cores',
-    processorthreads: 'Execution Threads',
-    cores: 'Processor Cores',
-    threads: 'Execution Threads',
-    socket: 'Socket Form Factor',
-    package: 'Package / Socket Type',
-    ramcapacity: 'RAM Capacity',
-    ramtype: 'RAM Type',
-    ramspeed: 'RAM Speed / Frequency',
-    memory: 'Installed RAM',
-    memorycapacity: 'Memory Capacity',
-    memorytype: 'Memory Type',
-    storagecapacity: 'Storage Capacity',
-    storagetype: 'Storage Type',
-    storageinterface: 'Storage Interface',
-    screensize: 'Screen Size',
-    displaytechnology: 'Display Technology',
-    resolution: 'Display Resolution',
-    refreshrate: 'Refresh Rate',
-    aspectratio: 'Aspect Ratio',
-    brightness: 'Screen Brightness',
-    touchscreen: 'Touchscreen Support',
-    operatingsystem: 'Operating System',
-    os: 'Operating System',
-    graphicscard: 'Graphics Card (GPU)',
-    gpu: 'GPU Model',
-    gputype: 'GPU Architecture',
-    dedicatedvram: 'Dedicated VRAM',
-    graphicsmemory: 'Graphics Memory',
-    powersupply: 'Power Supply Unit (PSU)',
-    tdp: 'Thermal Design Power (TDP)',
-    wattage: 'TDP / Power Consumption',
-    formfactor: 'Form Factor',
-    motherboardchipset: 'Motherboard Chipset',
-    chipset: 'Chipset',
-    maxboostclock: 'Max Turbo Frequency',
-    boostclock: 'Max Boost Clock',
-    baseclock: 'Base Clock Frequency',
-    cache: 'Smart Cache Capacity',
-    wireless: 'Wi-Fi & Bluetooth',
-    network: 'Networking & Ethernet',
-    ports: 'I/O Ports & Interfaces',
-    battery: 'Battery Specification',
-    weight: 'Product Weight',
-    dimensions: 'Physical Dimensions',
-    warranty: 'Warranty Coverage',
-  };
-
-  if (dictionary[normalized]) {
-    return dictionary[normalized];
-  }
-
-  return key
-    .replace(/([A-Z]+)(?=[A-Z][a-z])/g, '$1 ')
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/_/g, ' ')
-    .trim()
-    .replace(/\b(ram|ssd|hdd|nvme|pcie|gpu|cpu|tdp|os|ips|led|oled|wuxga|fhd|uhd|rgb|psu|io|lan|usb|hdmi)\b/gi, m => m.toUpperCase())
-    .replace(/\b\w/g, c => c.toUpperCase());
-}
-
-function getSpecIcon(key: string) {
-  const k = key.toLowerCase();
-  if (k.includes('processor') || k.includes('cpu') || k.includes('socket') || k.includes('core') || k.includes('thread') || k.includes('package')) {
-    return Cpu;
-  }
-  if (k.includes('ram') || k.includes('memory') || k.includes('ddr')) {
-    return Boxes;
-  }
-  if (k.includes('storage') || k.includes('ssd') || k.includes('nvme') || k.includes('hdd') || k.includes('cache')) {
-    return HardDrive;
-  }
-  if (k.includes('screen') || k.includes('display') || k.includes('resolution') || k.includes('panel') || k.includes('refresh') || k.includes('wuxga') || k.includes('oled') || k.includes('ips')) {
-    return Monitor;
-  }
-  if (k.includes('category') || k.includes('laptop') || k.includes('chassis') || k.includes('form')) {
-    return Laptop;
-  }
-  if (k.includes('gpu') || k.includes('graphic') || k.includes('video') || k.includes('vram')) {
-    return Sparkles;
-  }
-  if (k.includes('os') || k.includes('operating') || k.includes('system') || k.includes('software')) {
-    return Sliders;
-  }
-  if (k.includes('power') || k.includes('watt') || k.includes('tdp') || k.includes('battery')) {
-    return Flame;
-  }
-  if (k.includes('clock') || k.includes('boost') || k.includes('frequency') || k.includes('speed')) {
-    return Gauge;
-  }
-  if (k.includes('condition') || k.includes('warranty') || k.includes('sealed')) {
-    return ShieldCheck;
-  }
-  return Layers;
-}
-
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
   const { product, reviews, relatedProducts } = await getProductData(slug);
@@ -196,8 +78,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   if (!product) {
     notFound();
   }
-
-  const specEntries = Object.entries(product.specifications || {});
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -291,108 +171,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       {/* Main Product Hero Grid */}
       <ProductDetailClient product={product} />
 
-      {/* Technical Specifications Matrix */}
-      <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-6 transition-all">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800/80">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center p-1.5 shrink-0 shadow-sm border border-slate-200 dark:border-slate-700">
-              <NextechLogo className="w-full h-full" size={24} alt="Specifications Matrix" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                  Technical Specifications Matrix
-                </h3>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-tech-blue/10 text-tech-blue dark:text-cyan-400 border border-tech-blue/20 px-2.5 py-0.5 rounded-full">
-                  Architecture Datasheet
-                </span>
-                {specEntries.length > 0 && (
-                  <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/70 dark:border-slate-700/60">
-                    {specEntries.length} Parameters
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Verified hardware parameters for system integration, socket compatibility &amp; power delivery
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-auto text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span className="font-semibold">OEM Verified Specifications</span>
-          </div>
-        </div>
-
-        {specEntries.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5">
-            {specEntries.map(([key, value]) => {
-              const IconComp = getSpecIcon(key);
-              const formattedKey = formatSpecKey(key);
-              const displayVal = Array.isArray(value) ? value.join(', ') : String(value ?? '');
-
-              return (
-                <div
-                  key={key}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 hover:border-tech-blue/40 dark:hover:border-cyan-500/40 hover:bg-white dark:hover:bg-slate-900/90 hover:shadow-xs transition-all duration-150 gap-4"
-                >
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:text-tech-blue dark:group-hover:text-cyan-400 group-hover:border-tech-blue/30 dark:group-hover:border-cyan-500/30 shrink-0 transition-colors shadow-2xs">
-                      <IconComp className="w-4 h-4" />
-                    </div>
-                    <span className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate">
-                      {formattedKey}
-                    </span>
-                  </div>
-
-                  <div className="text-right shrink-0 max-w-[55%]">
-                    <span className="inline-block text-xs sm:text-sm font-mono font-bold text-slate-900 dark:text-white break-words">
-                      {displayVal}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-slate-500 dark:text-slate-400">Standard specifications apply as per manufacturer datasheets.</p>
-        )}
-
-        {/* Features List Redesigned as Tech Capability Cards */}
-        {product.features && product.features.length > 0 && (
-          <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                <Award className="w-4 h-4 text-tech-blue dark:text-cyan-400" />
-                <span>Architectural Technologies &amp; Hardware Capabilities</span>
-              </div>
-              <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                Active Verification
-              </span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {product.features.map((feat, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800/70 flex items-start gap-3 hover:border-emerald-500/40 hover:bg-white dark:hover:bg-slate-900/80 transition-all shadow-xs"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-500/20">
-                    <Check className="w-3.5 h-3.5 stroke-[3]" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-snug">
-                      {feat}
-                    </div>
-                    <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      Hardware Acceleration &amp; Instruction Set
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
+      {/* Technical Specifications Matrix — Enterprise Redesign */}
+      <TechnicalSpecificationsMatrix
+        specifications={product.specifications || {}}
+        productName={product.name}
+        brandName={product.brandName}
+        categoryName={product.categoryName}
+        sku={product.sku}
+        features={product.features}
+      />
 
       {/* Customer Reviews Section */}
       <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-6 transition-all">
