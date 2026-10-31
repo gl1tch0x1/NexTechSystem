@@ -1307,7 +1307,10 @@ export class AdminController {
       .replace(/[^a-z0-9_]/g, '')
       .slice(0, 30);
 
-    if (!cleanName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) || !cleanUsername || typeof password !== 'string' || password.length < 8) {
+    // CodeQL (CWE-1333): Non-backtracking RFC 5322 / HTML5 standard email regex with explicit length bounds to prevent Polynomial ReDoS
+    const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+    if (!cleanName || cleanEmail.length > 254 || !EMAIL_REGEX.test(cleanEmail) || !cleanUsername || typeof password !== 'string' || password.length < 8) {
       res.status(400).json({ success: false, error: { message: 'Provide a name, valid email, username, and password of at least 8 characters.' } });
       return;
     }
