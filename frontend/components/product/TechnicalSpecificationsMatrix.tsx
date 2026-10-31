@@ -8,22 +8,13 @@ import {
   Sparkles,
   Laptop,
   ShieldCheck,
-  Layers,
   Search,
   Copy,
   Check,
   X,
-  Zap,
-  Award,
   Sliders,
-  Shield,
-  Boxes,
-  Keyboard,
-  Fingerprint,
-  Palette,
-  Battery
+  Award
 } from 'lucide-react';
-import { NextechLogo } from '@/components/ui/NextechLogo';
 
 export interface TechnicalSpecificationsMatrixProps {
   specifications: Record<string, unknown>;
@@ -39,46 +30,287 @@ interface SpecItem {
   label: string;
   value: string;
   category: string;
-  icon: React.ComponentType<{ className?: string }>;
+  priority: number;
 }
 
-interface SpecGroup {
+interface CategoryConfig {
   id: string;
   title: string;
   subtitle: string;
   icon: React.ComponentType<{ className?: string }>;
-  accentColor: string;
-  pillColor: string;
-  items: SpecItem[];
 }
 
-function formatSpecKey(key: string): string {
+const CATEGORIES: CategoryConfig[] = [
+  {
+    id: 'processor',
+    title: 'Processor & Platform',
+    subtitle: 'Compute cores, architecture & socket interface',
+    icon: Cpu,
+  },
+  {
+    id: 'memory_storage',
+    title: 'Memory & Storage',
+    subtitle: 'System memory bus, channel configuration & NVMe SSD',
+    icon: HardDrive,
+  },
+  {
+    id: 'display',
+    title: 'Display & Visuals',
+    subtitle: 'Panel diagonal, native resolution, refresh rate & touch',
+    icon: Monitor,
+  },
+  {
+    id: 'graphics',
+    title: 'Graphics & GPU',
+    subtitle: 'Integrated / dedicated GPU engine & video memory',
+    icon: Sparkles,
+  },
+  {
+    id: 'input_design',
+    title: 'Design, Input & Mobility',
+    subtitle: 'Chassis form factor, keyboard layout, biometric security & battery',
+    icon: Laptop,
+  },
+  {
+    id: 'system_warranty',
+    title: 'System, OS & Warranty',
+    subtitle: 'Model MPN, factory operating system, condition & warranty',
+    icon: ShieldCheck,
+  },
+  {
+    id: 'additional',
+    title: 'Additional Specifications',
+    subtitle: 'Supplementary hardware parameters & environmental compliance',
+    icon: Sliders,
+  },
+];
+
+// Priority rankings inside categories for logical executive ordering
+const SPEC_ORDER_RANKING: Record<string, number> = {
+  // Processor
+  'processor brand': 10,
+  'processorbrand': 10,
+  'processor model': 20,
+  'processormodel': 20,
+  'processor': 20,
+  'cpu': 20,
+  'processor cores': 30,
+  'processorcores': 30,
+  'cores': 30,
+  'execution threads': 40,
+  'processorthreads': 40,
+  'threads': 40,
+  'base clock frequency': 50,
+  'base clock': 50,
+  'baseclock': 50,
+  'max turbo frequency': 60,
+  'max boost clock': 60,
+  'boostclock': 60,
+  'smart cache capacity': 70,
+  'cache': 70,
+  'socket type': 80,
+  'socket form factor': 80,
+  'socket': 80,
+  'package / socket type': 80,
+  'package': 80,
+  'tdp': 90,
+  'thermal design power (tdp)': 90,
+  'wattage': 90,
+  'chipset': 100,
+  'motherboard chipset': 100,
+
+  // Memory & Storage
+  'ram capacity': 110,
+  'ramcapacity': 110,
+  'memory capacity': 110,
+  'installed ram': 110,
+  'memory': 110,
+  'ram type': 120,
+  'ramtype': 120,
+  'memory type': 120,
+  'ram speed / frequency': 130,
+  'ram speed': 130,
+  'ramspeed': 130,
+  'storage capacity': 140,
+  'storagecapacity': 140,
+  'installed hard drive': 140,
+  'storage': 140,
+  'storage type': 150,
+  'storagetype': 150,
+  'storage interface': 160,
+  'storageinterface': 160,
+  'interface protocol': 160,
+
+  // Display
+  'screen size': 210,
+  'screensize': 210,
+  'display size': 210,
+  'display resolution': 220,
+  'resolution': 220,
+  'display technology': 230,
+  'displaytechnology': 230,
+  'panel type': 230,
+  'refresh rate': 240,
+  'refreshrate': 240,
+  'aspect ratio': 250,
+  'aspectratio': 250,
+  'touchscreen support': 260,
+  'touchscreen': 260,
+  'screen brightness': 270,
+  'brightness': 270,
+
+  // Graphics
+  'graphics card (gpu)': 310,
+  'graphicscard': 310,
+  'gpu model': 310,
+  'gpu': 310,
+  'graphics card': 310,
+  'graphics memory': 320,
+  'graphicsmemory': 320,
+  'dedicated vram': 320,
+  'vram': 320,
+  'gpu architecture': 330,
+  'gputype': 330,
+
+  // Design, Input & Mobility
+  'computer form factor': 410,
+  'form factor': 410,
+  'formfactor': 410,
+  'color': 420,
+  'chassis': 420,
+  'keyboard type': 430,
+  'keyboardtype': 430,
+  'backlit keyboard': 440,
+  'backlit': 440,
+  'keyboard language': 450,
+  'keyboardlanguage': 450,
+  'fingerprint reader': 460,
+  'fingerprint': 460,
+  'touchpad': 470,
+  'webcam': 480,
+  'camera': 480,
+  'battery specification': 490,
+  'battery': 490,
+  'product weight': 500,
+  'weight': 500,
+  'physical dimensions': 510,
+  'dimensions': 510,
+  'included bag / case': 520,
+  'included bag': 520,
+
+  // System & Identifiers
+  'model': 610,
+  'model name': 610,
+  'part number': 620,
+  'partnumber': 620,
+  'mpn': 620,
+  'sku': 625,
+  'product category': 630,
+  'productcategory': 630,
+  'category': 630,
+  'computer intended use': 640,
+  'intended use': 640,
+  'operating system': 650,
+  'operatingsystem': 650,
+  'os': 650,
+  'item condition': 660,
+  'condition': 660,
+  'warranty coverage': 670,
+  'warranty': 670,
+};
+
+// Formatter to standardize parameter labels
+function formatSpecLabel(key: string): string {
+  const normalized = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  const dictionary: Record<string, string> = {
+    condition: 'Item Condition',
+    itemcondition: 'Item Condition',
+    productcategory: 'Product Category',
+    category: 'Product Category',
+    processorbrand: 'Processor Brand',
+    processormodel: 'Processor Model',
+    processorcores: 'Processor Cores',
+    processorthreads: 'Execution Threads',
+    cores: 'Processor Cores',
+    threads: 'Execution Threads',
+    socket: 'Socket Form Factor',
+    sockettype: 'Socket Form Factor',
+    package: 'Package / Socket Type',
+    ramcapacity: 'RAM Capacity',
+    ramtype: 'RAM Type',
+    ramspeed: 'RAM Speed / Frequency',
+    memory: 'Installed RAM',
+    memorycapacity: 'Memory Capacity',
+    memorytype: 'Memory Type',
+    storagecapacity: 'Storage Capacity',
+    storagetype: 'Storage Type',
+    storageinterface: 'Storage Interface',
+    screensize: 'Screen Size',
+    displaytechnology: 'Display Technology',
+    resolution: 'Display Resolution',
+    displayresolution: 'Display Resolution',
+    refreshrate: 'Refresh Rate',
+    aspectratio: 'Aspect Ratio',
+    brightness: 'Screen Brightness',
+    touchscreen: 'Touchscreen Support',
+    touchscreensupport: 'Touchscreen Support',
+    operatingsystem: 'Operating System',
+    os: 'Operating System',
+    graphicscard: 'Graphics Card (GPU)',
+    graphicscardgpu: 'Graphics Card (GPU)',
+    gpu: 'GPU Model',
+    gpumodel: 'GPU Model',
+    gputype: 'GPU Architecture',
+    dedicatedvram: 'Dedicated VRAM',
+    graphicsmemory: 'Graphics Memory',
+    powersupply: 'Power Supply Unit (PSU)',
+    tdp: 'Thermal Design Power (TDP)',
+    wattage: 'TDP / Power Consumption',
+    computerformfactor: 'Computer Form Factor',
+    formfactor: 'Form Factor',
+    motherboardchipset: 'Motherboard Chipset',
+    chipset: 'Chipset',
+    maxboostclock: 'Max Turbo Frequency',
+    boostclock: 'Max Boost Clock',
+    baseclock: 'Base Clock Frequency',
+    cache: 'Smart Cache Capacity',
+    smartcachecapacity: 'Smart Cache Capacity',
+    wireless: 'Wi-Fi & Bluetooth',
+    network: 'Networking & Ethernet',
+    ports: 'I/O Ports & Interfaces',
+    battery: 'Battery Specification',
+    batteryspecification: 'Battery Specification',
+    weight: 'Product Weight',
+    productweight: 'Product Weight',
+    dimensions: 'Physical Dimensions',
+    physicaldimensions: 'Physical Dimensions',
+    warranty: 'Warranty Coverage',
+    warrantycoverage: 'Warranty Coverage',
+    partnumber: 'Part Number (MPN)',
+    model: 'Model Name',
+    computerintendeduse: 'Intended Use',
+    keyboardtype: 'Keyboard Type',
+    backlitkeyboard: 'Backlit Keyboard',
+    keyboardlanguage: 'Keyboard Language',
+    fingerprintreader: 'Fingerprint Reader',
+    includedbagcase: 'Included Bag / Case',
+    color: 'Chassis Color',
+  };
+
+  if (dictionary[normalized]) {
+    return dictionary[normalized];
+  }
+
   return key
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     .replace(/_/g, ' ')
     .trim()
-    .replace(/\b(ram|ssd|hdd|nvme|pcie|gpu|cpu|tdp|os|ips|led|oled|wuxga|fhd|uhd|rgb|psu|io|lan|usb|hdmi|vram|ddr|lpddr)\b/gi, m => m.toUpperCase())
+    .replace(/\b(ram|ssd|hdd|nvme|pcie|gpu|cpu|tdp|os|ips|led|oled|wuxga|fhd|uhd|rgb|psu|io|lan|usb|hdmi|vram|ddr|lpddr|sodimm|mpn|sku)\b/gi, m => m.toUpperCase())
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function resolveItemIcon(key: string): React.ComponentType<{ className?: string }> {
-  const k = key.toLowerCase();
-  if (k.includes('processor') || k.includes('cpu') || k.includes('socket') || k.includes('core') || k.includes('thread') || k.includes('generation')) return Cpu;
-  if (k.includes('ram') || k.includes('memory') || k.includes('ddr')) return Boxes;
-  if (k.includes('storage') || k.includes('ssd') || k.includes('nvme') || k.includes('hdd') || k.includes('hard drive') || k.includes('rpm') || k.includes('cache')) return HardDrive;
-  if (k.includes('screen') || k.includes('display') || k.includes('resolution') || k.includes('panel') || k.includes('refresh') || k.includes('wuxga') || k.includes('oled') || k.includes('ips')) return Monitor;
-  if (k.includes('gpu') || k.includes('graphic') || k.includes('video') || k.includes('vram')) return Sparkles;
-  if (k.includes('keyboard') || k.includes('backlit')) return Keyboard;
-  if (k.includes('fingerprint') || k.includes('biometric')) return Fingerprint;
-  if (k.includes('battery') || k.includes('power source') || k.includes('watt') || k.includes('tdp')) return Battery;
-  if (k.includes('color') || k.includes('chassis')) return Palette;
-  if (k.includes('form factor') || k.includes('laptop') || k.includes('dimensions') || k.includes('weight')) return Laptop;
-  if (k.includes('os') || k.includes('operating') || k.includes('software')) return Sliders;
-  if (k.includes('condition') || k.includes('warranty') || k.includes('sealed')) return ShieldCheck;
-  return Layers;
-}
-
-function categorizeKey(key: string): string {
+function assignCategory(key: string): string {
   const k = key.toLowerCase();
   if (
     k.includes('processor') || k.includes('cpu') || k.includes('socket') || k.includes('core') ||
@@ -86,12 +318,12 @@ function categorizeKey(key: string): string {
     k.includes('tdp') || k.includes('wattage') || k.includes('package') || k.includes('chipset') ||
     k.includes('boost') || k.includes('cache')
   ) {
-    return 'cpu';
+    return 'processor';
   }
   if (
     k.includes('ram') || k.includes('memory') || k.includes('ddr') || k.includes('lpddr') ||
     k.includes('storage') || k.includes('ssd') || k.includes('nvme') || k.includes('hdd') ||
-    k.includes('hard drive') || k.includes('spindle') || k.includes('rpm') || k.includes('interface protocol')
+    k.includes('hard drive') || k.includes('spindle') || k.includes('rpm') || k.includes('sodimm')
   ) {
     return 'memory_storage';
   }
@@ -99,7 +331,7 @@ function categorizeKey(key: string): string {
     k.includes('screen') || k.includes('display') || k.includes('resolution') || k.includes('panel') ||
     k.includes('refresh') || k.includes('wuxga') || k.includes('fhd') || k.includes('uhd') ||
     k.includes('oled') || k.includes('ips') || k.includes('touchscreen') || k.includes('aspect') ||
-    k.includes('brightness') || k.includes('anti-glare') || k.includes('color gamut') || k.includes('stylus')
+    k.includes('brightness') || k.includes('anti-glare') || k.includes('color gamut')
   ) {
     return 'display';
   }
@@ -111,82 +343,23 @@ function categorizeKey(key: string): string {
     return 'graphics';
   }
   if (
-    k.includes('form factor') || k.includes('chassis') || k.includes('color') || k.includes('keyboard') ||
-    k.includes('backlit') || k.includes('fingerprint') || k.includes('touchpad') || k.includes('battery') ||
-    k.includes('power source') || k.includes('dimensions') || k.includes('weight') || k.includes('bag') ||
-    k.includes('case') || k.includes('camera') || k.includes('webcam') || k.includes('audio') ||
-    k.includes('speaker') || k.includes('mic')
+    k.includes('form factor') || k.includes('formfactor') || k.includes('chassis') || k.includes('color') ||
+    k.includes('keyboard') || k.includes('backlit') || k.includes('fingerprint') || k.includes('touchpad') ||
+    k.includes('battery') || k.includes('power source') || k.includes('dimensions') || k.includes('weight') ||
+    k.includes('bag') || k.includes('case') || k.includes('camera') || k.includes('webcam') ||
+    k.includes('audio') || k.includes('speaker') || k.includes('mic')
   ) {
-    return 'chassis';
+    return 'input_design';
   }
   if (
     k.includes('os') || k.includes('operating') || k.includes('warranty') || k.includes('condition') ||
     k.includes('category') || k.includes('part number') || k.includes('model') || k.includes('sku') ||
-    k.includes('mpn') || k.includes('intended use') || k.includes('origin') || k.includes('disclosures') ||
-    k.includes('compliance')
+    k.includes('mpn') || k.includes('intended use') || k.includes('origin') || k.includes('compliance')
   ) {
-    return 'system';
+    return 'system_warranty';
   }
   return 'additional';
 }
-
-const CATEGORY_METADATA: Record<string, {
-  title: string;
-  subtitle: string;
-  icon: React.ComponentType<{ className?: string }>;
-  accentColor: string;
-  pillColor: string;
-}> = {
-  cpu: {
-    title: 'Processor & Architecture',
-    subtitle: 'Compute cores, socket type, generation & thermal envelope',
-    icon: Cpu,
-    accentColor: 'text-blue-600 dark:text-cyan-400',
-    pillColor: 'bg-blue-500/10 text-blue-600 dark:text-cyan-400 border-blue-500/20',
-  },
-  memory_storage: {
-    title: 'Memory & High-Speed Storage',
-    subtitle: 'System RAM bus, channel capacity & NVMe PCIe bandwidth',
-    icon: HardDrive,
-    accentColor: 'text-purple-600 dark:text-purple-400',
-    pillColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-  },
-  display: {
-    title: 'Display & Visuals',
-    subtitle: 'Panel diagonal, native resolution & anti-glare coatings',
-    icon: Monitor,
-    accentColor: 'text-amber-600 dark:text-amber-400',
-    pillColor: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-  },
-  graphics: {
-    title: 'Graphics & GPU Accelerator',
-    subtitle: 'Dedicated or integrated graphics engines & VRAM pool',
-    icon: Sparkles,
-    accentColor: 'text-rose-600 dark:text-rose-400',
-    pillColor: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
-  },
-  chassis: {
-    title: 'Design, Input & Mobility',
-    subtitle: 'Form factor, keyboard layout, biometric security & battery',
-    icon: Laptop,
-    accentColor: 'text-emerald-600 dark:text-emerald-400',
-    pillColor: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-  },
-  system: {
-    title: 'System, OS & Warranty',
-    subtitle: 'Factory operating system, manufacturer warranty & MPN identifiers',
-    icon: ShieldCheck,
-    accentColor: 'text-sky-600 dark:text-sky-400',
-    pillColor: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
-  },
-  additional: {
-    title: 'Additional Specifications',
-    subtitle: 'Supplementary hardware parameters & environmental compliance',
-    icon: Layers,
-    accentColor: 'text-slate-600 dark:text-slate-400',
-    pillColor: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
-  },
-};
 
 export function TechnicalSpecificationsMatrix({
   specifications,
@@ -196,158 +369,61 @@ export function TechnicalSpecificationsMatrix({
   sku,
   features,
 }: TechnicalSpecificationsMatrixProps) {
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [copied, setCopied] = useState(false);
 
-  // Normalize specifications into structured list
+  // Normalize, categorize, and prioritize all specifications
   const allItems = useMemo<SpecItem[]>(() => {
     if (!specifications || typeof specifications !== 'object') return [];
+
     return Object.entries(specifications)
-      .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+      .filter(([_, val]) => val !== null && val !== undefined && val !== '')
       .map(([rawKey, val]) => {
         const displayVal = Array.isArray(val) ? val.join(', ') : String(val);
-        const category = categorizeKey(rawKey);
+        const category = assignCategory(rawKey);
+        const normKey = rawKey.toLowerCase().trim();
+        const priority = SPEC_ORDER_RANKING[normKey] ?? 999;
+
         return {
           rawKey,
-          label: formatSpecKey(rawKey),
+          label: formatSpecLabel(rawKey),
           value: displayVal,
           category,
-          icon: resolveItemIcon(rawKey),
+          priority,
         };
-      });
+      })
+      .sort((a, b) => a.priority - b.priority || a.label.localeCompare(b.label));
   }, [specifications]);
 
-  // Extract Top 6 "Key Specs at a Glance"
-  const keyHighlights = useMemo(() => {
-    const map = new Map<string, string>();
-    allItems.forEach(item => {
-      map.set(item.rawKey.toLowerCase(), item.value);
-    });
+  // Group items by category
+  const groupedCategories = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
 
-    const findVal = (...keys: string[]): string | null => {
-      for (const k of keys) {
-        const found = map.get(k.toLowerCase());
-        if (found) return found;
+    return CATEGORIES.map(cat => {
+      let items = allItems.filter(item => item.category === cat.id);
+
+      if (q) {
+        items = items.filter(
+          item =>
+            item.label.toLowerCase().includes(q) ||
+            item.value.toLowerCase().includes(q) ||
+            item.rawKey.toLowerCase().includes(q)
+        );
       }
-      return null;
-    };
 
-    const cpuModel = findVal('Processor Model', 'processor', 'CPU', 'Processor Brand');
-    const cpuCores = findVal('Processor Cores');
-    const ramCap = findVal('RAM Capacity', 'RAM', 'Memory');
-    const ramType = findVal('RAM Type');
-    const ssdCap = findVal('Storage Capacity', 'Storage', 'Installed Hard Drive');
-    const ssdType = findVal('Storage Type');
-    const displaySize = findVal('Screen Size', 'Display');
-    const displayRes = findVal('Display Resolution', 'Resolution');
-    const displayTech = findVal('Display Technology');
-    const gpuName = findVal('Graphics Card (GPU)', 'Graphics Card', 'GPU');
-    const osName = findVal('Operating System', 'OS');
-    const warranty = findVal('Warranty Coverage', 'Warranty');
-
-    const highlights: { label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }> }[] = [];
-
-    if (cpuModel) {
-      highlights.push({
-        label: 'Processor Engine',
-        value: cpuModel,
-        sub: cpuCores ? `${cpuCores}` : undefined,
-        icon: Cpu,
-      });
-    }
-
-    if (ramCap) {
-      highlights.push({
-        label: 'System Memory',
-        value: `${ramCap}${ramType ? ` ${ramType}` : ''}`,
-        sub: ramType ? 'High-Bandwidth Configuration' : undefined,
-        icon: Boxes,
-      });
-    }
-
-    if (ssdCap) {
-      highlights.push({
-        label: 'Primary Storage',
-        value: `${ssdCap}${ssdType ? ` ${ssdType}` : ''}`,
-        sub: 'Solid State Architecture',
-        icon: HardDrive,
-      });
-    }
-
-    if (displaySize || displayRes) {
-      highlights.push({
-        label: 'Visual Display',
-        value: `${displaySize || ''}${displaySize && displayRes ? ' • ' : ''}${displayRes || ''}`,
-        sub: displayTech || undefined,
-        icon: Monitor,
-      });
-    }
-
-    if (gpuName) {
-      highlights.push({
-        label: 'Graphics Processor',
-        value: gpuName,
-        sub: findVal('Graphics Memory') || undefined,
-        icon: Sparkles,
-      });
-    }
-
-    if (osName || warranty) {
-      highlights.push({
-        label: 'OS & Official Protection',
-        value: osName || warranty || 'Verified System',
-        sub: warranty ? `Warranty: ${warranty}` : undefined,
-        icon: ShieldCheck,
-      });
-    }
-
-    return highlights;
-  }, [allItems]);
-
-  // Filter items by search query and category
-  const filteredItems = useMemo(() => {
-    let result = allItems;
-    if (selectedCategory !== 'all') {
-      result = result.filter(item => item.category === selectedCategory);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        item =>
-          item.label.toLowerCase().includes(q) ||
-          item.value.toLowerCase().includes(q) ||
-          item.rawKey.toLowerCase().includes(q)
-      );
-    }
-    return result;
-  }, [allItems, selectedCategory, searchQuery]);
-
-  // Group filtered items into Category blocks
-  const groupedCategories = useMemo<SpecGroup[]>(() => {
-    const categoryOrder = ['cpu', 'memory_storage', 'display', 'graphics', 'chassis', 'system', 'additional'];
-    const groups: SpecGroup[] = [];
-
-    categoryOrder.forEach(catId => {
-      const itemsInCat = filteredItems.filter(item => item.category === catId);
-      if (itemsInCat.length > 0) {
-        const meta = CATEGORY_METADATA[catId] || CATEGORY_METADATA.additional;
-        groups.push({
-          id: catId,
-          title: meta.title,
-          subtitle: meta.subtitle,
-          icon: meta.icon,
-          accentColor: meta.accentColor,
-          pillColor: meta.pillColor,
-          items: itemsInCat,
-        });
-      }
+      return {
+        ...cat,
+        items,
+      };
+    }).filter(group => {
+      if (group.items.length === 0) return false;
+      if (activeCategory !== 'all' && group.id !== activeCategory) return false;
+      return true;
     });
+  }, [allItems, activeCategory, searchQuery]);
 
-    return groups;
-  }, [filteredItems]);
-
-  // Category Counts for navigation pills
+  // Total count for filter pills
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { all: allItems.length };
     allItems.forEach(item => {
@@ -356,10 +432,10 @@ export function TechnicalSpecificationsMatrix({
     return counts;
   }, [allItems]);
 
-  // Copy Full Datasheet to Clipboard
+  // Copy Full Datasheet
   const handleCopyDatasheet = useCallback(() => {
     const rows = allItems.map(item => `| ${item.label} | ${item.value} |`).join('\n');
-    const markdown = `# Technical Specifications: ${productName}\n${brandName ? `Brand: ${brandName} | ` : ''}${categoryName ? `Category: ${categoryName} | ` : ''}${sku ? `SKU: ${sku}` : ''}\n\n| Specification Parameter | Value |\n| --- | --- |\n${rows}\n\n*Verified by NexTech Systems Official Architecture Datasheet*`;
+    const markdown = `# Technical Specifications: ${productName}\n${brandName ? `Brand: ${brandName} | ` : ''}${categoryName ? `Category: ${categoryName} | ` : ''}${sku ? `SKU: ${sku}` : ''}\n\n| Specification Parameter | Value |\n| --- | --- |\n${rows}\n\n*Verified by NexTech Systems Architecture Datasheet*`;
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(markdown).then(() => {
@@ -369,334 +445,292 @@ export function TechnicalSpecificationsMatrix({
     }
   }, [allItems, productName, brandName, categoryName, sku]);
 
-  // Render stylized value (e.g. badges for Condition, Yes/No, OS, Warranty)
-  const renderSpecValue = (val: string, key: string) => {
+  // Render stylized, high-legibility value
+  const renderValue = (val: string, rawKey: string) => {
     const lowerVal = val.toLowerCase().trim();
-    const lowerKey = key.toLowerCase();
+    const lowerKey = rawKey.toLowerCase();
 
-    if (lowerVal === 'yes' || lowerVal === 'true') {
+    // Condition
+    if (lowerVal.includes('brand new') || lowerVal.includes('factory sealed')) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-          <Check className="w-3 h-3 stroke-[3]" />
-          Yes
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80">
+          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+          {val}
         </span>
       );
     }
 
+    // Warranty
+    if (lowerKey.includes('warranty') || lowerVal.includes('official warranty')) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-cyan-300 border border-blue-200/80 dark:border-blue-800/80">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          {val}
+        </span>
+      );
+    }
+
+    // Boolean Yes/True
+    if (lowerVal === 'yes' || lowerVal === 'true' || lowerVal.startsWith('yes (')) {
+      return (
+        <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+          <Check className="w-4 h-4 stroke-[2.5]" />
+          <span>{val}</span>
+        </span>
+      );
+    }
+
+    // Boolean No/False
     if (lowerVal === 'no' || lowerVal === 'false') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-          <X className="w-3 h-3" />
+        <span className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500">
           No
         </span>
       );
     }
 
-    if (lowerVal.includes('brand new') || lowerVal.includes('factory sealed')) {
+    // Monospace codes: MPN, Part Number, Resolution, Socket
+    if (
+      lowerKey.includes('part number') ||
+      lowerKey.includes('mpn') ||
+      lowerKey.includes('resolution') ||
+      lowerKey.includes('socket')
+    ) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shadow-2xs">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+        <span className="font-mono text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 bg-slate-100/80 dark:bg-slate-800/60 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60">
           {val}
         </span>
       );
     }
 
-    if (lowerKey.includes('warranty') || lowerVal.includes('official') || lowerVal.includes('warranty')) {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-tech-blue/10 text-tech-blue dark:text-cyan-400 border border-tech-blue/20">
-          <Shield className="w-3.5 h-3.5" />
-          {val}
-        </span>
-      );
-    }
-
-    if (lowerKey.includes('part number') || lowerKey.includes('model') || lowerKey.includes('sku') || lowerKey.includes('resolution')) {
-      return (
-        <span className="inline-block font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 tracking-wide bg-slate-100 dark:bg-slate-800/60 px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60">
-          {val}
-        </span>
-      );
-    }
-
+    // Standard high-legibility value
     return (
-      <span className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-slate-100 leading-relaxed">
+      <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 leading-relaxed">
         {val}
       </span>
     );
   };
 
+  if (allItems.length === 0 && (!features || features.length === 0)) {
+    return null;
+  }
+
   return (
-    <section className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-2xl space-y-8 transition-all">
-      {/* 1. SECTION HEADER & METADATA BAR */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-6 border-b border-slate-100 dark:border-slate-800/80">
-        <div className="flex items-start sm:items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-indigo-500/10 flex items-center justify-center p-2 shrink-0 shadow-sm border border-tech-blue/20 dark:border-cyan-500/20">
-            <NextechLogo className="w-full h-full text-tech-blue dark:text-cyan-400" size={26} alt="Specifications Matrix" />
-          </div>
+    <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm overflow-hidden transition-all">
+      {/* 1. EXECUTIVE HEADER BAR */}
+      <div className="p-6 sm:p-8 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Technical Specifications Matrix
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Technical Specifications
               </h3>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-tech-blue/10 text-tech-blue dark:text-cyan-400 border border-tech-blue/20 px-2.5 py-0.5 rounded-full">
-                OEM Architecture Datasheet
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                {allItems.length} Parameters
               </span>
-              {allItems.length > 0 && (
-                <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/70 dark:border-slate-700/60">
-                  {allItems.length} Verified Parameters
-                </span>
-              )}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Verified OEM hardware benchmarks, socket compatibility, memory timings, and enterprise telemetry
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Verified manufacturer specifications, hardware architecture, and system parameters
             </p>
           </div>
-        </div>
 
-        {/* Right Action Tools: Copy Datasheet + OEM Verification Badge */}
-        <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-auto">
-          <button
-            type="button"
-            onClick={handleCopyDatasheet}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
-            title="Copy structured datasheet in markdown format"
-          >
-            {copied ? (
-              <>
-                <Check className="w-4 h-4 text-emerald-500" />
-                <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">Copied Datasheet!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                <span>Copy Specs</span>
-              </>
-            )}
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+            {/* Copy Datasheet */}
+            <button
+              type="button"
+              onClick={handleCopyDatasheet}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer"
+              title="Copy markdown formatted datasheet"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Copy Datasheet</span>
+                </>
+              )}
+            </button>
 
-          <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-3.5 py-2 rounded-xl border border-emerald-500/20 shadow-2xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>100% OEM Verified</span>
+            {/* OEM Verified Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>OEM Verified</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 2. AT-A-GLANCE HARDWARE HIGHLIGHTS (HERO SNAPSHOT STRIP) */}
-      {keyHighlights.length > 0 && (
-        <div className="space-y-2.5">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            <Zap className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400" />
-            <span>Hardware Architecture Snapshot</span>
-          </div>
+        {/* 2. CATEGORY TABS & FILTER SEARCH */}
+        <div className="mt-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-5 border-t border-slate-200/60 dark:border-slate-800/60">
+          {/* Category Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+            <button
+              type="button"
+              onClick={() => setActiveCategory('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                activeCategory === 'all'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-2xs'
+                  : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/70 border border-slate-200/80 dark:border-slate-700/80'
+              }`}
+            >
+              All ({categoryCounts.all || 0})
+            </button>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
-            {keyHighlights.map((hl, idx) => {
-              const IconComp = hl.icon;
+            {CATEGORIES.map(cat => {
+              const count = categoryCounts[cat.id] || 0;
+              if (count === 0) return null;
+              const isSelected = activeCategory === cat.id;
+
               return (
-                <div
-                  key={idx}
-                  className="p-3.5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-slate-100/60 dark:from-slate-950/80 dark:to-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between hover:border-tech-blue/40 dark:hover:border-cyan-500/40 hover:shadow-xs transition-all"
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                    isSelected
+                      ? 'bg-tech-blue text-white dark:bg-cyan-500 dark:text-slate-950 shadow-2xs'
+                      : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/70 border border-slate-200/80 dark:border-slate-700/80'
+                  }`}
                 >
-                  <div className="flex items-center justify-between gap-1 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
-                      {hl.label}
-                    </span>
-                    <div className="w-6 h-6 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center text-tech-blue dark:text-cyan-400 shrink-0 shadow-2xs">
-                      <IconComp className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-tight break-words line-clamp-2">
-                      {hl.value}
-                    </div>
-                    {hl.sub && (
-                      <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1 truncate">
-                        {hl.sub}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  <span>{cat.title.split(' ')[0]}</span>
+                  <span className="ml-1 text-[10px] opacity-75 font-mono">({count})</span>
+                </button>
               );
             })}
           </div>
-        </div>
-      )}
 
-      {/* 3. SEARCH & CATEGORY FILTER BAR */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-2">
-        {/* Category Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 md:pb-0 scrollbar-thin">
-          <button
-            type="button"
-            onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-              selectedCategory === 'all'
-                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            All Specs ({categoryCounts.all || 0})
-          </button>
-
-          {Object.entries(CATEGORY_METADATA).map(([catId, meta]) => {
-            const count = categoryCounts[catId] || 0;
-            if (count === 0) return null;
-            const isSelected = selectedCategory === catId;
-            const IconComp = meta.icon;
-
-            return (
+          {/* Minimal Live Filter Input */}
+          <div className="relative w-full md:w-64 shrink-0">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Filter specifications..."
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 pl-8 pr-7 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-tech-blue dark:focus:border-cyan-400 font-medium transition-colors"
+            />
+            {searchQuery && (
               <button
-                key={catId}
                 type="button"
-                onClick={() => setSelectedCategory(catId)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                  isSelected
-                    ? 'bg-tech-blue text-white dark:bg-cyan-500 dark:text-slate-950 shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
               >
-                <IconComp className="w-3.5 h-3.5" />
-                <span>{meta.title.split(' ')[0]}</span>
-                <span className="text-[10px] opacity-75 font-mono">({count})</span>
+                <X className="w-3 h-3" />
               </button>
-            );
-          })}
-        </div>
-
-        {/* Real-time Search Input */}
-        <div className="relative min-w-[240px] md:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search specs (e.g. Core, RAM, OLED)..."
-            className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 pl-9 pr-8 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-tech-blue dark:focus:border-cyan-500 font-medium transition-colors"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 4. GROUPED SPECIFICATION MATRIX CARDS */}
+      {/* 3. STRUCTURED SPECIFICATION TABLE SECTIONS */}
       {groupedCategories.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-start">
+        <div className="divide-y divide-slate-200/80 dark:divide-slate-800">
           {groupedCategories.map(group => {
             const GroupIcon = group.icon;
+
             return (
               <div
                 key={group.id}
-                className="rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900 overflow-hidden shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col"
+                className="grid grid-cols-1 lg:grid-cols-12 transition-colors"
               >
-                {/* Group Header */}
-                <div className="px-5 py-4 bg-slate-50/80 dark:bg-slate-950/70 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center p-2 border ${group.pillColor} shrink-0`}>
-                      <GroupIcon className="w-4 h-4" />
+                {/* Category Sidebar Column (Desktop) / Header (Mobile) */}
+                <div className="lg:col-span-4 p-5 sm:p-6 lg:p-7 bg-slate-50/40 dark:bg-slate-950/30 lg:border-r border-b lg:border-b-0 border-slate-100 dark:border-slate-800/80 flex flex-col justify-between">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200 shrink-0 shadow-2xs">
+                      <GroupIcon className="w-4 h-4 text-tech-blue dark:text-cyan-400" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-slate-900 dark:text-white leading-tight">
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
                         {group.title}
                       </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-snug">
                         {group.subtitle}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
-                    {group.items.length} {group.items.length === 1 ? 'Spec' : 'Specs'}
-                  </span>
+                  <div className="hidden lg:block pt-4">
+                    <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 font-medium">
+                      {group.items.length} {group.items.length === 1 ? 'parameter' : 'parameters'}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Structured Key-Value List */}
-                <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                  {group.items.map(item => {
-                    const ItemIcon = item.icon;
-                    return (
-                      <div
-                        key={item.rawKey}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between py-3.5 px-5 hover:bg-slate-50/60 dark:hover:bg-slate-950/40 transition-colors gap-2 sm:gap-4"
-                      >
-                        {/* Spec Label */}
-                        <div className="flex items-center gap-2.5 sm:max-w-[45%] shrink-0">
-                          <ItemIcon className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                            {item.label}
-                          </span>
-                        </div>
-
-                        {/* Spec Value */}
-                        <div className="sm:text-right sm:max-w-[55%] break-words">
-                          {renderSpecValue(item.value, item.rawKey)}
-                        </div>
+                {/* Key-Value Specifications List (Desktop Right 2/3) */}
+                <div className="lg:col-span-8 divide-y divide-slate-100 dark:divide-slate-800/60">
+                  {group.items.map(item => (
+                    <div
+                      key={item.rawKey}
+                      className="grid grid-cols-1 sm:grid-cols-12 py-3.5 px-5 sm:px-6 lg:px-8 hover:bg-slate-50/60 dark:hover:bg-slate-850/40 transition-colors gap-1 sm:gap-4 items-center"
+                    >
+                      {/* Left: Parameter Name */}
+                      <div className="sm:col-span-5 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+                        {item.label}
                       </div>
-                    );
-                  })}
+
+                      {/* Right: Parameter Value */}
+                      <div className="sm:col-span-7 break-words">
+                        {renderValue(item.value, item.rawKey)}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="text-center py-12 px-4 rounded-2xl bg-slate-50/60 dark:bg-slate-950/60 border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
-          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 mx-auto flex items-center justify-center text-slate-400">
-            <Search className="w-5 h-5" />
-          </div>
-          <div className="text-sm font-bold text-slate-800 dark:text-slate-200">
+        <div className="text-center py-12 px-4 space-y-3">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             No specifications found matching &ldquo;{searchQuery}&rdquo;
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Try adjusting your search keyword or clearing the active filter to view all parameters.
           </p>
           <button
             type="button"
-            onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-            className="px-4 py-1.5 rounded-xl text-xs font-bold bg-tech-blue text-white hover:bg-tech-blue/90 dark:bg-cyan-500 dark:text-slate-950 transition-colors cursor-pointer"
+            onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-tech-blue text-white hover:bg-tech-blue/90 dark:bg-cyan-500 dark:text-slate-950 transition-colors cursor-pointer"
           >
-            Reset Filters
+            Clear Filter
           </button>
         </div>
       )}
 
-      {/* 5. ARCHITECTURAL CAPABILITIES & HARDWARE FEATURES */}
+      {/* 4. ARCHITECTURAL TECHNOLOGIES & CAPABILITIES (IF AVAILABLE) */}
       {features && features.length > 0 && (
-        <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-              <Award className="w-4 h-4 text-tech-blue dark:text-cyan-400" />
-              <span>Architectural Technologies &amp; Hardware Capabilities</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-950/20">
+          <div className="lg:col-span-4 p-5 sm:p-6 lg:p-7 bg-slate-50/40 dark:bg-slate-950/30 lg:border-r border-b lg:border-b-0 border-slate-100 dark:border-slate-800/80">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200 shrink-0 shadow-2xs">
+                <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                  Technologies & Capabilities
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+                  Hardware acceleration, instruction sets &amp; integrated platform features
+                </p>
+              </div>
             </div>
-            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-              Active Verification
-            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {features.map((feat, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800/70 flex items-start gap-3 hover:border-emerald-500/40 hover:bg-white dark:hover:bg-slate-900/80 transition-all shadow-xs"
-              >
-                <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-500/20">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+          <div className="lg:col-span-8 p-5 sm:p-6 lg:p-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {features.map((feat, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60"
+                >
+                  <div className="w-5 h-5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-200/60 dark:border-emerald-800/60">
+                    <Check className="w-3 h-3 stroke-[2.5]" />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-snug">
                     {feat}
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                    Hardware Acceleration &amp; Instruction Set
-                  </div>
+                  </span>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
