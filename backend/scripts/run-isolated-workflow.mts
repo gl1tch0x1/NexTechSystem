@@ -8,8 +8,8 @@ import { spawnSync } from 'node:child_process';
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nextech-workflow-'));
 fs.mkdirSync(path.join(root, 'backend', 'data_store'), { recursive: true });
 const env = { ...process.env };
-const config = fs.readFileSync(new URL('../src/config/env.ts', import.meta.url), 'utf8');
-for (const match of config.matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/g)) env[match[1]] = '';
+const mockEnvKeys = ['MONGODB_URI', 'DATABASE_URL', 'FIRESTORE_PROJECT_ID', 'RESEND_API_KEY', 'TABBY_SECRET_KEY', 'TAMARA_API_TOKEN', 'CLOUDFLARE_TURNSTILE_SECRET_KEY', 'ADMIN_SECRET_KEY'];
+for (const k of mockEnvKeys) env[k] = '';
 Object.assign(env, { NODE_ENV: 'test', JWT_SECRET: 'isolated-workflow-test-key', ENABLE_MONGODB: 'false', ENABLE_FIRESTORE_SYNC: 'false', CLOUDFLARE_SECURITY_ENABLED: 'false', ALLOW_DEV_OTP: 'true', ALLOW_DEV_WEBHOOK_BYPASS: 'true' });
 try {
   const result = spawnSync(process.execPath, ['--import', import.meta.resolve('tsx'), fileURLToPath(new URL('../src/test-workflow.ts', import.meta.url))], { cwd: root, env, stdio: 'inherit' });

@@ -8,7 +8,8 @@ import jwt from 'jsonwebtoken';
 test('production payment guards and persistent uploads use isolated fixtures', async t => {
   const cwd = process.cwd(), root = fs.mkdtempSync(path.join(os.tmpdir(), 'nextech-platform-'));
   fs.mkdirSync(path.join(root,'backend','data_store'),{recursive:true}); process.chdir(root);
-  for (const m of fs.readFileSync(new URL('../src/config/env.ts',import.meta.url),'utf8').matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/g)) process.env[m[1]] = '';
+  const mockEnvVars = ['MONGODB_URI', 'DATABASE_URL', 'FIRESTORE_PROJECT_ID', 'RESEND_API_KEY', 'TABBY_SECRET_KEY', 'TAMARA_API_TOKEN', 'CLOUDFLARE_TURNSTILE_SECRET_KEY', 'ADMIN_SECRET_KEY'];
+  for (const k of mockEnvVars) delete process.env[k];
   Object.assign(process.env,{NODE_ENV:'test',JWT_SECRET:'platform-test-only-key',ENABLE_MONGODB:'false',ENABLE_FIRESTORE_SYNC:'false',CLOUDFLARE_SECURITY_ENABLED:'false'});
   const { paymentController } = await import('../src/controllers/payment.controller.js');
   const { orderService } = await import('../src/services/order.service.js');
