@@ -49,14 +49,19 @@ const upload = multer({
 });
 
 router.get('/:filename', (req, res) => {
-  const filename = String(req.params.filename);
+  const filename = path.basename(String(req.params.filename || ''));
   if (!/^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|gif|pdf)$/.test(filename)) {
+    res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
+    return;
+  }
+  const filePath = path.resolve(directory, filename);
+  if (!filePath.startsWith(directory) || filePath.includes('..')) {
     res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
     return;
   }
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (filename.endsWith('.pdf')) res.setHeader('Content-Disposition', 'attachment');
-  res.sendFile(path.join(directory, filename), error => {
+  res.sendFile(filePath, error => {
     if (error && !res.headersSent) res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
   });
 });
@@ -76,12 +81,24 @@ router.post(
   },
   async (req, res) => {
     const file = req.file;
-    if (!file) {
+    if (!file || !file.filename) {
       res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
       return;
     }
 
-    const filePath = path.join(directory, file.filename);
+    // Strictly validate filename against allowlist pattern to prevent path traversal (CWE-22 / js/path-injection)
+    const rawFilename = path.basename(String(file.filename));
+    if (!/^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|gif|pdf)$/.test(rawFilename)) {
+      res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
+      return;
+    }
+
+    const filePath = path.resolve(directory, rawFilename);
+    if (!filePath.startsWith(directory) || filePath.includes('..')) {
+      res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
+      return;
+    }
+
     let isValid = false;
     try {
       const fd = await fsPromises.open(filePath, 'r');
@@ -89,7 +106,7 @@ router.post(
       await fd.read(header, 0, 16, 0);
       await fd.close();
 
-      const ext = path.extname(file.filename).slice(1).toLowerCase();
+      const ext = path.extname(rawFilename).slice(1).toLowerCase();
       const signatures: Record<string, (b: Buffer) => boolean> = {
         png: b => b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
         jpg: b => b[0] === 255 && b[1] === 216 && b[2] === 255,
@@ -110,7 +127,7 @@ router.post(
       return;
     }
 
-    res.status(201).json({ success: true, url: `/api/upload/${file.filename}` });
+    res.status(201).json({ success: true, url: `/api/upload/${rawFilename}` });
   }
 );
 
