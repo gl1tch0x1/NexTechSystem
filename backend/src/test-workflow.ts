@@ -125,7 +125,7 @@ async function runComprehensiveTest() {
     }
 
     const devOtpCode = otpReqData.data?.devCode;
-    console.log(`[OTP Dispatched] Masked Email: ${otpReqData.data?.maskedEmail}`);
+    console.log('[OTP Dispatched] Verification OTP request accepted.');
 
     // Test verify-otp endpoint
     const verifyOtpRes = await fetch(`${BASE_URL}/orders/verify-otp`, {

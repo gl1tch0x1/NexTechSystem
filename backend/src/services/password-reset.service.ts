@@ -407,21 +407,20 @@ export class PasswordResetService {
         });
 
         if (response.ok) {
-          console.log(`[PasswordResetService] Successfully dispatched password reset OTP email to ${sanitizedEmail} via Resend.`);
+          console.log('[PasswordResetService] Successfully dispatched password reset OTP email via Resend.');
           return;
         } else {
-          const errData = await response.text();
-          console.warn(`[PasswordResetService] Resend dispatch warning:`, errData);
+          console.warn(`[PasswordResetService] Resend dispatch warning (HTTP ${response.status}).`);
         }
       } catch (err: any) {
-        console.warn(`[PasswordResetService] Resend connection failed:`, err.message);
+        console.warn(`[PasswordResetService] Resend connection failed:`, err?.message || err);
       }
     }
 
-    // In compliance with CWE-312 / CWE-532, never log plaintext OTP codes or sensitive credentials to stdout
+    // In compliance with CWE-312 / CWE-532, never log plaintext OTP codes, emails, or credentials to stdout
     const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
     if (!isProd) {
-      console.log(`[PasswordResetService] Password reset OTP dispatched for ${sanitizedEmail} (valid for ${expiresInMinutes} minutes).`);
+      console.log('[PasswordResetService] Password reset OTP dispatched successfully.');
     }
   }
 }

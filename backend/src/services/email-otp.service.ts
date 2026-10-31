@@ -441,21 +441,20 @@ export class EmailOtpService {
         });
 
         if (response.ok) {
-          console.log(`[EmailOtpService] Successfully dispatched OTP email to ${sanitizedEmail} via Resend.`);
+          console.log('[EmailOtpService] Successfully dispatched OTP email via Resend.');
           return;
         } else {
-          const errData = await response.text();
-          console.warn(`[EmailOtpService] Resend dispatch warning:`, errData);
+          console.warn(`[EmailOtpService] Resend dispatch warning (HTTP ${response.status}).`);
         }
       } catch (err: any) {
         console.warn(`[EmailOtpService] Failed to dispatch via Resend:`, err?.message || err);
       }
     }
 
-    // In compliance with CWE-312 / CWE-532, never log plaintext OTP codes or sensitive credentials to stdout
+    // In compliance with CWE-312 / CWE-532, never log plaintext OTP codes, emails, or credentials to stdout
     const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
     if (!isProd) {
-      console.log(`[EmailOtpService] Order verification OTP dispatched for ${sanitizedEmail} (valid for ${expiresInMinutes} minutes).`);
+      console.log('[EmailOtpService] Order verification OTP dispatched successfully.');
     }
   }
 }
