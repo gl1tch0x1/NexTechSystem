@@ -418,17 +418,10 @@ export class PasswordResetService {
       }
     }
 
-    // In production, never dump plaintext OTP codes to stdout or log aggregators
+    // In compliance with CWE-312 / CWE-532, never log plaintext OTP codes or sensitive credentials to stdout
     const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
     if (!isProd) {
-      console.log('\n====================================================================');
-      console.log('🔐 [NEXTECH SECURITY: PASSWORD RESET OTP DISPATCHED (DEV SANDBOX)]');
-      console.log(`Recipient Email : ${sanitizedEmail}`);
-      console.log(`Customer Name   : ${recipientName}`);
-      console.log(`Purpose         : Account Password Recovery & Authorization`);
-      console.log(`OTP Code        : >>>  ${code}  <<<`);
-      console.log(`Validity        : ${expiresInMinutes} Minutes`);
-      console.log('====================================================================\n');
+      console.log(`[PasswordResetService] Password reset OTP dispatched for ${sanitizedEmail} (valid for ${expiresInMinutes} minutes).`);
     }
   }
 }

@@ -452,18 +452,10 @@ export class EmailOtpService {
       }
     }
 
-    // In production, never dump plaintext OTP codes to stdout or log aggregators
+    // In compliance with CWE-312 / CWE-532, never log plaintext OTP codes or sensitive credentials to stdout
     const isProd = process.env.NODE_ENV === 'production' || ENV.NODE_ENV === 'production';
     if (!isProd) {
-      const border = '='.repeat(68);
-      console.log(`\n${border}`);
-      console.log(`🔐 [NEXTECH SECURITY: ORDER VERIFICATION OTP DISPATCHED (DEV SANDBOX)]`);
-      console.log(`Recipient Email : ${sanitizedEmail}`);
-      console.log(`Customer Name   : ${safeName}`);
-      console.log(`Order Amount    : ${totalFormatted}`);
-      console.log(`OTP Code        : >>>  ${code}  <<<`);
-      console.log(`Validity        : ${expiresInMinutes} Minutes`);
-      console.log(`${border}\n`);
+      console.log(`[EmailOtpService] Order verification OTP dispatched for ${sanitizedEmail} (valid for ${expiresInMinutes} minutes).`);
     }
   }
 }
