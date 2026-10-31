@@ -7,7 +7,6 @@ import {
   X,
   Send,
   Trash2,
-  Bot,
   User,
   ArrowRight
 } from 'lucide-react';
@@ -123,10 +122,10 @@ export function AIChatbotModal() {
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Close NexTech AI Assistant" : "Open NexTech Hardware AI Assistant"}
           aria-expanded={isOpen}
-          className="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center bg-slate-900 dark:bg-slate-950 text-white shadow-xl shadow-slate-950/30 hover:shadow-2xl hover:border-blue-500/80 hover:scale-104 active:scale-95 transition-all duration-200 cursor-pointer border border-slate-700/80"
+          className="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center bg-slate-900 dark:bg-slate-950 text-white shadow-xl shadow-slate-950/40 hover:shadow-2xl hover:border-cyan-500/70 hover:shadow-cyan-500/20 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border border-slate-700/80"
         >
           {/* Subtle Accent Glow */}
-          <span className="absolute -inset-0.5 rounded-2xl bg-blue-600/20 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none" />
+          <span className="absolute -inset-0.5 rounded-2xl bg-gradient-to-tr from-tech-blue/30 to-cyan-500/30 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none" />
 
           {/* Active Ping Status Dot (Top-Right) */}
           {!isOpen && (
@@ -136,12 +135,12 @@ export function AIChatbotModal() {
             </span>
           )}
 
-          {/* Icon (Toggle between Bot and X) */}
+          {/* Icon (Toggle between Sparkles and X) */}
           <div className="relative z-10 flex items-center justify-center">
             {isOpen ? (
               <X className="w-5 h-5 text-white transition-transform duration-200 rotate-0 group-hover:rotate-90" />
             ) : (
-              <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 transition-transform duration-200 group-hover:scale-110" />
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 group-hover:text-cyan-300 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 drop-shadow-[0_0_10px_rgba(0,229,255,0.45)]" />
             )}
           </div>
         </button>
@@ -153,8 +152,8 @@ export function AIChatbotModal() {
           {/* Header */}
           <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-tech-blue to-tech-cyan flex items-center justify-center text-white shadow-sm shrink-0">
-                <Bot className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-tech-blue via-blue-600 to-tech-cyan flex items-center justify-center text-white shadow-sm shrink-0">
+                <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
                 <div className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
