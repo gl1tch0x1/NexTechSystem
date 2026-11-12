@@ -1472,7 +1472,7 @@ export class AdminController {
         trimmed.startsWith('/api/upload/') ||
         trimmed.startsWith('data:image/')
       ) {
-        cleanAvatar = trimmed.slice(0, 2048);
+        cleanAvatar = trimmed.startsWith('data:image/') ? trimmed.slice(0, 5 * 1024 * 1024) : trimmed.slice(0, 2048);
       }
     }
 
