@@ -72,11 +72,14 @@ export default function AdminAdminsPage() {
     try {
       setLoading(true);
       const res = await ApiClient.get<AdminUser[]>('/admin/admins', { token: token || undefined });
-      if (res) {
+      if (res && Array.isArray(res)) {
         setAdmins(res);
+      } else {
+        setAdmins([]);
       }
     } catch (err: any) {
-      console.error('Failed to load administrators:', err);
+      console.warn('[Admin Roster Notice]:', err.message);
+      setAdmins([]);
       setToastMessage({ type: 'error', text: err.message || 'Failed to fetch administrator accounts.' });
     } finally {
       setLoading(false);
@@ -164,23 +167,23 @@ export default function AdminAdminsPage() {
         avatar: avatar.trim() || undefined,
       }, { token: token || undefined });
 
-      if (res && res.success) {
-        setToastMessage({
-          type: 'success',
-          text: `Administrator "${name}" created successfully with full administrative permissions.`,
-        });
-        setIsAddModalOpen(false);
-        // Reset form
-        setName('');
-        setEmail('');
-        setUsername('');
-        setPassword('');
-        setPhone('');
-        setAvatar('');
-        fetchAdmins();
-      } else {
-        throw new Error(res?.error?.message || 'Failed to create administrator.');
+      const createdAdmin = res?.data || res;
+      setToastMessage({
+        type: 'success',
+        text: `Administrator "${name}" created successfully with full administrative permissions.`,
+      });
+      setIsAddModalOpen(false);
+      // Reset form
+      setName('');
+      setEmail('');
+      setUsername('');
+      setPassword('');
+      setPhone('');
+      setAvatar('');
+      if (createdAdmin && createdAdmin.id) {
+        setAdmins(prev => [...prev.filter(a => a.id !== createdAdmin.id), createdAdmin]);
       }
+      fetchAdmins();
     } catch (err: any) {
       setFormError(err.message || 'Failed to create administrator account.');
     } finally {
@@ -197,17 +200,15 @@ export default function AdminAdminsPage() {
     try {
       setTogglingId(admin.id);
       const res = await ApiClient.put<any>(`/admin/admins/${admin.id}/status`, {}, { token: token || undefined });
-      if (res && res.success) {
-        setToastMessage({
-          type: 'success',
-          text: `Administrator ${admin.name} is now ${!admin.isActive ? 'Active' : 'Suspended'}.`,
-        });
-        setAdmins(prev =>
-          prev.map(a => (a.id === admin.id ? { ...a, isActive: !a.isActive } : a))
-        );
-      } else {
-        throw new Error(res?.error?.message || 'Failed to update status.');
-      }
+      const updatedAdmin = res?.data || res;
+      const newStatus = updatedAdmin?.isActive !== undefined ? updatedAdmin.isActive : !admin.isActive;
+      setToastMessage({
+        type: 'success',
+        text: `Administrator ${admin.name} is now ${newStatus ? 'Active' : 'Suspended'}.`,
+      });
+      setAdmins(prev =>
+        prev.map(a => (a.id === admin.id ? { ...a, isActive: newStatus } : a))
+      );
     } catch (err: any) {
       setToastMessage({ type: 'error', text: err.message || 'Failed to toggle status.' });
     } finally {
@@ -225,17 +226,13 @@ export default function AdminAdminsPage() {
 
     try {
       setIsDeleting(true);
-      const res = await ApiClient.delete<any>(`/admin/admins/${deletingAdmin.id}`, { token: token || undefined });
-      if (res && res.success) {
-        setToastMessage({
-          type: 'success',
-          text: `Administrator "${deletingAdmin.name}" has been permanently removed.`,
-        });
-        setAdmins(prev => prev.filter(a => a.id !== deletingAdmin.id));
-        setDeletingAdmin(null);
-      } else {
-        throw new Error(res?.error?.message || 'Failed to delete administrator.');
-      }
+      await ApiClient.delete<any>(`/admin/admins/${deletingAdmin.id}`, { token: token || undefined });
+      setToastMessage({
+        type: 'success',
+        text: `Administrator "${deletingAdmin.name}" has been permanently removed.`,
+      });
+      setAdmins(prev => prev.filter(a => a.id !== deletingAdmin.id));
+      setDeletingAdmin(null);
     } catch (err: any) {
       setToastMessage({ type: 'error', text: err.message || 'Failed to remove administrator.' });
     } finally {
