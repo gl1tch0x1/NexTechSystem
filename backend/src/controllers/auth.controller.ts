@@ -601,17 +601,51 @@ export class AuthController {
       return;
     }
 
-    const { name, phone, addresses } = req.body;
-    const updated = await userRepository.update(req.user.id, {
-      name: name ? String(name).trim().slice(0, 100) : undefined,
-      phone: phone ? String(phone).trim().slice(0, 20) : undefined,
-      addresses: Array.isArray(addresses) ? addresses : undefined,
-    });
+    const { name, phone, addresses, avatar } = req.body;
+
+    let cleanAvatar: string | undefined = undefined;
+    if (typeof avatar === 'string') {
+      const trimmed = avatar.trim();
+      // Allow valid HTTP/HTTPS URLs, relative upload paths (/api/upload/...), or safe image data URIs
+      if (
+        trimmed.startsWith('https://') ||
+        trimmed.startsWith('http://') ||
+        trimmed.startsWith('/api/upload/') ||
+        trimmed.startsWith('data:image/')
+      ) {
+        cleanAvatar = trimmed.slice(0, 2048);
+      } else if (trimmed === '') {
+        cleanAvatar = '';
+      }
+    }
+
+    const updates: Partial<User> = {
+      updatedAt: new Date().toISOString(),
+    };
+    if (name !== undefined) updates.name = String(name).trim().slice(0, 100);
+    if (phone !== undefined) updates.phone = String(phone).trim().slice(0, 20);
+    if (Array.isArray(addresses)) updates.addresses = addresses;
+    if (cleanAvatar !== undefined) updates.avatar = cleanAvatar;
+
+    const updated = await userRepository.update(req.user.id, updates);
+
+    // If user is a reseller and updated their avatar, sync to their reseller business logo
+    if (cleanAvatar && req.user.role === 'RESELLER') {
+      try {
+        const reseller = await resellerRepository.findByUserId(req.user.id);
+        if (reseller) {
+          await resellerRepository.update(reseller.id, { logo: cleanAvatar });
+        }
+      } catch (err) {
+        console.warn('[Profile Update] Reseller logo sync notice:', err);
+      }
+    }
 
     // Never return the passwordHash in profile responses
     res.json({
       success: true,
       data: updated ? sanitizeUser(updated as User) : null,
+      message: 'Profile updated successfully.',
     });
   }
 

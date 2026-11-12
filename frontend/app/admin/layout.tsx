@@ -35,7 +35,10 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Settings
+  Settings,
+  ShieldCheck,
+  Camera,
+  Upload
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -49,6 +52,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Admin Credentials Modal State
   const [credentialsModalOpen, setCredentialsModalOpen] = useState(false);
   const [newUsername, setNewUsername] = useState('');
+  const [newAvatar, setNewAvatar] = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -144,6 +150,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {
           title: 'SYSTEM & SETTINGS',
           items: [
+            { href: '/admin/admins', label: 'Admin Team & Roles', icon: ShieldCheck },
             { href: '/admin/editors', label: 'Product Editors & Staff', icon: Users },
             { href: '/admin/settings', label: 'E-Bill Stamp & Store Settings', icon: Settings },
           ],
@@ -152,11 +159,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleOpenCredentialsModal = () => {
     setNewUsername(user?.username || '');
+    setNewAvatar(user?.avatar || '');
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setCredentialsToast(null);
     setCredentialsModalOpen(true);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setCredentialsToast({ type: 'error', message: 'Image must be under 5MB.' });
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error?.message || 'Upload failed.');
+      setNewAvatar(data.url);
+      setCredentialsToast({ type: 'success', message: 'Profile picture uploaded! Click save to apply changes.' });
+    } catch (err: any) {
+      setCredentialsToast({ type: 'error', message: err.message || 'Image upload failed.' });
+    } finally {
+      setAvatarUploading(false);
+    }
   };
 
   const handleUpdateCredentials = async (e: React.FormEvent) => {
@@ -167,14 +203,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const trimmedNewPass = newPassword.trim();
     const trimmedCurrentPass = currentPassword.trim();
     const currentUsername = user?.username || '';
+    const currentAvatar = user?.avatar || '';
 
     const isUpdatingUsername = trimmedUsername && trimmedUsername !== currentUsername;
     const isUpdatingPassword = !!trimmedNewPass;
+    const isUpdatingAvatar = newAvatar !== currentAvatar;
 
-    if (!isUpdatingUsername && !isUpdatingPassword) {
+    if (!isUpdatingUsername && !isUpdatingPassword && !isUpdatingAvatar) {
       setCredentialsToast({
         type: 'error',
-        message: 'No changes detected. Enter a new username or new password to update.',
+        message: 'No changes detected. Update your avatar, username, or password to save changes.',
       });
       return;
     }
@@ -187,7 +225,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
 
-    if (!trimmedCurrentPass) {
+    if ((isUpdatingUsername || isUpdatingPassword) && !trimmedCurrentPass) {
       setCredentialsToast({
         type: 'error',
         message: 'Current password is required to verify administrator identity before updating credentials.',
@@ -222,8 +260,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         },
         body: JSON.stringify({
           username: isUpdatingUsername ? trimmedUsername : undefined,
-          currentPassword: isUpdatingPassword ? trimmedCurrentPass : undefined,
+          currentPassword: trimmedCurrentPass || undefined,
           newPassword: isUpdatingPassword ? trimmedNewPass : undefined,
+          avatar: isUpdatingAvatar ? newAvatar : undefined,
         }),
       });
 
@@ -334,10 +373,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }`}
             title={isProductEditor ? 'Product Editor Account' : 'Click to update username & password'}
           >
-            <div className={`w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white flex items-center justify-center font-bold text-xs shrink-0 transition-colors ${
+            <div className={`w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white flex items-center justify-center font-bold text-xs shrink-0 transition-colors overflow-hidden ${
               !isProductEditor ? 'group-hover:bg-blue-50 dark:group-hover:bg-blue-950/40 group-hover:border-blue-400 dark:group-hover:border-blue-500' : ''
             }`}>
-              {isProductEditor ? 'PE' : 'AD'}
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.name || 'Admin'} className="w-full h-full object-cover" />
+              ) : isProductEditor ? (
+                'PE'
+              ) : (
+                'AD'
+              )}
             </div>
             <div className="hidden xl:block text-left">
               <div className={`text-xs font-bold text-slate-900 dark:text-white truncate max-w-[120px] transition-colors ${
@@ -561,6 +606,65 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <span>{credentialsToast.message}</span>
                 </div>
               )}
+
+              {/* Profile Avatar Section */}
+              <div className="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800/80">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5 text-tech-blue dark:text-tech-cyan" />
+                  <span>Profile Picture / Avatar</span>
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-bold text-base shrink-0 overflow-hidden border border-blue-400/30 shadow-sm">
+                    {newAvatar ? (
+                      <img src={newAvatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{(user?.name || user?.username || 'AD').slice(0, 2).toUpperCase()}</span>
+                    )}
+                    {avatarUploading && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="file"
+                      ref={avatarInputRef}
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        disabled={avatarUploading}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-500 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-blue-500" />
+                        <span>{newAvatar ? 'Change Photo' : 'Upload Photo'}</span>
+                      </button>
+                      {newAvatar && (
+                        <button
+                          type="button"
+                          onClick={() => setNewAvatar('')}
+                          className="text-xs text-rose-500 hover:underline cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Or paste image URL (https://...)"
+                      value={newAvatar}
+                      onChange={e => setNewAvatar(e.target.value)}
+                      className="w-full px-2.5 py-1 text-[11px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
 
               {/* Section 1: Username */}
               <div className="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800/80">

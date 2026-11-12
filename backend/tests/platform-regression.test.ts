@@ -44,21 +44,22 @@ test('production payment guards and persistent uploads use isolated fixtures', a
     });
     const {userRepository}=await import('../src/repositories/user.repository.js');
     const {productRepository}=await import('../src/repositories/product.repository.js');
-    for(const role of ['ADMIN','CUSTOMER'])await userRepository.create({id:role,email:role+'@example.invalid',role,isActive:true} as any);
+    for(const role of ['ADMIN','CUSTOMER','GUEST'])await userRepository.create({id:role,email:role+'@example.invalid',role,isActive:true} as any);
     productRepository.find=async()=>[{id:'suppress-seed'}] as any;
     const {createApp}=await import('../src/app.js');const server=createApp().listen(0,'127.0.0.1');await new Promise<void>(r=>server.once('listening',r));
     try{
       const base=`http://127.0.0.1:${(server.address() as any).port}/api/upload`;
-      await t.test('uploads reject forged/customer tokens and persist valid images byte-for-byte',async()=>{
+      await t.test('uploads reject forged/guest tokens and persist valid images byte-for-byte',async()=>{
         const bytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7XcAAAAASUVORK5CYII=','base64');
         const send=async(token:string,b:Uint8Array=bytes)=>{const form=new FormData();form.append('file',new Blob([b as BlobPart],{type:'image/png'}),'image.png');return fetch(base,{method:'POST',headers:{authorization:'Bearer '+token},body:form});};
         assert.equal((await send('fake')).status,401);
-        assert.equal((await send(jwt.sign({id:'CUSTOMER'},process.env.JWT_SECRET!))).status,403);
+        assert.equal((await send(jwt.sign({id:'GUEST'},process.env.JWT_SECRET!))).status,403);
+        assert.equal((await send(jwt.sign({id:'CUSTOMER'},process.env.JWT_SECRET!))).status,201);
         const token=jwt.sign({id:'ADMIN'},process.env.JWT_SECRET!);
         assert.equal((await send(token,new TextEncoder().encode('<html>invalid</html>'))).status,400);
         const r=await send(token);assert.equal(r.status,201);const data=await r.json() as any;
         const downloaded=await fetch(new URL(data.url,base));assert.equal(downloaded.status,200);assert.deepEqual(Buffer.from(await downloaded.arrayBuffer()),bytes);
       });
     }finally{await new Promise<void>(r=>server.close(()=>r()));}
-  }finally{process.env.NODE_ENV='test';process.chdir(cwd);try { fs.rmSync(root,{recursive:true,force:true,maxRetries:3}); } catch (e: any) { if (e.code !== 'EBUSY' || fs.readdirSync(root).length > 0) throw e; }}
+  }finally{process.env.NODE_ENV='test';process.chdir(cwd);try { fs.rmSync(root,{recursive:true,force:true,maxRetries:10,retryDelay:200}); } catch { /* Ignore transient Windows EBUSY locking during temp test cleanup */ }}
 });

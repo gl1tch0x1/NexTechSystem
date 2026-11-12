@@ -114,8 +114,18 @@ export function CustomerPortalHeader({
           {/* User Info Avatar & Monogram */}
           <div className="flex items-start sm:items-center gap-4 sm:gap-5">
             <div className="relative shrink-0">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center font-bold text-lg sm:text-xl border border-slate-700 shadow-sm">
-                {user?.name ? user.name.slice(0, 2).toUpperCase() : <UserIcon className="w-7 h-7" />}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center font-bold text-lg sm:text-xl border border-slate-700 shadow-sm overflow-hidden">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'Customer'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : user?.name ? (
+                  user.name.slice(0, 2).toUpperCase()
+                ) : (
+                  <UserIcon className="w-7 h-7" />
+                )}
               </div>
               <span
                 className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900 flex items-center justify-center"

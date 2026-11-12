@@ -163,6 +163,7 @@ export interface Product {
   costPrice?: number;
   currency: string;
   stock: number;
+  stockStatus?: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
   reservedStock: number;
   lowStockThreshold: number;
   locations?: WarehouseLocationStock[];
@@ -605,6 +606,8 @@ export interface StoreSettings {
   storeName: string;
   supportEmail: string;
   supportPhone: string;
+  whatsappNumber?: string;
+  inquiryEmail?: string;
   defaultCurrency: string;
   currencySymbol: string;
   taxRate: number; // e.g. 5 for 5% VAT

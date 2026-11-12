@@ -90,8 +90,16 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
 
           {/* Vendor Brand Card */}
           <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-amber-50/40 border border-slate-200/90 flex items-center gap-3.5 shadow-sm">
-            <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-sm shrink-0">
-              <Store className="w-6 h-6" />
+            <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-sm shrink-0 overflow-hidden">
+              {resellerData?.logo || user?.avatar ? (
+                <img
+                  src={resellerData?.logo || user?.avatar}
+                  alt={resellerData?.displayName || 'Vendor Logo'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Store className="w-6 h-6" />
+              )}
             </div>
             <div className="min-w-0">
               <div className="text-xs font-black text-slate-900 truncate">

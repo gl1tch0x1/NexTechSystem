@@ -111,4 +111,10 @@ router.post('/editors', requireRole('ADMIN'), (req, res, next) => adminControlle
 router.put('/editors/:id/status', requireRole('ADMIN'), (req, res, next) => adminController.toggleProductEditorStatus(req, res).catch(next));
 router.delete('/editors/:id', requireRole('ADMIN'), (req, res, next) => adminController.deleteProductEditor(req, res).catch(next));
 
+// 17. Administrator Account Management (Strictly ADMIN only)
+router.get('/admins', requireRole('ADMIN'), (req, res, next) => adminController.getAdmins(req, res).catch(next));
+router.post('/admins', requireRole('ADMIN'), (req, res, next) => adminController.createAdmin(req, res).catch(next));
+router.put('/admins/:id/status', requireRole('ADMIN'), (req, res, next) => adminController.toggleAdminStatus(req, res).catch(next));
+router.delete('/admins/:id', requireRole('ADMIN'), (req, res, next) => adminController.deleteAdmin(req, res).catch(next));
+
 export default router;

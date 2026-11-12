@@ -676,12 +676,12 @@ export class AdminController {
       return;
     }
 
-    const { username, currentPassword, newPassword } = req.body;
+    const { username, currentPassword, newPassword, avatar, name } = req.body;
 
-    if (!username && !newPassword) {
+    if (!username && !newPassword && avatar === undefined && !name) {
       res.status(400).json({
         success: false,
-        error: { code: 'BAD_REQUEST', message: 'Please provide either a new username or a new password to update.' },
+        error: { code: 'BAD_REQUEST', message: 'Please provide either a new username, password, name, or profile avatar to update.' },
       });
       return;
     }
@@ -702,23 +702,25 @@ export class AdminController {
     }
 
     // Defense against CWE-807 & CWE-290 (CodeQL js/user-controlled-bypass):
-    // Unconditionally require current password verification for any sensitive administrative credential or identity change
-    if (!currentPassword || typeof currentPassword !== 'string' || !currentPassword.trim()) {
-      res.status(400).json({
-        success: false,
-        error: { code: 'BAD_REQUEST', message: 'Current administrator password is required to verify identity before modifying credentials.' },
-      });
-      return;
-    }
+    // Unconditionally require current password verification if modifying sensitive credentials (username or password)
+    if (username || newPassword) {
+      if (!currentPassword || typeof currentPassword !== 'string' || !currentPassword.trim()) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Current administrator password is required to verify identity before modifying credentials.' },
+        });
+        return;
+      }
 
-    // Unconditionally verify current password against cryptographically stored hash
-    const rawCurrent = String(currentPassword).trim();
-    if (!adminUser.passwordHash || !verifyPassword(rawCurrent, adminUser.passwordHash)) {
-      res.status(403).json({
-        success: false,
-        error: { code: 'INVALID_CREDENTIALS', message: 'Current password verification failed. Access denied.' },
-      });
-      return;
+      // Unconditionally verify current password against cryptographically stored hash
+      const rawCurrent = String(currentPassword).trim();
+      if (!adminUser.passwordHash || !verifyPassword(rawCurrent, adminUser.passwordHash)) {
+        res.status(403).json({
+          success: false,
+          error: { code: 'INVALID_CREDENTIALS', message: 'Current password verification failed. Access denied.' },
+        });
+        return;
+      }
     }
 
     // If changing password, validate new password complexity
@@ -762,6 +764,25 @@ export class AdminController {
     // If updating password
     if (newPassword) {
       updates.passwordHash = hashPassword(String(newPassword).trim());
+    }
+
+    // If updating avatar profile image
+    if (avatar !== undefined) {
+      const trimmed = String(avatar).trim();
+      if (
+        trimmed.startsWith('https://') ||
+        trimmed.startsWith('http://') ||
+        trimmed.startsWith('/api/upload/') ||
+        trimmed.startsWith('data:image/') ||
+        trimmed === ''
+      ) {
+        updates.avatar = trimmed.slice(0, 2048);
+      }
+    }
+
+    // If updating name
+    if (name) {
+      updates.name = String(name).trim().slice(0, 100);
     }
 
     const updated = await userRepository.update(adminUser.id, updates);
@@ -1400,6 +1421,172 @@ export class AdminController {
     });
 
     res.json({ success: true, message: 'Product Editor removed successfully.' });
+  }
+
+  // 17. Administrator Account Management (Strictly ADMIN only)
+  async getAdmins(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    const allUsers = await userRepository.find();
+    const admins = allUsers.filter(u => u.role === 'ADMIN');
+    const safeAdmins = admins.map(a => sanitizeUser(a));
+    res.json({ success: true, data: safeAdmins });
+  }
+
+  async createAdmin(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { name, email, username, password, phone, avatar } = req.body;
+    if (!name || !email || !password) {
+      res.status(400).json({ success: false, error: { message: 'Name, email, and password are required.' } });
+      return;
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanName = String(name).trim();
+    const cleanUsername = (username ? String(username).trim().toLowerCase() : cleanEmail.split('@')[0])
+      .replace(/[^a-z0-9_]/g, '')
+      .slice(0, 30);
+
+    // CodeQL (CWE-1333): Non-backtracking RFC 5322 email regex with length bounds to prevent ReDoS
+    const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+    if (!cleanName || cleanEmail.length > 254 || !EMAIL_REGEX.test(cleanEmail) || !cleanUsername || typeof password !== 'string' || password.length < 8) {
+      res.status(400).json({ success: false, error: { message: 'Provide a name, valid email, username, and password of at least 8 characters.' } });
+      return;
+    }
+
+    const existingEmail = await userRepository.findByEmail(cleanEmail);
+    if (existingEmail) {
+      res.status(400).json({ success: false, error: { message: 'An account with this email already exists.' } });
+      return;
+    }
+
+    if (await userRepository.findByUsername(cleanUsername)) {
+      res.status(409).json({ success: false, error: { message: 'An account with this username already exists.' } });
+      return;
+    }
+
+    let cleanAvatar = '';
+    if (typeof avatar === 'string') {
+      const trimmed = avatar.trim();
+      if (
+        trimmed.startsWith('https://') ||
+        trimmed.startsWith('http://') ||
+        trimmed.startsWith('/api/upload/') ||
+        trimmed.startsWith('data:image/')
+      ) {
+        cleanAvatar = trimmed.slice(0, 2048);
+      }
+    }
+
+    const passwordHash = hashPassword(String(password));
+    const newAdmin: User = {
+      id: `user_admin_${uuidv4().substring(0, 8)}`,
+      name: cleanName,
+      email: cleanEmail,
+      username: cleanUsername,
+      role: 'ADMIN',
+      phone: phone ? String(phone).trim() : '',
+      avatar: cleanAvatar,
+      addresses: [],
+      passwordHash,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await userRepository.create(newAdmin);
+
+    await auditService.log({
+      action: 'CREATE',
+      resource: 'ADMIN_USER',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL || 'admin',
+      userRole: 'ADMIN',
+      details: { adminId: newAdmin.id, adminEmail: newAdmin.email, adminName: newAdmin.name, adminUsername: newAdmin.username },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: sanitizeUser(newAdmin),
+      message: 'New administrator account created successfully with full administrative permissions.',
+    });
+  }
+
+  async toggleAdminStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    if (id === req.user?.id) {
+      res.status(400).json({ success: false, error: { message: 'You cannot change the active status of your own administrator account.' } });
+      return;
+    }
+
+    const targetUser = await userRepository.findById(id);
+    if (!targetUser || targetUser.role !== 'ADMIN') {
+      res.status(404).json({ success: false, error: { message: 'Administrator not found.' } });
+      return;
+    }
+
+    // Ensure at least one active administrator remains
+    if (targetUser.isActive) {
+      const allUsers = await userRepository.find();
+      const activeAdmins = allUsers.filter(u => u.role === 'ADMIN' && u.isActive && u.id !== id);
+      if (activeAdmins.length === 0) {
+        res.status(400).json({ success: false, error: { message: 'Cannot deactivate the only remaining active administrator in the system.' } });
+        return;
+      }
+    }
+
+    const updated = await userRepository.update(id, {
+      isActive: !targetUser.isActive,
+      updatedAt: new Date().toISOString(),
+    });
+
+    await auditService.log({
+      action: 'UPDATE',
+      resource: 'ADMIN_USER',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL || 'admin',
+      userRole: 'ADMIN',
+      details: { adminId: id, adminEmail: targetUser.email, isActive: !targetUser.isActive },
+    });
+
+    res.json({
+      success: true,
+      data: updated ? sanitizeUser(updated) : null,
+      message: `Administrator ${updated?.isActive ? 'activated' : 'suspended'} successfully.`,
+    });
+  }
+
+  async deleteAdmin(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    if (id === req.user?.id) {
+      res.status(400).json({ success: false, error: { message: 'You cannot delete your own administrator account.' } });
+      return;
+    }
+
+    const targetUser = await userRepository.findById(id);
+    if (!targetUser || targetUser.role !== 'ADMIN') {
+      res.status(404).json({ success: false, error: { message: 'Administrator not found.' } });
+      return;
+    }
+
+    // Ensure at least one administrator remains
+    const allUsers = await userRepository.find();
+    const otherAdmins = allUsers.filter(u => u.role === 'ADMIN' && u.id !== id);
+    if (otherAdmins.length === 0) {
+      res.status(400).json({ success: false, error: { message: 'Cannot delete the only remaining administrator in the system.' } });
+      return;
+    }
+
+    await userRepository.delete(id);
+
+    await auditService.log({
+      action: 'DELETE',
+      resource: 'ADMIN_USER',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL || 'admin',
+      userRole: 'ADMIN',
+      details: { adminId: id, adminEmail: targetUser.email },
+    });
+
+    res.json({ success: true, message: 'Administrator removed successfully.' });
   }
 }
 

@@ -69,7 +69,7 @@ router.get('/:filename', (req, res) => {
 router.post(
   '/',
   authenticate,
-  requireRole('ADMIN', 'PRODUCT_EDITOR'),
+  requireRole('ADMIN', 'PRODUCT_EDITOR', 'RESELLER', 'CUSTOMER'),
   (req, res, next) => {
     upload.single('file')(req, res, error => {
       if (error) {

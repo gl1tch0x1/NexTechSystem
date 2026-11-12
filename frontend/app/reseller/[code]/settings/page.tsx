@@ -15,13 +15,16 @@ import {
   Lock,
   KeyRound,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  Loader2,
+  Store
 } from 'lucide-react';
 
 export default function ResellerSettingsPage() {
   const params = useParams();
   const resellerCode = params.code as string;
-  const { token, role } = useAuth();
+  const { token, role, refreshUser } = useAuth();
 
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -42,6 +45,7 @@ export default function ResellerSettingsPage() {
     email: 'procurement@comnet.ae',
     phone: '+971 4 399 2211',
     website: 'https://comnet.ae',
+    logo: '',
     addressLine1: 'Al Quoz Industrial Area 3, Warehouse 18',
     city: 'Dubai',
     state: 'Dubai',
@@ -49,6 +53,7 @@ export default function ResellerSettingsPage() {
     postalCode: '11223',
     dispatchHub: 'JAFZA South Logistics Hub',
   });
+  const [logoUploading, setLogoUploading] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -62,6 +67,7 @@ export default function ResellerSettingsPage() {
               displayName: res.displayName || prev.displayName,
               email: res.email || prev.email,
               phone: res.phone || prev.phone,
+              logo: res.logo || prev.logo || '',
               tradeLicenseNumber: biz?.tradeLicense || biz?.tradeLicenseNumber || prev.tradeLicenseNumber,
               taxRegistrationNumber: biz?.taxRegistrationNumber || biz?.trn || prev.taxRegistrationNumber,
               addressLine1: res.address?.addressLine1 || prev.addressLine1,
@@ -76,6 +82,39 @@ export default function ResellerSettingsPage() {
     }
   }, [token, resellerCode]);
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Logo / Profile image must be under 5MB.');
+      return;
+    }
+
+    try {
+      setLogoUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error?.message || 'Failed to upload profile image.');
+      }
+
+      setForm(prev => ({ ...prev, logo: data.url }));
+    } catch (err: any) {
+      alert(err.message || 'Error uploading image.');
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
@@ -89,6 +128,7 @@ export default function ResellerSettingsPage() {
           displayName: form.displayName,
           businessName: form.businessName,
           phone: form.phone,
+          logo: form.logo,
           address: {
             addressLine1: form.addressLine1,
             city: form.city,
@@ -103,6 +143,7 @@ export default function ResellerSettingsPage() {
         },
         { token }
       );
+      await refreshUser();
       setSuccessMsg('Vendor profile and compliance credentials successfully saved!');
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err: any) {
@@ -197,6 +238,59 @@ export default function ResellerSettingsPage() {
             <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
               Verified Partner ✓
             </span>
+          </div>
+
+          {/* Vendor Logo / Avatar */}
+          <div className="flex items-center gap-5 p-4 rounded-2xl bg-slate-50 border border-slate-200/90">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg border border-amber-600 shadow-sm overflow-hidden shrink-0">
+              {form.logo ? (
+                <img
+                  src={form.logo}
+                  alt={form.displayName || 'Vendor Logo'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Store className="w-8 h-8" />
+              )}
+            </div>
+
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="text-xs font-bold text-slate-900">Vendor Logo & Avatar</div>
+              <p className="text-[11px] text-slate-500">
+                Visible across your hardware catalog, tenant storefront, and system telemetry (PNG, JPG, max 5MB).
+              </p>
+              <div className="flex items-center gap-2 pt-1">
+                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold cursor-pointer shadow-2xs transition-colors">
+                  {logoUploading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Upload Logo</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onChange={handleLogoUpload}
+                    disabled={logoUploading}
+                    className="hidden"
+                  />
+                </label>
+                {form.logo && (
+                  <button
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, logo: '' }))}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

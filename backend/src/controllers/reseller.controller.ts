@@ -8,6 +8,7 @@ import { excelImportService } from '../services/excel-import.service.js';
 import { productRepository } from '../repositories/product.repository.js';
 import { importRepository } from '../repositories/import.repository.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
+import { userRepository } from '../repositories/user.repository.js';
 import { Reseller, Product } from '../types/index.js';
 
 export class ResellerController {
@@ -79,15 +80,24 @@ export class ResellerController {
     if (logo !== undefined) safeUpdates.logo = String(logo).slice(0, 500);
     if (address !== undefined && typeof address === 'object') safeUpdates.address = address;
     if (businessInformation !== undefined && typeof businessInformation === 'object') {
+      const tax = businessInformation.taxNumber || businessInformation.taxRegistrationNumber || businessInformation.trn;
+      const license = businessInformation.tradeLicense || businessInformation.tradeLicenseNumber;
       safeUpdates.businessInformation = {
-        taxNumber: businessInformation.taxNumber ? String(businessInformation.taxNumber).slice(0, 50) : undefined,
-        tradeLicense: businessInformation.tradeLicense ? String(businessInformation.tradeLicense).slice(0, 50) : undefined,
+        taxNumber: tax ? String(tax).slice(0, 50) : undefined,
+        tradeLicense: license ? String(license).slice(0, 50) : undefined,
         website: businessInformation.website ? String(businessInformation.website).slice(0, 200) : undefined,
         description: businessInformation.description ? String(businessInformation.description).slice(0, 500) : undefined,
       };
     }
 
     const updated = await resellerService.updateResellerProfile(resellerId, safeUpdates);
+    if (safeUpdates.logo && updated?.userId) {
+      try {
+        await userRepository.update(updated.userId, { avatar: safeUpdates.logo });
+      } catch (err) {
+        console.warn('[Reseller Avatar Sync Notice]:', err);
+      }
+    }
     res.json({ success: true, data: updated });
   }
 

@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
+import { useStoreSettings } from '@/lib/use-store-settings';
 import {
   ShoppingCart,
   Heart,
@@ -11,7 +12,10 @@ import {
   Truck,
   Minus,
   Plus,
-  Zap
+  Zap,
+  MessageCircle,
+  Mail,
+  AlertTriangle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import BnplPromoBadge from '@/components/checkout/BnplPromoBadge';
@@ -72,6 +76,30 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const currentSku = selectedVariant ? selectedVariant.sku : product.sku;
   const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
   const isOutOfStock = currentStock === 0 && !product.allowBackorder;
+  const isLowStock = currentStock > 0 && currentStock <= ((product as any).lowStockThreshold || 5);
+
+  const { whatsappNumber: dbWhatsApp, inquiryEmail: dbEmail, storeName } = useStoreSettings();
+  const contactWhatsApp = (product as any).contactWhatsApp || dbWhatsApp || '';
+  const contactEmail = (product as any).contactEmail || dbEmail || '';
+
+  const handleWhatsApp = () => {
+    const cleanNumber = (contactWhatsApp || '').replace(/[^0-9]/g, '');
+    const storeLabel = storeName || 'Sales Team';
+    const msg = encodeURIComponent(
+      `Hi ${storeLabel}, I am interested in ${product.name} (SKU: ${currentSku}). I would like to inquire about ${quantity} unit(s). Please share current pricing and availability.`
+    );
+    window.open(`https://wa.me/${cleanNumber}?text=${msg}`, '_blank');
+  };
+
+  const handleEmail = () => {
+    const targetEmail = contactEmail || 'support@nextechsystems.com';
+    const storeLabel = storeName || 'Sales Team';
+    const subject = encodeURIComponent(`Product Inquiry: ${product.name} [SKU: ${currentSku}]`);
+    const body = encodeURIComponent(
+      `Hello ${storeLabel},\n\nI would like to inquire about pricing and stock availability for:\n- Product: ${product.name}\n- SKU: ${currentSku}\n- Quantity: ${quantity} units\n\nPlease send me current pricing and availability.\n\nThank you.`
+    );
+    window.open(`mailto:${targetEmail}?subject=${subject}&body=${body}`, '_blank');
+  };
 
   const handleAddToCart = () => {
     const added = addToCart(product, quantity, selectedVariant);
@@ -226,34 +254,55 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
           {/* Price Box */}
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/90 dark:border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-baseline gap-3">
-                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
-                  {formatPrice(currentPrice)}
-                </span>
-                {originalPrice && (
-                  <span className="text-sm text-slate-400 dark:text-slate-500 line-through font-mono whitespace-nowrap">
-                    {formatPrice(originalPrice)}
+            {isLowStock ? (
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight whitespace-nowrap">
+                    Contact for Price
                   </span>
-                )}
-                {originalPrice && originalPrice > currentPrice && (
-                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">
-                    -{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% SAVE
+                  <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono uppercase">
+                    Low Stock
                   </span>
-                )}
-              </div>
-              {product.unitPrice && product.unitMeasure && (
-                <div className="text-[11px] font-mono text-slate-400 mt-0.5 whitespace-nowrap">
-                  ({formatPrice(product.unitPrice)} / {product.unitMeasure})
                 </div>
-              )}
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                {product.chargeTax === false ? 'VAT Exempt' : 'Includes 5% UAE VAT'} • Free GCC Express Delivery over AED 500
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  Direct stock is limited. Inquire below to lock in B2B / wholesale pricing and reserve your units.
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
+                    {formatPrice(currentPrice)}
+                  </span>
+                  {originalPrice && (
+                    <span className="text-sm text-slate-400 dark:text-slate-500 line-through font-mono whitespace-nowrap">
+                      {formatPrice(originalPrice)}
+                    </span>
+                  )}
+                  {originalPrice && originalPrice > currentPrice && (
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">
+                      -{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% SAVE
+                    </span>
+                  )}
+                </div>
+                {product.unitPrice && product.unitMeasure && (
+                  <div className="text-[11px] font-mono text-slate-400 mt-0.5 whitespace-nowrap">
+                    ({formatPrice(product.unitPrice)} / {product.unitMeasure})
+                  </div>
+                )}
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  {product.chargeTax === false ? 'VAT Exempt' : 'Includes 5% UAE VAT'} • Free GCC Express Delivery over AED 500
+                </div>
+              </div>
+            )}
 
             <div className="sm:text-right shrink-0">
-              {currentStock > 0 ? (
+              {isLowStock ? (
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/60 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span className="whitespace-nowrap">Low Stock — {currentStock} Units Left</span>
+                </div>
+              ) : currentStock > 0 ? (
                 <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   <span className="whitespace-nowrap">{currentStock} Units In Stock</span>
@@ -265,14 +314,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 </div>
               ) : (
                 <div className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-950/40 px-3.5 py-2 rounded-xl border border-red-200 whitespace-nowrap shadow-sm">
-                  Currently Out of Stock
+                  Sold Out — Currently Out of Stock
                 </div>
               )}
             </div>
           </div>
 
           {/* GCC Buy Now Pay Later (Tamara & Tabby) Promotional Badge */}
-          <BnplPromoBadge price={currentPrice} className="mt-3.5" />
+          {!isLowStock && <BnplPromoBadge price={currentPrice} className="mt-3.5" />}
         </div>
 
         {/* Quantity and Actions */}
@@ -289,7 +338,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               </button>
               <span className="w-10 text-center text-xs font-bold text-slate-900 dark:text-white font-mono">{quantity}</span>
               <button
-                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                onClick={() => setQuantity(isLowStock ? quantity + 1 : Math.min(currentStock || 1, quantity + 1))}
                 className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                 title="Increase quantity"
               >
@@ -312,33 +361,55 @@ export function ProductDetailClient({ product }: { product: Product }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              disabled={isOutOfStock}
-              onClick={handleAddToCart}
-              className={`w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
-                isOutOfStock
-                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
-                  : 'bg-tech-blue hover:bg-blue-600 text-white shadow-blue-500/20 active:scale-[0.98]'
-              }`}
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span>{addedMessage ? '✓ Added to Cart!' : 'Add to Cart'}</span>
-            </button>
+          {isLowStock ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleWhatsApp}
+                className="w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 active:scale-[0.98]"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Contact via WhatsApp ({quantity} Qty)</span>
+              </button>
 
-            <button
-              disabled={isOutOfStock}
-              onClick={handleBuyNow}
-              className={`w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
-                isOutOfStock
-                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 active:scale-[0.98]'
-              }`}
-            >
-              <Zap className="w-4 h-4" />
-              <span>Instant Checkout</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={handleEmail}
+                className="w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md bg-transparent border-2 border-blue-600 text-blue-600 dark:text-cyan-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 active:scale-[0.98]"
+              >
+                <Mail className="w-4 h-4" />
+                <span>Contact via Email ({quantity} Qty)</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                disabled={isOutOfStock}
+                onClick={handleAddToCart}
+                className={`w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
+                  isOutOfStock
+                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
+                    : 'bg-tech-blue hover:bg-blue-600 text-white shadow-blue-500/20 active:scale-[0.98]'
+                }`}
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span>{isOutOfStock ? 'Sold Out' : (addedMessage ? '✓ Added to Cart!' : 'Add to Cart')}</span>
+              </button>
+
+              <button
+                disabled={isOutOfStock}
+                onClick={handleBuyNow}
+                className={`w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
+                  isOutOfStock
+                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 active:scale-[0.98]'
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                <span>{isOutOfStock ? 'Sold Out' : 'Instant Checkout'}</span>
+              </button>
+            </div>
+          )}
 
           {/* Trust Guarantees */}
           <div className="grid grid-cols-2 gap-3 pt-4 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-800/60">

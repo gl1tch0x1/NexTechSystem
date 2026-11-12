@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Product } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
+import { useStoreSettings } from '@/lib/use-store-settings';
 import {
   ShoppingCart,
   Heart,
@@ -12,12 +13,21 @@ import {
   Check,
   Zap,
   Sparkles,
+  MessageCircle,
+  Mail,
 } from 'lucide-react';
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { formatPrice, convertPrice, currentCurrency } = useCurrency();
+  const { whatsappNumber: dbWhatsApp, inquiryEmail: dbEmail, storeName } = useStoreSettings();
+  const contactWhatsApp = (product as any).contactWhatsApp || dbWhatsApp || '';
+  const contactEmail = (product as any).contactEmail || dbEmail || '';
   const [justAdded, setJustAdded] = useState(false);
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [inquiryQty, setInquiryQty] = useState(1);
+  const [inquiryName, setInquiryName] = useState('');
+  const [inquiryNote, setInquiryNote] = useState('');
   const inWishlist = isInWishlist(product.id);
 
   const price = product.salePrice || product.price;
@@ -27,6 +37,7 @@ export function ProductCard({ product }: { product: Product }) {
     : 0;
 
   const isOutOfStock = product.stock === 0;
+  const isLowStock = product.stock > 0 && product.stock <= ((product as any).lowStockThreshold || 5);
 
   const convertedPrice = convertPrice(price);
   const formattedPriceAmount = convertedPrice.toLocaleString('en-US', {
@@ -79,18 +90,47 @@ export function ProductCard({ product }: { product: Product }) {
     }
   };
 
+  const buildInquiryMessage = () => {
+    const storeLabel = storeName || 'Sales Team';
+    const name = inquiryName.trim() ? `I'm ${inquiryName.trim()}` : "I'm interested";
+    const note = inquiryNote.trim() ? ` Additional note: ${inquiryNote.trim()}` : '';
+    return `Hi ${storeLabel}, ${name} in ${product.name}. I'd like to inquire about ${inquiryQty} unit(s). Please let me know availability and pricing.${note}`;
+  };
+
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const cleanNumber = (contactWhatsApp || '').replace(/[^0-9]/g, '');
+    const msg = encodeURIComponent(buildInquiryMessage());
+    window.open(`https://wa.me/${cleanNumber}?text=${msg}`, '_blank');
+  };
+
+  const handleEmail = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const subject = encodeURIComponent(`Inquiry: ${product.name}`);
+    const body = encodeURIComponent(buildInquiryMessage());
+    window.open(`mailto:${contactEmail}?subject=${subject}&body=${body}`, '_blank');
+  };
+
   return (
     <div className="group relative bg-white dark:bg-[#0B101D] rounded-xl border border-slate-200/90 dark:border-slate-800/90 hover:border-blue-500/70 dark:hover:border-cyan-500/70 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-200 flex flex-col justify-between overflow-hidden">
       {/* Top Image Stage Container */}
       <div className="relative aspect-[4/3] w-full bg-slate-100/80 dark:bg-slate-950 p-3 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         {/* Top Badges (Left) */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
-          {discountPercent > 0 && (
+          {isOutOfStock ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9.5px] font-mono font-bold uppercase tracking-wider bg-slate-900/90 text-white border border-slate-700 shadow-xs">
+              Sold Out
+            </span>
+          ) : isLowStock ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9.5px] font-mono font-bold uppercase tracking-wider bg-amber-500 text-slate-950 font-black shadow-xs">
+              Low Stock
+            </span>
+          ) : discountPercent > 0 ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9.5px] font-mono font-bold uppercase tracking-wider bg-rose-600 text-white shadow-xs">
               <Zap className="w-2.5 h-2.5 fill-current" />
               <span>-{discountPercent}%</span>
             </span>
-          )}
+          ) : null}
           {product.isFeatured && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9.5px] font-mono font-semibold uppercase tracking-wider bg-slate-900/90 text-slate-100 backdrop-blur-xs shadow-xs border border-white/10">
               <Sparkles className="w-2.5 h-2.5 text-amber-400" />
@@ -181,6 +221,10 @@ export function ProductCard({ product }: { product: Product }) {
               <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono">
                 Sold Out
               </span>
+            ) : isLowStock ? (
+              <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-2 py-0.5 rounded-md font-mono">
+                Low Stock
+              </span>
             ) : (
               <span className="text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -190,54 +234,159 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
-        {/* Pricing & Add to Cart Action Bar - Perfectly Aligned */}
+        {/* Pricing & Action Bar */}
         <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2.5 mt-auto">
-          <div className="min-w-0 flex flex-col justify-center">
-            <div className="flex items-baseline gap-1 whitespace-nowrap">
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                {currentCurrency.symbol}
+          {/* Price area */}
+          {isLowStock ? (
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 font-mono">
+                Contact for Price
               </span>
-              <span className="text-base sm:text-[17px] font-bold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
-                {formattedPriceAmount}
-              </span>
+              <div className="h-4 flex items-center mt-1">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono select-none blur-[3px]">
+                  ••••••
+                </span>
+              </div>
             </div>
-            <div className="h-4 flex items-center mt-1">
-              {originalPrice && originalPrice > price ? (
-                <span className="text-[10.5px] text-slate-400 dark:text-slate-500 line-through font-mono leading-none">
-                  {formatPrice(originalPrice)}
+          ) : (
+            <div className="min-w-0 flex flex-col justify-center">
+              <div className="flex items-baseline gap-1 whitespace-nowrap">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                  {currentCurrency.symbol}
                 </span>
+                <span className="text-base sm:text-[17px] font-bold text-slate-900 dark:text-white font-mono tracking-tight leading-none">
+                  {formattedPriceAmount}
+                </span>
+              </div>
+              <div className="h-4 flex items-center mt-1">
+                {originalPrice && originalPrice > price ? (
+                  <span className="text-[10.5px] text-slate-400 dark:text-slate-500 line-through font-mono leading-none">
+                    {formatPrice(originalPrice)}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-none">
+                    Official GCC Warranty
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action button(s) */}
+          {isLowStock ? (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowInquiryForm(v => !v); }}
+                className="h-10 px-3 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white active:scale-95"
+                title="Inquire via WhatsApp"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>WhatsApp</span>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowInquiryForm(v => !v); }}
+                className="h-10 px-3 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 shadow-xs bg-transparent border border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 active:scale-95"
+                title="Inquire via Email"
+              >
+                <Mail className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              disabled={isOutOfStock}
+              onClick={handleAddToCart}
+              className={`h-10 px-4 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center gap-1.5 shadow-xs ${
+                isOutOfStock
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                  : justAdded
+                  ? 'bg-emerald-600 text-white shadow-emerald-500/25'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 active:scale-95'
+              }`}
+            >
+              {justAdded ? (
+                <>
+                  <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Added</span>
+                </>
               ) : (
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-none">
-                  Official GCC Warranty
-                </span>
+                <>
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  <span>{isOutOfStock ? 'Sold Out' : 'Add to Cart'}</span>
+                </>
               )}
+            </button>
+          )}
+        </div>
+
+        {/* Inquiry Form (slides in below action bar for low-stock items) */}
+        {isLowStock && showInquiryForm && (
+          <div className="border-t border-amber-200 dark:border-amber-800/60 pt-3 mt-1 space-y-2.5">
+            <p className="text-[10.5px] font-semibold text-amber-700 dark:text-amber-400 font-mono uppercase tracking-wide">
+              Quantity Inquiry
+            </p>
+
+            {/* Quantity + Name row */}
+            <div className="flex gap-2">
+              <div className="flex flex-col gap-1 w-20 shrink-0">
+                <label className="text-[9.5px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wide">Qty</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={inquiryQty}
+                  onChange={e => setInquiryQty(Math.max(1, parseInt(e.target.value) || 1))}
+                  onClick={e => e.preventDefault()}
+                  className="h-8 px-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                />
+              </div>
+              <div className="flex flex-col gap-1 flex-1">
+                <label className="text-[9.5px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wide">Name</label>
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={inquiryName}
+                  onChange={e => setInquiryName(e.target.value)}
+                  onClick={e => e.preventDefault()}
+                  className="h-8 px-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-400 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            {/* Note */}
+            <div className="flex flex-col gap-1">
+              <label className="text-[9.5px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wide">Note <span className="normal-case font-normal">(optional)</span></label>
+              <input
+                type="text"
+                placeholder="Any additional details…"
+                value={inquiryNote}
+                onChange={e => setInquiryNote(e.target.value)}
+                onClick={e => e.preventDefault()}
+                className="h-8 px-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-400 placeholder:text-slate-400"
+              />
+            </div>
+
+            {/* Submit buttons */}
+            <div className="flex gap-2 pt-0.5">
+              <button
+                type="button"
+                onClick={handleWhatsApp}
+                className="flex-1 h-9 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs"
+              >
+                <MessageCircle className="w-3 h-3" />
+                Send via WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={handleEmail}
+                className="flex-1 h-9 rounded-lg text-[11px] font-bold border border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-center gap-1.5 transition-all active:scale-95"
+              >
+                <Mail className="w-3 h-3" />
+                Send via Email
+              </button>
             </div>
           </div>
-
-          <button
-            disabled={isOutOfStock}
-            onClick={handleAddToCart}
-            className={`h-10 px-4 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center gap-1.5 shadow-xs ${
-              isOutOfStock
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
-                : justAdded
-                ? 'bg-emerald-600 text-white shadow-emerald-500/25'
-                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 active:scale-95'
-            }`}
-          >
-            {justAdded ? (
-              <>
-                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Added</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-3.5 h-3.5" />
-                <span>{isOutOfStock ? 'Sold Out' : 'Add to Cart'}</span>
-              </>
-            )}
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

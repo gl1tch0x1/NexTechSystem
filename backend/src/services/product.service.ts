@@ -377,6 +377,12 @@ export class ProductService {
         };
       });
     }
+
+    const threshold = product.lowStockThreshold || 5;
+    product.stockStatus = product.stock === 0
+      ? 'OUT_OF_STOCK'
+      : (product.stock <= threshold ? 'LOW_STOCK' : 'IN_STOCK');
+
     return product;
   }
 
@@ -417,11 +423,17 @@ export class ProductService {
       computedStock = data.variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
     }
 
+    const threshold = data.lowStockThreshold || 5;
+    const stockStatus = computedStock === 0
+      ? 'OUT_OF_STOCK'
+      : (computedStock <= threshold ? 'LOW_STOCK' : 'IN_STOCK');
+
     const newProduct: Product = {
       ...data,
       id: `prod_${uuidv4()}`,
       slug,
       stock: computedStock,
+      stockStatus,
       chargeTax: data.chargeTax !== false,
       isPhysical: data.isPhysical !== false,
       inventoryTracked: data.inventoryTracked !== false,
@@ -429,7 +441,7 @@ export class ProductService {
       rating: data.rating || 5.0,
       reviewCount: data.reviewCount || 0,
       reservedStock: data.reservedStock || 0,
-      lowStockThreshold: data.lowStockThreshold || 5,
+      lowStockThreshold: threshold,
       isFeatured: !!data.isFeatured,
       isActive: data.isActive !== false,
       approvalStatus: data.approvalStatus || (data.sellerType === 'ADMIN' ? 'APPROVED' : 'PENDING_APPROVAL'),
@@ -468,6 +480,13 @@ export class ProductService {
     }
     if (updates.hasVariants && updates.variants && updates.variants.length > 0) {
       updates.stock = updates.variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+    }
+    const effectiveStock = updates.stock !== undefined ? updates.stock : existing?.stock;
+    const effectiveThreshold = updates.lowStockThreshold !== undefined ? updates.lowStockThreshold : (existing?.lowStockThreshold || 5);
+    if (effectiveStock !== undefined) {
+      updates.stockStatus = effectiveStock === 0
+        ? 'OUT_OF_STOCK'
+        : (effectiveStock <= effectiveThreshold ? 'LOW_STOCK' : 'IN_STOCK');
     }
     updates.updatedAt = new Date().toISOString();
 

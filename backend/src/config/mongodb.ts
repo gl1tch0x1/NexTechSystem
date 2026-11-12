@@ -59,7 +59,7 @@ class MongoDbManager {
       });
 
       await this.client.connect();
-      const dbName = ENV.MONGODB_DB_NAME || undefined;
+      const dbName = ENV.MONGODB_DB_NAME || 'nextech_ecommerce';
       this.db = this.client.db(dbName);
 
       // Verify connection with ping
