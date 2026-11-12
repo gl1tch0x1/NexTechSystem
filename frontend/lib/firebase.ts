@@ -28,7 +28,7 @@ try {
 // Safe Auth initialization with SSR prerender protection
 let auth: Auth;
 try {
-  auth = getAuth(app);
+  auth = isLiveKey ? getAuth(app) : ({} as Auth);
 } catch (e) {
   auth = {} as Auth;
 }
