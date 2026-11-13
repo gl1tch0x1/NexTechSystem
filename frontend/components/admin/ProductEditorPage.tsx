@@ -49,8 +49,7 @@ import {
   TrendingUp,
   MapPin,
   MoveLeft,
-  MoveRight,
-  Sliders
+  MoveRight
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
 
@@ -478,22 +477,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [resellers, setResellers] = useState<Reseller[]>([]);
 
-  // Focused Step-by-Step Tabbed Navigation Mode vs Simple Guided Mode
-  const [editorExperience, setEditorExperience] = useState<'simple' | 'advanced'>('simple');
+  // Step-by-Step Workspace Tab Navigation
   const [activeTab, setActiveTab] = useState<TabKey>('general');
   const [activeSpecTab, setActiveSpecTab] = useState<string>(SPECIFICATION_GROUPS[0]?.id || 'core');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('nextech_editor_experience');
-      if (saved === 'simple' || saved === 'advanced') {
-        setEditorExperience(saved);
-      }
-    } catch {}
-  }, []);
 
   // Local helper inputs
   const [tagInput, setTagInput] = useState('');
@@ -1619,42 +1608,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           {/* Controls: Status & Actions */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end shrink-0">
 
-            {/* Mode Switcher: Simple Guided vs Advanced Studio */}
-            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setEditorExperience('simple');
-                  try { localStorage.setItem('nextech_editor_experience', 'simple'); } catch {}
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  editorExperience === 'simple'
-                    ? 'bg-white dark:bg-slate-700 text-purple-700 dark:text-purple-300 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
-                title="Switch to Simplified Guided Mode (Fast & Intuitive)"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                <span>Simple Mode</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditorExperience('advanced');
-                  try { localStorage.setItem('nextech_editor_experience', 'advanced'); } catch {}
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  editorExperience === 'advanced'
-                    ? 'bg-white dark:bg-slate-700 text-purple-700 dark:text-purple-300 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
-                title="Switch to Advanced Engineering Studio (Logistics, FX, Multi-Hub, Variants)"
-              >
-                <Sliders className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                <span>Advanced Studio</span>
-              </button>
-            </div>
-
             {/* Status Selector */}
             <select
               value={formData.status}
@@ -1767,766 +1720,75 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         </div>
       )}
 
-      {/* 2. TABBED STEP-BY-STEP WORKSPACE NAVIGATION (Only shown in Advanced Studio) */}
-      {editorExperience === 'advanced' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none">
-          {TABS.map((tab, idx) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer min-w-[140px] ${isActive
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span>{idx + 1}. {tab.label}</span>
-              </button>
-            );
-          })}
+      {/* 1-Click Hardware Quick-Start Baseline Templates */}
+      <div className="bg-gradient-to-r from-purple-50 via-white to-indigo-50/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/20 border border-purple-200/70 dark:border-purple-900/40 rounded-2xl p-3.5 shadow-xs">
+        <div className="flex items-center justify-between gap-3 mb-2.5 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-purple-600 text-white text-xs font-bold shadow-xs">
+              <Sparkles className="w-3.5 h-3.5" />
+            </span>
+            <span className="text-xs font-black text-slate-900 dark:text-white">
+              Quick-Start Hardware Presets
+            </span>
+            <span className="text-[11px] text-slate-500 hidden md:inline">
+              — 1-click baseline templates for popular hardware categories (prefills specs, title, brand & photography)
+            </span>
+          </div>
+          <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950 px-2.5 py-0.5 rounded-full border border-purple-200/80 dark:border-purple-800/80">
+            One-Click Setup
+          </span>
         </div>
-      )}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {HARDWARE_IMAGE_PRESETS.slice(0, 6).map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => handleApplyPreset(preset)}
+              className="group p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-xs transition-all text-left flex items-center gap-2.5 cursor-pointer"
+              title={`Autofill baseline for ${preset.label}`}
+            >
+              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-200/60 dark:border-slate-700">
+                <img src={preset.url} alt={preset.label} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] font-bold text-slate-800 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  {preset.category}
+                </div>
+                <div className="text-[9px] text-slate-400 truncate">
+                  {preset.brand}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 2. TABBED STEP-BY-STEP WORKSPACE NAVIGATION */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none">
+        {TABS.map((tab, idx) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer min-w-[140px] ${isActive
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                }`}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              <span>{idx + 1}. {tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* MASTER 2-COLUMN ENTERPRISE WORKSPACE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ===================== LEFT / MAIN COLUMN (8 COLS) ===================== */}
         <div className="lg:col-span-8 space-y-8">
-          {editorExperience === 'simple' ? (
-            <div className="space-y-6">
-              {/* Simple Mode Header & Quick-Start Templates */}
-              <div className="p-5 rounded-3xl bg-gradient-to-br from-purple-50 via-white to-indigo-50/40 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/20 border border-purple-200/60 dark:border-purple-900/40 shadow-sm space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-purple-600/30">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                        <span>Simple Hardware Product Creator</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
-                          Non-Tech Friendly
-                        </span>
-                      </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Fill in these basic essentials to get your hardware product live in minutes.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditorExperience('advanced');
-                      try { localStorage.setItem('nextech_editor_experience', 'advanced'); } catch {}
-                    }}
-                    className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 self-start sm:self-auto cursor-pointer"
-                  >
-                    <span>Switch to Advanced Studio</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Quick-Start Preset Starter Cards */}
-                <div className="pt-3 border-t border-purple-100 dark:border-purple-900/30">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
-                    <Wand2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                    <span>Quick-Start From a Hardware Template:</span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {HARDWARE_IMAGE_PRESETS.slice(0, 6).map((preset) => (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => handleApplyPreset(preset)}
-                        className="p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-xs transition-all text-left flex items-center gap-2.5 group cursor-pointer"
-                      >
-                        <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-200/60 dark:border-slate-700">
-                          <img src={preset.url} alt={preset.label} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-slate-800 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                            {preset.label}
-                          </div>
-                          <div className="text-[10px] text-slate-400 truncate">
-                            {preset.brand} • {preset.category}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* CARD 1: Basic Information */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs">
-                      1
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
-                        Product Information
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Name your hardware, select brand and category
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 px-2.5 py-1 rounded-full">
-                    Required
-                  </span>
-                </div>
-
-                {/* Product Title */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <span>Product Title</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <span className="text-[10px] text-slate-400">
-                      {formData.title.length}/180 characters
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={e => {
-                      const val = e.target.value;
-                      const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-                      setFormData(prev => ({ ...prev, title: val, slug }));
-                    }}
-                    placeholder="e.g. ASUS ROG Strix G16 16-inch Gaming Laptop Core i9 RTX 4070"
-                    maxLength={180}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                  />
-                  <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                    <span>Store link:</span>
-                    <span className="font-mono text-purple-600 dark:text-purple-400 truncate">
-                      nextechsystem.com/products/{formData.slug || 'product-url'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Category & Brand Selectors */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Category Dropdown */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                      <span>Category</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.categoryId}
-                      onChange={e => {
-                        const catId = e.target.value;
-                        const cat = categories.find(c => c.id === catId);
-                        setFormData(prev => ({
-                          ...prev,
-                          categoryId: catId,
-                          categoryName: cat?.name || '',
-                          sku: prev.sku && prev.sku.startsWith('NX-') ? generateRandomSku(catId) : prev.sku,
-                        }));
-                      }}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all cursor-pointer"
-                    >
-                      <option value="">-- Choose Category --</option>
-                      {categories.map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Brand Dropdown */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                      <span>Brand / Vendor</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.brandId}
-                      onChange={e => {
-                        const brandId = e.target.value;
-                        const brand = brands.find(b => b.id === brandId);
-                        setFormData(prev => ({
-                          ...prev,
-                          brandId,
-                          brandName: brand?.name || '',
-                        }));
-                      }}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all cursor-pointer"
-                    >
-                      <option value="">-- Choose Brand --</option>
-                      {brands.map(b => (
-                        <option key={b.id} value={b.id}>
-                          {b.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Product Condition Pills */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Product Condition
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { id: 'Brand New (Factory Sealed)', label: 'Brand New', desc: 'Factory Sealed' },
-                      { id: 'Open Box (Like New)', label: 'Open Box', desc: 'Tested, Like New' },
-                      { id: 'Certified Refurbished', label: 'Refurbished', desc: 'Grade A Certified' },
-                      { id: 'Pre-Owned (Tested & Verified)', label: 'Pre-Owned', desc: 'Fully Inspected' },
-                    ].map(cond => {
-                      const isSelected = formData.condition === cond.id;
-                      return (
-                        <button
-                          key={cond.id}
-                          type="button"
-                          onClick={() => {
-                            setFormData(prev => ({
-                              ...prev,
-                              condition: cond.id,
-                              specifications: { ...prev.specifications, Condition: cond.id },
-                            }));
-                          }}
-                          className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                            isSelected
-                              ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/40 text-purple-900 dark:text-purple-200 shadow-2xs'
-                              : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-400'
-                          }`}
-                        >
-                          <div className="text-xs font-bold">{cond.label}</div>
-                          <div className="text-[10px] opacity-70">{cond.desc}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Short Description */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Description & Highlights
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.shortDescription}
-                    onChange={e => {
-                      const val = e.target.value;
-                      setFormData(prev => ({ ...prev, shortDescription: val, description: prev.description || val }));
-                    }}
-                    placeholder="Briefly describe key features, specifications, and what comes inside the box..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-xs font-normal text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white dark:focus:bg-slate-900 transition-all resize-none"
-                  />
-                </div>
-              </div>
-
-              {/* CARD 2: Pricing & Stock */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
-                      2
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
-                        Pricing & Inventory Stock
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Selling price, purchase cost, available units, and warranty
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-full">
-                    Financials
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Selling Price */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                        <span>Selling Price</span>
-                        <span className="text-red-500">*</span>
-                      </label>
-                      {profitMetrics.margin > 0 && (
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                          {profitMetrics.margin}% Margin (+{profitMetrics.profit} AED)
-                        </span>
-                      )}
-                    </div>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={formData.price || ''}
-                        onChange={e => {
-                          const val = Math.max(0, parseFloat(e.target.value) || 0);
-                          setFormData(prev => ({
-                            ...prev,
-                            price: val,
-                            originalPrice: prev.originalPrice || Math.round(val * 1.15),
-                          }));
-                        }}
-                        placeholder="0"
-                        className="w-full pl-3.5 pr-14 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-base font-mono font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                      />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                        AED
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-400">
-                      The price customers will pay on the website.
-                    </p>
-                  </div>
-
-                  {/* Cost Price */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <span>Cost / Purchase Price</span>
-                      <span className="text-[10px] font-normal text-slate-400">(Optional)</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={formData.costPrice || ''}
-                        onChange={e => {
-                          const val = Math.max(0, parseFloat(e.target.value) || 0);
-                          setFormData(prev => ({ ...prev, costPrice: val }));
-                        }}
-                        placeholder="0"
-                        className="w-full pl-3.5 pr-14 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-base font-mono font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                      />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                        AED
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-400">
-                      What you paid for this unit. Used to calculate your profit.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Stock Quantity */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                      <span>Available Stock</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={formData.stock}
-                        onChange={e => {
-                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                          setFormData(prev => ({ ...prev, stock: val }));
-                        }}
-                        className="w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                      />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                        Units
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-400">
-                      Physical units in warehouse ready for delivery.
-                    </p>
-                  </div>
-
-                  {/* Warranty Period */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Warranty
-                    </label>
-                    <select
-                      value={formData.warranty}
-                      onChange={e => {
-                        const val = e.target.value;
-                        setFormData(prev => ({
-                          ...prev,
-                          warranty: val,
-                          specifications: { ...prev.specifications, Warranty: val },
-                        }));
-                      }}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all cursor-pointer"
-                    >
-                      {WARRANTY_OPTIONS.map(opt => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Tax & Low Stock Options */}
-                <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 text-xs">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="simple-tax"
-                      checked={formData.chargeTax}
-                      onChange={e => setFormData(prev => ({ ...prev, chargeTax: e.target.checked }))}
-                      className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
-                    />
-                    <label htmlFor="simple-tax" className="font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                      Include 5% UAE Standard VAT
-                    </label>
-                  </div>
-                  <div className="text-[11px] text-slate-400 font-mono">
-                    SKU: {formData.sku}
-                  </div>
-                </div>
-              </div>
-
-              {/* CARD 3: Photos & Gallery */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
-                      3
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
-                        Product Imagery
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Add product photos for your storefront presentation
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full">
-                    {formData.images.length} {formData.images.length === 1 ? 'Photo' : 'Photos'}
-                  </span>
-                </div>
-
-                {/* Photo Input (Upload or Direct URL) */}
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <input
-                      type="url"
-                      value={galleryUrlInput}
-                      onChange={e => setGalleryUrlInput(e.target.value)}
-                      placeholder="Paste image web address (e.g. https://... or unsplash URL)"
-                      className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!galleryUrlInput.trim()) return;
-                        const url = galleryUrlInput.trim();
-                        setFormData(prev => ({
-                          ...prev,
-                          primaryImage: prev.primaryImage || url,
-                          images: Array.from(new Set([...prev.images, url])),
-                        }));
-                        setGalleryUrlInput('');
-                      }}
-                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors cursor-pointer shrink-0"
-                    >
-                      + Add URL
-                    </button>
-                    <label className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shrink-0">
-                      <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Upload File</span>
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp,image/gif"
-                        className="hidden"
-                        onChange={async e => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const formDataUpload = new FormData();
-                          formDataUpload.append('file', file);
-                          try {
-                            const res = await fetch('/api/upload', { method: 'POST', body: formDataUpload });
-                            const data = await res.json();
-                            if (data.url) {
-                              setFormData(prev => ({
-                                ...prev,
-                                primaryImage: prev.primaryImage || data.url,
-                                images: Array.from(new Set([...prev.images, data.url])),
-                              }));
-                            }
-                          } catch {}
-                        }}
-                      />
-                    </label>
-                  </div>
-
-                  {/* Thumbnail Gallery */}
-                  {formData.images.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                      {formData.images.map((img, idx) => {
-                        const isCover = img === formData.primaryImage;
-                        return (
-                          <div
-                            key={img + idx}
-                            className={`relative rounded-2xl overflow-hidden border aspect-video group bg-slate-100 dark:bg-slate-800 ${
-                              isCover ? 'ring-2 ring-purple-600 border-purple-600' : 'border-slate-200 dark:border-slate-700'
-                            }`}
-                          >
-                            <img src={getSafeImageUrl(img)} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                            {isCover && (
-                              <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-600 text-white text-[10px] font-black flex items-center gap-1 shadow-sm">
-                                <Star className="w-3 h-3 fill-current" />
-                                <span>Cover</span>
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                              {!isCover && (
-                                <button
-                                  type="button"
-                                  onClick={() => setFormData(prev => ({ ...prev, primaryImage: img }))}
-                                  className="p-1.5 rounded-lg bg-white/90 text-slate-900 hover:bg-white text-xs font-bold cursor-pointer"
-                                  title="Make Cover Photo"
-                                >
-                                  <Star className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFormData(prev => {
-                                    const nextImgs = prev.images.filter(x => x !== img);
-                                    return {
-                                      ...prev,
-                                      images: nextImgs,
-                                      primaryImage: prev.primaryImage === img ? nextImgs[0] || '' : prev.primaryImage,
-                                    };
-                                  });
-                                }}
-                                className="p-1.5 rounded-lg bg-red-600 text-white hover:bg-red-500 text-xs font-bold cursor-pointer"
-                                title="Remove Image"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2">
-                      <ImageIcon className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
-                      <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        No product photos added yet
-                      </div>
-                      <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
-                        Paste an image address above or click a hardware template at the top to load high-resolution product photos automatically.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* CARD 4: Essential Specifications */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
-                      4
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
-                        Key Specifications
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Top hardware attributes shown to customers in catalog comparison
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditorExperience('advanced');
-                      setActiveTab('specs');
-                      try { localStorage.setItem('nextech_editor_experience', 'advanced'); } catch {}
-                    }}
-                    className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Full Spec Matrix (60+)</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Dynamic Category Spec Fields */}
-                {(() => {
-                  const specsConfig = SIMPLE_CATEGORY_SPECS[formData.categoryId] || [
-                    { label: 'Condition', key: 'Condition', placeholder: 'e.g. Brand New (Factory Sealed)', options: ['Brand New (Factory Sealed)', 'Open Box (Like New)', 'Certified Refurbished'] },
-                    { label: 'Form Factor / Model', key: 'Form Factor', placeholder: 'e.g. ATX, M.2 2280, 2U Rackmount', options: ['ATX', 'Micro-ATX', 'Mini-ITX', 'M.2 2280', '2.5-inch', '3.5-inch'] },
-                    { label: 'Interface / Ports', key: 'Interface', placeholder: 'e.g. PCIe 4.0, USB-C Thunderbolt 4', options: ['PCIe 4.0', 'PCIe 5.0', 'USB 3.2 Gen 2', 'Thunderbolt 4', 'Wi-Fi 7'] },
-                    { label: 'Official Warranty', key: 'Warranty', placeholder: 'e.g. 3 Years Official Brand Warranty', options: ['1 Year Warranty', '2 Years Warranty', '3 Years Warranty', '5 Years Warranty'] },
-                  ];
-
-                  return (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {specsConfig.map(spec => {
-                        const currentVal = formData.specifications[spec.key] || '';
-                        return (
-                          <div key={spec.key} className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                              {spec.label}
-                            </label>
-                            <div className="space-y-1">
-                              <input
-                                type="text"
-                                value={currentVal}
-                                onChange={e => {
-                                  const val = e.target.value;
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    specifications: {
-                                      ...prev.specifications,
-                                      [spec.key]: val,
-                                    },
-                                  }));
-                                }}
-                                placeholder={spec.placeholder}
-                                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                              />
-                              {spec.options && spec.options.length > 0 && (
-                                <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pt-0.5">
-                                  {spec.options.slice(0, 3).map(opt => (
-                                    <button
-                                      key={opt}
-                                      type="button"
-                                      onClick={() => {
-                                        setFormData(prev => ({
-                                          ...prev,
-                                          specifications: {
-                                            ...prev.specifications,
-                                            [spec.key]: opt,
-                                          },
-                                        }));
-                                      }}
-                                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors shrink-0 cursor-pointer ${
-                                        currentVal === opt
-                                          ? 'bg-indigo-600 text-white'
-                                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                                      }`}
-                                    >
-                                      {opt}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* CARD 5: Publishing Readiness & Sticky Bottom Action */}
-              <div className="p-6 rounded-3xl bg-slate-900 text-white dark:bg-slate-950 border border-slate-800 shadow-xl space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-sm font-black tracking-tight flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      <span>Product Publishing Readiness</span>
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {formData.title && formData.categoryId && Number(formData.price) > 0
-                        ? 'All required fields are complete. You are ready to publish this SKU!'
-                        : 'Please complete the remaining required fields before publishing.'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleSaveProduct('DRAFT')}
-                      disabled={isSubmitting}
-                      className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
-                    >
-                      Save as Draft
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSaveProduct('ACTIVE')}
-                      disabled={isSubmitting}
-                      className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/30 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Publishing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Check className="w-4 h-4" />
-                          <span>Publish Hardware SKU</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Checklist Badges */}
-                <div className="pt-3 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div className="flex items-center gap-2">
-                    {formData.title ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border border-amber-400/60 text-amber-400 text-[10px] flex items-center justify-center font-bold">!</div>
-                    )}
-                    <span className={formData.title ? 'text-slate-300 font-semibold' : 'text-amber-300 font-semibold'}>
-                      Title Added
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {formData.categoryId ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border border-amber-400/60 text-amber-400 text-[10px] flex items-center justify-center font-bold">!</div>
-                    )}
-                    <span className={formData.categoryId ? 'text-slate-300 font-semibold' : 'text-amber-300 font-semibold'}>
-                      Category Chosen
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {Number(formData.price) > 0 ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border border-amber-400/60 text-amber-400 text-[10px] flex items-center justify-center font-bold">!</div>
-                    )}
-                    <span className={Number(formData.price) > 0 ? 'text-slate-300 font-semibold' : 'text-amber-300 font-semibold'}>
-                      Selling Price Set
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {formData.images.length > 0 ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border border-slate-500 text-slate-500 text-[10px] flex items-center justify-center font-bold">○</div>
-                    )}
-                    <span className={formData.images.length > 0 ? 'text-slate-300 font-semibold' : 'text-slate-400'}>
-                      Photo Added
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <>
           {/* SECTION 1: GENERAL PRODUCT & MEDIA STUDIO */}
           {activeTab === 'general' && (
             <div id="section-overview" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
@@ -2809,6 +2071,38 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           </button>
                         )}
                       </div>
+                      {/* One-Click Sample Hardware Photography */}
+                      <div className="space-y-1.5 p-3 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                            <Sparkles className="w-3 h-3" /> Quick Hardware Photography (Click to Set as Cover)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                          {HARDWARE_IMAGE_PRESETS.map((p) => (
+                            <button
+                              key={p.label}
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  primaryImage: p.url,
+                                  images: prev.images.includes(p.url) ? prev.images : [p.url, ...prev.images]
+                                }));
+                                setFailedPreviewUrl(null);
+                              }}
+                              className="group relative flex-shrink-0 w-16 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-purple-500 hover:scale-105 transition-all cursor-pointer bg-slate-100 dark:bg-slate-800"
+                              title={`Apply ${p.label} sample photo`}
+                            >
+                              <img src={p.url} alt={p.label} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Star className="w-3 h-3 text-amber-300" />
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
                       {/* Thumbnail Strip */}
                       {formData.images.length > 0 ? (
                         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -3010,6 +2304,64 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   </div>
                 </div>
               </div>
+
+              {/* Warehouse Available Stock Units (Admin Direct Inventory) */}
+              {portal === 'admin' && (
+                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                        <Warehouse className="w-4 h-4 text-purple-600" />
+                        <span>Direct Warehouse Stock & Inventory Thresholds</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Physical units available in central Dubai logistics hub</div>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                      {formData.stock} units on hand
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        Available Stock Quantity (Units) *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={formData.stock}
+                          onChange={e => setFormData(p => ({ ...p, stock: Math.max(0, parseInt(e.target.value, 10) || 0) }))}
+                          className="w-full bg-white dark:bg-slate-900 px-4 py-3 rounded-xl text-base font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          placeholder="e.g. 25"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">units</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1">Available physical units in stock for customer order fulfillment.</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        Low Stock Alert Threshold
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={formData.lowStockThreshold}
+                          onChange={e => setFormData(p => ({ ...p, lowStockThreshold: Math.max(1, parseInt(e.target.value, 10) || 5) }))}
+                          className="w-full bg-white dark:bg-slate-900 px-4 py-3 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          placeholder="e.g. 5"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">units</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1">System alerts your team when remaining stock falls below this quantity.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Dynamic Financial Profitability Card */}
               <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-purple-50/40 dark:from-slate-950 dark:to-purple-950/20 border border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 shadow-sm">
@@ -3411,9 +2763,84 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             </div>
           )}
 
-          {/* SECTION 4: TECHNICAL SPECIFICATIONS MATRIX — REDESIGNED */}
+          {/* SECTION 4: TECHNICAL SPECIFICATIONS MATRIX */}
           {activeTab === 'specs' && (
-            <div id="section-specs" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
+            <div id="section-specs" className="space-y-6">
+
+              {/* 1. SMART CATEGORY KEY HIGHLIGHTS (ESSENTIAL SPECS) */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+                <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-600/20">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                        <span>Category Key Highlights</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
+                          {formData.categoryName || 'Essential Hardware'}
+                        </span>
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Essential specifications buyers look for when shopping for {formData.categoryName || 'hardware'}. Quick and intuitive for non-technical users.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800">
+                    {configuredSpecsCount} specs configured
+                  </span>
+                </div>
+
+                {/* Grid of Essential Specs for this Category */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {(SIMPLE_CATEGORY_SPECS[formData.categoryId] || SIMPLE_CATEGORY_SPECS.cat_laptops).map((field) => {
+                    const currentVal = formData.specifications[field.key] || '';
+                    return (
+                      <div key={field.key} className="space-y-2 p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {field.label}
+                          </label>
+                          {currentVal && (
+                            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                              <Check className="w-3 h-3" /> Set
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          placeholder={field.placeholder}
+                          value={currentVal}
+                          onChange={e => handleSpecChange(field.key, e.target.value)}
+                          className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                        />
+                        {/* Quick Presets for this field */}
+                        {field.options && field.options.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {field.options.map((opt) => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => handleSpecChange(field.key, opt)}
+                                className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                  currentVal === opt
+                                    ? 'bg-purple-600 text-white border-purple-600 font-bold shadow-xs'
+                                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-700'
+                                }`}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. COMPLETE ENGINEERING SPECIFICATION MATRIX (ALL 60+ FIELDS) */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
 
               {/* Section Header */}
               <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-gradient-to-r from-slate-50 to-purple-50/30 dark:from-slate-900 dark:to-purple-950/10">
@@ -3690,6 +3117,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </button>
               </div>
             </div>
+          </div>
           )}
 
           {/* SECTION 5: VARIANTS & MULTI-SKU COMBINATIONS */}
@@ -4092,9 +3520,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                        HS Tariff Code
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                          HS Tariff Code
+                        </label>
+                        <span className="text-[10px] text-slate-400">GCC Customs</span>
+                      </div>
                       <input
                         type="text"
                         placeholder="8471.30.01"
@@ -4102,6 +3533,23 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         onChange={e => setFormData({ ...formData, hsCode: e.target.value })}
                         className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-800"
                       />
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {[
+                          { code: '8471.30.01', label: 'Laptop' },
+                          { code: '8471.50.00', label: 'Desktop / Server' },
+                          { code: '8473.30.00', label: 'GPU / Parts' },
+                          { code: '8523.51.00', label: 'SSD' },
+                        ].map(hs => (
+                          <button
+                            key={hs.code}
+                            type="button"
+                            onClick={() => setFormData(p => ({ ...p, hsCode: hs.code }))}
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono transition-colors cursor-pointer ${formData.hsCode === hs.code ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'}`}
+                          >
+                            {hs.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -4186,8 +3634,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </button>
               </div>
             </div>
-          )}
-          </>
           )}
         </div>
 
@@ -4345,16 +3791,28 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             {/* Checklist */}
             <div className="space-y-2 pt-1">
               {completeness.checks.map(check => (
-                <div key={check.id} className="flex items-center justify-between text-xs">
-                  <span className={check.passed ? 'text-slate-700 dark:text-slate-300 font-medium' : 'text-slate-400'}>
+                <button
+                  type="button"
+                  key={check.id}
+                  onClick={() => {
+                    if (check.id === 'title' || check.id === 'sku' || check.id === 'image') setActiveTab('general');
+                    else if (check.id === 'price') setActiveTab('pricing');
+                    else if (check.id === 'stock') setActiveTab(portal === 'admin' ? 'pricing' : 'inventory');
+                    else if (check.id === 'specs') setActiveTab('specs');
+                    else if (check.id === 'shipping') setActiveTab('logistics');
+                  }}
+                  className="w-full flex items-center justify-between text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 p-1.5 rounded-lg transition-colors text-left cursor-pointer group"
+                  title="Click to jump to section"
+                >
+                  <span className={check.passed ? 'text-slate-700 dark:text-slate-300 font-medium group-hover:text-purple-600' : 'text-slate-400 group-hover:text-purple-600'}>
                     {check.label}
                   </span>
                   {check.passed ? (
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   ) : (
-                    <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0 group-hover:bg-purple-500" />
                   )}
-                </div>
+                </button>
               ))}
             </div>
           </div>
