@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/product/ProductCard';
 import {
@@ -108,21 +109,32 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
       {/* Control Bar: Professional Category Tabs + Search + Sort */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
         {/* Category Segmented Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-2 bg-slate-100/90 dark:bg-slate-900/90 rounded-xl border border-slate-200/80 dark:border-slate-800 shrink-0">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                activeTab === id
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 shrink-0 ${activeTab === id ? 'text-white' : 'text-slate-400'}`} />
-              <span>{label}</span>
-            </button>
-          ))}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-2 bg-slate-100/90 dark:bg-slate-900/90 rounded-xl border border-slate-200/80 dark:border-slate-800 shrink-0 relative">
+          {tabs.map(({ id, label, icon: Icon }) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveTab(id)}
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer z-10 ${
+                  isActive
+                    ? 'text-white font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="matrixActiveTabIndicator"
+                    className="absolute inset-0 rounded-lg bg-blue-600 shadow-xs -z-10"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  />
+                )}
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Search & Sort Widgets */}
@@ -153,33 +165,64 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
         </div>
       </div>
 
-      {/* Product Grid or Empty State */}
-      {displayList.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {displayList.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-        <div className="p-12 text-center rounded-3xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-3">
-          <Boxes className="w-10 h-10 text-slate-400 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">No components matched your criteria</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Try adjusting your search query or switching to another category tab to view all available SKUs.
-          </p>
-          <button
-            onClick={() => {
-              setActiveTab('ALL');
-              setSearchQuery('');
-              setSortBy('FEATURED');
+      {/* Product Grid or Empty State with smooth crossfade */}
+      <AnimatePresence mode="wait">
+        {displayList.length > 0 ? (
+          <motion.div
+            key={activeTab + sortBy}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.05,
+                },
+              },
             }}
-            className="px-4 py-2 rounded-xl bg-tech-blue text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Filters</span>
-          </button>
-        </div>
-      )}
+            {displayList.map(product => (
+              <motion.div
+                key={product.id}
+                variants={{
+                  hidden: { opacity: 0, y: 12 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+                }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="p-12 text-center rounded-3xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-3"
+          >
+            <Boxes className="w-10 h-10 text-slate-400 mx-auto" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">No components matched your criteria</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Try adjusting your search query or switching to another category tab to view all available SKUs.
+            </p>
+            <button
+              onClick={() => {
+                setActiveTab('ALL');
+                setSearchQuery('');
+                setSortBy('FEATURED');
+              }}
+              className="px-4 py-2 rounded-xl bg-tech-blue text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm hover:scale-102 active:scale-98 transition-transform cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Filters</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom CTA to Full Catalog */}
       <div className="pt-2 flex items-center justify-between">

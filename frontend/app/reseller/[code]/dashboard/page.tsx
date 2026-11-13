@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -160,9 +161,29 @@ export default function ResellerDashboardPage() {
       </div>
 
       {/* 4 Main Enterprise KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-30px' }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.08,
+            },
+          },
+        }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
         {/* Approved Active SKUs */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-emerald-300 transition-all">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-emerald-300 transition-colors"
+        >
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[11px] font-mono font-bold uppercase tracking-wider">Approved Live SKUs</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -179,10 +200,17 @@ export default function ResellerDashboardPage() {
               View active
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Pending Review SKUs */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-amber-300 transition-all">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-amber-300 transition-colors"
+        >
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[11px] font-mono font-bold uppercase tracking-wider">Pending Admin Review</span>
             <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -198,10 +226,17 @@ export default function ResellerDashboardPage() {
               View queue
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Capitalized Inventory Valuation */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-blue-300 transition-all">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-blue-300 transition-colors"
+        >
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[11px] font-mono font-bold uppercase tracking-wider">Inventory Valuation</span>
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -215,13 +250,20 @@ export default function ResellerDashboardPage() {
             <span>Capitalized Hardware Asset</span>
             <span className="font-mono text-slate-700 font-bold">AED</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stock Safety & Alert Health */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-purple-300 transition-all">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 hover:border-indigo-300 transition-colors"
+        >
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[11px] font-mono font-bold uppercase tracking-wider">Stock Buffer Health</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
               <Boxes className="w-4 h-4" />
             </div>
           </div>
@@ -236,12 +278,12 @@ export default function ResellerDashboardPage() {
             ) : (
               <span className="text-emerald-700 font-bold">100% Buffer Capacity</span>
             )}
-            <Link href={`/reseller/${resellerCode}/inventory`} className="text-purple-700 hover:text-purple-900 font-bold">
+            <Link href={`/reseller/${resellerCode}/inventory`} className="text-indigo-700 hover:text-indigo-900 font-bold">
               Adjust Buffers
             </Link>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Stock Health & Approval Pipeline Banner */}
       {(pendingApproval > 0 || lowStockCount > 0 || outOfStockCount > 0) && (
@@ -361,25 +403,25 @@ export default function ResellerDashboardPage() {
 
         <Link
           href={`/reseller/${resellerCode}/settings`}
-          className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-purple-400 hover:shadow-md transition-all flex flex-col justify-between group shadow-xs space-y-4"
+          className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-slate-400 hover:shadow-md transition-all flex flex-col justify-between group shadow-xs space-y-4"
         >
           <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <Settings className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-black font-mono bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md">
+            <span className="text-[10px] font-black font-mono bg-slate-200 text-slate-800 px-2 py-0.5 rounded-md">
               PROFILE
             </span>
           </div>
           <div>
-            <div className="text-sm font-black text-slate-900 group-hover:text-purple-700 transition-colors">
+            <div className="text-sm font-black text-slate-900 group-hover:text-slate-900 transition-colors">
               Vendor Store & Compliance
             </div>
             <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
               Update legal trade name, tax registration number (TRN), trade license, and regional contacts.
             </p>
           </div>
-          <div className="flex items-center gap-1 text-xs font-bold text-purple-700 group-hover:translate-x-0.5 transition-transform">
+          <div className="flex items-center gap-1 text-xs font-bold text-slate-700 group-hover:translate-x-0.5 transition-transform">
             <span>Vendor Configuration</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </div>
@@ -439,7 +481,7 @@ export default function ResellerDashboardPage() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div>
             <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
-              <Package className="w-4 h-4 text-purple-600" />
+              <Package className="w-4 h-4 text-blue-600" />
               <span>Recent Hardware SKUs & Approval Pipeline</span>
             </h3>
             <p className="text-[11px] text-slate-500 mt-0.5">
@@ -448,156 +490,183 @@ export default function ResellerDashboardPage() {
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none relative">
             <button
               type="button"
               onClick={() => setSelectedCategoryFilter('ALL')}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`relative px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer z-10 ${
                 selectedCategoryFilter === 'ALL'
-                  ? 'bg-slate-900 text-white shadow-xs'
+                  ? 'text-white font-black'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
+              {selectedCategoryFilter === 'ALL' && (
+                <motion.span
+                  layoutId="activeResellerCategoryTab"
+                  className="absolute inset-0 rounded-xl bg-slate-900 shadow-xs -z-10"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
               All Categories ({products.length})
             </button>
-            {categoryBreakdown.slice(0, 4).map(cat => (
-              <button
-                key={cat.name}
-                type="button"
-                onClick={() => setSelectedCategoryFilter(cat.name)}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  selectedCategoryFilter === cat.name
-                    ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {cat.name} ({cat.count})
-              </button>
-            ))}
+            {categoryBreakdown.slice(0, 4).map(cat => {
+              const isSelected = selectedCategoryFilter === cat.name;
+              return (
+                <button
+                  key={cat.name}
+                  type="button"
+                  onClick={() => setSelectedCategoryFilter(cat.name)}
+                  className={`relative px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap z-10 ${
+                    isSelected
+                      ? 'text-slate-950 font-black'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {isSelected && (
+                    <motion.span
+                      layoutId="activeResellerCategoryTab"
+                      className="absolute inset-0 rounded-xl bg-amber-500 shadow-xs -z-10"
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  {cat.name} ({cat.count})
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {displayedProducts.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                  <th className="py-3 px-3">Hardware Product</th>
-                  <th className="py-3 px-3">SKU & Barcode</th>
-                  <th className="py-3 px-3">Category</th>
-                  <th className="py-3 px-3 text-right">Price (AED)</th>
-                  <th className="py-3 px-3 text-center">On-Hand Stock</th>
-                  <th className="py-3 px-3 text-center">Admin Approval</th>
-                  <th className="py-3 px-3 text-right">Studio Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {displayedProducts.map(prod => {
-                  const isApproved = prod.approvalStatus === 'APPROVED';
-                  const isPending = prod.approvalStatus === 'PENDING_APPROVAL';
-                  const isRejected = prod.approvalStatus === 'REJECTED';
-                  const img = prod.primaryImage || prod.thumbnail || prod.images?.[0] || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=400&q=80';
-
-                  return (
-                    <tr key={prod.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={img}
-                            alt=""
-                            className="w-10 h-10 rounded-lg object-cover bg-slate-100 border border-slate-200 shrink-0"
-                          />
-                          <div className="min-w-0 max-w-xs sm:max-w-sm">
-                            <div className="font-bold text-slate-900 truncate">{prod.name || prod.title}</div>
-                            <div className="text-[11px] text-slate-400 font-medium truncate">{prod.brandName || 'NexTech Partner'}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 font-mono font-bold text-slate-700">
-                        <div>{prod.sku}</div>
-                        {prod.barcode && <div className="text-[10px] text-slate-400">{prod.barcode}</div>}
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-semibold text-[11px]">
-                          {prod.categoryName || 'Hardware'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono font-black text-slate-900 text-sm">
-                        {formatPrice(prod.price)}
-                      </td>
-                      <td className="py-3 px-3 text-center font-mono">
-                        <span className={`inline-block px-2 py-0.5 rounded font-bold text-xs ${
-                          prod.stock <= 0
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                            : prod.stock <= 5
-                            ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                            : 'bg-slate-100 text-slate-800'
-                        }`}>
-                          {prod.stock} units
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {isApproved ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>Catalog Live</span>
-                          </span>
-                        ) : isPending ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[11px] font-bold">
-                            <Clock className="w-3.5 h-3.5 text-amber-600" />
-                            <span>Pending Review</span>
-                          </span>
-                        ) : isRejected ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200 text-[11px] font-bold">
-                            <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                            <span>Revision Needed</span>
-                          </span>
-                        ) : (
-                          <span className="font-mono text-slate-500">{prod.approvalStatus || 'APPROVED'}</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <Link
-                          href={`/reseller/${resellerCode}/products/${prod.id}/edit`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 hover:border-purple-200 font-bold transition-all text-xs"
-                          title="Open SKU Configuration Studio"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                          <span>Studio</span>
-                        </Link>
-                      </td>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedCategoryFilter}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+          >
+            {displayedProducts.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+                      <th className="py-3 px-3">Hardware Product</th>
+                      <th className="py-3 px-3">SKU & Barcode</th>
+                      <th className="py-3 px-3">Category</th>
+                      <th className="py-3 px-3 text-right">Price (AED)</th>
+                      <th className="py-3 px-3 text-center">On-Hand Stock</th>
+                      <th className="py-3 px-3 text-center">Admin Approval</th>
+                      <th className="py-3 px-3 text-right">Studio Action</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="py-12 text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center mx-auto">
-              <Package className="w-6 h-6" />
-            </div>
-            <div className="text-sm font-black text-slate-900">No hardware product listings found</div>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Start adding your hardware SKUs using the enterprise Studio or Excel bulk upload.
-            </p>
-            <div className="flex items-center justify-center gap-3 pt-2">
-              <Link
-                href={`/reseller/${resellerCode}/products/new`}
-                className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-xs"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-                <span>Launch SKU Studio</span>
-              </Link>
-              <Link
-                href={`/reseller/${resellerCode}/products/import`}
-                className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl text-xs"
-              >
-                <span>Bulk Import</span>
-              </Link>
-            </div>
-          </div>
-        )}
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {displayedProducts.map(prod => {
+                      const isApproved = prod.approvalStatus === 'APPROVED';
+                      const isPending = prod.approvalStatus === 'PENDING_APPROVAL';
+                      const isRejected = prod.approvalStatus === 'REJECTED';
+                      const img = prod.primaryImage || prod.thumbnail || prod.images?.[0] || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=400&q=80';
+
+                      return (
+                        <tr key={prod.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-3 px-3">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={img}
+                                alt=""
+                                className="w-10 h-10 rounded-lg object-cover bg-slate-100 border border-slate-200 shrink-0"
+                              />
+                              <div className="min-w-0 max-w-xs sm:max-w-sm">
+                                <div className="font-bold text-slate-900 truncate">{prod.name || prod.title}</div>
+                                <div className="text-[11px] text-slate-400 font-medium truncate">{prod.brandName || 'NexTech Partner'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-3 font-mono font-bold text-slate-700">
+                            <div>{prod.sku}</div>
+                            {prod.barcode && <div className="text-[10px] text-slate-400">{prod.barcode}</div>}
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-semibold text-[11px]">
+                              {prod.categoryName || 'Hardware'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono font-black text-slate-900 text-sm">
+                            {formatPrice(prod.price)}
+                          </td>
+                          <td className="py-3 px-3 text-center font-mono">
+                            <span className={`inline-block px-2 py-0.5 rounded font-bold text-xs ${
+                              prod.stock <= 0
+                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                : prod.stock <= 5
+                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                : 'bg-slate-100 text-slate-800'
+                            }`}>
+                              {prod.stock} units
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            {isApproved ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Catalog Live</span>
+                              </span>
+                            ) : isPending ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[11px] font-bold">
+                                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Pending Review</span>
+                              </span>
+                            ) : isRejected ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200 text-[11px] font-bold">
+                                <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                                <span>Revision Needed</span>
+                              </span>
+                            ) : (
+                              <span className="font-mono text-slate-500">{prod.approvalStatus || 'APPROVED'}</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <Link
+                              href={`/reseller/${resellerCode}/products/${prod.id}/edit`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 font-bold transition-all text-xs"
+                              title="Open SKU Configuration Studio"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Studio</span>
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="py-12 text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center mx-auto">
+                  <Package className="w-6 h-6" />
+                </div>
+                <div className="text-sm font-black text-slate-900">No hardware product listings found</div>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Start adding your hardware SKUs using the enterprise Studio or Excel bulk upload.
+                </p>
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <Link
+                    href={`/reseller/${resellerCode}/products/new`}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Plus className="w-4 h-4 stroke-[2.5]" />
+                    <span>Launch SKU Studio</span>
+                  </Link>
+                  <Link
+                    href={`/reseller/${resellerCode}/products/import`}
+                    className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl text-xs"
+                  >
+                    <span>Bulk Import</span>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
           <span>Showing {displayedProducts.length} of {products.length} hardware lines</span>

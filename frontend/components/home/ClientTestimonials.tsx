@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Star, CheckCircle2, Quote, Award } from 'lucide-react';
 import { ClientTestimonial } from '@/types';
 
@@ -37,12 +38,30 @@ export function ClientTestimonials({ testimonials = [] }: ClientTestimonialsProp
         </div>
       </div>
 
-      {/* Testimonials 3 Columns Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Testimonials 3 Columns Grid with Staggered Viewport Entrance */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-40px' }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+            },
+          },
+        }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
         {reviews.map(rev => (
-          <div
+          <motion.div
             key={rev.id}
-            className="group relative rounded-3xl p-7 bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-2xl hover:border-tech-blue/50 dark:hover:border-tech-cyan/50 transition-all duration-300 space-y-5 hover:-translate-y-1 overflow-hidden"
+            variants={{
+              hidden: { opacity: 0, y: 16 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
+            }}
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            className="group relative rounded-3xl p-7 bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-2xl hover:border-tech-blue/50 dark:hover:border-tech-cyan/50 transition-shadow duration-300 space-y-5 overflow-hidden"
           >
             {/* Background Accent */}
             <div className="absolute top-0 right-0 p-6 text-slate-100 dark:text-slate-800/40 pointer-events-none group-hover:text-tech-blue/10 transition-colors">
@@ -84,9 +103,9 @@ export function ClientTestimonials({ testimonials = [] }: ClientTestimonialsProp
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{rev.role} • {rev.company}</div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }

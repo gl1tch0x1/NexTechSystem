@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import {
   BrainCircuit,
   Server,
@@ -54,13 +55,31 @@ export function EnterpriseSolutions({ solutions }: EnterpriseSolutionsProps) {
       </div>
 
       {/* 3 Solutions Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-40px' }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+            },
+          },
+        }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+      >
         {displaySolutions.map(sol => {
           const Icon = ICON_MAP[sol.iconName] || BrainCircuit;
           return (
-            <div
+            <motion.div
               key={sol.id}
-              className="group relative rounded-xl p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-blue-500/70 dark:hover:border-cyan-500/70 hover:shadow-xl transition-all duration-200 flex flex-col justify-between overflow-hidden"
+              variants={{
+                hidden: { opacity: 0, y: 16 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
+              }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="group relative rounded-xl p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-blue-500/70 dark:hover:border-cyan-500/70 hover:shadow-xl transition-shadow duration-200 flex flex-col justify-between overflow-hidden"
             >
               <div className="relative z-10 space-y-3.5">
                 {/* Top Card Bar */}
@@ -122,10 +141,10 @@ export function EnterpriseSolutions({ solutions }: EnterpriseSolutionsProps) {
                   <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                 </Link>
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }

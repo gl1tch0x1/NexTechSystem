@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
@@ -494,22 +495,28 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-7 max-w-7xl mx-auto transition-colors duration-200 pb-16">
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold flex items-center gap-2.5 animate-in slide-in-from-top-2 duration-200 ${toastMessage.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800'
-              : 'bg-rose-50 dark:bg-rose-950 text-rose-800 dark:text-rose-200 border-rose-300 dark:border-rose-800'
-            }`}
-        >
-          {toastMessage.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          ) : (
-            <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-          )}
-          <span>{toastMessage.message}</span>
-        </div>
-      )}
+      {/* Toast Alert with Framer Motion */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold flex items-center gap-2.5 ${toastMessage.type === 'success'
+                ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800'
+                : 'bg-rose-50 dark:bg-rose-950 text-rose-800 dark:text-rose-200 border-rose-300 dark:border-rose-800'
+              }`}
+          >
+            {toastMessage.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+            )}
+            <span>{toastMessage.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ========================================================================= */}
       {/* SECTION 1: EXECUTIVE COMMAND HEADER & GLOBAL ACTION BAR */}
@@ -570,9 +577,29 @@ export default function AdminDashboardPage() {
       {/* ========================================================================= */}
       {/* SECTION 2: WORKING CAPITAL & EXECUTIVE FINANCIAL HEALTH RIBBON */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-40px' }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.08,
+            },
+          },
+        }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
         {/* Card 1: Gross Realized Revenue */}
-        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 14 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between group"
+        >
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
@@ -605,10 +632,17 @@ export default function AdminDashboardPage() {
             <span>Cashflow Rate</span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">100% FTA Reconciled</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Card 2: Commercial Sales Orders & Fulfillment Velocity */}
-        <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 14 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between group"
+        >
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
@@ -648,10 +682,17 @@ export default function AdminDashboardPage() {
               <div className="h-full bg-blue-500" style={{ width: `${processingPct}%` }} />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Card 3: Multi-Hub Inventory Asset Valuation */}
-        <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 14 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between group"
+        >
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
@@ -685,10 +726,17 @@ export default function AdminDashboardPage() {
               {lowStockCount > 0 ? `${lowStockCount} Below Buffer` : 'All Hubs Optimal'}
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Card 4: Net Operating Margin & Procurement COGS */}
-        <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 14 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+          }}
+          whileHover={{ y: -3, transition: { duration: 0.18 } }}
+          className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between group"
+        >
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
@@ -720,8 +768,8 @@ export default function AdminDashboardPage() {
             <span>Supplier Terms</span>
             <span className="text-slate-700 dark:text-slate-300 font-bold">Net-30 Standard</span>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Stock Health Notification Alert Banner */}
       {(lowStockCount > 0 || outOfStockCount > 0) && (
@@ -775,7 +823,7 @@ export default function AdminDashboardPage() {
         <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-2xs space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/70">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-0.5">
+              <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-blue-600 dark:text-cyan-400 uppercase tracking-wider mb-0.5">
                 <Briefcase className="w-3.5 h-3.5" />
                 <span>Enterprise B2B CRM Engine</span>
               </div>
@@ -791,7 +839,7 @@ export default function AdminDashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsQuoteModalOpen(true)}
-                className="h-8 px-3.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs"
+                className="h-8 px-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create B2B Quote</span>
@@ -830,12 +878,12 @@ export default function AdminDashboardPage() {
                   <div className="text-[11px] text-blue-600/80 dark:text-blue-400/80 mt-0.5 font-mono">{formatPrice(pendingDealsValue)}</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40">
-                  <div className="text-[10px] font-bold text-purple-600 dark:text-purple-400 font-mono uppercase">3. Commercial Approved</div>
-                  <div className="text-xl font-black text-purple-700 dark:text-purple-300 font-mono mt-1">
+                <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40">
+                  <div className="text-[10px] font-bold text-blue-600 dark:text-cyan-400 font-mono uppercase">3. Commercial Approved</div>
+                  <div className="text-xl font-black text-blue-700 dark:text-cyan-300 font-mono mt-1">
                     {approvedDeals.length} Deal{approvedDeals.length === 1 ? '' : 's'}
                   </div>
-                  <div className="text-[11px] text-purple-600/80 dark:text-purple-400/80 mt-0.5 font-mono">{formatPrice(approvedDealsValue)}</div>
+                  <div className="text-[11px] text-blue-600/80 dark:text-cyan-400/80 mt-0.5 font-mono">{formatPrice(approvedDealsValue)}</div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40">
@@ -904,7 +952,7 @@ export default function AdminDashboardPage() {
                       </td>
                       <td className="py-3">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${deal.status === 'APPROVED'
-                            ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                            ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-cyan-300 border-blue-200 dark:border-blue-800'
                             : deal.status === 'CONVERTED'
                               ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                               : deal.status === 'PENDING'
@@ -921,7 +969,7 @@ export default function AdminDashboardPage() {
                               type="button"
                               onClick={() => handleApproveQuote(deal.id, deal.quoteNumber)}
                               disabled={actionInProgressId === deal.id}
-                              className="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
+                              className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
                             >
                               <CheckCheck className="w-3 h-3" />
                               <span>Approve Terms</span>
@@ -1240,25 +1288,39 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/60 self-start sm:self-auto">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/60 self-start sm:self-auto relative">
             <button
               type="button"
               onClick={() => setChartMode('revenue')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${chartMode === 'revenue'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+              className={`relative px-3 py-1 rounded-lg text-xs font-semibold transition-colors z-10 ${chartMode === 'revenue'
+                  ? 'text-slate-900 dark:text-white font-bold'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
+              {chartMode === 'revenue' && (
+                <motion.span
+                  layoutId="activeChartModePill"
+                  className="absolute inset-0 rounded-lg bg-white dark:bg-slate-900 shadow-2xs -z-10"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
               Revenue (AED)
             </button>
             <button
               type="button"
               onClick={() => setChartMode('orders')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${chartMode === 'orders'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+              className={`relative px-3 py-1 rounded-lg text-xs font-semibold transition-colors z-10 ${chartMode === 'orders'
+                  ? 'text-slate-900 dark:text-white font-bold'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
+              {chartMode === 'orders' && (
+                <motion.span
+                  layoutId="activeChartModePill"
+                  className="absolute inset-0 rounded-lg bg-white dark:bg-slate-900 shadow-2xs -z-10"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
               Order Count
             </button>
           </div>
@@ -1355,20 +1417,30 @@ export default function AdminDashboardPage() {
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Authoritative commercial transactions ledger</p>
             </div>
 
-            <div className="flex items-center gap-1">
-              {(['ALL', 'PROCESSING', 'DELIVERED'] as const).map(filter => (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => setOrderFilter(filter)}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${orderFilter === filter
-                      ? 'bg-blue-600 text-white shadow-2xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                >
-                  {filter}
-                </button>
-              ))}
+            <div className="flex items-center gap-1 relative">
+              {(['ALL', 'PROCESSING', 'DELIVERED'] as const).map(filter => {
+                const isSelected = orderFilter === filter;
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setOrderFilter(filter)}
+                    className={`relative px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors z-10 ${isSelected
+                        ? 'text-white font-black'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                  >
+                    {isSelected && (
+                      <motion.span
+                        layoutId="activeAdminOrderFilterPill"
+                        className="absolute inset-0 rounded-lg bg-blue-600 shadow-2xs -z-10"
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    {filter}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -1436,9 +1508,21 @@ export default function AdminDashboardPage() {
       {/* ========================================================================= */}
       {/* MODAL 1: NEW B2B ENTERPRISE QUOTATION BUILDER */}
       {/* ========================================================================= */}
-      {isQuoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <AnimatePresence>
+        {isQuoteModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 14 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 14 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl overflow-hidden"
+            >
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
               <div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white">Create B2B Enterprise Quotation</h3>
@@ -1559,16 +1643,29 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ========================================================================= */}
       {/* MODAL 2: ENTERPRISE RESTOCK PO & SUPPLIER DOSSIER REQUISITION */}
       {/* ========================================================================= */}
-      {isRestockModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-3xl overflow-hidden animate-in zoom-in-95 duration-200 my-auto max-h-[92vh] flex flex-col">
+      <AnimatePresence>
+        {isRestockModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 14 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 14 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-3xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
+            >
             {/* Modal Header */}
             <div className="p-5 sm:px-6 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/40 shrink-0">
               <div className="flex items-center gap-3">
@@ -1948,9 +2045,10 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* OFFICIAL PURCHASE ORDER DOCUMENT / LEGAL DOSSIER MODAL */}
       <PurchaseOrderDocumentModal

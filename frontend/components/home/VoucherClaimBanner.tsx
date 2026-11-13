@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check, Sparkles, ArrowRight, BadgePercent } from 'lucide-react';
 import { Coupon } from '@/types';
 
@@ -36,12 +37,12 @@ export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
         {/* Left Voucher Info */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-3.5 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-tech-blue text-white flex items-center justify-center shadow-md shadow-tech-blue/25 shrink-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20 shrink-0">
             <BadgePercent className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
 
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[9.5px] font-mono font-bold uppercase tracking-wider mb-0.5">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-blue-900/60 text-[9.5px] font-mono font-bold uppercase tracking-wider mb-0.5">
               <Sparkles className="w-3 h-3" />
               <span>{badge}</span>
             </div>
@@ -56,20 +57,43 @@ export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
 
         {/* Right 1-Click Copy Voucher Card */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto shrink-0">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleCopy}
-            className="flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-600 font-mono font-bold text-slate-900 dark:text-white text-xs shadow-2xs hover:border-purple-500 transition-all cursor-pointer group w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 font-mono font-bold text-slate-900 dark:text-white text-xs shadow-2xs hover:border-blue-500 transition-colors cursor-pointer group w-full sm:w-auto"
             title="Click to copy voucher code"
           >
-            <span className="text-purple-600 dark:text-purple-400 text-sm tracking-wider font-extrabold">{code}</span>
-            <div className="p-1 rounded-md bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+            <span className="text-blue-600 dark:text-cyan-400 text-sm tracking-wider font-extrabold">{code}</span>
+            <div className="p-1 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-cyan-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <AnimatePresence mode="wait">
+                {copied ? (
+                  <motion.div
+                    key="check"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  >
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="copy"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </button>
+          </motion.button>
 
           <Link
             href={ctaLink}
-            className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 w-full sm:w-auto text-center"
+            className="px-4 py-2 bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 w-full sm:w-auto text-center hover:scale-101 active:scale-98"
           >
             <span>{ctaText}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -79,4 +103,3 @@ export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
     </section>
   );
 }
-

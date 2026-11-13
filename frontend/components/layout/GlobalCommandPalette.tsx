@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -136,19 +137,30 @@ export function GlobalCommandPalette() {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
-      {/* Modal Container */}
-      <div
-        className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] transition-all"
-        onClick={e => e.stopPropagation()}
-        onKeyDown={handleKeyDownList}
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-[9999] flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/70 backdrop-blur-md"
+          onClick={() => setIsOpen(false)}
+        >
+          {/* Modal Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: -8 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 400 }}
+            className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            onKeyDown={handleKeyDownList}
+          >
         {/* Top Search Input Bar */}
         <div className="flex items-center px-4 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/50">
-          <Search className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0 ml-1" />
+          <Search className="w-5 h-5 text-blue-600 dark:text-cyan-400 shrink-0 ml-1" />
           <input
             ref={inputRef}
             type="text"
@@ -158,7 +170,7 @@ export function GlobalCommandPalette() {
             className="w-full bg-transparent px-3.5 py-1 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none font-medium"
           />
           {loading && (
-            <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin shrink-0 mr-2" />
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin shrink-0 mr-2" />
           )}
           {query && (
             <button
@@ -183,7 +195,7 @@ export function GlobalCommandPalette() {
             <div>
               <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
                 <span>Hardware Catalog Matches ({results.length})</span>
-                {results.length > 0 && <span className="text-purple-600 font-bold">Use ↑ ↓ & Enter</span>}
+                {results.length > 0 && <span className="text-blue-600 dark:text-cyan-400 font-bold">Use ↑ ↓ & Enter</span>}
               </div>
 
               {results.length > 0 ? (
@@ -198,7 +210,7 @@ export function GlobalCommandPalette() {
                         onMouseEnter={() => setSelectedIndex(idx)}
                         className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                             : 'hover:bg-slate-100 dark:hover:bg-slate-800/60 text-slate-900 dark:text-slate-100'
                         }`}
                       >
@@ -214,7 +226,7 @@ export function GlobalCommandPalette() {
                             <div className="text-xs font-bold truncate">
                               {prod.name}
                             </div>
-                            <div className={`text-[10px] flex items-center gap-2 ${isSelected ? 'text-purple-200' : 'text-slate-400'}`}>
+                            <div className={`text-[10px] flex items-center gap-2 ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
                               <span className="font-mono">SKU: {prod.sku}</span>
                               {prod.brandName && (
                                 <>
@@ -229,7 +241,7 @@ export function GlobalCommandPalette() {
                         </div>
 
                         <div className="flex items-center gap-3 shrink-0 ml-3">
-                          <span className={`text-xs font-mono font-bold ${isSelected ? 'text-white' : 'text-purple-600 dark:text-purple-400'}`}>
+                          <span className={`text-xs font-mono font-bold ${isSelected ? 'text-white' : 'text-blue-600 dark:text-cyan-400'}`}>
                             {priceFormatted}
                           </span>
                           <CornerDownLeft className={`w-3.5 h-3.5 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
@@ -262,13 +274,13 @@ export function GlobalCommandPalette() {
                       <button
                         key={idx}
                         onClick={() => handleSelectShortcut(sc.href)}
-                        className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 hover:bg-purple-50 dark:hover:bg-purple-950/30 border border-slate-200/80 dark:border-slate-800/80 hover:border-purple-500/50 text-left transition-all cursor-pointer group"
+                        className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 hover:bg-blue-50 dark:hover:bg-blue-950/30 border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500/50 text-left transition-all cursor-pointer group"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-cyan-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                             <Icon className="w-4 h-4" />
                           </div>
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 truncate">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-cyan-400 truncate">
                             {sc.label}
                           </span>
                         </div>
@@ -293,7 +305,7 @@ export function GlobalCommandPalette() {
                       <button
                         key={cat.id}
                         onClick={() => handleSelectShortcut(`/products?category=${cat.id}`)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-purple-600 hover:text-white text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
                       >
                         {cat.name}
                       </button>
@@ -343,12 +355,14 @@ export function GlobalCommandPalette() {
               Close
             </span>
           </div>
-          <div className="flex items-center gap-1.5 font-mono text-[10px] text-purple-600 dark:text-purple-400 font-bold">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] text-blue-600 dark:text-cyan-400 font-bold">
             <Sparkles className="w-3 h-3" />
             <span>NexTech Global Search Engine</span>
           </div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

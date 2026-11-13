@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
@@ -87,8 +88,8 @@ const getStatusBadgeConfig = (status: OrderStatus | string) => {
     case 'CONFIRMED':
       return {
         label: 'Processing',
-        badgeClass: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-        dotClass: 'bg-purple-500',
+        badgeClass: 'bg-blue-500/10 text-blue-600 dark:text-cyan-400 border-blue-500/20',
+        dotClass: 'bg-blue-500',
         itemsStatus: 'Items In Processing',
         icon: PackageCheck,
       };
@@ -697,7 +698,7 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <div className="text-xs text-purple-600 dark:text-purple-400 font-mono uppercase font-bold tracking-wider mb-1 flex items-center gap-2">
+          <div className="text-xs text-blue-600 dark:text-cyan-400 font-mono uppercase font-bold tracking-wider mb-1 flex items-center gap-2">
             <span>Global Fulfillment & Logistics Pipeline</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Air & Ground Freight Active</span>
@@ -713,7 +714,7 @@ export default function AdminOrdersPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleOpenCreateModal}
-            className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
+            className="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Create Sales Order</span>
@@ -761,13 +762,13 @@ export default function AdminOrdersPage() {
             placeholder="Search orders by order number, customer name, email..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+            className="w-full bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-500"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
 
         {/* Status Filter Tabs (with Cargo tab placed right after Processing) */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs w-full md:w-auto overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs w-full md:w-auto overflow-x-auto relative">
           {[
             { id: 'ALL', label: 'All Orders' },
             {
@@ -788,24 +789,30 @@ export default function AdminOrdersPage() {
             { id: 'CANCELLED', label: 'Cancelled' },
           ].map(tab => {
             const Icon = tab.icon;
+            const isSelected = statusFilter === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                  statusFilter === tab.id
-                    ? tab.id === 'CARGO'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-purple-600 text-white shadow-sm'
+                className={`relative px-3.5 py-1.5 rounded-xl font-bold transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 z-10 ${
+                  isSelected
+                    ? 'text-white font-black'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
+                {isSelected && (
+                  <motion.span
+                    layoutId="activeAdminOrderStatusTab"
+                    className="absolute inset-0 rounded-xl bg-blue-600 shadow-sm -z-10"
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
+                )}
                 {Icon && <Icon className="w-3.5 h-3.5" />}
                 <span>{tab.label}</span>
                 {typeof tab.count === 'number' && tab.count > 0 && (
                   <span
                     className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
-                      statusFilter === tab.id
+                      isSelected
                         ? 'bg-white text-slate-900'
                         : tab.id === 'CARGO'
                         ? 'bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300'
@@ -822,7 +829,15 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Main Content Area: Dedicated Cargo View OR Standard Orders Table */}
-      {statusFilter === 'CARGO' ? (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={statusFilter}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+        >
+          {statusFilter === 'CARGO' ? (
         <CargoLogisticsView
           orders={cargoOrders}
           onSelectCargoOrder={setSelectedOrder}
@@ -859,7 +874,7 @@ export default function AdminOrdersPage() {
                           {order.companyName || order.customerName}
                         </span>
                         {order.customerType === 'BUSINESS' || order.companyName ? (
-                          <span className="text-[9px] font-bold font-mono uppercase bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                          <span className="text-[9px] font-bold font-mono uppercase bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">
                             B2B
                           </span>
                         ) : null}
@@ -947,7 +962,7 @@ export default function AdminOrdersPage() {
                         <button
                           type="button"
                           onClick={() => setEBillOrder(order)}
-                          className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-cyan-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                           title="Open Digital Tax E-Bill"
                         >
                           <FileText className="w-3.5 h-3.5" />
@@ -968,6 +983,8 @@ export default function AdminOrdersPage() {
         </div>
       </div>
       )}
+        </motion.div>
+      </AnimatePresence>
 
       {/* CREATE SALES ORDER MODAL */}
       {isCreateModalOpen && (
@@ -976,7 +993,7 @@ export default function AdminOrdersPage() {
             {/* Modal Fixed Header */}
             <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-between shrink-0 z-10">
               <div className="min-w-0 flex-1 pr-2">
-                <div className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase font-bold flex items-center gap-1.5">
+                <div className="text-[10px] font-mono text-blue-600 dark:text-cyan-400 uppercase font-bold flex items-center gap-1.5">
                   <PackageCheck className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">Admin Direct Dispatch &amp; Procurement</span>
                 </div>
@@ -1019,7 +1036,7 @@ export default function AdminOrdersPage() {
                   {/* Top Bar: Title & Database vs Manual Pill Switch */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800/80 pb-3 sm:pb-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
+                      <div className="w-7 h-7 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-cyan-400 flex items-center justify-center font-bold shrink-0">
                         <Building2 className="w-4 h-4" />
                       </div>
                       <div>
@@ -1049,7 +1066,7 @@ export default function AdminOrdersPage() {
                         }}
                         className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                           clientSelectionMode === 'DATABASE'
-                            ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-300 shadow-xs'
+                            ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-cyan-300 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
@@ -1065,7 +1082,7 @@ export default function AdminOrdersPage() {
                         }}
                         className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                           clientSelectionMode === 'MANUAL'
-                            ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-300 shadow-xs'
+                            ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-cyan-300 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
@@ -1086,13 +1103,13 @@ export default function AdminOrdersPage() {
                         onClick={() => setCustomerType('INDIVIDUAL')}
                         className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
                           customerType === 'INDIVIDUAL'
-                            ? 'bg-purple-50/70 dark:bg-purple-950/30 border-purple-300 dark:border-purple-800 ring-2 ring-purple-500/20'
+                            ? 'bg-blue-50/70 dark:bg-blue-950/30 border-blue-300 dark:border-blue-800 ring-2 ring-blue-500/20'
                             : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                         }`}
                       >
                         <div className={`p-2 rounded-lg shrink-0 ${
                           customerType === 'INDIVIDUAL'
-                            ? 'bg-purple-600 text-white'
+                            ? 'bg-blue-600 text-white'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                         }`}>
                           <User className="w-4 h-4" />
@@ -1115,13 +1132,13 @@ export default function AdminOrdersPage() {
                         onClick={() => setCustomerType('BUSINESS')}
                         className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
                           customerType === 'BUSINESS'
-                            ? 'bg-purple-50/70 dark:bg-purple-950/30 border-purple-300 dark:border-purple-800 ring-2 ring-purple-500/20'
+                            ? 'bg-blue-50/70 dark:bg-blue-950/30 border-blue-300 dark:border-blue-800 ring-2 ring-blue-500/20'
                             : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                         }`}
                       >
                         <div className={`p-2 rounded-lg shrink-0 ${
                           customerType === 'BUSINESS'
-                            ? 'bg-purple-600 text-white'
+                            ? 'bg-blue-600 text-white'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                         }`}>
                           <Briefcase className="w-4 h-4" />
@@ -1129,7 +1146,7 @@ export default function AdminOrdersPage() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1.5 flex-wrap">
                             <span className="font-bold text-xs text-slate-900 dark:text-white">Business Seller / Commercial Partner</span>
-                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 shrink-0">
+                            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-cyan-300 shrink-0">
                               B2B / Reseller
                             </span>
                           </div>
@@ -1151,7 +1168,7 @@ export default function AdminOrdersPage() {
                         <select
                           value={selectedCustomerId}
                           onChange={e => handleSelectCustomer(e.target.value)}
-                          className="w-full sm:flex-1 min-w-0 bg-slate-50 dark:bg-slate-950 text-xs font-medium text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 truncate"
+                          className="w-full sm:flex-1 min-w-0 bg-slate-50 dark:bg-slate-950 text-xs font-medium text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 truncate"
                         >
                           <option value="">-- Select Client from Database ({availableCustomers.length} registered) --</option>
                           {availableCustomers.map(c => {
@@ -1187,8 +1204,8 @@ export default function AdminOrdersPage() {
 
                   {/* Manual Mode Banner */}
                   {clientSelectionMode === 'MANUAL' && (
-                    <div className="p-3 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/70 dark:border-purple-900/40 flex items-center justify-between gap-3 text-xs">
-                      <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                    <div className="p-3 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/70 dark:border-blue-900/40 flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2 text-blue-700 dark:text-cyan-300">
                         <Plus className="w-4 h-4 shrink-0" />
                         <span className="text-[11px] font-medium">
                           <strong>Manual Direct Entry Active:</strong> Enter consignee or business seller information directly below. This order will be recorded without linking to an existing account.
@@ -1197,7 +1214,7 @@ export default function AdminOrdersPage() {
                       <button
                         type="button"
                         onClick={handleClearCustomerForm}
-                        className="px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-300 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-cyan-300 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
                       >
                         <RotateCcw className="w-3 h-3" />
                         <span>Clear Form</span>
@@ -1212,7 +1229,7 @@ export default function AdminOrdersPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                            Customer Full Name <span className="text-purple-600 dark:text-purple-400">*</span>
+                            Customer Full Name <span className="text-blue-600 dark:text-cyan-400">*</span>
                           </label>
                           <input
                             type="text"
@@ -1220,13 +1237,13 @@ export default function AdminOrdersPage() {
                             value={customerName}
                             onChange={e => setCustomerName(e.target.value)}
                             placeholder="e.g. Tariq Al-Mansoor"
-                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                           />
                         </div>
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                            Email Address <span className="text-purple-600 dark:text-purple-400">*</span>
+                            Email Address <span className="text-blue-600 dark:text-cyan-400">*</span>
                           </label>
                           <input
                             type="email"
@@ -1234,7 +1251,7 @@ export default function AdminOrdersPage() {
                             value={customerEmail}
                             onChange={e => setCustomerEmail(e.target.value)}
                             placeholder="e.g. customer@domain.ae"
-                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                           />
                         </div>
 
@@ -1247,7 +1264,7 @@ export default function AdminOrdersPage() {
                             value={customerPhone}
                             onChange={e => setCustomerPhone(e.target.value)}
                             placeholder="+971 4 800 1234"
-                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                           />
                         </div>
                       </div>
@@ -1262,7 +1279,7 @@ export default function AdminOrdersPage() {
                             value={addressLine1}
                             onChange={e => setAddressLine1(e.target.value)}
                             placeholder="Street, Building, Apartment / Villa Number"
-                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                            className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                           />
                         </div>
                         <div>
@@ -1275,14 +1292,14 @@ export default function AdminOrdersPage() {
                               value={city}
                               onChange={e => setCity(e.target.value)}
                               placeholder="Dubai"
-                              className="col-span-2 w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                              className="col-span-2 w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                             />
                             <input
                               type="text"
                               value={country}
                               onChange={e => setCountry(e.target.value)}
                               placeholder="AE"
-                              className="col-span-1 w-full text-center bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-bold uppercase"
+                              className="col-span-1 w-full text-center bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-bold uppercase"
                             />
                           </div>
                         </div>
@@ -1294,7 +1311,7 @@ export default function AdminOrdersPage() {
                       {/* Sub-section 1: Commercial Legal Entity Profile */}
                       <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
                         <div className="text-[11px] font-bold text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
-                          <span className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400">
+                          <span className="flex items-center gap-1.5 text-blue-600 dark:text-cyan-400">
                             <Building2 className="w-3.5 h-3.5" />
                             <span>1. Commercial Legal Entity Profile</span>
                           </span>
@@ -1304,7 +1321,7 @@ export default function AdminOrdersPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                           <div className="sm:col-span-2">
                             <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                              Company / Legal Trading Name <span className="text-purple-600 dark:text-purple-400">*</span>
+                              Company / Legal Trading Name <span className="text-blue-600 dark:text-cyan-400">*</span>
                             </label>
                             <input
                               type="text"
@@ -1312,7 +1329,7 @@ export default function AdminOrdersPage() {
                               value={companyName}
                               onChange={e => setCompanyName(e.target.value)}
                               placeholder="e.g. Apex Hardware Technologies FZ-LLC"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                             />
                           </div>
 
@@ -1325,7 +1342,7 @@ export default function AdminOrdersPage() {
                               value={tradeLicense}
                               onChange={e => setTradeLicense(e.target.value)}
                               placeholder="e.g. CN-1049281-DXB"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono"
                             />
                           </div>
 
@@ -1338,7 +1355,7 @@ export default function AdminOrdersPage() {
                               value={trn}
                               onChange={e => setTrn(e.target.value)}
                               placeholder="15-digit TRN: 100xxxxxxxx0003"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono"
                             />
                           </div>
                         </div>
@@ -1351,7 +1368,7 @@ export default function AdminOrdersPage() {
                             <select
                               value={partnerTier}
                               onChange={e => setPartnerTier(e.target.value)}
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                             >
                               <option value="CERTIFIED_PARTNER">Certified Technology Reseller</option>
                               <option value="GOLD_PARTNER">Gold Wholesale Partner (Volume Tier)</option>
@@ -1370,7 +1387,7 @@ export default function AdminOrdersPage() {
                               value={poNumber}
                               onChange={e => setPoNumber(e.target.value)}
                               placeholder="e.g. PO-2026-APEX-8891"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono font-bold"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono font-bold"
                             />
                           </div>
                         </div>
@@ -1389,7 +1406,7 @@ export default function AdminOrdersPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                              Contact Person Name <span className="text-purple-600 dark:text-purple-400">*</span>
+                              Contact Person Name <span className="text-blue-600 dark:text-cyan-400">*</span>
                             </label>
                             <input
                               type="text"
@@ -1400,7 +1417,7 @@ export default function AdminOrdersPage() {
                                 if (!customerName) setCustomerName(e.target.value);
                               }}
                               placeholder="e.g. Tariq Al-Mansoor"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                             />
                           </div>
 
@@ -1413,13 +1430,13 @@ export default function AdminOrdersPage() {
                               value={contactRole}
                               onChange={e => setContactRole(e.target.value)}
                               placeholder="e.g. VP Infrastructure Procurement"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                             />
                           </div>
 
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                              Official Corporate Email <span className="text-purple-600 dark:text-purple-400">*</span>
+                              Official Corporate Email <span className="text-blue-600 dark:text-cyan-400">*</span>
                             </label>
                             <input
                               type="email"
@@ -1427,7 +1444,7 @@ export default function AdminOrdersPage() {
                               value={customerEmail}
                               onChange={e => setCustomerEmail(e.target.value)}
                               placeholder="e.g. procurement@apexsolutions.ae"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                             />
                           </div>
 
@@ -1440,7 +1457,7 @@ export default function AdminOrdersPage() {
                               value={customerPhone}
                               onChange={e => setCustomerPhone(e.target.value)}
                               placeholder="+971 4 800 1234 ext 201"
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                             />
                           </div>
                         </div>
@@ -1464,7 +1481,7 @@ export default function AdminOrdersPage() {
                             <select
                               value={paymentTerms}
                               onChange={e => setPaymentTerms(e.target.value)}
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                             >
                               <option value="PREPAID">Prepaid / Wire Advance (Immediate)</option>
                               <option value="NET_15">Net 15 Days (Commercial Terms)</option>
@@ -1481,7 +1498,7 @@ export default function AdminOrdersPage() {
                             <select
                               value={taxTreatment}
                               onChange={e => setTaxTreatment(e.target.value as any)}
-                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium font-mono"
+                              className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium font-mono"
                             >
                               <option value="STANDARD">Standard Rate (5% UAE VAT)</option>
                               <option value="FREE_ZONE">Designated Free Zone Exemption (0% VAT - Art. 45)</option>
@@ -1504,7 +1521,7 @@ export default function AdminOrdersPage() {
                               type="checkbox"
                               checked={sameAsShipping}
                               onChange={e => setSameAsShipping(e.target.checked)}
-                              className="rounded text-purple-600 focus:ring-purple-500 w-3.5 h-3.5"
+                              className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
                             />
                             <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
                               Billing address same as delivery address
@@ -1524,7 +1541,7 @@ export default function AdminOrdersPage() {
                                 value={addressLine1}
                                 onChange={e => setAddressLine1(e.target.value)}
                                 placeholder="Street, Warehouse Bay, Unit / Floor"
-                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                               />
                             </div>
                             <div className="grid grid-cols-3 gap-2">
@@ -1533,14 +1550,14 @@ export default function AdminOrdersPage() {
                                 value={city}
                                 onChange={e => setCity(e.target.value)}
                                 placeholder="City (e.g. Dubai)"
-                                className="col-span-2 w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                                className="col-span-2 w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                               />
                               <input
                                 type="text"
                                 value={country}
                                 onChange={e => setCountry(e.target.value)}
                                 placeholder="AE"
-                                className="col-span-1 w-full text-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-bold uppercase"
+                                className="col-span-1 w-full text-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-bold uppercase"
                               />
                             </div>
                           </div>
@@ -1549,7 +1566,7 @@ export default function AdminOrdersPage() {
                         {/* Separate Billing Address if unchecked */}
                         {!sameAsShipping && (
                           <div className="pt-2 border-t border-dashed border-slate-200 dark:border-slate-800 animate-in fade-in-0 duration-200">
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1.5">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-cyan-400 mb-1.5">
                               Official Invoicing & Tax Billing Address
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1559,7 +1576,7 @@ export default function AdminOrdersPage() {
                                   value={billingAddressLine1}
                                   onChange={e => setBillingAddressLine1(e.target.value)}
                                   placeholder="Headquarters, Corporate Tower, Suite #"
-                                  className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                                  className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                                 />
                               </div>
                               <div className="grid grid-cols-3 gap-2">
@@ -1568,14 +1585,14 @@ export default function AdminOrdersPage() {
                                   value={billingCity}
                                   onChange={e => setBillingCity(e.target.value)}
                                   placeholder="City"
-                                  className="col-span-2 w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-medium"
+                                  className="col-span-2 w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
                                 />
                                 <input
                                   type="text"
                                   value={billingCountry}
                                   onChange={e => setBillingCountry(e.target.value)}
                                   placeholder="AE"
-                                  className="col-span-1 w-full text-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-bold uppercase"
+                                  className="col-span-1 w-full text-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-2.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-bold uppercase"
                                 />
                               </div>
                             </div>
@@ -1590,11 +1607,11 @@ export default function AdminOrdersPage() {
                 <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/80 dark:border-slate-800/80 pb-3">
                     <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-xs">
-                      <div className="w-6 h-6 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-cyan-400 flex items-center justify-center">
                         <Layers className="w-3.5 h-3.5" />
                       </div>
                       <span>Hardware Line Items</span>
-                      <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 font-mono text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-cyan-300 font-mono text-[10px] font-bold">
                         {orderItems.length}
                       </span>
                     </div>
@@ -1622,7 +1639,7 @@ export default function AdminOrdersPage() {
                             }
                           }}
                           placeholder="Search or select hardware by name, SKU..."
-                          className="w-full bg-white dark:bg-slate-900 text-xs font-medium text-slate-900 dark:text-white pl-9 pr-14 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs placeholder:text-slate-400 transition-all"
+                          className="w-full bg-white dark:bg-slate-900 text-xs font-medium text-slate-900 dark:text-white pl-9 pr-14 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs placeholder:text-slate-400 transition-all"
                         />
 
                         {/* Right input action buttons: Clear & Chevron */}
@@ -1647,7 +1664,7 @@ export default function AdminOrdersPage() {
                             className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
                             title="Toggle catalog dropdown"
                           >
-                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isProductDropdownOpen ? 'rotate-180 text-purple-600 dark:text-purple-400' : ''}`} />
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isProductDropdownOpen ? 'rotate-180 text-blue-600 dark:text-cyan-400' : ''}`} />
                           </button>
                         </div>
 
@@ -1661,7 +1678,7 @@ export default function AdminOrdersPage() {
                                   ? `${filteredProducts.length} matching items`
                                   : `Hardware Catalog (${availableProducts.length} items)`}
                               </span>
-                              <span className="text-[9px] lowercase text-purple-600 dark:text-purple-400 font-mono">click item to select</span>
+                              <span className="text-[9px] lowercase text-blue-600 dark:text-cyan-400 font-mono">click item to select</span>
                             </div>
 
                             {/* Dropdown List */}
@@ -1680,7 +1697,7 @@ export default function AdminOrdersPage() {
                                       onClick={() => handleSelectProduct(p)}
                                       className={`p-2.5 flex items-center justify-between gap-3 cursor-pointer transition-colors text-left group ${
                                         isSelected
-                                          ? 'bg-purple-50/80 dark:bg-purple-950/30'
+                                          ? 'bg-blue-50/80 dark:bg-blue-950/30'
                                           : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                       }`}
                                     >
@@ -1691,7 +1708,7 @@ export default function AdminOrdersPage() {
                                           className="w-8 h-8 rounded-lg object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200/80 dark:border-slate-800"
                                         />
                                         <div className="min-w-0">
-                                          <div className={`font-bold text-xs truncate ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400'}`}>
+                                          <div className={`font-bold text-xs truncate ${isSelected ? 'text-blue-700 dark:text-cyan-300' : 'text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-cyan-400'}`}>
                                             {p.name}
                                           </div>
                                           <div className="text-[10px] text-slate-400 font-mono flex items-center gap-2 mt-0.5">
@@ -1714,7 +1731,7 @@ export default function AdminOrdersPage() {
                                             e.stopPropagation();
                                             handleAddProduct(p);
                                           }}
-                                          className="px-2 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-600 hover:text-white text-purple-600 dark:text-purple-300 font-bold text-[10px] transition-all border border-purple-200 dark:border-purple-800 flex items-center gap-1 cursor-pointer"
+                                          className="px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-600 hover:text-white text-blue-600 dark:text-cyan-300 font-bold text-[10px] transition-all border border-blue-200 dark:border-blue-800 flex items-center gap-1 cursor-pointer"
                                           title="Add directly to sales order"
                                         >
                                           <Plus className="w-3 h-3" />
@@ -1735,7 +1752,7 @@ export default function AdminOrdersPage() {
                         type="button"
                         onClick={() => handleAddProduct()}
                         disabled={!selectedProductIdToAdd && filteredProducts.length === 0}
-                        className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm shadow-purple-600/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Add</span>
@@ -1748,7 +1765,7 @@ export default function AdminOrdersPage() {
                       <PackageCheck className="w-8 h-8 mx-auto text-slate-400 dark:text-slate-600 opacity-60" />
                       <div className="font-semibold text-xs text-slate-700 dark:text-slate-300">No hardware line items added yet</div>
                       <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                        Select a product from the catalog dropdown above and click <span className="font-bold text-purple-600 dark:text-purple-400">+ Add</span>.
+                        Select a product from the catalog dropdown above and click <span className="font-bold text-blue-600 dark:text-cyan-400">+ Add</span>.
                       </p>
                     </div>
                   ) : (
@@ -1835,7 +1852,7 @@ export default function AdminOrdersPage() {
                         <select
                           value={paymentMethod}
                           onChange={e => setPaymentMethod(e.target.value as any)}
-                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                         >
                           <option value="CREDIT_CARD">Credit Card</option>
                           <option value="BANK_TRANSFER">Bank Wire Transfer</option>
@@ -1852,7 +1869,7 @@ export default function AdminOrdersPage() {
                         <select
                           value={paymentStatus}
                           onChange={e => setPaymentStatus(e.target.value as any)}
-                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                         >
                           <option value="PAID">PAID (Verified)</option>
                           <option value="PENDING">PENDING (Awaiting)</option>
@@ -1868,7 +1885,7 @@ export default function AdminOrdersPage() {
                         <select
                           value={orderStatus}
                           onChange={e => setOrderStatus(e.target.value as any)}
-                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                         >
                           <option value="PROCESSING">PROCESSING</option>
                           <option value="CONFIRMED">CONFIRMED</option>
@@ -1887,7 +1904,7 @@ export default function AdminOrdersPage() {
                           value={orderNotes}
                           onChange={e => setOrderNotes(e.target.value)}
                           placeholder="e.g. VIP client procurement"
-                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-xs font-medium"
+                          className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs font-medium"
                         />
                       </div>
                     </div>
@@ -1957,7 +1974,7 @@ export default function AdminOrdersPage() {
                   type="submit"
                   form="createSalesOrderForm"
                   disabled={creatingOrder || orderItems.length === 0}
-                  className="flex-2 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center"
+                  className="flex-2 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center"
                 >
                   {creatingOrder ? (
                     <>
@@ -1984,7 +2001,7 @@ export default function AdminOrdersPage() {
             {/* Modal Fixed Header */}
             <div className="px-5 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-between shrink-0 z-10">
               <div>
-                <div className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase font-bold flex items-center gap-1.5">
+                <div className="text-[10px] font-mono text-blue-600 dark:text-cyan-400 uppercase font-bold flex items-center gap-1.5">
                   <PackageCheck className="w-3.5 h-3.5" />
                   <span>Order Fulfillment & Lifecycle</span>
                 </div>
@@ -2025,11 +2042,11 @@ export default function AdminOrdersPage() {
                 <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
                   <div className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                      <MapPin className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                       <span>Consignee & Client Details</span>
                     </div>
                     {selectedOrder.customerType === 'BUSINESS' || selectedOrder.companyName ? (
-                      <span className="text-[9px] font-bold uppercase bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800">
+                      <span className="text-[9px] font-bold uppercase bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
                         B2B Commercial Partner
                       </span>
                     ) : (
@@ -2056,7 +2073,7 @@ export default function AdminOrdersPage() {
                     </div>
                   )}
                   {selectedOrder.poNumber && (
-                    <div className="text-[11px] text-purple-700 dark:text-purple-400 font-mono font-bold">
+                    <div className="text-[11px] text-blue-700 dark:text-cyan-400 font-mono font-bold">
                       PO Reference: #{selectedOrder.poNumber}
                     </div>
                   )}
@@ -2086,7 +2103,7 @@ export default function AdminOrdersPage() {
               {/* Line Items */}
               <div className="space-y-2.5">
                 <div className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <Layers className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <Layers className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                   <span>Hardware Line Items ({selectedOrder.items?.length || 0})</span>
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-slate-800/80 rounded-2xl bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
@@ -2128,7 +2145,7 @@ export default function AdminOrdersPage() {
                         <div className="flex items-center gap-1.5">
                           <span className="text-slate-500 font-medium">Serial Number(s):</span>
                           {item.serialNumbers && item.serialNumbers.length > 0 ? (
-                            <span className="font-mono font-bold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
+                            <span className="font-mono font-bold text-blue-700 dark:text-cyan-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800">
                               {item.serialNumbers.join(', ')}
                             </span>
                           ) : (
@@ -2138,7 +2155,7 @@ export default function AdminOrdersPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenSerialModal(idx)}
-                          className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-[10px] font-bold transition-colors cursor-pointer"
+                          className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-cyan-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-[10px] font-bold transition-colors cursor-pointer"
                         >
                           {item.serialNumbers && item.serialNumbers.length > 0 ? 'Edit S/N' : '+ Assign S/N'}
                         </button>
@@ -2190,8 +2207,8 @@ export default function AdminOrdersPage() {
               )}
 
               {/* Status Transition Actions */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/40 space-y-3 shadow-xs">
-                <div className="text-xs font-bold text-purple-800 dark:text-purple-300 flex items-center gap-1.5">
+              <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/40 space-y-3 shadow-xs">
+                <div className="text-xs font-bold text-blue-800 dark:text-cyan-300 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Update Order Fulfillment Status</span>
                 </div>
@@ -2205,7 +2222,7 @@ export default function AdminOrdersPage() {
                         onClick={() => handleUpdateStatus(selectedOrder.id, st, `Status transitioned to ${st} by Admin`)}
                         className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                           isCurrent
-                            ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
                             : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs'
                         }`}
                       >
@@ -2222,7 +2239,7 @@ export default function AdminOrdersPage() {
               <button
                 type="button"
                 onClick={() => setEBillOrder(selectedOrder)}
-                className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center justify-center sm:justify-start gap-1.5 transition-colors cursor-pointer py-1"
+                className="text-xs font-bold text-blue-600 dark:text-cyan-400 hover:text-blue-700 dark:hover:text-cyan-300 flex items-center justify-center sm:justify-start gap-1.5 transition-colors cursor-pointer py-1"
               >
                 <FileText className="w-4 h-4" />
                 <span>Open Digital E-Bill Tax Invoice</span>
@@ -2245,7 +2262,7 @@ export default function AdminOrdersPage() {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/50 text-blue-600 dark:text-cyan-400 flex items-center justify-center font-bold">
                   <PackageCheck className="w-4 h-4" />
                 </div>
                 <div>
@@ -2282,7 +2299,7 @@ export default function AdminOrdersPage() {
                   value={serialModal.serialNumbers}
                   onChange={e => setSerialModal({ ...serialModal, serialNumbers: e.target.value })}
                   placeholder="e.g. SN-DXB-948210, SN-DXB-948211"
-                  className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 font-mono text-xs focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 font-mono text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
 
@@ -2295,7 +2312,7 @@ export default function AdminOrdersPage() {
                     .map((sn, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-mono text-[10px] font-bold border border-purple-200 dark:border-purple-800"
+                        className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-cyan-300 font-mono text-[10px] font-bold border border-blue-200 dark:border-blue-800"
                       >
                         #{idx + 1}: {sn}
                       </span>
@@ -2316,7 +2333,7 @@ export default function AdminOrdersPage() {
                 type="button"
                 disabled={savingSerial}
                 onClick={handleSaveSerialNumbers}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md shadow-purple-600/20 flex items-center gap-1.5 transition-all disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/20 flex items-center gap-1.5 transition-all disabled:opacity-50"
               >
                 {savingSerial ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                 <span>Save Serial Numbers</span>

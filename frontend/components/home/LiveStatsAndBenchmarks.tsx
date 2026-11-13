@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Cpu,
   Zap,
@@ -58,84 +59,103 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
       {/* Main Container */}
       <div className="p-4 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
         {/* Category Switcher Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 max-w-full">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 max-w-full relative">
           {benchmarks.map(b => {
             const Icon = ICON_MAP[b.iconName?.toLowerCase() || ''] || ICON_MAP[b.id?.toLowerCase() || ''] || Cpu;
             const isActive = b.id === activeCategory;
             return (
               <button
                 key={b.id}
+                type="button"
                 onClick={() => setActiveCategory(b.id)}
-                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`relative flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer z-10 ${
                   isActive
-                    ? 'bg-tech-blue text-white shadow-md'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'text-white'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                {isActive && (
+                  <motion.span
+                    layoutId="activeBenchmarkTabPill"
+                    className="absolute inset-0 rounded-xl bg-blue-600 shadow-md shadow-blue-600/25 -z-10"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  />
+                )}
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{b.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Benchmark Visualizer Bars */}
-        <div className="space-y-4 pt-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
-            <h3 className="font-black text-slate-900 dark:text-white">{current.title}</h3>
-            <span className="font-mono text-slate-400 text-[11px]">{current.metric}</span>
-          </div>
+        {/* Benchmark Visualizer Bars with smooth crossfade */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={current.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="space-y-4 pt-2"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
+              <h3 className="font-black text-slate-900 dark:text-white">{current.title}</h3>
+              <span className="font-mono text-slate-400 text-[11px]">{current.metric}</span>
+            </div>
 
-          <div className="space-y-3.5">
-            {current.benchmarks.map((item, idx) => {
-              const percent = Math.round((item.score / item.maxScore) * 100);
-              return (
-                <div key={idx} className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{item.name}</span>
-                      {item.isTop && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-tech-blue/10 text-tech-blue dark:text-tech-cyan border border-tech-blue/30 shrink-0">
-                          {item.badge || 'Leader'}
-                        </span>
-                      )}
+            <div className="space-y-3.5">
+              {current.benchmarks.map((item, idx) => {
+                const percent = Math.round((item.score / item.maxScore) * 100);
+                return (
+                  <div key={idx} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{item.name}</span>
+                        {item.isTop && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-cyan-400 border border-blue-200 dark:border-blue-900 shrink-0">
+                            {item.badge || 'Leader'}
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-mono font-black text-slate-900 dark:text-white shrink-0 ml-2">
+                        {item.score.toLocaleString()}
+                      </span>
                     </div>
-                    <span className="font-mono font-black text-slate-900 dark:text-white shrink-0 ml-2">
-                      {item.score.toLocaleString()}
-                    </span>
-                  </div>
 
-                  {/* Progress Bar */}
-                  <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ${
-                        item.isTop
-                          ? 'bg-tech-blue'
-                          : 'bg-slate-300 dark:bg-slate-600'
-                      }`}
-                      style={{ width: `${percent}%` }}
-                    />
+                    {/* Progress Bar with Framer Motion Animation */}
+                    <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <motion.div
+                        className={`h-full rounded-full ${
+                          item.isTop
+                            ? 'bg-blue-600'
+                            : 'bg-slate-300 dark:bg-slate-600'
+                        }`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percent}%` }}
+                        transition={{ duration: 0.65, ease: 'easeOut', delay: idx * 0.08 }}
+                      />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
 
-          {/* Test Note Footer */}
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-tech-blue dark:text-tech-cyan" />
-              <span>{current.note}</span>
-            </span>
-            <Link
-              href="/products"
-              className="font-bold text-tech-blue dark:text-tech-cyan hover:underline flex items-center gap-1"
-            >
-              <span>Explore Top Benchmarked SKUs</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
+            {/* Test Note Footer */}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
+                <span>{current.note}</span>
+              </span>
+              <Link
+                href="/products"
+                className="font-bold text-blue-600 dark:text-cyan-400 hover:underline flex items-center gap-1"
+              >
+                <span>Explore Top Benchmarked SKUs</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   );

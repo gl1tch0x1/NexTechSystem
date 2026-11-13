@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import {
@@ -196,20 +197,28 @@ export function CustomerPortalHeader({
 
       {/* Unified Tab Navigation Bar */}
       <div className="relative border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
-        <nav className="flex items-center gap-2 min-w-max pb-2" aria-label="Customer Portal Tabs">
+        <nav className="flex items-center gap-2 min-w-max pb-2 relative" aria-label="Customer Portal Tabs">
           {navItems.map(item => {
             const Icon = item.icon;
             const active = item.isActive;
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={item.onClick}
-                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer z-10 ${
                   active
-                    ? 'bg-blue-600 text-white shadow-xs font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                    ? 'text-white font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
+                {active && (
+                  <motion.span
+                    layoutId="activeCustomerPortalTab"
+                    className="absolute inset-0 rounded-lg bg-blue-600 shadow-xs -z-10"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  />
+                )}
                 <Icon className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
                 <span>{item.label}</span>
                 {item.badge && (
