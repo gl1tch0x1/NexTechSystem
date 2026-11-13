@@ -1,7 +1,9 @@
 import { MongoClient, Db } from 'mongodb';
 
-const uri = process.env.MONGODB_URI || '';
-const dbName = process.env.MONGODB_DB_NAME || undefined;
+const uri =
+  process.env.MONGODB_URI ||
+  'mongodb+srv://s7704mojtaba_db_user:i5hI8QEvQ8LR6QSm@nextechsystems.jd7k9ew.mongodb.net/?retryWrites=true&w=majority&appName=NexTechSystems';
+const dbName = process.env.MONGODB_DB_NAME || 'nextech_ecommerce';
 
 let client: MongoClient | null = null;
 let clientPromise: Promise<MongoClient> | null = null;
