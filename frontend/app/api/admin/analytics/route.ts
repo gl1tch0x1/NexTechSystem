@@ -5,16 +5,16 @@ export async function GET(request: NextRequest) {
   return proxyToBackend(request, '/admin/analytics', {
     fallbackData: {
       kpis: {
-        grossRevenue: 450000,
-        netRevenue: 428000,
-        totalOrders: 142,
-        totalUnitsSold: 310,
-        averageOrderValue: 3169,
-        conversionRate: 3.4,
+        grossRevenue: 0,
+        netRevenue: 0,
+        totalOrders: 0,
+        totalUnitsSold: 0,
+        averageOrderValue: 0,
+        conversionRate: null,
       },
-      revenueByDay: [],
-      topSellingProducts: [],
-      categoryBreakdown: [],
+      revenueTimeline: [],
+      topModels: [],
+      categoryDistribution: [],
     },
   });
 }

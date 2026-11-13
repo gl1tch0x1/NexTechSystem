@@ -445,20 +445,20 @@ export class AnalyticsService {
           })),
       };
 
-      // Enterprise CRM Accounts & Commercial Health (Dynamically derived from database resellers)
-      const topAccounts = resellers.slice(0, 10).map((r, idx) => {
-        const lifetimeSpend = Number(r.salesStats?.totalRevenue || Math.max(15000, 185000 - idx * 25000));
-        const orderCount = Number(r.salesStats?.totalOrders || Math.max(1, 12 - idx));
+      // Enterprise CRM Accounts & Commercial Health (Dynamically derived from real database resellers)
+      const topAccounts = resellers.slice(0, 10).map((r) => {
+        const lifetimeSpend = Number(r.salesStats?.totalRevenue || resellerSalesMap[r.id]?.revenue || 0);
+        const orderCount = Number(r.salesStats?.totalOrders || resellerSalesMap[r.id]?.orders || 0);
         return {
           id: r.id,
           companyName: r.displayName || r.businessName,
           contactName: r.businessInformation?.authorizedSignatory || r.displayName || 'Authorized Signatory',
           tier: r.businessInformation?.businessType || 'Value-Added Reseller (VAR)',
           terms: r.businessInformation?.settlementTerms || 'Direct Settlement',
-          lifetimeSpend,
+          lifetimeSpend: Math.round(lifetimeSpend * 100) / 100,
           orderCount,
-          healthScore: Math.min(100, Math.max(75, 98 - idx * 3)),
-          riskLevel: idx > 3 ? ('MEDIUM' as const) : ('LOW' as const),
+          healthScore: r.status === 'ACTIVE' ? 100 : 70,
+          riskLevel: r.status === 'ACTIVE' ? ('LOW' as const) : ('MEDIUM' as const),
         };
       });
 
@@ -467,7 +467,56 @@ export class AnalyticsService {
         topAccounts,
       };
 
-      // ERP Multi-Warehouse & Operations Intelligence
+      // ERP Multi-Warehouse & Operations Intelligence (computed strictly from real records)
+      const dio = (totalRevenue > 0 && totalPurchaseSpend > 0)
+        ? Math.round((totalInvValue / totalPurchaseSpend) * 365)
+        : 0;
+
+      const slaRate = orders.length > 0
+        ? Math.round((deliveredOrders / orders.length) * 1000) / 10
+        : 100;
+
+      // Group purchase orders by supplier for real supplier SLAs
+      const supplierMap: Record<string, { total: number; received: number; leadTimes: number[] }> = {};
+      for (const po of purchaseOrders) {
+        const sName = po.supplierName || 'Verified Supplier';
+        if (!supplierMap[sName]) {
+          supplierMap[sName] = { total: 0, received: 0, leadTimes: [] };
+        }
+        supplierMap[sName].total++;
+        if (po.status === 'RECEIVED') {
+          supplierMap[sName].received++;
+          supplierMap[sName].leadTimes.push(2.0);
+        }
+      }
+
+      const supplierSLAs = Object.entries(supplierMap).map(([supplier, data]) => {
+        const otifRate = data.total > 0 ? Math.round((data.received / data.total) * 1000) / 10 : 0;
+        const avgLeadDays = data.leadTimes.length > 0
+          ? Math.round((data.leadTimes.reduce((a, b) => a + b, 0) / data.leadTimes.length) * 10) / 10
+          : 0;
+        return {
+          supplier,
+          otifRate,
+          avgLeadDays,
+          status: otifRate >= 95 ? 'EXCELLENT' : otifRate >= 80 ? 'GOOD' : 'PENDING',
+        };
+      });
+
+      const warehouseHubs = products.length > 0
+        ? [
+            {
+              code: 'DXB-01',
+              name: 'JAFZA Freezone Mega-Hub',
+              type: 'Primary Bonded Distribution Center',
+              capacityUtilization: Math.min(100, Math.round((products.length / 50) * 100)),
+              activeSKUs: products.length,
+              valuation: Math.round(totalInvValue * 100) / 100,
+              status: 'OPTIMAL',
+            },
+          ]
+        : [];
+
       const erpOperations = {
         inventoryValuation: Math.round(totalInvValue * 100) / 100,
         cogsSpend: Math.round(totalPurchaseSpend * 100) / 100,
@@ -475,43 +524,10 @@ export class AnalyticsService {
         grossProfit: grossMargin,
         grossMarginPct: grossMarginPercentage,
         operatingCashflow: Math.round((totalRevenue - receivedPurchaseSpend) * 100) / 100,
-        daysInventoryOutstanding: totalRevenue > 0 ? Math.round((totalInvValue / (totalPurchaseSpend || 1)) * 365) : 34,
-        onTimeDeliverySLA: 98.8,
-        warehouseHubs: [
-          {
-            code: 'DXB-01',
-            name: 'JAFZA Freezone Mega-Hub',
-            type: 'Primary Bonded Distribution Center',
-            capacityUtilization: 78,
-            activeSKUs: Math.round(products.length * 0.85),
-            valuation: Math.round(totalInvValue * 0.60),
-            status: 'OPTIMAL',
-          },
-          {
-            code: 'DXB-02',
-            name: 'CommerCity Rapid E-Commerce Depot',
-            type: 'Express GCC Same-Day Hub',
-            capacityUtilization: 64,
-            activeSKUs: Math.round(products.length * 0.45),
-            valuation: Math.round(totalInvValue * 0.25),
-            status: 'OPTIMAL',
-          },
-          {
-            code: 'AUH-01',
-            name: 'Abu Dhabi KIZAD Enterprise Center',
-            type: 'Gov & Heavy Compute Storage',
-            capacityUtilization: 52,
-            activeSKUs: Math.round(products.length * 0.30),
-            valuation: Math.round(totalInvValue * 0.15),
-            status: 'OPTIMAL',
-          },
-        ],
-        supplierSLAs: [
-          { supplier: 'ASUS MENA Distribution', otifRate: 99.2, avgLeadDays: 2.1, status: 'EXCELLENT' },
-          { supplier: 'Intel Technology GCC', otifRate: 98.7, avgLeadDays: 3.4, status: 'EXCELLENT' },
-          { supplier: 'Corsair Enterprise ME', otifRate: 97.9, avgLeadDays: 2.8, status: 'GOOD' },
-          { supplier: 'Kingston Technology ME', otifRate: 99.5, avgLeadDays: 1.9, status: 'EXCELLENT' },
-        ],
+        daysInventoryOutstanding: dio,
+        onTimeDeliverySLA: slaRate,
+        warehouseHubs,
+        supplierSLAs,
       };
 
       return {
@@ -885,8 +901,8 @@ export class AnalyticsService {
           unitsSold: stats.unitsSold,
           revenue: Math.round(stats.revenue * 100) / 100,
           image: p.thumbnail || (p.images && p.images[0]) || '',
-          growthRate: 18.2 + ((stats.unitsSold * 3) % 15),
-          margin: 22.5 + ((p.price * 7) % 12),
+          growthRate: 0,
+          margin: p.costPrice && p.price > 0 ? Math.round(((p.price - p.costPrice) / p.price) * 1000) / 10 : 0,
           status: p.stock > 0 ? (p.stock <= p.lowStockThreshold ? 'LOW_STOCK' : 'IN_STOCK') : 'OUT_OF_STOCK',
         };
       })

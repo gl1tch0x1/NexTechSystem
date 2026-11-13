@@ -49,18 +49,18 @@ export function PurchaseOrderDocumentModal({ po, isOpen, onClose }: PurchaseOrde
   };
 
   const buyer = po.buyerDetails || NEXTECH_BUYER_DETAILS;
-  const items = po.items && po.items.length > 0 ? po.items : [
+  const items = po.items && po.items.length > 0 ? po.items : (po as any).sku ? [
     {
-      productId: 'prod_hardware_main',
-      sku: (po as any).sku || 'ROG-STRIX-RTX4090-O24G-GAMING',
-      name: (po as any).sku ? `Hardware Component (${(po as any).sku})` : 'ASUS ROG Strix GeForce RTX 4090 24GB GDDR6X OC Edition',
-      orderedQuantity: (po as any).units || 12,
-      quantity: (po as any).units || 12,
-      unitCost: ((po as any).totalCost && (po as any).units) ? Math.round((po as any).totalCost / (po as any).units) : 7450,
-      totalCost: (po as any).totalCost || 89400,
-      subtotal: (po as any).totalCost || 89400,
+      productId: (po as any).productId || 'prod_item',
+      sku: (po as any).sku,
+      name: (po as any).productName || `Hardware Item (${(po as any).sku})`,
+      orderedQuantity: Number((po as any).units || (po as any).quantity || 1),
+      quantity: Number((po as any).units || (po as any).quantity || 1),
+      unitCost: ((po as any).totalCost && (po as any).units) ? Math.round(Number((po as any).totalCost) / Number((po as any).units)) : Number((po as any).unitCost || 0),
+      totalCost: Number((po as any).totalCost || 0),
+      subtotal: Number((po as any).totalCost || 0),
     }
-  ];
+  ] : [];
 
   const subtotal = po.totalCost || po.totalEstimatedCost || items.reduce((acc, it) => acc + (it.totalCost || (it.unitCost * (it.orderedQuantity || it.quantity || 1))), 0);
   const vatRate = 0.05;

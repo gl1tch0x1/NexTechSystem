@@ -110,13 +110,13 @@ export default function AdminAnalyticsPage() {
   const funnel = analytics?.conversionFunnel || [];
 
   const purchasesSummary = analytics?.purchasesSummary || {
-    totalPurchaseSpend: kpis.totalPurchaseSpend || 272000,
-    totalPurchaseCount: kpis.totalPurchaseCount || 4,
-    totalUnitsPurchased: kpis.totalUnitsPurchased || 89,
-    receivedSpend: 219000,
-    pendingSpend: 53000,
-    receivedPOCount: 2,
-    pendingPOCount: 2,
+    totalPurchaseSpend: kpis.totalPurchaseSpend || 0,
+    totalPurchaseCount: kpis.totalPurchaseCount || 0,
+    totalUnitsPurchased: kpis.totalUnitsPurchased || 0,
+    receivedSpend: 0,
+    pendingSpend: 0,
+    receivedPOCount: 0,
+    pendingPOCount: 0,
   };
 
   const salesSummary = analytics?.salesSummary || {
@@ -127,9 +127,9 @@ export default function AdminAnalyticsPage() {
   };
 
   const profitabilitySummary = analytics?.profitabilitySummary || {
-    grossProfit: kpis.grossProfit || Math.round(((kpis.grossRevenue || 0) - purchasesSummary.totalPurchaseSpend) * 100) / 100,
-    grossMarginPercentage: kpis.grossMarginPercentage || 28.5,
-    salesToPurchaseRatio: purchasesSummary.totalPurchaseSpend > 0 ? Math.round(((kpis.grossRevenue || 0) / purchasesSummary.totalPurchaseSpend) * 100) / 100 : 1.34,
+    grossProfit: kpis.grossProfit ?? (Math.round(((kpis.grossRevenue || 0) - (purchasesSummary.totalPurchaseSpend || 0)) * 100) / 100),
+    grossMarginPercentage: kpis.grossMarginPercentage ?? 0,
+    salesToPurchaseRatio: purchasesSummary.totalPurchaseSpend > 0 ? Math.round(((kpis.grossRevenue || 0) / purchasesSummary.totalPurchaseSpend) * 100) / 100 : 0,
   };
 
   return (
@@ -205,7 +205,7 @@ export default function AdminAnalyticsPage() {
                 <span>LIVE TELEMETRY STREAM</span>
               </div>
               <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono">
-                {traffic.realTimeActiveUsers || 42} <span className="text-xs font-sans text-slate-500 dark:text-slate-400 font-normal">Active Concurrent Visitors</span>
+                {traffic.realTimeActiveUsers ?? 0} <span className="text-xs font-sans text-slate-500 dark:text-slate-400 font-normal">Active Concurrent Visitors</span>
               </div>
             </div>
           </div>
@@ -253,7 +253,7 @@ export default function AdminAnalyticsPage() {
           </div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>+19.4% vs Previous Period</span>
+            <span>{kpis.growthPercentage !== undefined ? `${kpis.growthPercentage >= 0 ? '+' : ''}${kpis.growthPercentage}% vs Previous Period` : 'Verified Platform Sales'}</span>
           </div>
         </div>
 
@@ -605,10 +605,10 @@ export default function AdminAnalyticsPage() {
 
                     <td className="py-3 px-4 whitespace-nowrap">
                       <div className="text-xs font-bold text-purple-600 dark:text-purple-400">
-                        +{item.growthRate?.toFixed(1) || 18.2}% Velocity
+                        {item.growthRate !== undefined ? `${item.growthRate >= 0 ? '+' : ''}${item.growthRate.toFixed(1)}% Velocity` : '0.0% Velocity'}
                       </div>
                       <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                        {item.margin?.toFixed(1) || 24.5}% Gross Margin
+                        {item.margin !== undefined ? `${item.margin.toFixed(1)}% Gross Margin` : '0.0% Gross Margin'}
                       </div>
                     </td>
                   </tr>

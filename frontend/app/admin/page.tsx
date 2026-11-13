@@ -154,44 +154,44 @@ export default function AdminDashboardPage() {
       if (posRes.status === 'fulfilled' && posRes.value) {
         const rawPos = posRes.value;
         const posList = Array.isArray(rawPos?.data) ? rawPos.data : Array.isArray(rawPos) ? rawPos : [];
-        if (posList.length > 0) {
-          setPurchaseOrdersList(posList);
-        }
+        setPurchaseOrdersList(posList);
+      } else {
+        setPurchaseOrdersList([]);
       }
 
       if (quotesRes.status === 'fulfilled' && quotesRes.value) {
         const rawQuotes = quotesRes.value;
         const qList = Array.isArray(rawQuotes?.data) ? rawQuotes.data : Array.isArray(rawQuotes) ? rawQuotes : [];
-        if (qList.length > 0) {
-          setDealsList(qList.map((q: any) => ({
-            id: q.id,
-            quoteNumber: q.quoteNumber,
-            companyName: q.companyName,
-            contactName: q.contactName,
-            itemsSummary: q.itemsSummary || (q.items && q.items[0]?.productName ? `${q.items[0]?.quantity || 1}x ${q.items[0]?.productName}` : (q.notes || 'Enterprise B2B Hardware RFQ')),
-            total: Number(q.total || 0),
-            margin: q.margin || 25.0,
-            deliverySLA: q.deliverySLA || 'EX_STOCK_24H',
-            paymentTerms: q.paymentTerms || 'NET_30',
-            status: q.status || 'PENDING',
-            validUntil: q.validUntil ? q.validUntil.split('T')[0] : '2026-11-01',
-          })));
-        }
+        setDealsList(qList.map((q: any) => ({
+          id: q.id,
+          quoteNumber: q.quoteNumber,
+          companyName: q.companyName,
+          contactName: q.contactName,
+          itemsSummary: q.itemsSummary || (q.items && q.items[0]?.productName ? `${q.items[0]?.quantity || 1}x ${q.items[0]?.productName}` : (q.notes || 'Enterprise B2B Hardware RFQ')),
+          total: Number(q.total || 0),
+          margin: Number(q.margin || 0),
+          deliverySLA: q.deliverySLA || 'EX_STOCK_24H',
+          paymentTerms: q.paymentTerms || 'NET_30',
+          status: q.status || 'PENDING',
+          validUntil: q.validUntil ? q.validUntil.split('T')[0] : '',
+        })));
+      } else {
+        setDealsList([]);
       }
 
       if (resellersRes.status === 'fulfilled' && resellersRes.value) {
         const rawResellers = resellersRes.value;
         const rList = Array.isArray(rawResellers?.data) ? rawResellers.data : Array.isArray(rawResellers) ? rawResellers : [];
-        if (rList.length > 0) {
-          setCorporateAccounts(rList.map((r: any, idx: number) => ({
-            id: r.id,
-            company: r.displayName || r.businessName,
-            tier: r.businessInformation?.businessType || 'Value-Added Reseller (VAR)',
-            paymentTerms: r.businessInformation?.settlementTerms || 'Direct Settlement',
-            rating: idx === 0 ? 'AAA Prime' : idx === 1 ? 'AA Strong' : 'A- Monitored',
-            status: r.status || 'ACTIVE',
-          })));
-        }
+        setCorporateAccounts(rList.map((r: any) => ({
+          id: r.id,
+          company: r.displayName || r.businessName,
+          tier: r.businessInformation?.businessType || 'Value-Added Reseller (VAR)',
+          paymentTerms: r.businessInformation?.settlementTerms || 'Direct Settlement',
+          rating: r.status === 'ACTIVE' ? 'Active Partner' : 'Pending Verification',
+          status: r.status || 'ACTIVE',
+        })));
+      } else {
+        setCorporateAccounts([]);
       }
     } catch (err) {
       console.error('Failed to load admin dashboard telemetry:', err);
@@ -395,10 +395,10 @@ export default function AdminDashboardPage() {
         ['Generated At', new Date().toISOString()],
         [],
         ['--- SECTION 1: WORKING CAPITAL & FINANCIAL TOTALS ---'],
-        ['Total Revenue (AED)', (metrics?.revenue?.total ?? 348250).toString()],
-        ['Operating Gross Profit (AED)', '86366.50'],
-        ['Total Processed Orders', (metrics?.totalOrders || 148).toString()],
-        ['Total Warehouse Valuation (AED)', '1450000.00'],
+        ['Total Revenue (AED)', (metrics?.revenue?.total ?? 0).toString()],
+        ['Operating Gross Profit (AED)', (metrics?.profitabilitySummary?.grossMargin ?? metrics?.erpOperations?.grossProfit ?? 0).toString()],
+        ['Total Processed Orders', (metrics?.orders?.total ?? metrics?.totalOrders ?? 0).toString()],
+        ['Total Warehouse Valuation (AED)', (metrics?.inventory?.totalInventoryValue ?? metrics?.erpOperations?.inventoryValuation ?? 0).toString()],
         [],
         ['--- SECTION 2: B2B CRM DEAL FUNNEL ---'],
         ['Quote Number', 'Company Name', 'Contact', 'Items', 'Total Value (AED)', 'Margin %', 'Status'],
@@ -454,19 +454,35 @@ export default function AdminDashboardPage() {
   }
 
   // Authoritative Metrics Extracted from Backend Telemetry
-  const revenueTotal = metrics?.revenue?.total ?? 348250;
-  const growthPercentage = metrics?.revenue?.growthPercentage ?? 14.8;
-  const aov = metrics?.revenue?.averageOrderValue ?? 4250;
-  const totalProducts = metrics?.inventory?.totalProducts ?? 48;
-  const totalValuation = metrics?.inventory?.totalInventoryValue ?? 1450000;
-  const lowStockCount = metrics?.inventory?.lowStock ?? 3;
-  const outOfStockCount = metrics?.inventory?.outOfStock ?? 1;
+  const revenueTotal = Number(metrics?.revenue?.total ?? 0);
+  const growthPercentage = Number(metrics?.revenue?.growthPercentage ?? 0);
+  const aov = Number(metrics?.revenue?.averageOrderValue ?? 0);
+  const totalProducts = Number(metrics?.inventory?.totalProducts ?? 0);
+  const totalValuation = Number(metrics?.inventory?.totalInventoryValue ?? metrics?.erpOperations?.inventoryValuation ?? 0);
+  const lowStockCount = Number(metrics?.inventory?.lowStock ?? 0);
+  const outOfStockCount = Number(metrics?.inventory?.outOfStock ?? 0);
   const salesChartData = metrics?.salesChart || [];
   const topProducts = metrics?.topProducts || [];
   const recentOrders = metrics?.recentOrders || [];
 
   const rawLowStock = metrics?.inventory?.lowStockItems || [];
   const displayLowStock = rawLowStock.slice(0, 3);
+
+  // Real order stats derived from backend
+  const totalOrdersCount = Number(metrics?.orders?.total ?? metrics?.totalOrders ?? 0);
+  const deliveredOrdersCount = Number(metrics?.orders?.delivered ?? 0);
+  const inTransitOrdersCount = Number(metrics?.orders?.shipped ?? 0);
+  const processingOrdersCount = Number((metrics?.orders?.processing ?? 0) + (metrics?.orders?.pending ?? 0));
+  const deliveredPct = totalOrdersCount > 0 ? Math.round((deliveredOrdersCount / totalOrdersCount) * 100) : 0;
+  const inTransitPct = totalOrdersCount > 0 ? Math.round((inTransitOrdersCount / totalOrdersCount) * 100) : 0;
+  const processingPct = totalOrdersCount > 0 ? Math.round((processingOrdersCount / totalOrdersCount) * 100) : 0;
+  const fulfillmentSlaPct = totalOrdersCount > 0 ? deliveredPct : 0;
+
+  // Real financial spread derived from backend
+  const grossProfit = Number(metrics?.profitabilitySummary?.grossMargin ?? metrics?.erpOperations?.grossProfit ?? (revenueTotal - (metrics?.purchasesSummary?.totalPurchaseSpend ?? 0)));
+  const grossMarginPct = Number(metrics?.profitabilitySummary?.grossMarginPercentage ?? metrics?.erpOperations?.grossMarginPct ?? 0);
+  const cogsSpend = Number(metrics?.purchasesSummary?.totalPurchaseSpend ?? metrics?.erpOperations?.cogsSpend ?? 0);
+  const dioDays = Number(metrics?.erpOperations?.daysInventoryOutstanding ?? 0);
 
   const displayedOrders = recentOrders.filter((ord: any) => {
     if (orderFilter === 'ALL') return true;
@@ -577,7 +593,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center gap-2 pt-1 flex-wrap">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10.5px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
                 <TrendingUp className="w-3 h-3" />
-                +{growthPercentage}% Velocity
+                {growthPercentage >= 0 ? `+${growthPercentage}%` : `${growthPercentage}%`} Velocity
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 AOV: {formatPrice(aov)}
@@ -605,13 +621,13 @@ export default function AdminDashboardPage() {
 
             <div className="my-1.5">
               <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
-                {metrics?.totalOrders || 148} Orders
+                {totalOrdersCount} Orders
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 pt-1 flex-wrap">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10.5px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
-                99.4% Fulfillment SLA
+                {fulfillmentSlaPct}% Fulfillment SLA
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 Live Dispatch Velocity
@@ -622,14 +638,14 @@ export default function AdminDashboardPage() {
           {/* Fulfillment Health Progress */}
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 space-y-1.5">
             <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-              <span>Delivered: 88%</span>
-              <span>In-Transit: 10%</span>
-              <span className="text-blue-500">Processing: 2%</span>
+              <span>Delivered: {deliveredPct}%</span>
+              <span>In-Transit: {inTransitPct}%</span>
+              <span className="text-blue-500">Processing: {processingPct}%</span>
             </div>
             <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex">
-              <div className="h-full bg-emerald-500" style={{ width: '88%' }} />
-              <div className="h-full bg-cyan-500" style={{ width: '10%' }} />
-              <div className="h-full bg-blue-500" style={{ width: '2%' }} />
+              <div className="h-full bg-emerald-500" style={{ width: `${deliveredPct}%` }} />
+              <div className="h-full bg-cyan-500" style={{ width: `${inTransitPct}%` }} />
+              <div className="h-full bg-blue-500" style={{ width: `${processingPct}%` }} />
             </div>
           </div>
         </div>
@@ -655,10 +671,10 @@ export default function AdminDashboardPage() {
             <div className="flex items-center gap-1.5 pt-1 flex-wrap">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10.5px] font-semibold font-mono border border-slate-200 dark:border-slate-700">
                 <Package className="w-3 h-3 text-slate-400" />
-                {totalProducts} SKUs • 3 Hubs
+                {totalProducts} SKUs
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                DIO: 28.4 Days
+                DIO: {dioDays} Days
               </span>
             </div>
           </div>
@@ -685,17 +701,17 @@ export default function AdminDashboardPage() {
 
             <div className="my-1.5">
               <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
-                {formatPrice(86366.50)}
+                {formatPrice(grossProfit)}
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 pt-1 flex-wrap">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10.5px] font-semibold font-mono border border-emerald-200/60 dark:border-emerald-800/40">
                 <TrendingUp className="w-3 h-3" />
-                24.8% Margin
+                {grossMarginPct >= 0 ? `+${grossMarginPct}%` : `${grossMarginPct}%`} Margin
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                COGS: {formatPrice(272000)}
+                COGS: {formatPrice(cogsSpend)}
               </span>
             </div>
           </div>
@@ -784,39 +800,62 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* 5 Funnel Stages */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60">
-              <div className="text-[10px] font-bold text-slate-400 font-mono uppercase">1. Draft Proposal</div>
-              <div className="text-xl font-black text-slate-900 dark:text-white font-mono mt-1">1 Deal</div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">{formatPrice(64000)}</div>
-            </div>
+          {(() => {
+            const draftDeals = dealsList.filter(d => d.status === 'DRAFT');
+            const draftDealsValue = draftDeals.reduce((sum, d) => sum + (d.total || 0), 0);
+            const pendingDeals = dealsList.filter(d => d.status === 'PENDING' || d.status === 'PENDING_REVIEW');
+            const pendingDealsValue = pendingDeals.reduce((sum, d) => sum + (d.total || 0), 0);
+            const approvedDeals = dealsList.filter(d => d.status === 'APPROVED');
+            const approvedDealsValue = approvedDeals.reduce((sum, d) => sum + (d.total || 0), 0);
+            const convertedDeals = dealsList.filter(d => d.status === 'CONVERTED');
+            const convertedDealsValue = convertedDeals.reduce((sum, d) => sum + (d.total || 0), 0);
+            const totalPipelineValue = dealsList.reduce((sum, d) => sum + (d.total || 0), 0);
+            const winRate = dealsList.length > 0 ? Math.round((convertedDeals.length / dealsList.length) * 100) : 0;
 
-            <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40">
-              <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 font-mono uppercase">2. Under RFQ Review</div>
-              <div className="text-xl font-black text-blue-700 dark:text-blue-300 font-mono mt-1">1 Deal</div>
-              <div className="text-[11px] text-blue-600/80 dark:text-blue-400/80 mt-0.5 font-mono">{formatPrice(112500)}</div>
-            </div>
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60">
+                  <div className="text-[10px] font-bold text-slate-400 font-mono uppercase">1. Draft Proposal</div>
+                  <div className="text-xl font-black text-slate-900 dark:text-white font-mono mt-1">
+                    {draftDeals.length} Deal{draftDeals.length === 1 ? '' : 's'}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">{formatPrice(draftDealsValue)}</div>
+                </div>
 
-            <div className="p-3.5 rounded-xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40">
-              <div className="text-[10px] font-bold text-purple-600 dark:text-purple-400 font-mono uppercase">3. Commercial Approved</div>
-              <div className="text-xl font-black text-purple-700 dark:text-purple-300 font-mono mt-1">2 Deals</div>
-              <div className="text-[11px] text-purple-600/80 dark:text-purple-400/80 mt-0.5 font-mono">{formatPrice(264300)}</div>
-            </div>
+                <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40">
+                  <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 font-mono uppercase">2. Under RFQ Review</div>
+                  <div className="text-xl font-black text-blue-700 dark:text-blue-300 font-mono mt-1">
+                    {pendingDeals.length} Deal{pendingDeals.length === 1 ? '' : 's'}
+                  </div>
+                  <div className="text-[11px] text-blue-600/80 dark:text-blue-400/80 mt-0.5 font-mono">{formatPrice(pendingDealsValue)}</div>
+                </div>
 
-            <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40">
-              <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono uppercase">4. Converted to Order</div>
-              <div className="text-xl font-black text-emerald-700 dark:text-emerald-300 font-mono mt-1">Active</div>
-              <div className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-0.5 font-mono">FTA Tax E-Bill Generated</div>
-            </div>
+                <div className="p-3.5 rounded-xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40">
+                  <div className="text-[10px] font-bold text-purple-600 dark:text-purple-400 font-mono uppercase">3. Commercial Approved</div>
+                  <div className="text-xl font-black text-purple-700 dark:text-purple-300 font-mono mt-1">
+                    {approvedDeals.length} Deal{approvedDeals.length === 1 ? '' : 's'}
+                  </div>
+                  <div className="text-[11px] text-purple-600/80 dark:text-purple-400/80 mt-0.5 font-mono">{formatPrice(approvedDealsValue)}</div>
+                </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60">
-              <div className="text-[10px] font-bold text-slate-400 font-mono uppercase">5. Pipeline Velocity</div>
-              <div className="text-base font-black text-slate-900 dark:text-white font-mono mt-1 truncate">
-                {formatPrice(440800)}
+                <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40">
+                  <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono uppercase">4. Converted to Order</div>
+                  <div className="text-xl font-black text-emerald-700 dark:text-emerald-300 font-mono mt-1">
+                    {convertedDeals.length} Converted
+                  </div>
+                  <div className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-0.5 font-mono">{formatPrice(convertedDealsValue)}</div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60">
+                  <div className="text-[10px] font-bold text-slate-400 font-mono uppercase">5. Pipeline Total</div>
+                  <div className="text-base font-black text-slate-900 dark:text-white font-mono mt-1 truncate">
+                    {formatPrice(totalPipelineValue)}
+                  </div>
+                  <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-bold">{winRate}% Win Rate</div>
+                </div>
               </div>
-              <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-bold">64.2% Win Rate</div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Interactive B2B Deals Table */}
           <div className="overflow-x-auto pt-2">
@@ -838,85 +877,93 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                {dealsList.map(deal => (
-                  <tr key={deal.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">
-                      {deal.quoteNumber}
-                    </td>
-                    <td className="py-3">
-                      <div className="font-bold text-slate-900 dark:text-white text-xs">{deal.companyName}</div>
-                      <div className="text-[11px] text-slate-400">{deal.contactName}</div>
-                    </td>
-                    <td className="py-3 text-[11px] text-slate-600 dark:text-slate-300 max-w-xs truncate" title={deal.itemsSummary}>
-                      {deal.itemsSummary}
-                    </td>
-                    <td className="py-3 font-mono font-black text-slate-900 dark:text-white text-right text-xs">
-                      {formatPrice(deal.total)}
-                    </td>
-                    <td className="py-3 text-center">
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
-                        {deal.margin}%
-                      </span>
-                    </td>
-                    <td className="py-3 text-[10px] font-mono text-slate-500">
-                      <div>{deal.paymentTerms}</div>
-                      <div className="text-slate-400">{deal.deliverySLA}</div>
-                    </td>
-                    <td className="py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${deal.status === 'APPROVED'
-                          ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
-                          : deal.status === 'CONVERTED'
-                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                            : deal.status === 'PENDING'
-                              ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                        }`}>
-                        {deal.status}
-                      </span>
-                    </td>
-                    <td className="py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {deal.status === 'PENDING' && (
-                          <button
-                            type="button"
-                            onClick={() => handleApproveQuote(deal.id, deal.quoteNumber)}
-                            disabled={actionInProgressId === deal.id}
-                            className="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
-                          >
-                            <CheckCheck className="w-3 h-3" />
-                            <span>Approve Terms</span>
-                          </button>
-                        )}
-                        {deal.status === 'APPROVED' && (
-                          <button
-                            type="button"
-                            onClick={() => handleConvertQuote(deal.id, deal.quoteNumber)}
-                            disabled={actionInProgressId === deal.id}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all shadow-2xs disabled:opacity-50"
-                          >
-                            <ArrowRight className="w-3 h-3" />
-                            <span>Convert to Order</span>
-                          </button>
-                        )}
-                        {deal.status === 'CONVERTED' && (
-                          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-bold flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Active Order</span>
-                          </span>
-                        )}
-                        {deal.status === 'DRAFT' && (
-                          <button
-                            type="button"
-                            onClick={() => handleApproveQuote(deal.id, deal.quoteNumber)}
-                            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-[11px] font-semibold transition-all"
-                          >
-                            <span>Fast-Track RFQ</span>
-                          </button>
-                        )}
-                      </div>
+                {dealsList.length > 0 ? (
+                  dealsList.map(deal => (
+                    <tr key={deal.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3 font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">
+                        {deal.quoteNumber}
+                      </td>
+                      <td className="py-3">
+                        <div className="font-bold text-slate-900 dark:text-white text-xs">{deal.companyName}</div>
+                        <div className="text-[11px] text-slate-400">{deal.contactName}</div>
+                      </td>
+                      <td className="py-3 text-[11px] text-slate-600 dark:text-slate-300 max-w-xs truncate" title={deal.itemsSummary}>
+                        {deal.itemsSummary}
+                      </td>
+                      <td className="py-3 font-mono font-black text-slate-900 dark:text-white text-right text-xs">
+                        {formatPrice(deal.total)}
+                      </td>
+                      <td className="py-3 text-center">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+                          {deal.margin}%
+                        </span>
+                      </td>
+                      <td className="py-3 text-[10px] font-mono text-slate-500">
+                        <div>{deal.paymentTerms}</div>
+                        <div className="text-slate-400">{deal.deliverySLA}</div>
+                      </td>
+                      <td className="py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${deal.status === 'APPROVED'
+                            ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                            : deal.status === 'CONVERTED'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                              : deal.status === 'PENDING'
+                                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                          }`}>
+                          {deal.status}
+                        </span>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {deal.status === 'PENDING' && (
+                            <button
+                              type="button"
+                              onClick={() => handleApproveQuote(deal.id, deal.quoteNumber)}
+                              disabled={actionInProgressId === deal.id}
+                              className="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
+                            >
+                              <CheckCheck className="w-3 h-3" />
+                              <span>Approve Terms</span>
+                            </button>
+                          )}
+                          {deal.status === 'APPROVED' && (
+                            <button
+                              type="button"
+                              onClick={() => handleConvertQuote(deal.id, deal.quoteNumber)}
+                              disabled={actionInProgressId === deal.id}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all shadow-2xs disabled:opacity-50"
+                            >
+                              <ArrowRight className="w-3 h-3" />
+                              <span>Convert to Order</span>
+                            </button>
+                          )}
+                          {deal.status === 'CONVERTED' && (
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-bold flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Active Order</span>
+                            </span>
+                          )}
+                          {deal.status === 'DRAFT' && (
+                            <button
+                              type="button"
+                              onClick={() => handleApproveQuote(deal.id, deal.quoteNumber)}
+                              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-[11px] font-semibold transition-all"
+                            >
+                              <span>Fast-Track RFQ</span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-xs text-slate-400 font-mono">
+                      No active enterprise quotations or B2B deals recorded.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -945,45 +992,51 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            {corporateAccounts.map(account => (
-              <div key={account.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/50 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="font-bold text-xs text-slate-900 dark:text-white truncate" title={account.company}>
-                      {account.company}
-                    </h3>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{account.tier}</p>
-                  </div>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
-                    {account.rating}
-                  </span>
-                </div>
-
-                <div className="space-y-1.5 pt-1">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-500 text-[11px]">Settlement Model:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">
-                      {account.paymentTerms}
+            {corporateAccounts.length > 0 ? (
+              corporateAccounts.map(account => (
+                <div key={account.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/50 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-bold text-xs text-slate-900 dark:text-white truncate" title={account.company}>
+                        {account.company}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{account.tier}</p>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                      {account.rating}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1">
-                    <span>Compliance:</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">100% Verified</span>
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-slate-500 text-[11px]">Settlement Model:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {account.paymentTerms}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1">
+                      <span>Compliance:</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">100% Verified</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between text-[10px] font-mono text-slate-400">
+                    <span>Status: {account.status}</span>
+                    <Link
+                      href="/admin/resellers"
+                      className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                    >
+                      View Portal
+                    </Link>
                   </div>
                 </div>
-
-                <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between text-[10px] font-mono text-slate-400">
-                  <span>Status: {account.status}</span>
-                  <Link
-                    href="/admin/resellers"
-                    className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
-                  >
-                    View Portal
-                  </Link>
-                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-8 text-center text-xs text-slate-400 font-mono">
+                No registered enterprise reseller accounts found.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -1019,112 +1072,52 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* 3 Warehouse Hub Cards */}
+          {/* Warehouse Hub Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/50 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-                  DXB-01
-                </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  OPTIMAL (68%)
-                </span>
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">JAFZA Bonded Mega-Hub</h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Primary Import & High-Compute Distribution Gateway</p>
-              </div>
-              <div className="space-y-1.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/50">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500">Asset Valuation:</span>
-                  <strong className="text-slate-900 dark:text-white font-bold">{formatPrice(842500)}</strong>
-                </div>
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500">SKUs Stocked:</span>
-                  <strong className="text-blue-600 dark:text-blue-400">24 SKUs</strong>
-                </div>
-                <div className="space-y-1 pt-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                    <span>Capacity Utilization</span>
-                    <span>68%</span>
+            {(metrics?.erpOperations?.warehouseHubs && metrics.erpOperations.warehouseHubs.length > 0) ? (
+              metrics.erpOperations.warehouseHubs.map((hub: any) => (
+                <div key={hub.code} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+                      {hub.code}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      {hub.status} ({hub.capacityUtilization}%)
+                    </span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                    <div className="h-full rounded-full bg-emerald-500" style={{ width: '68%' }} />
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">{hub.name}</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{hub.type}</p>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/50 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
-                  DXB-02
-                </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  OPTIMAL (41%)
-                </span>
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Dubai Silicon Oasis Express Center</h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Rapid B2B Express & Custom Rig Assembly Facility</p>
-              </div>
-              <div className="space-y-1.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/50">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500">Asset Valuation:</span>
-                  <strong className="text-slate-900 dark:text-white font-bold">{formatPrice(390000)}</strong>
-                </div>
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500">SKUs Stocked:</span>
-                  <strong className="text-blue-600 dark:text-blue-400">18 SKUs</strong>
-                </div>
-                <div className="space-y-1 pt-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                    <span>Capacity Utilization</span>
-                    <span>41%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                    <div className="h-full rounded-full bg-emerald-500" style={{ width: '41%' }} />
+                  <div className="space-y-1.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/50">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-slate-500">Asset Valuation:</span>
+                      <strong className="text-slate-900 dark:text-white font-bold">{formatPrice(hub.valuation)}</strong>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-slate-500">SKUs Stocked:</span>
+                      <strong className="text-blue-600 dark:text-blue-400">{hub.activeSKUs} SKUs</strong>
+                    </div>
+                    <div className="space-y-1 pt-1">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                        <span>Capacity Utilization</span>
+                        <span>{hub.capacityUtilization}%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                        <div className="h-full rounded-full bg-emerald-500" style={{ width: `${hub.capacityUtilization}%` }} />
+                      </div>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full py-8 text-center text-xs text-slate-400 font-mono">
+                {totalProducts > 0
+                  ? `Central Inventory: ${totalProducts} SKUs • Total Valuation: ${formatPrice(totalValuation)}`
+                  : 'No inventory or warehouse hubs registered.'}
               </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/50 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">
-                  AUH-01
-                </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  OPTIMAL (52%)
-                </span>
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Abu Dhabi KIZAD Center</h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Government & Heavy Compute Cluster Storage</p>
-              </div>
-              <div className="space-y-1.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/50">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500">Asset Valuation:</span>
-                  <strong className="text-slate-900 dark:text-white font-bold">{formatPrice(217500)}</strong>
-                </div>
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500">SKUs Stocked:</span>
-                  <strong className="text-blue-600 dark:text-blue-400">15 SKUs</strong>
-                </div>
-                <div className="space-y-1 pt-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                    <span>Capacity Utilization</span>
-                    <span>52%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                    <div className="h-full rounded-full bg-emerald-500" style={{ width: '52%' }} />
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Supplier Restock POs Command Table */}
@@ -1158,65 +1151,73 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                  {purchaseOrdersList.map(po => (
-                    <tr key={po.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 font-mono font-bold text-slate-900 dark:text-white text-xs">
-                        {po.poNumber}
-                      </td>
-                      <td className="py-3">
-                        <div className="font-bold text-slate-900 dark:text-white text-xs">{po.supplierName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">{po.targetHub}</div>
-                      </td>
-                      <td className="py-3 font-mono text-[11px] text-slate-600 dark:text-slate-300">
-                        <span className="font-bold text-slate-900 dark:text-white">{po.units} Units</span> • {po.sku}
-                      </td>
-                      <td className="py-3 font-mono font-black text-slate-900 dark:text-white text-right text-xs">
-                        {formatPrice(po.totalCost)}
-                      </td>
-                      <td className="py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${po.status === 'RECEIVED_RESTOCKED'
-                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                            : po.status === 'IN_TRANSIT'
-                              ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-                              : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                          }`}>
-                          {po.status === 'RECEIVED_RESTOCKED' ? 'Received & Restocked' : po.status === 'IN_TRANSIT' ? 'In Transit' : 'Pending Supplier'}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedPoForDoc(po);
-                              setIsPoDocModalOpen(true);
-                            }}
-                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all"
-                            title="View Official Corporate PO Dossier"
-                          >
-                            <Eye className="w-3 h-3 text-blue-500" />
-                            <span>Dossier</span>
-                          </button>
-                          {po.status !== 'RECEIVED_RESTOCKED' ? (
+                  {purchaseOrdersList.length > 0 ? (
+                    purchaseOrdersList.map(po => (
+                      <tr key={po.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3 font-mono font-bold text-slate-900 dark:text-white text-xs">
+                          {po.poNumber}
+                        </td>
+                        <td className="py-3">
+                          <div className="font-bold text-slate-900 dark:text-white text-xs">{po.supplierName}</div>
+                          <div className="text-[10px] text-slate-400 font-mono">{po.targetHub}</div>
+                        </td>
+                        <td className="py-3 font-mono text-[11px] text-slate-600 dark:text-slate-300">
+                          <span className="font-bold text-slate-900 dark:text-white">{po.units} Units</span> • {po.sku}
+                        </td>
+                        <td className="py-3 font-mono font-black text-slate-900 dark:text-white text-right text-xs">
+                          {formatPrice(po.totalCost)}
+                        </td>
+                        <td className="py-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${po.status === 'RECEIVED_RESTOCKED'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                              : po.status === 'IN_TRANSIT'
+                                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                                : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                            }`}>
+                            {po.status === 'RECEIVED_RESTOCKED' ? 'Received & Restocked' : po.status === 'IN_TRANSIT' ? 'In Transit' : 'Pending Supplier'}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
-                              onClick={() => handleReceivePO(po.id, po.poNumber)}
-                              disabled={actionInProgressId === po.id}
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all disabled:opacity-50 shadow-2xs"
+                              onClick={() => {
+                                setSelectedPoForDoc(po);
+                                setIsPoDocModalOpen(true);
+                              }}
+                              className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all"
+                              title="View Official Corporate PO Dossier"
                             >
-                              <PackageCheck className="w-3 h-3" />
-                              <span>Receive</span>
+                              <Eye className="w-3 h-3 text-blue-500" />
+                              <span>Dossier</span>
                             </button>
-                          ) : (
-                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-bold flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />
-                              <span>Reconciled</span>
-                            </span>
-                          )}
-                        </div>
+                            {po.status !== 'RECEIVED_RESTOCKED' ? (
+                              <button
+                                type="button"
+                                onClick={() => handleReceivePO(po.id, po.poNumber)}
+                                disabled={actionInProgressId === po.id}
+                                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all disabled:opacity-50 shadow-2xs"
+                              >
+                                <PackageCheck className="w-3 h-3" />
+                                <span>Receive</span>
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-bold flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>Reconciled</span>
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-xs text-slate-400 font-mono">
+                        No supplier purchase orders recorded yet.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1333,7 +1334,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-xs font-black font-mono text-slate-900 dark:text-white">{formatPrice(prod.price)}</div>
-                    <span className="text-[10px] text-emerald-600 font-mono font-bold">{prod.salesCount || 12} sold</span>
+                    <span className="text-[10px] text-emerald-600 font-mono font-bold">{prod.unitsSold ?? prod.salesCount ?? 0} sold</span>
                   </div>
                 </div>
               ))

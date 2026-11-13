@@ -171,3 +171,4 @@ export function useStaffPresence(options: { pollInterval?: number; autoPoll?: bo
     sendHeartbeat,
   };
 }
+
