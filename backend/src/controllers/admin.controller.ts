@@ -1426,7 +1426,38 @@ export class AdminController {
   // 17. Administrator Account Management (Strictly ADMIN only)
   async getAdmins(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const allUsers = await userRepository.find();
-    const admins = allUsers.filter(u => u.role === 'ADMIN');
+    let admins = allUsers.filter(u => u.role === 'ADMIN');
+
+    // Dual-sync: retrieve any coAdmins registered in settings and ensure sync into userRepository
+    try {
+      const settings: any = await settingsRepository.getSettings();
+      const coAdmins: any[] = settings?.coAdmins || [];
+      for (const co of coAdmins) {
+        const alreadyInUsers = admins.some(
+          a => a.id === co.id || a.email.toLowerCase() === co.email.toLowerCase()
+        );
+        if (!alreadyInUsers) {
+          admins.push(co);
+          try {
+            await userRepository.create({
+              id: co.id,
+              name: co.name,
+              email: co.email,
+              username: co.username,
+              role: 'ADMIN',
+              phone: co.phone || '',
+              avatar: co.avatar || '',
+              addresses: [],
+              passwordHash: co.passwordHash,
+              isActive: co.isActive !== false,
+              createdAt: co.createdAt || new Date().toISOString(),
+              updatedAt: co.updatedAt,
+            });
+          } catch {}
+        }
+      }
+    } catch {}
+
     const safeAdmins = admins.map(a => sanitizeUser(a));
     res.json({ success: true, data: safeAdmins });
   }
@@ -1494,6 +1525,14 @@ export class AdminController {
 
     await userRepository.create(newAdmin);
 
+    // Dual-persistence: update coAdmins in settings repository
+    try {
+      const settings: any = await settingsRepository.getSettings();
+      const coAdmins: any[] = settings?.coAdmins || [];
+      const updatedCoAdmins = [...coAdmins.filter((a: any) => a.id !== newAdmin.id && a.email !== newAdmin.email), newAdmin];
+      await settingsRepository.updateSettings({ coAdmins: updatedCoAdmins } as any);
+    } catch {}
+
     await auditService.log({
       action: 'CREATE',
       resource: 'ADMIN_USER',
@@ -1538,6 +1577,16 @@ export class AdminController {
       updatedAt: new Date().toISOString(),
     });
 
+    // Dual-persistence: update in settings repository
+    try {
+      const settings: any = await settingsRepository.getSettings();
+      const coAdmins: any[] = settings?.coAdmins || [];
+      const updatedCoAdmins = coAdmins.map((a: any) =>
+        a.id === id ? { ...a, isActive: !targetUser.isActive, updatedAt: new Date().toISOString() } : a
+      );
+      await settingsRepository.updateSettings({ coAdmins: updatedCoAdmins } as any);
+    } catch {}
+
     await auditService.log({
       action: 'UPDATE',
       resource: 'ADMIN_USER',
@@ -1576,6 +1625,14 @@ export class AdminController {
     }
 
     await userRepository.delete(id);
+
+    // Dual-persistence: delete from settings repository
+    try {
+      const settings: any = await settingsRepository.getSettings();
+      const coAdmins: any[] = settings?.coAdmins || [];
+      const updatedCoAdmins = coAdmins.filter((a: any) => a.id !== id);
+      await settingsRepository.updateSettings({ coAdmins: updatedCoAdmins } as any);
+    } catch {}
 
     await auditService.log({
       action: 'DELETE',

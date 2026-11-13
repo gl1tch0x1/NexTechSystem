@@ -72,19 +72,81 @@ export default function AdminAdminsPage() {
     try {
       setLoading(true);
       const res = await ApiClient.get<AdminUser[]>('/admin/admins', { token: token || undefined });
-      if (res && Array.isArray(res)) {
-        setAdmins(res);
-      } else {
-        setAdmins([]);
+      let list = Array.isArray(res) ? res : [];
+
+      // Ensure the currently authenticated administrator is always in the roster
+      if (currentAdmin && currentAdmin.role === 'ADMIN') {
+        const hasCurrent = list.some(
+          a => a.id === currentAdmin.id || (currentAdmin.email && a.email.toLowerCase() === currentAdmin.email.toLowerCase())
+        );
+        if (!hasCurrent) {
+          const currentAdminEntry: AdminUser = {
+            id: currentAdmin.id || 'admin_master',
+            name: currentAdmin.name || 'Master Administrator',
+            email: currentAdmin.email || 'admin@nextechsystem.com',
+            username: currentAdmin.username || (currentAdmin.email ? currentAdmin.email.split('@')[0] : 'admin'),
+            role: 'ADMIN',
+            phone: currentAdmin.phone || '',
+            avatar: currentAdmin.avatar || '',
+            isActive: currentAdmin.isActive !== false,
+            createdAt: currentAdmin.createdAt || new Date().toISOString(),
+          };
+          list = [currentAdminEntry, ...list];
+        }
       }
+
+      setAdmins(list);
+      try {
+        localStorage.setItem('nextech_cached_admins', JSON.stringify(list));
+      } catch {}
     } catch (err: any) {
       console.warn('[Admin Roster Notice]:', err.message);
-      setAdmins([]);
+      // Fallback: preserve existing cached admins or currentAdmin
+      try {
+        const cached = localStorage.getItem('nextech_cached_admins');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setAdmins(parsed);
+            return;
+          }
+        }
+      } catch {}
+
+      if (currentAdmin && currentAdmin.role === 'ADMIN') {
+        setAdmins(prev => {
+          if (prev.length > 0) return prev;
+          return [{
+            id: currentAdmin.id || 'admin_master',
+            name: currentAdmin.name || 'Master Administrator',
+            email: currentAdmin.email || 'admin@nextechsystem.com',
+            username: currentAdmin.username || (currentAdmin.email ? currentAdmin.email.split('@')[0] : 'admin'),
+            role: 'ADMIN',
+            phone: currentAdmin.phone || '',
+            avatar: currentAdmin.avatar || '',
+            isActive: true,
+            createdAt: currentAdmin.createdAt || new Date().toISOString(),
+          }];
+        });
+      }
       setToastMessage({ type: 'error', text: err.message || 'Failed to fetch administrator accounts.' });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('nextech_cached_admins');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAdmins(parsed);
+          setLoading(false);
+        }
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -180,8 +242,14 @@ export default function AdminAdminsPage() {
       setPassword('');
       setPhone('');
       setAvatar('');
-      if (createdAdmin && createdAdmin.id) {
-        setAdmins(prev => [...prev.filter(a => a.id !== createdAdmin.id), createdAdmin]);
+      if (createdAdmin && (createdAdmin.id || createdAdmin.email)) {
+        setAdmins(prev => {
+          const next = [...prev.filter(a => a.id !== createdAdmin.id && a.email.toLowerCase() !== createdAdmin.email.toLowerCase()), createdAdmin];
+          try {
+            localStorage.setItem('nextech_cached_admins', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
       }
       fetchAdmins();
     } catch (err: any) {
@@ -206,9 +274,13 @@ export default function AdminAdminsPage() {
         type: 'success',
         text: `Administrator ${admin.name} is now ${newStatus ? 'Active' : 'Suspended'}.`,
       });
-      setAdmins(prev =>
-        prev.map(a => (a.id === admin.id ? { ...a, isActive: newStatus } : a))
-      );
+      setAdmins(prev => {
+        const next = prev.map(a => (a.id === admin.id ? { ...a, isActive: newStatus } : a));
+        try {
+          localStorage.setItem('nextech_cached_admins', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
     } catch (err: any) {
       setToastMessage({ type: 'error', text: err.message || 'Failed to toggle status.' });
     } finally {
@@ -231,7 +303,13 @@ export default function AdminAdminsPage() {
         type: 'success',
         text: `Administrator "${deletingAdmin.name}" has been permanently removed.`,
       });
-      setAdmins(prev => prev.filter(a => a.id !== deletingAdmin.id));
+      setAdmins(prev => {
+        const next = prev.filter(a => a.id !== deletingAdmin.id);
+        try {
+          localStorage.setItem('nextech_cached_admins', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
       setDeletingAdmin(null);
     } catch (err: any) {
       setToastMessage({ type: 'error', text: err.message || 'Failed to remove administrator.' });

@@ -53,21 +53,25 @@ const nextConfig = {
     const proxyTarget = process.env.API_PROXY_TARGET || process.env.BACKEND_URL;
     if (proxyTarget && !proxyTarget.includes('localhost') && !proxyTarget.includes('127.0.0.1')) {
       const cleanTarget = proxyTarget.replace(/\/$/, '').replace(/\/api$/, '');
-      return [
-        {
-          source: '/api/:path*',
-          destination: `${cleanTarget}/api/:path*`,
-        },
-      ];
+      return {
+        fallback: [
+          {
+            source: '/api/:path*',
+            destination: `${cleanTarget}/api/:path*`,
+          },
+        ],
+      };
     }
     const isProd = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
     const fallback = isProd ? 'https://api.nextechsystem.com/api/:path*' : 'http://localhost:5000/api/:path*';
-    return [
-      {
-        source: '/api/:path*',
-        destination: fallback,
-      },
-    ];
+    return {
+      fallback: [
+        {
+          source: '/api/:path*',
+          destination: fallback,
+        },
+      ],
+    };
   },
   poweredByHeader: false,
   async headers() {

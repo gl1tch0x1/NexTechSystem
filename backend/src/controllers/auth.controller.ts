@@ -12,6 +12,7 @@ import { passwordResetService } from '../services/password-reset.service.js';
 import { auditService } from '../services/audit.service.js';
 import { getFirebaseAuth } from '../config/firebase.js';
 import { dbStore } from '../config/db-store.js';
+import { settingsRepository } from '../repositories/settings.repository.js';
 
 // In-memory failed login tracking for brute-force defense
 const failedLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
@@ -416,6 +417,37 @@ export class AuthController {
     let user = await userRepository.findByEmail(cleanIdentifier);
     if (!user) {
       user = await userRepository.findByUsername(cleanIdentifier);
+    }
+
+    if (!user) {
+      try {
+        const settings: any = await settingsRepository.getSettings();
+        const coAdmins: any[] = settings?.coAdmins || [];
+        const matched = coAdmins.find(
+          (a: any) =>
+            a.email?.toLowerCase() === cleanIdentifier ||
+            a.username?.toLowerCase() === cleanIdentifier
+        );
+        if (matched) {
+          user = {
+            id: matched.id,
+            name: matched.name,
+            email: matched.email,
+            username: matched.username,
+            role: 'ADMIN',
+            phone: matched.phone || '',
+            avatar: matched.avatar || '',
+            addresses: [],
+            passwordHash: matched.passwordHash,
+            isActive: matched.isActive !== false,
+            createdAt: matched.createdAt || new Date().toISOString(),
+            updatedAt: matched.updatedAt,
+          };
+          try {
+            await userRepository.create(user);
+          } catch {}
+        }
+      } catch {}
     }
 
     if (!user) {

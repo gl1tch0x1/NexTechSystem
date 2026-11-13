@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { proxyToBackend } from '@/lib/proxy-helper';
+import { proxyToBackend, getBackendApiUrl } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 import crypto from 'node:crypto';
 
@@ -24,6 +24,38 @@ function hashPassword(password: string): string {
   return `${salt}:${hash}`;
 }
 
+async function fetchBackendSettings(token: string) {
+  try {
+    const target = `${getBackendApiUrl()}/api/admin/settings`;
+    const res = await fetch(target, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json?.data || json;
+    }
+  } catch {}
+  return null;
+}
+
+async function saveBackendSettings(token: string, payload: any) {
+  try {
+    const target = `${getBackendApiUrl()}/api/admin/settings`;
+    const res = await fetch(target, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+      cache: 'no-store',
+    });
+    return res.ok;
+  } catch {}
+  return false;
+}
+
 export async function GET(request: NextRequest) {
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
@@ -42,26 +74,43 @@ export async function GET(request: NextRequest) {
       return upstream;
     }
 
-    // Fallback: If cPanel backend returns 404 (route not compiled on server yet), query MongoDB directly
-    const db = await getMongoDb();
-    if (db) {
-      const users = await db.collection('users').find({ role: 'ADMIN' }).toArray();
-      const safeAdmins = users.map(sanitizeUser);
-      return NextResponse.json({ success: true, data: safeAdmins });
-    }
+    // Fallback Tier 1: Query MongoDB directly if connection string is configured
+    try {
+      const db = await getMongoDb();
+      if (db) {
+        const users = await db.collection('users').find({ role: 'ADMIN' }).toArray();
+        if (users && users.length > 0) {
+          return NextResponse.json({ success: true, data: users.map(sanitizeUser) });
+        }
+      }
+    } catch {}
 
-    // File-based store fallback if running with local data_store
+    // Fallback Tier 2: Query coAdmins stored securely in backend settings repository
+    const settings = await fetchBackendSettings(token);
+    const coAdmins: any[] = settings?.coAdmins || [];
+
+    // Fallback Tier 3: Local data_store fallback if running locally
+    let localAdmins: any[] = [];
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
       const p = path.resolve(process.cwd(), 'backend', 'data_store', 'users.json');
       const raw = await fs.readFile(p, 'utf8');
       const users = JSON.parse(raw);
-      const safeAdmins = users.filter((u: any) => u.role === 'ADMIN').map(sanitizeUser);
-      return NextResponse.json({ success: true, data: safeAdmins });
-    } catch {
-      return NextResponse.json({ success: true, data: [] });
+      localAdmins = users.filter((u: any) => u.role === 'ADMIN');
+    } catch {}
+
+    // Merge and deduplicate administrators by ID or Email
+    const mergedMap = new Map<string, any>();
+    for (const a of localAdmins) {
+      mergedMap.set(a.id || a.email, a);
     }
+    for (const a of coAdmins) {
+      mergedMap.set(a.id || a.email, a);
+    }
+
+    const allAdmins = Array.from(mergedMap.values()).map(sanitizeUser);
+    return NextResponse.json({ success: true, data: allAdmins });
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: err?.message || 'Failed to fetch administrators.' } },
@@ -90,7 +139,7 @@ export async function POST(request: NextRequest) {
       return upstream;
     }
 
-    // Fallback: If cPanel backend returns 404, insert administrator directly into MongoDB
+    // Fallback: If cPanel backend returns 404, insert administrator directly
     const body = await cloned.json();
     const { name, email, username, password, phone, avatar } = body;
 
@@ -122,25 +171,65 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     };
 
-    const db = await getMongoDb();
-    if (db) {
-      const existing = await db.collection('users').findOne({
-        $or: [{ email: cleanEmail }, { username: cleanUsername }],
-      });
-      if (existing) {
-        return NextResponse.json(
-          { success: false, error: { message: 'An account with this email or username already exists.' } },
-          { status: 409 }
-        );
+    // 1. Direct MongoDB insert if connected
+    try {
+      const db = await getMongoDb();
+      if (db) {
+        const existing = await db.collection('users').findOne({
+          $or: [{ email: cleanEmail }, { username: cleanUsername }],
+        });
+        if (existing) {
+          return NextResponse.json(
+            { success: false, error: { message: 'An account with this email or username already exists.' } },
+            { status: 409 }
+          );
+        }
+        await db.collection('users').insertOne(newAdmin);
       }
-      await db.collection('users').insertOne(newAdmin);
+    } catch {}
+
+    // 2. Dual persistence into backend settings repository via authenticated admin API
+    const settings = await fetchBackendSettings(token);
+    const existingCoAdmins: any[] = settings?.coAdmins || [];
+    const duplicate = existingCoAdmins.some(
+      (a: any) =>
+        a.email?.toLowerCase() === cleanEmail ||
+        (a.username && a.username.toLowerCase() === cleanUsername)
+    );
+    if (duplicate) {
+      return NextResponse.json(
+        { success: false, error: { message: 'An account with this email or username already exists.' } },
+        { status: 409 }
+      );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: sanitizeUser(newAdmin),
-      message: 'New administrator account created successfully with full administrative permissions.',
-    }, { status: 201 });
+    const updatedCoAdmins = [
+      ...existingCoAdmins.filter((a: any) => a.id !== newAdmin.id && a.email !== newAdmin.email),
+      newAdmin,
+    ];
+    await saveBackendSettings(token, { coAdmins: updatedCoAdmins });
+
+    // 3. Local data_store fallback if present
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const p = path.resolve(process.cwd(), 'backend', 'data_store', 'users.json');
+      const raw = await fs.readFile(p, 'utf8');
+      const users = JSON.parse(raw);
+      if (!users.some((u: any) => u.email === cleanEmail || u.username === cleanUsername)) {
+        users.push(newAdmin);
+        await fs.writeFile(p, JSON.stringify(users, null, 2), 'utf8');
+      }
+    } catch {}
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: sanitizeUser(newAdmin),
+        message: 'New administrator account created successfully with full administrative permissions.',
+      },
+      { status: 201 }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: { message: err?.message || 'Failed to create administrator.' } },

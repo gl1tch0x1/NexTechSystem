@@ -17,35 +17,40 @@ export const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-DEMONEXTECH'
 };
 
-// Safe singleton Firebase app initialization
+// Safe singleton Firebase app initialization: only initialize when a live Google API key is configured
+// to prevent automated background pings to Google Identity Toolkit with placeholder keys
 let app: FirebaseApp;
 try {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-} catch (e) {
-  app = initializeApp(firebaseConfig, 'nextech-fallback');
+  if (isLiveKey) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  } else {
+    app = (getApps().length > 0 ? getApp() : ({} as FirebaseApp));
+  }
+} catch {
+  app = {} as FirebaseApp;
 }
 
 // Safe Auth initialization with SSR prerender protection
 let auth: Auth;
 try {
-  auth = isLiveKey ? getAuth(app) : ({} as Auth);
-} catch (e) {
+  auth = isLiveKey && app && typeof (app as any).name === 'string' ? getAuth(app) : ({} as Auth);
+} catch {
   auth = {} as Auth;
 }
 
 // Safe Firestore initialization
 let db: Firestore;
 try {
-  db = getFirestore(app);
-} catch (e) {
+  db = isLiveKey && app && typeof (app as any).name === 'string' ? getFirestore(app) : ({} as Firestore);
+} catch {
   db = {} as Firestore;
 }
 
 // Safe Storage initialization
 let storage: FirebaseStorage;
 try {
-  storage = getStorage(app);
-} catch (e) {
+  storage = isLiveKey && app && typeof (app as any).name === 'string' ? getStorage(app) : ({} as FirebaseStorage);
+} catch {
   storage = {} as FirebaseStorage;
 }
 
