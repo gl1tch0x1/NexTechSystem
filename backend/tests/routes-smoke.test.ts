@@ -162,6 +162,15 @@ const DECLARED_ROUTES: readonly { readonly method: string; readonly path: string
   { method: 'PUT', path: '/api/admin/editors/:id/status' },
   { method: 'DELETE', path: '/api/admin/editors/:id' },
 
+  // Admin Administrators & Presence Telemetry
+  { method: 'GET', path: '/api/admin/admins' },
+  { method: 'POST', path: '/api/admin/admins' },
+  { method: 'PUT', path: '/api/admin/admins/:id/status' },
+  { method: 'DELETE', path: '/api/admin/admins/:id' },
+  { method: 'GET', path: '/api/admin/presence' },
+  { method: 'POST', path: '/api/admin/presence/heartbeat' },
+  { method: 'POST', path: '/api/presence/heartbeat' },
+
   // Reseller Portal
   { method: 'GET', path: '/api/reseller/template/download' },
   { method: 'GET', path: '/api/reseller/dashboard' },

@@ -72,50 +72,57 @@ export default function AdminAdminsPage() {
     try {
       setLoading(true);
       const res = await ApiClient.get<AdminUser[]>('/admin/admins', { token: token || undefined });
-      let list = Array.isArray(res) ? res : [];
+      const list = Array.isArray(res) ? res : [];
 
-      // Ensure the currently authenticated administrator is always in the roster
-      if (currentAdmin && currentAdmin.role === 'ADMIN') {
-        const hasCurrent = list.some(
-          a => a.id === currentAdmin.id || (currentAdmin.email && a.email.toLowerCase() === currentAdmin.email.toLowerCase())
-        );
-        if (!hasCurrent) {
-          const currentAdminEntry: AdminUser = {
-            id: currentAdmin.id || 'admin_master',
-            name: currentAdmin.name || 'Master Administrator',
-            email: currentAdmin.email || 'admin@nextechsystem.com',
-            username: currentAdmin.username || (currentAdmin.email ? currentAdmin.email.split('@')[0] : 'admin'),
-            role: 'ADMIN',
-            phone: currentAdmin.phone || '',
-            avatar: currentAdmin.avatar || '',
-            isActive: currentAdmin.isActive !== false,
-            createdAt: currentAdmin.createdAt || new Date().toISOString(),
-          };
-          list = [currentAdminEntry, ...list];
+      setAdmins(prev => {
+        const map = new Map<string, AdminUser>();
+        // Preserve any admin accounts already present in local state
+        for (const a of prev) {
+          if (a?.email) map.set(a.email.toLowerCase(), a);
+          else if (a?.id) map.set(a.id, a);
         }
-      }
-
-      setAdmins(list);
-      try {
-        localStorage.setItem('nextech_cached_admins', JSON.stringify(list));
-      } catch {}
+        // Merge in authoritative API accounts
+        for (const a of list) {
+          if (a?.email) map.set(a.email.toLowerCase(), a);
+          else if (a?.id) map.set(a.id, a);
+        }
+        // Always ensure the currently authenticated administrator is present
+        if (currentAdmin && currentAdmin.role === 'ADMIN') {
+          const key = (currentAdmin.email || currentAdmin.id || 'admin_master').toLowerCase();
+          if (!map.has(key)) {
+            map.set(key, {
+              id: currentAdmin.id || 'admin_master',
+              name: currentAdmin.name || 'Master Administrator',
+              email: currentAdmin.email || 'admin@nextechsystem.com',
+              username: currentAdmin.username || (currentAdmin.email ? currentAdmin.email.split('@')[0] : 'admin'),
+              role: 'ADMIN',
+              phone: currentAdmin.phone || '',
+              avatar: currentAdmin.avatar || '',
+              isActive: currentAdmin.isActive !== false,
+              createdAt: currentAdmin.createdAt || new Date().toISOString(),
+            });
+          }
+        }
+        const merged = Array.from(map.values());
+        try {
+          localStorage.setItem('nextech_cached_admins', JSON.stringify(merged));
+        } catch {}
+        return merged;
+      });
     } catch (err: any) {
       console.warn('[Admin Roster Notice]:', err.message);
       // Fallback: preserve existing cached admins or currentAdmin
-      try {
-        const cached = localStorage.getItem('nextech_cached_admins');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setAdmins(parsed);
-            return;
+      setAdmins(prev => {
+        if (prev.length > 0) return prev;
+        try {
+          const cached = localStorage.getItem('nextech_cached_admins');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
           }
-        }
-      } catch {}
+        } catch {}
 
-      if (currentAdmin && currentAdmin.role === 'ADMIN') {
-        setAdmins(prev => {
-          if (prev.length > 0) return prev;
+        if (currentAdmin && currentAdmin.role === 'ADMIN') {
           return [{
             id: currentAdmin.id || 'admin_master',
             name: currentAdmin.name || 'Master Administrator',
@@ -127,13 +134,42 @@ export default function AdminAdminsPage() {
             isActive: true,
             createdAt: currentAdmin.createdAt || new Date().toISOString(),
           }];
-        });
+        }
+        return prev;
+      });
+
+      // Suppress technical proxy 404 error toasts when admin is already displayed
+      if (!err.message?.includes('API route not found') && !err.message?.includes('404')) {
+        setToastMessage({ type: 'error', text: err.message || 'Failed to fetch administrator accounts.' });
       }
-      setToastMessage({ type: 'error', text: err.message || 'Failed to fetch administrator accounts.' });
     } finally {
       setLoading(false);
     }
   };
+
+  // Re-sync current administrator whenever currentAdmin resolves
+  useEffect(() => {
+    if (currentAdmin && currentAdmin.role === 'ADMIN') {
+      setAdmins(prev => {
+        const exists = prev.some(
+          a => a.id === currentAdmin.id || (currentAdmin.email && a.email?.toLowerCase() === currentAdmin.email.toLowerCase())
+        );
+        if (exists) return prev;
+        const currentEntry: AdminUser = {
+          id: currentAdmin.id || 'admin_master',
+          name: currentAdmin.name || 'Master Administrator',
+          email: currentAdmin.email || 'admin@nextechsystem.com',
+          username: currentAdmin.username || (currentAdmin.email ? currentAdmin.email.split('@')[0] : 'admin'),
+          role: 'ADMIN',
+          phone: currentAdmin.phone || '',
+          avatar: currentAdmin.avatar || '',
+          isActive: currentAdmin.isActive !== false,
+          createdAt: currentAdmin.createdAt || new Date().toISOString(),
+        };
+        return [currentEntry, ...prev];
+      });
+    }
+  }, [currentAdmin]);
 
   useEffect(() => {
     try {

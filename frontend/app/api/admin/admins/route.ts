@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const upstream = await proxyToBackend(request, '/admin/admins');
-    if (upstream.status !== 404) {
+    if (upstream.ok || (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504)) {
       return upstream;
     }
 
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const upstream = await proxyToBackend(request, '/admin/admins');
-    if (upstream.status !== 404) {
+    if (upstream.ok || (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504)) {
       return upstream;
     }
 
