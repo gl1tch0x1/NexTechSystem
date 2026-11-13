@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Product,
   ProductVariant,
@@ -523,7 +524,7 @@ export function AdminProductModal({
     return Object.keys(formData.specifications).filter(k => Boolean(formData.specifications[k])).length + formData.customSpecs.length;
   }, [formData.specifications, formData.customSpecs]);
 
-  if (!isOpen) return null;
+  // Controlled by AnimatePresence below
 
   // Tag Helpers
   const handleAddTag = (tagToAdd: string) => {
@@ -923,13 +924,28 @@ export function AdminProductModal({
   const currentStepIndex = MODAL_STEPS.findIndex(s => s.id === activeModalStep);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 rounded-3xl w-full max-w-6xl h-[94vh] max-h-[900px] shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-white">
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 350 }}
+            className="relative z-10 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 rounded-3xl w-full max-w-6xl h-[94vh] max-h-[900px] shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-white"
+          >
         
         {/* Top Header */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-600/20">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20">
               <Package className="w-5 h-5" />
             </div>
             <div>
@@ -937,7 +953,7 @@ export function AdminProductModal({
                 <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
                   {isEditing ? 'Edit Hardware Product' : 'Add New Hardware SKU'}
                 </h2>
-                <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-300 border border-blue-200 dark:border-blue-800">
                   {configuredSpecsCount} Specs Configured
                 </span>
                 {formData.hasVariants && (
@@ -981,7 +997,7 @@ export function AdminProductModal({
                 onClick={() => setActiveModalStep(step.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-purple-600 text-white shadow-sm'
+                    ? 'bg-blue-600 text-white shadow-sm'
                     : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
                 }`}
               >
@@ -1009,7 +1025,7 @@ export function AdminProductModal({
               <div className="space-y-5 animate-fadeIn">
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <Layers className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Basic Product Information & Taxonomy
                     </h3>
@@ -1026,7 +1042,7 @@ export function AdminProductModal({
                         placeholder="e.g. HP ProBook 460 G11 Intel Core Ultra 5 16.1 FHD BL ENG DOS"
                         value={formData.title}
                         onChange={e => setFormData({ ...formData, title: e.target.value })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-semibold"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-semibold"
                       />
                     </div>
 
@@ -1039,7 +1055,7 @@ export function AdminProductModal({
                           <button
                             type="button"
                             onClick={() => setFormData({ ...formData, sku: generateRandomSku(formData.categoryId) })}
-                            className="text-[10px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                            className="text-[10px] text-blue-600 dark:text-cyan-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                           >
                             <RefreshCw className="w-3 h-3" />
                             <span>Randomize</span>
@@ -1051,7 +1067,7 @@ export function AdminProductModal({
                           placeholder="e.g. NX-HP-PB460-BASE"
                           value={formData.sku}
                           onChange={e => setFormData({ ...formData, sku: e.target.value })}
-                          className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono font-bold"
+                          className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono font-bold"
                         />
                       </div>
 
@@ -1063,7 +1079,7 @@ export function AdminProductModal({
                           <button
                             type="button"
                             onClick={() => setFormData({ ...formData, barcode: generateRandomBarcode() })}
-                            className="text-[10px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                            className="text-[10px] text-blue-600 dark:text-cyan-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                           >
                             <RefreshCw className="w-3 h-3" />
                             <span>Generate EAN</span>
@@ -1074,7 +1090,7 @@ export function AdminProductModal({
                           placeholder="e.g. 729183920192"
                           value={formData.barcode}
                           onChange={e => setFormData({ ...formData, barcode: e.target.value })}
-                          className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+                          className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono"
                         />
                       </div>
                     </div>
@@ -1094,7 +1110,7 @@ export function AdminProductModal({
                               categoryName: cat?.name || formData.categoryName,
                             });
                           }}
-                          className="w-full bg-white dark:bg-slate-900 px-3 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          className="w-full bg-white dark:bg-slate-900 px-3 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                         >
                           {categories.map(c => (
                             <option key={c.id} value={c.id}>{c.name}</option>
@@ -1116,7 +1132,7 @@ export function AdminProductModal({
                               brandName: b?.name || formData.brandName,
                             });
                           }}
-                          className="w-full bg-white dark:bg-slate-900 px-3 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          className="w-full bg-white dark:bg-slate-900 px-3 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                         >
                           {brands.map(b => (
                             <option key={b.id} value={b.id}>{b.name}</option>
@@ -1134,7 +1150,7 @@ export function AdminProductModal({
                         placeholder="Brief summary for catalog card teasers and search previews"
                         value={formData.shortDescription}
                         onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                       />
                     </div>
 
@@ -1147,7 +1163,7 @@ export function AdminProductModal({
                         placeholder="Detailed technical overview, system architecture, enterprise workload performance..."
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                       />
                     </div>
                   </div>
@@ -1161,7 +1177,7 @@ export function AdminProductModal({
                 {/* Collections Section */}
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <Tag className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <Tag className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Collections Assignment
                     </h3>
@@ -1183,12 +1199,12 @@ export function AdminProductModal({
                           handleAddCollection(collectionInput);
                         }
                       }}
-                      className="flex-1 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      className="flex-1 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                     />
                     <button
                       type="button"
                       onClick={() => handleAddCollection(collectionInput)}
-                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all cursor-pointer"
                     >
                       Add Collection
                     </button>
@@ -1201,7 +1217,7 @@ export function AdminProductModal({
                       {formData.collections.map(col => (
                         <span
                           key={col}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-blue-800"
                         >
                           <span>{col}</span>
                           <button
@@ -1225,7 +1241,7 @@ export function AdminProductModal({
                           key={col}
                           type="button"
                           onClick={() => handleAddCollection(col)}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-purple-100 dark:hover:bg-purple-950/50 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-blue-950/50 hover:text-blue-700 dark:hover:text-cyan-300 transition-colors"
                         >
                           + {col}
                         </button>
@@ -1237,7 +1253,7 @@ export function AdminProductModal({
                 {/* Interactive Tag-Chip Input Section */}
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <Sparkles className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Interactive Product Tag Chips
                     </h3>
@@ -1259,12 +1275,12 @@ export function AdminProductModal({
                           handleAddTag(tagInput);
                         }
                       }}
-                      className="flex-1 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-medium"
+                      className="flex-1 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => handleAddTag(tagInput)}
-                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all cursor-pointer"
                     >
                       Add Tag
                     </button>
@@ -1319,7 +1335,7 @@ export function AdminProductModal({
               <div className="space-y-5 animate-fadeIn">
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <ImageIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <ImageIcon className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Multi-Image Gallery & Primary Display
                     </h3>
@@ -1345,12 +1361,12 @@ export function AdminProductModal({
                           handleAddImage(newImageUrl);
                         }
                       }}
-                      className="flex-1 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+                      className="flex-1 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono"
                     />
                     <button
                       type="button"
                       onClick={() => handleAddImage(newImageUrl)}
-                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all cursor-pointer"
                     >
                       Add Image
                     </button>
@@ -1365,7 +1381,7 @@ export function AdminProductModal({
                           key={idx}
                           className={`p-3 rounded-2xl border transition-all flex flex-col justify-between gap-3 ${
                             isPrimary
-                              ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/30 shadow-md'
+                              ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 shadow-md'
                               : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
                           }`}
                         >
@@ -1380,7 +1396,7 @@ export function AdminProductModal({
                               }}
                             />
                             {isPrimary && (
-                              <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-600 text-white shadow-md uppercase">
+                              <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-600 text-white shadow-md uppercase">
                                 Primary
                               </span>
                             )}
@@ -1395,7 +1411,7 @@ export function AdminProductModal({
                               <button
                                 type="button"
                                 onClick={() => handleSetPrimaryImage(img)}
-                                className="text-xs text-purple-600 dark:text-purple-400 hover:underline font-bold"
+                                className="text-xs text-blue-600 dark:text-cyan-400 hover:underline font-bold"
                               >
                                 Set as Primary
                               </button>
@@ -1430,7 +1446,7 @@ export function AdminProductModal({
                           key={i}
                           type="button"
                           onClick={() => handleAddImage(preset.url)}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-purple-600 hover:text-white transition-all"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white transition-all"
                         >
                           + {preset.label}
                         </button>
@@ -1446,7 +1462,7 @@ export function AdminProductModal({
               <div className="space-y-5 animate-fadeIn">
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <DollarSign className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <DollarSign className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Commercial Pricing & Profit Margins
                     </h3>
@@ -1464,7 +1480,7 @@ export function AdminProductModal({
                         required
                         value={formData.price}
                         onChange={e => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono font-bold"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono font-bold"
                       />
                     </div>
 
@@ -1478,7 +1494,7 @@ export function AdminProductModal({
                         step="any"
                         value={formData.originalPrice}
                         onChange={e => setFormData({ ...formData, originalPrice: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono"
                       />
                     </div>
 
@@ -1492,13 +1508,13 @@ export function AdminProductModal({
                         step="any"
                         value={formData.costPrice}
                         onChange={e => setFormData({ ...formData, costPrice: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono"
                       />
                     </div>
                   </div>
 
                   {/* Margin & Discount Badge */}
-                  <div className="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/60 flex items-center justify-between text-xs">
+                  <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex items-center justify-between text-xs">
                     <div>
                       <span className="text-slate-500 dark:text-slate-400">Gross Margin: </span>
                       <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
@@ -1511,7 +1527,7 @@ export function AdminProductModal({
 
                     <div>
                       <span className="text-slate-500 dark:text-slate-400">Discount Strike: </span>
-                      <span className="font-mono font-bold text-purple-600 dark:text-purple-300">
+                      <span className="font-mono font-bold text-blue-600 dark:text-cyan-300">
                         {formData.originalPrice > formData.price
                           ? Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)
                           : 0}% OFF
@@ -1525,7 +1541,7 @@ export function AdminProductModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                        <Percent className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <Percent className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                         <span>Charge UAE 5% VAT on this Product</span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -1540,13 +1556,13 @@ export function AdminProductModal({
                         onChange={e => setFormData({ ...formData, chargeTax: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
                     </label>
                   </div>
 
                   <div className="text-[11px] font-semibold text-slate-500">
                     Status:{' '}
-                    <span className={formData.chargeTax ? 'text-purple-600 font-bold' : 'text-amber-500 font-bold'}>
+                    <span className={formData.chargeTax ? 'text-blue-600 font-bold' : 'text-amber-500 font-bold'}>
                       {formData.chargeTax ? 'Taxable (5% UAE VAT Calculated)' : 'Tax Exempt (0% VAT Charged)'}
                     </span>
                   </div>
@@ -1555,7 +1571,7 @@ export function AdminProductModal({
                 {/* Unit Pricing Section */}
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-3">
                   <div className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <DollarSign className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <span>Unit Pricing Specification</span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -1573,7 +1589,7 @@ export function AdminProductModal({
                         step="any"
                         value={formData.unitPrice || ''}
                         onChange={e => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono"
                       />
                     </div>
 
@@ -1586,14 +1602,14 @@ export function AdminProductModal({
                         placeholder="e.g. unit, piece, kg, meter, license, pack"
                         value={formData.unitMeasure}
                         onChange={e => setFormData({ ...formData, unitMeasure: e.target.value })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                       />
                     </div>
                   </div>
 
                   {formData.unitPrice && formData.unitMeasure && (
                     <div className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 font-mono">
-                      Storefront Customer Preview: <span className="font-bold text-purple-600 dark:text-purple-400">{formatPrice(formData.unitPrice)} / {formData.unitMeasure}</span>
+                      Storefront Customer Preview: <span className="font-bold text-blue-600 dark:text-cyan-400">{formatPrice(formData.unitPrice)} / {formData.unitMeasure}</span>
                     </div>
                   )}
                 </div>
@@ -1606,7 +1622,7 @@ export function AdminProductModal({
                 {/* Inventory Policies */}
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <Boxes className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <Boxes className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Inventory Tracking & Backorder Policy
                     </h3>
@@ -1623,7 +1639,7 @@ export function AdminProductModal({
                         type="checkbox"
                         checked={formData.inventoryTracked}
                         onChange={e => setFormData({ ...formData, inventoryTracked: e.target.checked })}
-                        className="w-4 h-4 text-purple-600 rounded"
+                        className="w-4 h-4 text-blue-600 rounded"
                       />
                     </div>
 
@@ -1637,7 +1653,7 @@ export function AdminProductModal({
                         type="checkbox"
                         checked={formData.allowBackorder}
                         onChange={e => setFormData({ ...formData, allowBackorder: e.target.checked })}
-                        className="w-4 h-4 text-purple-600 rounded"
+                        className="w-4 h-4 text-blue-600 rounded"
                       />
                     </div>
                   </div>
@@ -1652,7 +1668,7 @@ export function AdminProductModal({
                         min="0"
                         value={formData.stock}
                         onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value, 10) || 0 })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono font-bold"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono font-bold"
                       />
                     </div>
 
@@ -1665,7 +1681,7 @@ export function AdminProductModal({
                         min="0"
                         value={formData.lowStockThreshold}
                         onChange={e => setFormData({ ...formData, lowStockThreshold: parseInt(e.target.value, 10) || 0 })}
-                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+                        className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono"
                       />
                     </div>
                   </div>
@@ -1741,7 +1757,7 @@ export function AdminProductModal({
               <div className="space-y-5 animate-fadeIn">
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <Truck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <Truck className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Physical Product & Freight Logistics
                     </h3>
@@ -1757,7 +1773,7 @@ export function AdminProductModal({
                       type="checkbox"
                       checked={formData.isPhysical}
                       onChange={e => setFormData({ ...formData, isPhysical: e.target.checked })}
-                      className="w-4 h-4 text-purple-600 rounded"
+                      className="w-4 h-4 text-blue-600 rounded"
                     />
                   </div>
 
@@ -1775,7 +1791,7 @@ export function AdminProductModal({
                             value={formData.weight || ''}
                             onChange={e => setFormData({ ...formData, weight: parseFloat(e.target.value) || 0 })}
                             placeholder="e.g. 1.74"
-                            className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono"
+                            className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono"
                           />
                         </div>
 
@@ -1788,7 +1804,7 @@ export function AdminProductModal({
                             placeholder="e.g. 8471.30.01 (Laptops) or 8471.70.00 (Storage)"
                             value={formData.hsCode}
                             onChange={e => setFormData({ ...formData, hsCode: e.target.value })}
-                            className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-mono font-bold"
+                            className="w-full bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-mono font-bold"
                           />
                         </div>
                       </div>
@@ -1888,7 +1904,7 @@ export function AdminProductModal({
                           onClick={() => setActiveSpecTab(group.id)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                             isActive
-                              ? 'bg-purple-600 text-white shadow-sm'
+                              ? 'bg-blue-600 text-white shadow-sm'
                               : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
                           }`}
                         >
@@ -1918,7 +1934,7 @@ export function AdminProductModal({
                                 <select
                                   value={currentValue}
                                   onChange={e => handleSpecChange(specField.key, e.target.value)}
-                                  className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                                  className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                                 >
                                   <option value="">-- Select {specField.label} --</option>
                                   {presets.map(opt => (
@@ -1931,7 +1947,7 @@ export function AdminProductModal({
                                   placeholder={specField.placeholder || `Enter ${specField.label}...`}
                                   value={currentValue}
                                   onChange={e => handleSpecChange(specField.key, e.target.value)}
-                                  className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-medium"
+                                  className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-medium"
                                 />
                               )}
                             </div>
@@ -1950,7 +1966,7 @@ export function AdminProductModal({
                       <button
                         type="button"
                         onClick={handleAddCustomSpec}
-                        className="px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900 text-xs font-bold hover:bg-purple-600 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-cyan-400 border border-blue-200 dark:border-blue-900 text-xs font-bold hover:bg-blue-600 hover:text-white transition-all cursor-pointer flex items-center gap-1"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Add Field</span>
@@ -1993,7 +2009,7 @@ export function AdminProductModal({
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <Sparkles className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                       <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                         Product Variants & Multi-SKU Engine
                       </h3>
@@ -2004,7 +2020,7 @@ export function AdminProductModal({
                         type="checkbox"
                         checked={formData.hasVariants}
                         onChange={e => setFormData({ ...formData, hasVariants: e.target.checked })}
-                        className="w-4 h-4 text-purple-600 rounded"
+                        className="w-4 h-4 text-blue-600 rounded"
                       />
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                         Enable Multi-SKU Variants
@@ -2014,7 +2030,7 @@ export function AdminProductModal({
 
                   {!formData.hasVariants ? (
                     <div className="text-center py-8 text-slate-500 text-xs">
-                      This product currently uses a single flat SKU (<span className="font-mono font-bold text-purple-600">{formData.sku}</span>).
+                      This product currently uses a single flat SKU (<span className="font-mono font-bold text-blue-600">{formData.sku}</span>).
                       <br />Check &ldquo;Enable Multi-SKU Variants&rdquo; above to configure options such as RAM, Storage, or Color.
                     </div>
                   ) : (
@@ -2028,7 +2044,7 @@ export function AdminProductModal({
                           <button
                             type="button"
                             onClick={handleGenerateVariants}
-                            className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>Generate Combinations Matrix</span>
@@ -2040,7 +2056,7 @@ export function AdminProductModal({
                           {formData.variantOptions.map((opt, optIdx) => (
                             <div key={opt.name} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
                               <div className="flex items-center justify-between">
-                                <span className="font-bold text-xs text-purple-600 dark:text-purple-400">
+                                <span className="font-bold text-xs text-blue-600 dark:text-cyan-400">
                                   Option {optIdx + 1}: {opt.name}
                                 </span>
                                 <button
@@ -2092,7 +2108,7 @@ export function AdminProductModal({
                           <button
                             type="button"
                             onClick={handleAddVariantOption}
-                            className="px-3 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200 dark:border-purple-800 hover:bg-purple-600 hover:text-white transition-all cursor-pointer"
+                            className="px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 font-bold text-xs border border-blue-200 dark:border-blue-800 hover:bg-blue-600 hover:text-white transition-all cursor-pointer"
                           >
                             + Add Option Dimension
                           </button>
@@ -2149,7 +2165,7 @@ export function AdminProductModal({
                                         required
                                         value={v.sku}
                                         onChange={e => handleUpdateVariant(vIdx, 'sku', e.target.value)}
-                                        className="w-36 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800 font-mono font-bold text-purple-600 dark:text-purple-400"
+                                        className="w-36 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800 font-mono font-bold text-blue-600 dark:text-cyan-400"
                                       />
                                     </td>
                                     <td className="py-2 px-3">
@@ -2184,7 +2200,7 @@ export function AdminProductModal({
                                         type="checkbox"
                                         checked={v.chargeTax !== false}
                                         onChange={e => handleUpdateVariant(vIdx, 'chargeTax', e.target.checked)}
-                                        className="w-4 h-4 text-purple-600 rounded"
+                                        className="w-4 h-4 text-blue-600 rounded"
                                       />
                                     </td>
                                     <td className="py-2 px-3 text-right">
@@ -2215,7 +2231,7 @@ export function AdminProductModal({
               <div className="space-y-5 animate-fadeIn">
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
                       Publishing Status, Channel & Governance
                     </h3>
@@ -2238,7 +2254,7 @@ export function AdminProductModal({
                           onClick={() => setFormData({ ...formData, status: st.id as any })}
                           className={`p-3 rounded-xl border text-left transition-all ${
                             formData.status === st.id
-                              ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/40 shadow-sm'
+                              ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/40 shadow-sm'
                               : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300'
                           }`}
                         >
@@ -2260,7 +2276,7 @@ export function AdminProductModal({
                         onClick={() => setFormData({ ...formData, sellerType: 'ADMIN', resellerId: '', resellerName: '' })}
                         className={`p-3 rounded-xl border text-left transition-all ${
                           formData.sellerType === 'ADMIN'
-                            ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/40'
+                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/40'
                             : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
                         }`}
                       >
@@ -2380,7 +2396,7 @@ export function AdminProductModal({
                 <button
                   type="button"
                   onClick={() => setActiveModalStep(MODAL_STEPS[currentStepIndex + 1].id)}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-md shadow-purple-600/20 transition-all flex items-center gap-1 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-md shadow-blue-600/20 transition-all flex items-center gap-1 cursor-pointer"
                 >
                   <span>Next Section</span>
                   <ChevronRight className="w-4 h-4" />
@@ -2390,7 +2406,7 @@ export function AdminProductModal({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-sm transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5 ml-1"
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-sm transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5 ml-1"
               >
                 <Check className="w-4 h-4" />
                 <span>
@@ -2401,7 +2417,9 @@ export function AdminProductModal({
           </div>
         </form>
 
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
   X,
@@ -118,11 +119,13 @@ export function AIChatbotModal() {
           <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-950/70 px-1.5 py-0.5 rounded-full border border-cyan-800/50">Online</span>
         </div>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.94 }}
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Close NexTech AI Assistant" : "Open NexTech Hardware AI Assistant"}
           aria-expanded={isOpen}
-          className="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center bg-slate-900 dark:bg-slate-950 text-white shadow-xl shadow-slate-950/40 hover:shadow-2xl hover:border-cyan-500/70 hover:shadow-cyan-500/20 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border border-slate-700/80"
+          className="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center bg-slate-900 dark:bg-slate-950 text-white shadow-xl shadow-slate-950/40 hover:shadow-2xl hover:border-cyan-500/70 hover:shadow-cyan-500/20 transition-colors duration-200 cursor-pointer border border-slate-700/80"
         >
           {/* Subtle Accent Glow */}
           <span className="absolute -inset-0.5 rounded-2xl bg-tech-blue/20 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none" />
@@ -143,12 +146,19 @@ export function AIChatbotModal() {
               <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 group-hover:text-cyan-300 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 drop-shadow-[0_0_10px_rgba(0,229,255,0.45)]" />
             )}
           </div>
-        </button>
+        </motion.button>
       </div>
 
       {/* Interactive Chat Window */}
-      {isOpen && (
-        <div className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 z-50 w-[calc(100vw-24px)] sm:w-[420px] max-w-full h-[min(520px,calc(100vh-100px))] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-700/90 shadow-2xl flex flex-col overflow-hidden animate-fadeIn transition-colors duration-200">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 z-50 w-[calc(100vw-24px)] sm:w-[420px] max-w-full h-[min(520px,calc(100vh-100px))] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-700/90 shadow-2xl flex flex-col overflow-hidden transition-colors duration-200 origin-bottom-right"
+          >
           {/* Header */}
           <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
@@ -200,8 +210,11 @@ export function AIChatbotModal() {
           {/* Messages Conversation Area */}
           <div className="flex-1 p-4 overflow-y-auto space-y-4 text-xs">
             {messages.map(msg => (
-              <div
+              <motion.div
                 key={msg.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18 }}
                 className={`flex gap-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.sender === 'bot' && (
@@ -267,7 +280,7 @@ export function AIChatbotModal() {
                     <User className="w-3.5 h-3.5" />
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
 
             {isTyping && (
@@ -296,17 +309,20 @@ export function AIChatbotModal() {
               onKeyDown={handleKeyDown}
               className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue transition-colors placeholder:text-slate-400"
             />
-            <button
+            <motion.button
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.92 }}
               onClick={() => handleSendMessage()}
               disabled={!inputValue.trim()}
-              className="p-2 rounded-xl bg-tech-blue hover:bg-blue-600 disabled:opacity-40 text-white transition-colors shadow-sm"
+              className="p-2 rounded-xl bg-tech-blue hover:bg-blue-600 disabled:opacity-40 text-white transition-colors shadow-sm cursor-pointer disabled:cursor-not-allowed"
               title="Send Message"
             >
               <Send className="w-4 h-4" />
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       )}
-    </>
+    </AnimatePresence>
+  </>
   );
 }

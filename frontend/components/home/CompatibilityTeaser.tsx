@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2,
   ArrowRight,
@@ -32,14 +33,14 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
       <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
         {/* Left Interactive Narrative */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 text-xs font-semibold font-mono">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-400 border border-blue-200 dark:border-blue-900/60 text-xs font-semibold font-mono">
             <NextechLogo className="w-3.5 h-3.5" size={14} alt="Hardware Verification Engine" />
             <span>Hardware Verification Engine</span>
           </div>
 
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-snug">
             Intelligent PC Builder Studio with <br />
-            <span className="text-purple-600 dark:text-purple-400">
+            <span className="text-blue-600 dark:text-cyan-400">
               Zero-Defect Socket &amp; TDP Headroom Guard
             </span>
           </h2>
@@ -53,33 +54,46 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
             <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Explore Pre-Validated Architecture Presets:
             </div>
-            <div className="flex flex-wrap gap-2">
-              {activePresets.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelectedPresetId(p.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    p.id === selectedPresetId
-                      ? 'bg-purple-600 text-white shadow-md shadow-purple-600/25 border border-purple-400/50'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-                  }`}
-                >
-                  {p.name}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-2 relative">
+              {activePresets.map(p => {
+                const isSelected = p.id === selectedPresetId;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedPresetId(p.id)}
+                    className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer z-10 ${
+                      isSelected
+                        ? 'text-white font-bold'
+                        : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                    }`}
+                  >
+                    {isSelected && (
+                      <motion.span
+                        layoutId="activePresetIndicator"
+                        className="absolute inset-0 rounded-lg bg-blue-600 shadow-md shadow-blue-600/25 -z-10"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    {p.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Action CTAs */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2">
-            <Link
-              href="/pc-builder"
-              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 text-center"
-            >
-              <NextechLogo className="w-4 h-4" size={16} alt="Launch PC Builder" />
-              <span>Launch Custom PC Builder</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/pc-builder"
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 text-center"
+              >
+                <NextechLogo className="w-4 h-4" size={16} alt="Launch PC Builder" />
+                <span>Launch Custom PC Builder</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </motion.div>
 
             <Link
               href="/compare"
@@ -104,23 +118,32 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
             </span>
           </div>
 
-          {/* Architecture Spec Breakdown */}
-          <div className="space-y-2">
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-              <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">CPU Processor</span>
-              <span className="text-slate-900 dark:text-white font-bold truncate text-right">{preset.cpu}</span>
-            </div>
+          {/* Architecture Spec Breakdown with smooth crossfade */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={preset.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-2"
+            >
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">CPU Processor</span>
+                <span className="text-slate-900 dark:text-white font-bold truncate text-right">{preset.cpu}</span>
+              </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-              <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">GPU Accelerator</span>
-              <span className="text-purple-700 dark:text-purple-300 font-bold truncate text-right">{preset.gpu}</span>
-            </div>
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">GPU Accelerator</span>
+                <span className="text-blue-600 dark:text-cyan-400 font-bold truncate text-right">{preset.gpu}</span>
+              </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-              <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">Socket & Bus</span>
-              <span className="text-sky-600 dark:text-tech-cyan font-bold truncate text-right">{preset.socket}</span>
-            </div>
-          </div>
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px] shrink-0">Socket & Bus</span>
+                <span className="text-slate-700 dark:text-slate-300 font-bold truncate text-right">{preset.socket}</span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
 
           {/* Ant Design Power Budget Progress Bar */}
           <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
@@ -131,9 +154,11 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
 
             {/* Visual Gauge Bar */}
             <div className="h-3 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
-              <div
-                className="h-full bg-emerald-500 transition-all duration-500"
-                style={{ width: `${wattagePercentage}%` }}
+              <motion.div
+                className="h-full bg-emerald-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${wattagePercentage}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
               />
             </div>
 

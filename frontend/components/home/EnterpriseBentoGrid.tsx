@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import {
   Truck,
   ShieldCheck,
@@ -31,7 +32,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 const COLOR_MAP: Record<string, { bgGlow: string; iconBg: string; textCol: string; borderCol: string }> = {
   truck: { bgGlow: 'bg-tech-blue/10', iconBg: 'bg-tech-blue/10 text-tech-blue dark:text-tech-cyan group-hover:bg-tech-blue group-hover:text-white', textCol: 'text-tech-blue dark:text-tech-cyan', borderCol: 'hover:border-tech-blue/50' },
-  creditcard: { bgGlow: 'bg-purple-600/10', iconBg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white', textCol: 'text-purple-600 dark:text-purple-300', borderCol: 'hover:border-purple-500/50' },
+  creditcard: { bgGlow: 'bg-blue-600/10', iconBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white', textCol: 'text-blue-600 dark:text-blue-300', borderCol: 'hover:border-blue-500/50' },
   flame: { bgGlow: 'bg-amber-600/10', iconBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white', textCol: 'text-amber-600 dark:text-amber-300', borderCol: 'hover:border-amber-500/50' },
   bot: { bgGlow: 'bg-emerald-600/10', iconBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white', textCol: 'text-emerald-600 dark:text-emerald-300', borderCol: 'hover:border-emerald-500/50' },
 };
@@ -74,7 +75,20 @@ export function EnterpriseBentoGrid({
       </div>
 
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-50px' }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+            },
+          },
+        }}
+        className="grid grid-cols-1 md:grid-cols-12 gap-5"
+      >
         {activeFeatures.map((feat) => {
           const key = feat.iconName?.toLowerCase() || 'truck';
           const Icon = ICON_MAP[key] || Award;
@@ -82,9 +96,14 @@ export function EnterpriseBentoGrid({
           const colors = COLOR_MAP[key] || COLOR_MAP.truck;
 
           return (
-            <div
+            <motion.div
               key={feat.id}
-              className={`group relative ${colSpanClass} rounded-3xl p-5 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 ${colors.borderCol} flex flex-col justify-between hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1`}
+              variants={{
+                hidden: { opacity: 0, y: 16 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
+              }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className={`group relative ${colSpanClass} rounded-3xl p-5 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 ${colors.borderCol} flex flex-col justify-between hover:shadow-xl transition-shadow duration-300 overflow-hidden`}
             >
               <div className={`absolute -top-16 -right-16 w-48 h-48 ${colors.bgGlow} rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity pointer-events-none`} />
 
@@ -124,7 +143,7 @@ export function EnterpriseBentoGrid({
                 <div className="relative z-10 pt-6 mt-4 border-t border-slate-200/80 dark:border-slate-800">
                   <Link
                     href={feat.ctaLink}
-                    className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm"
                   >
                     <span>{feat.ctaText}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -140,10 +159,10 @@ export function EnterpriseBentoGrid({
                   </span>
                 </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }

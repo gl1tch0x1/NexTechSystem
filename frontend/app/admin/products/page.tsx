@@ -165,7 +165,7 @@ export default function AdminProductsPage() {
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
             <span>Hardware Catalog & Inventory</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-mono font-bold border border-purple-200 dark:border-purple-800">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 font-mono font-bold border border-blue-200 dark:border-blue-800">
               {products.length} SKUs
             </span>
           </h1>
@@ -176,7 +176,7 @@ export default function AdminProductsPage() {
 
         <Link
           href="/admin/products/new"
-          className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-purple-600/20 transition-all cursor-pointer shrink-0"
+          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Hardware SKU</span>
@@ -191,7 +191,7 @@ export default function AdminProductsPage() {
             placeholder="Search by Title, SKU, or Brand..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 pl-9 pr-4 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium"
+            className="w-full bg-slate-50 dark:bg-slate-950 pl-9 pr-4 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
@@ -210,7 +210,7 @@ export default function AdminProductsPage() {
               onClick={() => setStatusFilter(tab.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 statusFilter === tab.id
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -258,7 +258,7 @@ export default function AdminProductsPage() {
                               className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shrink-0"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
                               <Package className="w-5 h-5" />
                             </div>
                           )}
@@ -285,7 +285,7 @@ export default function AdminProductsPage() {
                                 </span>
                               )}
                               {specs['RAM Capacity'] && (
-                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-mono">
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20 font-mono">
                                   {specs['RAM Capacity']}
                                 </span>
                               )}
@@ -381,7 +381,7 @@ export default function AdminProductsPage() {
                           <Link
                             href={`/admin/products/${prod.id}/edit`}
                             title="Edit Product"
-                            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer inline-flex"
+                            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-cyan-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer inline-flex"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </Link>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import {
   Cpu,
   Zap,
@@ -40,12 +41,12 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 const COLOR_PALETTES = [
   'bg-blue-50 dark:bg-blue-950/60 text-tech-blue dark:text-tech-cyan border border-blue-200/60 dark:border-blue-900/40',
   'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-900/40',
-  'bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-200/60 dark:border-purple-900/40',
+  'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700',
   'bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 border border-cyan-200/60 dark:border-cyan-900/40',
   'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40',
-  'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700',
-  'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/40',
   'bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/60 dark:border-sky-900/40',
+  'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/40',
+  'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800',
 ];
 
 export function TaxonomyExplorer({ categories = [] }: TaxonomyExplorerProps) {
@@ -94,7 +95,20 @@ export function TaxonomyExplorer({ categories = [] }: TaxonomyExplorerProps) {
       </div>
 
       {/* Grid of Dynamic Category Cards from Database */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-40px' }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.06,
+            },
+          },
+        }}
+        className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"
+      >
         {categories.slice(0, 8).map((cat, idx) => {
           const Icon = getCategoryIcon(cat);
           const colorClass = COLOR_PALETTES[idx % COLOR_PALETTES.length];
@@ -103,32 +117,40 @@ export function TaxonomyExplorer({ categories = [] }: TaxonomyExplorerProps) {
             : cat.description || 'Enterprise grade';
 
           return (
-            <Link
+            <motion.div
               key={cat.id}
-              href={`/products?category=${cat.id}`}
-              className="group relative p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/50 dark:hover:border-tech-cyan/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-3 sm:space-y-4 hover:-translate-y-1 overflow-hidden"
+              variants={{
+                hidden: { opacity: 0, y: 14 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+              }}
+              whileHover={{ y: -3, transition: { duration: 0.18 } }}
             >
-              <div className="flex items-center justify-between">
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${colorClass} flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
-                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+              <Link
+                href={`/products?category=${cat.id}`}
+                className="group relative p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/50 dark:hover:border-tech-cyan/50 hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between space-y-3 sm:space-y-4 overflow-hidden h-full"
+              >
+                <div className="flex items-center justify-between">
+                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${colorClass} flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-tech-blue group-hover:text-white flex items-center justify-center transition-colors">
+                    <ChevronRight className="w-4 h-4" />
+                  </div>
                 </div>
-                <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-tech-blue group-hover:text-white flex items-center justify-center transition-colors">
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-              </div>
 
-              <div>
-                <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
-                  {cat.name}
-                </h3>
-                <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 font-mono">
-                  {productCountText}
-                </p>
-              </div>
-            </Link>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
+                    {cat.name}
+                  </h3>
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 font-mono">
+                    {productCountText}
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }

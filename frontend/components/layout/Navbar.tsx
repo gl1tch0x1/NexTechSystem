@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
@@ -277,8 +278,15 @@ export function Navbar() {
             </button>
 
             {/* Profile Dropdown Menu (Ant Design / Shadcn Card Style) */}
-            {userDropdownOpen && (
-              <div className="absolute right-0 mt-2.5 w-72 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-50 animate-fadeIn">
+            <AnimatePresence>
+              {userDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={{ duration: 0.16, ease: 'easeOut' }}
+                  className="absolute right-0 mt-2.5 w-72 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-50 origin-top-right"
+                >
                 {user ? (
                   <>
                     <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 mb-2">
@@ -441,9 +449,10 @@ export function Navbar() {
                     </Link>
                   </div>
                 )}
-              </div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
+        </div>
 
           {/* Mobile Menu Toggle */}
           <button
@@ -501,8 +510,15 @@ export function Navbar() {
       </nav>
 
       {/* 4. MOBILE DRAWER */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-4 animate-fadeIn shadow-xl max-h-[85vh] overflow-y-auto">
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: 'easeInOut' }}
+            className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto"
+          >
           {/* Mobile Top Controls: Currency + Theme + Wishlist */}
           <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80">
             {/* Currency Select */}
@@ -726,9 +742,10 @@ export function Navbar() {
               </Link>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
-    </header>
+    </AnimatePresence>
+  </header>
     </>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Product, HeroHighlight } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
@@ -149,7 +150,12 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Enterprise Narrative */}
-          <div className="lg:col-span-6 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="lg:col-span-6 space-y-6"
+          >
             {/* Enterprise Tag */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-cyan-400 text-xs font-mono font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-cyan-400" />
@@ -219,26 +225,34 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">GCC Express Dispatch</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column: Unified Sleek Hardware Showcase Terminal */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
             <div className="w-full max-w-[480px] relative rounded-xl p-4 sm:p-5 bg-white dark:bg-[#0B101D] border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all space-y-3">
               {/* Top Navigation Bar: Precision Architectural Segmented Switcher */}
               <div className="flex items-center justify-between gap-2 pb-0.5">
-                <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar max-w-full">
+                <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar max-w-full relative">
                   {activeHighlights.map(item => {
                     const ItemIcon = ICON_MAP[item.iconName] || Zap;
                     const isActive = item.id === selectedTabId;
                     return (
                       <button
                         key={item.id}
+                        type="button"
                         onClick={() => setSelectedTabId(item.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-all cursor-pointer shrink-0 ${isActive
-                          ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                        className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-colors cursor-pointer shrink-0 z-10 ${isActive
+                          ? 'text-white font-semibold'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                       >
+                        {isActive && (
+                          <motion.span
+                            layoutId="activeHeroTabIndicator"
+                            className="absolute inset-0 rounded-md bg-blue-600 shadow-xs -z-10"
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                          />
+                        )}
                         <ItemIcon className="w-3 h-3" />
                         <span>{item.tabLabel}</span>
                       </button>
@@ -252,84 +266,97 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 </div>
               </div>
 
-              {/* Hardware Visual Presentation Stage */}
-              <div className="relative aspect-[16/9] max-h-[220px] rounded-lg bg-slate-950 border border-slate-800 overflow-hidden group shadow-inner flex items-center justify-center">
-                {/* Ambient Radial Spotlight */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.22)_0%,_transparent_70%)] pointer-events-none" />
+              {/* Hardware Visual Presentation Stage with smooth tab crossfade */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedTabId}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  className="space-y-3"
+                >
+                  <div className="relative aspect-[16/9] max-h-[220px] rounded-lg bg-slate-950 border border-slate-800 overflow-hidden group shadow-inner flex items-center justify-center">
+                    {/* Ambient Radial Spotlight */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.22)_0%,_transparent_70%)] pointer-events-none" />
 
-                {/* Top Right Floating Power Tag */}
-                <div className="absolute top-2.5 right-2.5 z-10">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900/85 border border-slate-700/80 text-amber-300 text-[9.5px] font-mono font-bold backdrop-blur-md shadow-xs">
-                    <Zap className="w-2.5 h-2.5" />
-                    <span>{currentHighlight.powerRating}</span>
-                  </span>
-                </div>
-
-                {/* Hardware Photo Canvas */}
-                <img
-                  src={resolvedImage}
-                  alt={displayName}
-                  className="w-full h-full object-contain p-2 filter brightness-105 contrast-105 group-hover:scale-102 transition-transform duration-500 rounded-xl"
-                />
-              </div>
-
-              {/* Hardware Metadata & Title/Price Row */}
-              <div className="space-y-0.5">
-                {/* Brand & Category Breadcrumb / GCC Stock */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] sm:text-[10.5px] font-semibold tracking-normal text-blue-600 dark:text-cyan-400 truncate max-w-[260px]">
-                    {currentHighlight.brand} • {currentHighlight.category}
-                  </span>
-                  <span className="text-[10px] sm:text-[10.5px] font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
-                    Official GCC Stock
-                  </span>
-                </div>
-
-                {/* Title and Price Side-by-Side */}
-                <div className="flex items-start justify-between gap-3 pt-0.5">
-                  <h3
-                    className="font-heading text-[13.5px] sm:text-sm font-semibold text-slate-800 dark:text-slate-100 tracking-tight leading-snug line-clamp-1 flex-1 min-w-0"
-                    title={displayName}
-                  >
-                    {displayName}
-                  </h3>
-
-                  <div className="text-right shrink-0">
-                    <div className="font-mono text-[15px] sm:text-base font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap leading-none">
-                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 mr-1">
-                        AED
+                    {/* Top Right Floating Power Tag */}
+                    <div className="absolute top-2.5 right-2.5 z-10">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900/85 border border-slate-700/80 text-amber-300 text-[9.5px] font-mono font-bold backdrop-blur-md shadow-xs">
+                        <Zap className="w-2.5 h-2.5" />
+                        <span>{currentHighlight.powerRating}</span>
                       </span>
-                      {formattedCurrentAmount}
                     </div>
-                    {originalPrice && originalPrice > currentPrice && (
-                      <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 line-through whitespace-nowrap mt-0.5">
-                        {formatPrice(originalPrice)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
 
-              {/* 4 Separate Technical Spec Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
-                {currentHighlight.specs?.map((spec, i) => (
-                  <div
-                    key={i}
-                    className="p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 text-xs flex flex-col justify-center min-w-0"
-                  >
-                    <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium">
-                      {spec.label}
-                    </span>
-                    <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px] mt-0.5 truncate tracking-tight font-sans" title={spec.value}>
-                      {spec.value}
-                    </span>
+                    {/* Hardware Photo Canvas */}
+                    <img
+                      src={resolvedImage}
+                      alt={displayName}
+                      className="w-full h-full object-contain p-2 filter brightness-105 contrast-105 group-hover:scale-102 transition-transform duration-500 rounded-xl"
+                    />
                   </div>
-                ))}
-              </div>
+
+                  {/* Hardware Metadata & Title/Price Row */}
+                  <div className="space-y-0.5">
+                    {/* Brand & Category Breadcrumb / GCC Stock */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] sm:text-[10.5px] font-semibold tracking-normal text-blue-600 dark:text-cyan-400 truncate max-w-[260px]">
+                        {currentHighlight.brand} • {currentHighlight.category}
+                      </span>
+                      <span className="text-[10px] sm:text-[10.5px] font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
+                        Official GCC Stock
+                      </span>
+                    </div>
+
+                    {/* Title and Price Side-by-Side */}
+                    <div className="flex items-start justify-between gap-3 pt-0.5">
+                      <h3
+                        className="font-heading text-[13.5px] sm:text-sm font-semibold text-slate-800 dark:text-slate-100 tracking-tight leading-snug line-clamp-1 flex-1 min-w-0"
+                        title={displayName}
+                      >
+                        {displayName}
+                      </h3>
+
+                      <div className="text-right shrink-0">
+                        <div className="font-mono text-[15px] sm:text-base font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap leading-none">
+                          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 mr-1">
+                            AED
+                          </span>
+                          {formattedCurrentAmount}
+                        </div>
+                        {originalPrice && originalPrice > currentPrice && (
+                          <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 line-through whitespace-nowrap mt-0.5">
+                            {formatPrice(originalPrice)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4 Separate Technical Spec Cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
+                    {currentHighlight.specs?.map((spec, i) => (
+                      <div
+                        key={i}
+                        className="p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 text-xs flex flex-col justify-center min-w-0"
+                      >
+                        <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium">
+                          {spec.label}
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px] mt-0.5 truncate tracking-tight font-sans" title={spec.value}>
+                          {spec.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
 
               {/* Action Buttons Bar */}
               <div className="pt-1.5 flex items-center gap-2">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
                   className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${justAdded
                     ? 'bg-emerald-600 text-white scale-101 shadow-emerald-600/25'
@@ -347,11 +374,11 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                       <span>Add to Order ({formatPrice(currentPrice)})</span>
                     </>
                   )}
-                </button>
+                </motion.button>
 
                 <Link
                   href={matchedProduct?.slug ? `/products/${matchedProduct.slug}` : '/products'}
-                  className="py-2.5 px-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs"
+                  className="py-2.5 px-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs hover:scale-101 active:scale-98"
                 >
                   <span>Datasheet</span>
                   <ExternalLink className="w-3 h-3" />

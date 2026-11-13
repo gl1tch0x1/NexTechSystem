@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
@@ -1529,7 +1530,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   if (loading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">
-        <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
         <div className="text-sm font-bold text-slate-600 dark:text-slate-400">
           Loading Hardware SKU Specifications...
         </div>
@@ -1559,7 +1560,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           <button
             type="button"
             onClick={() => { setFormError(''); setProductLoadRetry(r => r + 1); }}
-            className="px-4 py-2 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
           >
             Retry
           </button>
@@ -1577,7 +1578,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href={returnPath}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors shrink-0 cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-cyan-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
               title="Return to Catalog"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -1586,7 +1587,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
                 <Link href={returnPath} className="hover:underline">Hardware Catalog</Link>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-purple-600 dark:text-purple-400 font-bold">
+                <span className="text-blue-600 dark:text-cyan-400 font-bold">
                   {portal === 'reseller'
                     ? (mode === 'edit' ? 'Vendor SKU Studio' : 'Submit Hardware SKU')
                     : (mode === 'edit' ? 'SKU Configuration Studio' : 'New Hardware SKU')}
@@ -1628,7 +1629,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               type="button"
               onClick={() => handleSaveProduct('DRAFT')}
               disabled={isSubmitting}
-              className="h-9 px-3.5 flex items-center rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              className="h-9 px-3.5 flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               Save Draft
             </button>
@@ -1637,7 +1638,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               type="button"
               onClick={() => handleSaveProduct()}
               disabled={isSubmitting}
-              className="h-9 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-sm shadow-purple-600/30 flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-50 shrink-0 whitespace-nowrap"
+              className="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm shadow-blue-600/25 flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-50 shrink-0 whitespace-nowrap"
             >
               {isSubmitting ? (
                 <>
@@ -1663,7 +1664,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-slate-400">Price:</span>
-            <span className="font-mono font-bold text-purple-600 dark:text-purple-400">{formatPrice(formData.price)}</span>
+            <span className="font-mono font-bold text-blue-600 dark:text-cyan-400">{formatPrice(formData.price)}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-slate-400">Margin:</span>
@@ -1692,7 +1693,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           {formData.hasVariants && (
             <div className="flex items-center gap-1.5 shrink-0">
               <span className="text-slate-400">Variants:</span>
-              <span className="font-bold text-purple-600 dark:text-purple-400">{formData.variants.length} active</span>
+              <span className="font-bold text-blue-600 dark:text-cyan-400">{formData.variants.length} active</span>
             </div>
           )}
         </div>
@@ -1714,7 +1715,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       )}
 
       {/* 2. TABBED STEP-BY-STEP WORKSPACE NAVIGATION */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none relative">
         {TABS.map((tab, idx) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -1723,11 +1724,18 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer min-w-[140px] ${isActive
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+              className={`relative flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-colors whitespace-nowrap cursor-pointer min-w-[140px] z-10 ${isActive
+                  ? 'text-white font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
+              {isActive && (
+                <motion.span
+                  layoutId="activeProductEditorTab"
+                  className="absolute inset-0 rounded-xl bg-blue-600 shadow-md shadow-blue-600/25 -z-10"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
               <Icon className="w-4 h-4 shrink-0" />
               <span>{idx + 1}. {tab.label}</span>
             </button>
@@ -1739,20 +1747,29 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ===================== LEFT / MAIN COLUMN (8 COLS) ===================== */}
         <div className="lg:col-span-8 space-y-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className="space-y-8"
+            >
           {/* SECTION 1: GENERAL PRODUCT & MEDIA STUDIO */}
           {activeTab === 'general' && (
             <div id="section-overview" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                    <Package className="w-5 h-5 text-purple-600" />
+                    <Package className="w-5 h-5 text-blue-600" />
                     <span>Product Identification & Visual Studio</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Define commercial model name, SKU barcode identifiers, and high-definition photography.
                   </p>
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-cyan-400 border border-blue-200 dark:border-blue-800">
                   Step 1
                 </span>
               </div>
@@ -1768,7 +1785,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <button
                         type="button"
                         onClick={handleGenerateStandardTitle}
-                        className="text-[11px] text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-[11px] text-blue-600 dark:text-cyan-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                         title="Auto-build title from brand, category, and specifications (max 80 chars)"
                       >
                         <Wand2 className="w-3 h-3" /> Auto-Construct Title
@@ -1799,11 +1816,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         slug: prev.slug ? prev.slug : val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
                       }));
                     }}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-sm font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-inner"
+                    className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-sm font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 shadow-inner"
                   />
                   <div className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-400 font-mono">
                     <span>Slug:</span>
-                    <span className="text-purple-600 dark:text-purple-400">/shop/product/{formData.slug || 'product-slug'}</span>
+                    <span className="text-blue-600 dark:text-cyan-400">/shop/product/{formData.slug || 'product-slug'}</span>
                   </div>
                 </div>
 
@@ -1817,7 +1834,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <button
                         type="button"
                         onClick={() => setFormData(p => ({ ...p, sku: generateRandomSku(p.categoryId) }))}
-                        className="text-xs text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-xs text-blue-600 dark:text-cyan-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <RefreshCw className="w-3.5 h-3.5" /> Randomize
                       </button>
@@ -1826,7 +1843,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       type="text"
                       value={formData.sku}
                       onChange={e => setFormData({ ...formData, sku: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                     />
                   </div>
 
@@ -1838,7 +1855,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <button
                         type="button"
                         onClick={() => setFormData(p => ({ ...p, barcode: generateRandomBarcode() }))}
-                        className="text-xs text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-xs text-blue-600 dark:text-cyan-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <Barcode className="w-3.5 h-3.5" /> Generate EAN
                       </button>
@@ -1847,7 +1864,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       type="text"
                       value={formData.barcode}
                       onChange={e => setFormData({ ...formData, barcode: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                     />
                   </div>
                 </div>
@@ -1880,7 +1897,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           sku: mode === 'create' && prev.sku.startsWith('NX-') ? generateRandomSku(e.target.value) : prev.sku,
                         }));
                       }}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-bold cursor-pointer"
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-bold cursor-pointer"
                     >
                       <option value="">{taxonomyLoading && categories.length === 0 ? 'Loading categories…' : 'Select a hardware category'}</option>
                       {formData.categoryId && !categories.some(c => c.id === formData.categoryId) && (
@@ -1907,7 +1924,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           brandName: b?.name || prev.brandName,
                         }));
                       }}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-bold cursor-pointer"
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-bold cursor-pointer"
                     >
                       <option value="">Select a manufacturer</option>
                       {formData.brandId && !brands.some(b => b.id === formData.brandId) && (
@@ -1930,7 +1947,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     placeholder="Concise commercial summary for cards and search snippets"
                     value={formData.shortDescription}
                     onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                    className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                   />
                 </div>
 
@@ -1943,7 +1960,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     placeholder="Comprehensive architectural features, enterprise workload suitability, thermal design..."
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 p-4 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                    className="w-full bg-slate-50 dark:bg-slate-950 p-4 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                   />
                 </div>
 
@@ -1951,9 +1968,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-purple-600" />
+                      <ImageIcon className="w-4 h-4 text-blue-600" />
                       <span>Multi-Asset Gallery Studio</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-300">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-300">
                         {formData.images.length} asset{formData.images.length !== 1 ? 's' : ''}
                       </span>
                     </h3>
@@ -1989,13 +2006,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                               key={getSafeImageUrl(formData.primaryImage)}
                               onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
                             />
-                            <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-purple-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
+                            <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-blue-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
                               <Check className="w-3 h-3 text-white" /> Cover
                             </div>
                           </>
                         ) : (
                           <div className="p-4 text-center space-y-1.5 text-slate-400">
-                            <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200/60 dark:border-purple-800/60 flex items-center justify-center mx-auto text-purple-600 dark:text-purple-400 shadow-xs">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center mx-auto text-blue-600 dark:text-cyan-400 shadow-xs">
                               {getCategoryIcon(formData.categoryId, 'w-6 h-6')}
                             </div>
                             <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{formData.primaryImage ? 'Image could not be loaded' : 'No Cover Asset Selected'}</div>
@@ -2029,7 +2046,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             return (
                               <div
                                 key={imgIdx}
-                                className={`relative flex-shrink-0 w-20 rounded-xl overflow-hidden border-2 transition-all ${isPrimary ? 'border-purple-500 shadow-lg shadow-purple-500/20' : 'border-slate-200 dark:border-slate-800'
+                                className={`relative flex-shrink-0 w-20 rounded-xl overflow-hidden border-2 transition-all ${isPrimary ? 'border-blue-500 shadow-lg shadow-blue-500/20' : 'border-slate-200 dark:border-slate-800'
                                   }`}
                               >
                                 <div className="aspect-video">
@@ -2040,7 +2057,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                                   />
                                 </div>
                                 {isPrimary && (
-                                  <div className="absolute top-1 left-1 w-3.5 h-3.5 rounded-full bg-purple-600 flex items-center justify-center">
+                                  <div className="absolute top-1 left-1 w-3.5 h-3.5 rounded-full bg-blue-600 flex items-center justify-center">
                                     <Check className="w-2 h-2 text-white" />
                                   </div>
                                 )}
@@ -2105,12 +2122,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                               handleAddGalleryImage(galleryUrlInput);
                             }
                           }}
-                          className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                         />
                         <button
                           type="button"
                           onClick={() => handleAddGalleryImage(galleryUrlInput)}
-                          className="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
                         >
                           <Plus className="w-3.5 h-3.5" /> Add
                         </button>
@@ -2129,7 +2146,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             setFormData({ ...formData, primaryImage: sanitized });
                             setFailedPreviewUrl(null);
                           }}
-                          className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                         />
                       </div>
                     </div>
@@ -2141,7 +2158,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   <button
                     type="button"
                     onClick={() => setActiveTab('pricing')}
-                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-blue-600/20 cursor-pointer"
                   >
                     <span>Next: Pricing & Financials</span>
                     <ChevronRight className="w-4 h-4" />
@@ -2157,14 +2174,14 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-purple-600" />
+                    <DollarSign className="w-5 h-5 text-blue-600" />
                     <span>Commercial Pricing, Profitability & UAE VAT</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Unit economics, margin analytics, compare-at MSRP, and UAE Federal Tax Authority VAT exemption.
                   </p>
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-cyan-400 border border-blue-200 dark:border-blue-800">
                   Step 2
                 </span>
               </div>
@@ -2182,7 +2199,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       step="0.01"
                       value={formData.price}
                       onChange={e => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-base font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-base font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">AED</span>
                   </div>
@@ -2199,7 +2216,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       step="0.01"
                       value={formData.originalPrice}
                       onChange={e => setFormData({ ...formData, originalPrice: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">AED</span>
                   </div>
@@ -2216,7 +2233,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       step="0.01"
                       value={formData.costPrice}
                       onChange={e => setFormData({ ...formData, costPrice: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">AED</span>
                   </div>
@@ -2229,7 +2246,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                        <Warehouse className="w-4 h-4 text-purple-600" />
+                        <Warehouse className="w-4 h-4 text-blue-600" />
                         <span>Direct Warehouse Stock & Inventory Thresholds</span>
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5">Physical units available in central Dubai logistics hub</div>
@@ -2251,7 +2268,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           step="1"
                           value={formData.stock}
                           onChange={e => setFormData(p => ({ ...p, stock: Math.max(0, parseInt(e.target.value, 10) || 0) }))}
-                          className="w-full bg-white dark:bg-slate-900 px-4 py-3 rounded-xl text-base font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          className="w-full bg-white dark:bg-slate-900 px-4 py-3 rounded-xl text-base font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                           placeholder="e.g. 25"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">units</span>
@@ -2270,7 +2287,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           step="1"
                           value={formData.lowStockThreshold}
                           onChange={e => setFormData(p => ({ ...p, lowStockThreshold: Math.max(1, parseInt(e.target.value, 10) || 5) }))}
-                          className="w-full bg-white dark:bg-slate-900 px-4 py-3 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500"
+                          className="w-full bg-white dark:bg-slate-900 px-4 py-3 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                           placeholder="e.g. 5"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">units</span>
@@ -2284,7 +2301,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               {/* Dynamic Financial Profitability Card */}
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 shadow-sm">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black shadow-md shadow-purple-600/20">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-600/20">
                     %
                   </div>
                   <div>
@@ -2387,11 +2404,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   <div className="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <div>
                       <div className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                        <Percent className="w-3.5 h-3.5 text-purple-600" /> B2B Volume Tiered Pricing Matrix
+                        <Percent className="w-3.5 h-3.5 text-blue-600" /> B2B Volume Tiered Pricing Matrix
                       </div>
                       <div className="text-[10px] text-slate-500 mt-0.5">Wholesale discount tiers for enterprise bulk orders</div>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-300">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-300">
                       {formData.tieredPricing.length} Tiers
                     </span>
                   </div>
@@ -2473,7 +2490,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, chargeTax: !prev.chargeTax }))}
-                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${formData.chargeTax ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-700'
+                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${formData.chargeTax ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                 >
                   <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${formData.chargeTax ? 'translate-x-6' : 'translate-x-0.5'}`} />
@@ -2493,7 +2510,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <button
                   type="button"
                   onClick={() => setActiveTab(portal === 'admin' ? 'specs' : 'inventory')}
-                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-blue-600/20 cursor-pointer"
                 >
                   <span>{portal === 'admin' ? 'Next: Technical Specs' : 'Next: Warehousing & Stock'}</span>
                   <ChevronRight className="w-4 h-4" />
@@ -2508,7 +2525,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                    <Warehouse className="w-5 h-5 text-purple-600" />
+                    <Warehouse className="w-5 h-5 text-blue-600" />
                     <span>Regional Warehouse Nodes & Stock Allocations</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -2522,7 +2539,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       type="checkbox"
                       checked={formData.inventoryTracked}
                       onChange={e => setFormData({ ...formData, inventoryTracked: e.target.checked })}
-                      className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span>Track Quantities</span>
                   </label>
@@ -2532,7 +2549,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       type="checkbox"
                       checked={formData.allowBackorder}
                       onChange={e => setFormData({ ...formData, allowBackorder: e.target.checked })}
-                      className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span>Allow Backorders</span>
                   </label>
@@ -2542,12 +2559,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               {/* Smart Distribution Preset Buttons */}
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
                 <div className="flex items-center gap-2 mb-1">
-                  <Warehouse className="w-3.5 h-3.5 text-purple-600" />
+                  <Warehouse className="w-3.5 h-3.5 text-blue-600" />
                   <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Smart Stock Distribution</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => handleSmartStockDistribution('consolidate_jafza')}
-                    className="text-xs px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold cursor-pointer transition-all flex items-center gap-1">
+                    className="text-xs px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer transition-all flex items-center gap-1">
                     <MapPin className="w-3 h-3" /> Consolidate JAFZA
                   </button>
                   <button type="button" onClick={() => handleSmartStockDistribution('even')}
@@ -2613,7 +2630,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             min="0"
                             value={loc.available}
                             onChange={e => handleLocationStockChange(idx, 'available', parseInt(e.target.value, 10) || 0)}
-                            className="w-20 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-purple-600 dark:text-purple-400"
+                            className="w-20 mx-auto block bg-slate-50 dark:bg-slate-950 text-center py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-blue-600 dark:text-cyan-400"
                           />
                         </td>
                         <td className="py-3 px-3">
@@ -2672,7 +2689,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <button
                   type="button"
                   onClick={() => setActiveTab('specs')}
-                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-blue-600/20 cursor-pointer"
                 >
                   <span>Next: Technical Specs</span>
                   <ChevronRight className="w-4 h-4" />
@@ -2689,13 +2706,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
                 <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-600/20">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20">
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div>
                       <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                         <span>Category Key Highlights</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-cyan-300">
                           {formData.categoryName || 'Essential Hardware'}
                         </span>
                       </h2>
@@ -2704,7 +2721,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs font-mono font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800">
+                  <span className="text-xs font-mono font-bold text-blue-600 dark:text-cyan-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
                     {configuredSpecsCount} specs configured
                   </span>
                 </div>
@@ -2730,7 +2747,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           placeholder={field.placeholder}
                           value={currentVal}
                           onChange={e => handleSpecChange(field.key, e.target.value)}
-                          className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                          className="w-full bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                         />
                         {/* Quick Presets for this field */}
                         {field.options && field.options.length > 0 && (
@@ -2742,8 +2759,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                                 onClick={() => handleSpecChange(field.key, opt)}
                                 className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
                                   currentVal === opt
-                                    ? 'bg-purple-600 text-white border-purple-600 font-bold shadow-xs'
-                                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-700'
+                                    ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-xs'
+                                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-700'
                                 }`}
                               >
                                 {opt}
@@ -2763,7 +2780,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               {/* Section Header */}
               <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-slate-50 dark:bg-slate-900/60">
                 <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-xl bg-purple-600/10 border border-purple-200 dark:border-purple-800 flex items-center justify-center">
+                  <div className="p-1.5 rounded-xl bg-blue-600/10 border border-blue-200 dark:border-blue-800 flex items-center justify-center">
                     <NextechLogo className="w-5 h-5" size={20} alt="Specifications" />
                   </div>
                   <div>
@@ -2784,7 +2801,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         strokeLinecap="round"
                       />
                     </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-purple-600 dark:text-purple-400">
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-blue-600 dark:text-cyan-400">
                       {Math.round((configuredSpecsCount / Math.max(1, SPECIFICATION_GROUPS.reduce((t, g) => t + g.fields.length, 0))) * 100)}%
                     </span>
                   </div>
@@ -2801,8 +2818,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     const filledCount = group.fields.filter(f => Boolean(formData.specifications[f.key])).length;
                     const totalCount = group.fields.length;
                     const fillPct = Math.round((filledCount / totalCount) * 100);
-                    const pillColors = ['bg-purple-600', 'bg-blue-600', 'bg-emerald-600', 'bg-amber-500', 'bg-rose-600', 'bg-indigo-600'];
-                    const textColors = ['text-purple-600', 'text-blue-600', 'text-emerald-600', 'text-amber-600', 'text-rose-600', 'text-indigo-600'];
+                    const pillColors = ['bg-blue-600', 'bg-blue-600', 'bg-emerald-600', 'bg-amber-500', 'bg-rose-600', 'bg-indigo-600'];
+                    const textColors = ['text-blue-600', 'text-blue-600', 'text-emerald-600', 'text-amber-600', 'text-rose-600', 'text-indigo-600'];
                     const pc = pillColors[gIdx % pillColors.length];
                     const tc = textColors[gIdx % textColors.length];
                     return (
@@ -2842,9 +2859,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm border border-slate-200 dark:border-slate-800">
                           <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-purple-600 shrink-0"></span>
+                              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></span>
                               <h3 className="text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white">{currentGroup.name}</h3>
-                              <span className="inline-flex items-center whitespace-nowrap shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 shadow-xs">
+                              <span className="inline-flex items-center whitespace-nowrap shrink-0 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-blue-800/80 shadow-xs">
                                 Group {groupIndex + 1} of {SPECIFICATION_GROUPS.length}
                               </span>
                             </div>
@@ -2909,7 +2926,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                                     <select
                                       value={currentValue}
                                       onChange={e => handleSpecChange(field.key, e.target.value)}
-                                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 cursor-pointer appearance-none transition-all pr-8"
+                                      className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 cursor-pointer appearance-none transition-all pr-8"
                                     >
                                       <option value="">— Select —</option>
                                       {currentValue && !presets.includes(currentValue) && (
@@ -2927,7 +2944,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                                     placeholder={field.placeholder || `Enter ${field.label}…`}
                                     value={currentValue}
                                     onChange={e => handleSpecChange(field.key, e.target.value)}
-                                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 transition-all placeholder:text-slate-400"
+                                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400"
                                   />
                                 )}
                               </div>
@@ -2945,14 +2962,14 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                               {currentGroup.fields.filter(f => Boolean(formData.specifications[f.key])).map(f => (
                                 <span
                                   key={f.key}
-                                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800 shadow-sm"
+                                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-cyan-200 border border-blue-200/80 dark:border-blue-800 shadow-sm"
                                 >
                                   <span className="text-slate-500 dark:text-slate-400">{f.label}:</span>
                                   <span className="font-bold text-slate-900 dark:text-white">{formData.specifications[f.key]}</span>
                                   <button
                                     type="button"
                                     onClick={() => handleSpecChange(f.key, '')}
-                                    className="p-0.5 text-purple-400 hover:text-red-500 cursor-pointer transition-colors"
+                                    className="p-0.5 text-cyan-400 hover:text-red-500 cursor-pointer transition-colors"
                                     title="Remove"
                                   >
                                     <X className="w-3 h-3" />
@@ -3028,7 +3045,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <button
                   type="button"
                   onClick={() => setActiveTab('variants')}
-                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-blue-600/20 cursor-pointer"
                 >
                   <span>Next: Multi-SKU Variants</span>
                   <ChevronRight className="w-4 h-4" />
@@ -3044,7 +3061,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <Sparkles className="w-5 h-5 text-blue-600" />
                     <span>Product Variants & Multi-SKU Engine</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -3091,7 +3108,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <button
                           type="button"
                           onClick={handleAddOptionName}
-                          className="px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-500 transition-colors cursor-pointer"
+                          className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-500 transition-colors cursor-pointer"
                         >
                           + Add Option
                         </button>
@@ -3103,7 +3120,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <div key={optIdx} className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                              Option: <span className="text-purple-600 dark:text-purple-400 font-black">{opt.name}</span>
+                              Option: <span className="text-blue-600 dark:text-cyan-400 font-black">{opt.name}</span>
                             </span>
                             <button
                               type="button"
@@ -3169,7 +3186,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           </div>
                           <div className="text-xs text-slate-500">Granular pricing, independent stock nodes, and barcode tracking</div>
                         </div>
-                        <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400">
+                        <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-cyan-400">
                           Total Variant Stock: {formData.stock} units
                         </span>
                       </div>
@@ -3178,7 +3195,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <div className="px-4 py-3 bg-indigo-50/50 dark:bg-indigo-950/20 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-black uppercase text-slate-500 mr-1">Batch Actions:</span>
                         <button type="button" onClick={handleBatchVariantPrice}
-                          className="text-[11px] px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold cursor-pointer transition-all flex items-center gap-1">
+                          className="text-[11px] px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer transition-all flex items-center gap-1">
                           <DollarSign className="w-3 h-3" /> Apply Base Price to All
                         </button>
                         <button type="button" onClick={() => handleBatchVariantMarkup(5)}
@@ -3274,7 +3291,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                                     type="number"
                                     value={v.stock}
                                     onChange={e => handleUpdateVariant(i, { stock: parseInt(e.target.value, 10) || 0 })}
-                                    className="bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-purple-600 dark:text-purple-400 border border-slate-200 dark:border-slate-800 w-20 text-center"
+                                    className="bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-blue-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-800 w-20 text-center"
                                   />
                                 </td>
                                 <td className="py-3 px-3 text-right">
@@ -3297,7 +3314,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </div>
               ) : (
                 <div className="p-8 text-center space-y-3 bg-slate-50/50 dark:bg-slate-950/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                  <Sparkles className="w-8 h-8 text-purple-500 mx-auto" />
+                  <Sparkles className="w-8 h-8 text-blue-600 mx-auto" />
                   <div className="text-sm font-bold text-slate-700 dark:text-slate-300">Single Standalone Hardware SKU</div>
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
                     This hardware model currently operates as a standalone SKU. Enable Multi-SKU mode to configure RAM, Storage, or Graphics options.
@@ -3305,7 +3322,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   <button
                     type="button"
                     onClick={() => setFormData(p => ({ ...p, hasVariants: true }))}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
                   >
                     Enable Multi-SKU Combinations
                   </button>
@@ -3325,7 +3342,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <button
                   type="button"
                   onClick={() => setActiveTab('logistics')}
-                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-purple-600/20 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-blue-600/20 cursor-pointer"
                 >
                   <span>Next: Logistics & Compliance</span>
                   <ChevronRight className="w-4 h-4" />
@@ -3340,14 +3357,14 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                    <Truck className="w-5 h-5 text-purple-600" />
+                    <Truck className="w-5 h-5 text-blue-600" />
                     <span>Logistics, Volumetric Shipping & GCC Customs</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Packaging dimensions, volumetric weight calculation, HS tariff codes, and warranty terms.
                   </p>
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-cyan-400 border border-blue-200 dark:border-blue-800">
                   Step 6
                 </span>
               </div>
@@ -3361,7 +3378,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <button
                   type="button"
                   onClick={() => setFormData(p => ({ ...p, isPhysical: !p.isPhysical }))}
-                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${formData.isPhysical ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-700'
+                  className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${formData.isPhysical ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                 >
                   <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${formData.isPhysical ? 'translate-x-6' : 'translate-x-0.5'}`} />
@@ -3462,7 +3479,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             key={hs.code}
                             type="button"
                             onClick={() => setFormData(p => ({ ...p, hsCode: hs.code }))}
-                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono transition-colors cursor-pointer ${formData.hsCode === hs.code ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'}`}
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono transition-colors cursor-pointer ${formData.hsCode === hs.code ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'}`}
                           >
                             {hs.label}
                           </button>
@@ -3474,12 +3491,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   {/* Volumetric Weight Calculator Advice */}
                   <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 text-xs">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-blue-600 dark:text-cyan-400">
                         <Truck className="w-4 h-4" />
                       </div>
                       <div>
                         <span className="font-bold text-slate-900 dark:text-white">Courier Billable Weight: </span>
-                        <span className="font-mono font-black text-purple-600 dark:text-purple-400">{volumetricMetrics.billableWeight} kg</span>
+                        <span className="font-mono font-black text-blue-600 dark:text-cyan-400">{volumetricMetrics.billableWeight} kg</span>
                         <span className="text-slate-400 ml-1.5">
                           (Volumetric: {volumetricMetrics.volWeight} kg vs Actual: {formData.weight || 0} kg)
                         </span>
@@ -3545,7 +3562,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   type="button"
                   onClick={() => handleSaveProduct()}
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-sm shadow-purple-600/30 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-sm shadow-blue-600/25 cursor-pointer disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
                   <span>{mode === 'edit' ? 'Save Changes' : (portal === 'reseller' ? 'Submit SKU for Review' : 'Publish Hardware SKU')}</span>
@@ -3553,6 +3570,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               </div>
             </div>
           )}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* ===================== RIGHT SIDEBAR (4 COLS) ===================== */}
@@ -3561,7 +3580,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-purple-600" /> Live Preview Studio
+                <Eye className="w-4 h-4 text-blue-600" /> Live Preview Studio
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
                 Live Mockup
@@ -3581,7 +3600,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       type="button"
                       onClick={() => setPreviewCurrency(cur)}
                       className={`px-2 py-1.5 rounded-xl text-[10px] font-black transition-all cursor-pointer text-center ${isSelected
-                          ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30'
+                          ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/25'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                         }`}
                     >
@@ -3591,7 +3610,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 })}
               </div>
               <div className="text-center pt-1 pb-0.5">
-                <div className="text-2xl font-mono font-black text-purple-600 dark:text-purple-400 tracking-tight">
+                <div className="text-2xl font-mono font-black text-blue-600 dark:text-cyan-400 tracking-tight">
                   {formatFxPrice(formData.price, previewCurrency)}
                 </div>
                 <div className="text-[10px] font-medium text-slate-400 mt-0.5">
@@ -3613,7 +3632,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900/60 text-slate-400 gap-2 p-4 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-xs border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-cyan-400">
                       {getCategoryIcon(formData.categoryId, 'w-6 h-6')}
                     </div>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -3660,7 +3679,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </div>
 
                 <div className="flex items-baseline gap-2 flex-wrap pt-0.5">
-                  <span className="text-base font-black font-mono text-purple-600 dark:text-purple-400">
+                  <span className="text-base font-black font-mono text-blue-600 dark:text-cyan-400">
                     {formatFxPrice(formData.price, previewCurrency)}
                   </span>
                   {formData.originalPrice > formData.price && (
@@ -3690,7 +3709,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-purple-600" /> Catalog Readiness Score
+                <ShieldCheck className="w-4 h-4 text-blue-600" /> Catalog Readiness Score
               </span>
               <span className={`text-xs font-mono font-black ${completeness.percentage >= 80 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                 }`}>
@@ -3702,7 +3721,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             <div className="space-y-2">
               <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-500 rounded-full ${completeness.percentage >= 80 ? 'bg-emerald-600' : 'bg-purple-600'}`}
+                  className={`h-full transition-all duration-500 rounded-full ${completeness.percentage >= 80 ? 'bg-emerald-600' : 'bg-blue-600'}`}
                   style={{ width: `${completeness.percentage}%` }}
                 />
               </div>
@@ -3728,13 +3747,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   className="w-full flex items-center justify-between text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 p-1.5 rounded-lg transition-colors text-left cursor-pointer group"
                   title="Click to jump to section"
                 >
-                  <span className={check.passed ? 'text-slate-700 dark:text-slate-300 font-medium group-hover:text-purple-600' : 'text-slate-400 group-hover:text-purple-600'}>
+                  <span className={check.passed ? 'text-slate-700 dark:text-slate-300 font-medium group-hover:text-blue-600' : 'text-slate-400 group-hover:text-blue-600'}>
                     {check.label}
                   </span>
                   {check.passed ? (
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   ) : (
-                    <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0 group-hover:bg-purple-500" />
+                    <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0 group-hover:bg-blue-600" />
                   )}
                 </button>
               ))}
@@ -3745,7 +3764,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
-                <Layers className="w-4 h-4 text-purple-600" /> Collections & Tags
+                <Layers className="w-4 h-4 text-blue-600" /> Collections & Tags
               </span>
               <span className="text-[10px] font-bold text-slate-400">
                 {formData.collections.length + formData.tags.length} assigned
@@ -3761,7 +3780,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 {formData.collections.map(c => (
                   <span
                     key={c}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[11px] font-bold"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 text-[11px] font-bold"
                   >
                     {c}
                     <button type="button" onClick={() => handleRemoveCollection(c)} className="hover:text-red-500">
@@ -3835,15 +3854,15 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
                       isActive
-                        ? 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-purple-600'
+                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-blue-800 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-blue-600'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-blue-600 dark:text-cyan-400' : 'text-slate-400'}`} />
                       <span>{idx + 1}. {tab.label}</span>
                     </div>
-                    <ChevronRight className={`w-3.5 h-3.5 ${isActive ? 'text-purple-600 dark:text-purple-400 opacity-100' : 'opacity-40'}`} />
+                    <ChevronRight className={`w-3.5 h-3.5 ${isActive ? 'text-blue-600 dark:text-cyan-400 opacity-100' : 'opacity-40'}`} />
                   </button>
                 );
               })}

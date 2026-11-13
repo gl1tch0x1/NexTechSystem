@@ -12,6 +12,7 @@
     "clsx": "^2.1.1",
     "dirham": "^1.5.3",
     "firebase": "^12.19.0",
+    "framer-motion": "^14.14.0",
     "lucide-react": "^1.48.0",
     "mongodb": "^7.7.0",
     "next": "16.4.3",
