@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
+import { productImageUrl } from '@/lib/product-image-url';
 import { Product, ProductApprovalStatus } from '@/types';
 import {
   CheckCircle2,
@@ -16,11 +17,11 @@ import {
   Trash2,
   X,
   AlertTriangle,
-  Check
+  Check,
+  Package
 } from 'lucide-react';
 
-const DEFAULT_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+const DEFAULT_FALLBACK_IMAGE = '';
 
 /**
  * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
@@ -250,11 +251,17 @@ export default function AdminProductsPage() {
                       {/* Product Thumbnail & Title */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={getSafeImageUrl(prod.primaryImage, DEFAULT_FALLBACK_IMAGE)}
-                            alt={title}
-                            className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shrink-0"
-                          />
+                          {prod.primaryImage && productImageUrl(prod.primaryImage) ? (
+                            <img
+                              src={getSafeImageUrl(prod.primaryImage, '')}
+                              alt={title}
+                              className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                              <Package className="w-5 h-5" />
+                            </div>
+                          )}
                           <div>
                             <div className="font-bold text-slate-900 dark:text-white max-w-[220px] truncate">{title}</div>
                             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">

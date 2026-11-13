@@ -49,7 +49,14 @@ import {
   TrendingUp,
   MapPin,
   MoveLeft,
-  MoveRight
+  MoveRight,
+  Laptop,
+  CircuitBoard,
+  Cpu,
+  HardDrive,
+  Database,
+  Server,
+  Monitor
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
 
@@ -60,8 +67,7 @@ const WAREHOUSE_LOCATIONS = [
   { id: 'loc_shj_depot', name: 'Sharjah Industrial Logistics Depot', city: 'Sharjah', code: 'SHJ-01' },
 ];
 
-const DEFAULT_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+const DEFAULT_FALLBACK_IMAGE = '';
 
 /**
  * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
@@ -100,12 +106,36 @@ function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE
   return fallback;
 }
 
+export function getCategoryIcon(categoryId?: string, className: string = 'w-5 h-5') {
+  const id = (categoryId || '').toLowerCase();
+  if (id.includes('laptop') || id.includes('notebook')) return <Laptop className={className} />;
+  if (id.includes('gpu') || id.includes('graphic')) return <CircuitBoard className={className} />;
+  if (id.includes('processor') || id.includes('cpu')) return <Cpu className={className} />;
+  if (id.includes('storage') || id.includes('ssd') || id.includes('hdd') || id.includes('drive')) return <HardDrive className={className} />;
+  if (id.includes('ram') || id.includes('memory')) return <Database className={className} />;
+  if (id.includes('server')) return <Server className={className} />;
+  if (id.includes('monitor') || id.includes('display')) return <Monitor className={className} />;
+  return <Package className={className} />;
+}
+
+export function getPresetIcon(iconType: string, className: string = 'w-4 h-4') {
+  switch (iconType) {
+    case 'laptop': return <Laptop className={className} />;
+    case 'gpu': return <CircuitBoard className={className} />;
+    case 'cpu': return <Cpu className={className} />;
+    case 'ssd': return <HardDrive className={className} />;
+    case 'ram': return <Database className={className} />;
+    case 'server': return <Server className={className} />;
+    default: return <Package className={className} />;
+  }
+}
+
 export interface HardwarePreset {
   label: string;
   category: string;
   catId: string;
   brand: string;
-  url: string;
+  iconType: 'laptop' | 'gpu' | 'cpu' | 'ssd' | 'ram' | 'server';
   fullTitle: string;
   skuPrefix: string;
   price: number;
@@ -127,7 +157,7 @@ export const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
     category: 'Laptops',
     catId: 'cat_laptops',
     brand: 'HP',
-    url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
+    iconType: 'laptop',
     fullTitle: 'HP ProBook 460 G11 Intel Core Ultra 5 125U 16.0" WUXGA Business Laptop',
     skuPrefix: 'LPT',
     price: 3499,
@@ -165,7 +195,7 @@ export const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
     category: 'GPUs',
     catId: 'cat_gpus',
     brand: 'ASUS',
-    url: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80',
+    iconType: 'gpu',
     fullTitle: 'ASUS ROG Astral GeForce RTX 5090 OC Edition 32GB GDDR7 Flagship Gaming GPU',
     skuPrefix: 'GPU',
     price: 8999,
@@ -194,7 +224,7 @@ export const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
     category: 'CPUs',
     catId: 'cat_processors',
     brand: 'Intel',
-    url: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
+    iconType: 'cpu',
     fullTitle: 'Intel Core Ultra 9 285K Arrow Lake 24-Core 5.7GHz LGA1851 Desktop Processor',
     skuPrefix: 'CPU',
     price: 2599,
@@ -224,7 +254,7 @@ export const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
     category: 'Storage',
     catId: 'cat_storage',
     brand: 'Samsung',
-    url: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80',
+    iconType: 'ssd',
     fullTitle: 'Samsung 990 PRO 4TB NVMe M.2 2280 PCIe 4.0 Internal Solid State Drive with Heatsink',
     skuPrefix: 'SSD',
     price: 1499,
@@ -251,7 +281,7 @@ export const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
     category: 'RAM',
     catId: 'cat_ram',
     brand: 'Corsair',
-    url: 'https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80',
+    iconType: 'ram',
     fullTitle: 'Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 7200MHz CL34 High-Performance Memory',
     skuPrefix: 'RAM',
     price: 1299,
@@ -277,7 +307,7 @@ export const HARDWARE_IMAGE_PRESETS: HardwarePreset[] = [
     category: 'Servers',
     catId: 'cat_servers',
     brand: 'Dell Technologies',
-    url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80',
+    iconType: 'server',
     fullTitle: 'Dell PowerEdge R760 2U Rack Server Dual Intel Xeon Gold 6430 128GB DDR5 ECC',
     skuPrefix: 'SRV',
     price: 24999,
@@ -556,8 +586,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       weight: preset.weight,
       dimensions: preset.dimensions,
       hsCode: preset.hsCode,
-      primaryImage: preset.url,
-      images: [preset.url],
+      primaryImage: '',
+      images: [],
       specifications: {
         ...prev.specifications,
         ...preset.specs,
@@ -565,7 +595,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       tags: Array.from(new Set([...prev.tags, ...preset.tags])),
       collections: Array.from(new Set([...prev.collections, ...preset.collections])),
     }));
-    setSuccessNotice(`Template "${preset.label}" applied! Specifications and photos ready.`);
+    setSuccessNotice(`Template "${preset.label}" applied! Specifications and baseline populated.`);
   };
 
   // Form State: Clean, production initial state without hardcoded mock/seed data
@@ -1747,8 +1777,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               className="group p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-xs transition-all text-left flex items-center gap-2.5 cursor-pointer"
               title={`Autofill baseline for ${preset.label}`}
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-200/60 dark:border-slate-700">
-                <img src={preset.url} alt={preset.label} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center shrink-0 border border-purple-200/60 dark:border-purple-800/60 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform shadow-2xs">
+                {getPresetIcon(preset.iconType, 'w-4 h-4')}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-[11px] font-bold text-slate-800 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
@@ -2045,11 +2075,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           </>
                         ) : (
                           <div className="p-4 text-center space-y-1.5 text-slate-400">
-                            <div className="w-9 h-9 rounded-xl bg-slate-200/60 dark:bg-slate-800/80 flex items-center justify-center mx-auto text-slate-500 dark:text-slate-400">
-                              <ImageIcon className="w-5 h-5" />
+                            <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200/60 dark:border-purple-800/60 flex items-center justify-center mx-auto text-purple-600 dark:text-purple-400 shadow-xs">
+                              {getCategoryIcon(formData.categoryId, 'w-6 h-6')}
                             </div>
-                            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">{formData.primaryImage ? 'Image could not be loaded' : 'No Cover Asset Selected'}</div>
-                            <p className="text-[10px] text-slate-400">Use a direct, publicly accessible HTTPS image URL. Page links and private links cannot display as images.</p>
+                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{formData.primaryImage ? 'Image could not be loaded' : 'No Cover Asset Selected'}</div>
+                            <p className="text-[10px] text-slate-400 max-w-[220px] mx-auto">Upload or paste a product image URL below. System category icon is used as placeholder.</p>
                           </div>
                         )}
                       </div>
@@ -2071,38 +2101,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           </button>
                         )}
                       </div>
-                      {/* One-Click Sample Hardware Photography */}
-                      <div className="space-y-1.5 p-3 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
-                            <Sparkles className="w-3 h-3" /> Quick Hardware Photography (Click to Set as Cover)
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                          {HARDWARE_IMAGE_PRESETS.map((p) => (
-                            <button
-                              key={p.label}
-                              type="button"
-                              onClick={() => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  primaryImage: p.url,
-                                  images: prev.images.includes(p.url) ? prev.images : [p.url, ...prev.images]
-                                }));
-                                setFailedPreviewUrl(null);
-                              }}
-                              className="group relative flex-shrink-0 w-16 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-purple-500 hover:scale-105 transition-all cursor-pointer bg-slate-100 dark:bg-slate-800"
-                              title={`Apply ${p.label} sample photo`}
-                            >
-                              <img src={p.url} alt={p.label} className="w-full h-full object-cover" />
-                              <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Star className="w-3 h-3 text-amber-300" />
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
                       {/* Thumbnail Strip */}
                       {formData.images.length > 0 ? (
                         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -3694,10 +3692,16 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                               onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 text-slate-400 gap-1.5 p-4 text-center">
-                    <ImageIcon className="w-8 h-8 text-slate-300 dark:text-slate-600" />
-                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Asset preview pending</span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500">Provide cover image to preview storefront card</span>
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-50/40 via-slate-100 to-indigo-50/40 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/20 text-slate-400 gap-2 p-4 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                      {getCategoryIcon(formData.categoryId, 'w-6 h-6')}
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {formData.title || formData.categoryName || 'Hardware SKU'}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      Hardware icon placeholder (add photo in Step 1 to preview real image)
+                    </span>
                   </div>
                 )}
                 <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-slate-900/80 dark:bg-slate-900/90 text-white text-[10px] font-black tracking-wider uppercase backdrop-blur-md border border-white/10 shadow-sm">
