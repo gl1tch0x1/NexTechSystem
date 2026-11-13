@@ -561,43 +561,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     return `729${rand}`;
   }, []);
 
-  const handleApplyPreset = (preset: HardwarePreset) => {
-    const brandObj = brands.find(b => b.name.toLowerCase() === preset.brand.toLowerCase());
-    const catObj = categories.find(c => c.id === preset.catId || c.slug === preset.catId || c.name.toLowerCase() === preset.category.toLowerCase());
-    const matchedBrandId = brandObj?.id || preset.brand.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    const matchedCatId = catObj?.id || preset.catId || 'cat_laptops';
-    const newSku = generateRandomSku(matchedCatId);
-
-    setFormData(prev => ({
-      ...prev,
-      title: preset.fullTitle,
-      slug: preset.fullTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
-      sku: newSku,
-      brandId: matchedBrandId,
-      brandName: preset.brand,
-      categoryId: matchedCatId,
-      categoryName: catObj?.name || preset.category,
-      price: preset.price,
-      costPrice: preset.costPrice,
-      originalPrice: preset.originalPrice,
-      shortDescription: preset.shortDesc,
-      description: preset.shortDesc,
-      warranty: preset.warranty,
-      weight: preset.weight,
-      dimensions: preset.dimensions,
-      hsCode: preset.hsCode,
-      primaryImage: '',
-      images: [],
-      specifications: {
-        ...prev.specifications,
-        ...preset.specs,
-      },
-      tags: Array.from(new Set([...prev.tags, ...preset.tags])),
-      collections: Array.from(new Set([...prev.collections, ...preset.collections])),
-    }));
-    setSuccessNotice(`Template "${preset.label}" applied! Specifications and baseline populated.`);
-  };
-
   // Form State: Clean, production initial state without hardcoded mock/seed data
   const [formData, setFormData] = useState<ProductFormData>({
     title: '',
@@ -1749,49 +1712,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           <span className="font-semibold">{successNotice}</span>
         </div>
       )}
-
-      {/* 1-Click Hardware Quick-Start Baseline Templates */}
-      <div className="bg-gradient-to-r from-purple-50 via-white to-indigo-50/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/20 border border-purple-200/70 dark:border-purple-900/40 rounded-2xl p-3.5 shadow-xs">
-        <div className="flex items-center justify-between gap-3 mb-2.5 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-purple-600 text-white text-xs font-bold shadow-xs">
-              <Sparkles className="w-3.5 h-3.5" />
-            </span>
-            <span className="text-xs font-black text-slate-900 dark:text-white">
-              Quick-Start Hardware Presets
-            </span>
-            <span className="text-[11px] text-slate-500 hidden md:inline">
-              — 1-click baseline templates for popular hardware categories (prefills specs, title, brand & photography)
-            </span>
-          </div>
-          <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950 px-2.5 py-0.5 rounded-full border border-purple-200/80 dark:border-purple-800/80">
-            One-Click Setup
-          </span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-          {HARDWARE_IMAGE_PRESETS.slice(0, 6).map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => handleApplyPreset(preset)}
-              className="group p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-xs transition-all text-left flex items-center gap-2.5 cursor-pointer"
-              title={`Autofill baseline for ${preset.label}`}
-            >
-              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center shrink-0 border border-purple-200/60 dark:border-purple-800/60 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform shadow-2xs">
-                {getPresetIcon(preset.iconType, 'w-4 h-4')}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-[11px] font-bold text-slate-800 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                  {preset.category}
-                </div>
-                <div className="text-[9px] text-slate-400 truncate">
-                  {preset.brand}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* 2. TABBED STEP-BY-STEP WORKSPACE NAVIGATION */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none">
