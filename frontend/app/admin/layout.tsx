@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AdminNotificationCenter } from '@/components/admin/AdminNotificationCenter';
+import { OnlineStaffPill } from '@/components/admin/OnlineStaffPill';
 import {
   LayoutDashboard,
   Package,
@@ -343,6 +344,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Center/Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Live Online Personnel (Admins, Product Editors & Resellers) */}
+          <OnlineStaffPill />
+
           {/* Admin Real-Time Action & Notification Center */}
           {!isProductEditor && <AdminNotificationCenter />}
 

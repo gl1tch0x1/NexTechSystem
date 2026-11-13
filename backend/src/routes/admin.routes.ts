@@ -117,4 +117,8 @@ router.post('/admins', requireRole('ADMIN'), (req, res, next) => adminController
 router.put('/admins/:id/status', requireRole('ADMIN'), (req, res, next) => adminController.toggleAdminStatus(req, res).catch(next));
 router.delete('/admins/:id', requireRole('ADMIN'), (req, res, next) => adminController.deleteAdmin(req, res).catch(next));
 
+// 18. Live Staff & Reseller Presence Telemetry
+router.get('/presence', requireRole('ADMIN', 'PRODUCT_EDITOR'), (req, res, next) => adminController.getOnlineStaff(req, res).catch(next));
+router.post('/presence/heartbeat', (req, res, next) => adminController.recordHeartbeat(req, res).catch(next));
+
 export default router;

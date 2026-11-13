@@ -20,6 +20,7 @@ import { bentoFeatureRepo } from '../repositories/content.repository.js';
 import { dbStore } from '../config/db-store.js';
 import { mongoDb } from '../config/mongodb.js';
 import { auditService } from '../services/audit.service.js';
+import { presenceService } from '../services/presence.service.js';
 import { ENV } from '../config/env.js';
 import { randomUUID as uuidv4 } from 'crypto';
 import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address, User } from '../types/index.js';
@@ -1644,6 +1645,29 @@ export class AdminController {
     });
 
     res.json({ success: true, message: 'Administrator removed successfully.' });
+  }
+
+  // 18. Live Staff & Reseller Presence Telemetry
+  async getOnlineStaff(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (req.user) {
+      presenceService.recordHeartbeat(
+        req.user,
+        (req.query.currentPath as string) || '/admin',
+        (req.query.device as string) || 'desktop'
+      );
+    }
+    const staff = presenceService.getOnlineStaff();
+    res.json({ success: true, count: staff.length, data: staff });
+  }
+
+  async recordHeartbeat(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: { message: 'Authentication required' } });
+      return;
+    }
+    const { currentPath, device } = req.body || {};
+    const session = presenceService.recordHeartbeat(req.user, currentPath, device);
+    res.json({ success: true, data: session });
   }
 }
 

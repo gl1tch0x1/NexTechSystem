@@ -16,6 +16,8 @@ import warrantyRoutes from './warranty.routes.js';
 import quoteRoutes from './quote.routes.js';
 import paymentRoutes from './payment.routes.js';
 import uploadRoutes from './upload.routes.js';
+import { authenticate } from '../middleware/auth.js';
+import { adminController } from '../controllers/admin.controller.js';
 
 const router = Router();
 
@@ -37,6 +39,9 @@ router.use('/vat', vatRoutes);
 router.use('/warranty', warrantyRoutes);
 router.use('/quotes', quoteRoutes);
 router.use('/admin/quotes', quoteRoutes);
+
+// Global authenticated presence heartbeat (for Resellers, Editors, Admins)
+router.post('/presence/heartbeat', authenticate, (req, res, next) => adminController.recordHeartbeat(req, res).catch(next));
 
 // Health check endpoint
 router.get('/health', (_req, res) => {

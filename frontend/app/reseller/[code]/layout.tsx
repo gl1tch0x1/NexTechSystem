@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
+import { useStaffPresence } from '@/lib/useStaffPresence';
 import { Reseller } from '@/types';
 import {
   LayoutDashboard,
@@ -28,6 +29,9 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
   const resellerCode = (params.code as string)?.toLowerCase();
   const { user, role, reseller, token, logout, isLoading } = useAuth();
   const [resellerData, setResellerData] = useState<Reseller | null>(null);
+
+  // Send live presence heartbeat for active reseller sessions
+  useStaffPresence({ autoPoll: false });
 
   useEffect(() => {
     // Permit authorized RESELLER accounts as well as master ADMINs inspecting the portal
