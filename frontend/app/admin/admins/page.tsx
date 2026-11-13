@@ -489,7 +489,7 @@ export default function AdminAdminsPage() {
                   {/* Top Row: Avatar & Status */}
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">
+                      <div className="relative w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">
                         {admin.avatar ? (
                           <img src={admin.avatar} alt={admin.name} className="w-full h-full object-cover" />
                         ) : (

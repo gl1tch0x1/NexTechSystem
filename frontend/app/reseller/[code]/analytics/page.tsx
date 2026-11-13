@@ -162,7 +162,7 @@ export default function ResellerAnalyticsPage() {
                     </div>
                     <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200/60">
                       <div
-                        className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-300"
+                        className="h-full bg-amber-500 rounded-full transition-all duration-300"
                         style={{ width: `${Math.max(day.revenue > 0 ? 10 : 3, pct)}%` }}
                       />
                     </div>
@@ -217,7 +217,7 @@ export default function ResellerAnalyticsPage() {
             </div>
           </div>
 
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-50/70 to-white border border-amber-200/80 shadow-xs space-y-3">
+          <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center gap-2 font-black text-xs text-amber-900">
               <Sparkles className="w-4 h-4 text-amber-600" />
               <span>Catalog Expansion Recommendation</span>

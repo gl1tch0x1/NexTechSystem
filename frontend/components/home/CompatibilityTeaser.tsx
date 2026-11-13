@@ -28,11 +28,7 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
   const wattagePercentage = Math.round((preset.estTotalWatts / preset.psuWatts) * 100);
 
   return (
-    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 via-white to-purple-50/40 dark:from-slate-900 dark:via-[#0A0F1D] dark:to-[#050811] text-slate-900 dark:text-white p-5 sm:p-8 border border-slate-200/90 dark:border-slate-800 shadow-lg dark:shadow-xl">
-      {/* Dynamic Ambient Background Glows */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 dark:bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 dark:bg-tech-blue/15 rounded-full blur-3xl pointer-events-none" />
-
+    <section className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
         {/* Left Interactive Narrative */}
         <div className="lg:col-span-7 space-y-4">
@@ -43,8 +39,8 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
 
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-snug">
             Intelligent PC Builder Studio with <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 dark:from-purple-400 dark:via-tech-cyan dark:to-blue-400">
-              Zero-Defect Socket & TDP Headroom Guard
+            <span className="text-purple-600 dark:text-purple-400">
+              Zero-Defect Socket &amp; TDP Headroom Guard
             </span>
           </h2>
 
@@ -78,7 +74,7 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2">
             <Link
               href="/pc-builder"
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-semibold transition-all shadow-md shadow-purple-600/20 flex items-center justify-center gap-2 text-center"
+              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 text-center"
             >
               <NextechLogo className="w-4 h-4" size={16} alt="Launch PC Builder" />
               <span>Launch Custom PC Builder</span>
@@ -136,7 +132,7 @@ export function CompatibilityTeaser({ presets = [] }: CompatibilityTeaserProps) 
             {/* Visual Gauge Bar */}
             <div className="h-3 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
               <div
-                className="h-full bg-gradient-to-r from-emerald-500 via-tech-cyan to-purple-500 transition-all duration-500"
+                className="h-full bg-emerald-500 transition-all duration-500"
                 style={{ width: `${wattagePercentage}%` }}
               />
             </div>

@@ -713,7 +713,7 @@ export default function AdminOrdersPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleOpenCreateModal}
-            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-600/25 transition-all cursor-pointer shrink-0"
+            className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Create Sales Order</span>
@@ -1158,7 +1158,7 @@ export default function AdminOrdersPage() {
                             const isReseller = c.role === 'RESELLER';
                             return (
                               <option key={c.id} value={c.id}>
-                                {c.companyName || c.name || c.fullName || c.email} ({c.email}) {isReseller ? '★ [Reseller]' : ''}
+                                {c.companyName || c.name || c.fullName || c.email} ({c.email}) {isReseller ? '[Reseller]' : ''}
                               </option>
                             );
                           })}
@@ -1957,7 +1957,7 @@ export default function AdminOrdersPage() {
                   type="submit"
                   form="createSalesOrderForm"
                   disabled={creatingOrder || orderItems.length === 0}
-                  className="flex-2 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center"
+                  className="flex-2 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center"
                 >
                   {creatingOrder ? (
                     <>

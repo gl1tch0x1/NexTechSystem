@@ -531,46 +531,50 @@ export default function AdminSettingsPage() {
               <button
                 type="button"
                 onClick={() => setSignatureMode('upload')}
-                className={`px-3.5 py-1.5 rounded-xl transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   signatureMode === 'upload'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                📁 Upload Photo / Scan
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload Photo / Scan</span>
               </button>
               <button
                 type="button"
                 onClick={() => setSignatureMode('draw')}
-                className={`px-3.5 py-1.5 rounded-xl transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   signatureMode === 'draw'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                🖊️ Draw Signature Pad
+                <PenTool className="w-3.5 h-3.5" />
+                <span>Draw Signature Pad</span>
               </button>
               <button
                 type="button"
                 onClick={() => setSignatureMode('presets')}
-                className={`px-3.5 py-1.5 rounded-xl transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   signatureMode === 'presets'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                ✨ Executive Presets
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Executive Presets</span>
               </button>
               <button
                 type="button"
                 onClick={() => setSignatureMode('url')}
-                className={`px-3.5 py-1.5 rounded-xl transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   signatureMode === 'url'
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                🌐 Image URL
+                <Link2 className="w-3.5 h-3.5" />
+                <span>Image URL</span>
               </button>
             </div>
 

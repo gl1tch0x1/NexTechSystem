@@ -183,7 +183,7 @@ export default function AdminAnalyticsPage() {
           {/* Export Report CSV */}
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-purple-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export CSV</span>
@@ -192,7 +192,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* 1. Real-Time Google Analytics Traffic Pulse Hero Bar */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-900/20 via-indigo-900/10 to-tech-blue/20 border border-purple-500/30 shadow-md">
+      <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           {/* Real-time users count */}
           <div className="md:col-span-4 flex items-center gap-4">
@@ -227,7 +227,7 @@ export default function AdminAnalyticsPage() {
                 return (
                   <div
                     key={idx}
-                    className="flex-1 bg-gradient-to-t from-purple-600 to-tech-cyan rounded-t-sm transition-all duration-300 hover:opacity-80 group relative cursor-pointer"
+                    className="flex-1 bg-purple-600 rounded-t-sm transition-all duration-300 hover:opacity-80 group relative cursor-pointer"
                     style={{ height: `${heightPct}%` }}
                     title={`${m.minute}: ${m.activeUsers} active visitors`}
                   />
@@ -419,7 +419,7 @@ export default function AdminAnalyticsPage() {
           </div>
           <div className="flex items-center gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-md bg-gradient-to-t from-purple-600 to-indigo-500" />
+              <span className="w-3 h-3 rounded-md bg-purple-600" />
               <span className="text-slate-800 dark:text-slate-200 font-bold">Gross Sales (AED)</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -646,7 +646,7 @@ export default function AdminAnalyticsPage() {
                 </div>
                 <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-tech-blue transition-all duration-500"
+                    className="h-full rounded-full bg-purple-600 transition-all duration-500"
                     style={{ width: `${Math.max(5, c.percentage)}%` }}
                   />
                 </div>
@@ -706,7 +706,7 @@ export default function AdminAnalyticsPage() {
                 </div>
                 <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-purple-600 via-indigo-500 to-tech-cyan transition-all duration-500"
+                    className="h-full rounded-full bg-purple-600 transition-all duration-500"
                     style={{ width: `${step.percentage}%` }}
                   />
                 </div>

@@ -84,7 +84,7 @@ export function EnterpriseBentoGrid({
           return (
             <div
               key={feat.id}
-              className={`group relative ${colSpanClass} rounded-3xl p-5 sm:p-8 bg-gradient-to-br from-blue-600/5 via-slate-50 to-white dark:from-blue-900/15 dark:via-[#0E1527] dark:to-slate-900 border border-slate-200/90 dark:border-slate-800 ${colors.borderCol} flex flex-col justify-between hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1`}
+              className={`group relative ${colSpanClass} rounded-3xl p-5 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 ${colors.borderCol} flex flex-col justify-between hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1`}
             >
               <div className={`absolute -top-16 -right-16 w-48 h-48 ${colors.bgGlow} rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity pointer-events-none`} />
 

@@ -407,7 +407,7 @@ export default function AdminCouponsPage() {
           </div>
 
           <div className={`transition-opacity duration-300 ${isBannerActive ? 'opacity-100' : 'opacity-40 grayscale pointer-events-none'}`}>
-            <div className="relative overflow-hidden rounded-3xl p-5 sm:p-7 bg-gradient-to-r from-blue-600/10 via-purple-600/15 to-tech-cyan/10 border border-purple-500/30 shadow-sm">
+            <div className="relative overflow-hidden rounded-3xl p-5 sm:p-7 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0">
                   <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-tech-blue text-white flex items-center justify-center shadow-lg shadow-tech-blue/25 shrink-0">

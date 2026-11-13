@@ -86,7 +86,7 @@ export default function CodLocationModal({
         aria-modal="true"
       >
         {/* Modal Header */}
-        <div className="relative p-6 pb-4 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-br from-amber-500/10 via-transparent to-blue-500/5">
+        <div className="relative p-6 pb-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
           <button
             type="button"
             onClick={onClose}

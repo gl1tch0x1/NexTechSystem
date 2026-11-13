@@ -246,7 +246,7 @@ export function Navbar() {
           {/* Modern Cart Button (Always visible) */}
           <Link
             href="/cart"
-            className="relative flex items-center gap-1.5 sm:gap-2.5 p-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-gradient-to-r from-blue-600/10 to-cyan-500/10 dark:from-blue-600/20 dark:to-cyan-500/20 text-tech-blue dark:text-cyan-300 hover:bg-tech-blue hover:text-white dark:hover:bg-tech-blue dark:hover:text-white border border-tech-blue/30 dark:border-cyan-500/30 transition-all duration-200 font-bold text-xs shadow-sm group shrink-0"
+            className="relative flex items-center gap-1.5 sm:gap-2.5 p-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-blue-50 dark:bg-slate-800 text-tech-blue dark:text-cyan-300 hover:bg-tech-blue hover:text-white dark:hover:bg-tech-blue dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all duration-200 font-bold text-xs shadow-sm group shrink-0"
           >
             <div className="relative">
               <ShoppingCart className="w-4 h-4" />
@@ -267,7 +267,7 @@ export function Navbar() {
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
               className="flex items-center gap-2 p-1.5 pl-2.5 pr-2 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm"
             >
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+              <div className="w-7 h-7 rounded-xl bg-tech-blue text-white flex items-center justify-center font-black text-xs shadow-xs">
                 {user ? user.name.slice(0, 2).toUpperCase() : <User className="w-3.5 h-3.5" />}
               </div>
               <span className="hidden xl:inline text-xs font-bold text-slate-800 dark:text-slate-200 max-w-[100px] truncate">
@@ -285,8 +285,8 @@ export function Navbar() {
                       <div className="flex items-center gap-3">
                         <div className={`w-9 h-9 rounded-xl ${
                           role === 'ADMIN'
-                            ? 'bg-gradient-to-tr from-purple-600 to-indigo-600'
-                            : 'bg-gradient-to-tr from-blue-600 to-indigo-600'
+                            ? 'bg-purple-600'
+                            : 'bg-tech-blue'
                         } text-white flex items-center justify-center font-black text-sm shadow-sm`}>
                           {user.name.slice(0, 2).toUpperCase()}
                         </div>

@@ -261,7 +261,7 @@ export default function AdminQuotesPage() {
       const data = await safeJson(res);
       if (data.success) {
         const orderNum = data.data?.order?.orderNumber || 'ORD-QTE-NEW';
-        showToast(`🎉 Success! Quotation converted to verified Sales Order #${orderNum}`);
+        showToast(`Success: Quotation converted to verified Sales Order #${orderNum}`);
         setQuotes((prev) =>
           prev.map((q) =>
             q.id === quote.id || q.quoteNumber === quote.quoteNumber
@@ -525,7 +525,7 @@ export default function AdminQuotesPage() {
       });
       const data = await safeJson(res);
       if (data.success) {
-        showToast(`🎉 Quotation ${data.data?.quoteNumber || 'QTE-NEW'} drafted successfully!`);
+        showToast(`Quotation ${data.data?.quoteNumber || 'QTE-NEW'} drafted successfully.`);
         setIsNewQuoteModalOpen(false);
         fetchQuotes();
       } else {
@@ -1003,7 +1003,7 @@ export default function AdminQuotesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
           <div className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-purple-500/5 via-transparent to-transparent shrink-0">
+            <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/60 shrink-0">
               <div className="flex items-center gap-3.5">
                 <div className="w-11 h-11 rounded-2xl bg-purple-600/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold shadow-inner">
                   <FileText className="w-6 h-6" />
@@ -1699,7 +1699,7 @@ export default function AdminQuotesPage() {
               </div>
 
               {/* SECTION 5: REAL-TIME FINANCIAL SUMMARY CARD */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-50 via-white to-slate-50 dark:from-purple-950/30 dark:via-slate-900 dark:to-slate-950 border border-purple-200 dark:border-purple-800/60 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-xs uppercase tracking-wider">
                     <Sparkles className="w-4 h-4" />

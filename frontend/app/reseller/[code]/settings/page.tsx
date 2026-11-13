@@ -236,7 +236,7 @@ export default function ResellerSettingsPage() {
               <span>Commercial Entity Registration</span>
             </h3>
             <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-              Verified Partner ✓
+              Verified Partner
             </span>
           </div>
 

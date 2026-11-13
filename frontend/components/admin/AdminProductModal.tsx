@@ -929,7 +929,7 @@ export function AdminProductModal({
         {/* Top Header */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-purple-600/20">
+            <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-600/20">
               <Package className="w-5 h-5" />
             </div>
             <div>
@@ -1547,7 +1547,7 @@ export function AdminProductModal({
                   <div className="text-[11px] font-semibold text-slate-500">
                     Status:{' '}
                     <span className={formData.chargeTax ? 'text-purple-600 font-bold' : 'text-amber-500 font-bold'}>
-                      {formData.chargeTax ? '✓ Taxable (5% UAE VAT Calculated)' : '⚠ Tax Exempt (0% VAT Charged)'}
+                      {formData.chargeTax ? 'Taxable (5% UAE VAT Calculated)' : 'Tax Exempt (0% VAT Charged)'}
                     </span>
                   </div>
                 </div>
@@ -2031,7 +2031,7 @@ export function AdminProductModal({
                             className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
-                            <span>⚡ Generate Combinations Matrix</span>
+                            <span>Generate Combinations Matrix</span>
                           </button>
                         </div>
 
@@ -2116,7 +2116,7 @@ export function AdminProductModal({
 
                         {formData.variants.length === 0 ? (
                           <div className="text-center py-6 text-slate-500 text-xs bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                            No variants generated yet. Click &ldquo;⚡ Generate Combinations Matrix&rdquo; above.
+                            No variants generated yet. Click &ldquo;Generate Combinations Matrix&rdquo; above.
                           </div>
                         ) : (
                           <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -2390,7 +2390,7 @@ export function AdminProductModal({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-purple-600/25 transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5 ml-1"
+                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-sm transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5 ml-1"
               >
                 <Check className="w-4 h-4" />
                 <span>

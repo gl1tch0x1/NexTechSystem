@@ -38,14 +38,14 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 };
 
 const COLOR_PALETTES = [
-  'from-blue-600/20 to-cyan-500/20 text-tech-blue dark:text-tech-cyan',
-  'from-purple-600/20 to-pink-500/20 text-purple-600 dark:text-purple-400',
-  'from-indigo-600/20 to-blue-500/20 text-indigo-600 dark:text-indigo-400',
-  'from-cyan-600/20 to-emerald-500/20 text-cyan-600 dark:text-cyan-400',
-  'from-emerald-600/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400',
-  'from-amber-600/20 to-orange-500/20 text-amber-600 dark:text-amber-400',
-  'from-sky-600/20 to-blue-500/20 text-sky-600 dark:text-sky-400',
-  'from-rose-600/20 to-red-500/20 text-rose-600 dark:text-rose-400',
+  'bg-blue-50 dark:bg-blue-950/60 text-tech-blue dark:text-tech-cyan border border-blue-200/60 dark:border-blue-900/40',
+  'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-900/40',
+  'bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-200/60 dark:border-purple-900/40',
+  'bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 border border-cyan-200/60 dark:border-cyan-900/40',
+  'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40',
+  'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700',
+  'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/40',
+  'bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/60 dark:border-sky-900/40',
 ];
 
 export function TaxonomyExplorer({ categories = [] }: TaxonomyExplorerProps) {
@@ -109,7 +109,7 @@ export function TaxonomyExplorer({ categories = [] }: TaxonomyExplorerProps) {
               className="group relative p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 hover:border-tech-blue/50 dark:hover:border-tech-cyan/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-3 sm:space-y-4 hover:-translate-y-1 overflow-hidden"
             >
               <div className="flex items-center justify-between">
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br ${colorClass} flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${colorClass} flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-tech-blue group-hover:text-white flex items-center justify-center transition-colors">

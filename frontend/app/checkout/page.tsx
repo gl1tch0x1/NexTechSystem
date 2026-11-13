@@ -452,7 +452,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* Human-in-the-Loop Reassurance Trust Banner */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-blue-50/70 via-indigo-50/50 to-purple-50/60 dark:from-slate-900/90 dark:via-blue-950/20 dark:to-slate-900/90 border border-blue-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-2xl bg-tech-blue text-white flex items-center justify-center font-bold shrink-0 shadow-md shadow-blue-500/25">
             <Shield className="w-4 h-4" />
@@ -1116,7 +1116,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-4 bg-gradient-to-r from-tech-blue via-blue-600 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-4 bg-tech-blue hover:bg-blue-600 text-white rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

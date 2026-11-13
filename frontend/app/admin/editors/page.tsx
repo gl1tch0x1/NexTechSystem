@@ -306,7 +306,7 @@ export default function AdminEditorsPage() {
       </div>
 
       {/* Policy Card */}
-      <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 dark:from-blue-950/20 dark:via-indigo-950/10 dark:to-slate-900 border border-blue-200/80 dark:border-blue-900/60 rounded-3xl p-5 sm:p-6">
+      <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6">
         <div className="flex items-start gap-3.5">
           <div className="p-2 rounded-xl bg-blue-600 text-white shrink-0 mt-0.5">
             <ShieldCheck className="w-4 h-4" />

@@ -346,7 +346,7 @@ export default function AdminResellersPage() {
 
         <button
           onClick={() => setModalOpen(true)}
-          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-tech hover:shadow-purple-600/30 transition-all cursor-pointer"
+          className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Provision New Reseller</span>
@@ -505,7 +505,7 @@ export default function AdminResellersPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
           <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[92vh] flex flex-col my-auto overflow-hidden">
             {/* Modal Header */}
-            <div className="px-4 sm:px-6 py-3.5 sm:py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-purple-500/5 via-transparent to-transparent shrink-0">
+            <div className="px-4 sm:px-6 py-3.5 sm:py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/60 shrink-0">
               <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1 pr-2">
                 <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-purple-600/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold shadow-inner shrink-0">
                   <Store className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -1222,7 +1222,7 @@ export default function AdminResellersPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-2 sm:flex-none px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl font-black text-xs shadow-lg shadow-purple-600/25 hover:shadow-purple-600/40 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 text-center"
+                  className="flex-2 sm:flex-none px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-black text-xs shadow-sm transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 text-center"
                 >
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>{isSubmitting ? 'Provisioning Reseller...' : 'Confirm & Create Reseller'}</span>
@@ -1277,9 +1277,9 @@ export default function AdminResellersPage() {
             </div>
 
             {/* Generated Credentials Card */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50/50 dark:from-purple-950/40 dark:to-indigo-950/30 border border-purple-200 dark:border-purple-800/80 space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-slate-900 dark:text-slate-200 flex items-center gap-1.5">
                   <KeyRound className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                   <span>Auto-Generated Vendor Credentials</span>
                 </span>

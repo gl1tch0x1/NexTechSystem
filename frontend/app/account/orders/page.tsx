@@ -210,7 +210,7 @@ function CustomerOrdersContent() {
         </div>
         <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex">
           <div
-            className="h-full bg-gradient-to-r from-tech-blue to-tech-cyan transition-all duration-500 rounded-full"
+            className="h-full bg-tech-blue transition-all duration-500 rounded-full"
             style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
           />
         </div>

@@ -547,7 +547,7 @@ export function AdminNotificationCenter({ className = '' }: NotificationCenterPr
           {/* URGENT ADMINISTRATIVE ACTION CLEARANCE BANNER */}
           {/* ========================================================================= */}
           {actionRequiredCount > 0 && (
-            <div className="p-3.5 bg-gradient-to-r from-amber-500/15 via-rose-500/10 to-amber-500/15 border-b border-amber-300/70 dark:border-amber-800/60 shrink-0">
+            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/60 shrink-0">
               <div className="flex items-start gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
                   <BellRing className="w-4 h-4 animate-bounce" />

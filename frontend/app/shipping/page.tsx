@@ -104,7 +104,7 @@ export default function ShippingPage() {
       </div>
 
       {/* CTA Box */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-slate-900/40 border border-purple-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h3 className="text-sm font-bold text-white">Have questions regarding enterprise freight or bulk pallet delivery?</h3>
           <p className="text-xs text-slate-300">Contact our 24/7 dedicated logistics desk for expedited container or freight quotes.</p>

@@ -145,7 +145,7 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
 
         {emailSent && (
           <div className="bg-emerald-500 text-white text-xs font-bold py-2 px-6 text-center animate-fadeIn print:hidden">
-            ✓ Digital E-Bill & PDF Receipt dispatched to customer email: {order.customerEmail}
+            Digital E-Bill & PDF Receipt dispatched to customer email: {order.customerEmail}
           </div>
         )}
 

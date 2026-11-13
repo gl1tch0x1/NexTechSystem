@@ -2282,7 +2282,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               )}
 
               {/* Dynamic Financial Profitability Card */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-purple-50/40 dark:from-slate-950 dark:to-purple-950/20 border border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 shadow-sm">
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 shadow-sm">
                 <div className="flex items-center gap-3.5">
                   <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black shadow-md shadow-purple-600/20">
                     %
@@ -2317,7 +2317,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               </div>
 
               {/* ── Target Gross Margin Calculator ── */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50/40 dark:from-emerald-950/30 dark:to-teal-950/20 border border-emerald-200/60 dark:border-emerald-800/40 space-y-3">
+              <div className="p-5 rounded-2xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 space-y-3">
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp className="w-4 h-4 text-emerald-600" />
                   <span className="text-xs font-black text-slate-900 dark:text-white">Target Gross Margin Calculator</span>
@@ -2552,11 +2552,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   </button>
                   <button type="button" onClick={() => handleSmartStockDistribution('even')}
                     className="text-xs px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer transition-all">
-                    ⚖️ Distribute Evenly
+                    Distribute Evenly
                   </button>
                   <button type="button" onClick={() => handleSmartStockDistribution('ratio_70_10')}
                     className="text-xs px-3 py-1.5 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold hover:bg-indigo-200 dark:hover:bg-indigo-900 cursor-pointer transition-all">
-                    📊 Enterprise 70/10/10/10
+                    Enterprise 70/10/10/10
                   </button>
                   <button type="button" onClick={() => handleSmartStockDistribution('clear')}
                     className="text-xs px-3 py-1.5 rounded-xl bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 font-bold hover:bg-red-200 dark:hover:bg-red-900 cursor-pointer transition-all">
@@ -2637,7 +2637,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <td className="py-3 px-3 text-right font-mono font-black text-slate-900 dark:text-white">
                           {loc.onHand}
                           {(loc.safetyStock ?? 0) > 0 && loc.available <= (loc.safetyStock ?? 0) && (
-                            <div className="text-[9px] text-amber-500 font-bold">⚠ Low</div>
+                            <div className="text-[9px] text-amber-600 dark:text-amber-400 font-bold">Low</div>
                           )}
                         </td>
                       </tr>
@@ -2761,7 +2761,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
 
               {/* Section Header */}
-              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-gradient-to-r from-slate-50 to-purple-50/30 dark:from-slate-900 dark:to-purple-950/10">
+              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-slate-50 dark:bg-slate-900/60">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-xl bg-purple-600/10 border border-purple-200 dark:border-purple-800 flex items-center justify-center">
                     <NextechLogo className="w-5 h-5" size={20} alt="Specifications" />
@@ -2839,7 +2839,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <div className="space-y-6">
 
                         {/* Group Header Banner — Theme Adaptive (Light & Dark) */}
-                        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50/80 via-slate-50 to-slate-100/60 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm border border-purple-100/90 dark:border-slate-800">
+                        <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm border border-slate-200 dark:border-slate-800">
                           <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                               <span className="w-2.5 h-2.5 rounded-full bg-purple-600 shrink-0"></span>
@@ -3059,7 +3059,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                     }`}
                 >
-                  {formData.hasVariants ? '✓ Multi-SKU Matrix Enabled' : 'Enable Multi-SKU Mode'}
+                  {formData.hasVariants ? 'Multi-SKU Matrix Enabled' : 'Enable Multi-SKU Mode'}
                 </button>
               </div>
 
@@ -3151,7 +3151,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <button
                         type="button"
                         onClick={handleGenerateVariants}
-                        className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2 cursor-pointer transition-all"
+                        className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-2 cursor-pointer transition-all"
                       >
                         <Sparkles className="w-4 h-4" />
                         <span>Generate Combinations Matrix</span>
@@ -3612,7 +3612,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                               onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-50/40 via-slate-100 to-indigo-50/40 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/20 text-slate-400 gap-2 p-4 text-center">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900/60 text-slate-400 gap-2 p-4 text-center">
                     <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center justify-center text-purple-600 dark:text-purple-400">
                       {getCategoryIcon(formData.categoryId, 'w-6 h-6')}
                     </div>
@@ -3628,7 +3628,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   {formData.brandName || 'Brand'}
                 </div>
                 {formData.discountPercentage > 0 && (
-                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] font-black tracking-wider shadow-sm">
+                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-black tracking-wider shadow-sm">
                     -{formData.discountPercentage}%
                   </div>
                 )}
@@ -3702,7 +3702,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             <div className="space-y-2">
               <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-600 to-emerald-500 transition-all duration-500 rounded-full"
+                  className={`h-full transition-all duration-500 rounded-full ${completeness.percentage >= 80 ? 'bg-emerald-600' : 'bg-purple-600'}`}
                   style={{ width: `${completeness.percentage}%` }}
                 />
               </div>

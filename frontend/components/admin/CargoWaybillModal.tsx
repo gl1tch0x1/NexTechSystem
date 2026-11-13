@@ -99,7 +99,7 @@ export default function CargoWaybillModal({ order, onClose, onUpdateCargo }: Car
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 shrink-0 print:hidden no-print">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <div className="w-11 h-11 rounded-2xl bg-tech-blue text-white flex items-center justify-center shadow-md shadow-blue-500/25">
               <Truck className="w-6 h-6" />
             </div>
             <div>

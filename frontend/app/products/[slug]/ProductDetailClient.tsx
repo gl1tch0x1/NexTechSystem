@@ -121,7 +121,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       {/* Left Images Gallery */}
       <div className="lg:col-span-6 space-y-4">
         {/* Main Display Image */}
-        <div className="aspect-[4/3] rounded-2xl bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 dark:from-[#0B0F19] dark:via-[#0E1527] dark:to-[#070B14] p-6 sm:p-8 flex items-center justify-center overflow-hidden border border-slate-200/80 dark:border-slate-800 relative shadow-inner group">
+        <div className="aspect-[4/3] rounded-2xl bg-slate-50 dark:bg-slate-950 p-6 sm:p-8 flex items-center justify-center overflow-hidden border border-slate-200/80 dark:border-slate-800 relative shadow-inner group">
           {/* Ambient Spotlight */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/10 dark:from-tech-cyan/15 via-transparent to-transparent pointer-events-none" />
 
@@ -393,7 +393,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 }`}
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>{isOutOfStock ? 'Sold Out' : (addedMessage ? '✓ Added to Cart!' : 'Add to Cart')}</span>
+                <span>{isOutOfStock ? 'Sold Out' : (addedMessage ? 'Added to Cart' : 'Add to Cart')}</span>
               </button>
 
               <button

@@ -258,7 +258,7 @@ export default function WarrantyPage() {
               </div>
               <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-purple-500 to-emerald-500 transition-all duration-1000"
+                  className="h-full rounded-full bg-emerald-500 transition-all duration-1000"
                   style={{
                     width: `${Math.min(
                       100,

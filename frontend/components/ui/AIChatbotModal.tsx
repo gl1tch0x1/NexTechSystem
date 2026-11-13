@@ -18,7 +18,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg_welcome',
     sender: 'bot',
-    text: "👋 **Hello! I'm the NexTech AI Hardware Assistant.**\n\nI can assist you with real-time hardware specifications, PC Builder socket compatibility (LGA1700 / AM5), PSU wattage safety headroom, active discount coupons (`TECH10`), and free GCC express shipping terms.\n\n*What can I help you configure or locate today?*",
+    text: "**Hello! I'm the NexTech AI Hardware Assistant.**\n\nI can assist you with real-time hardware specifications, PC Builder socket compatibility (LGA1700 / AM5), PSU wattage safety headroom, active discount coupons (`TECH10`), and free GCC express shipping terms.\n\n*What can I help you configure or locate today?*",
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     links: [
       { label: 'Browse Hardware Catalog', url: '/products' },
@@ -29,11 +29,11 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 ];
 
 const SUGGESTED_QUERIES = [
-  '⚡ What are the RTX 4090 specs & price?',
-  '🧩 How does CPU socket compatibility work?',
-  '🎁 What discount coupons are active?',
-  '🚚 What are the GCC shipping & VAT terms?',
-  '🏢 Tell me about Dell PowerEdge R760 server'
+  'What are the RTX 4090 specs & price?',
+  'How does CPU socket compatibility work?',
+  'What discount coupons are active?',
+  'What are the GCC shipping & VAT terms?',
+  'Tell me about Dell PowerEdge R760 server'
 ];
 
 export function AIChatbotModal() {
@@ -125,7 +125,7 @@ export function AIChatbotModal() {
           className="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center bg-slate-900 dark:bg-slate-950 text-white shadow-xl shadow-slate-950/40 hover:shadow-2xl hover:border-cyan-500/70 hover:shadow-cyan-500/20 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border border-slate-700/80"
         >
           {/* Subtle Accent Glow */}
-          <span className="absolute -inset-0.5 rounded-2xl bg-gradient-to-tr from-tech-blue/30 to-cyan-500/30 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none" />
+          <span className="absolute -inset-0.5 rounded-2xl bg-tech-blue/20 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none" />
 
           {/* Active Ping Status Dot (Top-Right) */}
           {!isOpen && (
@@ -152,7 +152,7 @@ export function AIChatbotModal() {
           {/* Header */}
           <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-tech-blue via-blue-600 to-tech-cyan flex items-center justify-center text-white shadow-sm shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-tech-blue flex items-center justify-center text-white shadow-sm shrink-0">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -213,7 +213,7 @@ export function AIChatbotModal() {
                 <div
                   className={`max-w-[82%] rounded-2xl p-3.5 shadow-sm space-y-2 leading-relaxed ${
                     msg.sender === 'user'
-                      ? 'bg-gradient-to-r from-tech-blue to-blue-600 text-white rounded-tr-sm'
+                      ? 'bg-tech-blue text-white rounded-tr-sm'
                       : 'bg-slate-100 dark:bg-slate-950/90 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-tl-sm'
                   }`}
                 >

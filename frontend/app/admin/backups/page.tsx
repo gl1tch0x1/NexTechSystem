@@ -174,7 +174,7 @@ export default function AdminBackupsPage() {
           <button
             onClick={handleDownloadBackup}
             disabled={downloading}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-blue-500/25 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {downloading ? (
               <RefreshCw className="w-4 h-4 animate-spin" />

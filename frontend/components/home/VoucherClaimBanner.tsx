@@ -32,7 +32,7 @@ export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-blue-600/10 via-purple-600/15 to-tech-cyan/10 border border-tech-blue/30 shadow-xs transition-colors">
+    <section className="relative overflow-hidden rounded-2xl p-4 sm:p-5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
         {/* Left Voucher Info */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-3.5 min-w-0">

@@ -76,7 +76,7 @@ export function ClientTestimonials({ testimonials = [] }: ClientTestimonialsProp
 
             {/* Author Attribution with Gradient Avatar Halo */}
             <div className="relative z-10 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${rev.avatarColor} text-white font-black text-xs flex items-center justify-center shadow-md shrink-0 font-mono`}>
+              <div className={`w-10 h-10 rounded-2xl ${rev.avatarColor?.startsWith('bg-') ? rev.avatarColor : 'bg-tech-blue'} text-white font-black text-xs flex items-center justify-center shadow-md shrink-0 font-mono`}>
                 {rev.initials}
               </div>
               <div className="min-w-0">

@@ -259,8 +259,9 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
                 {/* Top Right Floating Power Tag */}
                 <div className="absolute top-2.5 right-2.5 z-10">
-                  <span className="px-2 py-0.5 rounded-md bg-slate-900/85 border border-slate-700/80 text-amber-300 text-[9.5px] font-mono font-bold backdrop-blur-md shadow-xs">
-                    ⚡ {currentHighlight.powerRating}
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900/85 border border-slate-700/80 text-amber-300 text-[9.5px] font-mono font-bold backdrop-blur-md shadow-xs">
+                    <Zap className="w-2.5 h-2.5" />
+                    <span>{currentHighlight.powerRating}</span>
                   </span>
                 </div>
 

@@ -21,7 +21,7 @@ export default function ResellerCodeLoginPage() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl text-center space-y-6 animate-fadeIn">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-purple-600/25">
+        <div className="w-16 h-16 rounded-2xl bg-purple-600 text-white mx-auto flex items-center justify-center shadow-md shadow-purple-600/25">
           <Store className="w-8 h-8" />
         </div>
 

@@ -1460,7 +1460,7 @@ function AuthContent() {
         >
           <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
             {/* Ambient Top Glow Bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-tech-blue" />
 
             {/* Header & Close Button */}
             <div className="flex items-start justify-between gap-3">
@@ -1581,7 +1581,7 @@ function AuthContent() {
                   <button
                     type="submit"
                     disabled={forgotLoading || !forgotEmail.trim()}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {forgotLoading ? (
                       <>
@@ -1684,7 +1684,7 @@ function AuthContent() {
                   <button
                     type="submit"
                     disabled={forgotLoading || forgotOtp.trim().length !== 6}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {forgotLoading ? (
                       <>
@@ -1801,7 +1801,7 @@ function AuthContent() {
                       forgotNewPassword.length < 8 ||
                       forgotNewPassword !== forgotConfirmPassword
                     }
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {forgotLoading ? (
                       <>
@@ -1837,7 +1837,7 @@ function AuthContent() {
                     setShowForgotModal(false);
                     setTab('signin');
                   }}
-                  className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition-all"
+                  className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all"
                 >
                   <span>Proceed to Sign In</span>
                   <ArrowRight className="w-3.5 h-3.5" />

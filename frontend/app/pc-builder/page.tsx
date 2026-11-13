@@ -328,7 +328,7 @@ export default function PCBuilderPage() {
             >
               <ShoppingCart className="w-4 h-4" />
               <span>
-                {bundleAdded ? '✓ Complete Build Added to Cart!' : 'Add Complete Build to Cart'}
+                {bundleAdded ? 'Complete Build Added to Cart' : 'Add Complete Build to Cart'}
               </span>
             </button>
           </div>

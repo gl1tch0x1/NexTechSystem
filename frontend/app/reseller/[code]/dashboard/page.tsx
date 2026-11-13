@@ -174,7 +174,7 @@ export default function ResellerDashboardPage() {
             <span className="text-xs text-slate-400 font-normal font-sans">/ {totalProducts} total</span>
           </div>
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-            <span className="text-emerald-700 font-bold">Catalog Live ✓</span>
+            <span className="text-emerald-700 font-bold">Catalog Live</span>
             <Link href={`/reseller/${resellerCode}/products?status=APPROVED`} className="text-slate-500 hover:text-slate-800 font-medium">
               View active
             </Link>

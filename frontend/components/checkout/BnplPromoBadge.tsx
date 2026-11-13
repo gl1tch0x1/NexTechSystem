@@ -22,7 +22,7 @@ export default function BnplPromoBadge({ price, className = '', compact = false 
   return (
     <>
       <div
-        className={`p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-slate-900/90 shadow-xs transition-all hover:border-slate-300 dark:hover:border-slate-700 ${className}`}
+        className={`p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shadow-xs transition-all hover:border-slate-300 dark:hover:border-slate-700 ${className}`}
       >
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">

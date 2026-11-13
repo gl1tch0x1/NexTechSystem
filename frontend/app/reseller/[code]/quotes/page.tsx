@@ -6,7 +6,8 @@ import { formatPrice } from '@/lib/utils';
 import {
   FileQuestion,
   CheckCircle2,
-  Send
+  Send,
+  X
 } from 'lucide-react';
 
 interface RFQQuote {
@@ -228,9 +229,9 @@ export default function ResellerQuotesPage() {
               <button
                 type="button"
                 onClick={() => setRespondingQuote(null)}
-                className="text-slate-400 hover:text-slate-700 font-bold text-sm cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 font-bold p-1 cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

@@ -182,7 +182,7 @@ export default function OrderOtpModal({
         aria-labelledby="otp-modal-title"
       >
         {/* Top Header Glow Bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-tech-blue via-emerald-500 to-tech-cyan" />
+        <div className="h-1.5 w-full bg-tech-blue" />
 
         {/* Close Button */}
         <button

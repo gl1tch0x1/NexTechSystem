@@ -316,8 +316,9 @@ export default function CartPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
 
-            <div className="text-[11px] text-slate-400 text-center">
-              🔒 256-Bit SSL Encrypted Checkout • Tax Invoice Generated Automatically
+            <div className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
+              <Lock className="w-3 h-3 text-slate-400" />
+              <span>256-Bit SSL Encrypted Checkout • Tax Invoice Generated Automatically</span>
             </div>
           </div>
         </div>

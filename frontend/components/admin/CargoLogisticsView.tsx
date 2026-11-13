@@ -259,7 +259,7 @@ export default function CargoLogisticsView({
             setHubFilter('ALL');
             setStageFilter('ALL');
           }}
-          className="p-5 rounded-3xl bg-gradient-to-br from-white via-white to-blue-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-blue-950/20 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-400/50 transition-all cursor-pointer group"
+          className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-400/50 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
@@ -286,7 +286,7 @@ export default function CargoLogisticsView({
         </div>
 
         {/* Metric 2 */}
-        <div className="p-5 rounded-3xl bg-gradient-to-br from-white via-white to-emerald-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-emerald-950/20 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-emerald-400/50 transition-all group">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-emerald-400/50 transition-all group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
               Total Freight Tonnage
@@ -308,7 +308,7 @@ export default function CargoLogisticsView({
         </div>
 
         {/* Metric 3 */}
-        <div className="p-5 rounded-3xl bg-gradient-to-br from-white via-white to-purple-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-purple-950/20 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-purple-400/50 transition-all group">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-purple-400/50 transition-all group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
               Cartons & Pallets
@@ -330,7 +330,7 @@ export default function CargoLogisticsView({
         </div>
 
         {/* Metric 4 */}
-        <div className="p-5 rounded-3xl bg-gradient-to-br from-white via-white to-emerald-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-emerald-950/20 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-emerald-400/50 transition-all group">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-emerald-400/50 transition-all group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
               Customs Clearance
@@ -392,11 +392,11 @@ export default function CargoLogisticsView({
                 }}
                 className="appearance-none bg-slate-50 dark:bg-slate-950 text-xs text-slate-700 dark:text-slate-300 font-bold pl-3.5 pr-8 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs"
               >
-                <option value="ALL">🏢 All Logistics Hubs</option>
-                <option value="DXB">✈️ DXB Air Cargo Village (Terminal 2)</option>
-                <option value="AUH">🚢 AUH Khalifa Port (KIZAD Hub)</option>
-                <option value="RUH">🚛 RUH Cargo Dry Port Terminal 4</option>
-                <option value="SHJ">📦 SHJ International Freight Hub</option>
+                <option value="ALL">All Logistics Hubs</option>
+                <option value="DXB">DXB Air Cargo Village (Terminal 2)</option>
+                <option value="AUH">AUH Khalifa Port (KIZAD Hub)</option>
+                <option value="RUH">RUH Cargo Dry Port Terminal 4</option>
+                <option value="SHJ">SHJ International Freight Hub</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -411,10 +411,10 @@ export default function CargoLogisticsView({
                 }}
                 className="appearance-none bg-slate-50 dark:bg-slate-950 text-xs text-slate-700 dark:text-slate-300 font-bold pl-3.5 pr-8 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs"
               >
-                <option value="ALL">🔄 All Transit Stages</option>
-                <option value="DEPOT">📦 Depot Palletized</option>
-                <option value="TRANSIT">✈️ Line-Haul In-Transit</option>
-                <option value="DELIVERED">✅ Consignee Delivered</option>
+                <option value="ALL">All Transit Stages</option>
+                <option value="DEPOT">Depot Palletized</option>
+                <option value="TRANSIT">Line-Haul In-Transit</option>
+                <option value="DELIVERED">Consignee Delivered</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -429,10 +429,10 @@ export default function CargoLogisticsView({
                 }}
                 className="appearance-none bg-slate-50 dark:bg-slate-950 text-xs text-slate-700 dark:text-slate-300 font-bold pl-3.5 pr-8 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs"
               >
-                <option value="ALL">📦 All Freight Types</option>
-                <option value="PALLET">🛡️ Pallet Freight</option>
-                <option value="PARCEL">⚡ Electronic Parcel</option>
-                <option value="EXPRESS">🚀 Express Courier</option>
+                <option value="ALL">All Freight Types</option>
+                <option value="PALLET">Pallet Freight</option>
+                <option value="PARCEL">Electronic Parcel</option>
+                <option value="EXPRESS">Express Courier</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -890,13 +890,13 @@ export default function CargoLogisticsView({
                                   </div>
                                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-1">
                                     <span className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[9px] font-bold border border-blue-200 dark:border-blue-800">
-                                      ⚡ ESD Sensitive
+                                      ESD Sensitive
                                     </span>
                                     <span className="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[9px] font-bold border border-purple-200 dark:border-purple-800">
-                                      📦 Double Boxed
+                                      Double Boxed
                                     </span>
                                     <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[9px] font-bold border border-emerald-200 dark:border-emerald-800">
-                                      🛡️ Tamper Sealed
+                                      Tamper Sealed
                                     </span>
                                   </div>
                                 </div>

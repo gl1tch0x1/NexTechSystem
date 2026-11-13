@@ -110,7 +110,7 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         item.isTop
-                          ? 'bg-gradient-to-r from-tech-blue to-tech-cyan'
+                          ? 'bg-tech-blue'
                           : 'bg-slate-300 dark:bg-slate-600'
                       }`}
                       style={{ width: `${percent}%` }}
@@ -123,7 +123,10 @@ export function LiveStatsAndBenchmarks({ benchmarks = [] }: LiveStatsAndBenchmar
 
           {/* Test Note Footer */}
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-            <span>🔬 {current.note}</span>
+            <span className="flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-tech-blue dark:text-tech-cyan" />
+              <span>{current.note}</span>
+            </span>
             <Link
               href="/products"
               className="font-bold text-tech-blue dark:text-tech-cyan hover:underline flex items-center gap-1"

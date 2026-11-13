@@ -111,7 +111,7 @@ export default function ResellerPayoutsPage() {
       </div>
 
       {/* Verified Payout Account Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
+      <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs font-mono text-amber-400 font-bold uppercase tracking-wider">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -125,7 +125,7 @@ export default function ResellerPayoutsPage() {
 
         <div className="shrink-0 flex items-center gap-2">
           <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold">
-            Direct Wire Active ✓
+            Direct Wire Active
           </span>
         </div>
       </div>

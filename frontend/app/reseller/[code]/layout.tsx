@@ -93,7 +93,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
           )}
 
           {/* Vendor Brand Card */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-amber-50/40 border border-slate-200/90 flex items-center gap-3.5 shadow-sm">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center gap-3.5 shadow-sm">
             <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-sm shrink-0 overflow-hidden">
               {resellerData?.logo || user?.avatar ? (
                 <img
@@ -121,7 +121,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
             <span className="text-slate-500 font-semibold">Tenant Protocol</span>
             <span className="font-mono font-bold text-emerald-700 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline" />
-              <span>ISOLATED ✓</span>
+              <span>ISOLATED</span>
             </span>
           </div>
 
