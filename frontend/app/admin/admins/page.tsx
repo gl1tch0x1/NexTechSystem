@@ -37,6 +37,43 @@ interface AdminUser {
   updatedAt?: string;
 }
 
+/**
+ * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
+ * Strictly complies with CodeQL's MetacharEscapeSanitizer and UriEncodingSanitizer.
+ */
+function getSafeImageUrl(url: unknown, fallback: string = ''): string {
+  if (typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // Explicitly block dangerous pseudo-protocols
+  if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
+    return fallback;
+  }
+
+  // Strictly validate HTTP, HTTPS, or safe relative paths
+  if (
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('http://') ||
+    (trimmed.startsWith('/') && !trimmed.startsWith('//'))
+  ) {
+    try {
+      const parsed = new URL(trimmed, 'https://nextech.local');
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    } catch {
+      if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    }
+  }
+
+  return fallback;
+}
+
 export default function AdminAdminsPage() {
   const { user: currentAdmin, token } = useAuth();
   const [admins, setAdmins] = useState<AdminUser[]>([]);
@@ -223,7 +260,7 @@ export default function AdminAdminsPage() {
         throw new Error(data.error?.message || 'Failed to upload profile image.');
       }
 
-      setAvatar(data.url);
+      setAvatar(getSafeImageUrl(data.url));
     } catch (err: any) {
       setFormError(err.message || 'Error uploading image.');
     } finally {
@@ -262,7 +299,7 @@ export default function AdminAdminsPage() {
         username: username.trim() || email.trim().split('@')[0],
         password: password.trim(),
         phone: phone.trim() || undefined,
-        avatar: avatar.trim() || undefined,
+        avatar: getSafeImageUrl(avatar) || undefined,
       }, { token: token || undefined });
 
       const createdAdmin = res?.data || res;
@@ -491,7 +528,7 @@ export default function AdminAdminsPage() {
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">
                         {admin.avatar ? (
-                          <img src={admin.avatar} alt={admin.name} className="w-full h-full object-cover" />
+                          <img src={getSafeImageUrl(admin.avatar)} alt={admin.name} className="w-full h-full object-cover" />
                         ) : (
                           <span>{admin.name.slice(0, 2).toUpperCase()}</span>
                         )}
@@ -629,7 +666,7 @@ export default function AdminAdminsPage() {
               <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800">
                 <div className="relative w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-bold text-base shrink-0 overflow-hidden border border-blue-400/30 shadow-sm">
                   {avatar ? (
-                    <img src={avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                    <img src={getSafeImageUrl(avatar)} alt="Avatar Preview" className="w-full h-full object-cover" />
                   ) : name ? (
                     <span>{name.slice(0, 2).toUpperCase()}</span>
                   ) : (

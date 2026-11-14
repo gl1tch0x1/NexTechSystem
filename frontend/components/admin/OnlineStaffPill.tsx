@@ -15,6 +15,41 @@ import {
   X
 } from 'lucide-react';
 
+/**
+ * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
+ * Strictly complies with CodeQL's MetacharEscapeSanitizer and UriEncodingSanitizer.
+ */
+function getSafeImageUrl(url: unknown, fallback: string = ''): string {
+  if (typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
+    return fallback;
+  }
+
+  if (
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('http://') ||
+    (trimmed.startsWith('/') && !trimmed.startsWith('//'))
+  ) {
+    try {
+      const parsed = new URL(trimmed, 'https://nextech.local');
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    } catch {
+      if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    }
+  }
+
+  return fallback;
+}
+
 export function OnlineStaffPill() {
   const { onlineStaff, onlineCount, isLoading, refreshPresence } = useStaffPresence();
   const [isOpen, setIsOpen] = useState(false);
@@ -151,7 +186,7 @@ export function OnlineStaffPill() {
                 title={`${staff.name} (${staff.role})`}
               >
                 {staff.avatar ? (
-                  <img src={staff.avatar} alt={staff.name} className="w-full h-full object-cover" />
+                  <img src={getSafeImageUrl(staff.avatar)} alt={staff.name} className="w-full h-full object-cover" />
                 ) : (
                   staff.name.slice(0, 1).toUpperCase()
                 )}
@@ -292,7 +327,7 @@ export function OnlineStaffPill() {
                   <div className="relative shrink-0">
                     <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center overflow-hidden">
                       {staff.avatar ? (
-                        <img src={staff.avatar} alt={staff.name} className="w-full h-full object-cover" />
+                        <img src={getSafeImageUrl(staff.avatar)} alt={staff.name} className="w-full h-full object-cover" />
                       ) : (
                         <span>{staff.name ? staff.name.slice(0, 2).toUpperCase() : 'ST'}</span>
                       )}
