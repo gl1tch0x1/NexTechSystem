@@ -113,8 +113,9 @@ function WishlistContent() {
                     {product.brandName || 'Enterprise Hardware'}
                   </span>
                   {isProductOutOfStock(product) ? (
-                    <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50">
-                      Sold Out
+                    <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                      <span>Restock on Request</span>
                     </span>
                   ) : (
                     <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
@@ -131,8 +132,8 @@ function WishlistContent() {
                 </Link>
 
                 {isProductOutOfStock(product) ? (
-                  <div className="text-sm font-bold text-rose-600 dark:text-rose-400 font-mono pt-1">
-                    Sold Out
+                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300 font-mono pt-1">
+                    Price on Request
                   </div>
                 ) : (
                   <div className="text-base font-black text-slate-900 dark:text-white pt-1">
@@ -145,7 +146,7 @@ function WishlistContent() {
                 {isProductOutOfStock(product) ? (
                   <button
                     onClick={() => openEnquiry(product)}
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                    className="w-full py-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
                     <span>Enquire on WhatsApp</span>

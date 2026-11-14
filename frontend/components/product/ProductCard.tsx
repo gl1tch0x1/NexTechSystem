@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { useCart } from '@/lib/cart-context';
@@ -49,17 +49,47 @@ export function ProductCard({ product }: { product: Product }) {
     maximumFractionDigits: currentCurrency.decimals,
   });
 
-  // Extract key technical spec values with intelligent label formatting
-  const specEntries = Object.entries(product.specifications || {}).slice(0, 3).map(([key, val]) => {
-    let strVal = String(val);
-    const lowerKey = key.toLowerCase();
-    if (lowerKey.includes('core') && !strVal.toLowerCase().includes('core')) {
-      strVal = `${strVal} Cores`;
-    } else if (lowerKey.includes('thread') && !strVal.toLowerCase().includes('thread')) {
-      strVal = `${strVal} Threads`;
+  // Extract key technical spec values with intelligent prioritization & clean label formatting
+  const specEntries = useMemo(() => {
+    const raw = product.specifications || {};
+    const ignoredKeys = new RegExp(
+      '^(condition|status|category|brand|model|sku|weight|dimensions|dimension|warranty|origin|part number|type|item condition|overview)$',
+      'i'
+    );
+    const priorityKeys = ['processor', 'cpu', 'ram', 'memory', 'storage', 'capacity', 'ssd', 'gpu', 'graphics', 'display', 'screen'];
+
+    const entries: { key: string; label: string; priority: number }[] = [];
+
+    for (const [k, v] of Object.entries(raw)) {
+      if (!v || (typeof v !== 'string' && typeof v !== 'number')) continue;
+      const keyClean = k.trim();
+      const valClean = String(v).trim();
+      if (!valClean || ignoredKeys.test(keyClean)) continue;
+      if (/^(brand new|factory sealed|used|refurbished|brand new \(factory sealed\))$/i.test(valClean)) continue;
+
+      let label = valClean;
+      const lowerKey = keyClean.toLowerCase();
+      if (lowerKey.includes('core') && !label.toLowerCase().includes('core')) {
+        label = `${label} Cores`;
+      } else if (lowerKey.includes('thread') && !label.toLowerCase().includes('thread')) {
+        label = `${label} Threads`;
+      }
+
+      if (label.length > 20) {
+        label = label.slice(0, 18) + '…';
+      }
+
+      const priorityIdx = priorityKeys.findIndex(pk => lowerKey.includes(pk));
+      entries.push({
+        key: keyClean,
+        label,
+        priority: priorityIdx !== -1 ? priorityIdx : 99,
+      });
     }
-    return { key, label: strVal };
-  });
+
+    entries.sort((a, b) => a.priority - b.priority);
+    return entries.slice(0, 2);
+  }, [product.specifications]);
 
   // Clean brand name to avoid awkward truncation
   const cleanBrandName = product.brandName === 'Samsung Semiconductor'
@@ -196,7 +226,7 @@ export function ProductCard({ product }: { product: Product }) {
 
           {/* Technical Specs Tags (Uniform height for row alignment across cards) */}
           <div className="h-6 overflow-hidden flex items-center gap-1.5">
-            {specEntries.slice(0, 3).map(({ key, label }) => (
+            {specEntries.map(({ key, label }: { key: string; label: string }) => (
               <span
                 key={key}
                 className="text-[9.5px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 truncate max-w-[120px] border border-slate-200/60 dark:border-slate-700/60"
@@ -222,8 +252,9 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
 
             {isOutOfStock ? (
-              <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono">
-                Sold Out
+              <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                <span>Restock on Request</span>
               </span>
             ) : isLowStock ? (
               <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-2 py-0.5 rounded-md font-mono">
@@ -239,16 +270,17 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* Pricing & Action Bar */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2.5 mt-auto">
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 mt-auto">
           {/* Price area */}
           {isOutOfStock ? (
             <div className="min-w-0 flex flex-col justify-center">
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono inline-block w-fit">
-                Sold Out
+              <span className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-300 font-mono tracking-tight whitespace-nowrap">
+                Price on Request
               </span>
-              <div className="h-4 flex items-center mt-1">
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-none">
-                  Restock Enquiry Available
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate">
+                  WhatsApp Enquiry
                 </span>
               </div>
             </div>
@@ -296,11 +328,11 @@ export function ProductCard({ product }: { product: Product }) {
                 e.stopPropagation();
                 openEnquiry(product);
               }}
-              className="h-10 px-3 sm:px-3.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 shadow-xs bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95 shrink-0"
+              className="h-9 px-3 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-xs shadow-emerald-500/20 active:scale-95 shrink-0"
               title="Enquire on WhatsApp"
             >
-              <MessageCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>Enquire <span className="hidden sm:inline">on WhatsApp</span></span>
+              <MessageCircle className="w-3.5 h-3.5 shrink-0 fill-white/20" />
+              <span>Enquire</span>
             </button>
           ) : isLowStock ? (
             <div className="flex items-center gap-1.5 shrink-0">

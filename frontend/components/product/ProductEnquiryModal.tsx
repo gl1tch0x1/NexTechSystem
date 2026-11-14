@@ -260,14 +260,14 @@ export function ProductEnquiryModal({
                     alt={product.name}
                     className="w-full h-full object-contain filter drop-shadow-sm"
                   />
-                  <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-rose-500" />
+                  <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-500" />
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-200/80 dark:border-rose-900/60 inline-flex items-center gap-1">
-                      <PackageX className="w-3 h-3" />
-                      <span>Sold Out / Out of Stock</span>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-900/60 inline-flex items-center gap-1.5">
+                      <PackageX className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <span>Custom Allocation Required</span>
                     </span>
                     {product.brandName && (
                       <span className="text-[10px] font-mono text-slate-400">
@@ -472,7 +472,7 @@ export function ProductEnquiryModal({
                 <button
                   type="submit"
                   disabled={isSubmitting || !!validationError}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-md shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:cursor-not-allowed active:scale-[0.98]"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-extrabold bg-[#25D366] hover:bg-[#20bd5a] disabled:opacity-50 text-white shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:cursor-not-allowed active:scale-[0.98]"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span>{isSubmitting ? 'Opening WhatsApp...' : 'Continue to WhatsApp'}</span>

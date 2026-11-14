@@ -99,8 +99,8 @@ export default function ComparePage() {
                     </Link>
                     {isProductOutOfStock(prod) ? (
                       <div className="mt-2">
-                        <span className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono">
-                          Sold Out
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono">
+                          Price on Request
                         </span>
                       </div>
                     ) : (
@@ -111,7 +111,7 @@ export default function ComparePage() {
                     {isProductOutOfStock(prod) ? (
                       <button
                         onClick={() => openEnquiry(prod)}
-                        className="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs"
+                        className="mt-3 w-full py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs shadow-xs"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         <span>Enquire on WhatsApp</span>

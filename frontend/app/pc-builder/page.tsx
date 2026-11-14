@@ -382,7 +382,7 @@ export default function PCBuilderPage() {
 
                   <div className="text-right shrink-0 flex items-center gap-3">
                     {isProductOutOfStock(product) ? (
-                      <span className="text-xs font-bold text-rose-500 font-mono">Sold Out</span>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono">Price on Request</span>
                     ) : (
                       <div className="text-sm font-extrabold text-slate-900 dark:text-white">
                         {formatPrice(product.salePrice || product.price, product.currency)}
@@ -391,7 +391,7 @@ export default function PCBuilderPage() {
                     {isProductOutOfStock(product) ? (
                       <button
                         onClick={() => openEnquiry(product)}
-                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
                       >
                         Enquire
                       </button>

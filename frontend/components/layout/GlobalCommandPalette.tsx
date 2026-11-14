@@ -244,10 +244,10 @@ export function GlobalCommandPalette() {
                         <div className="flex items-center gap-3 shrink-0 ml-3">
                           <span className={`text-xs font-mono font-bold ${
                             isProductOutOfStock(prod)
-                              ? (isSelected ? 'text-rose-200' : 'text-rose-500')
+                              ? (isSelected ? 'text-slate-200' : 'text-slate-400')
                               : (isSelected ? 'text-white' : 'text-blue-600 dark:text-cyan-400')
                           }`}>
-                            {isProductOutOfStock(prod) ? 'Sold Out' : priceFormatted}
+                            {isProductOutOfStock(prod) ? 'Price on Request' : priceFormatted}
                           </span>
                           <CornerDownLeft className={`w-3.5 h-3.5 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
                         </div>
