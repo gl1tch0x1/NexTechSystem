@@ -72,6 +72,18 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
       id: 'global_settings',
       updatedAt: new Date().toISOString()
     };
+    if (updates.isLandingDiscountBannerActive !== undefined && Array.isArray(merged.storefrontSections)) {
+      merged.storefrontSections = merged.storefrontSections.map((s: any) => {
+        if (s.id === 'voucher_banner' || s.id === 'deals_banner') {
+          return {
+            ...s,
+            isVisible: updates.isLandingDiscountBannerActive,
+            enabled: updates.isLandingDiscountBannerActive
+          };
+        }
+        return s;
+      });
+    }
     await this.update('global_settings', merged as any);
     return merged;
   }

@@ -14,6 +14,9 @@ import { getApiUrl } from '@/lib/api-client';
 import { FALLBACK_PRODUCTS, FALLBACK_HOMEPAGE_CONTENT } from '@/lib/fallback-data';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getHomeData(): Promise<{
   products: Product[];
   categories: Category[];
@@ -57,7 +60,29 @@ async function getHomeData(): Promise<{
       products: products.length > 0 ? products : FALLBACK_PRODUCTS,
       categories: categories.length > 0 ? categories : DEFAULT_CATEGORIES,
       brands: brands.length > 0 ? brands : DEFAULT_BRANDS,
-      content: (content && content.heroHighlights && content.heroHighlights.length > 0) ? content : FALLBACK_HOMEPAGE_CONTENT,
+      content: content ? {
+        heroHighlights: (content.heroHighlights && content.heroHighlights.length > 0)
+          ? content.heroHighlights
+          : FALLBACK_HOMEPAGE_CONTENT.heroHighlights,
+        solutions: (content.solutions && content.solutions.length > 0)
+          ? content.solutions
+          : FALLBACK_HOMEPAGE_CONTENT.solutions,
+        benchmarks: (content.benchmarks && content.benchmarks.length > 0)
+          ? content.benchmarks
+          : FALLBACK_HOMEPAGE_CONTENT.benchmarks,
+        testimonials: (content.testimonials && content.testimonials.length > 0)
+          ? content.testimonials
+          : FALLBACK_HOMEPAGE_CONTENT.testimonials,
+        features: (content.features && content.features.length > 0)
+          ? content.features
+          : FALLBACK_HOMEPAGE_CONTENT.features,
+        builderPresets: (content.builderPresets && content.builderPresets.length > 0)
+          ? content.builderPresets
+          : FALLBACK_HOMEPAGE_CONTENT.builderPresets,
+        stats: content.stats || FALLBACK_HOMEPAGE_CONTENT.stats,
+        storeSettings: content.storeSettings || FALLBACK_HOMEPAGE_CONTENT.storeSettings,
+        activeCoupon: content.activeCoupon ?? undefined,
+      } : FALLBACK_HOMEPAGE_CONTENT,
     };
   } catch (err) {
     console.warn('[Home] Failed to load dynamic home data:', err);
@@ -96,8 +121,8 @@ export default async function HomePage() {
       {/* MAIN CONTAINER FOR STRUCTURED SECTIONS */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
         {/* 3. PROMOTIONAL VOUCHER BANNER (1-Click Copy TECH10 / Dynamic Coupon) */}
-        {isEnabled('deals_banner') && content?.storeSettings?.isLandingDiscountBannerActive !== false && content?.activeCoupon && (
-          <VoucherClaimBanner activeCoupon={content.activeCoupon} />
+        {(isEnabled('voucher_banner') && isEnabled('deals_banner')) && content?.storeSettings?.isLandingDiscountBannerActive !== false && content?.activeCoupon && (
+          <VoucherClaimBanner activeCoupon={content!.activeCoupon!} />
         )}
 
         {/* 4. VERIFIED HARDWARE MATRIX SHOWCASE (Ant Design Tabs + Search + Sort) */}

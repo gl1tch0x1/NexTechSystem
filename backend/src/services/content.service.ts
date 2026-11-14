@@ -47,14 +47,16 @@ export class ContentService {
       bentoFeatureRepo.find({ where: [{ field: 'isActive', operator: '==', value: true }], orderBy: { field: 'order', direction: 'asc' } }),
       builderPresetRepo.find({ where: [{ field: 'isActive', operator: '==', value: true }], orderBy: { field: 'order', direction: 'asc' } }),
       couponRepository.find({ where: [{ field: 'isActive', operator: '==', value: true }] }),
-      settingsRepository.findById('global_settings'),
+      settingsRepository.getSettings(),
       productRepository.count({ where: [{ field: 'isActive', operator: '==', value: true }, { field: 'approvalStatus', operator: '==', value: 'APPROVED' }] }),
       categoryRepository.count({ where: [{ field: 'isActive', operator: '==', value: true }] }),
       brandRepository.count({ where: [{ field: 'isActive', operator: '==', value: true }] })
     ]);
 
-    // Check if landing discount banner is enabled in store settings
-    const isBannerEnabled = settings?.isLandingDiscountBannerActive !== false;
+    // Check if landing discount banner is enabled in store settings and CMS sections
+    const voucherSection = settings?.storefrontSections?.find((s: any) => s.id === 'voucher_banner' || s.id === 'deals_banner');
+    const isSectionVisible = voucherSection ? (voucherSection.isVisible !== false && voucherSection.enabled !== false) : true;
+    const isBannerEnabled = settings?.isLandingDiscountBannerActive !== false && isSectionVisible;
     let featuredCoupon: Coupon | undefined = undefined;
 
     if (isBannerEnabled && activeCoupons.length > 0) {
@@ -72,8 +74,11 @@ export class ContentService {
       testimonials,
       features,
       builderPresets,
-      activeCoupon: featuredCoupon,
-      storeSettings: settings || undefined,
+      activeCoupon: isBannerEnabled ? featuredCoupon : undefined,
+      storeSettings: settings ? {
+        ...settings,
+        isLandingDiscountBannerActive: isBannerEnabled
+      } : undefined,
       stats: {
         totalProducts: productsCount,
         totalCategories: categoriesCount,

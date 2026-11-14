@@ -1156,8 +1156,12 @@ export class AdminController {
       return;
     }
 
-    const updated = await settingsRepository.update('global_settings', {
+    const voucherSec = sections.find(s => s.id === 'voucher_banner' || s.id === 'deals_banner');
+    const isBannerActive = voucherSec ? (voucherSec.isVisible !== false && voucherSec.enabled !== false) : true;
+
+    const updated = await settingsRepository.updateSettings({
       storefrontSections: sections,
+      isLandingDiscountBannerActive: isBannerActive,
     } as any);
 
     await auditService.log({

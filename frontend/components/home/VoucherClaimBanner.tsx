@@ -13,7 +13,7 @@ interface VoucherClaimBannerProps {
 export function VoucherClaimBanner({ activeCoupon }: VoucherClaimBannerProps) {
   const [copied, setCopied] = useState(false);
 
-  if (!activeCoupon) return null;
+  if (!activeCoupon || activeCoupon.isActive === false) return null;
 
   const code = activeCoupon.code || 'TECH10';
   const discountText = activeCoupon.discountType === 'PERCENTAGE'
