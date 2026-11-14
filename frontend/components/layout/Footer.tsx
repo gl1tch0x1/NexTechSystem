@@ -108,51 +108,27 @@ export function Footer() {
           </ul>
         </div>
 
-        {/* Beside Assistance & Billing: Official UAE Consumer Rights */}
-        <div className="md:col-span-2 space-y-3">
-          <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">Consumer Rights</h4>
-          <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-amber-400/60 dark:hover:border-amber-500/50 hover:shadow-md transition-all space-y-2.5">
-            <a
-              href="https://consumerrights.ae"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Dubai Economy & Tourism (DET) Consumer Protection • Click to visit consumerrights.ae"
-              aria-label="UAE Consumer Rights - Be Right Know Your Consumer Rights"
-              className="block group"
-            >
-              <picture className="flex items-center justify-center">
-                <source srcSet="/images/consumer-rights.avif" type="image/avif" />
-                <img
-                  src="/images/consumer-rights.png"
-                  alt="UAE Consumer Rights - Be Right Know Your Consumer Rights"
-                  width={112}
-                  height={112}
-                  className="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-full group-hover:scale-105 transition-transform drop-shadow-xs mx-auto"
-                />
-              </picture>
-            </a>
-
-            <div className="text-center pt-1 border-t border-slate-100 dark:border-slate-800/80">
-              <a
-                href="https://consumerrights.ae"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-bold text-xs text-slate-800 dark:text-slate-200 hover:text-tech-blue dark:hover:text-tech-cyan transition-colors block"
-              >
-                Consumer Protection
-              </a>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
-                Hotline:{' '}
-                <a
-                  href="tel:600545555"
-                  className="font-bold text-amber-600 dark:text-amber-500 hover:underline"
-                  title="Call Consumer Rights Hotline 600 545555"
-                >
-                  600 545555
-                </a>
-              </div>
-            </div>
-          </div>
+        {/* Beside Assistance & Billing: Official UAE Consumer Rights Emblem */}
+        <div className="md:col-span-2 flex items-start justify-start pt-1">
+          <a
+            href="https://consumerrights.ae"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Dubai Economy & Tourism (DET) Consumer Protection • Hotline: 600 545555"
+            aria-label="UAE Consumer Rights - Be Right Know Your Consumer Rights"
+            className="inline-block group focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-full"
+          >
+            <picture>
+              <source srcSet="/images/consumer-rights.avif" type="image/avif" />
+              <img
+                src="/images/consumer-rights.png"
+                alt="UAE Consumer Rights - Be Right Know Your Consumer Rights"
+                width={160}
+                height={160}
+                className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
+              />
+            </picture>
+          </a>
         </div>
       </div>
 
