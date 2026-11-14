@@ -18,6 +18,7 @@ import {
   Award,
   Image as ImageIcon,
   Sliders,
+  Megaphone,
   LogOut,
   ExternalLink,
   ChevronLeft,
@@ -182,6 +183,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           items: [
             { href: '/admin/coupons', label: 'Discount Coupons', icon: Tag },
             { href: '/admin/banners', label: 'Storefront Banners', icon: ImageIcon },
+            { href: '/admin/announcements', label: 'Header Announcements & Timers', icon: Megaphone },
             { href: '/admin/cms', label: 'Storefront CMS & Content', icon: Sliders },
           ],
         },

@@ -76,6 +76,8 @@ router.get('/profile', requireRole('ADMIN'), (req, res, next) => adminController
 router.put('/credentials', requireRole('ADMIN'), (req, res, next) => adminController.updateAdminCredentials(req, res).catch(next));
 router.get('/settings', requireRole('ADMIN'), (req, res, next) => adminController.getSettings(req, res).catch(next));
 router.put('/settings', requireRole('ADMIN'), (req, res, next) => adminController.updateSettings(req, res).catch(next));
+router.get('/announcements', requireRole('ADMIN'), (req, res, next) => adminController.getAnnouncements(req, res).catch(next));
+router.put('/announcements', requireRole('ADMIN'), (req, res, next) => adminController.updateAnnouncements(req, res).catch(next));
 router.get('/audit-logs', requireRole('ADMIN'), (req, res, next) => adminController.getAuditLogs(req, res).catch(next));
 
 // 11. Database Backup & Disaster Recovery (Strictly ADMIN only)

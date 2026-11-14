@@ -23,7 +23,7 @@ import { auditService } from '../services/audit.service.js';
 import { presenceService } from '../services/presence.service.js';
 import { ENV } from '../config/env.js';
 import { randomUUID as uuidv4 } from 'crypto';
-import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address, User } from '../types/index.js';
+import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address, User, StoreSettings } from '../types/index.js';
 import { hashPassword, verifyPassword, sanitizeUser } from './auth.controller.js';
 
 export class AdminController {
@@ -634,14 +634,116 @@ export class AdminController {
   // ==========================================
   // 9. SETTINGS & AUDIT LOGS
   // ==========================================
+  private countWords(text: string): number {
+    if (!text) return 0;
+    return text.trim().split(/\s+/).filter(Boolean).length;
+  }
+
   async getSettings(_req: AuthenticatedRequest, res: Response): Promise<void> {
     const settings = await settingsRepository.getSettings();
     res.json({ success: true, data: settings });
   }
 
   async updateSettings(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (req.body.headerNotifications && Array.isArray(req.body.headerNotifications)) {
+      for (let i = 0; i < req.body.headerNotifications.length; i++) {
+        const item = req.body.headerNotifications[i];
+        if (item.text && this.countWords(item.text) > 25) {
+          res.status(400).json({
+            success: false,
+            error: { message: `Notification #${i + 1} exceeds 25 words maximum limit.` }
+          });
+          return;
+        }
+      }
+    }
     const updated = await settingsRepository.updateSettings(req.body);
     res.json({ success: true, data: updated });
+  }
+
+  async getAnnouncements(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    const settings = await settingsRepository.getSettings();
+    res.json({
+      success: true,
+      data: {
+        isAnnouncementActive: settings.isAnnouncementActive ?? true,
+        notificationRotationSeconds: settings.notificationRotationSeconds || 5,
+        headerNotifications: settings.headerNotifications || [],
+      },
+    });
+  }
+
+  async updateAnnouncements(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { isAnnouncementActive, notificationRotationSeconds, headerNotifications } = req.body;
+
+    if (headerNotifications !== undefined) {
+      if (!Array.isArray(headerNotifications)) {
+        res.status(400).json({ success: false, error: { message: 'headerNotifications must be an array.' } });
+        return;
+      }
+
+      for (let i = 0; i < headerNotifications.length; i++) {
+        const item = headerNotifications[i];
+        if (!item.text || typeof item.text !== 'string' || item.text.trim().length === 0) {
+          res.status(400).json({ success: false, error: { message: `Notification #${i + 1} message text is required.` } });
+          return;
+        }
+        const words = this.countWords(item.text);
+        if (words > 25) {
+          res.status(400).json({
+            success: false,
+            error: {
+              message: `Notification #${i + 1} exceeds 25 words maximum limit (${words} words found). Please shorten to 20-25 words or fewer.`,
+            },
+          });
+          return;
+        }
+        if (!item.id) {
+          item.id = `notif_${uuidv4()}`;
+        }
+        if (!item.createdAt) {
+          item.createdAt = new Date().toISOString();
+        }
+        item.updatedAt = new Date().toISOString();
+      }
+    }
+
+    const updates: Partial<StoreSettings> = {};
+    if (isAnnouncementActive !== undefined) updates.isAnnouncementActive = Boolean(isAnnouncementActive);
+    if (notificationRotationSeconds !== undefined) {
+      updates.notificationRotationSeconds = Math.max(2, Math.min(60, Number(notificationRotationSeconds) || 5));
+    }
+    if (headerNotifications !== undefined) {
+      updates.headerNotifications = headerNotifications;
+      if (headerNotifications.length > 0) {
+        updates.announcementText = headerNotifications[0].text;
+      }
+    }
+
+    const updated = await settingsRepository.updateSettings(updates);
+
+    await auditService.log({
+      action: 'UPDATE',
+      resource: 'HEADER_ANNOUNCEMENTS',
+      resourceId: 'global_settings',
+      userId: req.user?.id || 'admin',
+      userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+      userRole: 'ADMIN',
+      details: {
+        isAnnouncementActive: updated.isAnnouncementActive,
+        totalNotifications: updated.headerNotifications?.length || 0,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        isAnnouncementActive: updated.isAnnouncementActive,
+        notificationRotationSeconds: updated.notificationRotationSeconds,
+        headerNotifications: updated.headerNotifications,
+      },
+      message: 'Announcement notifications updated successfully.',
+    });
   }
 
   async getAuditLogs(_req: AuthenticatedRequest, res: Response): Promise<void> {

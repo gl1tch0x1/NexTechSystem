@@ -31,6 +31,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
+import { TopAnnouncementBar } from '@/components/layout/TopAnnouncementBar';
 
 interface SubmenuLink {
   title: string;
@@ -357,23 +358,8 @@ export function Navbar() {
 
   return (
     <>
-      {/* 1. TOP ANNOUNCEMENT BAR (Centered GCC Dispatch Highlight) */}
-      <div className="bg-slate-900 dark:bg-slate-950 text-slate-300 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-slate-800/80">
-        <div className="max-w-7xl mx-auto flex items-center justify-center text-center">
-          <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 font-medium tracking-wide">
-            <div className="flex items-center gap-1.5 font-extrabold text-amber-400">
-              <Flame className="w-3.5 h-3.5 animate-pulse shrink-0" />
-              <span>GCC EXPRESS DISPATCH:</span>
-            </div>
-            <span className="text-slate-200 hidden xs:inline">
-              Free Insured Shipping on Orders over AED 500
-            </span>
-            <span className="text-slate-200 xs:hidden">
-              Free GCC Shipping &gt; AED 500
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* 1. TOP ANNOUNCEMENT BAR (Dynamic Framer Motion Notification Banner) */}
+      <TopAnnouncementBar />
 
       {/* 2. STICKY MAIN HEADER & SUB-NAVIGATION BAR (Sticks to top on scroll) */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0A0E1A]/95 backdrop-blur-xl border-b border-slate-200/90 dark:border-slate-800/90 transition-colors duration-200 shadow-sm">

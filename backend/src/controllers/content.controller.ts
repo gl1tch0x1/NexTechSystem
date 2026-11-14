@@ -130,6 +130,37 @@ export class ContentController {
       });
     }
   }
+
+  /**
+   * GET /api/content/announcements
+   */
+  async getAnnouncements(_req: Request, res: Response): Promise<void> {
+    try {
+      const settings = await settingsRepository.getSettings();
+      const now = new Date();
+      const allNotifications = settings.headerNotifications || [];
+      const activeNotifications = allNotifications.filter((n) => {
+        if (!n.isActive) return false;
+        if (n.startDate && new Date(n.startDate) > now) return false;
+        if (n.endDate && new Date(n.endDate) < now) return false;
+        return true;
+      });
+
+      res.json({
+        success: true,
+        data: {
+          isAnnouncementActive: settings.isAnnouncementActive ?? true,
+          notificationRotationSeconds: settings.notificationRotationSeconds || 5,
+          headerNotifications: activeNotifications,
+        },
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        error: { code: 'FETCH_ANNOUNCEMENTS_ERROR', message: err.message },
+      });
+    }
+  }
 }
 
 export const contentController = new ContentController();

@@ -30,6 +30,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import Link from 'next/link';
+import { AnnouncementManager } from '@/components/admin/AnnouncementManager';
 
 const ICON_OPTIONS = [
   { id: 'truck', label: 'Logistics Truck', icon: Truck },
@@ -55,10 +56,6 @@ export default function AdminCmsPage() {
   const [bentoTitle, setBentoTitle] = useState('Why Enterprise Tech Teams Trust NexTech');
   const [bentoSubtitle, setBentoSubtitle] = useState('The NexTech Advantage');
   const [bentoDescription, setBentoDescription] = useState('Engineered for mission-critical reliability, transparent procurement, and rapid GCC deployment.');
-
-  // Global Settings State
-  const [announcementText, setAnnouncementText] = useState('Free Insured Shipping on Orders over AED 500 across UAE & GCC');
-  const [isAnnouncementActive, setIsAnnouncementActive] = useState(true);
 
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -645,49 +642,9 @@ export default function AdminCmsPage() {
         </div>
       )}
 
-      {/* TAB 3: ANNOUNCEMENT BAR */}
+      {/* TAB 3: TOP ANNOUNCEMENT BAR & NOTIFICATIONS */}
       {activeTab === 'announcements' && (
-        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 max-w-3xl">
-          <div className="space-y-1">
-            <h2 className="text-base font-black text-slate-900 dark:text-white">Top Announcement Bar</h2>
-            <p className="text-xs text-slate-500">
-              Customize the message shown in the top header banner across all customer pages.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Announcement Banner Text:</label>
-              <input
-                type="text"
-                value={announcementText}
-                onChange={e => setAnnouncementText(e.target.value)}
-                className="w-full text-xs font-medium p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-tech-blue"
-              />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="isAnnouncementActive"
-                checked={isAnnouncementActive}
-                onChange={e => setIsAnnouncementActive(e.target.checked)}
-                className="rounded text-tech-blue focus:ring-tech-blue h-4 w-4"
-              />
-              <label htmlFor="isAnnouncementActive" className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                Display Announcement Bar on Customer Storefront
-              </label>
-            </div>
-
-            <button
-              onClick={handleSaveSections}
-              disabled={saving}
-              className="px-5 py-2.5 rounded-xl bg-tech-blue hover:bg-blue-600 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
-            >
-              Update Announcement Banner
-            </button>
-          </div>
-        </div>
+        <AnnouncementManager />
       )}
 
       {/* EDIT / CREATE BENTO FEATURE MODAL */}

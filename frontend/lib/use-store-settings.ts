@@ -1,44 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { StoreSettings } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import type { StoreSettings } from '@/types';
+import type { HeaderNotification } from '@/components/layout/TopAnnouncementBar';
 
-let cachedSettings: StoreSettings | null = null;
-let fetchPromise: Promise<StoreSettings | null> | null = null;
+type ExtendedSettings = StoreSettings & {
+  headerNotifications?: HeaderNotification[];
+  notificationRotationSeconds?: number;
+};
+
+let cachedSettings: ExtendedSettings | null = null;
+let fetchPromise: Promise<ExtendedSettings | null> | null = null;
 
 export function useStoreSettings() {
-  const [settings, setSettings] = useState<StoreSettings | null>(cachedSettings);
+  const [settings, setSettings] = useState<ExtendedSettings | null>(cachedSettings);
   const [loading, setLoading] = useState<boolean>(!cachedSettings);
+
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await fetch('/api/content/settings', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch settings from database');
+      const json = await res.json();
+      const data: StoreSettings = json.data || json;
+      cachedSettings = data;
+      setSettings(data);
+      return data;
+    } catch (err: any) {
+      console.warn('[useStoreSettings] Notice: Fetching store settings from database:', err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (cachedSettings) {
       setSettings(cachedSettings);
       setLoading(false);
-      return;
-    }
-
-    if (!fetchPromise) {
-      fetchPromise = fetch('/api/content/settings')
-        .then(async (res) => {
-          if (!res.ok) throw new Error('Failed to fetch settings from database');
-          const json = await res.json();
-          const data: StoreSettings = json.data || json;
-          cachedSettings = data;
-          return data;
-        })
-        .catch((err) => {
-          console.warn('[useStoreSettings] Notice: Fetching store settings from database:', err.message);
-          return null;
-        });
-    }
-
-    fetchPromise.then((data) => {
-      if (data) {
-        setSettings(data);
+    } else {
+      if (!fetchPromise) {
+        fetchPromise = fetchSettings();
       }
-      setLoading(false);
-    });
-  }, []);
+      fetchPromise.then((data) => {
+        if (data) {
+          setSettings(data);
+        }
+        setLoading(false);
+      });
+    }
+
+    // Listen for custom settings update events to sync instantly across components
+    const handleSettingsUpdated = (e: any) => {
+      if (e.detail) {
+        cachedSettings = e.detail;
+        setSettings(e.detail);
+      } else {
+        fetchSettings();
+      }
+    };
+
+    window.addEventListener('store-settings-updated', handleSettingsUpdated);
+    return () => {
+      window.removeEventListener('store-settings-updated', handleSettingsUpdated);
+    };
+  }, [fetchSettings]);
 
   return {
     settings,
@@ -48,6 +73,11 @@ export function useStoreSettings() {
     storeName: settings?.storeName || '',
     supportPhone: settings?.supportPhone || '',
     supportEmail: settings?.supportEmail || '',
+    isAnnouncementActive: settings?.isAnnouncementActive ?? true,
+    announcementText: settings?.announcementText || '',
+    headerNotifications: settings?.headerNotifications || [],
+    notificationRotationSeconds: settings?.notificationRotationSeconds || 5,
+    refreshSettings: fetchSettings,
   };
 }
 

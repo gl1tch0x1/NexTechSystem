@@ -17,6 +17,7 @@ router.get('/testimonials', contentController.getTestimonials);
 router.get('/features', contentController.getFeatures);
 router.get('/builder-presets', contentController.getBuilderPresets);
 router.get('/settings', contentController.getStoreSettings);
+router.get('/announcements', contentController.getAnnouncements);
 
 export default router;
 

@@ -28,6 +28,26 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
       if (!existing.featuredLandingCouponCode) {
         existing.featuredLandingCouponCode = 'TECH10';
       }
+      if (!existing.headerNotifications || existing.headerNotifications.length === 0) {
+        existing.headerNotifications = [
+          {
+            id: 'notif_default_1',
+            prefix: 'GCC EXPRESS DISPATCH:',
+            text: 'Free Insured Shipping on Orders over AED 500 across UAE & GCC',
+            link: '/products',
+            icon: 'flame',
+            isActive: true,
+            displayDurationSeconds: 5,
+            createdAt: new Date().toISOString(),
+          }
+        ];
+      }
+      if (existing.isAnnouncementActive === undefined) {
+        existing.isAnnouncementActive = true;
+      }
+      if (!existing.notificationRotationSeconds) {
+        existing.notificationRotationSeconds = 5;
+      }
       return existing;
     }
     const defaultSettings: StoreSettings & { id: string } = {
@@ -42,8 +62,21 @@ export class SettingsRepository extends BaseRepository<StoreSettings & { id: str
       freeShippingThreshold: 500,
       address: 'Silicon Oasis Tech Park, Dubai, UAE',
       taxRegistrationNumber: 'TRN-10029384910003',
-      announcementText: '🔥 Enterprise Summer Tech Deals — Up to 40% Off on RTX 4090 Workstations & Servers',
+      announcementText: 'GCC EXPRESS DISPATCH: Free Insured Shipping on Orders over AED 500 across UAE & GCC',
       isAnnouncementActive: true,
+      headerNotifications: [
+        {
+          id: 'notif_default_1',
+          prefix: 'GCC EXPRESS DISPATCH:',
+          text: 'Free Insured Shipping on Orders over AED 500 across UAE & GCC',
+          link: '/products',
+          icon: 'flame',
+          isActive: true,
+          displayDurationSeconds: 5,
+          createdAt: new Date().toISOString(),
+        }
+      ],
+      notificationRotationSeconds: 5,
       isLandingDiscountBannerActive: true,
       featuredLandingCouponCode: 'TECH10',
       socialLinks: {

@@ -602,6 +602,22 @@ export interface Banner {
   endDate?: string;
 }
 
+export interface HeaderNotification {
+  id: string;
+  prefix?: string;
+  text: string;
+  link?: string;
+  icon?: 'flame' | 'truck' | 'zap' | 'sparkles' | 'clock' | 'bell' | 'info';
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+  displayDurationSeconds?: number;
+  showCountdown?: boolean;
+  order?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface StoreSettings {
   storeName: string;
   supportEmail: string;
@@ -617,6 +633,8 @@ export interface StoreSettings {
   taxRegistrationNumber: string;
   announcementText?: string;
   isAnnouncementActive: boolean;
+  headerNotifications?: HeaderNotification[];
+  notificationRotationSeconds?: number;
   isLandingDiscountBannerActive?: boolean;
   featuredLandingCouponCode?: string;
   logoUrl?: string;
