@@ -475,6 +475,9 @@ export function Navbar() {
               <Layers className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400" />
               <span>All Products</span>
             </Link>
+            <Link href="/products?category=cat_laptops" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
+              Laptops
+            </Link>
             <Link href="/products?category=cat_components" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Processors & GPUs
             </Link>
@@ -486,13 +489,6 @@ export function Navbar() {
             </Link>
             <Link href="/products?category=cat_networking" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Networking & PoE
-            </Link>
-            <Link
-              href="/pc-builder"
-              className="text-tech-blue dark:text-cyan-400 hover:underline font-bold flex items-center gap-1.5 shrink-0"
-            >
-              <NextechLogo className="w-3.5 h-3.5" size={14} alt="Custom PC Builder" />
-              <span>Custom PC Builder</span>
             </Link>
             <Link href="/compare" className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors shrink-0">
               Hardware Compare
@@ -621,6 +617,13 @@ export function Navbar() {
           {/* Categories Quick List */}
           <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
             <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 px-1">Hardware Categories</div>
+            <Link
+              href="/products?category=cat_laptops"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
+            >
+              Laptops
+            </Link>
             <Link
               href="/products?category=cat_components"
               onClick={() => setMobileMenuOpen(false)}
