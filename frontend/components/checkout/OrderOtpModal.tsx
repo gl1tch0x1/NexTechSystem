@@ -84,8 +84,6 @@ export default function OrderOtpModal({
     return () => clearInterval(interval);
   }, [isOpen, cooldown]);
 
-  if (!isOpen) return null;
-
   const currentCode = digits.join('');
 
   const handleDigitChange = (index: number, value: string) => {

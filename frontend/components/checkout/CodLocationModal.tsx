@@ -52,8 +52,6 @@ export default function CodLocationModal({
     }
   }, [isOpen, initialAddress]);
 
-  if (!isOpen) return null;
-
   const isBurDubai = isBurDubaiChecker(address);
 
   const handleSubmit = (e: React.FormEvent) => {
