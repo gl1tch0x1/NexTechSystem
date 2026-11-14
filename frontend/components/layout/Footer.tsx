@@ -51,8 +51,8 @@ export function Footer() {
       </div>
 
       {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto py-10 sm:py-12 px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
-        <div className="col-span-2 space-y-4">
+      <div className="max-w-7xl mx-auto py-10 sm:py-12 px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8">
+        <div className="sm:col-span-2 md:col-span-4 space-y-4">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex items-center justify-center p-0.5 shrink-0">
               <img
@@ -75,7 +75,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">Hardware Catalog</h4>
           <ul className="space-y-2">
             <li><Link href="/products?category=cat_components" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Processors (CPUs)</Link></li>
@@ -86,7 +86,7 @@ export function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">Enterprise Tools</h4>
           <ul className="space-y-2">
             <li><Link href="/pc-builder" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors font-bold text-tech-blue dark:text-tech-cyan">Custom PC Builder</Link></li>
@@ -97,7 +97,7 @@ export function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">Assistance & Billing</h4>
           <ul className="space-y-2">
             <li><Link href="/account/orders" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Track Orders & E-Bills</Link></li>
@@ -107,40 +107,63 @@ export function Footer() {
             <li><Link href="/terms" className="hover:text-tech-blue dark:hover:text-tech-cyan transition-colors">Terms of Enterprise SLA</Link></li>
           </ul>
         </div>
+
+        {/* Beside Assistance & Billing: Official UAE Consumer Rights */}
+        <div className="md:col-span-2 space-y-3">
+          <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">Consumer Rights</h4>
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-amber-400/60 dark:hover:border-amber-500/50 hover:shadow-md transition-all space-y-2.5">
+            <a
+              href="https://consumerrights.ae"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Dubai Economy & Tourism (DET) Consumer Protection • Click to visit consumerrights.ae"
+              aria-label="UAE Consumer Rights - Be Right Know Your Consumer Rights"
+              className="block group"
+            >
+              <picture className="flex items-center justify-center">
+                <source srcSet="/images/consumer-rights.avif" type="image/avif" />
+                <img
+                  src="/images/consumer-rights.png"
+                  alt="UAE Consumer Rights - Be Right Know Your Consumer Rights"
+                  width={112}
+                  height={112}
+                  className="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-full group-hover:scale-105 transition-transform drop-shadow-xs mx-auto"
+                />
+              </picture>
+            </a>
+
+            <div className="text-center pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <a
+                href="https://consumerrights.ae"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-xs text-slate-800 dark:text-slate-200 hover:text-tech-blue dark:hover:text-tech-cyan transition-colors block"
+              >
+                Consumer Protection
+              </a>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
+                Hotline:{' '}
+                <a
+                  href="tel:600545555"
+                  className="font-bold text-amber-600 dark:text-amber-500 hover:underline"
+                  title="Call Consumer Rights Hotline 600 545555"
+                >
+                  600 545555
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-slate-200 dark:border-slate-800/80 py-3.5 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
+      <div className="border-t border-slate-200 dark:border-slate-800/80 py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
         <div>© 2026 NexTech Systems Enterprise FZCO. All rights reserved.</div>
-
-        {/* Bottom Right: Official UAE Consumer Rights Protection */}
-        <a
-          href="https://consumerrights.ae"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Dubai Economy & Tourism (DET) Consumer Protection • Hotline: 600 545555"
-          aria-label="UAE Consumer Rights - Be Right Know Your Consumer Rights"
-          className="flex items-center gap-2.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors group shrink-0"
-        >
-          <div className="text-right leading-tight">
-            <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
-              UAE Consumer Rights
-            </div>
-            <div className="text-[10px] text-slate-400 font-mono">
-              Hotline: <span className="font-semibold text-slate-600 dark:text-slate-400">600 545555</span>
-            </div>
-          </div>
-          <picture className="shrink-0 flex items-center">
-            <source srcSet="/images/consumer-rights.avif" type="image/avif" />
-            <img
-              src="/images/consumer-rights.png"
-              alt="UAE Consumer Rights - Be Right Know Your Consumer Rights"
-              width={38}
-              height={38}
-              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-full shadow-2xs group-hover:scale-105 transition-transform"
-            />
-          </picture>
-        </a>
+        <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 font-mono text-[10px]">
+          <span>Dubai Economy & Tourism Certified</span>
+          <span>•</span>
+          <span>UAE TRN: 10029384910003</span>
+        </div>
       </div>
     </footer>
   );
