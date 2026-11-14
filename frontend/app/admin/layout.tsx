@@ -42,6 +42,43 @@ import {
   Upload
 } from 'lucide-react';
 
+/**
+ * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
+ * Strictly complies with CodeQL's MetacharEscapeSanitizer and UriEncodingSanitizer.
+ */
+function getSafeImageUrl(url: unknown, fallback: string = ''): string {
+  if (typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // Explicitly block dangerous pseudo-protocols
+  if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
+    return fallback;
+  }
+
+  // Strictly validate HTTP, HTTPS, or safe relative paths
+  if (
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('http://') ||
+    (trimmed.startsWith('/') && !trimmed.startsWith('//'))
+  ) {
+    try {
+      const parsed = new URL(trimmed, 'https://nextech.local');
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    } catch {
+      if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+        const escaped = trimmed.replace(/[<>'"]/g, '');
+        return encodeURI(escaped);
+      }
+    }
+  }
+
+  return fallback;
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -187,7 +224,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error?.message || 'Upload failed.');
-      setNewAvatar(data.url);
+      setNewAvatar(getSafeImageUrl(data.url));
       setCredentialsToast({ type: 'success', message: 'Profile picture uploaded! Click save to apply changes.' });
     } catch (err: any) {
       setCredentialsToast({ type: 'error', message: err.message || 'Image upload failed.' });
@@ -263,7 +300,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           username: isUpdatingUsername ? trimmedUsername : undefined,
           currentPassword: trimmedCurrentPass || undefined,
           newPassword: isUpdatingPassword ? trimmedNewPass : undefined,
-          avatar: isUpdatingAvatar ? newAvatar : undefined,
+          avatar: isUpdatingAvatar ? getSafeImageUrl(newAvatar) : undefined,
         }),
       });
 
@@ -380,8 +417,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className={`w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white flex items-center justify-center font-bold text-xs shrink-0 transition-colors overflow-hidden ${
               !isProductEditor ? 'group-hover:bg-blue-50 dark:group-hover:bg-blue-950/40 group-hover:border-blue-400 dark:group-hover:border-blue-500' : ''
             }`}>
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name || 'Admin'} className="w-full h-full object-cover" />
+              {getSafeImageUrl(user?.avatar) ? (
+                <img src={getSafeImageUrl(user?.avatar)} alt={user?.name || 'Admin'} className="w-full h-full object-cover" />
               ) : isProductEditor ? (
                 'PE'
               ) : (
@@ -619,8 +656,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </label>
                 <div className="flex items-center gap-4">
                   <div className="relative w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-bold text-base shrink-0 overflow-hidden border border-blue-400/30 shadow-sm">
-                    {newAvatar ? (
-                      <img src={newAvatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                    {getSafeImageUrl(newAvatar) ? (
+                      <img src={getSafeImageUrl(newAvatar)} alt="Avatar Preview" className="w-full h-full object-cover" />
                     ) : (
                       <span>{(user?.name || user?.username || 'AD').slice(0, 2).toUpperCase()}</span>
                     )}

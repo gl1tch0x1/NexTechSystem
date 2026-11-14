@@ -41,7 +41,7 @@ export function Footer() {
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-tech-blue/10 border border-tech-blue/20 flex items-center justify-center text-tech-blue dark:text-tech-cyan shrink-0">
               <Headphones className="w-5 h-5" />
-            </div>
+            </div>  
             <div>
               <div className="font-bold text-slate-900 dark:text-white text-sm">24/7 Tech AI & Engineers</div>
               <div className="text-slate-500 dark:text-slate-400 text-[11px]">Certified hardware support</div>
@@ -71,7 +71,7 @@ export function Footer() {
             Enterprise computing architecture, high-density AI servers, workstation GPUs, and certified hardware multi-seller marketplace.
           </p>
           <div className="text-slate-400 dark:text-slate-500 text-[11px] font-mono">
-            TRN: TRN-10029384910003 • Silicon Oasis Tech Tower, Dubai, UAE
+            TRN: TRN-100349940500003 • Bayat Centre - 2 29A St - Al Souq Al Kabeer - Al Fahidi - Dubai, UAE
           </div>
         </div>
 
@@ -138,7 +138,7 @@ export function Footer() {
         <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 font-mono text-[10px]">
           <span>Dubai Economy & Tourism Certified</span>
           <span>•</span>
-          <span>UAE TRN: 10029384910003</span>
+          <span>UAE TRN: 100349940500003</span>
         </div>
       </div>
     </footer>
