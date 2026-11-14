@@ -70,7 +70,7 @@ export function generateStoreAIResponse(
   // 1. Guardrail rejection
   if (!isQueryAllowed(q)) {
     return {
-      text: "**NexTech Policy Guardrail**: I am the **NexTech Systems AI Assistant**, specialized exclusively in our computer hardware catalog, PC Builder compatibility matrix, enterprise servers, orders, warranty, and GCC store policies.\n\nI cannot assist with queries outside the NexTech Systems store domain. Please feel free to ask about our components, compatibility verification, discount coupons, or shipping terms!",
+      text: "**NexTech Store Support**: We specialize in computer hardware specifications, PC Builder component compatibility (Intel LGA1700 / AMD AM5), enterprise servers, warranty, shipping, and order assistance.\n\nPlease feel free to ask about any hardware components, socket matching, discount codes, or shipping policies!",
       links: [
         { label: 'Browse Hardware Catalog', url: '/products' },
         { label: 'Launch PC Builder Matrix', url: '/pc-builder' }
@@ -173,7 +173,7 @@ export function generateStoreAIResponse(
 
   // 9. General Hardware Catalog overview / fallback
   return {
-    text: `**Welcome to NexTech Systems AI Hardware Assistant**!\n\nI can help you with:\n- **Hardware Specs & Availability**: Inquire about CPUs, RTX 4090 GPUs, DDR5 RAM, and NVMe SSDs.\n- **PC Compatibility Matrix**: Verify socket compatibility (LGA1700 / AM5) and PSU wattage requirements.\n- **Discounts & Coupons**: Apply promo codes like \`TECH10\` (10% off) or \`SUMMER50\` (AED 50 off).\n- **Enterprise Infrastructure**: Explore Dell PowerEdge Xeon servers & Cisco enterprise networking.\n- **Orders, Shipping & VAT**: Inquire about GCC free insured shipping over AED 500 and 5% UAE VAT.\n\n*How can I assist your setup today?*`,
+    text: `**Welcome to NexTech Hardware Support Desk**\n\nHow can we help you today? You can inquire about:\n- **Hardware Specs & Availability**: CPUs, RTX 4090 GPUs, DDR5 RAM, and NVMe SSDs.\n- **PC Compatibility Matrix**: Verify socket compatibility (LGA1700 / AM5) and PSU wattage headroom.\n- **Discounts & Coupons**: Apply active promotional vouchers like \`TECH10\` or \`SUMMER50\`.\n- **Enterprise Datacenter**: Dell PowerEdge Xeon servers & Cisco enterprise networking.\n- **Orders, Shipping & VAT**: GCC insured shipping over AED 500 and standard 5% UAE VAT.\n\n*How can we assist your setup today?*`,
     links: [
       { label: 'Browse Hardware Catalog', url: '/products' },
       { label: 'Launch PC Builder Matrix', url: '/pc-builder' },
