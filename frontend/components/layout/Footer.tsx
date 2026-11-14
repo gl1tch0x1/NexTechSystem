@@ -110,8 +110,37 @@ export function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-slate-200 dark:border-slate-800/80 py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
+      <div className="border-t border-slate-200 dark:border-slate-800/80 py-3.5 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
         <div>© 2026 NexTech Systems Enterprise FZCO. All rights reserved.</div>
+
+        {/* Bottom Right: Official UAE Consumer Rights Protection */}
+        <a
+          href="https://consumerrights.ae"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Dubai Economy & Tourism (DET) Consumer Protection • Hotline: 600 545555"
+          aria-label="UAE Consumer Rights - Be Right Know Your Consumer Rights"
+          className="flex items-center gap-2.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors group shrink-0"
+        >
+          <div className="text-right leading-tight">
+            <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-tech-blue dark:group-hover:text-tech-cyan transition-colors">
+              UAE Consumer Rights
+            </div>
+            <div className="text-[10px] text-slate-400 font-mono">
+              Hotline: <span className="font-semibold text-slate-600 dark:text-slate-400">600 545555</span>
+            </div>
+          </div>
+          <picture className="shrink-0 flex items-center">
+            <source srcSet="/images/consumer-rights.avif" type="image/avif" />
+            <img
+              src="/images/consumer-rights.png"
+              alt="UAE Consumer Rights - Be Right Know Your Consumer Rights"
+              width={38}
+              height={38}
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-full shadow-2xs group-hover:scale-105 transition-transform"
+            />
+          </picture>
+        </a>
       </div>
     </footer>
   );
