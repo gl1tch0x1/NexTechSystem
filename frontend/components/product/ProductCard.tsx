@@ -6,6 +6,8 @@ import { Product } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { useStoreSettings } from '@/lib/use-store-settings';
+import { useProductEnquiry } from '@/lib/product-enquiry-context';
+import { getProductAvailability } from '@/lib/product-availability';
 import {
   ShoppingCart,
   Heart,
@@ -21,6 +23,7 @@ export function ProductCard({ product }: { product: Product }) {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { formatPrice, convertPrice, currentCurrency } = useCurrency();
   const { whatsappNumber: dbWhatsApp, inquiryEmail: dbEmail, storeName } = useStoreSettings();
+  const { openEnquiry } = useProductEnquiry();
   const contactWhatsApp = (product as any).contactWhatsApp || dbWhatsApp || '';
   const contactEmail = (product as any).contactEmail || dbEmail || '';
   const [justAdded, setJustAdded] = useState(false);
@@ -36,8 +39,9 @@ export function ProductCard({ product }: { product: Product }) {
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
     : 0;
 
-  const isOutOfStock = product.stock === 0;
-  const isLowStock = product.stock > 0 && product.stock <= ((product as any).lowStockThreshold || 5);
+  const availability = getProductAvailability(product);
+  const isOutOfStock = availability.isOutOfStock;
+  const isLowStock = availability.isLowStock;
 
   const convertedPrice = convertPrice(price);
   const formattedPriceAmount = convertedPrice.toLocaleString('en-US', {
@@ -237,7 +241,18 @@ export function ProductCard({ product }: { product: Product }) {
         {/* Pricing & Action Bar */}
         <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2.5 mt-auto">
           {/* Price area */}
-          {isLowStock ? (
+          {isOutOfStock ? (
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono inline-block w-fit">
+                Sold Out
+              </span>
+              <div className="h-4 flex items-center mt-1">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-none">
+                  Restock Enquiry Available
+                </span>
+              </div>
+            </div>
+          ) : isLowStock ? (
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 font-mono">
                 Contact for Price
@@ -273,7 +288,21 @@ export function ProductCard({ product }: { product: Product }) {
           )}
 
           {/* Action button(s) */}
-          {isLowStock ? (
+          {isOutOfStock ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openEnquiry(product);
+              }}
+              className="h-10 px-3 sm:px-3.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 shadow-xs bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95 shrink-0"
+              title="Enquire on WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>Enquire <span className="hidden sm:inline">on WhatsApp</span></span>
+            </button>
+          ) : isLowStock ? (
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
@@ -298,9 +327,7 @@ export function ProductCard({ product }: { product: Product }) {
               disabled={isOutOfStock}
               onClick={handleAddToCart}
               className={`h-10 px-4 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center gap-1.5 shadow-xs ${
-                isOutOfStock
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
-                  : justAdded
+                justAdded
                   ? 'bg-emerald-600 text-white shadow-emerald-500/25'
                   : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 active:scale-95'
               }`}
@@ -313,7 +340,7 @@ export function ProductCard({ product }: { product: Product }) {
               ) : (
                 <>
                   <ShoppingCart className="w-3.5 h-3.5" />
-                  <span>{isOutOfStock ? 'Sold Out' : 'Add to Cart'}</span>
+                  <span>Add to Cart</span>
                 </>
               )}
             </button>

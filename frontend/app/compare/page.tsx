@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { Product } from '@/types';
 import { ApiClient } from '@/lib/api-client';
 import { useCart } from '@/lib/cart-context';
+import { useProductEnquiry } from '@/lib/product-enquiry-context';
+import { isProductOutOfStock } from '@/lib/product-availability';
 import { formatPrice } from '@/lib/utils';
-import { Plus, Trash2, ShoppingCart, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Plus, Trash2, ShoppingCart, CheckCircle2, XCircle, X, MessageCircle } from 'lucide-react';
 
 export default function ComparePage() {
   const { addToCart } = useCart();
+  const { openEnquiry } = useProductEnquiry();
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [comparedProducts, setComparedProducts] = useState<Product[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -94,16 +97,34 @@ export default function ComparePage() {
                     >
                       {prod.name}
                     </Link>
-                    <div className="text-base font-extrabold text-slate-900 dark:text-white mt-2">
-                      {formatPrice(prod.salePrice || prod.price, prod.currency)}
-                    </div>
-                    <button
-                      onClick={() => addToCart(prod, 1)}
-                      className="mt-3 w-full py-2 bg-tech-blue hover:bg-blue-600 text-white rounded-lg font-bold flex items-center justify-center gap-1.5"
-                    >
-                      <ShoppingCart className="w-3.5 h-3.5" />
-                      <span>Add to Cart</span>
-                    </button>
+                    {isProductOutOfStock(prod) ? (
+                      <div className="mt-2">
+                        <span className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded-md font-mono">
+                          Sold Out
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="text-base font-extrabold text-slate-900 dark:text-white mt-2">
+                        {formatPrice(prod.salePrice || prod.price, prod.currency)}
+                      </div>
+                    )}
+                    {isProductOutOfStock(prod) ? (
+                      <button
+                        onClick={() => openEnquiry(prod)}
+                        className="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>Enquire on WhatsApp</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => addToCart(prod, 1)}
+                        className="mt-3 w-full py-2 bg-tech-blue hover:bg-blue-600 text-white rounded-lg font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs"
+                      >
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <span>Add to Cart</span>
+                      </button>
+                    )}
                   </th>
                 ))}
               </tr>
@@ -191,7 +212,13 @@ export default function ComparePage() {
                     <img src={p.thumbnail || p.images?.[0]} alt={p.name} className="w-10 h-10 object-contain" />
                     <div>
                       <div className="text-xs font-bold text-slate-900 dark:text-white">{p.name}</div>
-                      <div className="text-[11px] text-slate-500">{formatPrice(p.salePrice || p.price, p.currency)}</div>
+                      <div className="text-[11px] text-slate-500">
+                        {isProductOutOfStock(p) ? (
+                          <span className="text-rose-500 font-bold font-mono">Sold Out</span>
+                        ) : (
+                          formatPrice(p.salePrice || p.price, p.currency)
+                        )}
+                      </div>
                     </div>
                   </div>
                   <span className="text-xs text-purple-600 dark:text-purple-400 font-bold">Select +</span>

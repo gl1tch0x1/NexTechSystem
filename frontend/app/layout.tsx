@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/lib/theme-context';
 import { AuthProvider } from '@/lib/auth-context';
 import { CartProvider } from '@/lib/cart-context';
 import { CurrencyProvider } from '@/lib/currency-context';
+import { ProductEnquiryProvider } from '@/lib/product-enquiry-context';
 import { StoreShell } from '@/components/layout/StoreShell';
 import { GlobalCommandPalette } from '@/components/layout/GlobalCommandPalette';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
@@ -69,10 +70,12 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <CurrencyProvider>
-                <GlobalCommandPalette />
-                <StoreShell>
-                  {children}
-                </StoreShell>
+                <ProductEnquiryProvider>
+                  <GlobalCommandPalette />
+                  <StoreShell>
+                    {children}
+                  </StoreShell>
+                </ProductEnquiryProvider>
               </CurrencyProvider>
             </CartProvider>
           </AuthProvider>

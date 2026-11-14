@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { Product, PCBuilderCompatibilityResult } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
+import { useProductEnquiry } from '@/lib/product-enquiry-context';
+import { isProductOutOfStock } from '@/lib/product-availability';
 import { ApiClient } from '@/lib/api-client';
 import {
   Cpu,
@@ -50,6 +52,7 @@ const SLOT_CONFIG: Array<{ key: keyof ComponentSlots; label: string; icon: any; 
 export default function PCBuilderPage() {
   const { addBundleToCart } = useCart();
   const { formatPrice } = useCurrency();
+  const { openEnquiry } = useProductEnquiry();
   const [componentsCatalog, setComponentsCatalog] = useState<Record<string, Product[]>>({});
   const [slots, setSlots] = useState<ComponentSlots>({
     cpu: null,
@@ -378,15 +381,28 @@ export default function PCBuilderPage() {
                   </div>
 
                   <div className="text-right shrink-0 flex items-center gap-3">
-                    <div className="text-sm font-extrabold text-slate-900 dark:text-white">
-                      {formatPrice(product.salePrice || product.price, product.currency)}
-                    </div>
-                    <button
-                      onClick={() => handleSelectComponent(activeModalSlot, product)}
-                      className="px-3.5 py-1.5 bg-tech-blue text-white rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors"
-                    >
-                      Select
-                    </button>
+                    {isProductOutOfStock(product) ? (
+                      <span className="text-xs font-bold text-rose-500 font-mono">Sold Out</span>
+                    ) : (
+                      <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                        {formatPrice(product.salePrice || product.price, product.currency)}
+                      </div>
+                    )}
+                    {isProductOutOfStock(product) ? (
+                      <button
+                        onClick={() => openEnquiry(product)}
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        Enquire
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleSelectComponent(activeModalSlot, product)}
+                        className="px-3.5 py-1.5 bg-tech-blue text-white rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors cursor-pointer"
+                      >
+                        Select
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

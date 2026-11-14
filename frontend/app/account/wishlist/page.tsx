@@ -4,17 +4,21 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
+import { useProductEnquiry } from '@/lib/product-enquiry-context';
+import { isProductOutOfStock } from '@/lib/product-availability';
 import { CustomerPortalHeader } from '@/components/account/CustomerPortalHeader';
 import {
   Heart,
   ShoppingCart,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  MessageCircle,
 } from 'lucide-react';
 
 function WishlistContent() {
   const { wishlist, moveToCartFromWishlist, toggleWishlist } = useCart();
   const { formatPrice } = useCurrency();
+  const { openEnquiry } = useProductEnquiry();
   const [movingAll, setMovingAll] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -108,9 +112,15 @@ function WishlistContent() {
                   <span className="text-[10px] font-bold text-tech-blue dark:text-tech-cyan uppercase tracking-wider">
                     {product.brandName || 'Enterprise Hardware'}
                   </span>
-                  <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                    In Stock
-                  </span>
+                  {isProductOutOfStock(product) ? (
+                    <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50">
+                      Sold Out
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                      In Stock
+                    </span>
+                  )}
                 </div>
 
                 <Link
@@ -120,19 +130,35 @@ function WishlistContent() {
                   {product.name}
                 </Link>
 
-                <div className="text-base font-black text-slate-900 dark:text-white pt-1">
-                  {formatPrice(product.salePrice || product.price, product.currency)}
-                </div>
+                {isProductOutOfStock(product) ? (
+                  <div className="text-sm font-bold text-rose-600 dark:text-rose-400 font-mono pt-1">
+                    Sold Out
+                  </div>
+                ) : (
+                  <div className="text-base font-black text-slate-900 dark:text-white pt-1">
+                    {formatPrice(product.salePrice || product.price, product.currency)}
+                  </div>
+                )}
               </div>
 
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  onClick={() => moveToCartFromWishlist(product)}
-                  className="w-full py-2.5 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors"
-                >
-                  <ShoppingCart className="w-3.5 h-3.5" />
-                  <span>Move to Cart</span>
-                </button>
+                {isProductOutOfStock(product) ? (
+                  <button
+                    onClick={() => openEnquiry(product)}
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Enquire on WhatsApp</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => moveToCartFromWishlist(product)}
+                    className="w-full py-2.5 bg-tech-blue hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span>Move to Cart</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}

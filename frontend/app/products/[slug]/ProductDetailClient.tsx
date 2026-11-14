@@ -16,9 +16,12 @@ import {
   MessageCircle,
   Mail,
   AlertTriangle,
+  PackageX,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import BnplPromoBadge from '@/components/checkout/BnplPromoBadge';
+import { useProductEnquiry } from '@/lib/product-enquiry-context';
+import { getProductAvailability, extractStorageConfigurations } from '@/lib/product-availability';
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
@@ -69,14 +72,29 @@ export function ProductDetailClient({ product }: { product: Product }) {
   };
 
   const inWishlist = isInWishlist(product.id);
+  const { openEnquiry } = useProductEnquiry();
   const currentPrice = selectedVariant ? selectedVariant.price : (product.salePrice || product.price);
   const originalPrice = selectedVariant
     ? (selectedVariant.compareAtPrice || null)
     : (product.compareAtPrice || (product.salePrice ? product.price : null));
   const currentSku = selectedVariant ? selectedVariant.sku : product.sku;
-  const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
-  const isOutOfStock = currentStock === 0 && !product.allowBackorder;
-  const isLowStock = currentStock > 0 && currentStock <= ((product as any).lowStockThreshold || 5);
+
+  const availability = getProductAvailability(product, selectedVariant);
+  const currentStock = availability.stock;
+  const isOutOfStock = availability.isOutOfStock;
+  const isLowStock = availability.isLowStock;
+
+  const storageOptions = useMemo(() => extractStorageConfigurations(product), [product]);
+  const activeRam =
+    selectedOptions['RAM'] ||
+    selectedOptions['Memory'] ||
+    undefined;
+  const activeStorage =
+    selectedOptions['Storage'] ||
+    selectedOptions['Capacity'] ||
+    selectedOptions['SSD'] ||
+    storageOptions[0] ||
+    undefined;
 
   const { whatsappNumber: dbWhatsApp, inquiryEmail: dbEmail, storeName } = useStoreSettings();
   const contactWhatsApp = (product as any).contactWhatsApp || dbWhatsApp || '';
@@ -254,7 +272,21 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
           {/* Price Box */}
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/90 dark:border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-            {isLowStock ? (
+            {isOutOfStock ? (
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 tracking-tight whitespace-nowrap">
+                    Currently Sold Out
+                  </span>
+                  <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 rounded-full font-mono uppercase">
+                    Out of Stock
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  This hardware configuration is currently unavailable for instant online purchase. Request quantities and incoming shipment allocation directly via WhatsApp.
+                </div>
+              </div>
+            ) : isLowStock ? (
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight whitespace-nowrap">
@@ -297,7 +329,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
             )}
 
             <div className="sm:text-right shrink-0">
-              {isLowStock ? (
+              {isOutOfStock ? (
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm font-mono">
+                  <PackageX className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                  <span>Sold Out — Warehouse Zero</span>
+                </div>
+              ) : isLowStock ? (
                 <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/60 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                   <span className="whitespace-nowrap">Low Stock — {currentStock} Units Left</span>
@@ -321,7 +358,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
           </div>
 
           {/* GCC Buy Now Pay Later (Tamara & Tabby) Promotional Badge */}
-          {!isLowStock && <BnplPromoBadge price={currentPrice} className="mt-3.5" />}
+          {!isLowStock && !isOutOfStock && <BnplPromoBadge price={currentPrice} className="mt-3.5" />}
         </div>
 
         {/* Quantity and Actions */}
@@ -338,7 +375,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               </button>
               <span className="w-10 text-center text-xs font-bold text-slate-900 dark:text-white font-mono">{quantity}</span>
               <button
-                onClick={() => setQuantity(isLowStock ? quantity + 1 : Math.min(currentStock || 1, quantity + 1))}
+                onClick={() => setQuantity(isLowStock || isOutOfStock ? quantity + 1 : Math.min(currentStock || 1, quantity + 1))}
                 className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                 title="Increase quantity"
               >
@@ -361,7 +398,19 @@ export function ProductDetailClient({ product }: { product: Product }) {
           </div>
 
           {/* Action Buttons */}
-          {isLowStock ? (
+          {isOutOfStock ? (
+            <div className="w-full">
+              <button
+                type="button"
+                onClick={() => openEnquiry(product, { initialRam: activeRam, initialStorage: activeStorage, initialQuantity: quantity })}
+                className="w-full py-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/25 active:scale-[0.98]"
+                title="Enquire on WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Enquire on WhatsApp ({quantity} {quantity === 1 ? 'Unit' : 'Units'})</span>
+              </button>
+            </div>
+          ) : isLowStock ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
@@ -386,27 +435,19 @@ export function ProductDetailClient({ product }: { product: Product }) {
               <button
                 disabled={isOutOfStock}
                 onClick={handleAddToCart}
-                className={`w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
-                  isOutOfStock
-                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
-                    : 'bg-tech-blue hover:bg-blue-600 text-white shadow-blue-500/20 active:scale-[0.98]'
-                }`}
+                className="w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md bg-tech-blue hover:bg-blue-600 text-white shadow-blue-500/20 active:scale-[0.98]"
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>{isOutOfStock ? 'Sold Out' : (addedMessage ? 'Added to Cart' : 'Add to Cart')}</span>
+                <span>{addedMessage ? 'Added to Cart' : 'Add to Cart'}</span>
               </button>
 
               <button
                 disabled={isOutOfStock}
                 onClick={handleBuyNow}
-                className={`w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
-                  isOutOfStock
-                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 active:scale-[0.98]'
-                }`}
+                className="w-full py-3.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 active:scale-[0.98]"
               >
                 <Zap className="w-4 h-4" />
-                <span>{isOutOfStock ? 'Sold Out' : 'Instant Checkout'}</span>
+                <span>Instant Checkout</span>
               </button>
             </div>
           )}

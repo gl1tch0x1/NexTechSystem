@@ -17,6 +17,7 @@ import {
 import { NextechLogo } from '@/components/ui/NextechLogo';
 import { ApiClient } from '@/lib/api-client';
 import { Product, Category, Brand } from '@/types';
+import { isProductOutOfStock } from '@/lib/product-availability';
 
 import { useCurrency } from '@/lib/currency-context';
 
@@ -241,8 +242,12 @@ export function GlobalCommandPalette() {
                         </div>
 
                         <div className="flex items-center gap-3 shrink-0 ml-3">
-                          <span className={`text-xs font-mono font-bold ${isSelected ? 'text-white' : 'text-blue-600 dark:text-cyan-400'}`}>
-                            {priceFormatted}
+                          <span className={`text-xs font-mono font-bold ${
+                            isProductOutOfStock(prod)
+                              ? (isSelected ? 'text-rose-200' : 'text-rose-500')
+                              : (isSelected ? 'text-white' : 'text-blue-600 dark:text-cyan-400')
+                          }`}>
+                            {isProductOutOfStock(prod) ? 'Sold Out' : priceFormatted}
                           </span>
                           <CornerDownLeft className={`w-3.5 h-3.5 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
                         </div>

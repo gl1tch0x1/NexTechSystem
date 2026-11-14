@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  MessageSquareText,
+  Headphones,
   X,
   SendHorizontal,
   RotateCcw,
@@ -141,7 +141,7 @@ export function AIChatbotModal() {
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Close NexTech Hardware Support" : "Open NexTech Hardware Support Desk"}
           aria-expanded={isOpen}
-          className={`relative w-13 h-13 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg ${
+          className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg ${
             isOpen
               ? 'bg-slate-900 dark:bg-slate-800 text-white border border-slate-700/80 shadow-slate-950/30'
               : 'bg-tech-blue hover:bg-blue-600 text-white shadow-blue-600/30 border border-blue-400/30'
@@ -151,7 +151,7 @@ export function AIChatbotModal() {
             <X className="w-5 h-5 text-white" />
           ) : (
             <>
-              <MessageSquareText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <Headphones className="w-6 h-6 text-white" />
               {/* Online Status Dot */}
               <span className="absolute top-1 right-1 flex h-3 w-3">
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-slate-900" />

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Product, ProductVariant, CartItem, Cart } from '@/types';
 import { ApiClient } from './api-client';
 import { useAuth } from './auth-context';
+import { isProductOutOfStock } from './product-availability';
 
 interface CartContextType {
   cart: Cart;
@@ -216,6 +217,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = (product: Product, quantity = 1, selectedVariant?: ProductVariant | null): boolean => {
     if (!user) {
       promptLogin();
+      return false;
+    }
+
+    if (isProductOutOfStock(product, selectedVariant)) {
       return false;
     }
 

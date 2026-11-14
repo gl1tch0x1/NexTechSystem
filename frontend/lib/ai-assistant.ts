@@ -128,8 +128,13 @@ export function generateStoreAIResponse(
         .map(([k, v]) => `• **${k}**: ${v}`)
         .join('\n');
 
+      const isOut = topProduct.stock <= 0 || topProduct.stockStatus === 'OUT_OF_STOCK';
+      const priceDisplay = isOut
+        ? 'Currently Sold Out (Enquire via WhatsApp)'
+        : `${formatPrice(topProduct.salePrice || topProduct.price, topProduct.currency)}${topProduct.salePrice ? ` *(Reg: ${formatPrice(topProduct.price, topProduct.currency)})*` : ''}`;
+
       return {
-        text: `**${topProduct.name}**\n\n- **Price**: ${formatPrice(topProduct.salePrice || topProduct.price, topProduct.currency)}${topProduct.salePrice ? ` *(Reg: ${formatPrice(topProduct.price, topProduct.currency)})*` : ''}\n- **Availability**: ${topProduct.stock > 0 ? `In Stock (${topProduct.stock} units)` : 'Backorder / Contact Sales'}\n- **Brand / Origin**: ${topProduct.brandName} (Official Warranty)\n${specSummary ? `\n**Technical Specs**:\n${specSummary}` : ''}`,
+        text: `**${topProduct.name}**\n\n- **Price**: ${priceDisplay}\n- **Availability**: ${isOut ? 'Sold Out / Out of Stock' : `In Stock (${topProduct.stock} units)`}\n- **Brand / Origin**: ${topProduct.brandName} (Official Warranty)\n${specSummary ? `\n**Technical Specs**:\n${specSummary}` : ''}`,
         links: [
           { label: `View ${topProduct.name.slice(0, 24)}...`, url: `/products/${topProduct.slug}` },
           { label: 'PC Builder Matrix', url: '/pc-builder' }
