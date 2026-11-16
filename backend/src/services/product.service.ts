@@ -25,10 +25,116 @@ export interface ProductFilterQuery {
   location?: string;
   resellerId?: string;
   approvalStatus?: ProductApprovalStatus;
-  sortBy?: 'price_asc' | 'price_desc' | 'newest' | 'rating' | 'name_asc';
+  sortBy?: 'price_asc' | 'price_desc' | 'newest' | 'rating' | 'name_asc' | 'featured';
   specifications?: Record<string, string>; // e.g. { processor: 'i9', ram: '32GB' }
   page?: number;
   limit?: number;
+}
+
+/**
+ * Intelligent hardware display priority ranking:
+ * Ensures complete computing systems (Laptops, Gaming Laptops, All-in-Ones, Desktops)
+ * are always presented first to customers, ahead of loose pull-out components and spare RAM/SSDs.
+ */
+export function getProductDisplayPriority(p: Product): number {
+  const cat = (p.categoryId || '').toLowerCase();
+  const catName = (p.categoryName || '').toLowerCase();
+  const name = (p.name || '').toLowerCase();
+  const brand = (p.brandName || '').toLowerCase();
+
+  // 1. Loose pull-out components and generic spare parts have lowest display priority
+  if (name.includes('pull out') || brand.includes('pull out') || (p.sku && p.sku.toLowerCase().includes('pullout'))) {
+    return 10;
+  }
+
+  // 2. Accessories, Bags, Cases, Adapters, Cables, Headsets, Peripherals
+  if (
+    cat.includes('accessory') ||
+    catName.includes('accessory') ||
+    cat.includes('bag') ||
+    catName.includes('bag') ||
+    cat.includes('peripheral') ||
+    catName.includes('peripheral') ||
+    cat.includes('headset') ||
+    catName.includes('headset') ||
+    cat.includes('ups') ||
+    catName.includes('ups') ||
+    name.includes('cestus') ||
+    name.includes('mouse') ||
+    name.includes('keyboard') ||
+    name.includes('docking')
+  ) {
+    return 20;
+  }
+
+  // 3. High-Performance Gaming Laptops
+  if (
+    cat.includes('gaming_laptop') ||
+    catName.includes('gaming laptop') ||
+    name.includes('alienware') ||
+    name.includes('omen') ||
+    name.includes('rog') ||
+    name.includes('predator helios') ||
+    name.includes('legion') ||
+    name.includes('nitro')
+  ) {
+    return 100;
+  }
+
+  // 4. Laptops, Mobile Workstations, Ultrabooks, MacBooks
+  if (
+    cat.includes('laptop') ||
+    catName.includes('laptop') ||
+    name.includes('macbook') ||
+    name.includes('thinkpad') ||
+    name.includes('zenbook') ||
+    name.includes('xps') ||
+    name.includes('latitude') ||
+    name.includes('elitebook') ||
+    name.includes('vivobook') ||
+    name.includes('ideapad') ||
+    name.includes('yoga')
+  ) {
+    return 95;
+  }
+
+  // 5. All-in-One PCs & Desktop Workstations
+  if (
+    cat.includes('all_in_one') ||
+    catName.includes('all-in-one') ||
+    cat.includes('desktop') ||
+    catName.includes('desktop') ||
+    name.includes('all in one') ||
+    name.includes('optiplex') ||
+    name.includes('thinkcentre')
+  ) {
+    return 90;
+  }
+
+  // 6. Servers, Enterprise Racks, Enterprise Networking
+  if (cat.includes('server') || catName.includes('server') || cat.includes('network') || catName.includes('network')) {
+    return 75;
+  }
+
+  // 7. High-End Processors & GPUs
+  if (name.includes('rtx') || name.includes('geforce') || name.includes('ryzen') || name.includes('core i9') || name.includes('core i7') || cat.includes('processor')) {
+    return 60;
+  }
+  if (cat.includes('component')) {
+    return 50;
+  }
+
+  // 8. Displays & Monitors
+  if (cat.includes('monitor') || catName.includes('monitor')) {
+    return 45;
+  }
+
+  // 9. Storage & Drives
+  if (cat.includes('storage') || catName.includes('storage')) {
+    return 40;
+  }
+
+  return 35;
 }
 
 export class ProductService {
@@ -63,24 +169,30 @@ export class ProductService {
       allProducts = allProducts.filter(p => p.approvalStatus === filter.approvalStatus);
     }
 
-    // Category filter
-    if (filter.categoryId) {
-      allProducts = allProducts.filter(p => p.categoryId === filter.categoryId);
-    } else if (filter.categorySlug) {
-      const c = await categoryRepository.findBySlug(filter.categorySlug);
-      if (c) {
-        allProducts = allProducts.filter(p => p.categoryId === c.id);
-      }
+    // Category filter (resilient matching by ID, slug, or normalized name)
+    if (filter.categoryId || filter.categorySlug) {
+      const term = (filter.categoryId || filter.categorySlug)!.toLowerCase().trim();
+      const bySlug = await categoryRepository.findBySlug(term);
+      const targetId = bySlug ? bySlug.id : null;
+      allProducts = allProducts.filter(p =>
+        p.categoryId === term ||
+        (targetId && p.categoryId === targetId) ||
+        p.categoryName?.toLowerCase() === term ||
+        p.categoryId?.toLowerCase() === term
+      );
     }
 
-    // Brand filter
-    if (filter.brandId) {
-      allProducts = allProducts.filter(p => p.brandId === filter.brandId);
-    } else if (filter.brandSlug) {
-      const b = await brandRepository.findBySlug(filter.brandSlug);
-      if (b) {
-        allProducts = allProducts.filter(p => p.brandId === b.id);
-      }
+    // Brand filter (resilient matching by ID, slug, or normalized name)
+    if (filter.brandId || filter.brandSlug) {
+      const term = (filter.brandId || filter.brandSlug)!.toLowerCase().trim();
+      const bySlug = await brandRepository.findBySlug(term);
+      const targetId = bySlug ? bySlug.id : null;
+      allProducts = allProducts.filter(p =>
+        p.brandId === term ||
+        (targetId && p.brandId === targetId) ||
+        p.brandName?.toLowerCase() === term ||
+        p.brandId?.toLowerCase() === term
+      );
     }
 
     // Search query
@@ -192,6 +304,15 @@ export class ProductService {
 
     // Sorting
     switch (filter.sortBy) {
+      case 'featured':
+        allProducts.sort((a, b) => {
+          const featDiff = (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+          if (featDiff !== 0) return featDiff;
+          const prioDiff = getProductDisplayPriority(b) - getProductDisplayPriority(a);
+          if (prioDiff !== 0) return prioDiff;
+          return (b.rating || 0) - (a.rating || 0);
+        });
+        break;
       case 'price_asc':
         allProducts.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price));
         break;
@@ -205,8 +326,18 @@ export class ProductService {
         allProducts.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case 'newest':
-      default:
         allProducts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      default:
+        // Default ranking: prioritize featured computing systems (Laptops, All-in-Ones, Desktops),
+        // then high-tier hardware, ensuring pull-out RAM & SSDs are not shown first
+        allProducts.sort((a, b) => {
+          const featDiff = (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+          if (featDiff !== 0) return featDiff;
+          const prioDiff = getProductDisplayPriority(b) - getProductDisplayPriority(a);
+          if (prioDiff !== 0) return prioDiff;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
         break;
     }
 

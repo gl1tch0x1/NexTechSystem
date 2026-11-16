@@ -21,6 +21,7 @@ import { dbStore } from '../config/db-store.js';
 import { mongoDb } from '../config/mongodb.js';
 import { auditService } from '../services/audit.service.js';
 import { presenceService } from '../services/presence.service.js';
+import { inventoryImportService } from '../services/inventory-import.service.js';
 import { ENV } from '../config/env.js';
 import { randomUUID as uuidv4 } from 'crypto';
 import { PurchaseOrder, POLineItem, StorefrontSectionConfig, BentoFeature, Address, User, StoreSettings } from '../types/index.js';
@@ -131,6 +132,40 @@ export class AdminController {
       details: { status, rejectionReason },
     });
     res.json({ success: true, data: updated });
+  }
+
+  async importInventory(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { forceUpdate, assignPricing, defaultStock, filePath } = req.body || {};
+    try {
+      const result = await inventoryImportService.importFromExcel({
+        filePath,
+        forceUpdate: Boolean(forceUpdate),
+        assignPricing: assignPricing !== false,
+        defaultStock: typeof defaultStock === 'number' ? defaultStock : undefined,
+      });
+
+      await auditService.log({
+        userId: req.user?.id || 'admin',
+        userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+        userRole: 'ADMIN',
+        action: 'ADMIN_INVENTORY_IMPORTED',
+        resource: 'product',
+        details: {
+          excelPath: result.excelPath,
+          totalParsed: result.totalParsed,
+          productsCreated: result.productsCreated,
+          productsUpdated: result.productsUpdated,
+        },
+      });
+
+      res.json({ success: true, data: result });
+    } catch (err: any) {
+      console.error('[AdminController] Inventory import failed:', err);
+      res.status(500).json({
+        success: false,
+        error: { code: 'IMPORT_FAILED', message: err?.message || 'Inventory import failed' },
+      });
+    }
   }
 
   // ==========================================

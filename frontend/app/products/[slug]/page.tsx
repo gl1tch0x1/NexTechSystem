@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   const brand = product.brandName && product.brandName.toLowerCase() !== 'comnet tech' ? product.brandName : 'Enterprise';
   const title = `${product.name} - ${brand} SKU | NexTech Systems UAE`;
   const description = product.shortDescription || (product.description ? product.description.slice(0, 160) : 'Enterprise grade computing hardware, workstations, and server components.');
-  const primaryImg = product.primaryImage || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+  const primaryImg = product.thumbnail || product.images?.[0] || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80';
 
   return {
     title,

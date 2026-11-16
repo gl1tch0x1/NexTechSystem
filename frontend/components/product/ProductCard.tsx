@@ -97,13 +97,20 @@ export function ProductCard({ product }: { product: Product }) {
     : (product.brandName || '').replace(/ Semiconductor/i, '').trim();
 
   // Authentic hardware photography mapping
-  const isIntelI9 = (product.slug?.includes('14900k') || product.name?.toLowerCase().includes('14900k'));
-  const isRyzen7950X = (product.slug?.includes('7950x') || product.name?.toLowerCase().includes('7950x'));
-  const isSamsung990 = (product.slug?.includes('990-pro') || product.name?.toLowerCase().includes('990 pro'));
-  const isRtx4090 = (product.slug?.includes('4090') || product.name?.toLowerCase().includes('rtx 4090'));
+  const isComputingSystem =
+    product.categoryName?.toLowerCase().includes('laptop') ||
+    product.categoryId === 'cat_laptops' ||
+    product.categoryId === 'cat_gaming_laptops' ||
+    product.categoryId === 'cat_all_in_one' ||
+    product.categoryId === 'cat_desktops';
+
+  const isIntelI9 = !isComputingSystem && (product.slug?.includes('14900k') || product.name?.toLowerCase().includes('14900k'));
+  const isRyzen7950X = !isComputingSystem && (product.slug?.includes('7950x') || product.name?.toLowerCase().includes('7950x'));
+  const isSamsung990 = !isComputingSystem && (product.slug?.includes('990-pro') || product.name?.toLowerCase().includes('990 pro'));
+  const isRtx4090 = !isComputingSystem && (product.slug?.includes('4090') || product.name?.toLowerCase().includes('rtx 4090'));
 
   const rawImage = product.thumbnail || product.images?.[0] || '';
-  let displayImage = rawImage || '/images/intel_i9_14900k.jpg';
+  let displayImage = rawImage || (isComputingSystem ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' : '/images/intel_i9_14900k.jpg');
   if (isIntelI9) {
     displayImage = '/images/intel_i9_14900k.jpg';
   } else if (isRyzen7950X) {

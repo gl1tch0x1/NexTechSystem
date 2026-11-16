@@ -15,6 +15,7 @@ router.get('/analytics', requireRole('ADMIN'), (req, res, next) => adminControll
 
 // 2. Products & Approvals (Accessible by ADMIN and PRODUCT_EDITOR)
 router.get('/products', requireRole('ADMIN', 'PRODUCT_EDITOR'), (req, res, next) => adminController.getProducts(req, res).catch(next));
+router.post('/products/import-inventory', requireRole('ADMIN'), (req, res, next) => adminController.importInventory(req, res).catch(next));
 router.get('/products/:id', requireRole('ADMIN', 'PRODUCT_EDITOR'), (req, res, next) => adminController.getProductById(req, res).catch(next));
 router.post('/products', requireRole('ADMIN', 'PRODUCT_EDITOR'), (req, res, next) => adminController.createProduct(req, res).catch(next));
 router.put('/products/:id', requireRole('ADMIN', 'PRODUCT_EDITOR'), (req, res, next) => adminController.updateProduct(req, res).catch(next));

@@ -146,11 +146,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
           {/* Product Image */}
           <img
             src={
-              selectedImage && !selectedImage.includes('1591799264318')
-                ? selectedImage
-                : product.slug.includes('14900k') || product.name.toLowerCase().includes('14900k')
-                ? '/images/intel_i9_14900k.jpg'
-                : selectedImage || '/images/intel_i9_14900k.jpg'
+              selectedImage ||
+              (product.categoryName?.toLowerCase().includes('laptop') || product.categoryId?.includes('laptop')
+                ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80'
+                : '/images/intel_i9_14900k.jpg')
             }
             alt={product.name}
             className="max-h-full max-w-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-500 relative z-10"

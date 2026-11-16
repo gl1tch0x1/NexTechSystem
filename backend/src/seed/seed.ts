@@ -17,6 +17,7 @@ import {
   builderPresetRepo
 } from '../repositories/content.repository.js';
 import { dbStore } from '../config/db-store.js';
+import { inventoryImportService } from '../services/inventory-import.service.js';
 import {
   SEED_CATEGORIES,
   SEED_BRANDS,
@@ -94,11 +95,21 @@ export async function runSeed(clean = false) {
     await resellerRepository.create(res);
   }
 
-  // 6. Products
-  for (const prod of SEED_PRODUCTS) {
-    await productRepository.create(prod);
+  // 6. Products: Seed dynamic enterprise catalog from inventory spreadsheet into database
+  if (SEED_PRODUCTS.length > 0) {
+    for (const prod of SEED_PRODUCTS) {
+      await productRepository.create(prod);
+    }
+    console.log(`[Seed] Seeded ${SEED_PRODUCTS.length} hardware products.`);
+  } else {
+    try {
+      console.log('[Seed] Dynamically importing enterprise catalog from inventory into database...');
+      const importResult = await inventoryImportService.importFromExcel({ forceUpdate: false, assignPricing: true });
+      console.log(`[Seed] Successfully populated database with ${importResult.totalProductsInDb} products.`);
+    } catch (err: any) {
+      console.warn('[Seed] Notice: Could not import inventory during seed:', err?.message || err);
+    }
   }
-  console.log(`[Seed] Seeded ${SEED_PRODUCTS.length} hardware products.`);
 
   // 7. Coupons
   for (const c of SEED_COUPONS) {

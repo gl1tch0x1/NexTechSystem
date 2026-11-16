@@ -88,14 +88,29 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   let resolvedImage = displayImage;
   const lowerName = (displayName || '').toLowerCase();
   const lowerId = (selectedTabId || '').toLowerCase();
-  if (lowerId.includes('gpu') || lowerName.includes('4090')) {
-    resolvedImage = '/images/hero_rtx4090.jpg';
-  } else if (lowerId.includes('cpu') || lowerName.includes('14900k') || lowerName.includes('intel')) {
-    resolvedImage = '/images/intel_i9_14900k.jpg';
-  } else if (lowerId.includes('ssd') || lowerName.includes('990') || lowerName.includes('samsung')) {
-    resolvedImage = '/images/samsung_990_pro.jpg';
-  } else if (lowerName.includes('7950x') || lowerName.includes('ryzen')) {
-    resolvedImage = '/images/amd_ryzen_7950x.jpg';
+  const isComputingSystem =
+    lowerName.includes('laptop') ||
+    lowerName.includes('notebook') ||
+    lowerName.includes('macbook') ||
+    lowerName.includes('zenbook') ||
+    lowerName.includes('xps') ||
+    lowerName.includes('thinkpad') ||
+    lowerName.includes('omen') ||
+    lowerName.includes('katana') ||
+    lowerName.includes('vector') ||
+    lowerName.includes('aio') ||
+    lowerName.includes('desktop');
+
+  if (!isComputingSystem) {
+    if (lowerId.includes('gpu') || lowerName.includes('4090')) {
+      resolvedImage = '/images/hero_rtx4090.jpg';
+    } else if (lowerId.includes('cpu') || lowerName.includes('14900k')) {
+      resolvedImage = '/images/intel_i9_14900k.jpg';
+    } else if (lowerId.includes('ssd') || lowerName.includes('990')) {
+      resolvedImage = '/images/samsung_990_pro.jpg';
+    } else if (lowerName.includes('7950x')) {
+      resolvedImage = '/images/amd_ryzen_7950x.jpg';
+    }
   }
 
   const handleAddToCart = (e: React.MouseEvent) => {

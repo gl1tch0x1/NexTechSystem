@@ -9,17 +9,107 @@ import {
   Cpu,
   Server,
   HardDrive,
-  Zap,
   Layers,
   ArrowRight,
   Sparkles,
   Search,
   Boxes,
-  RotateCcw
+  RotateCcw,
+  Laptop,
+  Flame,
+  Monitor,
 } from 'lucide-react';
 
 interface EnhancedHardwareMatrixProps {
   products: Product[];
+}
+
+/**
+ * High-precision computing system priority:
+ * Ensures complete systems (Laptops, Gaming Laptops, All-in-Ones, Desktops)
+ * always rank before loose pull-out RAM sticks, SSDs, and accessories.
+ */
+function getComputingPriority(p: Product): number {
+  const name = (p.name || '').toLowerCase();
+  const cat = (p.categoryName || '').toLowerCase();
+  const brand = (p.brandName || '').toLowerCase();
+
+  // Loose pull-out components and generic spare parts have lowest priority
+  if (name.includes('pull out') || brand.includes('pull out') || (p.sku && p.sku.toLowerCase().includes('pullout'))) {
+    return 10;
+  }
+
+  // Accessories, Cables, Bags, Headsets, Mice
+  if (
+    cat.includes('accessory') ||
+    cat.includes('bag') ||
+    cat.includes('peripheral') ||
+    cat.includes('headset') ||
+    name.includes('cestus') ||
+    name.includes('mouse') ||
+    name.includes('keyboard') ||
+    name.includes('docking')
+  ) {
+    return 20;
+  }
+
+  // 1. High-Performance Gaming Laptops
+  if (
+    cat.includes('gaming laptop') ||
+    name.includes('alienware') ||
+    name.includes('omen') ||
+    name.includes('rog') ||
+    name.includes('predator helios') ||
+    name.includes('legion') ||
+    name.includes('katana') ||
+    name.includes('vector 16')
+  ) {
+    return 100;
+  }
+
+  // 2. Laptops, Mobile Workstations, Ultrabooks, MacBooks
+  if (
+    cat.includes('laptop') ||
+    name.includes('macbook') ||
+    name.includes('thinkpad') ||
+    name.includes('zenbook') ||
+    name.includes('xps') ||
+    name.includes('latitude') ||
+    name.includes('elitebook') ||
+    name.includes('vivobook') ||
+    name.includes('ideapad') ||
+    name.includes('yoga')
+  ) {
+    return 95;
+  }
+
+  // 3. All-in-One PCs & Desktop Workstations
+  if (
+    cat.includes('all-in-one') ||
+    cat.includes('desktop') ||
+    name.includes('all in one') ||
+    name.includes('optiplex') ||
+    name.includes('ideacentre')
+  ) {
+    return 90;
+  }
+
+  // 4. Servers & Enterprise Infrastructure
+  if (cat.includes('server') || cat.includes('network') || name.includes('poweredge') || name.includes('cisco') || name.includes('ubiquiti')) {
+    return 75;
+  }
+
+  // 5. Processors & Dedicated GPUs
+  if (name.includes('rtx') || name.includes('geforce') || name.includes('ryzen') || name.includes('core i9') || name.includes('core i7') || cat.includes('processor')) {
+    return 60;
+  }
+  if (cat.includes('component')) return 50;
+
+  // 6. Displays & Storage
+  if (cat.includes('monitor') || cat.includes('display')) return 45;
+  if (cat.includes('storage') || name.includes('ssd') || name.includes('hdd')) return 40;
+
+  return 30;
 }
 
 export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps) {
@@ -28,12 +118,14 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
   const [sortBy, setSortBy] = useState<string>('FEATURED');
 
   const tabs = [
-    { id: 'ALL', label: 'All Hardware', icon: Sparkles },
-    { id: 'CPU', label: 'Processors (CPUs)', icon: Cpu },
-    { id: 'GPU', label: 'Graphics (GPUs)', icon: Zap },
-    { id: 'SERVER', label: 'Servers & Networking', icon: Server },
-    { id: 'STORAGE', label: 'NVMe Storage', icon: HardDrive },
-    { id: 'MEMORY', label: 'Motherboards & RAM', icon: Layers },
+    { id: 'ALL', label: 'All Systems & Hardware', icon: Sparkles },
+    { id: 'LAPTOPS', label: 'Laptops & Workstations', icon: Laptop },
+    { id: 'GAMING', label: 'Gaming & HPC Systems', icon: Flame },
+    { id: 'DESKTOPS', label: 'All-in-One & Desktops', icon: Monitor },
+    { id: 'CPUS', label: 'Processors (CPUs)', icon: Cpu },
+    { id: 'SERVERS', label: 'Servers & Networking', icon: Server },
+    { id: 'STORAGE', label: 'NVMe & Storage', icon: HardDrive },
+    { id: 'COMPONENTS', label: 'Components & Memory', icon: Layers },
   ];
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -45,21 +137,82 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
         const sku = (p.sku || '').toLowerCase();
         const brand = (p.brandName || '').toLowerCase();
 
-        if (activeTab === 'CPU') {
-          const isCpu = (name.includes('core') || name.includes('ryzen') || name.includes('cpu') || name.includes('intel') || name.includes('amd') || name.includes('xeon')) && !name.includes('rtx') && !name.includes('geforce');
+        if (activeTab === 'LAPTOPS') {
+          const isLaptop =
+            cat.includes('laptop') ||
+            name.includes('laptop') ||
+            name.includes('notebook') ||
+            name.includes('macbook') ||
+            name.includes('thinkpad') ||
+            name.includes('zenbook') ||
+            name.includes('xps') ||
+            name.includes('latitude') ||
+            name.includes('elitebook') ||
+            name.includes('yoga') ||
+            name.includes('ideapad');
+          if (!isLaptop) return false;
+        } else if (activeTab === 'GAMING') {
+          const isGaming =
+            cat.includes('gaming') ||
+            name.includes('gaming') ||
+            name.includes('alienware') ||
+            name.includes('omen') ||
+            name.includes('rog') ||
+            name.includes('tuf') ||
+            name.includes('predator') ||
+            name.includes('legion') ||
+            name.includes('nitro') ||
+            name.includes('katana') ||
+            name.includes('vector');
+          if (!isGaming) return false;
+        } else if (activeTab === 'DESKTOPS') {
+          const isDesktop =
+            cat.includes('desktop') ||
+            cat.includes('all_in_one') ||
+            cat.includes('all-in-one') ||
+            name.includes('all in one') ||
+            name.includes('desktop') ||
+            name.includes('aio') ||
+            name.includes('optiplex') ||
+            name.includes('thinkcentre') ||
+            name.includes('ideacentre');
+          if (!isDesktop) return false;
+        } else if (activeTab === 'CPUS') {
+          const isCpu =
+            (name.includes('core') || name.includes('ryzen') || name.includes('cpu') || name.includes('intel') || name.includes('amd') || name.includes('xeon')) &&
+            !name.includes('rtx') &&
+            !name.includes('geforce') &&
+            !cat.includes('laptop');
           if (!isCpu && !cat.includes('processor') && !cat.includes('cpu')) return false;
-        } else if (activeTab === 'GPU') {
-          const isGpu = name.includes('rtx') || name.includes('geforce') || name.includes('gpu') || name.includes('radeon') || cat.includes('graphic');
-          if (!isGpu) return false;
-        } else if (activeTab === 'SERVER') {
-          const isServer = cat.includes('server') || cat.includes('network') || name.includes('server') || name.includes('poweredge') || name.includes('switch') || name.includes('cisco');
+        } else if (activeTab === 'SERVERS') {
+          const isServer =
+            cat.includes('server') ||
+            cat.includes('network') ||
+            name.includes('server') ||
+            name.includes('poweredge') ||
+            name.includes('switch') ||
+            name.includes('cisco') ||
+            name.includes('ubiquiti') ||
+            name.includes('mikrotik');
           if (!isServer) return false;
         } else if (activeTab === 'STORAGE') {
-          const isStorage = cat.includes('storage') || name.includes('ssd') || name.includes('nvme') || name.includes('990 pro') || name.includes('crucial');
+          const isStorage =
+            cat.includes('storage') ||
+            name.includes('ssd') ||
+            name.includes('nvme') ||
+            name.includes('hard disk') ||
+            name.includes('hdd') ||
+            name.includes('wd') ||
+            name.includes('sandisk');
           if (!isStorage) return false;
-        } else if (activeTab === 'MEMORY') {
-          const isMem = cat.includes('memory') || cat.includes('motherboard') || name.includes('ddr5') || name.includes('ram') || name.includes('z790') || name.includes('x670');
-          if (!isMem) return false;
+        } else if (activeTab === 'COMPONENTS') {
+          const isComp =
+            cat.includes('component') ||
+            cat.includes('memory') ||
+            cat.includes('motherboard') ||
+            name.includes('ddr') ||
+            name.includes('ram');
+          if (!isComp) return false;
         }
 
         // Search Filter
@@ -78,7 +231,19 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
         if (sortBy === 'PRICE_ASC') return priceA - priceB;
         if (sortBy === 'PRICE_DESC') return priceB - priceA;
         if (sortBy === 'STOCK_DESC') return b.stock - a.stock;
-        return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+
+        // Default 'FEATURED':
+        // 1. Featured badge status
+        const featA = a.isFeatured ? 1 : 0;
+        const featB = b.isFeatured ? 1 : 0;
+        if (featB !== featA) return featB - featA;
+
+        // 2. Hardware priority (Laptops & Computing Devices first, loose pull-out RAMs/SSDs last)
+        const prioA = getComputingPriority(a);
+        const prioB = getComputingPriority(b);
+        if (prioB !== prioA) return prioB - prioA;
+
+        return 0;
       });
   }, [products, activeTab, searchQuery, sortBy]);
 
@@ -144,7 +309,7 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search components..."
+              placeholder="Search systems, SKUs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 pr-3 py-1.5 w-full sm:w-44 lg:w-48 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors shadow-2xs"
