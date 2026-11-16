@@ -23,6 +23,8 @@ import {
 interface ProductsPageProps {
   searchParams: Promise<{
     category?: string;
+    subCategory?: string;
+    subType?: string;
     brand?: string;
     search?: string;
     minPrice?: string;
@@ -38,6 +40,22 @@ interface ProductsPageProps {
     page?: string;
   }>;
 }
+
+const SUB_CATEGORY_LABELS: Record<string, string> = {
+  gaming: 'Gaming & High-Performance',
+  work: 'Work & Professional',
+  basics: 'Everyday & Ultra-Slim',
+  everyday: 'Everyday & Ultra-Slim',
+  nvme: 'High-Speed NVMe & M.2 SSDs',
+  ssd: 'Solid State Drives (SSDs)',
+  hdd: 'Mechanical Hard Drives (HDDs)',
+  flash: 'Flash, Enclosures & Docks',
+  aio: 'All-in-One Desktop PCs',
+  desktop: 'Tower Workstations & Desktops',
+  ram: 'DDR5 & DDR4 Memory (RAM)',
+  cpu: 'Processors (CPUs)',
+  network: 'Managed PoE & Switches',
+};
 
 /**
  * Smart windowed page numbers generator:
@@ -151,6 +169,7 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
   const { products, total, page, limit, totalPages, categories, brands } = await getProductsData(resolvedParams);
 
   const currentCategory = resolvedParams.category;
+  const currentSubCategory = resolvedParams.subCategory || resolvedParams.subType;
   const currentBrand = resolvedParams.brand;
   const currentSearch = resolvedParams.search;
   const currentSort = resolvedParams.sort || 'newest';
@@ -169,8 +188,18 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
   if (categoryObj) {
     const q = { ...resolvedParams };
     delete q.category;
+    delete q.subCategory;
+    delete q.subType;
     delete q.page;
     activePills.push({ label: `Category: ${categoryObj.name}`, removeQuery: q });
+  }
+  if (currentSubCategory) {
+    const q = { ...resolvedParams };
+    delete q.subCategory;
+    delete q.subType;
+    delete q.page;
+    const subLabel = SUB_CATEGORY_LABELS[currentSubCategory.toLowerCase()] || currentSubCategory;
+    activePills.push({ label: `Workload: ${subLabel}`, removeQuery: q });
   }
   if (brandObj) {
     const q = { ...resolvedParams };
@@ -245,8 +274,19 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
             {categoryObj && (
               <>
                 <span className="text-slate-300 dark:text-slate-600">/</span>
-                <span className="text-tech-blue dark:text-cyan-400 font-bold capitalize">
+                <Link
+                  href={{ pathname: '/products', query: { category: categoryObj.id } }}
+                  className="hover:text-tech-blue dark:hover:text-cyan-400 transition-colors capitalize"
+                >
                   {categoryObj.name}
+                </Link>
+              </>
+            )}
+            {currentSubCategory && (
+              <>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-tech-blue dark:text-cyan-400 font-bold capitalize">
+                  {SUB_CATEGORY_LABELS[currentSubCategory.toLowerCase()] || currentSubCategory}
                 </span>
               </>
             )}

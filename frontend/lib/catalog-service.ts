@@ -146,6 +146,7 @@ export function getCatalogProductBySlug(slug: string): Product | null {
 
 export interface CatalogFilterOptions {
   category?: string;
+  subCategory?: string;
   brand?: string;
   search?: string;
   minPrice?: number | string;
@@ -196,6 +197,122 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
     }
     if (sellerTypeFilter && (p.sellerType || 'ADMIN').toUpperCase() !== sellerTypeFilter) return false;
 
+    // Sub-Category / Use-Case precision filtering
+    if (options.subCategory) {
+      const sub = options.subCategory.toLowerCase().trim();
+      const name = (p.name || p.title || '').toLowerCase();
+      const cat = (p.categoryName || '').toLowerCase();
+
+      let matchesSub = false;
+      if (sub === 'gaming') {
+        matchesSub =
+          cat.includes('gaming') ||
+          name.includes('alienware') ||
+          name.includes('omen') ||
+          name.includes('rog') ||
+          name.includes('legion') ||
+          name.includes('katana') ||
+          name.includes('nitro') ||
+          name.includes('predator') ||
+          name.includes('vector') ||
+          name.includes('tuf') ||
+          name.includes('cyborg') ||
+          name.includes('loq');
+      } else if (sub === 'work' || sub === 'professional') {
+        matchesSub =
+          name.includes('thinkpad') ||
+          name.includes('latitude') ||
+          name.includes('expertbook') ||
+          name.includes('probook') ||
+          name.includes('elitebook') ||
+          name.includes('macbook') ||
+          name.includes('precision') ||
+          name.includes('zbook') ||
+          name.includes('xps') ||
+          name.includes('commercial');
+      } else if (sub === 'basics' || sub === 'everyday') {
+        matchesSub =
+          name.includes('vivobook') ||
+          name.includes('zenbook') ||
+          name.includes('aspire') ||
+          name.includes('inspiron') ||
+          name.includes('ideapad') ||
+          name.includes('yoga') ||
+          name.includes('swift') ||
+          name.includes('pavilion') ||
+          name.includes('essential') ||
+          name.includes('touchscreen') ||
+          name.includes('chromebook');
+      } else if (sub === 'nvme' || sub === 'ssd') {
+        matchesSub =
+          name.includes('nvme') ||
+          name.includes('m.2') ||
+          name.includes('ssd') ||
+          name.includes('firecuda') ||
+          name.includes('crucial');
+      } else if (sub === 'hdd') {
+        matchesSub =
+          name.includes('hdd') ||
+          name.includes('wd blue') ||
+          name.includes('3.5') ||
+          name.includes('2.5') ||
+          name.includes('hard drive');
+      } else if (sub === 'flash') {
+        matchesSub =
+          name.includes('adata') ||
+          name.includes('docking') ||
+          name.includes('flash') ||
+          name.includes('bracket') ||
+          name.includes('enclosure');
+      } else if (sub === 'aio') {
+        matchesSub =
+          cat.includes('all-in-one') ||
+          name.includes('all in one') ||
+          name.includes('aio') ||
+          name.includes('ideacentre');
+      } else if (sub === 'desktop' || sub === 'tower') {
+        matchesSub =
+          cat.includes('desktop') ||
+          name.includes('desktop') ||
+          name.includes('tower') ||
+          name.includes('axc');
+      } else if (sub === 'cpu') {
+        matchesSub =
+          name.includes('cpu') ||
+          name.includes('processor') ||
+          name.includes('intel core') ||
+          name.includes('i9-') ||
+          name.includes('ryzen');
+      } else if (sub === 'ram') {
+        matchesSub =
+          name.includes('ram') ||
+          name.includes('ddr5') ||
+          name.includes('ddr4') ||
+          name.includes('ddr3') ||
+          name.includes('ddr2') ||
+          name.includes('sodimm');
+      } else if (sub === 'network' || sub === 'switch') {
+        matchesSub =
+          name.includes('switch') ||
+          name.includes('poe') ||
+          cat.includes('network') ||
+          name.includes('cisco') ||
+          name.includes('aruba') ||
+          name.includes('fortinet') ||
+          name.includes('ubiquiti');
+      } else if (sub === 'gaming_monitor' || sub === 'gaming-display') {
+        matchesSub =
+          cat.includes('monitor') &&
+          (name.includes('gaming') || name.includes('144hz') || name.includes('165hz') || name.includes('240hz') || name.includes('curved') || name.includes('predator') || name.includes('nitro'));
+      } else if (sub === 'pro_monitor' || sub === 'work-display') {
+        matchesSub =
+          cat.includes('monitor') &&
+          !name.includes('gaming') && !name.includes('144hz') && !name.includes('165hz');
+      }
+
+      if (!matchesSub) return false;
+    }
+
     // Status filter (for Admin & Vendor views)
     if (options.status && options.status !== 'ALL') {
       const targetStatus = options.status.toUpperCase();
@@ -218,7 +335,11 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
       const matchCat =
         p.categoryId?.toLowerCase() === categoryFilter ||
         p.categoryName?.toLowerCase() === categoryFilter ||
-        p.categoryName?.toLowerCase().includes(categoryFilter);
+        p.categoryName?.toLowerCase().includes(categoryFilter) ||
+        (categoryFilter.includes('laptop') && ((p.categoryName || '').toLowerCase().includes('laptop') || (p.categoryId || '').toLowerCase().includes('laptop'))) ||
+        (categoryFilter.includes('storage') && ((p.categoryName || '').toLowerCase().includes('storage') || (p.categoryId || '').toLowerCase().includes('storage'))) ||
+        ((categoryFilter.includes('all-in-one') || categoryFilter.includes('all_in_one') || categoryFilter.includes('desktop')) &&
+          ((p.categoryName || '').toLowerCase().includes('desktop') || (p.categoryName || '').toLowerCase().includes('all-in-one') || (p.categoryId || '').toLowerCase().includes('desktop') || (p.categoryId || '').toLowerCase().includes('all_in_one')));
       if (!matchCat) return false;
     }
 

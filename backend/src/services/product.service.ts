@@ -26,6 +26,7 @@ export interface ProductFilterQuery {
   resellerId?: string;
   approvalStatus?: ProductApprovalStatus;
   sortBy?: 'price_asc' | 'price_desc' | 'newest' | 'rating' | 'name_asc' | 'featured';
+  subCategory?: string;
   specifications?: Record<string, string>; // e.g. { processor: 'i9', ram: '32GB' }
   page?: number;
   limit?: number;
@@ -180,7 +181,11 @@ export class ProductService {
         p.categoryId === term ||
         (targetId && p.categoryId === targetId) ||
         p.categoryName?.toLowerCase() === term ||
-        p.categoryId?.toLowerCase() === term
+        p.categoryId?.toLowerCase() === term ||
+        (term.includes('laptop') && ((p.categoryName || '').toLowerCase().includes('laptop') || (p.categoryId || '').toLowerCase().includes('laptop'))) ||
+        (term.includes('storage') && ((p.categoryName || '').toLowerCase().includes('storage') || (p.categoryId || '').toLowerCase().includes('storage'))) ||
+        ((term.includes('all-in-one') || term.includes('all_in_one') || term.includes('desktop')) &&
+          ((p.categoryName || '').toLowerCase().includes('desktop') || (p.categoryName || '').toLowerCase().includes('all-in-one') || (p.categoryId || '').toLowerCase().includes('desktop') || (p.categoryId || '').toLowerCase().includes('all_in_one')))
       );
     }
 
@@ -234,6 +239,123 @@ export class ProductService {
     }
     if (filter.maxPrice != null) {
       allProducts = allProducts.filter(p => (p.salePrice || p.price) <= filter.maxPrice!);
+    }
+
+    // Sub-Category / Hardware Use-Case filter
+    if (filter.subCategory) {
+      const sub = filter.subCategory.toLowerCase().trim();
+      allProducts = allProducts.filter(p => {
+        const name = (p.name || '').toLowerCase();
+        const cat = (p.categoryName || '').toLowerCase();
+
+        if (sub === 'gaming') {
+          return (
+            name.includes('alienware') ||
+            name.includes('omen') ||
+            name.includes('rog') ||
+            name.includes('legion') ||
+            name.includes('katana') ||
+            name.includes('nitro') ||
+            name.includes('predator') ||
+            name.includes('vector') ||
+            name.includes('tuf') ||
+            cat.includes('gaming laptop')
+          );
+        } else if (sub === 'work' || sub === 'professional') {
+          return (
+            name.includes('thinkpad') ||
+            name.includes('latitude') ||
+            name.includes('expertbook') ||
+            name.includes('probook') ||
+            name.includes('elitebook') ||
+            name.includes('macbook') ||
+            name.includes('precision') ||
+            name.includes('zbook') ||
+            name.includes('xps') ||
+            name.includes('commercial')
+          );
+        } else if (sub === 'basics' || sub === 'everyday') {
+          return (
+            name.includes('vivobook') ||
+            name.includes('zenbook') ||
+            name.includes('aspire') ||
+            name.includes('inspiron') ||
+            name.includes('ideapad') ||
+            name.includes('yoga') ||
+            name.includes('swift') ||
+            name.includes('pavilion') ||
+            name.includes('essential') ||
+            name.includes('touchscreen') ||
+            name.includes('chromebook')
+          );
+        } else if (sub === 'nvme' || sub === 'ssd') {
+          return (
+            name.includes('nvme') ||
+            name.includes('m.2') ||
+            name.includes('ssd') ||
+            name.includes('firecuda') ||
+            name.includes('crucial')
+          );
+        } else if (sub === 'hdd') {
+          return (
+            name.includes('hdd') ||
+            name.includes('wd blue') ||
+            name.includes('3.5') ||
+            name.includes('2.5') ||
+            name.includes('hard drive')
+          );
+        } else if (sub === 'flash') {
+          return (
+            name.includes('adata') ||
+            name.includes('docking') ||
+            name.includes('flash') ||
+            name.includes('bracket') ||
+            name.includes('enclosure')
+          );
+        } else if (sub === 'aio') {
+          return (
+            cat.includes('all-in-one') ||
+            name.includes('all in one') ||
+            name.includes('aio') ||
+            name.includes('ideacentre')
+          );
+        } else if (sub === 'desktop' || sub === 'tower') {
+          return (
+            cat.includes('desktop') ||
+            name.includes('desktop') ||
+            name.includes('tower') ||
+            name.includes('axc')
+          );
+        } else if (sub === 'cpu') {
+          return (
+            name.includes('cpu') ||
+            name.includes('processor') ||
+            name.includes('intel core') ||
+            name.includes('i9-') ||
+            name.includes('ryzen')
+          );
+        } else if (sub === 'ram') {
+          return (
+            name.includes('ram') ||
+            name.includes('ddr5') ||
+            name.includes('ddr4') ||
+            name.includes('ddr3') ||
+            name.includes('ddr2') ||
+            name.includes('sodimm')
+          );
+        } else if (sub === 'network' || sub === 'switch') {
+          return (
+            name.includes('switch') ||
+            name.includes('poe') ||
+            cat.includes('network') ||
+            name.includes('cisco') ||
+            name.includes('aruba') ||
+            name.includes('fortinet') ||
+            name.includes('ubiquiti')
+          );
+        }
+        return false;
+      });
     }
 
     // In-stock only
