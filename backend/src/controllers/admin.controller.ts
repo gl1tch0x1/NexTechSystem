@@ -148,7 +148,7 @@ export class AdminController {
           return;
         }
 
-        const rawPath = filePath.trim().replace(/\0/g, '');
+        const rawPath = filePath.trim().replace(/\0/g, '').replace(/\n|\r/g, '');
         // Block path traversal tokens
         if (rawPath.includes('..') || rawPath.includes('/') || rawPath.includes('\\')) {
           res.status(400).json({
@@ -198,7 +198,8 @@ export class AdminController {
 
       res.json({ success: true, data: result });
     } catch (err: any) {
-      console.error('[AdminController] Inventory import failed:', err);
+      const safeErrorMsg = String(err?.message || 'Inventory import failed').replace(/\n|\r/g, '');
+      console.error('[AdminController] Inventory import failed: %s', safeErrorMsg);
       res.status(500).json({
         success: false,
         error: { code: 'IMPORT_FAILED', message: err?.message || 'Inventory import failed' },

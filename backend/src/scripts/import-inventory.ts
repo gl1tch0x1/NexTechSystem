@@ -21,7 +21,8 @@ async function run() {
     console.log('\n====================================================');
     console.log('✅ Inventory Import to Database Complete!');
     console.log('====================================================');
-    console.log(`📁 Source:              ${result.excelPath}`);
+    const sanitizedExcelPath = String(result.excelPath).replace(/\n|\r/g, '');
+    console.log(`📁 Source:              ${sanitizedExcelPath}`);
     console.log(`📦 Total Items Parsed:  ${result.totalParsed}`);
     console.log(`🆕 Products Created:    ${result.productsCreated}`);
     console.log(`🔁 Products Updated:    ${result.productsUpdated}`);
@@ -32,7 +33,8 @@ async function run() {
     console.log('====================================================\n');
     process.exit(0);
   } catch (err: any) {
-    console.error('\n❌ [Inventory Import Error]:', err?.message || err);
+    const safeError = String(err?.message || err).replace(/\n|\r/g, '');
+    console.error('\n❌ [Inventory Import Error]: %s', safeError);
     process.exit(1);
   }
 }

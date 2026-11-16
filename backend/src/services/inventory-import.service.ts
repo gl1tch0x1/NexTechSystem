@@ -181,8 +181,8 @@ export class InventoryImportService {
     const safeDirPrefix = safeDir.endsWith(path.sep) ? safeDir : `${safeDir}${path.sep}`;
 
     if (customPath && typeof customPath === 'string' && customPath.trim()) {
-      // 1. Sanitize against null bytes
-      const sanitized = customPath.trim().replace(/\0/g, '');
+      // 1. Sanitize against null bytes and newline injection (CWE-117)
+      const sanitized = customPath.trim().replace(/\0/g, '').replace(/\n|\r/g, '');
 
       // 2. Extract base filename to strip any directory traversal sequences
       const cleanFileName = path.basename(sanitized);
@@ -644,8 +644,10 @@ export class InventoryImportService {
    * Primary entry point: Imports products from Excel into the Database
    */
   public async importFromExcel(options: ImportOptions = {}): Promise<ImportResult> {
-    const excelPath = this.resolveExcelPath(options.filePath);
-    console.log(`[InventoryImport] Reading Excel file from: ${excelPath}`);
+    const rawFilePath = typeof options.filePath === 'string' ? options.filePath.replace(/\n|\r/g, '') : options.filePath;
+    const excelPath = this.resolveExcelPath(rawFilePath);
+    const sanitizedLogPath = String(excelPath).replace(/\n|\r/g, '');
+    console.log(`[InventoryImport] Reading Excel file from: ${sanitizedLogPath}`);
 
     const wb = XLSX.readFile(excelPath);
     const sheet = wb.Sheets[wb.SheetNames[0]];

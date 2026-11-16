@@ -77,4 +77,11 @@ test('inventory importer CWE-022 path traversal defense', async (t) => {
     assert.equal(statusCode, 400);
     assert.equal(responseBody.error.code, 'INVALID_FILE_TYPE');
   });
+
+  await t.test('strips newline and carriage return characters to prevent CWE-117 log injection', () => {
+    // If a valid filename contains CRLF sequences, resolveExcelPath sanitizes them without crashing or forging lines
+    const resolved = inventoryImportService.resolveExcelPath('ComNet_Inventory.xls\r\n');
+    assert.ok(resolved.endsWith('ComNet_Inventory.xls'));
+    assert.ok(!resolved.includes('\r') && !resolved.includes('\n'));
+  });
 });
