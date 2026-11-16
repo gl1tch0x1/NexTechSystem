@@ -154,6 +154,7 @@ export interface CatalogFilterOptions {
   onSale?: boolean | string;
   featured?: boolean | string;
   sort?: string;
+  status?: string;
   page?: number | string;
   limit?: number | string;
 }
@@ -186,6 +187,20 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
   let filtered = sortedCatalog.filter(p => {
     if (featuredOnly && !p.isFeatured) return false;
     if (inStockOnly && (p.stock || 0) <= 0) return false;
+
+    // Status filter (for Admin & Vendor views)
+    if (options.status && options.status !== 'ALL') {
+      const targetStatus = options.status.toUpperCase();
+      if (targetStatus === 'APPROVED') {
+        if (p.approvalStatus !== 'APPROVED' && p.approvalStatus !== 'ACTIVE') return false;
+      } else if (targetStatus === 'PENDING' || targetStatus === 'PENDING_APPROVAL') {
+        if (p.approvalStatus !== 'PENDING_APPROVAL') return false;
+      } else if (targetStatus === 'REJECTED') {
+        if (p.approvalStatus !== 'REJECTED') return false;
+      } else if (targetStatus === 'LOW_STOCK') {
+        if ((p.stock || 0) > (p.lowStockThreshold || 5)) return false;
+      }
+    }
 
     const price = p.salePrice || p.price || 0;
     if (minPrice !== null && !isNaN(minPrice) && price < minPrice) return false;
@@ -234,6 +249,8 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
     if (sort === 'price_asc' || sort === 'price-asc') return priceA - priceB;
     if (sort === 'price_desc' || sort === 'price-desc') return priceB - priceA;
     if (sort === 'stock_desc' || sort === 'stock-desc') return (b.stock || 0) - (a.stock || 0);
+    if (sort === 'stock_asc' || sort === 'stock-asc') return (a.stock || 0) - (b.stock || 0);
+    if (sort === 'name_asc' || sort === 'name-asc') return (a.name || a.title || '').localeCompare(b.name || b.title || '');
     if (sort === 'newest') {
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();

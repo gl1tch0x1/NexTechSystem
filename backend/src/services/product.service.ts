@@ -29,6 +29,7 @@ export interface ProductFilterQuery {
   specifications?: Record<string, string>; // e.g. { processor: 'i9', ram: '32GB' }
   page?: number;
   limit?: number;
+  isAdmin?: boolean;
 }
 
 /**
@@ -153,7 +154,8 @@ export class ProductService {
     let allProducts = await productRepository.find();
 
     // Public storefront catalog: strictly return active and admin-approved products
-    if (!filter.approvalStatus && !filter.resellerId) {
+    // (Admin requests with filter.isAdmin: true bypass this filter to view drafts, pending, and inactive SKUs)
+    if (!filter.approvalStatus && !filter.resellerId && !filter.isAdmin) {
       allProducts = allProducts.filter(
         p => p.isActive && (p.approvalStatus === 'APPROVED' || p.approvalStatus === 'ACTIVE')
       );

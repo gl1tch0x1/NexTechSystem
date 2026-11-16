@@ -45,14 +45,17 @@ export class AdminController {
   // 1. PRODUCT MANAGEMENT CRUD
   // ==========================================
   async getProducts(req: AuthenticatedRequest, res: Response): Promise<void> {
-    const { status, search, page, limit, categoryId, brandId } = req.query;
+    const { status, search, page, limit, categoryId, brandId, sortBy } = req.query;
+    const parsedLimit = limit ? parseInt(limit as string, 10) : 500;
     const result = await productService.getProducts({
-      approvalStatus: status as any,
+      isAdmin: true,
+      approvalStatus: status && status !== 'ALL' ? (status as any) : undefined,
       search: search as string,
       categoryId: categoryId as string,
       brandId: brandId as string,
+      sortBy: sortBy as any,
       page: page ? parseInt(page as string, 10) : 1,
-      limit: limit ? parseInt(limit as string, 10) : 100,
+      limit: parsedLimit > 0 ? parsedLimit : 500,
     });
     res.json({ success: true, data: result.products, meta: result });
   }
