@@ -32,10 +32,12 @@ export async function GET(request: NextRequest) {
     minPrice: searchParams.get('minPrice') || undefined,
     maxPrice: searchParams.get('maxPrice') || undefined,
     inStock: searchParams.get('inStock') || undefined,
+    onSale: searchParams.get('onSale') || undefined,
+    sellerType: searchParams.get('sellerType') || undefined,
     featured: searchParams.get('featured') || undefined,
     sort: searchParams.get('sort') || searchParams.get('sortBy') || undefined,
     page: searchParams.get('page') || undefined,
-    limit: searchParams.get('limit') || undefined,
+    limit: searchParams.get('limit') || '10',
   };
 
   const result = filterCatalogProducts(options);

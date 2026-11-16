@@ -114,7 +114,7 @@ export class ProductController {
       location: location as string,
       sortBy: ((sort || sortBy) as any),
       page: page ? parseInt(page as string, 10) : 1,
-      limit: limit ? parseInt(limit as string, 10) : 20,
+      limit: limit ? parseInt(limit as string, 10) : 10,
       specifications: Object.keys(specifications).length > 0 ? specifications : undefined,
     });
 

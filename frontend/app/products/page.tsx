@@ -36,13 +36,12 @@ interface ProductsPageProps {
     featured?: string;
     sort?: string;
     page?: string;
-    limit?: string;
   }>;
 }
 
 /**
  * Smart windowed page numbers generator:
- * Produces accessible, clean arrays like [1, 2, 3, 4, 5, '...', 16] or [1, '...', 7, 8, 9, '...', 16].
+ * Produces accessible, clean arrays like [1, 2, 3, 4, 5, '...', 31] or [1, '...', 14, 15, 16, '...', 31].
  */
 function getPaginationItems(currentPage: number, totalPages: number): Array<number | '...'> {
   if (totalPages <= 7) {
@@ -64,7 +63,7 @@ async function getProductsData(params: Record<string, any>) {
   let products: Product[] = [];
   let total = 0;
   let page = Math.max(1, Number(params.page) || 1);
-  let limit = Math.max(1, Number(params.limit) || 20);
+  const limit = 10; // strictly 10 products per page
   let totalPages = 1;
   let facets: any = null;
   let categories: Category[] = [];
@@ -75,8 +74,8 @@ async function getProductsData(params: Record<string, any>) {
     for (const [k, v] of Object.entries(params)) {
       if (v) qs.append(k, v);
     }
-    // Ensure limit and page are passed to backend
-    if (!qs.has('limit')) qs.set('limit', String(limit));
+    // Strictly enforce 10 listings per page
+    qs.set('limit', String(limit));
     if (!qs.has('page')) qs.set('page', String(page));
 
     const res = await fetch(getApiUrl(`/products?${qs.toString()}`), { cache: 'no-store' });
@@ -85,7 +84,6 @@ async function getProductsData(params: Record<string, any>) {
       products = (json.data || []) as Product[];
       total = json.meta?.total || products.length;
       page = json.meta?.page || page;
-      limit = json.meta?.limit || limit;
       totalPages = json.meta?.totalPages || Math.ceil(total / limit) || 1;
       facets = json.meta?.facets;
     }
@@ -115,7 +113,6 @@ async function getProductsData(params: Record<string, any>) {
     products = catalogResult.products;
     total = catalogResult.total;
     page = catalogResult.page;
-    limit = catalogResult.limit;
     totalPages = catalogResult.totalPages;
     if (!facets || !facets.categories || facets.categories.length === 0) {
       facets = catalogResult.facets;
@@ -159,6 +156,9 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
   const currentSort = resolvedParams.sort || 'newest';
   const currentMinPrice = resolvedParams.minPrice;
   const currentMaxPrice = resolvedParams.maxPrice;
+  const currentInStock = resolvedParams.inStock === 'true';
+  const currentOnSale = resolvedParams.onSale === 'true';
+  const currentSellerType = resolvedParams.sellerType;
 
   const categoryObj = categories.find(c => c.id === currentCategory || c.slug === currentCategory);
   const brandObj = brands.find(b => b.id === currentBrand || b.slug === currentBrand);
@@ -196,9 +196,27 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
       : `Price: < AED ${currentMaxPrice}`;
     activePills.push({ label: priceText, removeQuery: q });
   }
+  if (currentInStock) {
+    const q = { ...resolvedParams };
+    delete q.inStock;
+    delete q.page;
+    activePills.push({ label: 'In-Stock UAE Pool Only', removeQuery: q });
+  }
+  if (currentOnSale) {
+    const q = { ...resolvedParams };
+    delete q.onSale;
+    delete q.page;
+    activePills.push({ label: 'Discounted / Deals Only', removeQuery: q });
+  }
+  if (currentSellerType === 'ADMIN') {
+    const q = { ...resolvedParams };
+    delete q.sellerType;
+    delete q.page;
+    activePills.push({ label: 'Tier-1 Direct OEM Only', removeQuery: q });
+  }
 
   // Helper to build canonical page URL preserving all active filters
-  const buildPageUrl = (targetPage: number, targetLimit?: number) => {
+  const buildPageUrl = (targetPage: number) => {
     const q: Record<string, string> = {};
     for (const [k, v] of Object.entries(resolvedParams)) {
       if (v && k !== 'page' && k !== 'limit') {
@@ -207,10 +225,6 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
     }
     if (targetPage > 1) {
       q.page = String(targetPage);
-    }
-    const effectiveLimit = targetLimit !== undefined ? targetLimit : limit;
-    if (effectiveLimit && effectiveLimit !== 20) {
-      q.limit = String(effectiveLimit);
     }
     return { pathname: '/products', query: q };
   };
@@ -308,32 +322,11 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
               )}
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* Density / Items per page selector */}
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                <span className="text-[11px] font-semibold text-slate-400">Per Page:</span>
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold">
-                  {[20, 40, 60].map(cnt => (
-                    <Link
-                      key={cnt}
-                      href={buildPageUrl(1, cnt)}
-                      className={`px-2 py-0.5 rounded-md transition-colors ${
-                        limit === cnt
-                          ? 'bg-blue-600 text-white shadow-xs'
-                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      {cnt}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sorting Pills */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
+                <ArrowUpDown className="w-3.5 h-3.5" /> Sort:
+              </span>
               <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-400 dark:text-slate-500 px-1.5 text-[11px] flex items-center gap-1 font-semibold">
-                  <ArrowUpDown className="w-3 h-3" />
-                </span>
                 <Link
                   href={{ pathname: '/products', query: { ...resolvedParams, sort: 'newest', page: undefined } }}
                   className={`px-2.5 py-1 rounded-md transition-colors ${

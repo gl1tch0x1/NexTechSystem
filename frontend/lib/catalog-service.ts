@@ -152,6 +152,7 @@ export interface CatalogFilterOptions {
   maxPrice?: number | string;
   inStock?: boolean | string;
   onSale?: boolean | string;
+  sellerType?: string;
   featured?: boolean | string;
   sort?: string;
   status?: string;
@@ -174,7 +175,7 @@ export interface CatalogFilterResult {
 
 export function filterCatalogProducts(options: CatalogFilterOptions = {}): CatalogFilterResult {
   const page = Math.max(1, Number(options.page) || 1);
-  const limit = Math.max(1, Number(options.limit) || 20);
+  const limit = Math.max(1, Number(options.limit) || 10);
 
   const q = options.search ? String(options.search).toLowerCase().trim() : '';
   const categoryFilter = options.category ? String(options.category).toLowerCase().trim() : '';
@@ -182,11 +183,18 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
   const minPrice = options.minPrice !== undefined && options.minPrice !== '' ? Number(options.minPrice) : null;
   const maxPrice = options.maxPrice !== undefined && options.maxPrice !== '' ? Number(options.maxPrice) : null;
   const inStockOnly = options.inStock === true || options.inStock === 'true' || options.inStock === '1';
+  const onSaleOnly = options.onSale === true || options.onSale === 'true' || options.onSale === '1';
   const featuredOnly = options.featured === true || options.featured === 'true' || options.featured === '1';
+  const sellerTypeFilter = options.sellerType ? String(options.sellerType).toUpperCase().trim() : '';
 
   let filtered = sortedCatalog.filter(p => {
     if (featuredOnly && !p.isFeatured) return false;
     if (inStockOnly && (p.stock || 0) <= 0) return false;
+    if (onSaleOnly) {
+      const hasDiscount = (p.salePrice && p.salePrice < p.price) || (p.compareAtPrice && p.compareAtPrice > p.price);
+      if (!hasDiscount) return false;
+    }
+    if (sellerTypeFilter && (p.sellerType || 'ADMIN').toUpperCase() !== sellerTypeFilter) return false;
 
     // Status filter (for Admin & Vendor views)
     if (options.status && options.status !== 'ALL') {

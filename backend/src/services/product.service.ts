@@ -345,7 +345,7 @@ export class ProductService {
 
     const total = allProducts.length;
     const page = Math.max(1, filter.page || 1);
-    const limit = Math.min(100, Math.max(1, filter.limit || 20));
+    const limit = Math.min(100, Math.max(1, filter.limit || 10));
     const totalPages = Math.ceil(total / limit) || 1;
     const offset = (page - 1) * limit;
     const paginatedProducts = allProducts.slice(offset, offset + limit);
