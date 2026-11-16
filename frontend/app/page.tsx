@@ -11,8 +11,13 @@ import { EnterpriseBentoGrid } from '@/components/home/EnterpriseBentoGrid';
 import { TaxonomyExplorer } from '@/components/home/TaxonomyExplorer';
 import { ClientTestimonials } from '@/components/home/ClientTestimonials';
 import { getApiUrl } from '@/lib/api-client';
-import { FALLBACK_PRODUCTS, FALLBACK_HOMEPAGE_CONTENT } from '@/lib/fallback-data';
+import { FALLBACK_HOMEPAGE_CONTENT } from '@/lib/fallback-data';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from '@/lib/default-taxonomy';
+import {
+  getAllCatalogProducts,
+  getCatalogCategories,
+  getCatalogBrands,
+} from '@/lib/catalog-service';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -56,10 +61,21 @@ async function getHomeData(): Promise<{
       content = json.data || null;
     }
 
+    const catalogProducts = getAllCatalogProducts();
+    let finalProducts = products;
+    if (finalProducts.length < 8) {
+      const existingIds = new Set(finalProducts.map(p => p.id));
+      const needed = catalogProducts.filter(p => !existingIds.has(p.id));
+      finalProducts = [...finalProducts, ...needed];
+    }
+
+    const finalCategories = categories.length >= 5 ? categories : getCatalogCategories();
+    const finalBrands = brands.length >= 5 ? brands : getCatalogBrands();
+
     return {
-      products: products.length > 0 ? products : FALLBACK_PRODUCTS,
-      categories: categories.length > 0 ? categories : DEFAULT_CATEGORIES,
-      brands: brands.length > 0 ? brands : DEFAULT_BRANDS,
+      products: finalProducts.length > 0 ? finalProducts : catalogProducts,
+      categories: finalCategories.length > 0 ? finalCategories : DEFAULT_CATEGORIES,
+      brands: finalBrands.length > 0 ? finalBrands : DEFAULT_BRANDS,
       content: content ? {
         heroHighlights: (content.heroHighlights && content.heroHighlights.length > 0)
           ? content.heroHighlights
@@ -87,9 +103,9 @@ async function getHomeData(): Promise<{
   } catch (err) {
     console.warn('[Home] Failed to load dynamic home data:', err);
     return {
-      products: FALLBACK_PRODUCTS,
-      categories: DEFAULT_CATEGORIES,
-      brands: DEFAULT_BRANDS,
+      products: getAllCatalogProducts(),
+      categories: getCatalogCategories(),
+      brands: getCatalogBrands(),
       content: FALLBACK_HOMEPAGE_CONTENT,
     };
   }

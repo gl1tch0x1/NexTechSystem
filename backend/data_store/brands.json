@@ -1,0 +1,479 @@
+[
+  {
+    "id": "brand_hp",
+    "name": "HP",
+    "slug": "hp",
+    "isActive": true,
+    "createdAt": "2026-11-12T14:00:00.000Z",
+    "updatedAt": "2026-11-16T14:25:27.744Z",
+    "productCount": 55
+  },
+  {
+    "id": "brand_asus",
+    "name": "ASUS",
+    "slug": "asus",
+    "isActive": true,
+    "createdAt": "2026-11-12T14:00:00.000Z",
+    "updatedAt": "2026-11-16T14:25:27.748Z",
+    "productCount": 18
+  },
+  {
+    "id": "brand_dell",
+    "name": "Dell",
+    "slug": "dell",
+    "isActive": true,
+    "createdAt": "2026-11-12T14:00:00.000Z",
+    "updatedAt": "2026-11-16T14:25:27.751Z",
+    "productCount": 28
+  },
+  {
+    "id": "brand_acer",
+    "name": "Acer",
+    "slug": "acer",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.014Z",
+    "updatedAt": "2026-11-16T14:25:27.753Z",
+    "productCount": 4
+  },
+  {
+    "id": "brand_lenovo",
+    "name": "Lenovo",
+    "slug": "lenovo",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.015Z",
+    "updatedAt": "2026-11-16T14:25:27.755Z",
+    "productCount": 23
+  },
+  {
+    "id": "brand_msi",
+    "name": "MSI",
+    "slug": "msi",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.017Z",
+    "updatedAt": "2026-11-16T14:25:27.758Z",
+    "productCount": 4
+  },
+  {
+    "id": "brand_sony",
+    "name": "Sony",
+    "slug": "sony",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.017Z",
+    "updatedAt": "2026-11-16T14:25:27.762Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_dji",
+    "name": "DJI",
+    "slug": "dji",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.017Z",
+    "updatedAt": "2026-11-16T14:25:27.764Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_jbl",
+    "name": "JBL",
+    "slug": "jbl",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.017Z",
+    "updatedAt": "2026-11-16T14:25:27.766Z",
+    "productCount": 2
+  },
+  {
+    "id": "brand_anker",
+    "name": "Anker",
+    "slug": "anker",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.018Z",
+    "updatedAt": "2026-11-16T14:25:27.769Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_samsung",
+    "name": "Samsung",
+    "slug": "samsung",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.771Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_lg",
+    "name": "LG",
+    "slug": "lg",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.774Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_honeywell",
+    "name": "Honeywell",
+    "slug": "honeywell",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.776Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_ubiquiti",
+    "name": "Ubiquiti",
+    "slug": "ubiquiti",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.778Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_apple",
+    "name": "Apple",
+    "slug": "apple",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.782Z",
+    "productCount": 10
+  },
+  {
+    "id": "brand_microsoft",
+    "name": "Microsoft",
+    "slug": "microsoft",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.021Z",
+    "updatedAt": "2026-11-16T14:25:27.784Z",
+    "productCount": 6
+  },
+  {
+    "id": "brand_generic",
+    "name": "Generic",
+    "slug": "generic",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.021Z",
+    "updatedAt": "2026-11-16T14:25:27.787Z",
+    "productCount": 7
+  },
+  {
+    "id": "brand_haysenser",
+    "name": "Haysenser",
+    "slug": "haysenser",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.021Z",
+    "updatedAt": "2026-11-16T14:25:27.789Z",
+    "productCount": 4
+  },
+  {
+    "id": "brand_google",
+    "name": "Google",
+    "slug": "google",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.021Z",
+    "updatedAt": "2026-11-16T14:25:27.791Z",
+    "productCount": 2
+  },
+  {
+    "id": "brand_rapoo",
+    "name": "Rapoo",
+    "slug": "rapoo",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.021Z",
+    "updatedAt": "2026-11-16T14:25:27.794Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_crucial",
+    "name": "Crucial",
+    "slug": "crucial",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.021Z",
+    "updatedAt": "2026-11-16T14:25:27.797Z",
+    "productCount": 18
+  },
+  {
+    "id": "brand_adata",
+    "name": "ADATA",
+    "slug": "adata",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.021Z",
+    "updatedAt": "2026-11-16T14:25:27.800Z",
+    "productCount": 5
+  },
+  {
+    "id": "brand_cisco",
+    "name": "Cisco",
+    "slug": "cisco",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.802Z",
+    "productCount": 3
+  },
+  {
+    "id": "brand_intel",
+    "name": "Intel",
+    "slug": "intel",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.804Z",
+    "productCount": 2
+  },
+  {
+    "id": "brand_toshiba",
+    "name": "Toshiba",
+    "slug": "toshiba",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.806Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_okade",
+    "name": "Okade",
+    "slug": "okade",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.808Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_redline",
+    "name": "Red Line",
+    "slug": "red-line",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.811Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_wd",
+    "name": "Western Digital",
+    "slug": "western-digital",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.814Z",
+    "productCount": 7
+  },
+  {
+    "id": "brand_seagate",
+    "name": "Seagate",
+    "slug": "seagate",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.817Z",
+    "productCount": 12
+  },
+  {
+    "id": "brand_transcend",
+    "name": "Transcend",
+    "slug": "transcend",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.819Z",
+    "productCount": 7
+  },
+  {
+    "id": "brand_razer",
+    "name": "Razer",
+    "slug": "razer",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.822Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_logitech",
+    "name": "Logitech",
+    "slug": "logitech",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.825Z",
+    "productCount": 2
+  },
+  {
+    "id": "brand_adesso",
+    "name": "Adesso",
+    "slug": "adesso",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.828Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_kensington",
+    "name": "Kensington",
+    "slug": "kensington",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.831Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_mikrotik",
+    "name": "MikroTik",
+    "slug": "mikrotik",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.833Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_pullout",
+    "name": "Generic (Pull Out)",
+    "slug": "generic-pull-out-",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.836Z",
+    "productCount": 50
+  },
+  {
+    "id": "brand_santak",
+    "name": "Santak",
+    "slug": "santak",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.838Z",
+    "productCount": 2
+  },
+  {
+    "id": "brand_imation",
+    "name": "Imation",
+    "slug": "imation",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.840Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_hynix",
+    "name": "SK Hynix",
+    "slug": "sk-hynix",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.843Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_sandisk",
+    "name": "SanDisk",
+    "slug": "sandisk",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.845Z",
+    "productCount": 2
+  },
+  {
+    "id": "brand_teamgroup",
+    "name": "TeamGroup",
+    "slug": "teamgroup",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.847Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_oscoo",
+    "name": "OSCOO",
+    "slug": "oscoo",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.850Z",
+    "productCount": 2
+  },
+  {
+    "id": "brand_kingston",
+    "name": "Kingston",
+    "slug": "kingston",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.852Z",
+    "productCount": 1
+  },
+  {
+    "id": "brand_apc",
+    "name": "APC",
+    "slug": "apc",
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.855Z",
+    "productCount": 5
+  },
+  {
+    "id": "brand_corsair",
+    "name": "Corsair",
+    "slug": "corsair",
+    "description": "Official Corsair authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.857Z"
+  },
+  {
+    "id": "brand_hisense",
+    "name": "Hisense",
+    "slug": "hisense",
+    "description": "Official Hisense authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.860Z"
+  },
+  {
+    "id": "brand_targus",
+    "name": "Targus",
+    "slug": "targus",
+    "description": "Official Targus authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.863Z"
+  },
+  {
+    "id": "brand_tucano",
+    "name": "Tucano",
+    "slug": "tucano",
+    "description": "Official Tucano authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.866Z"
+  },
+  {
+    "id": "brand_orico",
+    "name": "Orico",
+    "slug": "orico",
+    "description": "Official Orico authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.868Z"
+  },
+  {
+    "id": "brand_rivacase",
+    "name": "Rivacase",
+    "slug": "rivacase",
+    "description": "Official Rivacase authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.871Z"
+  },
+  {
+    "id": "brand_verbatim",
+    "name": "Verbatim",
+    "slug": "verbatim",
+    "description": "Official Verbatim authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.873Z"
+  },
+  {
+    "id": "brand_hyperx",
+    "name": "HyperX",
+    "slug": "hyperx",
+    "description": "Official HyperX authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.875Z"
+  },
+  {
+    "id": "brand_steelseries",
+    "name": "SteelSeries",
+    "slug": "steelseries",
+    "description": "Official SteelSeries authorized hardware catalog and certified distribution.",
+    "isActive": true,
+    "productCount": 0,
+    "updatedAt": "2026-11-16T14:25:27.880Z"
+  }
+]

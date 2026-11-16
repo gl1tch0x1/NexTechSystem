@@ -5,6 +5,11 @@ import { AdvancedCatalogFilter } from '@/components/product/AdvancedCatalogFilte
 import { Product, Category, Brand } from '@/types';
 import { Filter, ArrowUpDown, Search, RotateCcw, X } from 'lucide-react';
 import { getApiUrl } from '@/lib/api-client';
+import {
+  filterCatalogProducts,
+  getCatalogCategories,
+  getCatalogBrands,
+} from '@/lib/catalog-service';
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -59,6 +64,23 @@ async function getProductsData(params: Record<string, any>) {
     }
   } catch (err) {
     console.warn('[Products] Error fetching catalog data from Node.js backend:', err);
+  }
+
+  // If remote backend returned sparse or incomplete products, seamlessly populate from verified catalog
+  if (products.length <= 2) {
+    const catalogResult = filterCatalogProducts(params);
+    products = catalogResult.products;
+    total = catalogResult.total;
+    if (!facets || !facets.categories || facets.categories.length === 0) {
+      facets = catalogResult.facets;
+    }
+  }
+
+  if (categories.length === 0) {
+    categories = getCatalogCategories();
+  }
+  if (brands.length === 0) {
+    brands = getCatalogBrands();
   }
 
   if (!facets) {

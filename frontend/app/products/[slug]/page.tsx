@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { getApiUrl } from '@/lib/api-client';
+import { getCatalogProductBySlug, getAllCatalogProducts } from '@/lib/catalog-service';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -34,6 +35,16 @@ async function getProductData(slug: string): Promise<{
     }
   } catch (err) {
     console.warn(`[ProductDetail] Error fetching product ${slug} from Node.js backend:`, err);
+  }
+
+  // Resilient fallback from verified catalog
+  const product = getCatalogProductBySlug(slug);
+  if (product) {
+    const all = getAllCatalogProducts();
+    const relatedProducts = all
+      .filter(p => p.id !== product.id && (p.categoryId === product.categoryId || p.brandId === product.brandId))
+      .slice(0, 4);
+    return { product, reviews: [], relatedProducts };
   }
 
   return { product: null, reviews: [], relatedProducts: [] };

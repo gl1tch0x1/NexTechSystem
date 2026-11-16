@@ -15,8 +15,11 @@ import {
   Reseller
 } from '@/types';
 import { DEFAULT_CATEGORIES, DEFAULT_BRANDS } from './default-taxonomy';
+import { getAllCatalogProducts } from './catalog-service';
 
-export const FALLBACK_PRODUCTS: Product[] = [
+export const FALLBACK_PRODUCTS: Product[] = getAllCatalogProducts();
+
+export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
   {
     "id": "prod_cpu_14900k",
     "name": "Intel Core i9-14900K 24-Core Desktop Processor",

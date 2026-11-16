@@ -595,8 +595,8 @@ export class DbStore {
       const productCol = mongoDb.getCollection('products');
       if (productCol) {
         const count = await productCol.countDocuments({});
-        if (count === 0) {
-          console.log('📦 [MongoDB Bootstrapper] MongoDB database is currently empty. Synchronizing full enterprise catalog...');
+        if (count < 50) {
+          console.log('📦 [MongoDB Bootstrapper] MongoDB catalog has fewer than 50 items (found %d). Synchronizing full enterprise catalog...', count);
           await this.syncAllToMongo();
         }
       }

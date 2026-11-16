@@ -65,11 +65,17 @@ coverage/
 .vercel
 
 # Database stores & runtime caches (store data in Cloud Firestore/database, not codebase)
-data_store/
-backend/data_store/
-*/data_store/
-data_store
-backend/data_store
+/data_store/
+backend/data_store/*
+
+# Track essential catalog fixtures & imported inventory data for cloud & serverless deployments
+!backend/data_store/products.json
+!backend/data_store/categories.json
+!backend/data_store/brands.json
+!backend/data_store/product_imports/
+!backend/data_store/product_imports/**
+!frontend/data/
+!frontend/data/**
 
 # Auto-generated agent docs
 AGENTS.md

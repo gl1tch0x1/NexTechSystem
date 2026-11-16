@@ -1,0 +1,142 @@
+[
+  {
+    "id": "cat_laptops",
+    "name": "Laptops",
+    "slug": "laptops",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-12T14:00:00.000Z",
+    "updatedAt": "2026-11-16T14:25:27.709Z",
+    "productCount": 78
+  },
+  {
+    "id": "cat_storage",
+    "name": "Storage & Drives",
+    "slug": "storage-drives",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-12T14:00:00.000Z",
+    "updatedAt": "2026-11-16T14:25:27.711Z",
+    "productCount": 46
+  },
+  {
+    "id": "cat_all_in_one",
+    "name": "All-in-One PCs",
+    "slug": "all-in-one-pcs",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.015Z",
+    "updatedAt": "2026-11-16T14:25:27.714Z",
+    "productCount": 1
+  },
+  {
+    "id": "cat_gaming_laptops",
+    "name": "Gaming Laptops",
+    "slug": "gaming-laptops",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.016Z",
+    "updatedAt": "2026-11-16T14:25:27.716Z",
+    "productCount": 15
+  },
+  {
+    "id": "cat_desktops",
+    "name": "Desktops",
+    "slug": "desktops",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.017Z",
+    "updatedAt": "2026-11-16T14:25:27.718Z",
+    "productCount": 1
+  },
+  {
+    "id": "cat_headsets",
+    "name": "Headsets & Audio",
+    "slug": "headsets-audio",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.017Z",
+    "updatedAt": "2026-11-16T14:25:27.721Z",
+    "productCount": 5
+  },
+  {
+    "id": "cat_accessories",
+    "name": "Accessories",
+    "slug": "accessories",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.018Z",
+    "updatedAt": "2026-11-16T14:25:27.723Z",
+    "productCount": 37
+  },
+  {
+    "id": "cat_monitors",
+    "name": "Monitors",
+    "slug": "monitors",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.726Z",
+    "productCount": 6
+  },
+  {
+    "id": "cat_peripherals",
+    "name": "Peripherals",
+    "slug": "peripherals",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.729Z",
+    "productCount": 15
+  },
+  {
+    "id": "cat_networking",
+    "name": "Networking",
+    "slug": "networking",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.019Z",
+    "updatedAt": "2026-11-16T14:25:27.733Z",
+    "productCount": 7
+  },
+  {
+    "id": "cat_components",
+    "name": "Components",
+    "slug": "components",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.735Z",
+    "productCount": 66
+  },
+  {
+    "id": "cat_gaming_accessories",
+    "name": "Gaming Accessories",
+    "slug": "gaming-accessories",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.737Z",
+    "productCount": 1
+  },
+  {
+    "id": "cat_bags_cases",
+    "name": "Bags & Cases",
+    "slug": "bags-cases",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.022Z",
+    "updatedAt": "2026-11-16T14:25:27.740Z",
+    "productCount": 18
+  },
+  {
+    "id": "cat_ups",
+    "name": "UPS & Power",
+    "slug": "ups-power",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": "2026-11-15T13:18:40.023Z",
+    "updatedAt": "2026-11-16T14:25:27.741Z",
+    "productCount": 6
+  }
+]
