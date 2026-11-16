@@ -18,6 +18,8 @@ import {
   Laptop,
   Flame,
   Monitor,
+  X,
+  ArrowUpDown,
 } from 'lucide-react';
 
 interface EnhancedHardwareMatrixProps {
@@ -271,63 +273,118 @@ export function EnhancedHardwareMatrix({ products }: EnhancedHardwareMatrixProps
         </Link>
       </div>
 
-      {/* Control Bar: Professional Category Tabs + Search + Sort */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-        {/* Category Segmented Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-2 bg-slate-100/90 dark:bg-slate-900/90 rounded-xl border border-slate-200/80 dark:border-slate-800 shrink-0 relative">
-          {tabs.map(({ id, label, icon: Icon }) => {
-            const isActive = activeTab === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setActiveTab(id)}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer z-10 ${
-                  isActive
-                    ? 'text-white font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="matrixActiveTabIndicator"
-                    className="absolute inset-0 rounded-lg bg-blue-600 shadow-xs -z-10"
-                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                  />
-                )}
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                <span>{label}</span>
-              </button>
-            );
-          })}
+      {/* Control Bar: Dual-Tier Professional Category Navigation + Search & Sort Toolbar */}
+      <div className="space-y-3.5">
+        {/* Tier 1: Category Segmented Navigation Tabs */}
+        <div className="relative w-full">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1.5 px-2 bg-slate-100/90 dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+            {tabs.map(({ id, label, icon: Icon }) => {
+              const isActive = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveTab(id)}
+                  className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer z-10 ${
+                    isActive
+                      ? 'text-white font-bold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="matrixActiveTabIndicator"
+                      className="absolute inset-0 rounded-xl bg-blue-600 shadow-xs -z-10"
+                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                    />
+                  )}
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Search & Sort Widgets */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          {/* Quick Search Input */}
-          <div className="relative flex-1 sm:flex-initial">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        {/* Tier 2: Dedicated Search Input, Result Counter & Sort Control Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/80 dark:bg-slate-900/60 p-2 sm:p-2.5 rounded-2xl border border-slate-200/70 dark:border-slate-800/80">
+          {/* Hardware Search Input */}
+          <div className="relative flex-1 max-w-md w-full">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search systems, SKUs..."
+              placeholder="Search hardware by model, SKU, spec (e.g. RTX 4090, i9, OMEN)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 w-full sm:w-44 lg:w-48 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors shadow-2xs"
+              className="pl-9.5 pr-8 py-2 w-full text-xs font-medium rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xs"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          {/* Sort Dropdown */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="py-1.5 px-3 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none font-semibold cursor-pointer transition-colors shadow-2xs"
-          >
-            <option value="FEATURED">Featured First</option>
-            <option value="PRICE_ASC">Price: Low to High</option>
-            <option value="PRICE_DESC">Price: High to Low</option>
-            <option value="STOCK_DESC">Highest Stock</option>
-          </select>
+          {/* Right Controls: Matching Counter & Sort Dropdown */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+            <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium">
+              <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+                {filteredAndSortedProducts.length}
+              </span>
+              <span>{filteredAndSortedProducts.length === 1 ? 'system matched' : 'systems matched'}</span>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-1.5 shadow-2xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="FEATURED">Featured First</option>
+                <option value="PRICE_ASC">Price: Low to High</option>
+                <option value="PRICE_DESC">Price: High to Low</option>
+                <option value="STOCK_DESC">Highest Stock</option>
+              </select>
+            </div>
+          </div>
         </div>
+
+        {/* Tier 3: Active Filter Feedback Tag (when searching) */}
+        {searchQuery.trim() && (
+          <div className="flex items-center gap-2 pt-0.5 text-xs">
+            <span className="text-slate-500 dark:text-slate-400 text-2xs uppercase tracking-wider font-semibold">
+              Active Filter:
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40 font-medium">
+              <span>Keyword: &ldquo;{searchQuery}&rdquo;</span>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="hover:text-blue-900 dark:hover:text-white cursor-pointer"
+                title="Remove keyword filter"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setActiveTab('ALL');
+              }}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs underline cursor-pointer ml-1"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Product Grid or Empty State with smooth crossfade */}
