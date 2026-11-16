@@ -11,8 +11,8 @@ export async function GET(request: NextRequest) {
       const cloned = upstreamRes.clone();
       try {
         const json = await cloned.json();
-        // If upstream backend has a comprehensive catalog (>= 50 items), serve it directly
-        if (json && Array.isArray(json.data) && json.data.length >= 50) {
+        // If upstream backend has a comprehensive catalog (>= 50 items or total >= 50), serve it directly
+        if (json && Array.isArray(json.data) && (json.data.length >= 50 || (json.meta?.total && json.meta.total >= 50))) {
           return upstreamRes;
         }
       } catch {
