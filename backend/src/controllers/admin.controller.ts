@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import path from 'path';
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { analyticsService } from '../services/analytics.service.js';
@@ -137,8 +138,45 @@ export class AdminController {
   async importInventory(req: AuthenticatedRequest, res: Response): Promise<void> {
     const { forceUpdate, assignPricing, defaultStock, filePath } = req.body || {};
     try {
+      let sanitizedFilePath: string | undefined = undefined;
+      if (filePath !== undefined && filePath !== null) {
+        if (typeof filePath !== 'string' || !filePath.trim()) {
+          res.status(400).json({
+            success: false,
+            error: { code: 'INVALID_PATH', message: 'filePath must be a non-empty string when provided.' },
+          });
+          return;
+        }
+
+        const rawPath = filePath.trim().replace(/\0/g, '');
+        // Block path traversal tokens
+        if (rawPath.includes('..') || rawPath.includes('/') || rawPath.includes('\\')) {
+          res.status(400).json({
+            success: false,
+            error: { code: 'INVALID_PATH', message: 'Directory traversal sequences are prohibited in filePath.' },
+          });
+          return;
+        }
+
+        const baseName = path.basename(rawPath);
+        const ext = path.extname(baseName).toLowerCase();
+        const allowedExtensions = ['.xls', '.xlsx', '.csv'];
+        if (!allowedExtensions.includes(ext)) {
+          res.status(400).json({
+            success: false,
+            error: {
+              code: 'INVALID_FILE_TYPE',
+              message: `Only inventory files with extensions ${allowedExtensions.join(', ')} are permitted.`,
+            },
+          });
+          return;
+        }
+
+        sanitizedFilePath = baseName;
+      }
+
       const result = await inventoryImportService.importFromExcel({
-        filePath,
+        filePath: sanitizedFilePath,
         forceUpdate: Boolean(forceUpdate),
         assignPricing: assignPricing !== false,
         defaultStock: typeof defaultStock === 'number' ? defaultStock : undefined,

@@ -158,28 +158,76 @@ export interface ImportResult {
 
 export class InventoryImportService {
   /**
-   * Resolve inventory Excel file path from filesystem candidates
+   * Safe root directory for all imported inventory files
+   */
+  public getSafeImportsDirectory(): string {
+    const candidateDirs = [
+      path.resolve(process.cwd(), 'backend', 'data_store', 'product_imports'),
+      path.resolve(process.cwd(), 'data_store', 'product_imports'),
+    ];
+    for (const dir of candidateDirs) {
+      if (fs.existsSync(dir)) {
+        return path.normalize(dir);
+      }
+    }
+    return path.resolve(process.cwd(), 'backend', 'data_store', 'product_imports');
+  }
+
+  /**
+   * Resolve inventory Excel file path securely to prevent CWE-022 path traversal
    */
   public resolveExcelPath(customPath?: string): string {
-    const candidates = [
-      customPath,
-      process.env.INVENTORY_EXCEL_PATH,
-      path.resolve(process.cwd(), 'backend', 'data_store', 'product_imports', 'ComNet_Inventory.xls'),
-      path.resolve(process.cwd(), 'data_store', 'product_imports', 'ComNet_Inventory.xls'),
-      path.resolve(process.cwd(), 'backend', 'data_store', 'product_imports', 'ComNet_Inventory_Fixed.xlsx'),
-      path.resolve(process.cwd(), 'data_store', 'product_imports', 'ComNet_Inventory_Fixed.xlsx'),
-      path.resolve(__dirname, '../../data_store/product_imports/ComNet_Inventory.xls'),
-      path.resolve(__dirname, '../../../data_store/product_imports/ComNet_Inventory.xls'),
-    ].filter(Boolean) as string[];
+    const safeDir = this.getSafeImportsDirectory();
+    const safeDirPrefix = safeDir.endsWith(path.sep) ? safeDir : `${safeDir}${path.sep}`;
 
-    for (const cand of candidates) {
-      if (fs.existsSync(cand)) {
-        return cand;
+    if (customPath && typeof customPath === 'string' && customPath.trim()) {
+      // 1. Sanitize against null bytes
+      const sanitized = customPath.trim().replace(/\0/g, '');
+
+      // 2. Extract base filename to strip any directory traversal sequences
+      const cleanFileName = path.basename(sanitized);
+
+      // 3. Strict allowlist for inventory spreadsheet extensions
+      const ext = path.extname(cleanFileName).toLowerCase();
+      const allowedExtensions = ['.xls', '.xlsx', '.csv'];
+      if (!allowedExtensions.includes(ext)) {
+        throw new Error(
+          `Security Exception: Invalid file extension "${ext}". Only ${allowedExtensions.join(', ')} files are permitted.`
+        );
+      }
+
+      // 4. Resolve path strictly within safe root directory
+      const targetPath = path.resolve(safeDir, cleanFileName);
+
+      // 5. Strict containment check (CWE-022 path traversal guard)
+      if (!targetPath.startsWith(safeDirPrefix)) {
+        throw new Error('Security Exception: Path traversal outside imports directory is prohibited.');
+      }
+
+      // 6. Verify file exists
+      if (fs.existsSync(targetPath)) {
+        return targetPath;
+      }
+
+      throw new Error(`Inventory file "${cleanFileName}" not found in safe directory: ${safeDir}`);
+    }
+
+    // Default safe candidates (fixed static filenames strictly contained within safeDir)
+    const defaultFileNames = [
+      'ComNet_Inventory.xls',
+      'ComNet_Inventory_Fixed.xlsx',
+      'ComNet_Inventory_Fixed.csv',
+    ];
+
+    for (const fileName of defaultFileNames) {
+      const candidatePath = path.resolve(safeDir, fileName);
+      if (candidatePath.startsWith(safeDirPrefix) && fs.existsSync(candidatePath)) {
+        return candidatePath;
       }
     }
 
     throw new Error(
-      `Inventory Excel file not found. Checked: ${candidates.join(', ')}`
+      `Inventory Excel file not found. Checked safe files: ${defaultFileNames.join(', ')} in ${safeDir}`
     );
   }
 
