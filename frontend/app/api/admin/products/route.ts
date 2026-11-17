@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import { proxyToBackend } from '@/lib/proxy-helper';
 import { filterCatalogProducts, updateCatalogProduct } from '@/lib/catalog-service';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const search = searchParams.get('search') || searchParams.get('q') || '';
@@ -18,14 +21,16 @@ export async function GET(request: NextRequest) {
     if (upstreamRes.ok) {
       const data = await upstreamRes.json();
       if (data && data.success && Array.isArray(data.data) && data.data.length >= 10) {
-        return Response.json(data);
+        return Response.json(data, {
+          headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+        });
       }
     }
   } catch {
     // Upstream offline, unreachable, or unseeded; proceed to resilient catalog fallback
   }
 
-  // 2. Authoritative local hardware catalog fallback (302 enterprise SKUs)
+  // 2. Authoritative local hardware catalog fallback (308 enterprise SKUs)
   const result = filterCatalogProducts({
     search,
     category,
@@ -36,12 +41,15 @@ export async function GET(request: NextRequest) {
     limit,
   });
 
-  return Response.json({
-    success: true,
-    data: result.products,
-    meta: result,
-    source: 'authoritative_catalog_fallback',
-  });
+  return Response.json(
+    {
+      success: true,
+      data: result.products,
+      meta: result,
+      source: 'authoritative_catalog_fallback',
+    },
+    { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -54,11 +62,16 @@ export async function POST(request: NextRequest) {
   } catch {}
 
   try {
-    const upstreamRes = await proxyToBackend(request, '/admin/products');
+    const upstreamRes = await proxyToBackend(request, '/admin/products', {
+      body: body ? JSON.stringify(body) : undefined,
+    });
     if (upstreamRes.ok) {
       return upstreamRes;
     }
   } catch {}
 
-  return Response.json({ success: true, data: body || {} }, { status: 201 });
+  return Response.json(
+    { success: true, data: body || {} },
+    { status: 201, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+  );
 }

@@ -748,6 +748,21 @@ export class ProductService {
         ? 'OUT_OF_STOCK'
         : (effectiveStock <= effectiveThreshold ? 'LOW_STOCK' : 'IN_STOCK');
     }
+
+    const primaryImg =
+      updates.primaryImage ||
+      updates.thumbnail ||
+      (updates as any).image ||
+      (updates.images && updates.images[0]);
+    if (primaryImg) {
+      updates.primaryImage = primaryImg;
+      updates.thumbnail = primaryImg;
+      (updates as any).image = primaryImg;
+    }
+    if (updates.images && updates.images.length > 0 && primaryImg && !updates.images.includes(primaryImg)) {
+      updates.images = [primaryImg, ...updates.images];
+    }
+
     updates.updatedAt = new Date().toISOString();
 
     const updated = await productRepository.update(targetId, updates);
@@ -797,16 +812,19 @@ function syncProductToFrontendCatalog(prod: Product): void {
     ];
     for (const p of possiblePaths) {
       if (fs.existsSync(p)) {
-        const raw = fs.readFileSync(p, 'utf8');
-        const list: Product[] = JSON.parse(raw);
-        const idx = list.findIndex(item => item.id === prod.id || item.slug === prod.slug);
-        if (idx !== -1) {
-          list[idx] = { ...list[idx], ...prod };
-        } else {
-          list.unshift(prod);
+        try {
+          const raw = fs.readFileSync(p, 'utf8');
+          const list: Product[] = JSON.parse(raw);
+          const idx = list.findIndex(item => item.id === prod.id || item.slug === prod.slug);
+          if (idx !== -1) {
+            list[idx] = { ...list[idx], ...prod };
+          } else {
+            list.unshift(prod);
+          }
+          fs.writeFileSync(p, JSON.stringify(list, null, 2), 'utf8');
+        } catch {
+          // Continue to next path
         }
-        fs.writeFileSync(p, JSON.stringify(list, null, 2), 'utf8');
-        break;
       }
     }
   } catch {

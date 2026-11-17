@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
-import { getAuthenticProductImage } from '@/lib/product-image-url';
+import { getAuthenticProductImage, DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import { getAllCatalogProducts, getProductDisplayPriority } from '@/lib/catalog-service';
 import { Product, ProductApprovalStatus } from '@/types';
 import {
@@ -46,6 +46,12 @@ function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE
   // Explicitly block dangerous pseudo-protocols
   if (/^(javascript|vbscript|data:(?!image\/))/i.test(trimmed)) {
     return fallback;
+  }
+
+  // Safely allow data:image URLs (base64 / SVG)
+  if (trimmed.startsWith('data:image/')) {
+    const escaped = trimmed.replace(/[<>'"]/g, '');
+    return escaped;
   }
 
   // Strictly validate HTTP, HTTPS, or safe relative paths
@@ -105,7 +111,7 @@ export default function AdminProductsPage() {
       const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
 
       // Fetch from admin API endpoint (mirrors backend or authoritative local catalog fallback)
-      const prodRes = await ApiClient.get<Product[]>('/admin/products?limit=500', {
+      const prodRes = await ApiClient.get<Product[]>(`/admin/products?limit=500&t=${Date.now()}`, {
         token: effectiveToken || undefined,
       });
 
@@ -638,9 +644,12 @@ export default function AdminProductsPage() {
                             const itemImg = getAuthenticProductImage(prod);
                             return itemImg ? (
                               <img
-                                src={getSafeImageUrl(itemImg, '')}
+                                src={getSafeImageUrl(itemImg, DEFAULT_PRODUCT_PLACEHOLDER)}
                                 alt={title}
                                 className="w-10 h-10 rounded-xl object-contain border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shrink-0 p-0.5"
+                                onError={(e) => {
+                                  e.currentTarget.src = DEFAULT_PRODUCT_PLACEHOLDER;
+                                }}
                               />
                             ) : (
                               <div className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-cyan-400 flex items-center justify-center shrink-0">

@@ -75,6 +75,12 @@ function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE
     return fallback;
   }
 
+  // Safely allow data:image URLs (base64 / SVG)
+  if (trimmed.startsWith('data:image/')) {
+    const escaped = trimmed.replace(/[<>'"]/g, '');
+    return escaped;
+  }
+
   // Strictly validate HTTP, HTTPS, or safe relative paths
   if (
     trimmed.startsWith('https://') ||

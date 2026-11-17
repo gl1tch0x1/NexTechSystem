@@ -15,6 +15,14 @@ export function productImageUrl(value: unknown): string | null {
   let input = value.trim();
   if (!input || /[\u0000-\u001f\u007f\\<>"']/.test(input)) return null;
 
+  // Support safe data:image URIs (e.g. SVG placeholders or uploaded base64 images)
+  if (
+    /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,/i.test(input) ||
+    /^data:image\/svg\+xml;utf8,/i.test(input)
+  ) {
+    return input;
+  }
+
   // Automatically upgrade insecure http to https
   if (/^http:\/\//i.test(input)) {
     input = input.replace(/^http:\/\//i, 'https://');

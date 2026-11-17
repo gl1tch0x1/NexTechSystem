@@ -21,7 +21,7 @@ export function getBackendApiUrl(): string {
 export async function proxyToBackend(
   request: NextRequest,
   targetSubpath: string,
-  _options?: { fallbackData?: unknown },
+  options?: { fallbackData?: unknown; body?: string | ArrayBuffer },
 ): Promise<Response> {
   const normalizedPath = targetSubpath.replace(/\\/g, '/');
   let decodedPath: string;
@@ -39,9 +39,17 @@ export async function proxyToBackend(
     if (value !== null) headers.set(name, value);
   }
   try {
+    let reqBody: any = undefined;
+    if (!['GET', 'HEAD'].includes(request.method)) {
+      if (options?.body !== undefined) {
+        reqBody = options.body;
+      } else {
+        reqBody = await request.arrayBuffer();
+      }
+    }
     const upstream = await fetch(target, {
       method: request.method, headers,
-      body: ['GET', 'HEAD'].includes(request.method) ? undefined : await request.arrayBuffer(),
+      body: reqBody,
       cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(15000),
     });
     const responseHeaders = new Headers({ 'Cache-Control': 'no-store' });

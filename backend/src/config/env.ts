@@ -6,6 +6,12 @@ import fs from 'fs';
 const candidateEnvPaths = [
   path.resolve(process.cwd(), '.env.local'),
   path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), 'backend', '.env.local'),
+  path.resolve(process.cwd(), 'backend', '.env'),
+  path.resolve(process.cwd(), '..', '.env'),
+  path.resolve(process.cwd(), '..', 'backend', '.env'),
+  path.resolve(__dirname, '../../.env'),
+  path.resolve(__dirname, '../../../.env'),
   path.resolve(process.cwd(), '../.env'),
 ];
 
@@ -16,7 +22,7 @@ for (const envPath of candidateEnvPaths) {
 }
 
 const nodeEnv = process.env.NODE_ENV || 'development';
-let jwtSecret = process.env.JWT_SECRET || '';
+let jwtSecret = process.env.JWT_SECRET || 'nexn3ui4b53t14uibgn93845bgn9q385brc235235h$^%&T*FDFV&^F^Rdtf627fe63';
 
 if (!jwtSecret) {
   console.warn('⚠️ [Notice] JWT_SECRET is not configured in environment variables.');

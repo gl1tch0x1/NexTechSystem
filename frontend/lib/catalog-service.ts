@@ -154,15 +154,23 @@ function persistCatalogToFile(): void {
     if (typeof window === 'undefined') {
       const fs = require('fs');
       const path = require('path');
-      const possiblePaths = [
+      const targetPaths = [
         path.resolve(process.cwd(), 'data', 'products.json'),
         path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
         path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
+        path.resolve(process.cwd(), 'backend', 'data_store', 'products.json'),
+        path.resolve(process.cwd(), '..', 'backend', 'data_store', 'products.json'),
+        path.resolve(process.cwd(), 'data_store', 'products.json'),
+        path.resolve(process.cwd(), '..', 'data_store', 'products.json'),
       ];
-      for (const p of possiblePaths) {
-        if (fs.existsSync(p)) {
-          fs.writeFileSync(p, JSON.stringify(catalogProductsStore, null, 2), 'utf8');
-          break;
+      const dataStr = JSON.stringify(catalogProductsStore, null, 2);
+      for (const p of targetPaths) {
+        try {
+          if (fs.existsSync(p)) {
+            fs.writeFileSync(p, dataStr, 'utf8');
+          }
+        } catch {
+          // Continue to next path
         }
       }
     }
@@ -180,8 +188,19 @@ export function updateCatalogProduct(id: string, updates: Partial<Product>): Pro
       p.slug?.toLowerCase() === targetId ||
       p.sku?.toLowerCase() === targetId
   );
+
+  const primaryImg =
+    updates.primaryImage ||
+    updates.thumbnail ||
+    (updates as any).image ||
+    (updates.images && updates.images[0]) ||
+    '';
+
   if (idx === -1) {
     if (updates.name || updates.title) {
+      const newImages = updates.images && updates.images.length > 0
+        ? updates.images
+        : (primaryImg ? [primaryImg] : []);
       const newProd = {
         id: updates.id || `prod_${Date.now()}`,
         slug:
@@ -192,6 +211,10 @@ export function updateCatalogProduct(id: string, updates: Partial<Product>): Pro
         name: updates.name || updates.title || '',
         price: updates.price || 0,
         ...updates,
+        primaryImage: primaryImg || (updates as any).primaryImage || '',
+        thumbnail: primaryImg || (updates as any).thumbnail || '',
+        images: newImages,
+        updatedAt: new Date().toISOString(),
       } as Product;
       catalogProductsStore.unshift(newProd);
       persistCatalogToFile();
@@ -201,9 +224,24 @@ export function updateCatalogProduct(id: string, updates: Partial<Product>): Pro
   }
 
   const existing = catalogProductsStore[idx];
+  const finalPrimaryImg =
+    primaryImg ||
+    existing.primaryImage ||
+    existing.thumbnail ||
+    (existing as any).image ||
+    (existing.images && existing.images[0]) ||
+    '';
+
+  const finalImages = updates.images && updates.images.length > 0
+    ? updates.images
+    : (existing.images && existing.images.length > 0 ? existing.images : (finalPrimaryImg ? [finalPrimaryImg] : []));
+
   const updated: Product = {
     ...existing,
     ...updates,
+    primaryImage: finalPrimaryImg,
+    thumbnail: finalPrimaryImg,
+    images: finalImages,
     updatedAt: new Date().toISOString(),
   };
 
