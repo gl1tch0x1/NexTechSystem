@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -51,6 +51,7 @@ import {
   MapPin,
   MoveLeft,
   MoveRight,
+  UploadCloud,
   Laptop,
   CircuitBoard,
   Cpu,
@@ -536,6 +537,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const [previewCurrency, setPreviewCurrency] = useState<keyof typeof FX_RATES>('AED');
   const [targetMarginInput, setTargetMarginInput] = useState<number>(20);
   const [galleryUrlInput, setGalleryUrlInput] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const generateRandomSku = useCallback((catId?: string) => {
     const prefixMap: Record<string, string> = {
@@ -1188,6 +1192,116 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   };
 
   // Multi-Asset Gallery Handlers (Strictly Sanitized via getSafeImageUrl)
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      setImageUrlError('Please select a valid image file (PNG, JPG, WEBP, or GIF).');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setImageUrlError('File size exceeds the 5 MB limit. Please choose a smaller image.');
+      return;
+    }
+
+    setIsUploading(true);
+    setImageUrlError('');
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {},
+        body: uploadFormData,
+      });
+
+      let finalUrl = '';
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.url) {
+          finalUrl = data.url;
+        }
+      }
+
+      // If network upload route failed or offline, seamlessly fallback to local base64 data URL
+      if (!finalUrl) {
+        finalUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (finalUrl) {
+        setFormData(prev => {
+          const existing = prev.images.filter(img => img !== finalUrl && !isPlaceholderImageUrl(img));
+          const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
+          const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
+          const newImages = shouldSetPrimary ? [finalUrl, ...existing] : [...existing, finalUrl];
+          return {
+            ...prev,
+            primaryImage: newPrimary,
+            images: newImages,
+          };
+        });
+        setFailedPreviewUrl(null);
+      }
+    } catch {
+      try {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        if (base64) {
+          setFormData(prev => {
+            const existing = prev.images.filter(img => img !== base64 && !isPlaceholderImageUrl(img));
+            const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
+            const newPrimary = shouldSetPrimary ? base64 : prev.primaryImage;
+            return {
+              ...prev,
+              primaryImage: newPrimary,
+              images: shouldSetPrimary ? [base64, ...existing] : [...existing, base64],
+            };
+          });
+          setFailedPreviewUrl(null);
+        }
+      } catch {
+        setImageUrlError('Failed to read image file. Please try again.');
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
   const handleAddGalleryImage = (urlToAdd: string) => {
     const safe = productImageUrl(urlToAdd);
     if (!safe) {
@@ -2001,26 +2115,60 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   </div>
 
                   {/* Primary Cover Preview */}
+                  {/* Hidden File Input for Native File System Asset Ingestion */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleFileUpload(e.target.files[0]);
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
                           Primary Cover Asset
                         </label>
-                        {formData.primaryImage && (
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => {
-                              setFormData(prev => ({ ...prev, primaryImage: '' }));
-                              setFailedPreviewUrl(null);
-                            }}
-                            className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                            className="text-[10px] text-blue-600 dark:text-cyan-400 hover:underline font-semibold cursor-pointer flex items-center gap-1"
                           >
-                            Clear Cover
+                            <UploadCloud className="w-3 h-3" />
+                            {isUploading ? 'Uploading...' : 'Upload'}
                           </button>
-                        )}
+                          {formData.primaryImage && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, primaryImage: '' }));
+                                setFailedPreviewUrl(null);
+                              }}
+                              className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
+                            >
+                              Clear Cover
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 relative shadow-sm group flex items-center justify-center">
+                      <div
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 relative shadow-sm group flex items-center justify-center transition-all ${
+                          isDragging
+                            ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 ring-4 ring-blue-500/20'
+                            : 'border-slate-200 dark:border-slate-800'
+                        }`}
+                      >
                         {formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
                           <>
                             <img
@@ -2033,14 +2181,38 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-blue-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
                               <Check className="w-3 h-3 text-white" /> Cover
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-bold gap-1.5 cursor-pointer backdrop-blur-[2px]"
+                            >
+                              <UploadCloud className="w-6 h-6 text-blue-400" />
+                              <span>Replace Cover Image</span>
+                              <span className="text-[10px] text-slate-300 font-normal">Click or drag & drop</span>
+                            </button>
                           </>
                         ) : (
-                          <div className="p-4 text-center space-y-1.5 text-slate-400">
+                          <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="p-4 text-center space-y-1.5 text-slate-400 cursor-pointer w-full h-full flex flex-col items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+                          >
                             <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center mx-auto text-blue-600 dark:text-cyan-400 shadow-xs">
-                              {getCategoryIcon(formData.categoryId, 'w-6 h-6')}
+                              {isUploading ? (
+                                <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
+                              ) : (
+                                <UploadCloud className="w-6 h-6" />
+                              )}
                             </div>
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{formData.primaryImage ? 'Image could not be loaded' : 'No Cover Asset Selected'}</div>
-                            <p className="text-[10px] text-slate-400 max-w-[220px] mx-auto">Upload or paste a product image URL below. System category icon is used as placeholder.</p>
+                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                              {isUploading
+                                ? 'Uploading visual asset...'
+                                : formData.primaryImage
+                                ? 'Image could not be loaded'
+                                : 'Upload or Drag & Drop Cover Asset'}
+                            </div>
+                            <p className="text-[10px] text-slate-400 max-w-[220px] mx-auto">
+                              Click to select PNG, WEBP, or JPG from your computer, or drop file here.
+                            </p>
                           </div>
                         )}
                       </div>
@@ -2064,7 +2236,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       </div>
                       {/* Thumbnail Strip */}
                       {formData.images.length > 0 ? (
-                        <div className="flex gap-2 overflow-x-auto pb-1">
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          className="flex gap-2 overflow-x-auto pb-1"
+                        >
                           {formData.images.map((imgUrl, imgIdx) => {
                             const isPrimary = imgUrl === formData.primaryImage;
                             return (
@@ -2128,16 +2305,22 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           })}
                         </div>
                       ) : (
-                        <div className="p-3.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-center text-slate-400 space-y-0.5">
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          onClick={() => fileInputRef.current?.click()}
+                          className="p-3.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-center text-slate-400 space-y-0.5 cursor-pointer hover:bg-blue-50/20 transition-colors"
+                        >
                           <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">Gallery queue is empty</p>
-                          <p className="text-[10px] text-slate-400">Paste image URLs below to upload hardware photography angles.</p>
+                          <p className="text-[10px] text-slate-400">Click to upload image files or drag & drop photography angles here.</p>
                         </div>
                       )}
-                      {/* Add Asset URL Input */}
+                      {/* Add Asset URL & Direct Upload Controls */}
                       <div className="flex gap-2">
                         <input
                           type="url"
-                          placeholder="Paste image URL (PNG, WEBP, JPG) to add to gallery..."
+                          placeholder="Paste image URL (PNG, WEBP, JPG) or upload below..."
                           value={galleryUrlInput}
                           onChange={e => { setGalleryUrlInput(e.target.value); setImageUrlError(''); }}
                           onKeyDown={e => {
@@ -2153,17 +2336,30 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           onClick={() => handleAddGalleryImage(galleryUrlInput)}
                           className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
                         >
-                          <Plus className="w-3.5 h-3.5" /> Add
+                          <Plus className="w-3.5 h-3.5" /> Add URL
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isUploading}
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 border border-slate-700"
+                        >
+                          {isUploading ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                          ) : (
+                            <UploadCloud className="w-3.5 h-3.5 text-cyan-400" />
+                          )}
+                          <span>{isUploading ? 'Uploading...' : 'Upload File'}</span>
                         </button>
                       </div>
 
                       {imageUrlError && <p role="alert" className="text-xs text-red-600">{imageUrlError}</p>}
                       {/* Primary Image URL Direct Edit */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-500 mb-1">Cover Asset URL</label>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-1">Cover Asset URL / Path</label>
                         <input
-                          type="url"
-                          placeholder="e.g. https://domain.com/hardware-cover.webp"
+                          type="text"
+                          placeholder="e.g. /api/upload/... or https://domain.com/hardware-cover.webp"
                           value={formData.primaryImage}
                           onChange={e => {
                             const sanitized = e.target.value.trim();

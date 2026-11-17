@@ -177,6 +177,29 @@ export class DbStore {
         fs.copyFileSync(tmpPath, filePath);
         try { fs.unlinkSync(tmpPath); } catch {}
       }
+
+      // Synchronize hardware product catalog directly to frontend static catalog file
+      if (collectionName === 'products') {
+        const frontendPaths = [
+          path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
+          path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
+        ];
+        for (const fp of frontendPaths) {
+          let fd: number | null = null;
+          try {
+            fd = fs.openSync(fp, 'r+');
+            const buf = Buffer.from(data, 'utf-8');
+            fs.ftruncateSync(fd, 0);
+            fs.writeSync(fd, buf, 0, buf.length, 0);
+          } catch {
+            // Target path not present in current directory layout
+          } finally {
+            if (fd !== null) {
+              try { fs.closeSync(fd); } catch {}
+            }
+          }
+        }
+      }
     } catch (err) {
       console.error('[DbStore] Error persisting %s:', collectionName, err);
     } finally {

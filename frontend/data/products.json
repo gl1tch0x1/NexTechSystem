@@ -13,7 +13,7 @@
     "discountPercentage": 12,
     "chargeTax": true,
     "unitMeasure": "unit",
-    "stock": 15,
+    "stock": 42,
     "lowStockThreshold": 3,
     "inventoryTracked": true,
     "allowBackorder": false,
@@ -31,11 +31,11 @@
       "ai",
       "intel-ultra9"
     ],
-    "primaryImage": "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg",
-    "thumbnail": "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg",
-    "image": "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg",
+    "primaryImage": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80",
+    "image": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80",
     "images": [
-      "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg"
+      "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80"
     ],
     "categoryId": "cat_laptops",
     "categoryName": "Laptops & Workstations",
@@ -69,7 +69,7 @@
     "rating": 5,
     "reviewCount": 14,
     "isFeatured": true,
-    "updatedAt": "2026-11-17T15:54:00.024Z",
+    "updatedAt": "2026-11-17T17:01:40.654Z",
     "stockStatus": "IN_STOCK"
   },
   {
@@ -144,7 +144,7 @@
     "rating": 5,
     "reviewCount": 18,
     "isFeatured": true,
-    "updatedAt": "2026-11-17T15:11:19.702Z",
+    "updatedAt": "2026-11-17T16:26:29.177Z",
     "stockStatus": "IN_STOCK"
   },
   {

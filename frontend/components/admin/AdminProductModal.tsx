@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Product,
@@ -35,6 +35,7 @@ import {
   Trash2,
   RefreshCw,
   AlertTriangle,
+  UploadCloud,
   Percent
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
@@ -244,6 +245,9 @@ export function AdminProductModal({
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newOptionName, setNewOptionName] = useState('');
   const [newOptionValueInput, setNewOptionValueInput] = useState('');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Form Data State
   const [formData, setFormData] = useState<ProductModalFormData>({
@@ -554,6 +558,100 @@ export function AdminProductModal({
   };
 
   // Image Helpers
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      setFormError('Please select a valid image file (PNG, JPG, WEBP, or GIF).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setFormError('File size exceeds the 5 MB limit. Please choose a smaller image.');
+      return;
+    }
+    setIsUploading(true);
+    setFormError('');
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: uploadFormData,
+      });
+      let finalUrl = '';
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.url) finalUrl = data.url;
+      }
+      if (!finalUrl) {
+        finalUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+      if (finalUrl) {
+        setFormData(prev => {
+          const existing = prev.images.filter(img => img !== finalUrl && img !== DEFAULT_FALLBACK_IMAGE);
+          const shouldSetPrimary = !prev.primaryImage || prev.primaryImage === DEFAULT_FALLBACK_IMAGE || existing.length === 0;
+          const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
+          const newImages = shouldSetPrimary ? [finalUrl, ...existing] : [...existing, finalUrl];
+          return {
+            ...prev,
+            primaryImage: newPrimary,
+            images: newImages,
+          };
+        });
+      }
+    } catch {
+      try {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        if (base64) {
+          setFormData(prev => {
+            const existing = prev.images.filter(img => img !== base64 && img !== DEFAULT_FALLBACK_IMAGE);
+            return {
+              ...prev,
+              primaryImage: base64,
+              images: [base64, ...existing],
+            };
+          });
+        }
+      } catch {
+        setFormError('Failed to read image file.');
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
   const handleAddImage = (url: string) => {
     const clean = url.trim().replace(/[<>'"]/g, '');
     if (!clean) return;
@@ -1356,11 +1454,25 @@ export function AdminProductModal({
                   </div>
 
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Add multiple high-resolution product photos. Set a primary image for storefront cards and listings.
+                    Add multiple high-resolution product photos or upload files directly from your computer. Set a primary image for storefront cards and listings.
                   </p>
 
-                  {/* Add New Image Input */}
-                  <div className="flex items-center gap-2">
+                  {/* Hidden File Input for Native File System Uploads */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleFileUpload(e.target.files[0]);
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+
+                  {/* Add New Image Input & Direct File Upload */}
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                     <input
                       type="url"
                       placeholder="Paste image URL (HTTPS, PNG, JPG, WebP)..."
@@ -1380,14 +1492,36 @@ export function AdminProductModal({
                     <button
                       type="button"
                       onClick={() => handleAddImage(newImageUrl)}
-                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all cursor-pointer shrink-0"
                     >
-                      Add Image
+                      Add URL
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 border border-slate-700"
+                    >
+                      {isUploading ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                      ) : (
+                        <UploadCloud className="w-3.5 h-3.5 text-cyan-400" />
+                      )}
+                      <span>{isUploading ? 'Uploading...' : 'Upload File'}</span>
                     </button>
                   </div>
 
-                  {/* Gallery Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                  {/* Gallery Grid & Drop Zone */}
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2 p-2 rounded-2xl transition-all ${
+                      isDragging
+                        ? 'border-2 border-dashed border-blue-500 bg-blue-50/40 dark:bg-blue-950/20'
+                        : ''
+                    }`}
+                  >
                     {formData.images.map((img, idx) => {
                       const isPrimary = formData.primaryImage === img;
                       return (

@@ -235,22 +235,30 @@ export function updateCatalogProduct(id: string, updates: Partial<Product>): Pro
 
   const existing = catalogProductsStore[idx];
   const finalPrimaryImg =
-    primaryImg ||
-    existing.primaryImage ||
-    existing.thumbnail ||
-    (existing as any).image ||
-    (existing.images && existing.images[0]) ||
-    '';
+    updates.primaryImage !== undefined
+      ? updates.primaryImage
+      : (primaryImg ||
+        existing.primaryImage ||
+        existing.thumbnail ||
+        (existing as any).image ||
+        (existing.images && existing.images[0]) ||
+        '');
 
-  const finalImages = updates.images && updates.images.length > 0
-    ? updates.images
-    : (existing.images && existing.images.length > 0 ? existing.images : (finalPrimaryImg ? [finalPrimaryImg] : []));
+  const finalImages =
+    updates.images !== undefined && Array.isArray(updates.images)
+      ? updates.images
+      : (existing.images && existing.images.length > 0
+        ? existing.images
+        : (finalPrimaryImg ? [finalPrimaryImg] : []));
 
   const updated: Product = {
     ...existing,
     ...updates,
+    title: updates.title || updates.name || existing.title || existing.name || '',
+    name: updates.name || updates.title || existing.name || existing.title || '',
     primaryImage: finalPrimaryImg,
     thumbnail: finalPrimaryImg,
+    image: finalPrimaryImg,
     images: finalImages,
     updatedAt: new Date().toISOString(),
   };

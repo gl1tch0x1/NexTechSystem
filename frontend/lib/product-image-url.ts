@@ -2,9 +2,10 @@ import { Product } from '@/types';
 
 /**
  * Standard neutral SVG placeholder when a product record has no visual assets stored in the database.
+ * Base64-encoded to guarantee zero metacharacter issues (<, >, ', ") across DOM sanitizer pipelines.
  */
 export const DEFAULT_PRODUCT_PLACEHOLDER =
-  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>';
+  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjgiIHJ4PSIyIi8+PHJlY3QgeD0iMiIgeT0iMTQiIHdpZHRoPSIyMCIgaGVpZ2h0PSI4IiByeD0iMiIvPjxsaW5lIHgxPSI2IiB5MT0iNiIgeDI9IjYuMDEiIHkyPSI2Ii8+PGxpbmUgeDE9IjYiIHkxPSIxOCIgeDI9IjYuMDEiIHkyPSIxOCIvPjwvc3ZnPg==';
 
 /**
  * Validates, normalizes, and sanitizes product image URLs.
@@ -46,7 +47,11 @@ export function productImageUrl(value: unknown): string | null {
 export function isPlaceholderImageUrl(url?: string | null): boolean {
   if (!url || typeof url !== 'string') return true;
   const clean = url.trim();
-  return clean === '' || clean === DEFAULT_PRODUCT_PLACEHOLDER;
+  return (
+    clean === '' ||
+    clean === DEFAULT_PRODUCT_PLACEHOLDER ||
+    clean.includes('data:image/svg+xml')
+  );
 }
 
 /**
