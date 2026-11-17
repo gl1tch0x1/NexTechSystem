@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { randomUUID as uuidv4 } from 'crypto';
 import { productRepository } from '../repositories/product.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
@@ -714,7 +712,6 @@ export class ProductService {
     };
 
     const created = await productRepository.create(newProduct);
-    syncProductToFrontendCatalog(created);
     return created;
   }
 
@@ -766,9 +763,6 @@ export class ProductService {
     updates.updatedAt = new Date().toISOString();
 
     const updated = await productRepository.update(targetId, updates);
-    if (updated) {
-      syncProductToFrontendCatalog(updated);
-    }
     return updated;
   }
 
@@ -800,47 +794,6 @@ export class ProductService {
     }
 
     return updated;
-  }
-}
-
-function syncProductToFrontendCatalog(prod: Product): void {
-  try {
-    const possiblePaths = [
-      path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
-      path.resolve(process.cwd(), 'data', 'products.json'),
-      path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
-    ];
-    for (const p of possiblePaths) {
-      let fd: number | null = null;
-      try {
-        // Open with 'r+' which atomically requires the file to exist, avoiding TOCTOU race conditions (CWE-367 / js/file-system-race)
-        fd = fs.openSync(p, 'r+');
-        const raw = fs.readFileSync(fd, 'utf8');
-        const list: Product[] = JSON.parse(raw);
-        const idx = list.findIndex(item => item.id === prod.id || item.slug === prod.slug);
-        if (idx !== -1) {
-          list[idx] = { ...list[idx], ...prod };
-        } else {
-          list.unshift(prod);
-        }
-        const str = JSON.stringify(list, null, 2);
-        fs.ftruncateSync(fd, 0);
-        const buf = Buffer.from(str, 'utf8');
-        fs.writeSync(fd, buf, 0, buf.length, 0);
-      } catch {
-        // Path does not exist or cannot be accessed in current directory; continue
-      } finally {
-        if (fd !== null) {
-          try {
-            fs.closeSync(fd);
-          } catch {
-            // Ignore descriptor close errors
-          }
-        }
-      }
-    }
-  } catch {
-    // Non-fatal if frontend directory cannot be accessed
   }
 }
 
