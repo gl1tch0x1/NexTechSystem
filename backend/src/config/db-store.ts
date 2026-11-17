@@ -180,11 +180,9 @@ export class DbStore {
     } catch (err) {
       console.error('[DbStore] Error persisting %s:', collectionName, err);
     } finally {
-      // Ensure temp file is cleaned up if it still exists
+      // Ensure temp file is cleaned up if it was created
       try {
-        if (fs.existsSync(tmpPath)) {
-          fs.unlinkSync(tmpPath);
-        }
+        fs.unlinkSync(tmpPath);
       } catch {}
     }
   }
@@ -210,9 +208,7 @@ export class DbStore {
       console.error('[DbStore] Error clearing collection %s:', collectionName, err);
     } finally {
       try {
-        if (fs.existsSync(tmpPath)) {
-          fs.unlinkSync(tmpPath);
-        }
+        fs.unlinkSync(tmpPath);
       } catch {}
     }
 
@@ -231,17 +227,15 @@ export class DbStore {
     if (!this.collections.has(name)) {
       const filePath = this.getFilePath(name);
       const map = new Map<string, any>();
-      if (fs.existsSync(filePath)) {
-        try {
-          const content = fs.readFileSync(filePath, 'utf-8');
-          const data: any[] = JSON.parse(content || '[]');
-          for (const item of data) {
-            if (item && item.id) {
-              map.set(item.id, item);
-            }
+      try {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data: any[] = JSON.parse(content || '[]');
+        for (const item of data) {
+          if (item && item.id) {
+            map.set(item.id, item);
           }
-        } catch (e) {}
-      }
+        }
+      } catch (e) {}
       this.collections.set(name, map);
     }
     return this.collections.get(name)!;

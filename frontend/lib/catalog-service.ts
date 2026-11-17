@@ -163,14 +163,24 @@ function persistCatalogToFile(): void {
         path.resolve(process.cwd(), 'data_store', 'products.json'),
         path.resolve(process.cwd(), '..', 'data_store', 'products.json'),
       ];
-      const dataStr = JSON.stringify(catalogProductsStore, null, 2);
+      const dataBuf = Buffer.from(JSON.stringify(catalogProductsStore, null, 2), 'utf8');
       for (const p of targetPaths) {
+        let fd: number | null = null;
         try {
-          if (fs.existsSync(p)) {
-            fs.writeFileSync(p, dataStr, 'utf8');
-          }
+          // Open with 'r+' which atomically requires the file to exist, avoiding TOCTOU race conditions (CWE-367 / js/file-system-race)
+          fd = fs.openSync(p, 'r+');
+          fs.ftruncateSync(fd, 0);
+          fs.writeSync(fd, dataBuf, 0, dataBuf.length, 0);
         } catch {
-          // Continue to next path
+          // Path does not exist or is not accessible in current environment; proceed
+        } finally {
+          if (fd !== null) {
+            try {
+              fs.closeSync(fd);
+            } catch {
+              // Ignore descriptor close errors
+            }
+          }
         }
       }
     }

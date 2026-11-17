@@ -811,19 +811,31 @@ function syncProductToFrontendCatalog(prod: Product): void {
       path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
     ];
     for (const p of possiblePaths) {
-      if (fs.existsSync(p)) {
-        try {
-          const raw = fs.readFileSync(p, 'utf8');
-          const list: Product[] = JSON.parse(raw);
-          const idx = list.findIndex(item => item.id === prod.id || item.slug === prod.slug);
-          if (idx !== -1) {
-            list[idx] = { ...list[idx], ...prod };
-          } else {
-            list.unshift(prod);
+      let fd: number | null = null;
+      try {
+        // Open with 'r+' which atomically requires the file to exist, avoiding TOCTOU race conditions (CWE-367 / js/file-system-race)
+        fd = fs.openSync(p, 'r+');
+        const raw = fs.readFileSync(fd, 'utf8');
+        const list: Product[] = JSON.parse(raw);
+        const idx = list.findIndex(item => item.id === prod.id || item.slug === prod.slug);
+        if (idx !== -1) {
+          list[idx] = { ...list[idx], ...prod };
+        } else {
+          list.unshift(prod);
+        }
+        const str = JSON.stringify(list, null, 2);
+        fs.ftruncateSync(fd, 0);
+        const buf = Buffer.from(str, 'utf8');
+        fs.writeSync(fd, buf, 0, buf.length, 0);
+      } catch {
+        // Path does not exist or cannot be accessed in current directory; continue
+      } finally {
+        if (fd !== null) {
+          try {
+            fs.closeSync(fd);
+          } catch {
+            // Ignore descriptor close errors
           }
-          fs.writeFileSync(p, JSON.stringify(list, null, 2), 'utf8');
-        } catch {
-          // Continue to next path
         }
       }
     }
