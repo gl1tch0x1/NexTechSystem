@@ -169,6 +169,8 @@ export interface Product {
   locations?: WarehouseLocationStock[];
   images: string[];
   thumbnail: string;
+  primaryImage?: string;
+  image?: string;
   specifications: Record<string, string>; // normalized key-values e.g. { socket: "LGA1700", ramType: "DDR5", wattage: "125W" }
   features: string[];
   tags: string[];

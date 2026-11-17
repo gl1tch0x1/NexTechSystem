@@ -22,14 +22,29 @@ import { useRouter } from 'next/navigation';
 import BnplPromoBadge from '@/components/checkout/BnplPromoBadge';
 import { useProductEnquiry } from '@/lib/product-enquiry-context';
 import { getProductAvailability, extractStorageConfigurations } from '@/lib/product-availability';
+import { getAuthenticProductImage, isPlaceholderImageUrl } from '@/lib/product-image-url';
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { formatPrice } = useCurrency();
-  const [selectedImage, setSelectedImage] = useState<string>(
-    product.images?.[0] || product.thumbnail || ''
-  );
+  const initialDisplayImage = useMemo(() => getAuthenticProductImage(product), [product]);
+  const [selectedImage, setSelectedImage] = useState<string>(initialDisplayImage);
+
+  // Compute all available authentic gallery images
+  const galleryImages = useMemo(() => {
+    const list: string[] = [];
+    if (product.primaryImage) list.push(product.primaryImage);
+    if (product.thumbnail && !list.includes(product.thumbnail)) list.push(product.thumbnail);
+    if (Array.isArray(product.images)) {
+      product.images.forEach(img => {
+        if (img && !list.includes(img)) list.push(img);
+      });
+    }
+    const hasCustom = list.some(img => !isPlaceholderImageUrl(img));
+    const effective = hasCustom ? list.filter(img => !isPlaceholderImageUrl(img)) : list;
+    return effective;
+  }, [product]);
   const [quantity, setQuantity] = useState<number>(1);
   const [addedMessage, setAddedMessage] = useState(false);
 
@@ -145,13 +160,16 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
           {/* Product Image */}
           <img
-            src={
-              selectedImage ||
-              (product.categoryName?.toLowerCase().includes('laptop') || product.categoryId?.includes('laptop')
-                ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80'
-                : '/images/intel_i9_14900k.jpg')
-            }
+            src={selectedImage || initialDisplayImage}
             alt={product.name}
+            onError={(e) => {
+              const fallback = product.categoryName?.toLowerCase().includes('laptop') || product.categoryId?.includes('laptop')
+                ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80'
+                : '/images/intel_i9_14900k.jpg';
+              if (e.currentTarget.src !== fallback) {
+                e.currentTarget.src = fallback;
+              }
+            }}
             className="max-h-full max-w-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-500 relative z-10"
           />
 
@@ -175,12 +193,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         {/* Thumbnail Selector */}
-        {product.images && product.images.length > 1 && (
+        {galleryImages && galleryImages.length > 1 && (
           <div className="flex items-center gap-3 overflow-x-auto pb-2">
-            {product.images.map((img, idx) => {
-              const displayImg = img.includes('1591799264318') && product.slug.includes('14900k')
-                ? '/images/intel_i9_14900k.jpg'
-                : img;
+            {galleryImages.map((displayImg, idx) => {
               return (
                 <button
                   key={idx}

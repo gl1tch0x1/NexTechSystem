@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
-import { productImageUrl } from '@/lib/product-image-url';
+import { getAuthenticProductImage } from '@/lib/product-image-url';
 import { getAllCatalogProducts, getProductDisplayPriority } from '@/lib/catalog-service';
 import { Product, ProductApprovalStatus } from '@/types';
 import {
@@ -634,17 +634,20 @@ export default function AdminProductsPage() {
                       {/* Product Thumbnail & Title */}
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-3">
-                          {prod.primaryImage && productImageUrl(prod.primaryImage) ? (
-                            <img
-                              src={getSafeImageUrl(prod.primaryImage, '')}
-                              alt={title}
-                              className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                              <Package className="w-5 h-5" />
-                            </div>
-                          )}
+                          {(() => {
+                            const itemImg = getAuthenticProductImage(prod);
+                            return itemImg ? (
+                              <img
+                                src={getSafeImageUrl(itemImg, '')}
+                                alt={title}
+                                className="w-10 h-10 rounded-xl object-contain border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shrink-0 p-0.5"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                                <Package className="w-5 h-5" />
+                              </div>
+                            );
+                          })()}
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-bold text-slate-900 dark:text-white max-w-[280px] truncate" title={title}>

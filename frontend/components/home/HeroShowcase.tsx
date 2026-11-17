@@ -20,6 +20,7 @@ import {
   Check
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
+import { getAuthenticProductImage } from '@/lib/product-image-url';
 
 interface HeroShowcaseProps {
   products: Product[];
@@ -77,41 +78,15 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   const currentPrice = matchedProduct?.salePrice || matchedProduct?.price || currentHighlight.defaultPrice;
   const originalPrice = matchedProduct?.compareAtPrice || (matchedProduct?.salePrice ? matchedProduct?.price : currentPrice + 400);
   const stockCount = matchedProduct?.stock || 25;
-  const displayImage = matchedProduct?.images?.[0] || matchedProduct?.thumbnail || currentHighlight.defaultImage;
+  const resolvedImage = matchedProduct
+    ? getAuthenticProductImage(matchedProduct)
+    : (currentHighlight.defaultImage || '/images/hero_rtx4090.jpg');
 
   const convertedCurrent = convertPrice(currentPrice);
   const formattedCurrentAmount = convertedCurrent.toLocaleString('en-US', {
     minimumFractionDigits: currentCurrency.decimals,
     maximumFractionDigits: currentCurrency.decimals,
   });
-
-  let resolvedImage = displayImage;
-  const lowerName = (displayName || '').toLowerCase();
-  const lowerId = (selectedTabId || '').toLowerCase();
-  const isComputingSystem =
-    lowerName.includes('laptop') ||
-    lowerName.includes('notebook') ||
-    lowerName.includes('macbook') ||
-    lowerName.includes('zenbook') ||
-    lowerName.includes('xps') ||
-    lowerName.includes('thinkpad') ||
-    lowerName.includes('omen') ||
-    lowerName.includes('katana') ||
-    lowerName.includes('vector') ||
-    lowerName.includes('aio') ||
-    lowerName.includes('desktop');
-
-  if (!isComputingSystem) {
-    if (lowerId.includes('gpu') || lowerName.includes('4090')) {
-      resolvedImage = '/images/hero_rtx4090.jpg';
-    } else if (lowerId.includes('cpu') || lowerName.includes('14900k')) {
-      resolvedImage = '/images/intel_i9_14900k.jpg';
-    } else if (lowerId.includes('ssd') || lowerName.includes('990')) {
-      resolvedImage = '/images/samsung_990_pro.jpg';
-    } else if (lowerName.includes('7950x')) {
-      resolvedImage = '/images/amd_ryzen_7950x.jpg';
-    }
-  }
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -133,8 +108,8 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
         currency: 'AED',
         stock: 15,
         lowStockThreshold: 3,
-        images: [displayImage],
-        thumbnail: displayImage,
+        images: [resolvedImage],
+        thumbnail: resolvedImage,
         specifications: {},
         features: [],
         tags: [],

@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { randomUUID as uuidv4 } from 'crypto';
 import { productRepository } from '../repositories/product.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
@@ -705,12 +707,15 @@ export class ProductService {
       tags: cleanTags,
       collections: cleanCollections,
       images: data.images || [],
-      thumbnail: data.thumbnail || data.images?.[0] || '',
+      thumbnail: data.thumbnail || (data as any).primaryImage || data.images?.[0] || '',
+      primaryImage: (data as any).primaryImage || data.thumbnail || data.images?.[0] || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    return productRepository.create(newProduct);
+    const created = await productRepository.create(newProduct);
+    syncProductToFrontendCatalog(created);
+    return created;
   }
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
@@ -745,7 +750,11 @@ export class ProductService {
     }
     updates.updatedAt = new Date().toISOString();
 
-    return productRepository.update(targetId, updates);
+    const updated = await productRepository.update(targetId, updates);
+    if (updated) {
+      syncProductToFrontendCatalog(updated);
+    }
+    return updated;
   }
 
   async deleteProduct(id: string): Promise<boolean> {
@@ -776,6 +785,32 @@ export class ProductService {
     }
 
     return updated;
+  }
+}
+
+function syncProductToFrontendCatalog(prod: Product): void {
+  try {
+    const possiblePaths = [
+      path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
+      path.resolve(process.cwd(), 'data', 'products.json'),
+      path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
+    ];
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        const raw = fs.readFileSync(p, 'utf8');
+        const list: Product[] = JSON.parse(raw);
+        const idx = list.findIndex(item => item.id === prod.id || item.slug === prod.slug);
+        if (idx !== -1) {
+          list[idx] = { ...list[idx], ...prod };
+        } else {
+          list.unshift(prod);
+        }
+        fs.writeFileSync(p, JSON.stringify(list, null, 2), 'utf8');
+        break;
+      }
+    }
+  } catch {
+    // Non-fatal if frontend directory cannot be accessed
   }
 }
 

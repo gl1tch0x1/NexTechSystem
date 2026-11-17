@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { proxyToBackend } from '@/lib/proxy-helper';
-import { filterCatalogProducts } from '@/lib/catalog-service';
+import { filterCatalogProducts, updateCatalogProduct } from '@/lib/catalog-service';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  let upstreamItems: any[] = [];
+
   try {
     const upstreamRes = await proxyToBackend(request, '/products');
     if (upstreamRes.ok) {
       const cloned = upstreamRes.clone();
       try {
         const json = await cloned.json();
-        // If upstream backend returned valid catalog data, serve it directly
-        if (json && Array.isArray(json.data) && (json.data.length > 0 || (json.meta?.total !== undefined && json.meta.total > 0))) {
+        // If upstream backend returned comprehensive catalog data (>= 20 items), serve it directly
+        if (json && Array.isArray(json.data) && (json.data.length >= 20 || (json.meta?.total !== undefined && json.meta.total >= 20))) {
           return upstreamRes;
+        }
+        // If upstream returned partial items (e.g. user-created products on remote backend), capture them
+        if (json && Array.isArray(json.data) && json.data.length > 0) {
+          upstreamItems = json.data;
         }
       } catch {
         // Fall back to local verified catalog
@@ -21,6 +27,15 @@ export async function GET(request: NextRequest) {
     }
   } catch {
     // Upstream unavailable, seamlessly serve from verified authoritative catalog
+  }
+
+  // If upstream contained user-created items from remote production, synchronize them into memory store
+  if (upstreamItems.length > 0) {
+    for (const item of upstreamItems) {
+      if (item && item.id) {
+        updateCatalogProduct(item.id, item);
+      }
+    }
   }
 
   // Parse search params for resilient catalog filtering

@@ -4,6 +4,7 @@ import categoriesData from '@/data/categories.json';
 import brandsData from '@/data/brands.json';
 
 const rawProducts = (productsData as unknown as Product[]) || [];
+let catalogProductsStore: Product[] = [...rawProducts];
 const rawCategories = (categoriesData as unknown as Category[]) || [];
 const rawBrands = (brandsData as unknown as Brand[]) || [];
 
@@ -109,21 +110,22 @@ export function getProductDisplayPriority(p: Product): number {
   return 30;
 }
 
-/** Pre-sorted verified authoritative product catalog */
-const sortedCatalog: Product[] = [...rawProducts].sort((a, b) => {
-  const featA = a.isFeatured ? 1 : 0;
-  const featB = b.isFeatured ? 1 : 0;
-  if (featB !== featA) return featB - featA;
+export function getSortedCatalog(): Product[] {
+  return [...catalogProductsStore].sort((a, b) => {
+    const featA = a.isFeatured ? 1 : 0;
+    const featB = b.isFeatured ? 1 : 0;
+    if (featB !== featA) return featB - featA;
 
-  const prioA = getProductDisplayPriority(a);
-  const prioB = getProductDisplayPriority(b);
-  if (prioB !== prioA) return prioB - prioA;
+    const prioA = getProductDisplayPriority(a);
+    const prioB = getProductDisplayPriority(b);
+    if (prioB !== prioA) return prioB - prioA;
 
-  return 0;
-});
+    return 0;
+  });
+}
 
 export function getAllCatalogProducts(): Product[] {
-  return sortedCatalog;
+  return getSortedCatalog();
 }
 
 export function getCatalogCategories(): Category[] {
@@ -138,10 +140,77 @@ export function getCatalogProductBySlug(slug: string): Product | null {
   if (!slug) return null;
   const cleanSlug = slug.toLowerCase().trim();
   return (
-    sortedCatalog.find(
-      p => p.slug?.toLowerCase() === cleanSlug || p.id === slug || p.sku?.toLowerCase() === cleanSlug
+    catalogProductsStore.find(
+      p =>
+        p.slug?.toLowerCase() === cleanSlug ||
+        p.id?.toLowerCase() === cleanSlug ||
+        p.sku?.toLowerCase() === cleanSlug
     ) || null
   );
+}
+
+function persistCatalogToFile(): void {
+  try {
+    if (typeof window === 'undefined') {
+      const fs = require('fs');
+      const path = require('path');
+      const possiblePaths = [
+        path.resolve(process.cwd(), 'data', 'products.json'),
+        path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
+        path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
+      ];
+      for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+          fs.writeFileSync(p, JSON.stringify(catalogProductsStore, null, 2), 'utf8');
+          break;
+        }
+      }
+    }
+  } catch {
+    // Non-fatal if serverless filesystem is read-only
+  }
+}
+
+export function updateCatalogProduct(id: string, updates: Partial<Product>): Product | null {
+  if (!id && !updates.id && !updates.slug) return null;
+  const targetId = (id || updates.id || updates.slug || '').trim().toLowerCase();
+  const idx = catalogProductsStore.findIndex(
+    p =>
+      p.id?.toLowerCase() === targetId ||
+      p.slug?.toLowerCase() === targetId ||
+      p.sku?.toLowerCase() === targetId
+  );
+  if (idx === -1) {
+    if (updates.name || updates.title) {
+      const newProd = {
+        id: updates.id || `prod_${Date.now()}`,
+        slug:
+          updates.slug ||
+          (updates.name || updates.title || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-'),
+        name: updates.name || updates.title || '',
+        price: updates.price || 0,
+        ...updates,
+      } as Product;
+      catalogProductsStore.unshift(newProd);
+      persistCatalogToFile();
+      return newProd;
+    }
+    return null;
+  }
+
+  const existing = catalogProductsStore[idx];
+  const updated: Product = {
+    ...existing,
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+
+  catalogProductsStore[idx] = updated;
+  persistCatalogToFile();
+
+  return updated;
 }
 
 export interface CatalogFilterOptions {
@@ -188,7 +257,7 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
   const featuredOnly = options.featured === true || options.featured === 'true' || options.featured === '1';
   const sellerTypeFilter = options.sellerType ? String(options.sellerType).toUpperCase().trim() : '';
 
-  let filtered = sortedCatalog.filter(p => {
+  let filtered = getSortedCatalog().filter(p => {
     if (featuredOnly && !p.isFeatured) return false;
     if (inStockOnly && (p.stock || 0) <= 0) return false;
     if (onSaleOnly) {
@@ -409,7 +478,7 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
   let minP = Infinity;
   let maxP = -Infinity;
 
-  for (const p of sortedCatalog) {
+  for (const p of catalogProductsStore) {
     if (p.categoryId) catCounts[p.categoryId] = (catCounts[p.categoryId] || 0) + 1;
     if (p.brandId) brandCounts[p.brandId] = (brandCounts[p.brandId] || 0) + 1;
     const pPrice = p.salePrice || p.price || 0;

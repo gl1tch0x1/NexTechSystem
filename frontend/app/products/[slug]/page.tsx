@@ -15,6 +15,7 @@ import {
 
 import { getApiUrl } from '@/lib/api-client';
 import { getCatalogProductBySlug, getAllCatalogProducts } from '@/lib/catalog-service';
+import { getAuthenticProductImage } from '@/lib/product-image-url';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   const brand = product.brandName && product.brandName.toLowerCase() !== 'comnet tech' ? product.brandName : 'Enterprise';
   const title = `${product.name} - ${brand} SKU | NexTech Systems UAE`;
   const description = product.shortDescription || (product.description ? product.description.slice(0, 160) : 'Enterprise grade computing hardware, workstations, and server components.');
-  const primaryImg = product.thumbnail || product.images?.[0] || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80';
+  const primaryImg = getAuthenticProductImage(product);
 
   return {
     title,
@@ -90,11 +91,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     notFound();
   }
 
+  const primaryImg = getAuthenticProductImage(product);
   const productJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: product.primaryImage ? [product.primaryImage] : [],
+    image: [primaryImg],
     description: product.shortDescription || product.description,
     sku: product.sku,
     mpn: product.sku,

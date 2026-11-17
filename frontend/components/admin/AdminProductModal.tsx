@@ -559,13 +559,18 @@ export function AdminProductModal({
     const clean = url.trim().replace(/[<>'"]/g, '');
     if (!clean) return;
     const safeUrl = getSafeImageUrl(clean);
-    if (!formData.images.includes(safeUrl)) {
-      setFormData(prev => ({
+    setFormData(prev => {
+      const isPlaceholder = (u?: string) => !u || u === DEFAULT_FALLBACK_IMAGE || u.includes('photo-1591799264318') || u.includes('photo-1517336714731');
+      const existing = prev.images.filter(img => img !== safeUrl && !isPlaceholder(img));
+      const shouldSetPrimary = isPlaceholder(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
+      const newPrimary = shouldSetPrimary ? safeUrl : prev.primaryImage;
+      const newImages = shouldSetPrimary ? [safeUrl, ...existing] : [...existing, safeUrl];
+      return {
         ...prev,
-        images: [...prev.images, safeUrl],
-        primaryImage: prev.primaryImage || safeUrl,
-      }));
-    }
+        images: newImages,
+        primaryImage: newPrimary,
+      };
+    });
     setNewImageUrl('');
   };
 
@@ -584,7 +589,14 @@ export function AdminProductModal({
   };
 
   const handleSetPrimaryImage = (url: string) => {
-    setFormData(prev => ({ ...prev, primaryImage: url }));
+    setFormData(prev => {
+      const rest = prev.images.filter(img => img !== url);
+      return {
+        ...prev,
+        primaryImage: url,
+        images: [url, ...rest],
+      };
+    });
   };
 
   // Variant Option Helpers
@@ -844,8 +856,11 @@ export function AdminProductModal({
         brandId: formData.brandId,
         brandName: matchedBrand?.name || formData.brandName,
         primaryImage: formData.primaryImage,
-        images: formData.images.length > 0 ? formData.images : [formData.primaryImage],
         thumbnail: formData.primaryImage,
+        image: formData.primaryImage,
+        images: formData.images.includes(formData.primaryImage)
+          ? [formData.primaryImage, ...formData.images.filter(img => img !== formData.primaryImage)]
+          : (formData.images.length > 0 ? formData.images : [formData.primaryImage]),
         isPhysical: Boolean(formData.isPhysical),
         weight: formData.weight ? Number(formData.weight) : undefined,
         dimensions: formData.dimensions,

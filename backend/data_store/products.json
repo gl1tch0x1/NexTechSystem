@@ -1,5 +1,152 @@
 [
   {
+    "title": "ACER ASPIRE 14 AI A14-52MT-94H5 - C75EPF",
+    "name": "ACER ASPIRE 14 AI A14-52MT-94H5 - C75EPF",
+    "slug": "acer-aspire-14-ai-a14-52mt-94h5-c75epf",
+    "sku": "NX-SKU-275577",
+    "barcode": "729675274011",
+    "shortDescription": "Acer Aspire 14 AI - Intel Ultra 9-288V, 32GB RAM, 1TB SSD",
+    "description": "Component\tSpecification\nProcessor\tIntel Core Ultra 9-288V\nMemory\t32GB RAM\nStorage\t1TB SSD\nDisplay\t14.0-inch WUXGA Touch IPS\nOS\tWindows 11 Home",
+    "price": 3499,
+    "originalPrice": 3999,
+    "compareAtPrice": 3999,
+    "discountPercentage": 12,
+    "chargeTax": true,
+    "unitMeasure": "unit",
+    "stock": 15,
+    "lowStockThreshold": 3,
+    "inventoryTracked": true,
+    "allowBackorder": false,
+    "dimensions": {
+      "length": 0,
+      "width": 0,
+      "height": 0,
+      "unit": "cm"
+    },
+    "isPhysical": true,
+    "collections": [],
+    "tags": [
+      "laptop",
+      "ultrabook",
+      "ai",
+      "intel-ultra9"
+    ],
+    "primaryImage": "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg",
+    "thumbnail": "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg",
+    "image": "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg",
+    "images": [
+      "https://m.media-amazon.com/images/I/614KWi3tv2L.jpg"
+    ],
+    "categoryId": "cat_laptops",
+    "categoryName": "Laptops & Workstations",
+    "brandId": "brand_acer",
+    "brandName": "Acer",
+    "sellerType": "ADMIN",
+    "locations": [
+      {
+        "locationName": "Dubai Logistics Hub (JAFZA)",
+        "city": "Dubai",
+        "available": 15
+      }
+    ],
+    "specifications": {
+      "Condition": "Brand New (Factory Sealed)",
+      "Product Category": "Laptops & Workstations",
+      "Processor Model": "Intel Core Ultra 9-288V",
+      "Processor Cores": "16 Cores",
+      "RAM Capacity": "32GB",
+      "Storage Capacity": "1TB",
+      "Screen Size": "14.0-inch Touch WUXGA"
+    },
+    "warranty": "1 Year Official Warranty",
+    "hasVariants": false,
+    "variantOptions": [],
+    "variants": [],
+    "status": "ACTIVE",
+    "isActive": true,
+    "approvalStatus": "APPROVED",
+    "id": "prod_33c65948-e2de-4a9c-8c1e-539d5c920bad",
+    "rating": 5,
+    "reviewCount": 14,
+    "isFeatured": true
+  },
+  {
+    "title": "LENOVO LEGION 5 15IRX10 - ABN6F0",
+    "name": "LENOVO LEGION 5 15IRX10 - ABN6F0",
+    "slug": "lenovo-legion-5-15irx10-abn6f0",
+    "sku": "NX-LPT-605058",
+    "barcode": "729490093331",
+    "shortDescription": "LENOVO LEGION 5 15IRX10 - i7-13650HX, 16GB, 1TB SSD, RTX 5060 8GB",
+    "description": "Component\tSpecification\nProcessor\tIntel Core i7-13650HX, 13th Gen\nMemory\t16GB RAM\nStorage\t1TB SSD\nGraphics\tNVIDIA GeForce RTX 5060 8GB\nDisplay\t15.3-inch WQXGA IPS\nKeyboard\tRGB Backlit English\nOS\tDOS",
+    "price": 6143,
+    "originalPrice": 6999,
+    "compareAtPrice": 6999,
+    "discountPercentage": 12,
+    "chargeTax": true,
+    "unitMeasure": "unit",
+    "stock": 12,
+    "lowStockThreshold": 3,
+    "inventoryTracked": true,
+    "allowBackorder": false,
+    "dimensions": {
+      "length": 0,
+      "width": 0,
+      "height": 0,
+      "unit": "cm"
+    },
+    "isPhysical": true,
+    "collections": [],
+    "tags": [
+      "gaming",
+      "laptop",
+      "rtx5060",
+      "intel-i7"
+    ],
+    "primaryImage": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
+    "thumbnail": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
+    "image": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
+    "images": [
+      "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
+      "https://m.media-amazon.com/images/I/71MyA2UbvGL._AC_SL1500_.jpg",
+      "https://m.media-amazon.com/images/I/71fRo6Q3LKL._AC_SL1500_.jpg",
+      "https://m.media-amazon.com/images/I/61k4+6k+W6L._AC_SL1500_.jpg"
+    ],
+    "categoryId": "cat_gaming_laptops",
+    "categoryName": "Gaming Laptops",
+    "brandId": "brand_lenovo",
+    "brandName": "Lenovo",
+    "sellerType": "ADMIN",
+    "locations": [
+      {
+        "locationName": "Dubai Logistics Hub (JAFZA)",
+        "city": "Dubai",
+        "available": 12
+      }
+    ],
+    "specifications": {
+      "Condition": "Brand New (Factory Sealed)",
+      "Product Category": "Gaming Laptops",
+      "Processor Model": "Intel Core i7-13650HX",
+      "Processor Cores": "14 Cores",
+      "RAM Capacity": "16GB",
+      "RAM Type": "DDR5 5600MHz",
+      "Storage Capacity": "1TB",
+      "Graphics Card": "NVIDIA GEFORCE RTX 5060 8GB GDDR6",
+      "Screen Size": "15.3-inch WQXGA IPS"
+    },
+    "warranty": "1 Year Official Warranty",
+    "hasVariants": false,
+    "variantOptions": [],
+    "variants": [],
+    "status": "ACTIVE",
+    "isActive": true,
+    "approvalStatus": "APPROVED",
+    "id": "prod_748a12bf-2cff-4644-b47f-485a46238413",
+    "rating": 5,
+    "reviewCount": 18,
+    "isFeatured": true
+  },
+  {
     "id": "prod_b7f80960-bde6-47e6-a2d2-c5c521a649df",
     "allowBackorder": false,
     "approvalStatus": "APPROVED",

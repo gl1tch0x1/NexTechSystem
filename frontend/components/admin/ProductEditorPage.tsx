@@ -1185,19 +1185,30 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const handleAddGalleryImage = (urlToAdd: string) => {
     const safe = productImageUrl(urlToAdd);
     if (!safe) {
-      setImageUrlError('Enter a direct HTTPS image URL or a site-relative image path.');
+      setImageUrlError('Enter a valid image URL (e.g. direct HTTPS URL or /images/... path).');
       return;
     }
     setImageUrlError('');
     setFormData(prev => {
-      const existing = prev.images.filter(img => img !== safe);
-      const newImages = [...existing, safe];
+      const isPlaceholder = (url?: string) =>
+        !url ||
+        url.includes('photo-1517336714731-489689fd1ca8') ||
+        url.includes('photo-1541807084-5c52b6b3adef') ||
+        url.includes('photo-1591799264318-7e6ef8ddb7ea');
+
+      // Purge generic placeholders from queue when adding authentic product photography
+      const existing = prev.images.filter(img => img !== safe && !isPlaceholder(img));
+      const shouldSetPrimary = isPlaceholder(prev.primaryImage) || !prev.primaryImage;
+      const newPrimary = shouldSetPrimary ? safe : prev.primaryImage;
+      const newImages = shouldSetPrimary ? [safe, ...existing] : [...existing, safe];
+
       return {
         ...prev,
-        primaryImage: prev.primaryImage || safe,
+        primaryImage: newPrimary,
         images: newImages,
       };
     });
+    setFailedPreviewUrl(null);
     setGalleryUrlInput('');
   };
 
@@ -1215,17 +1226,21 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         primaryImage: newPrimary,
       };
     });
+    setFailedPreviewUrl(null);
   };
 
   const handleSetPrimaryImage = (index: number) => {
     setFormData(prev => {
       const selectedUrl = prev.images[index];
       if (!selectedUrl) return prev;
+      const otherImages = prev.images.filter((_, i) => i !== index);
       return {
         ...prev,
         primaryImage: selectedUrl,
+        images: [selectedUrl, ...otherImages],
       };
     });
+    setFailedPreviewUrl(null);
   };
 
   const handleMoveImage = (index: number, direction: 'left' | 'right') => {
@@ -1414,9 +1429,15 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         isPhysical: formData.isPhysical !== false,
         collections: formData.collections,
         tags: formData.tags,
-        primaryImage: formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE,
-        thumbnail: formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE,
-        images: formData.images.length > 0 ? formData.images : [formData.primaryImage || DEFAULT_FALLBACK_IMAGE],
+        primaryImage: (formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE),
+        thumbnail: (formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE),
+        image: (formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE),
+        images: (() => {
+          const cover = formData.primaryImage || formData.images[0] || '';
+          const rest = formData.images.filter(img => img !== cover && Boolean(img));
+          const list = cover ? [cover, ...rest] : rest;
+          return list.length > 0 ? list : [DEFAULT_FALLBACK_IMAGE];
+        })(),
         categoryId: formData.categoryId,
         categoryName: selectedCategory?.name || formData.categoryName || 'Hardware',
         brandId: formData.brandId,
@@ -2142,8 +2163,16 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           placeholder="e.g. https://domain.com/hardware-cover.webp"
                           value={formData.primaryImage}
                           onChange={e => {
-                            const sanitized = e.target.value;
-                            setFormData({ ...formData, primaryImage: sanitized });
+                            const sanitized = e.target.value.trim();
+                            setFormData(prev => {
+                              const safe = productImageUrl(sanitized) || sanitized;
+                              const existing = prev.images.filter(img => img !== safe);
+                              return {
+                                ...prev,
+                                primaryImage: safe,
+                                images: safe ? [safe, ...existing] : existing,
+                              };
+                            });
                             setFailedPreviewUrl(null);
                           }}
                           className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"

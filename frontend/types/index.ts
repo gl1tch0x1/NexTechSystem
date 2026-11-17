@@ -155,6 +155,7 @@ export interface Product {
   images: string[];
   thumbnail: string;
   primaryImage?: string;
+  image?: string;
   specifications?: Record<string, string>;
   specs?: {
     socket?: string;

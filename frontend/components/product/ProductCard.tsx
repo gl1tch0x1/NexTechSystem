@@ -8,6 +8,7 @@ import { useCurrency } from '@/lib/currency-context';
 import { useStoreSettings } from '@/lib/use-store-settings';
 import { useProductEnquiry } from '@/lib/product-enquiry-context';
 import { getProductAvailability } from '@/lib/product-availability';
+import { getAuthenticProductImage } from '@/lib/product-image-url';
 import {
   ShoppingCart,
   Heart,
@@ -96,30 +97,8 @@ export function ProductCard({ product }: { product: Product }) {
     ? 'Samsung'
     : (product.brandName || '').replace(/ Semiconductor/i, '').trim();
 
-  // Authentic hardware photography mapping
-  const isComputingSystem =
-    product.categoryName?.toLowerCase().includes('laptop') ||
-    product.categoryId === 'cat_laptops' ||
-    product.categoryId === 'cat_gaming_laptops' ||
-    product.categoryId === 'cat_all_in_one' ||
-    product.categoryId === 'cat_desktops';
-
-  const isIntelI9 = !isComputingSystem && (product.slug?.includes('14900k') || product.name?.toLowerCase().includes('14900k'));
-  const isRyzen7950X = !isComputingSystem && (product.slug?.includes('7950x') || product.name?.toLowerCase().includes('7950x'));
-  const isSamsung990 = !isComputingSystem && (product.slug?.includes('990-pro') || product.name?.toLowerCase().includes('990 pro'));
-  const isRtx4090 = !isComputingSystem && (product.slug?.includes('4090') || product.name?.toLowerCase().includes('rtx 4090'));
-
-  const rawImage = product.thumbnail || product.images?.[0] || '';
-  let displayImage = rawImage || (isComputingSystem ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' : '/images/intel_i9_14900k.jpg');
-  if (isIntelI9) {
-    displayImage = '/images/intel_i9_14900k.jpg';
-  } else if (isRyzen7950X) {
-    displayImage = '/images/amd_ryzen_7950x.jpg';
-  } else if (isSamsung990) {
-    displayImage = '/images/samsung_990_pro.jpg';
-  } else if (isRtx4090) {
-    displayImage = '/images/hero_rtx4090.jpg';
-  }
+  // Authentic hardware photography mapping (prioritizes user-added gallery & primary images)
+  const displayImage = getAuthenticProductImage(product);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -202,6 +181,14 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={displayImage}
             alt={product.name}
+            onError={(e) => {
+              const fallback = product.categoryName?.toLowerCase().includes('laptop') || product.categoryId?.includes('laptop')
+                ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80'
+                : '/images/intel_i9_14900k.jpg';
+              if (e.currentTarget.src !== fallback) {
+                e.currentTarget.src = fallback;
+              }
+            }}
             className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-104 transition-transform duration-500"
           />
         </Link>
