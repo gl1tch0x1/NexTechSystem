@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 import BnplPromoBadge from '@/components/checkout/BnplPromoBadge';
 import { useProductEnquiry } from '@/lib/product-enquiry-context';
 import { getProductAvailability, extractStorageConfigurations } from '@/lib/product-availability';
-import { getAuthenticProductImage, isPlaceholderImageUrl } from '@/lib/product-image-url';
+import { getAuthenticProductImage, isPlaceholderImageUrl, DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
@@ -163,11 +163,8 @@ export function ProductDetailClient({ product }: { product: Product }) {
             src={selectedImage || initialDisplayImage}
             alt={product.name}
             onError={(e) => {
-              const fallback = product.categoryName?.toLowerCase().includes('laptop') || product.categoryId?.includes('laptop')
-                ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80'
-                : '/images/intel_i9_14900k.jpg';
-              if (e.currentTarget.src !== fallback) {
-                e.currentTarget.src = fallback;
+              if (e.currentTarget.src !== DEFAULT_PRODUCT_PLACEHOLDER) {
+                e.currentTarget.src = DEFAULT_PRODUCT_PLACEHOLDER;
               }
             }}
             className="max-h-full max-w-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-500 relative z-10"

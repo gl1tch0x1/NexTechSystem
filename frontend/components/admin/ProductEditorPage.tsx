@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
-import { productImageUrl } from '@/lib/product-image-url';
+import { productImageUrl, isPlaceholderImageUrl } from '@/lib/product-image-url';
 import { formatPrice, getSecureRandomInt } from '@/lib/utils';
 import {
   Product,
@@ -1190,11 +1190,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     }
     setImageUrlError('');
     setFormData(prev => {
-      const isPlaceholder = (url?: string) =>
-        !url ||
-        url.includes('photo-1517336714731-489689fd1ca8') ||
-        url.includes('photo-1541807084-5c52b6b3adef') ||
-        url.includes('photo-1591799264318-7e6ef8ddb7ea');
+      const isPlaceholder = (url?: string) => isPlaceholderImageUrl(url);
 
       // Purge generic placeholders from queue when adding authentic product photography
       const existing = prev.images.filter(img => img !== safe && !isPlaceholder(img));

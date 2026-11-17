@@ -8,7 +8,7 @@ import { useCurrency } from '@/lib/currency-context';
 import { useStoreSettings } from '@/lib/use-store-settings';
 import { useProductEnquiry } from '@/lib/product-enquiry-context';
 import { getProductAvailability } from '@/lib/product-availability';
-import { getAuthenticProductImage } from '@/lib/product-image-url';
+import { getAuthenticProductImage, DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import {
   ShoppingCart,
   Heart,
@@ -182,11 +182,8 @@ export function ProductCard({ product }: { product: Product }) {
             src={displayImage}
             alt={product.name}
             onError={(e) => {
-              const fallback = product.categoryName?.toLowerCase().includes('laptop') || product.categoryId?.includes('laptop')
-                ? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80'
-                : '/images/intel_i9_14900k.jpg';
-              if (e.currentTarget.src !== fallback) {
-                e.currentTarget.src = fallback;
+              if (e.currentTarget.src !== DEFAULT_PRODUCT_PLACEHOLDER) {
+                e.currentTarget.src = DEFAULT_PRODUCT_PLACEHOLDER;
               }
             }}
             className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-104 transition-transform duration-500"

@@ -38,6 +38,7 @@ import {
   Percent
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 
 export type AdminModalStep =
   | 'basic'
@@ -57,8 +58,7 @@ const WAREHOUSE_LOCATIONS = [
   { id: 'loc_shj_depot', name: 'Sharjah Industrial Logistics Depot', city: 'Sharjah', code: 'SHJ-01' },
 ];
 
-const DEFAULT_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+const DEFAULT_FALLBACK_IMAGE = DEFAULT_PRODUCT_PLACEHOLDER;
 
 /**
  * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
@@ -99,14 +99,7 @@ function getSafeImageUrl(url: unknown, fallback: string = DEFAULT_FALLBACK_IMAGE
   return fallback;
 }
 
-const HARDWARE_IMAGE_PRESETS = [
-  { label: 'Intel Core i9 CPU', category: 'CPUs', url: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80' },
-  { label: 'ASUS ROG RTX 4090', category: 'GPUs', url: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80' },
-  { label: 'HP ProBook Business Laptop', category: 'Laptops', url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Enterprise Storage Drive', category: 'Storage', url: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Corsair DDR5 Memory Kit', category: 'RAM', url: 'https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Platinum Server PSU', category: 'PSUs', url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80' },
-];
+
 
 const POPULAR_TAGS = [
   'Work Laptop',
@@ -1452,22 +1445,7 @@ export function AdminProductModal({
                     })}
                   </div>
 
-                  {/* Quick Visual Presets */}
-                  <div className="pt-3 border-t border-slate-200/60 dark:border-slate-800/60">
-                    <div className="text-[11px] font-semibold text-slate-500 mb-2">Add Preset Hardware Images:</div>
-                    <div className="flex flex-wrap gap-2">
-                      {HARDWARE_IMAGE_PRESETS.map((preset, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => handleAddImage(preset.url)}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white transition-all"
-                        >
-                          + {preset.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+
                 </div>
               </div>
             )}

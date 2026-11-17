@@ -22,6 +22,7 @@ import {
 } from '@/lib/product-availability';
 import { generateWhatsAppClickUrl } from '@/lib/whatsapp';
 import { useStoreSettings } from '@/lib/use-store-settings';
+import { getAuthenticProductImage } from '@/lib/product-image-url';
 
 export interface ProductEnquiryModalProps {
   isOpen: boolean;
@@ -192,10 +193,7 @@ export function ProductEnquiryModal({
     }, 400);
   };
 
-  const productImage =
-    product.thumbnail ||
-    product.images?.[0] ||
-    '/images/intel_i9_14900k.jpg';
+  const productImage = getAuthenticProductImage(product);
 
   return (
     <AnimatePresence>

@@ -20,7 +20,7 @@ import {
   Check
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
-import { getAuthenticProductImage } from '@/lib/product-image-url';
+import { getAuthenticProductImage, DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 
 interface HeroShowcaseProps {
   products: Product[];
@@ -80,7 +80,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   const stockCount = matchedProduct?.stock || 25;
   const resolvedImage = matchedProduct
     ? getAuthenticProductImage(matchedProduct)
-    : (currentHighlight.defaultImage || '/images/hero_rtx4090.jpg');
+    : (currentHighlight.defaultImage || DEFAULT_PRODUCT_PLACEHOLDER);
 
   const convertedCurrent = convertPrice(currentPrice);
   const formattedCurrentAmount = convertedCurrent.toLocaleString('en-US', {
