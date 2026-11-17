@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import fs from 'fs';
 
 // Try loading environment files in order of precedence: backend .env.local, backend .env, and workspace root .env
 const candidateEnvPaths = [
@@ -16,9 +15,9 @@ const candidateEnvPaths = [
 ];
 
 for (const envPath of candidateEnvPaths) {
-  if (fs.existsSync(envPath)) {
+  try {
     dotenv.config({ path: envPath });
-  }
+  } catch {}
 }
 
 const nodeEnv = process.env.NODE_ENV || 'development';

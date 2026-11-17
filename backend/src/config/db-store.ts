@@ -61,9 +61,9 @@ function resolveDataDir(): string {
   const defaultPath = process.cwd().endsWith('backend')
     ? path.resolve(process.cwd(), 'data_store')
     : path.resolve(process.cwd(), 'backend', 'data_store');
-  if (!fs.existsSync(defaultPath)) {
+  try {
     fs.mkdirSync(defaultPath, { recursive: true });
-  }
+  } catch {}
   return defaultPath;
 }
 
