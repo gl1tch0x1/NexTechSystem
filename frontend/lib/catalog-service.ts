@@ -184,13 +184,25 @@ export function getCatalogBrands(): Brand[] {
 export function getCatalogProductBySlug(slug: string): Product | null {
   if (!slug) return null;
   syncCatalogStoreFromDisk();
-  const cleanSlug = slug.toLowerCase().trim();
+  const clean = slug.toLowerCase().trim();
+  let decoded = clean;
+  try { decoded = decodeURIComponent(slug).toLowerCase().trim(); } catch {}
+  const slugified = decoded.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
   return (
     catalogProductsStore.find(
       p =>
-        p.slug?.toLowerCase() === cleanSlug ||
-        p.id?.toLowerCase() === cleanSlug ||
-        p.sku?.toLowerCase() === cleanSlug
+        p.slug?.toLowerCase() === clean ||
+        p.slug?.toLowerCase() === decoded ||
+        (slugified && p.slug?.toLowerCase() === slugified) ||
+        p.id?.toLowerCase() === clean ||
+        p.id?.toLowerCase() === decoded ||
+        p.sku?.toLowerCase() === clean ||
+        p.sku?.toLowerCase() === decoded ||
+        p.name?.toLowerCase() === clean ||
+        p.name?.toLowerCase() === decoded ||
+        p.title?.toLowerCase() === clean ||
+        p.title?.toLowerCase() === decoded
     ) || null
   );
 }
@@ -237,14 +249,38 @@ function persistCatalogToFile(): void {
 }
 
 export function updateCatalogProduct(id: string, updates: Partial<Product>): Product | null {
-  if (!id && !updates.id && !updates.slug) return null;
-  const targetId = (id || updates.id || updates.slug || '').trim().toLowerCase();
-  const idx = catalogProductsStore.findIndex(
-    p =>
-      p.id?.toLowerCase() === targetId ||
-      p.slug?.toLowerCase() === targetId ||
-      p.sku?.toLowerCase() === targetId
-  );
+  if (!id && !updates.id && !updates.slug && !updates.name && !updates.title && !updates.sku) return null;
+  syncCatalogStoreFromDisk();
+  const cleanId = (id || '').trim().toLowerCase();
+  let decodedId = cleanId;
+  try { decodedId = decodeURIComponent(id || '').trim().toLowerCase(); } catch {}
+  const slugifiedId = decodedId.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  const updateId = (updates.id || '').trim().toLowerCase();
+  const updateSlug = (updates.slug || '').trim().toLowerCase();
+  const updateSku = (updates.sku || '').trim().toLowerCase();
+  const updateName = (updates.name || updates.title || '').trim().toLowerCase();
+
+  const idx = catalogProductsStore.findIndex(p => {
+    const pId = p.id?.toLowerCase() || '';
+    const pSlug = p.slug?.toLowerCase() || '';
+    const pSku = p.sku?.toLowerCase() || '';
+    const pName = p.name?.toLowerCase() || '';
+    const pTitle = p.title?.toLowerCase() || '';
+
+    // Match by ID, slug, sku, name against id parameter
+    if (cleanId && (pId === cleanId || pSlug === cleanId || pSku === cleanId || pName === cleanId || pTitle === cleanId)) return true;
+    if (decodedId && (pId === decodedId || pSlug === decodedId || pSku === decodedId || pName === decodedId || pTitle === decodedId)) return true;
+    if (slugifiedId && (pSlug === slugifiedId || pId === slugifiedId)) return true;
+
+    // Match by updates payload properties
+    if (updateId && pId === updateId) return true;
+    if (updateSlug && (pSlug === updateSlug || pId === updateSlug)) return true;
+    if (updateSku && pSku === updateSku) return true;
+    if (updateName && (pName === updateName || pTitle === updateName)) return true;
+
+    return false;
+  });
 
   const primaryImg =
     (updates.images && updates.images.length > 0 && updates.images[0]) ||

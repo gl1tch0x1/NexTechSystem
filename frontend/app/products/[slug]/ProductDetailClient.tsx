@@ -38,17 +38,22 @@ export function ProductDetailClient({ product }: { product: Product }) {
   // Compute all available authentic gallery images
   const galleryImages = useMemo(() => {
     const list: string[] = [];
-    if (product.primaryImage) list.push(product.primaryImage);
-    if (product.thumbnail && !list.includes(product.thumbnail)) list.push(product.thumbnail);
+    if (initialDisplayImage && !isPlaceholderImageUrl(initialDisplayImage)) {
+      list.push(initialDisplayImage);
+    }
     if (Array.isArray(product.images)) {
       product.images.forEach(img => {
-        if (img && !list.includes(img)) list.push(img);
+        if (img && !list.includes(img) && !isPlaceholderImageUrl(img)) list.push(img);
       });
     }
-    const hasCustom = list.some(img => !isPlaceholderImageUrl(img));
-    const effective = hasCustom ? list.filter(img => !isPlaceholderImageUrl(img)) : list;
-    return effective;
-  }, [product]);
+    if (product.primaryImage && !list.includes(product.primaryImage) && !isPlaceholderImageUrl(product.primaryImage)) {
+      list.push(product.primaryImage);
+    }
+    if (product.thumbnail && !list.includes(product.thumbnail) && !isPlaceholderImageUrl(product.thumbnail)) {
+      list.push(product.thumbnail);
+    }
+    return list.length > 0 ? list : [DEFAULT_PRODUCT_PLACEHOLDER];
+  }, [product, initialDisplayImage]);
   const [quantity, setQuantity] = useState<number>(1);
   const [addedMessage, setAddedMessage] = useState(false);
 

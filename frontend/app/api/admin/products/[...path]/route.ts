@@ -60,8 +60,12 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     updatedProduct = updateCatalogProduct(path[0], body);
   }
 
+  const targetId = updatedProduct?.id || body?.id || path[0];
+  const subpath = path.length > 1 ? `/${path.slice(1).join('/')}` : '';
+  const upstreamPath = `/admin/products/${targetId}${subpath}`;
+
   try {
-    const upstreamRes = await proxyToBackend(request, `/admin/products/${path.join('/')}`, {
+    const upstreamRes = await proxyToBackend(request, upstreamPath, {
       body: body ? JSON.stringify(body) : undefined,
     });
     if (upstreamRes.ok) {
@@ -69,11 +73,12 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
       try {
         const json = await cloned.json();
         if (json && json.success && json.data) {
-          updateCatalogProduct(path[0], json.data);
+          updateCatalogProduct(targetId, json.data);
           try {
             revalidatePath('/products');
             revalidatePath('/');
             revalidatePath(`/products/${path[0]}`);
+            if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
             if (body?.slug) revalidatePath(`/products/${body.slug}`);
             if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
           } catch {}
@@ -89,7 +94,9 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath(`/products/${path[0]}`);
+    if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
     if (body?.slug) revalidatePath(`/products/${body.slug}`);
+    if (updatedProduct?.slug) revalidatePath(`/products/${updatedProduct.slug}`);
   } catch {}
 
   const finalProd = updatedProduct || (path.length >= 1 ? getCatalogProductBySlug(path[0]) : null);
@@ -105,7 +112,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
   }
 
   return Response.json(
-    { success: true, data: body || { id: path[0] } },
+    { success: true, data: body || { id: targetId } },
     { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
   );
 }
@@ -122,8 +129,12 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     updatedProduct = updateCatalogProduct(path[0], body);
   }
 
+  const targetId = updatedProduct?.id || body?.id || path[0];
+  const subpath = path.length > 1 ? `/${path.slice(1).join('/')}` : '';
+  const upstreamPath = `/admin/products/${targetId}${subpath}`;
+
   try {
-    const upstreamRes = await proxyToBackend(request, `/admin/products/${path.join('/')}`, {
+    const upstreamRes = await proxyToBackend(request, upstreamPath, {
       body: body ? JSON.stringify(body) : undefined,
     });
     if (upstreamRes.ok) {
@@ -131,11 +142,12 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       try {
         const json = await cloned.json();
         if (json && json.success && json.data) {
-          updateCatalogProduct(path[0], json.data);
+          updateCatalogProduct(targetId, json.data);
           try {
             revalidatePath('/products');
             revalidatePath('/');
             revalidatePath(`/products/${path[0]}`);
+            if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
             if (body?.slug) revalidatePath(`/products/${body.slug}`);
             if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
           } catch {}
@@ -151,7 +163,9 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath(`/products/${path[0]}`);
+    if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
     if (body?.slug) revalidatePath(`/products/${body.slug}`);
+    if (updatedProduct?.slug) revalidatePath(`/products/${updatedProduct.slug}`);
   } catch {}
 
   const finalProd = updatedProduct || (path.length >= 1 ? getCatalogProductBySlug(path[0]) : null);
@@ -167,7 +181,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
   }
 
   return Response.json(
-    { success: true, data: body || { id: path[0] } },
+    { success: true, data: body || { id: targetId } },
     { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
   );
 }

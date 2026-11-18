@@ -511,6 +511,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const returnPath = portal === 'reseller' ? `/reseller/${resellerCode || 'comnet101'}/products` : '/admin/products';
 
   const [loading, setLoading] = useState(mode === 'edit');
+  const [canonicalId, setCanonicalId] = useState<string>(productId || '');
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [brands, setBrands] = useState<Brand[]>(DEFAULT_BRANDS);
   const [resellers, setResellers] = useState<Reseller[]>([]);
@@ -715,6 +716,10 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           if (!product || (!product.title && !product.name)) {
             setFormError('Failed to load product details. The SKU may not exist or the service is temporarily unavailable.');
             return;
+          }
+
+          if (product.id) {
+            setCanonicalId(product.id);
           }
 
           const loadedSpecs: Record<string, string> = { ...(product.specifications || product.specs || {}) };
@@ -1512,7 +1517,10 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       const selectedHub = WAREHOUSE_LOCATIONS[0];
       const stockVal = Number(formData.stock) || 0;
 
+      const effectiveId = canonicalId || productId;
+
       const payload: Partial<Product> = {
+        id: effectiveId || undefined,
         title: formData.title.trim(),
         name: formData.title.trim(),
         slug: formData.slug.trim() || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
@@ -1599,8 +1607,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
       const authOpts = effectiveToken ? { token: effectiveToken } : {};
       if (portal === 'reseller') {
-        const endpoint = mode === 'edit' && productId ? `/reseller/products/${productId}` : '/reseller/products';
-        if (mode === 'edit' && productId) {
+        const endpoint = mode === 'edit' && effectiveId ? `/reseller/products/${effectiveId}` : '/reseller/products';
+        if (mode === 'edit' && effectiveId) {
           await ApiClient.put(endpoint, payload, authOpts);
           setSuccessNotice('Hardware SKU successfully updated and resubmitted for Admin review.');
         } else {
@@ -1608,8 +1616,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           setSuccessNotice('Hardware SKU successfully submitted to Admin verification queue (PENDING_APPROVAL).');
         }
       } else {
-        if (mode === 'edit' && productId) {
-          await ApiClient.put(`/admin/products/${productId}`, payload, authOpts);
+        if (mode === 'edit' && effectiveId) {
+          await ApiClient.put(`/admin/products/${effectiveId}`, payload, authOpts);
           setSuccessNotice('Hardware SKU successfully updated and synchronized across regional catalogs.');
         } else {
           await ApiClient.post('/admin/products', payload, authOpts);

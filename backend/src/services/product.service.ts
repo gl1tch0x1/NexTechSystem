@@ -642,15 +642,68 @@ export class ProductService {
   }
 
   async getProductBySlug(slug: string): Promise<Product | null> {
-    const prod = await productRepository.findBySlug(slug);
+    const prod = await this.resolveExistingProduct(slug);
     return prod ? this.attachLocations(prod) : null;
   }
 
-  async getProductById(id: string): Promise<Product | null> {
-    let prod = await productRepository.findById(id);
-    if (!prod) {
-      prod = await productRepository.findBySlug(id);
+  async resolveExistingProduct(identifier: string): Promise<Product | null> {
+    if (!identifier || typeof identifier !== 'string') return null;
+    const clean = identifier.trim();
+    if (!clean) return null;
+
+    // 1. Direct ID lookup
+    let prod = await productRepository.findById(clean);
+    if (prod) return prod;
+
+    // 2. Direct Slug lookup
+    prod = await productRepository.findBySlug(clean);
+    if (prod) return prod;
+
+    // 3. Direct SKU lookup
+    prod = await productRepository.findBySku(clean);
+    if (prod) return prod;
+
+    // 4. Decoded lookup (in case identifier is URL-encoded)
+    let decoded = clean;
+    try { decoded = decodeURIComponent(clean).trim(); } catch {}
+    if (decoded && decoded !== clean) {
+      prod = await productRepository.findById(decoded);
+      if (prod) return prod;
+      prod = await productRepository.findBySlug(decoded);
+      if (prod) return prod;
+      prod = await productRepository.findBySku(decoded);
+      if (prod) return prod;
     }
+
+    // 5. Normalized / slugified lookup (e.g. from name or hyphenated slug)
+    const slugified = decoded.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    if (slugified && slugified !== clean && slugified !== decoded) {
+      prod = await productRepository.findBySlug(slugified);
+      if (prod) return prod;
+    }
+
+    // 6. Case-insensitive Name / Title / Partial Slug search across all catalog products
+    const all = await productRepository.find();
+    const lowerDecoded = decoded.toLowerCase();
+    const found = all.find(p => {
+      const pName = (p.name || '').toLowerCase();
+      const pTitle = ((p as any).title || '').toLowerCase();
+      const pSlug = (p.slug || '').toLowerCase();
+      const pSku = (p.sku || '').toLowerCase();
+      return (
+        pName === lowerDecoded ||
+        pTitle === lowerDecoded ||
+        (slugified && pSlug === slugified) ||
+        pSku === lowerDecoded ||
+        (pName.length > 5 && (pName.includes(lowerDecoded) || lowerDecoded.includes(pName)))
+      );
+    });
+
+    return found || null;
+  }
+
+  async getProductById(id: string): Promise<Product | null> {
+    const prod = await this.resolveExistingProduct(id);
     return prod ? this.attachLocations(prod) : null;
   }
 
@@ -716,17 +769,21 @@ export class ProductService {
   }
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
-    let targetId = id;
-    const existing = await productRepository.findById(id);
+    let existing = await this.resolveExistingProduct(id);
+    if (!existing && updates.id) {
+      existing = await this.resolveExistingProduct(updates.id);
+    }
+    if (!existing && updates.slug) {
+      existing = await this.resolveExistingProduct(updates.slug);
+    }
+    if (!existing && (updates.name || (updates as any).title)) {
+      existing = await this.resolveExistingProduct(updates.name || (updates as any).title || '');
+    }
     if (!existing) {
-      const bySlug = await productRepository.findBySlug(id);
-      if (bySlug) {
-        targetId = bySlug.id;
-      } else {
-        return null;
-      }
+      return null;
     }
 
+    const targetId = existing.id;
     await this.validateProductData(updates, targetId);
 
     if (updates.tags && Array.isArray(updates.tags)) {

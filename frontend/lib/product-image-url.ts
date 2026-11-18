@@ -24,9 +24,19 @@ export function productImageUrl(value: unknown): string | null {
     return input;
   }
 
+  // Support protocol-relative URLs
+  if (input.startsWith('//')) {
+    input = `https:${input}`;
+  }
+
   // Automatically upgrade insecure http to https
   if (/^http:\/\//i.test(input)) {
     input = input.replace(/^http:\/\//i, 'https://');
+  }
+
+  // If input is a bare domain URL without protocol (e.g. m.media-amazon.com/..., images.unsplash.com/...)
+  if (!input.startsWith('/') && !/^https?:\/\//i.test(input) && /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/i.test(input)) {
+    input = `https://${input}`;
   }
 
   const relative = input.startsWith('/') && !input.startsWith('//');

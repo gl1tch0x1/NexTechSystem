@@ -104,12 +104,13 @@
       "rtx5060",
       "intel-i7"
     ],
-    "primaryImage": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
-    "thumbnail": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
-    "image": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
+    "primaryImage": "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
+    "thumbnail": "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
+    "image": "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
     "images": [
-      "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800"
+      "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
+      "https://m.media-amazon.com/images/I/GALLERY_ASSET_1.jpg",
+      "https://m.media-amazon.com/images/I/GALLERY_ASSET_2.jpg"
     ],
     "categoryId": "cat_gaming_laptops",
     "categoryName": "Gaming Laptops",
@@ -145,7 +146,7 @@
     "rating": 5,
     "reviewCount": 18,
     "isFeatured": true,
-    "updatedAt": "2026-11-18T08:51:45.744Z",
+    "updatedAt": "2026-11-18T14:14:36.197Z",
     "stockStatus": "IN_STOCK"
   },
   {
@@ -6209,7 +6210,7 @@
   {
     "id": "prod_3f6f9ba5-af08-4aef-a136-1dfa9712598c",
     "name": "HP OMEN 14-FB1047NR TRANSCEND",
-    "title": "HP OMEN 14-FB1047NR TRANSCEND | ULTRA 7 255H | 16GB | 1TB SSD | 14\"",
+    "title": "HP OMEN 14-FB1047NR TRANSCEND",
     "slug": "hp-omen-14-fb1047nr-transcend-mwhv1rbm45c",
     "sku": "CN-HNFO75",
     "brandId": "brand_hp",
@@ -6227,9 +6228,9 @@
     "reservedStock": 0,
     "lowStockThreshold": 3,
     "images": [
-      "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&auto=format&fit=crop&q=80"
+      "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg"
     ],
-    "thumbnail": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&auto=format&fit=crop&q=80",
+    "thumbnail": "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 7 255H",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -6272,7 +6273,7 @@
     "allowBackorder": false,
     "unitMeasure": "unit",
     "createdAt": "2026-11-15T13:18:40.018Z",
-    "updatedAt": "2026-11-16T14:25:26.021Z",
+    "updatedAt": "2026-11-18T14:06:54.348Z",
     "locations": [
       {
         "locationId": "loc_jafza",
@@ -6293,7 +6294,9 @@
         "committed": 0
       }
     ],
-    "primaryImage": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&auto=format&fit=crop&q=80"
+    "primaryImage": "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg",
+    "stockStatus": "IN_STOCK",
+    "image": "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg"
   },
   {
     "id": "prod_5459dff8-6c3a-4c1a-89b4-6ff03aa8a63c",
@@ -7854,9 +7857,9 @@
     "reservedStock": 0,
     "lowStockThreshold": 3,
     "images": [
-      "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&auto=format&fit=crop&q=80"
+      "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg"
     ],
-    "thumbnail": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&auto=format&fit=crop&q=80",
+    "thumbnail": "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 9 275HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -7899,7 +7902,7 @@
     "allowBackorder": false,
     "unitMeasure": "unit",
     "createdAt": "2026-11-15T13:18:40.019Z",
-    "updatedAt": "2026-11-16T14:25:26.162Z",
+    "updatedAt": "2026-11-18T13:38:48.126Z",
     "locations": [
       {
         "locationId": "loc_jafza",
@@ -7920,7 +7923,9 @@
         "committed": 0
       }
     ],
-    "primaryImage": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&auto=format&fit=crop&q=80"
+    "primaryImage": "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg",
+    "image": "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg",
+    "stockStatus": "IN_STOCK"
   },
   {
     "id": "prod_36371971-48f0-4133-b7cb-c47fec640861",
