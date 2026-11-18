@@ -705,8 +705,8 @@ export class ProductService {
       tags: cleanTags,
       collections: cleanCollections,
       images: data.images || [],
-      thumbnail: data.thumbnail || (data as any).primaryImage || data.images?.[0] || '',
-      primaryImage: (data as any).primaryImage || data.thumbnail || data.images?.[0] || '',
+      thumbnail: (data.images && data.images.length > 0 && data.images[0]) || data.thumbnail || (data as any).primaryImage || '',
+      primaryImage: (data.images && data.images.length > 0 && data.images[0]) || (data as any).primaryImage || data.thumbnail || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -747,10 +747,10 @@ export class ProductService {
     }
 
     const primaryImg =
+      (updates.images && updates.images.length > 0 && updates.images[0]) ||
       updates.primaryImage ||
       updates.thumbnail ||
-      (updates as any).image ||
-      (updates.images && updates.images[0]);
+      (updates as any).image;
     if (primaryImg) {
       updates.primaryImage = primaryImg;
       updates.thumbnail = primaryImg;

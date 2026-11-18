@@ -108,7 +108,8 @@
     "thumbnail": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
     "image": "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
     "images": [
-      "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg"
+      "https://m.media-amazon.com/images/I/7112Sa3EAIL._AC_SL1500_.jpg",
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800"
     ],
     "categoryId": "cat_gaming_laptops",
     "categoryName": "Gaming Laptops",
@@ -144,7 +145,7 @@
     "rating": 5,
     "reviewCount": 18,
     "isFeatured": true,
-    "updatedAt": "2026-11-17T16:26:29.177Z",
+    "updatedAt": "2026-11-18T08:51:45.744Z",
     "stockStatus": "IN_STOCK"
   },
   {

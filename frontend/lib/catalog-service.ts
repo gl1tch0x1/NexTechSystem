@@ -247,10 +247,10 @@ export function updateCatalogProduct(id: string, updates: Partial<Product>): Pro
   );
 
   const primaryImg =
+    (updates.images && updates.images.length > 0 && updates.images[0]) ||
     updates.primaryImage ||
     updates.thumbnail ||
     (updates as any).image ||
-    (updates.images && updates.images[0]) ||
     '';
 
   if (idx === -1) {
@@ -282,18 +282,16 @@ export function updateCatalogProduct(id: string, updates: Partial<Product>): Pro
 
   const existing = catalogProductsStore[idx];
   const finalPrimaryImg =
-    updates.primaryImage !== undefined
-      ? updates.primaryImage
-      : (primaryImg ||
-        existing.primaryImage ||
-        existing.thumbnail ||
-        (existing as any).image ||
-        (existing.images && existing.images[0]) ||
-        '');
+    primaryImg ||
+    (existing.images && existing.images.length > 0 && existing.images[0]) ||
+    existing.primaryImage ||
+    existing.thumbnail ||
+    (existing as any).image ||
+    '';
 
   const finalImages =
     updates.images !== undefined && Array.isArray(updates.images)
-      ? updates.images
+      ? (finalPrimaryImg ? [finalPrimaryImg, ...updates.images.filter(x => x !== finalPrimaryImg)] : updates.images)
       : (existing.images && existing.images.length > 0
         ? existing.images
         : (finalPrimaryImg ? [finalPrimaryImg] : []));

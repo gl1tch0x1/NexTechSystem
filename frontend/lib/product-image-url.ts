@@ -64,20 +64,34 @@ export function getAuthenticProductImage(product?: Partial<Product> | null): str
     return DEFAULT_PRODUCT_PLACEHOLDER;
   }
 
-  // Purely retrieve database-stored image fields in order of precedence
-  if (product.primaryImage && typeof product.primaryImage === 'string' && product.primaryImage.trim()) {
+  // 1. If images array is provided with a valid non-placeholder image, index 0 is authoritative
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    const firstImg = product.images[0];
+    if (typeof firstImg === 'string' && firstImg.trim() && !isPlaceholderImageUrl(firstImg)) {
+      return firstImg.trim();
+    }
+    const anyValid = product.images.find(img => typeof img === 'string' && img.trim() && !isPlaceholderImageUrl(img));
+    if (anyValid) {
+      return anyValid.trim();
+    }
+  }
+
+  // 2. Purely retrieve database-stored image fields in order of precedence
+  if (product.primaryImage && typeof product.primaryImage === 'string' && product.primaryImage.trim() && !isPlaceholderImageUrl(product.primaryImage)) {
     return product.primaryImage.trim();
   }
-  if (product.thumbnail && typeof product.thumbnail === 'string' && product.thumbnail.trim()) {
+  if (product.thumbnail && typeof product.thumbnail === 'string' && product.thumbnail.trim() && !isPlaceholderImageUrl(product.thumbnail)) {
     return product.thumbnail.trim();
   }
-  if ((product as any)?.image && typeof (product as any).image === 'string' && (product as any).image.trim()) {
+  if ((product as any)?.image && typeof (product as any).image === 'string' && (product as any).image.trim() && !isPlaceholderImageUrl((product as any).image)) {
     return (product as any).image.trim();
   }
+
+  // 3. Fallback to any string in images if present
   if (Array.isArray(product.images) && product.images.length > 0) {
-    const firstValid = product.images.find(img => typeof img === 'string' && img.trim().length > 0);
-    if (firstValid) {
-      return firstValid.trim();
+    const anyStr = product.images.find(img => typeof img === 'string' && img.trim().length > 0);
+    if (anyStr) {
+      return anyStr.trim();
     }
   }
 

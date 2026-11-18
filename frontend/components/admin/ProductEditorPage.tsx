@@ -1193,7 +1193,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   };
 
   // Multi-Asset Gallery Handlers (Strictly Sanitized via getSafeImageUrl)
-  const handleFileUpload = async (file: File, isCoverAsset: boolean = true) => {
+  const handleFileUpload = async (file: File, _isCoverAsset: boolean = true) => {
     if (!file) return;
 
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
@@ -1242,21 +1242,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       if (finalUrl) {
         setFormData(prev => {
           const cleanExisting = prev.images.filter(img => img !== finalUrl && !isPlaceholderImageUrl(img));
-          if (isCoverAsset) {
-            return {
-              ...prev,
-              primaryImage: finalUrl,
-              images: [finalUrl, ...cleanExisting],
-            };
-          } else {
-            const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage;
-            const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
-            return {
-              ...prev,
-              primaryImage: newPrimary,
-              images: shouldSetPrimary ? [finalUrl, ...cleanExisting] : [...cleanExisting, finalUrl],
-            };
-          }
+          return {
+            ...prev,
+            primaryImage: finalUrl,
+            images: [finalUrl, ...cleanExisting],
+          };
         });
         setFailedPreviewUrl(null);
       }
@@ -1271,21 +1261,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         if (base64) {
           setFormData(prev => {
             const cleanExisting = prev.images.filter(img => img !== base64 && !isPlaceholderImageUrl(img));
-            if (isCoverAsset) {
-              return {
-                ...prev,
-                primaryImage: base64,
-                images: [base64, ...cleanExisting],
-              };
-            } else {
-              const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage;
-              const newPrimary = shouldSetPrimary ? base64 : prev.primaryImage;
-              return {
-                ...prev,
-                primaryImage: newPrimary,
-                images: shouldSetPrimary ? [base64, ...cleanExisting] : [...cleanExisting, base64],
-              };
-            }
+            return {
+              ...prev,
+              primaryImage: base64,
+              images: [base64, ...cleanExisting],
+            };
           });
           setFailedPreviewUrl(null);
         }
@@ -1318,7 +1298,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     }
   };
 
-  const handleAddGalleryImage = (urlToAdd: string, setAsCover: boolean = false) => {
+  const handleAddGalleryImage = (urlToAdd: string, _setAsCover: boolean = true) => {
     const safe = productImageUrl(urlToAdd);
     if (!safe) {
       setImageUrlError('Enter a valid image URL (e.g. direct HTTPS URL or /images/... path).');
@@ -1327,13 +1307,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     setImageUrlError('');
     setFormData(prev => {
       const cleanExisting = prev.images.filter(img => img !== safe && !isPlaceholderImageUrl(img));
-      const shouldSetPrimary = setAsCover || isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage;
-      const newPrimary = shouldSetPrimary ? safe : prev.primaryImage;
-      const newImages = shouldSetPrimary ? [safe, ...cleanExisting] : [...cleanExisting, safe];
+      const newImages = [safe, ...cleanExisting];
 
       return {
         ...prev,
-        primaryImage: newPrimary,
+        primaryImage: safe,
         images: newImages,
       };
     });
@@ -1346,7 +1324,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       const targetUrl = prev.images[indexToRemove];
       const newImages = prev.images.filter((_, i) => i !== indexToRemove);
       let newPrimary = prev.primaryImage;
-      if (newPrimary === targetUrl) {
+      if (newPrimary === targetUrl || !newPrimary) {
         newPrimary = newImages[0] || '';
       }
       return {
@@ -1380,9 +1358,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       const temp = newImages[index];
       newImages[index] = newImages[targetIndex];
       newImages[targetIndex] = temp;
+      const newPrimary = newImages[0] || prev.primaryImage;
       return {
         ...prev,
         images: newImages,
+        primaryImage: newPrimary,
       };
     });
   };
@@ -1563,7 +1543,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         image: (formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE),
         images: (() => {
           const cover = formData.primaryImage || formData.images[0] || '';
-          const rest = formData.images.filter(img => img !== cover && Boolean(img));
+          const rest = formData.images.filter(img => img && img !== cover && !isPlaceholderImageUrl(img));
           const list = cover ? [cover, ...rest] : rest;
           return list.length > 0 ? list : [DEFAULT_FALLBACK_IMAGE];
         })(),
@@ -2352,14 +2332,14 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           onKeyDown={e => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
-                              handleAddGalleryImage(galleryUrlInput);
+                              handleAddGalleryImage(galleryUrlInput, true);
                             }
                           }}
                           className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                         />
                         <button
                           type="button"
-                          onClick={() => handleAddGalleryImage(galleryUrlInput, false)}
+                          onClick={() => handleAddGalleryImage(galleryUrlInput, true)}
                           className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
                           title="Add this image to the gallery queue"
                         >

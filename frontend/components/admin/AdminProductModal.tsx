@@ -558,7 +558,7 @@ export function AdminProductModal({
   };
 
   // Image Helpers
-  const handleFileUpload = async (file: File, isCoverAsset: boolean = true) => {
+  const handleFileUpload = async (file: File, _isCoverAsset: boolean = true) => {
     if (!file) return;
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type.toLowerCase())) {
@@ -595,21 +595,11 @@ export function AdminProductModal({
       if (finalUrl) {
         setFormData(prev => {
           const existing = prev.images.filter(img => img !== finalUrl && img !== DEFAULT_FALLBACK_IMAGE);
-          if (isCoverAsset) {
-            return {
-              ...prev,
-              primaryImage: finalUrl,
-              images: [finalUrl, ...existing],
-            };
-          } else {
-            const shouldSetPrimary = !prev.primaryImage || prev.primaryImage === DEFAULT_FALLBACK_IMAGE || existing.length === 0;
-            const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
-            return {
-              ...prev,
-              primaryImage: newPrimary,
-              images: shouldSetPrimary ? [finalUrl, ...existing] : [...existing, finalUrl],
-            };
-          }
+          return {
+            ...prev,
+            primaryImage: finalUrl,
+            images: [finalUrl, ...existing],
+          };
         });
       }
     } catch {
@@ -623,21 +613,11 @@ export function AdminProductModal({
         if (base64) {
           setFormData(prev => {
             const existing = prev.images.filter(img => img !== base64 && img !== DEFAULT_FALLBACK_IMAGE);
-            if (isCoverAsset) {
-              return {
-                ...prev,
-                primaryImage: base64,
-                images: [base64, ...existing],
-              };
-            } else {
-              const shouldSetPrimary = !prev.primaryImage || prev.primaryImage === DEFAULT_FALLBACK_IMAGE || existing.length === 0;
-              const newPrimary = shouldSetPrimary ? base64 : prev.primaryImage;
-              return {
-                ...prev,
-                primaryImage: newPrimary,
-                images: shouldSetPrimary ? [base64, ...existing] : [...existing, base64],
-              };
-            }
+            return {
+              ...prev,
+              primaryImage: base64,
+              images: [base64, ...existing],
+            };
           });
         }
       } catch {
@@ -669,20 +649,18 @@ export function AdminProductModal({
     }
   };
 
-  const handleAddImage = (url: string, setAsCover: boolean = false) => {
+  const handleAddImage = (url: string, _setAsCover: boolean = true) => {
     const clean = url.trim().replace(/[<>'"]/g, '');
     if (!clean) return;
     const safeUrl = getSafeImageUrl(clean);
     setFormData(prev => {
       const isPlaceholder = (u?: string) => !u || u === DEFAULT_FALLBACK_IMAGE || u.includes('photo-1591799264318') || u.includes('photo-1517336714731');
       const existing = prev.images.filter(img => img !== safeUrl && !isPlaceholder(img));
-      const shouldSetPrimary = setAsCover || isPlaceholder(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
-      const newPrimary = shouldSetPrimary ? safeUrl : prev.primaryImage;
-      const newImages = shouldSetPrimary ? [safeUrl, ...existing] : [...existing, safeUrl];
+      const newImages = [safeUrl, ...existing];
       return {
         ...prev,
         images: newImages,
-        primaryImage: newPrimary,
+        primaryImage: safeUrl,
       };
     });
     setNewImageUrl('');
@@ -969,12 +947,15 @@ export function AdminProductModal({
         categoryName: matchedCat?.name || formData.categoryName,
         brandId: formData.brandId,
         brandName: matchedBrand?.name || formData.brandName,
-        primaryImage: formData.primaryImage,
-        thumbnail: formData.primaryImage,
-        image: formData.primaryImage,
-        images: formData.images.includes(formData.primaryImage)
-          ? [formData.primaryImage, ...formData.images.filter(img => img !== formData.primaryImage)]
-          : (formData.images.length > 0 ? formData.images : [formData.primaryImage]),
+        primaryImage: (formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE),
+        thumbnail: (formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE),
+        image: (formData.primaryImage || formData.images[0] || DEFAULT_FALLBACK_IMAGE),
+        images: (() => {
+          const cover = formData.primaryImage || formData.images[0] || '';
+          const cleanRest = formData.images.filter(img => img && img !== cover && img !== DEFAULT_FALLBACK_IMAGE);
+          const list = cover && cover !== DEFAULT_FALLBACK_IMAGE ? [cover, ...cleanRest] : cleanRest;
+          return list.length > 0 ? list : [DEFAULT_FALLBACK_IMAGE];
+        })(),
         isPhysical: Boolean(formData.isPhysical),
         weight: formData.weight ? Number(formData.weight) : undefined,
         dimensions: formData.dimensions,
