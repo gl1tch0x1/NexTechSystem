@@ -20,6 +20,9 @@ import {
   getCatalogBrands,
 } from '@/lib/catalog-service';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ProductsPageProps {
   searchParams: Promise<{
     category?: string;
@@ -106,13 +109,13 @@ async function getProductsData(params: Record<string, any>) {
       facets = json.meta?.facets;
     }
 
-    const catRes = await fetch(getApiUrl('/products/categories'), { next: { revalidate: 60 } });
+    const catRes = await fetch(getApiUrl('/products/categories'), { cache: 'no-store' });
     if (catRes.ok) {
       const catJson = await catRes.json();
       categories = (catJson.data || []) as Category[];
     }
 
-    const brandRes = await fetch(getApiUrl('/products/brands'), { next: { revalidate: 60 } });
+    const brandRes = await fetch(getApiUrl('/products/brands'), { cache: 'no-store' });
     if (brandRes.ok) {
       const brandJson = await brandRes.json();
       brands = (brandJson.data || []) as Brand[];

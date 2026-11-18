@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { proxyToBackend } from '@/lib/proxy-helper';
 import { filterCatalogProducts, updateCatalogProduct } from '@/lib/catalog-service';
 
@@ -59,6 +60,11 @@ export async function POST(request: NextRequest) {
     if (body) {
       updateCatalogProduct(body.id || body.slug || '', body);
     }
+  } catch {}
+
+  try {
+    revalidatePath('/products');
+    revalidatePath('/');
   } catch {}
 
   try {

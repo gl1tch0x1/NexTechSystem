@@ -538,6 +538,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const [targetMarginInput, setTargetMarginInput] = useState<number>(20);
   const [galleryUrlInput, setGalleryUrlInput] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -1192,7 +1193,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   };
 
   // Multi-Asset Gallery Handlers (Strictly Sanitized via getSafeImageUrl)
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, isCoverAsset: boolean = true) => {
     if (!file) return;
 
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
@@ -1240,15 +1241,22 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
 
       if (finalUrl) {
         setFormData(prev => {
-          const existing = prev.images.filter(img => img !== finalUrl && !isPlaceholderImageUrl(img));
-          const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
-          const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
-          const newImages = shouldSetPrimary ? [finalUrl, ...existing] : [...existing, finalUrl];
-          return {
-            ...prev,
-            primaryImage: newPrimary,
-            images: newImages,
-          };
+          const cleanExisting = prev.images.filter(img => img !== finalUrl && !isPlaceholderImageUrl(img));
+          if (isCoverAsset) {
+            return {
+              ...prev,
+              primaryImage: finalUrl,
+              images: [finalUrl, ...cleanExisting],
+            };
+          } else {
+            const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage;
+            const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
+            return {
+              ...prev,
+              primaryImage: newPrimary,
+              images: shouldSetPrimary ? [finalUrl, ...cleanExisting] : [...cleanExisting, finalUrl],
+            };
+          }
         });
         setFailedPreviewUrl(null);
       }
@@ -1262,14 +1270,22 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         });
         if (base64) {
           setFormData(prev => {
-            const existing = prev.images.filter(img => img !== base64 && !isPlaceholderImageUrl(img));
-            const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
-            const newPrimary = shouldSetPrimary ? base64 : prev.primaryImage;
-            return {
-              ...prev,
-              primaryImage: newPrimary,
-              images: shouldSetPrimary ? [base64, ...existing] : [...existing, base64],
-            };
+            const cleanExisting = prev.images.filter(img => img !== base64 && !isPlaceholderImageUrl(img));
+            if (isCoverAsset) {
+              return {
+                ...prev,
+                primaryImage: base64,
+                images: [base64, ...cleanExisting],
+              };
+            } else {
+              const shouldSetPrimary = isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage;
+              const newPrimary = shouldSetPrimary ? base64 : prev.primaryImage;
+              return {
+                ...prev,
+                primaryImage: newPrimary,
+                images: shouldSetPrimary ? [base64, ...cleanExisting] : [...cleanExisting, base64],
+              };
+            }
           });
           setFailedPreviewUrl(null);
         }
@@ -1293,16 +1309,16 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent, isCoverAsset: boolean = true) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files[0]);
+      handleFileUpload(e.dataTransfer.files[0], isCoverAsset);
     }
   };
 
-  const handleAddGalleryImage = (urlToAdd: string) => {
+  const handleAddGalleryImage = (urlToAdd: string, setAsCover: boolean = false) => {
     const safe = productImageUrl(urlToAdd);
     if (!safe) {
       setImageUrlError('Enter a valid image URL (e.g. direct HTTPS URL or /images/... path).');
@@ -1310,13 +1326,10 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     }
     setImageUrlError('');
     setFormData(prev => {
-      const isPlaceholder = (url?: string) => isPlaceholderImageUrl(url);
-
-      // Purge generic placeholders from queue when adding authentic product photography
-      const existing = prev.images.filter(img => img !== safe && !isPlaceholder(img));
-      const shouldSetPrimary = isPlaceholder(prev.primaryImage) || !prev.primaryImage;
+      const cleanExisting = prev.images.filter(img => img !== safe && !isPlaceholderImageUrl(img));
+      const shouldSetPrimary = setAsCover || isPlaceholderImageUrl(prev.primaryImage) || !prev.primaryImage;
       const newPrimary = shouldSetPrimary ? safe : prev.primaryImage;
-      const newImages = shouldSetPrimary ? [safe, ...existing] : [...existing, safe];
+      const newImages = shouldSetPrimary ? [safe, ...cleanExisting] : [...cleanExisting, safe];
 
       return {
         ...prev,
@@ -2115,7 +2128,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   </div>
 
                   {/* Primary Cover Preview */}
-                  {/* Hidden File Input for Native File System Asset Ingestion */}
+                  {/* Hidden File Input for Native File System Cover Asset Ingestion */}
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -2123,7 +2136,20 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                     accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
                     onChange={e => {
                       if (e.target.files && e.target.files[0]) {
-                        handleFileUpload(e.target.files[0]);
+                        handleFileUpload(e.target.files[0], true);
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+                  {/* Hidden File Input for Native File System Gallery Asset Ingestion */}
+                  <input
+                    type="file"
+                    ref={galleryFileInputRef}
+                    className="hidden"
+                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleFileUpload(e.target.files[0], false);
                       }
                       e.target.value = '';
                     }}
@@ -2162,7 +2188,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       <div
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
+                        onDrop={e => handleDrop(e, true)}
                         className={`aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 relative shadow-sm group flex items-center justify-center transition-all ${
                           isDragging
                             ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 ring-4 ring-blue-500/20'
@@ -2239,7 +2265,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <div
                           onDragOver={handleDragOver}
                           onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
+                          onDrop={e => handleDrop(e, false)}
                           className="flex gap-2 overflow-x-auto pb-1"
                         >
                           {formData.images.map((imgUrl, imgIdx) => {
@@ -2308,8 +2334,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         <div
                           onDragOver={handleDragOver}
                           onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                          onClick={() => fileInputRef.current?.click()}
+                          onDrop={e => handleDrop(e, false)}
+                          onClick={() => galleryFileInputRef.current?.click()}
                           className="p-3.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-center text-slate-400 space-y-0.5 cursor-pointer hover:bg-blue-50/20 transition-colors"
                         >
                           <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">Gallery queue is empty</p>
@@ -2333,15 +2359,24 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         />
                         <button
                           type="button"
-                          onClick={() => handleAddGalleryImage(galleryUrlInput)}
+                          onClick={() => handleAddGalleryImage(galleryUrlInput, false)}
                           className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                          title="Add this image to the gallery queue"
                         >
-                          <Plus className="w-3.5 h-3.5" /> Add URL
+                          <Plus className="w-3.5 h-3.5" /> Add to Gallery
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddGalleryImage(galleryUrlInput, true)}
+                          className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                          title="Set this image as primary product cover"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-current" /> Set as Cover
                         </button>
                         <button
                           type="button"
                           disabled={isUploading}
-                          onClick={() => fileInputRef.current?.click()}
+                          onClick={() => galleryFileInputRef.current?.click()}
                           className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 border border-slate-700"
                         >
                           {isUploading ? (
@@ -2362,14 +2397,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           placeholder="e.g. /api/upload/... or https://domain.com/hardware-cover.webp"
                           value={formData.primaryImage}
                           onChange={e => {
-                            const sanitized = e.target.value.trim();
+                            const val = e.target.value.trim();
                             setFormData(prev => {
-                              const safe = productImageUrl(sanitized) || sanitized;
-                              const existing = prev.images.filter(img => img !== safe);
+                              const cleanExisting = prev.images.filter(img => img !== val && !isPlaceholderImageUrl(img));
                               return {
                                 ...prev,
-                                primaryImage: safe,
-                                images: safe ? [safe, ...existing] : existing,
+                                primaryImage: val,
+                                images: val ? [val, ...cleanExisting] : cleanExisting,
                               };
                             });
                             setFailedPreviewUrl(null);

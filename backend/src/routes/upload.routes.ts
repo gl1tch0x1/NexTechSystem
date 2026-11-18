@@ -54,14 +54,40 @@ router.get('/:filename', (req, res) => {
     res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
     return;
   }
-  const filePath = path.resolve(directory, filename);
-  if (!filePath.startsWith(directory) || filePath.includes('..')) {
+
+  const candidateDirs = [
+    directory,
+    path.resolve(process.cwd(), 'backend', 'uploads'),
+    path.resolve(process.cwd(), '..', 'uploads'),
+  ];
+
+  let foundPath: string | null = null;
+  for (const dir of candidateDirs) {
+    const candidate = path.resolve(dir, filename);
+    if (candidate.startsWith(dir) && !candidate.includes('..')) {
+      let fd: number | null = null;
+      try {
+        fd = fs.openSync(candidate, 'r');
+        foundPath = candidate;
+        break;
+      } catch {
+        // Path does not exist or cannot be read; continue
+      } finally {
+        if (fd !== null) {
+          try { fs.closeSync(fd); } catch {}
+        }
+      }
+    }
+  }
+
+  if (!foundPath) {
     res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
     return;
   }
+
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (filename.endsWith('.pdf')) res.setHeader('Content-Disposition', 'attachment');
-  res.sendFile(filePath, error => {
+  res.sendFile(foundPath, error => {
     if (error && !res.headersSent) res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
   });
 });

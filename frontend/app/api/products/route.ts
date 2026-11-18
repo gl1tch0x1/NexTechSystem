@@ -3,6 +3,7 @@ import { proxyToBackend } from '@/lib/proxy-helper';
 import { filterCatalogProducts, updateCatalogProduct } from '@/lib/catalog-service';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   let upstreamItems: any[] = [];
@@ -15,7 +16,9 @@ export async function GET(request: NextRequest) {
         const json = await cloned.json();
         // If upstream backend returned comprehensive catalog data (>= 20 items), serve it directly
         if (json && Array.isArray(json.data) && (json.data.length >= 20 || (json.meta?.total !== undefined && json.meta.total >= 20))) {
-          return upstreamRes;
+          return Response.json(json, {
+            headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
+          });
         }
         // If upstream returned partial items (e.g. user-created products on remote backend), capture them
         if (json && Array.isArray(json.data) && json.data.length > 0) {
@@ -73,7 +76,7 @@ export async function GET(request: NextRequest) {
     {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
       },
     }
   );

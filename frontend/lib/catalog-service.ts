@@ -5,8 +5,52 @@ import brandsData from '@/data/brands.json';
 
 const rawProducts = (productsData as unknown as Product[]) || [];
 let catalogProductsStore: Product[] = [...rawProducts];
+let lastCatalogMtime = 0;
 const rawCategories = (categoriesData as unknown as Category[]) || [];
 const rawBrands = (brandsData as unknown as Brand[]) || [];
+
+/**
+ * Synchronizes catalogProductsStore directly with verified data file on disk if modified.
+ * Avoids TOCTOU race conditions (CWE-367 / js/file-system-race) by using file descriptors.
+ */
+function syncCatalogStoreFromDisk(): void {
+  if (typeof window === 'undefined') {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const candidatePaths = [
+        path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
+        path.resolve(process.cwd(), 'data', 'products.json'),
+        path.resolve(process.cwd(), 'backend', 'data_store', 'products.json'),
+        path.resolve(process.cwd(), '..', 'backend', 'data_store', 'products.json'),
+      ];
+      for (const p of candidatePaths) {
+        let fd: number | null = null;
+        try {
+          fd = fs.openSync(p, 'r');
+          const stat = fs.fstatSync(fd);
+          if (stat.mtimeMs > lastCatalogMtime) {
+            const raw = fs.readFileSync(fd, 'utf8');
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              catalogProductsStore = parsed;
+              lastCatalogMtime = stat.mtimeMs;
+              break;
+            }
+          }
+        } catch {
+          // File does not exist or unreadable; continue to next path
+        } finally {
+          if (fd !== null) {
+            try { fs.closeSync(fd); } catch {}
+          }
+        }
+      }
+    } catch {
+      // Non-fatal if filesystem is restricted
+    }
+  }
+}
 
 /**
  * Enterprise Computing Priority Scoring:
@@ -111,6 +155,7 @@ export function getProductDisplayPriority(p: Product): number {
 }
 
 export function getSortedCatalog(): Product[] {
+  syncCatalogStoreFromDisk();
   return [...catalogProductsStore].sort((a, b) => {
     const featA = a.isFeatured ? 1 : 0;
     const featB = b.isFeatured ? 1 : 0;
@@ -138,6 +183,7 @@ export function getCatalogBrands(): Brand[] {
 
 export function getCatalogProductBySlug(slug: string): Product | null {
   if (!slug) return null;
+  syncCatalogStoreFromDisk();
   const cleanSlug = slug.toLowerCase().trim();
   return (
     catalogProductsStore.find(
@@ -183,6 +229,7 @@ function persistCatalogToFile(): void {
           }
         }
       }
+      lastCatalogMtime = Date.now();
     }
   } catch {
     // Non-fatal if serverless filesystem is read-only

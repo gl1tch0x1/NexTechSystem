@@ -558,7 +558,7 @@ export function AdminProductModal({
   };
 
   // Image Helpers
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, isCoverAsset: boolean = true) => {
     if (!file) return;
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type.toLowerCase())) {
@@ -595,14 +595,21 @@ export function AdminProductModal({
       if (finalUrl) {
         setFormData(prev => {
           const existing = prev.images.filter(img => img !== finalUrl && img !== DEFAULT_FALLBACK_IMAGE);
-          const shouldSetPrimary = !prev.primaryImage || prev.primaryImage === DEFAULT_FALLBACK_IMAGE || existing.length === 0;
-          const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
-          const newImages = shouldSetPrimary ? [finalUrl, ...existing] : [...existing, finalUrl];
-          return {
-            ...prev,
-            primaryImage: newPrimary,
-            images: newImages,
-          };
+          if (isCoverAsset) {
+            return {
+              ...prev,
+              primaryImage: finalUrl,
+              images: [finalUrl, ...existing],
+            };
+          } else {
+            const shouldSetPrimary = !prev.primaryImage || prev.primaryImage === DEFAULT_FALLBACK_IMAGE || existing.length === 0;
+            const newPrimary = shouldSetPrimary ? finalUrl : prev.primaryImage;
+            return {
+              ...prev,
+              primaryImage: newPrimary,
+              images: shouldSetPrimary ? [finalUrl, ...existing] : [...existing, finalUrl],
+            };
+          }
         });
       }
     } catch {
@@ -616,11 +623,21 @@ export function AdminProductModal({
         if (base64) {
           setFormData(prev => {
             const existing = prev.images.filter(img => img !== base64 && img !== DEFAULT_FALLBACK_IMAGE);
-            return {
-              ...prev,
-              primaryImage: base64,
-              images: [base64, ...existing],
-            };
+            if (isCoverAsset) {
+              return {
+                ...prev,
+                primaryImage: base64,
+                images: [base64, ...existing],
+              };
+            } else {
+              const shouldSetPrimary = !prev.primaryImage || prev.primaryImage === DEFAULT_FALLBACK_IMAGE || existing.length === 0;
+              const newPrimary = shouldSetPrimary ? base64 : prev.primaryImage;
+              return {
+                ...prev,
+                primaryImage: newPrimary,
+                images: shouldSetPrimary ? [base64, ...existing] : [...existing, base64],
+              };
+            }
           });
         }
       } catch {
@@ -648,18 +665,18 @@ export function AdminProductModal({
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files[0]);
+      handleFileUpload(e.dataTransfer.files[0], true);
     }
   };
 
-  const handleAddImage = (url: string) => {
+  const handleAddImage = (url: string, setAsCover: boolean = false) => {
     const clean = url.trim().replace(/[<>'"]/g, '');
     if (!clean) return;
     const safeUrl = getSafeImageUrl(clean);
     setFormData(prev => {
       const isPlaceholder = (u?: string) => !u || u === DEFAULT_FALLBACK_IMAGE || u.includes('photo-1591799264318') || u.includes('photo-1517336714731');
       const existing = prev.images.filter(img => img !== safeUrl && !isPlaceholder(img));
-      const shouldSetPrimary = isPlaceholder(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
+      const shouldSetPrimary = setAsCover || isPlaceholder(prev.primaryImage) || !prev.primaryImage || existing.length === 0;
       const newPrimary = shouldSetPrimary ? safeUrl : prev.primaryImage;
       const newImages = shouldSetPrimary ? [safeUrl, ...existing] : [...existing, safeUrl];
       return {

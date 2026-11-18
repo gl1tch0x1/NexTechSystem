@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { proxyToBackend } from '@/lib/proxy-helper';
 import { getCatalogProductBySlug, updateCatalogProduct } from '@/lib/catalog-service';
 
@@ -69,12 +70,26 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
         const json = await cloned.json();
         if (json && json.success && json.data) {
           updateCatalogProduct(path[0], json.data);
+          try {
+            revalidatePath('/products');
+            revalidatePath('/');
+            revalidatePath(`/products/${path[0]}`);
+            if (body?.slug) revalidatePath(`/products/${body.slug}`);
+            if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
+          } catch {}
           return Response.json(json, {
             headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
           });
         }
       } catch {}
     }
+  } catch {}
+
+  try {
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath(`/products/${path[0]}`);
+    if (body?.slug) revalidatePath(`/products/${body.slug}`);
   } catch {}
 
   const finalProd = updatedProduct || (path.length >= 1 ? getCatalogProductBySlug(path[0]) : null);
@@ -117,12 +132,26 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
         const json = await cloned.json();
         if (json && json.success && json.data) {
           updateCatalogProduct(path[0], json.data);
+          try {
+            revalidatePath('/products');
+            revalidatePath('/');
+            revalidatePath(`/products/${path[0]}`);
+            if (body?.slug) revalidatePath(`/products/${body.slug}`);
+            if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
+          } catch {}
           return Response.json(json, {
             headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
           });
         }
       } catch {}
     }
+  } catch {}
+
+  try {
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath(`/products/${path[0]}`);
+    if (body?.slug) revalidatePath(`/products/${body.slug}`);
   } catch {}
 
   const finalProd = updatedProduct || (path.length >= 1 ? getCatalogProductBySlug(path[0]) : null);
@@ -154,6 +183,11 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   } catch {}
 
   try {
+    revalidatePath('/products');
+    revalidatePath('/');
+  } catch {}
+
+  try {
     const upstreamRes = await proxyToBackend(request, `/admin/products/${path.join('/')}`, {
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -170,5 +204,10 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
   const { path } = await params;
+  try {
+    revalidatePath('/products');
+    revalidatePath('/');
+    if (path[0]) revalidatePath(`/products/${path[0]}`);
+  } catch {}
   return proxyToBackend(request, `/admin/products/${path.join('/')}`);
 }

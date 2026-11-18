@@ -17,6 +17,9 @@ import { getApiUrl } from '@/lib/api-client';
 import { getCatalogProductBySlug, getAllCatalogProducts } from '@/lib/catalog-service';
 import { getAuthenticProductImage } from '@/lib/product-image-url';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
 }

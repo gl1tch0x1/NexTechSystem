@@ -3,6 +3,7 @@ import { proxyToBackend } from '@/lib/proxy-helper';
 import { getCatalogProductBySlug, getAllCatalogProducts } from '@/lib/catalog-service';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: NextRequest, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
@@ -14,7 +15,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
       try {
         const json = await cloned.json();
         if (json && json.success && json.data && json.data.product) {
-          return upstreamRes;
+          return Response.json(json, {
+            headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
+          });
         }
       } catch {
         // Fall back to authoritative catalog
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
   if (!product) {
     return NextResponse.json(
       { success: false, error: { code: 'NOT_FOUND', message: 'Hardware SKU not found' } },
-      { status: 404 }
+      { status: 404, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
     );
   }
 
@@ -50,7 +53,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
     {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
       },
     }
   );

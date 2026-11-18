@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
@@ -30,6 +30,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const { formatPrice } = useCurrency();
   const initialDisplayImage = useMemo(() => getAuthenticProductImage(product), [product]);
   const [selectedImage, setSelectedImage] = useState<string>(initialDisplayImage);
+
+  useEffect(() => {
+    setSelectedImage(initialDisplayImage);
+  }, [initialDisplayImage]);
 
   // Compute all available authentic gallery images
   const galleryImages = useMemo(() => {

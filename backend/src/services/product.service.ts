@@ -755,9 +755,12 @@ export class ProductService {
       updates.primaryImage = primaryImg;
       updates.thumbnail = primaryImg;
       (updates as any).image = primaryImg;
-    }
-    if (updates.images && updates.images.length > 0 && primaryImg && !updates.images.includes(primaryImg)) {
-      updates.images = [primaryImg, ...updates.images];
+      if (Array.isArray(updates.images)) {
+        const cleanRest = updates.images.filter(x => x !== primaryImg);
+        updates.images = [primaryImg, ...cleanRest];
+      } else {
+        updates.images = [primaryImg];
+      }
     }
 
     updates.updatedAt = new Date().toISOString();
