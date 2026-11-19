@@ -6,6 +6,10 @@ const nextConfig = {
   // the "webpack config with no turbopack config" build error.
   turbopack: {},
   productionBrowserSourceMaps: false,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error'] } : false,
+  },
+  reactStrictMode: true,
 
   images: {
     remotePatterns: [

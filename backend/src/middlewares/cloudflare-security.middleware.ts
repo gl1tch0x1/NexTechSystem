@@ -92,7 +92,7 @@ export function getClientIp(req: Request): string {
     return req.ip;
   }
 
-  return req.socket.remoteAddress || '127.0.0.1';
+  return req.ip || req.socket?.remoteAddress || '127.0.0.1';
 }
 
 /**

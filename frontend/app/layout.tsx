@@ -9,6 +9,7 @@ import { ProductEnquiryProvider } from '@/lib/product-enquiry-context';
 import { StoreShell } from '@/components/layout/StoreShell';
 import { GlobalCommandPalette } from '@/components/layout/GlobalCommandPalette';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+import SecurityDeterrent from '@/components/security/SecurityDeterrent';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -65,6 +66,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} light`}>
       <body suppressHydrationWarning className="font-sans min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-tech-blue selection:text-white transition-colors duration-200 w-full max-w-full overflow-x-clip">
+        <SecurityDeterrent />
         <GoogleAnalytics />
         <ThemeProvider>
           <AuthProvider>

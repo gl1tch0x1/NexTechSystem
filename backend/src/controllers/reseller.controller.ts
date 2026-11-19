@@ -49,8 +49,19 @@ export class ResellerController {
       return;
     }
 
+    const reseller = await resellerService.getResellerById(resellerId);
     const metrics = await analyticsService.getResellerDashboardMetrics(resellerId);
-    res.json({ success: true, data: metrics });
+    res.json({
+      success: true,
+      data: {
+        ...metrics,
+        status: reseller?.status || 'PENDING_APPROVAL',
+        isApproved: reseller?.status === 'ACTIVE',
+        businessInformation: reseller?.businessInformation,
+        resellerCode: reseller?.resellerCode,
+        businessName: reseller?.businessName,
+      },
+    });
   }
 
   async getProfile(req: AuthenticatedRequest, res: Response): Promise<void> {

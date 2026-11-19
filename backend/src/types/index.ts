@@ -40,11 +40,17 @@ export interface User {
   passwordChangedAt?: string;
 }
 
-export type ResellerStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING_APPROVAL' | 'INACTIVE';
+export type ResellerStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING_APPROVAL' | 'INACTIVE' | 'REJECTED';
 
 export interface ResellerBusinessInformation {
   taxNumber?: string; // 15-digit FTA TRN
   tradeLicense?: string;
+  tradeLicenseDocument?: string; // Uploaded official Trade License document URL (PDF/Image)
+  vatCertificateDocument?: string; // Uploaded official VAT Registration Certificate document URL (PDF/Image)
+  verificationStatus?: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
+  verificationNotes?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
   licenseJurisdiction?: string;
   licenseExpiryDate?: string;
   businessType?: string;

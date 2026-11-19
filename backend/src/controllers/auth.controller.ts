@@ -13,6 +13,12 @@ import { auditService } from '../services/audit.service.js';
 import { getFirebaseAuth } from '../config/firebase.js';
 import { dbStore } from '../config/db-store.js';
 import { settingsRepository } from '../repositories/settings.repository.js';
+import { getClientIp } from '../middlewares/cloudflare-security.middleware.js';
+import {
+  recordFailedLogin,
+  recordSuccessfulLogin,
+  isIpBlocked,
+} from '../middlewares/login-brute-force.middleware.js';
 
 // In-memory failed login tracking for brute-force defense
 const failedLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
@@ -175,8 +181,10 @@ export class AuthController {
       // Professional Reseller fields
       businessName,
       tradeLicense,
+      tradeLicenseDocument,
       taxNumber,
       taxRegistrationNumber,
+      vatCertificateDocument,
       licenseJurisdiction,
       businessType,
       signatoryTitle,
@@ -238,6 +246,8 @@ export class AuthController {
       const cleanBusinessName = String(businessName || '').trim();
       const cleanTradeLicense = String(tradeLicense || '').trim();
       const effectiveTaxNumber = String(taxNumber || taxRegistrationNumber || '').trim();
+      const cleanTradeLicenseDoc = String(tradeLicenseDocument || '').trim();
+      const cleanVatDoc = String(vatCertificateDocument || '').trim();
 
       if (!cleanBusinessName) {
         res.status(400).json({ success: false, error: { code: 'MISSING_BUSINESS_NAME', message: 'Corporate legal business name is required for reseller registration.' } });
@@ -246,6 +256,21 @@ export class AuthController {
 
       if (!cleanTradeLicense) {
         res.status(400).json({ success: false, error: { code: 'MISSING_TRADE_LICENSE', message: 'Official Commercial Trade License number is required for reseller registration.' } });
+        return;
+      }
+
+      if (!effectiveTaxNumber) {
+        res.status(400).json({ success: false, error: { code: 'MISSING_TAX_NUMBER', message: 'Federal Tax Authority TRN (15 digits) is required for verified reseller registration.' } });
+        return;
+      }
+
+      if (!cleanTradeLicenseDoc) {
+        res.status(400).json({ success: false, error: { code: 'MISSING_TRADE_LICENSE_DOC', message: 'Official Trade License document (PDF/PNG/JPG) is required for admin verification.' } });
+        return;
+      }
+
+      if (!cleanVatDoc) {
+        res.status(400).json({ success: false, error: { code: 'MISSING_VAT_CERTIFICATE_DOC', message: 'Official VAT Registration Certificate document (PDF/PNG/JPG) is required for admin verification.' } });
         return;
       }
 
@@ -316,6 +341,9 @@ export class AuthController {
         businessInformation: {
           taxNumber: effectiveTaxNumber,
           tradeLicense: cleanTradeLicense,
+          tradeLicenseDocument: cleanTradeLicenseDoc,
+          vatCertificateDocument: cleanVatDoc,
+          verificationStatus: 'PENDING_APPROVAL',
           licenseJurisdiction: licenseJurisdiction ? String(licenseJurisdiction).trim() : 'Dubai Economy and Tourism (DET)',
           businessType: businessType ? String(businessType).trim() : 'IT Solutions & Hardware Distributor',
           authorizedSignatory: cleanName,
@@ -323,9 +351,9 @@ export class AuthController {
           website: website ? String(website).trim() : '',
           settlementTerms: settlementTerms ? String(settlementTerms).trim() : 'Net 30 Days Commercial',
           dispatchHub: dispatchHub ? String(dispatchHub).trim() : 'Dubai Logistics City (DWC)',
-          description: description ? String(description).trim() : `Verified Enterprise Reseller Partner: ${cleanBusinessName}`,
+          description: description ? String(description).trim() : `Enterprise Reseller Partner: ${cleanBusinessName}`,
         },
-        status: 'ACTIVE',
+        status: 'PENDING_APPROVAL',
         productCount: 0,
         salesStats: {
           totalRevenue: 0,
@@ -340,6 +368,24 @@ export class AuthController {
       await userRepository.create(newUser);
       await resellerRepository.create(newReseller);
       await walletService.getOrCreateWallet(userId);
+
+      await auditService.log({
+        userId: newUser.id,
+        userEmail: newUser.email,
+        userRole: 'RESELLER',
+        resellerId: resellerId,
+        action: 'RESELLER_REGISTERED_PENDING_APPROVAL',
+        resource: 'resellers',
+        resourceId: resellerId,
+        details: {
+          businessName: cleanBusinessName,
+          tradeLicense: cleanTradeLicense,
+          taxNumber: effectiveTaxNumber,
+          hasTradeLicenseDocument: Boolean(cleanTradeLicenseDoc),
+          hasVatCertificateDocument: Boolean(cleanVatDoc),
+          status: 'PENDING_APPROVAL',
+        },
+      });
 
       const token = jwt.sign(
         { id: newUser.id, email: newUser.email, role: newUser.role, resellerId },
@@ -408,6 +454,21 @@ export class AuthController {
   async login(req: Request, res: Response): Promise<void> {
     const { email, password, resellerCode } = req.body;
 
+    const clientIp = getClientIp(req);
+    const ipStatus = isIpBlocked(clientIp);
+    if (ipStatus.blocked) {
+      const waitMinutes = Math.max(1, Math.ceil(ipStatus.remainingSeconds / 60));
+      res.status(429).json({
+        success: false,
+        error: {
+          code: 'IP_BLOCKED_BRUTE_FORCE',
+          message: `Access denied: Your IP address (${clientIp}) has been temporarily blocked due to multiple failed login attempts. Potential brute-force attack detected. Please try again after ${waitMinutes} minutes.`,
+          retryAfter: ipStatus.remainingSeconds,
+        },
+      });
+      return;
+    }
+
     if (!email || !password) {
       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Email / Username and Password are required.' } });
       return;
@@ -451,6 +512,18 @@ export class AuthController {
     }
 
     if (!user) {
+      const ipFail = recordFailedLogin(clientIp, cleanIdentifier);
+      if (ipFail.isBlocked) {
+        res.status(429).json({
+          success: false,
+          error: {
+            code: 'IP_BLOCKED_BRUTE_FORCE',
+            message: `Access denied: Your IP address (${clientIp}) has been temporarily blocked due to multiple failed login attempts. Potential brute-force intrusion detected. Please try again after 30 minutes.`,
+            retryAfter: ipFail.remainingSeconds,
+          },
+        });
+        return;
+      }
       res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } });
       return;
     }
@@ -500,19 +573,33 @@ export class AuthController {
     }
 
     if (!isValid) {
+      const ipFail = recordFailedLogin(clientIp, cleanIdentifier);
       const currentAttempts = (lockRecord?.count || 0) + 1;
       if (currentAttempts >= 5) {
         failedLoginAttempts.set(lockKey, { count: currentAttempts, lockedUntil: Date.now() + 15 * 60 * 1000 });
       } else {
         failedLoginAttempts.set(lockKey, { count: currentAttempts, lockedUntil: 0 });
       }
+
+      if (ipFail.isBlocked) {
+        res.status(429).json({
+          success: false,
+          error: {
+            code: 'IP_BLOCKED_BRUTE_FORCE',
+            message: `Access denied: Your IP address (${clientIp}) has been temporarily blocked due to multiple failed login attempts. Potential brute-force intrusion detected. Please try again after 30 minutes.`,
+            retryAfter: ipFail.remainingSeconds,
+          },
+        });
+        return;
+      }
+
       res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } });
       return;
     }
 
     // Reset failed attempts on successful authentication
     failedLoginAttempts.delete(lockKey);
-
+    recordSuccessfulLogin(clientIp);
 
     // If logging into a Reseller Subdomain, verify resellerCode match
     if (user.role === 'RESELLER' && resellerCode) {
@@ -524,10 +611,10 @@ export class AuthController {
         });
         return;
       }
-      if (reseller.status !== 'ACTIVE') {
+      if (reseller.status === 'SUSPENDED' || reseller.status === 'REJECTED') {
         res.status(403).json({
           success: false,
-          error: { code: 'RESELLER_NOT_ACTIVE', message: `Reseller status is currently: ${reseller.status}` },
+          error: { code: 'RESELLER_INACTIVE', message: `Reseller account status is currently: ${reseller.status}. Access is restricted.` },
         });
         return;
       }

@@ -150,15 +150,92 @@ export default function ResellerDashboardPage() {
             <span>{isRefreshing ? 'Synchronizing...' : 'Sync Telemetry'}</span>
           </button>
 
-          <Link
-            href={`/reseller/${resellerCode}/products/new`}
-            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Hardware SKU</span>
-          </Link>
+          {metrics?.status === 'PENDING_APPROVAL' ? (
+            <div className="px-4 py-2.5 bg-slate-100 text-slate-400 font-bold rounded-xl text-xs flex items-center gap-2 border border-slate-200 cursor-not-allowed">
+              <Clock className="w-4 h-4 text-amber-500" />
+              <span>Catalog Locked (Pending Verification)</span>
+            </div>
+          ) : (
+            <Link
+              href={`/reseller/${resellerCode}/products/new`}
+              className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Add Hardware SKU</span>
+            </Link>
+          )}
         </div>
       </div>
+
+      {/* Profile Verification Step Card for Pending Resellers */}
+      {metrics?.status === 'PENDING_APPROVAL' && (
+        <div className="p-6 rounded-3xl bg-linear-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-500/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shadow-xs shrink-0">
+                <Clock className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-950 tracking-tight">
+                  Reseller Profile Verification In Progress
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Your partner profile and tax compliance records are being verified by NexTech Administration.
+                </p>
+              </div>
+            </div>
+            <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black bg-amber-500 text-slate-950 shadow-xs">
+              STATUS: PENDING VALIDATION
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+            <div className="p-3.5 rounded-2xl bg-white border border-amber-200/60 shadow-2xs space-y-1">
+              <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>1. Legal Entity</span>
+              </div>
+              <p className="text-xs font-bold text-slate-900 truncate">
+                {metrics?.businessName || 'Business Info'}
+              </p>
+              <p className="text-[10px] text-slate-400">Identity details registered</p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white border border-amber-200/60 shadow-2xs space-y-1">
+              <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>2. Trade License</span>
+              </div>
+              <p className="text-xs font-bold text-slate-900 truncate">
+                {metrics?.businessInformation?.tradeLicense || 'License Attached'}
+              </p>
+              <p className="text-[10px] text-slate-400">Official document submitted</p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white border border-amber-200/60 shadow-2xs space-y-1">
+              <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>3. VAT Certificate</span>
+              </div>
+              <p className="text-xs font-bold text-slate-900 truncate">
+                {metrics?.businessInformation?.taxNumber || '15-digit TRN'}
+              </p>
+              <p className="text-[10px] text-slate-400">FTA certificate uploaded</p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-300 shadow-2xs space-y-1">
+              <div className="flex items-center gap-1.5 text-amber-700 text-[11px] font-bold">
+                <Clock className="w-4 h-4 animate-spin text-amber-600" />
+                <span>4. Admin Authorization</span>
+              </div>
+              <p className="text-xs font-bold text-amber-950 truncate">
+                Review in Progress
+              </p>
+              <p className="text-[10px] text-amber-800">Awaiting admin approval</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 4 Main Enterprise KPI Cards */}
       <motion.div

@@ -22,8 +22,10 @@ export interface RegisterData {
   // Reseller specific fields:
   businessName?: string;
   tradeLicense?: string;
+  tradeLicenseDocument?: string;
   taxNumber?: string;
   taxRegistrationNumber?: string;
+  vatCertificateDocument?: string;
   licenseJurisdiction?: string;
   businessType?: string;
   signatoryTitle?: string;

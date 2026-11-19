@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authController } from '../controllers/auth.controller.js';
 import { authenticate } from '../middleware/auth.js';
 import { authLimiter } from '../middlewares/rate-limiter.middleware.js';
+import { loginBruteForceGuard } from '../middlewares/login-brute-force.middleware.js';
 
 const router = Router();
 
@@ -10,7 +11,7 @@ const router = Router();
 router.use(authLimiter);
 
 router.post('/register', (req, res, next) => authController.register(req, res).catch(next));
-router.post('/login', (req, res, next) => authController.login(req, res).catch(next));
+router.post('/login', loginBruteForceGuard, (req, res, next) => authController.login(req, res).catch(next));
 router.get('/login', (_req, res) => {
   res.json({
     success: true,

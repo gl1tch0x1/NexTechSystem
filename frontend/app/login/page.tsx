@@ -30,6 +30,7 @@ import {
   X,
   Shield,
   Clock,
+  Upload,
 } from 'lucide-react';
 
 interface CountryCode {
@@ -325,6 +326,70 @@ function AuthContent() {
   const [showResellerPassword, setShowResellerPassword] = useState(false);
   const [resellerComplianceAccepted, setResellerComplianceAccepted] = useState(false);
 
+  // Reseller Verification Documents
+  const [tradeLicenseFileUrl, setTradeLicenseFileUrl] = useState('');
+  const [tradeLicenseFileName, setTradeLicenseFileName] = useState('');
+  const [isUploadingTradeLicense, setIsUploadingTradeLicense] = useState(false);
+
+  const [vatCertificateFileUrl, setVatCertificateFileUrl] = useState('');
+  const [vatCertificateFileName, setVatCertificateFileName] = useState('');
+  const [isUploadingVatCert, setIsUploadingVatCert] = useState(false);
+
+  const handleDocumentUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: 'tradeLicense' | 'vatCertificate'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Document file size must not exceed 5 MB.');
+      return;
+    }
+
+    const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowed.includes(file.type.toLowerCase()) && !file.name.match(/\.(pdf|png|jpe?g|webp)$/i)) {
+      setError('Only PDF, PNG, JPG, or WEBP document formats are accepted.');
+      return;
+    }
+
+    setError('');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    if (type === 'tradeLicense') {
+      setIsUploadingTradeLicense(true);
+    } else {
+      setIsUploadingVatCert(true);
+    }
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data?.error?.message || 'Failed to upload document.');
+      }
+      if (type === 'tradeLicense') {
+        setTradeLicenseFileUrl(data.url);
+        setTradeLicenseFileName(file.name);
+      } else {
+        setVatCertificateFileUrl(data.url);
+        setVatCertificateFileName(file.name);
+      }
+    } catch (uploadErr: any) {
+      setError(uploadErr.message || 'Error uploading document file.');
+    } finally {
+      if (type === 'tradeLicense') {
+        setIsUploadingTradeLicense(false);
+      } else {
+        setIsUploadingVatCert(false);
+      }
+    }
+  };
+
   // Phone dropdown state for Customer
   const [custCountry, setCustCountry] = useState<CountryCode>(COUNTRY_CODES[0]);
   const [isCustCountryOpen, setIsCustCountryOpen] = useState(false);
@@ -477,6 +542,14 @@ function AuthContent() {
       setError('Federal Tax Authority TRN (15 digits) is required for verified resellers.');
       return;
     }
+    if (!tradeLicenseFileUrl) {
+      setError('Official Commercial Trade License document (PDF/PNG/JPG) upload is required for verification.');
+      return;
+    }
+    if (!vatCertificateFileUrl) {
+      setError('Official VAT Registration Certificate document (PDF/PNG/JPG) upload is required for verification.');
+      return;
+    }
     if (!resellerSignatoryName.trim()) {
       setError('Authorized Signatory name is required.');
       return;
@@ -522,8 +595,10 @@ function AuthContent() {
         password: resellerPassword,
         businessName: resellerBusinessName.trim(),
         tradeLicense: resellerTradeLicense.trim(),
+        tradeLicenseDocument: tradeLicenseFileUrl,
         taxNumber: resellerTaxNumber.trim(),
         taxRegistrationNumber: resellerTaxNumber.trim(),
+        vatCertificateDocument: vatCertificateFileUrl,
         licenseJurisdiction: resellerJurisdiction,
         businessType: resellerBusinessType,
         signatoryTitle: resellerSignatoryTitle.trim() || 'Managing Director',
@@ -558,9 +633,8 @@ function AuthContent() {
 
   return (
     <div
-      className={`mx-auto px-4 py-8 md:py-12 space-y-6 w-full transition-all duration-300 ${
-        tab === 'register' && accountType === 'RESELLER' ? 'max-w-3xl' : 'max-w-md md:max-w-2xl'
-      }`}
+      className={`mx-auto px-4 py-8 md:py-12 space-y-6 w-full transition-all duration-300 ${tab === 'register' && accountType === 'RESELLER' ? 'max-w-3xl' : 'max-w-md md:max-w-2xl'
+        }`}
     >
       {/* Brand Header */}
       <div className="text-center space-y-2">
@@ -582,22 +656,20 @@ function AuthContent() {
           <button
             type="button"
             onClick={() => { setTab('signin'); setError(''); }}
-            className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${
-              tab === 'signin'
+            className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${tab === 'signin'
                 ? 'bg-tech-blue text-white shadow-tech'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
+              }`}
           >
             Sign In
           </button>
           <button
             type="button"
             onClick={() => { setTab('register'); setError(''); }}
-            className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${
-              tab === 'register'
+            className={`py-2.5 px-3 rounded-xl text-[11px] md:text-xs font-bold transition-all ${tab === 'register'
                 ? 'bg-tech-blue text-white shadow-tech'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
+              }`}
           >
             Create Account
           </button>
@@ -630,8 +702,8 @@ function AuthContent() {
                 {googleLoading
                   ? 'Connecting to Google...'
                   : tab === 'signin'
-                  ? 'Continue with Google'
-                  : 'Sign up with Google'}
+                    ? 'Continue with Google'
+                    : 'Sign up with Google'}
               </span>
             </button>
 
@@ -760,20 +832,18 @@ function AuthContent() {
                 <button
                   type="button"
                   onClick={() => { setAccountType('CUSTOMER'); setError(''); }}
-                  className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between group ${
-                    accountType === 'CUSTOMER'
+                  className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between group ${accountType === 'CUSTOMER'
                       ? 'bg-blue-50/80 dark:bg-blue-950/40 border-tech-blue dark:border-blue-500 shadow-sm ring-1 ring-tech-blue/30'
                       : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between w-full mb-2">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                          accountType === 'CUSTOMER'
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${accountType === 'CUSTOMER'
                             ? 'bg-tech-blue text-white shadow-tech'
                             : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                        }`}
+                          }`}
                       >
                         <UserIcon className="w-4 h-4" />
                       </div>
@@ -795,20 +865,18 @@ function AuthContent() {
                 <button
                   type="button"
                   onClick={() => { setAccountType('RESELLER'); setError(''); }}
-                  className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between group ${
-                    accountType === 'RESELLER'
+                  className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between group ${accountType === 'RESELLER'
                       ? 'bg-blue-50/80 dark:bg-blue-950/40 border-tech-blue dark:border-blue-500 shadow-sm ring-1 ring-tech-blue/30'
                       : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between w-full mb-2">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                          accountType === 'RESELLER'
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${accountType === 'RESELLER'
                             ? 'bg-tech-blue text-white shadow-tech'
                             : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                        }`}
+                          }`}
                       >
                         <Building2 className="w-4 h-4" />
                       </div>
@@ -902,9 +970,8 @@ function AuthContent() {
                             {custCountry.dialCode}
                           </span>
                           <ChevronDown
-                            className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform ${
-                              isCustCountryOpen ? 'rotate-180 text-tech-blue' : ''
-                            }`}
+                            className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform ${isCustCountryOpen ? 'rotate-180 text-tech-blue' : ''
+                              }`}
                           />
                         </button>
 
@@ -936,11 +1003,10 @@ function AuthContent() {
                                       setIsCustCountryOpen(false);
                                       setCustCountrySearch('');
                                     }}
-                                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs text-left transition-colors ${
-                                      isSelected
+                                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs text-left transition-colors ${isSelected
                                         ? 'bg-tech-blue text-white font-bold'
                                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
-                                    }`}
+                                      }`}
                                   >
                                     <CountryFlag code={c.code} size={20} />
                                     <span className="flex-1 truncate text-[11px]">{c.name}</span>
@@ -1126,6 +1192,82 @@ function AuthContent() {
                           <option key={b} value={b}>{b}</option>
                         ))}
                       </select>
+                    </div>
+
+                    {/* Trade License Document Upload */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                        Upload Commercial Trade License (PDF / Image) <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-tech-blue dark:hover:border-tech-blue rounded-xl p-3 bg-slate-50 dark:bg-tech-slate/50 transition-colors">
+                        <input
+                          type="file"
+                          accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
+                          onChange={e => handleDocumentUpload(e, 'tradeLicense')}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className="flex items-center gap-2.5">
+                          {isUploadingTradeLicense ? (
+                            <RefreshCw className="w-5 h-5 text-tech-blue animate-spin shrink-0" />
+                          ) : tradeLicenseFileUrl ? (
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                          ) : (
+                            <Upload className="w-5 h-5 text-slate-400 shrink-0" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            {tradeLicenseFileName ? (
+                              <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 truncate">
+                                {tradeLicenseFileName}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-slate-600 dark:text-slate-300">
+                                Click or drag Trade License PDF / Image (Max 5MB)
+                              </p>
+                            )}
+                            <p className="text-[10px] text-slate-400">
+                              {tradeLicenseFileUrl ? 'Uploaded & Attached' : 'Required for official admin vetting'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* VAT Registration Certificate Document Upload */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                        Upload VAT Registration Certificate (PDF / Image) <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-tech-blue dark:hover:border-tech-blue rounded-xl p-3 bg-slate-50 dark:bg-tech-slate/50 transition-colors">
+                        <input
+                          type="file"
+                          accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
+                          onChange={e => handleDocumentUpload(e, 'vatCertificate')}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className="flex items-center gap-2.5">
+                          {isUploadingVatCert ? (
+                            <RefreshCw className="w-5 h-5 text-tech-blue animate-spin shrink-0" />
+                          ) : vatCertificateFileUrl ? (
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                          ) : (
+                            <Upload className="w-5 h-5 text-slate-400 shrink-0" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            {vatCertificateFileName ? (
+                              <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 truncate">
+                                {vatCertificateFileName}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-slate-600 dark:text-slate-300">
+                                Click or drag VAT Certificate PDF / Image (Max 5MB)
+                              </p>
+                            )}
+                            <p className="text-[10px] text-slate-400">
+                              {vatCertificateFileUrl ? 'Uploaded & Attached' : 'Required for FTA authenticity check'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1512,13 +1654,12 @@ function AuthContent() {
                   return (
                     <div key={s.step} className="flex items-center gap-1.5 text-xs font-semibold">
                       <span
-                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                          isDone
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${isDone
                             ? 'bg-emerald-500 text-white'
                             : isActive
-                            ? 'bg-blue-600 text-white ring-2 ring-blue-500/30'
-                            : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
-                        }`}
+                              ? 'bg-blue-600 text-white ring-2 ring-blue-500/30'
+                              : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                          }`}
                       >
                         {isDone ? <Check className="w-3 h-3" /> : idx + 1}
                       </span>
@@ -1763,19 +1904,17 @@ function AuthContent() {
                 {/* Password strength indicators */}
                 <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
                   <div
-                    className={`flex items-center gap-1.5 ${
-                      forgotNewPassword.length >= 8 ? 'text-emerald-500 font-semibold' : 'text-slate-400'
-                    }`}
+                    className={`flex items-center gap-1.5 ${forgotNewPassword.length >= 8 ? 'text-emerald-500 font-semibold' : 'text-slate-400'
+                      }`}
                   >
                     {forgotNewPassword.length >= 8 ? <Check className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border border-slate-400" />}
                     <span>At least 8 characters</span>
                   </div>
                   <div
-                    className={`flex items-center gap-1.5 ${
-                      forgotNewPassword && forgotConfirmPassword && forgotNewPassword === forgotConfirmPassword
+                    className={`flex items-center gap-1.5 ${forgotNewPassword && forgotConfirmPassword && forgotNewPassword === forgotConfirmPassword
                         ? 'text-emerald-500 font-semibold'
                         : 'text-slate-400'
-                    }`}
+                      }`}
                   >
                     {forgotNewPassword && forgotConfirmPassword && forgotNewPassword === forgotConfirmPassword ? (
                       <Check className="w-3.5 h-3.5" />

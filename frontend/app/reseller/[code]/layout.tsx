@@ -19,7 +19,8 @@ import {
   Plus,
   CheckCircle2,
   ExternalLink,
-  LogOut
+  LogOut,
+  Clock
 } from 'lucide-react';
 
 export default function ResellerLayout({ children }: { children: React.ReactNode }) {
@@ -119,20 +120,34 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
           {/* Subdomain Status Pill */}
           <div className="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px]">
             <span className="text-slate-500 font-semibold">Tenant Protocol</span>
-            <span className="font-mono font-bold text-emerald-700 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline" />
-              <span>ISOLATED</span>
-            </span>
+            {resellerData?.status === 'PENDING_APPROVAL' ? (
+              <span className="font-mono font-bold text-amber-600 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-amber-500 inline animate-pulse" />
+                <span>PENDING VETTING</span>
+              </span>
+            ) : (
+              <span className="font-mono font-bold text-emerald-700 flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline" />
+                <span>ISOLATED</span>
+              </span>
+            )}
           </div>
 
           {/* Quick SKU Creation CTA Button */}
-          <Link
-            href={`/reseller/${resellerCode}/products/new`}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-sm hover:shadow transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Hardware Product SKU</span>
-          </Link>
+          {resellerData?.status === 'PENDING_APPROVAL' ? (
+            <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs border border-slate-200 cursor-not-allowed">
+              <Clock className="w-4 h-4 text-amber-500" />
+              <span>Verification Pending</span>
+            </div>
+          ) : (
+            <Link
+              href={`/reseller/${resellerCode}/products/new`}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-sm hover:shadow transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Add Hardware Product SKU</span>
+            </Link>
+          )}
 
           {/* Navigation Sections */}
           <nav className="space-y-5">
@@ -194,6 +209,38 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
 
       {/* Main Vendor Content Area - White Background Canvas */}
       <main className="flex-1 bg-white p-6 sm:p-8 lg:p-10 overflow-y-auto">
+        {resellerData?.status === 'PENDING_APPROVAL' && (
+          <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 shadow-xs">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 font-bold mt-0.5 shadow-xs">
+                <Clock className="w-5 h-5 animate-pulse" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="font-black text-sm text-amber-950 tracking-tight">
+                    Reseller Account Under Compliance Verification
+                  </h4>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-200/90 text-amber-950 border border-amber-300">
+                    Awaiting Admin Approval
+                  </span>
+                </div>
+                <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                  Your reseller profile is currently getting verified by NexTech Administration. We are authenticating your uploaded <strong>Trade License</strong> and <strong>VAT Registration Certificate</strong> to authorize your merchant account.
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-[11px] font-semibold text-amber-900">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    Commercial Actions (Catalog, Stock, Orders, Payouts) Locked
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+                    Authentication Standard: FTA UAE &amp; DET Verified
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {children}
       </main>
     </div>

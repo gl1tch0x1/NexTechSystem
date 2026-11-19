@@ -263,8 +263,8 @@ export class AdminController {
 
   async updateResellerStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
-    const { status } = req.body;
-    const updated = await resellerService.updateResellerStatus(id, status, req.user?.id || 'admin');
+    const { status, notes } = req.body;
+    const updated = await resellerService.updateResellerStatus(id, status, req.user?.id || 'admin', notes);
     res.json({ success: true, data: updated });
   }
 

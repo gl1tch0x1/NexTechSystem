@@ -7,6 +7,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/jpg',
   'image/webp',
   'image/gif',
+  'application/pdf',
 ]);
 
 export async function POST(request: NextRequest) {
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     const mimeType = file.type.toLowerCase();
     if (!ALLOWED_MIME_TYPES.has(mimeType)) {
       return NextResponse.json(
-        { success: false, error: { message: 'Unsupported file type. Please upload a PNG, JPG, WEBP, or GIF.' } },
+        { success: false, error: { message: 'Unsupported file type. Please upload a PNG, JPG, WEBP, GIF, or PDF document.' } },
         { status: 400 }
       );
     }
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
       const file = formData.get('file') as File | null;
       if (!file || !ALLOWED_MIME_TYPES.has(file.type.toLowerCase()) || file.size > 5 * 1024 * 1024) {
         return NextResponse.json(
-          { success: false, error: { message: 'Valid image under 5 MB is required.' } },
+          { success: false, error: { message: 'Valid image or PDF document under 5 MB is required.' } },
           { status: 400 }
         );
       }

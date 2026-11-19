@@ -190,18 +190,33 @@ export class ResellerService {
     return resellers;
   }
 
-  async updateResellerStatus(id: string, status: ResellerStatus, adminUserId: string): Promise<Reseller | null> {
-    const updated = await resellerRepository.update(id, { status });
+  async updateResellerStatus(id: string, status: ResellerStatus, adminUserId: string, notes?: string): Promise<Reseller | null> {
+    const existing = await resellerRepository.findById(id);
+    const actingAdmin = adminUserId ? await userRepository.findById(adminUserId) : null;
+    const adminEmail = actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL;
+
+    const updates: Partial<Reseller> = { status };
+    if (existing?.businessInformation) {
+      const vStatus = status === 'ACTIVE' ? 'APPROVED' : status === 'REJECTED' ? 'REJECTED' : 'PENDING_APPROVAL';
+      updates.businessInformation = {
+        ...existing.businessInformation,
+        verificationStatus: vStatus,
+        verifiedAt: status === 'ACTIVE' ? new Date().toISOString() : existing.businessInformation.verifiedAt,
+        verifiedBy: status === 'ACTIVE' ? adminEmail : existing.businessInformation.verifiedBy,
+        ...(notes ? { verificationNotes: notes } : {}),
+      };
+    }
+
+    const updated = await resellerRepository.update(id, updates);
     if (updated) {
-      const actingAdmin = adminUserId ? await userRepository.findById(adminUserId) : null;
       await auditService.log({
         userId: adminUserId,
-        userEmail: actingAdmin?.email || ENV.ADMIN_DEFAULT_EMAIL,
+        userEmail: adminEmail,
         userRole: 'ADMIN',
         action: `RESELLER_STATUS_${status}`,
         resource: 'resellers',
         resourceId: id,
-        details: { status },
+        details: { status, notes, previousStatus: existing?.status },
       });
     }
     return updated;

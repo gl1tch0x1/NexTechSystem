@@ -86,11 +86,80 @@ router.get('/:filename', (req, res) => {
   }
 
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  if (filename.endsWith('.pdf')) res.setHeader('Content-Disposition', 'attachment');
+  if (filename.endsWith('.pdf')) {
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline');
+  }
   res.sendFile(foundPath, error => {
     if (error && !res.headersSent) res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
   });
 });
+
+async function handleFileUpload(req: any, res: any) {
+  const file = req.file;
+  if (!file || !file.filename) {
+    res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
+    return;
+  }
+
+  // Strictly validate filename against allowlist pattern to prevent path traversal (CWE-22 / js/path-injection)
+  const rawFilename = path.basename(String(file.filename));
+  if (!/^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|gif|pdf)$/.test(rawFilename)) {
+    res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
+    return;
+  }
+
+  const filePath = path.resolve(directory, rawFilename);
+  if (!filePath.startsWith(directory) || filePath.includes('..')) {
+    res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
+    return;
+  }
+
+  let isValid = false;
+  try {
+    const fd = await fsPromises.open(filePath, 'r');
+    const header = Buffer.alloc(16);
+    await fd.read(header, 0, 16, 0);
+    await fd.close();
+
+    const ext = path.extname(rawFilename).slice(1).toLowerCase();
+    const signatures: Record<string, (b: Buffer) => boolean> = {
+      png: b => b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
+      jpg: b => b[0] === 255 && b[1] === 216 && b[2] === 255,
+      jpeg: b => b[0] === 255 && b[1] === 216 && b[2] === 255,
+      gif: b => /^GIF8[79]a$/.test(b.subarray(0, 6).toString()),
+      webp: b => b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP',
+      pdf: b => b.subarray(0, 5).toString() === '%PDF-',
+    };
+    const check = signatures[ext];
+    isValid = Boolean(check && check(header));
+  } catch {
+    isValid = false;
+  }
+
+  if (!isValid) {
+    await fsPromises.unlink(filePath).catch(() => {});
+    res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
+    return;
+  }
+
+  res.status(201).json({ success: true, url: `/api/upload/${rawFilename}` });
+}
+
+// Reseller onboarding document upload (unauthenticated for registration, protected by file verification & limit)
+router.post(
+  '/reseller-document',
+  (req, res, next) => {
+    upload.single('file')(req, res, error => {
+      if (error) {
+        res.status(400).json({ success: false, error: { message: 'Document upload must contain one file no larger than 5 MB.' } });
+        return;
+      }
+      next();
+    });
+  },
+  handleFileUpload
+);
 
 router.post(
   '/',
@@ -105,56 +174,7 @@ router.post(
       next();
     });
   },
-  async (req, res) => {
-    const file = req.file;
-    if (!file || !file.filename) {
-      res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
-      return;
-    }
-
-    // Strictly validate filename against allowlist pattern to prevent path traversal (CWE-22 / js/path-injection)
-    const rawFilename = path.basename(String(file.filename));
-    if (!/^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|gif|pdf)$/.test(rawFilename)) {
-      res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
-      return;
-    }
-
-    const filePath = path.resolve(directory, rawFilename);
-    if (!filePath.startsWith(directory) || filePath.includes('..')) {
-      res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
-      return;
-    }
-
-    let isValid = false;
-    try {
-      const fd = await fsPromises.open(filePath, 'r');
-      const header = Buffer.alloc(16);
-      await fd.read(header, 0, 16, 0);
-      await fd.close();
-
-      const ext = path.extname(rawFilename).slice(1).toLowerCase();
-      const signatures: Record<string, (b: Buffer) => boolean> = {
-        png: b => b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
-        jpg: b => b[0] === 255 && b[1] === 216 && b[2] === 255,
-        jpeg: b => b[0] === 255 && b[1] === 216 && b[2] === 255,
-        gif: b => /^GIF8[79]a$/.test(b.subarray(0, 6).toString()),
-        webp: b => b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP',
-        pdf: b => b.subarray(0, 5).toString() === '%PDF-',
-      };
-      const check = signatures[ext];
-      isValid = Boolean(check && check(header));
-    } catch {
-      isValid = false;
-    }
-
-    if (!isValid) {
-      await fsPromises.unlink(filePath).catch(() => {});
-      res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
-      return;
-    }
-
-    res.status(201).json({ success: true, url: `/api/upload/${rawFilename}` });
-  }
+  handleFileUpload
 );
 
 export default router;

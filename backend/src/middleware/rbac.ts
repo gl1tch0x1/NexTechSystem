@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from './auth.js';
 import { UserRole } from '../types/index.js';
 import { auditService } from '../services/audit.service.js';
+import { resellerRepository } from '../repositories/reseller.repository.js';
 
 export function requireRole(...allowedRoles: UserRole[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
@@ -75,6 +76,57 @@ export function requireResellerTenant(req: AuthenticatedRequest, res: Response, 
     res.status(403).json({
       success: false,
       error: { code: 'TENANT_ISOLATION_VIOLATION', message: 'Unauthorized attempt to access another reseller tenant.' },
+    });
+    return;
+  }
+
+  next();
+}
+
+export async function requireApprovedReseller(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required.' },
+    });
+    return;
+  }
+
+  // Master Administrators bypass reseller verification checks
+  if (req.user.role === 'ADMIN') {
+    return next();
+  }
+
+  if (req.user.role !== 'RESELLER' || !req.user.resellerId) {
+    res.status(403).json({
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'Access restricted to authorized Resellers only.' },
+    });
+    return;
+  }
+
+  const reseller = await resellerRepository.findById(req.user.resellerId);
+  if (!reseller || reseller.status !== 'ACTIVE') {
+    auditService.log({
+      userId: req.user.id,
+      userEmail: req.user.email,
+      userRole: req.user.role,
+      resellerId: req.user.resellerId,
+      action: 'UNVERIFIED_RESELLER_ACTION_BLOCKED',
+      resource: req.originalUrl,
+      details: {
+        status: reseller?.status || 'PENDING_APPROVAL',
+        method: req.method,
+      },
+    });
+
+    res.status(403).json({
+      success: false,
+      error: {
+        code: 'RESELLER_PENDING_APPROVAL',
+        message: 'Reseller account is pending admin verification. Actions are disabled until authorized by administration.',
+        status: reseller?.status || 'PENDING_APPROVAL',
+      },
     });
     return;
   }

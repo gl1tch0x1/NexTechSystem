@@ -25,7 +25,8 @@ import {
   RefreshCw,
   KeyRound,
   Eye,
-  EyeOff
+  EyeOff,
+  FileText
 } from 'lucide-react';
 
 export default function AdminResellersPage() {
@@ -289,17 +290,25 @@ export default function AdminResellersPage() {
     }
   };
 
-  const handleStatusToggle = async (reseller: Reseller) => {
+  const handleUpdateStatus = async (reseller: Reseller, nextStatus: 'ACTIVE' | 'REJECTED' | 'SUSPENDED') => {
     if (!token) return;
-    const nextStatus = reseller.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     try {
       await ApiClient.put(`/admin/resellers/${reseller.id}/status`, { status: nextStatus }, { token });
       showToast('success', `Reseller "${reseller.businessName}" marked as ${nextStatus}.`);
       fetchResellers();
+      if (inspectReseller && inspectReseller.id === reseller.id) {
+        setInspectReseller(prev => prev ? { ...prev, status: nextStatus } : null);
+      }
     } catch (err: any) {
       console.error(err);
       showToast('error', err.message || 'Failed to update reseller status.');
     }
+  };
+
+  const handleStatusToggle = async (reseller: Reseller) => {
+    if (!token) return;
+    const nextStatus = reseller.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    await handleUpdateStatus(reseller, nextStatus);
   };
 
   const filtered = resellers.filter(r =>
@@ -455,10 +464,12 @@ export default function AdminResellersPage() {
                       className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
                         r.status === 'ACTIVE'
                           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                          : r.status === 'PENDING_APPROVAL'
+                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 animate-pulse'
                           : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
                       }`}
                     >
-                      {r.status}
+                      {r.status === 'PENDING_APPROVAL' ? 'PENDING APPROVAL' : r.status}
                     </span>
                   </td>
                   <td className="py-4 px-3 text-right whitespace-nowrap">
@@ -481,16 +492,37 @@ export default function AdminResellersPage() {
                         <span>Access Portal</span>
                         <ExternalLink className="w-3.5 h-3.5 text-purple-200" />
                       </Link>
-                      <button
-                        onClick={() => handleStatusToggle(r)}
-                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shadow-sm ${
-                          r.status === 'ACTIVE'
-                            ? 'bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/50'
-                            : 'bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50'
-                        }`}
-                      >
-                        {r.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                      </button>
+                      {r.status === 'PENDING_APPROVAL' ? (
+                        <>
+                          <button
+                            onClick={() => handleUpdateStatus(r, 'ACTIVE')}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shadow-xs bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600"
+                            title="Authorize & Validate Reseller Account"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Authorize</span>
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus(r, 'REJECTED')}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shadow-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                            title="Reject Reseller Application"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Reject</span>
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleStatusToggle(r)}
+                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shadow-sm ${
+                            r.status === 'ACTIVE'
+                              ? 'bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/50'
+                              : 'bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50'
+                          }`}
+                        >
+                          {r.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -1411,6 +1443,95 @@ export default function AdminResellersPage() {
                     {inspectReseller.phone}
                   </span>
                 </div>
+              </div>
+
+              {/* Document Verification Section (KYC & FTA) */}
+              <div className="p-3.5 rounded-2xl bg-purple-50/60 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/40 space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-purple-200/60 dark:border-purple-900/30">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                      Authentication Documents (KYC &amp; FTA)
+                    </span>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    inspectReseller.status === 'ACTIVE'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : inspectReseller.status === 'PENDING_APPROVAL'
+                      ? 'bg-amber-100 text-amber-700 animate-pulse'
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {inspectReseller.status}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {/* Trade License */}
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                    <div className="text-[10px] uppercase font-bold text-slate-400">Trade License No.</div>
+                    <div className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate">
+                      {inspectReseller.businessInformation?.tradeLicense || 'Not specified'}
+                    </div>
+                    {inspectReseller.businessInformation?.tradeLicenseDocument ? (
+                      <a
+                        href={inspectReseller.businessInformation.tradeLicenseDocument}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline pt-1"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>View Document</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 italic">No document file</span>
+                    )}
+                  </div>
+
+                  {/* VAT Certificate */}
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                    <div className="text-[10px] uppercase font-bold text-slate-400">FTA VAT TRN (15 Digits)</div>
+                    <div className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate">
+                      {inspectReseller.businessInformation?.taxNumber || 'Not specified'}
+                    </div>
+                    {inspectReseller.businessInformation?.vatCertificateDocument ? (
+                      <a
+                        href={inspectReseller.businessInformation.vatCertificateDocument}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline pt-1"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>View Certificate</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 italic">No certificate file</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Direct Action Buttons inside Modal */}
+                {inspectReseller.status === 'PENDING_APPROVAL' && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-purple-200/40 dark:border-purple-900/30">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStatus(inspectReseller, 'ACTIVE')}
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                      <span>Authorize Reseller Account</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStatus(inspectReseller, 'REJECTED')}
+                      className="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Reject Application</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Master Admin Guarantee */}
