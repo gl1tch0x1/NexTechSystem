@@ -57,14 +57,6 @@ export async function POST(request: NextRequest) {
   let body: any = null;
   try {
     body = await request.clone().json();
-    if (body) {
-      updateCatalogProduct(body.id || body.slug || '', body);
-    }
-  } catch {}
-
-  try {
-    revalidatePath('/products');
-    revalidatePath('/');
   } catch {}
 
   try {
@@ -72,8 +64,28 @@ export async function POST(request: NextRequest) {
       body: body ? JSON.stringify(body) : undefined,
     });
     if (upstreamRes.ok) {
+      try {
+        const cloned = upstreamRes.clone();
+        const json = await cloned.json();
+        if (json && json.success && json.data) {
+          updateCatalogProduct(json.data.id || json.data.slug || '', json.data);
+        }
+      } catch {}
+      try {
+        revalidatePath('/products');
+        revalidatePath('/');
+      } catch {}
       return upstreamRes;
     }
+  } catch {}
+
+  // Fallback if backend is unavailable
+  if (body) {
+    updateCatalogProduct(body.id || body.slug || '', body);
+  }
+  try {
+    revalidatePath('/products');
+    revalidatePath('/');
   } catch {}
 
   return Response.json(

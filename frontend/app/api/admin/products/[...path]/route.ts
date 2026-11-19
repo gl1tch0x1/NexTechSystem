@@ -55,14 +55,8 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     body = await request.clone().json();
   } catch {}
 
-  let updatedProduct: any = null;
-  if (path.length >= 1 && body) {
-    updatedProduct = updateCatalogProduct(path[0], body);
-  }
-
-  const targetId = updatedProduct?.id || body?.id || path[0];
-  const subpath = path.length > 1 ? `/${path.slice(1).join('/')}` : '';
-  const upstreamPath = `/admin/products/${targetId}${subpath}`;
+  const cleanSubpath = path.map(segment => encodeURIComponent(segment)).join('/');
+  const upstreamPath = `/admin/products/${cleanSubpath}`;
 
   try {
     const upstreamRes = await proxyToBackend(request, upstreamPath, {
@@ -73,12 +67,12 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
       try {
         const json = await cloned.json();
         if (json && json.success && json.data) {
-          updateCatalogProduct(targetId, json.data);
+          updateCatalogProduct(path[0], json.data);
           try {
             revalidatePath('/products');
             revalidatePath('/');
             revalidatePath(`/products/${path[0]}`);
-            if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
+            if (json.data?.id && json.data.id !== path[0]) revalidatePath(`/products/${json.data.id}`);
             if (body?.slug) revalidatePath(`/products/${body.slug}`);
             if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
           } catch {}
@@ -90,11 +84,16 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     }
   } catch {}
 
+  // Fallback if backend is unavailable
+  let updatedProduct: any = null;
+  if (path.length >= 1 && body) {
+    updatedProduct = updateCatalogProduct(path[0], body);
+  }
+
   try {
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath(`/products/${path[0]}`);
-    if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
     if (body?.slug) revalidatePath(`/products/${body.slug}`);
     if (updatedProduct?.slug) revalidatePath(`/products/${updatedProduct.slug}`);
   } catch {}
@@ -112,7 +111,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
   }
 
   return Response.json(
-    { success: true, data: body || { id: targetId } },
+    { success: true, data: body || { id: path[0] } },
     { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
   );
 }
@@ -124,14 +123,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     body = await request.clone().json();
   } catch {}
 
-  let updatedProduct: any = null;
-  if (path.length >= 1 && body) {
-    updatedProduct = updateCatalogProduct(path[0], body);
-  }
-
-  const targetId = updatedProduct?.id || body?.id || path[0];
-  const subpath = path.length > 1 ? `/${path.slice(1).join('/')}` : '';
-  const upstreamPath = `/admin/products/${targetId}${subpath}`;
+  const cleanSubpath = path.map(segment => encodeURIComponent(segment)).join('/');
+  const upstreamPath = `/admin/products/${cleanSubpath}`;
 
   try {
     const upstreamRes = await proxyToBackend(request, upstreamPath, {
@@ -142,12 +135,12 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       try {
         const json = await cloned.json();
         if (json && json.success && json.data) {
-          updateCatalogProduct(targetId, json.data);
+          updateCatalogProduct(path[0], json.data);
           try {
             revalidatePath('/products');
             revalidatePath('/');
             revalidatePath(`/products/${path[0]}`);
-            if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
+            if (json.data?.id && json.data.id !== path[0]) revalidatePath(`/products/${json.data.id}`);
             if (body?.slug) revalidatePath(`/products/${body.slug}`);
             if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
           } catch {}
@@ -159,11 +152,16 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
   } catch {}
 
+  // Fallback if backend is unavailable
+  let updatedProduct: any = null;
+  if (path.length >= 1 && body) {
+    updatedProduct = updateCatalogProduct(path[0], body);
+  }
+
   try {
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath(`/products/${path[0]}`);
-    if (targetId !== path[0]) revalidatePath(`/products/${targetId}`);
     if (body?.slug) revalidatePath(`/products/${body.slug}`);
     if (updatedProduct?.slug) revalidatePath(`/products/${updatedProduct.slug}`);
   } catch {}
@@ -181,7 +179,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
   }
 
   return Response.json(
-    { success: true, data: body || { id: targetId } },
+    { success: true, data: body || { id: path[0] } },
     { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
   );
 }
@@ -191,23 +189,36 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   let body: any = null;
   try {
     body = await request.clone().json();
-    if (body) {
-      updateCatalogProduct(body.id || body.slug || '', body);
-    }
   } catch {}
 
+  const cleanSubpath = path.map(segment => encodeURIComponent(segment)).join('/');
   try {
-    revalidatePath('/products');
-    revalidatePath('/');
-  } catch {}
-
-  try {
-    const upstreamRes = await proxyToBackend(request, `/admin/products/${path.join('/')}`, {
+    const upstreamRes = await proxyToBackend(request, `/admin/products/${cleanSubpath}`, {
       body: body ? JSON.stringify(body) : undefined,
     });
     if (upstreamRes.ok) {
+      try {
+        const cloned = upstreamRes.clone();
+        const json = await cloned.json();
+        if (json && json.success && json.data) {
+          updateCatalogProduct(json.data.id || json.data.slug || path[0] || '', json.data);
+        }
+      } catch {}
+      try {
+        revalidatePath('/products');
+        revalidatePath('/');
+      } catch {}
       return upstreamRes;
     }
+  } catch {}
+
+  // Fallback if backend is unavailable
+  if (body) {
+    updateCatalogProduct(body.id || body.slug || path[0] || '', body);
+  }
+  try {
+    revalidatePath('/products');
+    revalidatePath('/');
   } catch {}
 
   return Response.json(
