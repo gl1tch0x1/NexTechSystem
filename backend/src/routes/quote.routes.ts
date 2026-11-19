@@ -4,6 +4,7 @@ import { randomUUID as uuidv4 } from 'crypto';
 import { quoteRepository } from '../repositories/quote.repository.js';
 import { orderRepository } from '../repositories/order.repository.js';
 import { productRepository } from '../repositories/product.repository.js';
+import { inventoryService } from '../services/inventory.service.js';
 import { ebillService } from '../services/ebill.service.js';
 import { auditService } from '../services/audit.service.js';
 import { Quote, QuoteItem, Order, OrderItem, Address } from '../types/index.js';
@@ -302,23 +303,65 @@ router.post('/:id/convert', adminLimiter, authenticate, requireRole('ADMIN'), as
       return;
     }
 
+    if (!quote.items || quote.items.length === 0) {
+      res.status(400).json({ success: false, error: { message: 'Quotation has no line items to convert.' } });
+      return;
+    }
+
+    // Verify all products in quotation exist, are active, and have sufficient stock
+    const productCatalogMap = new Map();
+    for (const item of quote.items) {
+      const prod = await productRepository.findById(item.productId);
+      if (!prod) {
+        res.status(400).json({
+          success: false,
+          error: { message: `Cannot convert quote: Product "${item.productName || item.productId}" no longer exists in catalog.` },
+        });
+        return;
+      }
+      if ((prod as any).status === 'INACTIVE' || (prod as any).isActive === false) {
+        res.status(400).json({
+          success: false,
+          error: { message: `Cannot convert quote: Product "${prod.name}" is currently deactivated.` },
+        });
+        return;
+      }
+      const stockCheck = await inventoryService.checkStock(item.productId, item.quantity);
+      if (!stockCheck.available) {
+        res.status(400).json({
+          success: false,
+          error: {
+            message: `Cannot convert quote: Insufficient inventory for "${prod.name}". Available: ${stockCheck.currentStock}, Requested: ${item.quantity}.`,
+          },
+        });
+        return;
+      }
+      productCatalogMap.set(item.productId, prod);
+    }
+
+    // Atomically reserve and deduct inventory
+    await inventoryService.deductStock(quote.items.map(it => ({ productId: it.productId, quantity: it.quantity })));
+
     const orderId = uuidv4();
     const orderNumber = `ORD-QTE-${quote.quoteNumber.replace('QTE-2026-', '')}`;
 
-    const orderItems: OrderItem[] = quote.items.map(it => ({
-      productId: it.productId,
-      productName: it.productName,
-      sku: it.sku,
-      slug: it.sku.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-      thumbnail: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400',
-      unitPrice: it.unitPrice,
-      quantity: it.quantity,
-      discount: it.discount,
-      subtotal: it.subtotal,
-      sellerType: 'ADMIN',
-      warrantyMonths: 24,
-      warrantyExpiry: new Date(Date.now() + 24 * 30.5 * 24 * 60 * 60 * 1000).toISOString(),
-    }));
+    const orderItems: OrderItem[] = quote.items.map(it => {
+      const prod = productCatalogMap.get(it.productId);
+      return {
+        productId: it.productId,
+        productName: it.productName || prod?.name || 'Enterprise Hardware',
+        sku: it.sku || prod?.sku || 'SKU-ENT',
+        slug: (it.sku || prod?.sku || 'sku-ent').toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        thumbnail: prod?.thumbnail || prod?.images?.[0] || '',
+        unitPrice: it.unitPrice,
+        quantity: it.quantity,
+        discount: it.discount,
+        subtotal: it.subtotal,
+        sellerType: 'ADMIN',
+        warrantyMonths: 24,
+        warrantyExpiry: new Date(Date.now() + 24 * 30.5 * 24 * 60 * 60 * 1000).toISOString(),
+      };
+    });
 
     const corporateAddress: Address = {
       id: uuidv4(),

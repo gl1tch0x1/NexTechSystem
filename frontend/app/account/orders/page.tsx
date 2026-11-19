@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order, OrderStatus } from '@/types';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import { CustomerPortalHeader } from '@/components/account/CustomerPortalHeader';
 import {
   ShoppingBag,
@@ -391,7 +392,7 @@ function CustomerOrdersContent() {
                     <img
                       src={
                         it.thumbnail ||
-                        'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=150&q=80'
+                        DEFAULT_PRODUCT_PLACEHOLDER
                       }
                       alt={it.productName}
                       className="w-12 h-12 object-contain rounded-xl p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0"

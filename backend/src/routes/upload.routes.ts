@@ -1,12 +1,12 @@
-import { Router } from 'express';
+import crypto, { randomUUID } from 'node:crypto';
+import { Router, Response, NextFunction } from 'express';
 import multer from 'multer';
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
 import sharp from 'sharp';
-import { authenticate } from '../middleware/auth.js';
-import { requireRole } from '../middleware/rbac.js';
+import { authenticate, AuthenticatedRequest } from '../middleware/auth.js';
+import { resellerRepository } from '../repositories/reseller.repository.js';
 
 const router = Router();
 const directory = path.resolve(process.cwd(), 'uploads');
@@ -51,7 +51,7 @@ const upload = multer({
 
 router.get('/:filename', async (req, res) => {
   const filename = path.basename(String(req.params.filename || ''));
-  if (!/^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|gif|pdf)$/.test(filename)) {
+  if (!/^[a-f0-9-]{32,64}\.(png|jpg|jpeg|webp|gif|pdf)$/i.test(filename)) {
     res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
     return;
   }
@@ -62,12 +62,12 @@ router.get('/:filename', async (req, res) => {
     path.resolve(process.cwd(), '..', 'uploads'),
   ];
 
-  const baseUuid = path.parse(filename).name;
+  const baseHash = path.parse(filename).name;
   const requestedExt = path.extname(filename).slice(1).toLowerCase();
 
   // If a legacy .png or .jpg was requested, prefer serving the existing .webp version
   const checkFilenames = (['png', 'jpg', 'jpeg'].includes(requestedExt))
-    ? [`${baseUuid}.webp`, filename]
+    ? [`${baseHash}.webp`, filename]
     : [filename];
 
   let foundPath: string | null = null;
@@ -121,7 +121,7 @@ async function handleFileUpload(req: any, res: any) {
 
   // Strictly validate filename against allowlist pattern to prevent path traversal (CWE-22 / js/path-injection)
   const rawFilename = path.basename(String(file.filename));
-  if (!/^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|gif|pdf)$/.test(rawFilename)) {
+  if (!/^[a-f0-9-]{32,64}\.(png|jpg|jpeg|webp|gif|pdf)$/i.test(rawFilename)) {
     res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
     return;
   }
@@ -160,37 +160,102 @@ async function handleFileUpload(req: any, res: any) {
     return;
   }
 
-  // Automatic WebP Conversion for all raster images (PNG, JPG, JPEG, GIF)
-  // Guarantees fast rendering, lightweight payload, and instant caching
+  // Automatic WebP Conversion and cryptographic SHA-256 content-addressable hash formatting
   const ext = path.extname(rawFilename).slice(1).toLowerCase();
   let finalFilename = rawFilename;
+  let contentHash = '';
 
   if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
-    const baseUuid = path.parse(rawFilename).name;
-    const webpFilename = `${baseUuid}.webp`;
-    const webpPath = path.resolve(directory, webpFilename);
-
     try {
       const inputBuffer = await fsPromises.readFile(filePath);
-      await sharp(inputBuffer)
+      const webpBuffer = await sharp(inputBuffer)
         .webp({ quality: 85, effort: 4 })
-        .toFile(webpPath);
+        .toBuffer();
 
-      // Clean up original file if it had a different extension
-      if (rawFilename !== webpFilename) {
+      contentHash = crypto.createHash('sha256').update(webpBuffer).digest('hex');
+      const hashFilename = `${contentHash}.webp`;
+      const hashPath = path.resolve(directory, hashFilename);
+
+      await fsPromises.writeFile(hashPath, webpBuffer);
+
+      // Clean up uploaded temp file if name differs
+      if (rawFilename !== hashFilename) {
         await fsPromises.unlink(filePath).catch(() => {});
       }
-      finalFilename = webpFilename;
+      finalFilename = hashFilename;
     } catch {
-      // In case of conversion failure, gracefully fallback to original valid file
+      finalFilename = rawFilename;
+    }
+  } else {
+    // Non-image document (e.g. PDF trade license)
+    try {
+      const inputBuffer = await fsPromises.readFile(filePath);
+      contentHash = crypto.createHash('sha256').update(inputBuffer).digest('hex');
+      const hashFilename = `${contentHash}.${ext}`;
+      const hashPath = path.resolve(directory, hashFilename);
+
+      await fsPromises.writeFile(hashPath, inputBuffer);
+      if (rawFilename !== hashFilename) {
+        await fsPromises.unlink(filePath).catch(() => {});
+      }
+      finalFilename = hashFilename;
+    } catch {
       finalFilename = rawFilename;
     }
   }
 
-  res.status(201).json({ success: true, url: `/api/upload/${finalFilename}` });
+  res.status(201).json({
+    success: true,
+    url: `/api/upload/${finalFilename}`,
+    hash: contentHash,
+    imageHash: contentHash,
+    filename: finalFilename,
+  });
 }
 
-// Reseller onboarding document upload (unauthenticated for registration, protected by file verification & limit)
+/**
+ * Access control middleware: Only Master Admin, Product Editor, or verified Reseller can upload images.
+ */
+async function requireMediaUploadAuthorized(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } });
+    return;
+  }
+
+  // Master Administrators and Product Editors are fully authorized
+  if (req.user.role === 'ADMIN' || req.user.role === 'PRODUCT_EDITOR') {
+    return next();
+  }
+
+  // Resellers are authorized ONLY if their account has been validated and approved by an admin
+  if (req.user.role === 'RESELLER') {
+    const resellerId = req.user.resellerId || (await resellerRepository.findByUserId(req.user.id))?.id;
+    if (resellerId) {
+      const reseller = await resellerRepository.findById(resellerId);
+      if (reseller && reseller.status === 'ACTIVE') {
+        return next();
+      }
+    }
+    res.status(403).json({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Reseller account is pending admin verification. Only verified Resellers can upload media assets.',
+      },
+    });
+    return;
+  }
+
+  res.status(403).json({
+    success: false,
+    error: {
+      code: 'FORBIDDEN',
+      message: 'Access restricted. Only Administrators, Product Editors, and Verified Resellers can upload media assets.',
+    },
+  });
+}
+
+// Reseller onboarding document upload (for initial registration documents verification)
 router.post(
   '/reseller-document',
   (req, res, next) => {
@@ -205,10 +270,11 @@ router.post(
   handleFileUpload
 );
 
+// Protected image & media asset upload: Strictly Admin, Product Editor, or Verified Reseller
 router.post(
   '/',
   authenticate,
-  requireRole('ADMIN', 'PRODUCT_EDITOR', 'RESELLER', 'CUSTOMER'),
+  requireMediaUploadAuthorized,
   (req, res, next) => {
     upload.single('file')(req, res, error => {
       if (error) {

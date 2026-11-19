@@ -97,7 +97,6 @@ export class NotificationService {
 
     const discordPayload = {
       username: 'NexTech Order Approval Bot',
-      avatar_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=200&q=80',
       embeds: [
         {
           title: `⏳ ORDER AWAITING APPROVAL: #${order.orderNumber}`,

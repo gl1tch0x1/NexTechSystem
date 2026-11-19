@@ -14,6 +14,8 @@ export interface AuthenticatedRequest extends Request {
     resellerId?: string;
     adminPinHash?: string;
   };
+  file?: any;
+  files?: any;
 }
 
 function getCookieToken(req: Request): string | undefined {

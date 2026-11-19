@@ -128,7 +128,7 @@ flowchart LR
 - **B2B Quotations & Atomic Sales Order Conversion**: Comprehensive corporate RFQ drafting with configurable profit margins, volume discount breaks, UAE 5% VAT calculations, and atomic 1-click conversion into verified Sales Orders.
 - **Wholesale Procurement Lifecycle**: Purchase Order issuance, tracking, warehouse intake, and automatic stock level increments.
 - **Global Freight Logistics & Cargo Deck**: Air Waybill (AWB) generation, IATA tare/gross weight algorithms, courier fleet dispatch, transit milestone updates, and customs export manifests.
-- **Multi-Tenant Reseller Portals**: Isolated partner subdomains (`/reseller/:code`), bulk Excel catalog ingestion via streaming SheetJS, attributed commission tracking, and automated credential issuance.
+- **Strict Reseller Vetting & Authorized Portals**: Isolated partner subdomains (`/reseller/:code`), mandatory official Trade License and UAE VAT Registration Certificate document verification, administrative approval gating (`PENDING_APPROVAL` to `ACTIVE`), live onboarding status notifications, bulk Excel catalog ingestion via streaming SheetJS, attributed commission tracking, and automated credential issuance.
 
 ---
 
@@ -252,6 +252,21 @@ All high-traffic input parsers, email validators, and administrative sanitizers 
 ### 8. Sensitive Logging Redaction & DOM XSS Sanitization (CWE-312, CWE-532, CWE-079)
 Strict redaction filters ensure authorization OTPs, passwords, and tokens are never written to `stdout`/`stderr`. Dynamic user-supplied DOM assets enforce protocol verification (`http:`, `https:`, relative `/`) and meta-character escaping to prevent cross-site scripting vectors.
 
+### 9. Login Brute-Force Protection & IP Lockout
+Authentication routes enforce automated credential brute-force tracking (`login-brute-force.middleware.ts`). Consecutive failed login attempts from any IP address increment a rolling penalty counter; upon reaching 5 failures within 15 minutes, the IP address is automatically blocked with HTTP 429 (`TOO_MANY_ATTEMPTS`) and locked out until the cooldown period expires.
+
+### 10. Reseller Compliance & Document Verification Workflow
+Partner onboarding requires mandatory upload of official Trade License and VAT Registration Certificate documents (PDF or image). Reseller accounts initialize in `PENDING_APPROVAL` status. Mutating operations (catalog creation, stock modifications, bulk imports) are strictly blocked by the `requireApprovedReseller` middleware until master administrators review documents, verify TRN authenticity, and transition the account to `ACTIVE`. The partner dashboard features real-time verification status banners.
+
+### 11. High-Performance WebP Media Pipeline & Content-Addressable Storage
+Media uploads (`/api/upload`) automatically convert incoming PNG and JPEG images to WebP format via Sharp (`quality: 85, effort: 4`) for flash-speed rendering and minimal network payload. Uploads are hashed with SHA-256 and stored as `<sha256>.webp` (or `<sha256>.<ext>` for verified PDF documents). Upload privileges are restricted via `requireMediaUploadAuthorized` exclusively to Master Administrators (`ADMIN`), Product Editors (`PRODUCT_EDITOR`), and Verified Resellers (`RESELLER` with `ACTIVE` status). Third-party external stock photo dependencies (`images.unsplash.com`) have been completely purged from the codebase.
+
+### 12. Client-Side Source Integrity & Anti-Inspect Deterrence
+Production storefronts deploy `SecurityDeterrent.tsx` to preserve code integrity and discourage unauthorized source inspection. Intercepts common developer tool shortcuts (`F12`, `Ctrl+Shift+I`, `Ctrl+Shift+J`, `Ctrl+U`, `Cmd+Opt+I/J/U`) and suppresses right-click context menus.
+
+### 13. Cryptographic Order OTP Binding & Payment Webhook Validation
+Order placement OTPs compute a SHA-256 cart content digest binding the user ID, cart items, currency, and total amount. Checkout verification rejects any transaction where cart parameters have been tampered with. Regional BNPL payment webhooks (Tamara and Tabby) rigorously validate provider origin, order reference existence, currency, and exact amount matching before marking orders as paid.
+
 ---
 
 ## Core API Directory
@@ -296,6 +311,21 @@ Strict redaction filters ensure authorization OTPs, passwords, and tokens are ne
 | :---: | :--- | :--- | :--- |
 | `POST` | `/api/pc-builder/validate` | Evaluate socket, RAM generation, and wattage compatibility | Public |
 | `GET` | `/api/pc-builder/components` | Retrieve categorized components compatible with active configuration | Public |
+
+### Media Pipeline & Asset Storage
+| Method | Endpoint | Description | Auth Level |
+| :---: | :--- | :--- | :--- |
+| `POST` | `/api/upload` | Upload image/document with automated WebP conversion and SHA-256 content hashing | Admin / Editor / Verified Reseller |
+| `GET` | `/api/upload/:filename` | Retrieve content-addressable WebP image or PDF document with immutable cache headers | Public |
+
+### Reseller Portal & Administration
+| Method | Endpoint | Description | Auth Level |
+| :---: | :--- | :--- | :--- |
+| `POST` | `/api/auth/register-reseller` | Register new reseller account with mandatory Trade License & VAT Certificate uploads | Public |
+| `GET` | `/api/reseller/dashboard` | Access partner dashboard metrics, stock levels, and onboarding verification alerts | Reseller |
+| `PATCH` | `/api/reseller/products/:id/inventory` | Update product inventory stock and thresholds (requires `ACTIVE` status) | Verified Reseller |
+| `GET` | `/api/admin/resellers` | List all reseller applications with verification status and submitted documents | Admin |
+| `PATCH` | `/api/admin/resellers/:id/status` | Verify or reject reseller application and authorize catalog actions | Admin |
 
 ---
 
@@ -406,8 +436,10 @@ npm run dev:frontend
 
 ## Testing & Quality Assurance
 
+The test suite validates financial calculation accuracy, concurrency control, media pipelines, authentication security, and CodeQL vulnerability remediations across **206 passing tests**:
+
 ```bash
-# Execute backend unit and integration tests
+# Execute backend unit and integration test suite (206 tests passing)
 npm run test:backend
 
 # Run comprehensive financial, inventory & security E2E matrix
@@ -419,6 +451,12 @@ npm run lint
 # Validate complete production builds across frontend and backend
 npm run build
 ```
+
+---
+
+## Changelog
+
+For a detailed history of releases, new features, security hardening, and breaking changes, see the [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

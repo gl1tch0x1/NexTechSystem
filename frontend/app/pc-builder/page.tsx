@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 
 import { Product, PCBuilderCompatibilityResult } from '@/types';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { useProductEnquiry } from '@/lib/product-enquiry-context';
@@ -365,7 +366,7 @@ export default function PCBuilderPage() {
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <img
-                      src={product.thumbnail || product.images?.[0] || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80'}
+                      src={product.thumbnail || product.images?.[0] || DEFAULT_PRODUCT_PLACEHOLDER}
                       alt={product.name}
                       className="w-14 h-14 object-contain bg-white dark:bg-tech-dark p-1 rounded-xl"
                     />

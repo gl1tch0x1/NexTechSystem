@@ -24,6 +24,18 @@ export function productImageUrl(value: unknown): string | null {
     return input;
   }
 
+  // Support content-addressable SHA-256 image hashes stored in the database
+  if (/^hash:[a-f0-9]{32,64}(\.webp)?$/i.test(input)) {
+    const raw = input.replace(/^hash:/i, '');
+    return `/api/upload/${raw.endsWith('.webp') ? raw : `${raw}.webp`}`;
+  }
+  if (/^[a-f0-9]{32,64}\.(webp|png|jpg|jpeg|gif)$/i.test(input)) {
+    return `/api/upload/${input}`;
+  }
+  if (/^[a-f0-9]{64}$/i.test(input)) {
+    return `/api/upload/${input}.webp`;
+  }
+
   // Support protocol-relative URLs
   if (input.startsWith('//')) {
     input = `https:${input}`;
@@ -34,7 +46,7 @@ export function productImageUrl(value: unknown): string | null {
     input = input.replace(/^http:\/\//i, 'https://');
   }
 
-  // If input is a bare domain URL without protocol (e.g. m.media-amazon.com/..., images.unsplash.com/...)
+  // If input is a bare domain URL without protocol
   if (!input.startsWith('/') && !/^https?:\/\//i.test(input) && /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/i.test(input)) {
     input = `https://${input}`;
   }

@@ -208,9 +208,35 @@ export class ResellerController {
       return;
     }
 
+    let parsedStock = prod.stock;
+    if (stock !== undefined && stock !== null) {
+      const numStock = Number(stock);
+      if (!Number.isInteger(numStock) || numStock < 0 || !Number.isFinite(numStock)) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_STOCK', message: 'Stock must be a non-negative integer.' },
+        });
+        return;
+      }
+      parsedStock = numStock;
+    }
+
+    let parsedThreshold = prod.lowStockThreshold;
+    if (lowStockThreshold !== undefined && lowStockThreshold !== null) {
+      const numThreshold = Number(lowStockThreshold);
+      if (!Number.isInteger(numThreshold) || numThreshold < 0 || !Number.isFinite(numThreshold)) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_THRESHOLD', message: 'Low stock threshold must be a non-negative integer.' },
+        });
+        return;
+      }
+      parsedThreshold = numThreshold;
+    }
+
     const updated = await productRepository.update(id, {
-      stock: stock != null ? parseInt(stock, 10) : prod.stock,
-      lowStockThreshold: lowStockThreshold != null ? parseInt(lowStockThreshold, 10) : prod.lowStockThreshold,
+      stock: parsedStock,
+      lowStockThreshold: parsedThreshold,
     });
 
     res.json({ success: true, data: updated });
@@ -224,7 +250,37 @@ export class ResellerController {
     }
 
     const orders = await orderService.getOrdersByReseller(resellerId);
-    res.json({ success: true, data: orders });
+    const sanitizedOrders = orders.map(order => {
+      const resellerItems = (order.items || []).filter(item => item.resellerId === resellerId);
+      const resellerSubtotal = resellerItems.reduce(
+        (sum, it) => sum + (Number(it.subtotal ?? (Number(it.unitPrice || 0) * Number(it.quantity || 1))) || 0),
+        0
+      );
+
+      return {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        orderStatus: order.orderStatus,
+        paymentStatus: order.paymentStatus,
+        total: Number(resellerSubtotal.toFixed(2)),
+        items: resellerItems,
+        shippingAddress: order.shippingAddress ? {
+          fullName: order.shippingAddress.fullName,
+          city: order.shippingAddress.city,
+          state: order.shippingAddress.state,
+          country: order.shippingAddress.country,
+          postalCode: order.shippingAddress.postalCode,
+          phone: order.shippingAddress.phone,
+        } : undefined,
+        carrier: order.carrier,
+        trackingNumber: order.trackingNumber,
+        statusHistory: order.statusHistory,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+      };
+    });
+
+    res.json({ success: true, data: sanitizedOrders });
   }
 
   // Excel Product Import Engine

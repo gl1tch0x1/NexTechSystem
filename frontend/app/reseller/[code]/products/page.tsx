@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
 import { Product } from '@/types';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import {
   FileSpreadsheet,
   CheckCircle2,
@@ -53,8 +54,7 @@ const HARDWARE_BRANDS = [
   { id: 'brand_other', name: 'Other Enterprise Brand' },
 ];
 
-const DEFAULT_IMAGE_FALLBACK =
-  'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80';
+const DEFAULT_IMAGE_FALLBACK = DEFAULT_PRODUCT_PLACEHOLDER;
 
 /**
  * Sanitizes image URLs to prevent DOM-based XSS (CWE-79 / CWE-116).
@@ -852,10 +852,10 @@ export default function ResellerProductsPage() {
                   </div>
 
                   <div className="flex-1 space-y-1.5 w-full">
-                    <label className="font-bold text-slate-700">Image HTTPS URL</label>
+                    <label className="font-bold text-slate-700">Image Asset URL or SHA-256 Hash</label>
                     <input
-                      type="url"
-                      placeholder="https://images.unsplash.com/..."
+                      type="text"
+                      placeholder="/api/upload/... or image hash"
                       value={formData.thumbnail}
                       onChange={e => {
                         const cleanVal = e.target.value.replace(/[<>"']/g, '').trimStart();

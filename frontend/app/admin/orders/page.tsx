@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order, OrderStatus, CargoDetails } from '@/types';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import DigitalEBillModal from '@/components/invoice/DigitalEBillModal';
 import CargoWaybillModal from '@/components/admin/CargoWaybillModal';
 import CargoLogisticsView from '@/components/admin/CargoLogisticsView';
@@ -1703,7 +1704,7 @@ export default function AdminOrdersPage() {
                                     >
                                       <div className="flex items-center gap-2.5 min-w-0">
                                         <img
-                                          src={p.thumbnail || p.primaryImage || (p.images && p.images[0]) || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=100&q=80'}
+                                          src={p.thumbnail || p.primaryImage || (p.images && p.images[0]) || DEFAULT_PRODUCT_PLACEHOLDER}
                                           alt=""
                                           className="w-8 h-8 rounded-lg object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200/80 dark:border-slate-800"
                                         />
@@ -1777,7 +1778,7 @@ export default function AdminOrdersPage() {
                         >
                           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                             <img
-                              src={item.thumbnail || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=100&q=80'}
+                              src={item.thumbnail || DEFAULT_PRODUCT_PLACEHOLDER}
                               alt=""
                               className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-800"
                             />
@@ -2112,7 +2113,7 @@ export default function AdminOrdersPage() {
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-3">
                           <img
-                            src={item.productImage || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=100&q=80'}
+                            src={item.productImage || DEFAULT_PRODUCT_PLACEHOLDER}
                             alt={item.productName}
                             className="w-9 h-9 rounded-xl object-cover bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
                           />

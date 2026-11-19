@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import {
   Trash2,
   Minus,
@@ -140,7 +141,7 @@ export default function CartPage() {
               <div className="flex items-center gap-4 min-w-0 flex-1">
                 <div className="w-16 h-16 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-2 shrink-0 flex items-center justify-center">
                   <img
-                    src={item.image || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=200&q=80'}
+                    src={item.image || DEFAULT_PRODUCT_PLACEHOLDER}
                     alt={item.productName}
                     className="max-h-full max-w-full object-contain"
                   />

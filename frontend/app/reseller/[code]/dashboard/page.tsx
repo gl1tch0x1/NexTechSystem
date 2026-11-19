@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice } from '@/lib/utils';
 import { Product } from '@/types';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import {
   Package,
   Boxes,
@@ -640,7 +641,7 @@ export default function ResellerDashboardPage() {
                       const isApproved = prod.approvalStatus === 'APPROVED';
                       const isPending = prod.approvalStatus === 'PENDING_APPROVAL';
                       const isRejected = prod.approvalStatus === 'REJECTED';
-                      const img = prod.primaryImage || prod.thumbnail || prod.images?.[0] || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=400&q=80';
+                      const img = prod.primaryImage || prod.thumbnail || prod.images?.[0] || DEFAULT_PRODUCT_PLACEHOLDER;
 
                       return (
                         <tr key={prod.id} className="hover:bg-slate-50/80 transition-colors">

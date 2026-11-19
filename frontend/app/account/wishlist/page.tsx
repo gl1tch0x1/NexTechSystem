@@ -7,6 +7,7 @@ import { useCurrency } from '@/lib/currency-context';
 import { useProductEnquiry } from '@/lib/product-enquiry-context';
 import { isProductOutOfStock } from '@/lib/product-availability';
 import { CustomerPortalHeader } from '@/components/account/CustomerPortalHeader';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import {
   Heart,
   ShoppingCart,
@@ -94,7 +95,7 @@ function WishlistContent() {
             >
               <div className="aspect-[4/3] rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 p-4 flex items-center justify-center relative overflow-hidden">
                 <img
-                  src={product.thumbnail || product.images?.[0] || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=300&q=80'}
+                  src={product.thumbnail || product.images?.[0] || DEFAULT_PRODUCT_PLACEHOLDER}
                   alt={product.name}
                   className="max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
                 />

@@ -73,10 +73,11 @@ test('Upload & Media Pipeline: Automatic WebP Format Conversion', async (t) => {
     assert.equal(mockRes.statusCode, 201);
     assert.ok(mockRes.body.success);
     assert.ok(mockRes.body.url.endsWith('.webp'), 'Output URL must end in .webp');
-    assert.equal(mockRes.body.url, `/api/upload/${uuid}.webp`);
+    assert.match(mockRes.body.url, /^\/api\/upload\/[a-f0-9]{64}\.webp$/);
+    assert.match(mockRes.body.hash, /^[a-f0-9]{64}$/);
 
     // Verify converted file on disk is actual WebP with RIFF / WEBP magic bytes
-    const savedWebpPath = path.resolve(uploadsDir, `${uuid}.webp`);
+    const savedWebpPath = path.resolve(uploadsDir, `${mockRes.body.hash}.webp`);
     const webpData = await fsPromises.readFile(savedWebpPath);
     assert.equal(webpData.subarray(0, 4).toString(), 'RIFF');
     assert.equal(webpData.subarray(8, 12).toString(), 'WEBP');
@@ -108,7 +109,8 @@ test('Upload & Media Pipeline: Automatic WebP Format Conversion', async (t) => {
     assert.equal(mockRes.statusCode, 201);
     assert.ok(mockRes.body.success);
     assert.ok(mockRes.body.url.endsWith('.webp'));
-    assert.equal(mockRes.body.url, `/api/upload/${uuid}.webp`);
+    assert.match(mockRes.body.url, /^\/api\/upload\/[a-f0-9]{64}\.webp$/);
+    assert.match(mockRes.body.hash, /^[a-f0-9]{64}$/);
   });
 
   await t.test('3. Non-image PDF document remains .pdf without conversion', async () => {
@@ -133,7 +135,7 @@ test('Upload & Media Pipeline: Automatic WebP Format Conversion', async (t) => {
     assert.equal(mockRes.statusCode, 201);
     assert.ok(mockRes.body.success);
     assert.ok(mockRes.body.url.endsWith('.pdf'));
-    assert.equal(mockRes.body.url, `/api/upload/${uuid}.pdf`);
+    assert.match(mockRes.body.url, /^\/api\/upload\/[a-f0-9]{64}\.pdf$/);
   });
 
   process.chdir(originalCwd);

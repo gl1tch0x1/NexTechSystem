@@ -17,6 +17,7 @@ import {
 import { NextechLogo } from '@/components/ui/NextechLogo';
 import { ApiClient } from '@/lib/api-client';
 import { Product, Category, Brand } from '@/types';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import { isProductOutOfStock } from '@/lib/product-availability';
 
 import { useCurrency } from '@/lib/currency-context';
@@ -218,7 +219,7 @@ export function GlobalCommandPalette() {
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-300/60 dark:border-slate-700/60">
                             <img
-                              src={prod.primaryImage || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=150&q=80'}
+                              src={prod.primaryImage || DEFAULT_PRODUCT_PLACEHOLDER}
                               alt=""
                               className="w-full h-full object-cover"
                             />

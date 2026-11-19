@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { formatPrice, sanitizeCsvField } from '@/lib/utils';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import {
   TrendingUp,
   ShoppingBag,
@@ -569,7 +570,7 @@ export default function AdminAnalyticsPage() {
                           #{idx + 1}
                         </span>
                         <img
-                          src={item.image || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=150&q=80'}
+                          src={item.image || DEFAULT_PRODUCT_PLACEHOLDER}
                           alt={item.name}
                           className="w-10 h-10 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0"
                         />

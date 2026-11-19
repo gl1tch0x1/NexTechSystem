@@ -66,7 +66,7 @@ export default function AdminBannersPage() {
       badgeText: 'FLAGSHIP LAUNCH',
       link: '/products',
       buttonText: 'Explore Hardware',
-      image: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=1200&q=80',
+      image: '',
       isActive: true,
     });
     setIsModalOpen(true);
@@ -306,8 +306,8 @@ export default function AdminBannersPage() {
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-400 mb-1">Background Image URL</label>
                 <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
+                  type="text"
+                  placeholder="/api/upload/... or image hash"
                   value={formData.image}
                   onChange={e => setFormData({ ...formData, image: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"

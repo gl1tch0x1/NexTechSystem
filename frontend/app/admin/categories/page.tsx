@@ -70,7 +70,7 @@ export default function AdminCategoriesPage() {
       slug: '',
       description: '',
       icon: 'Layers',
-      image: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=400&q=80',
+      image: '',
     });
     setIsModalOpen(true);
   };

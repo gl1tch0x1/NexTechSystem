@@ -42,12 +42,24 @@ export class VatService {
 
     let standardNetTaxable = 0;
     let standardOutputVat = 0;
+    let zeroRatedNetTaxable = 0;
 
     for (const order of relevantOrders) {
       // Subtotal before tax
-      const netTaxable = order.subtotal - (order.discount || 0);
-      standardNetTaxable += Math.max(0, netTaxable);
-      standardOutputVat += order.tax || Number((netTaxable * (order.taxRate || 0.05)).toFixed(2));
+      const netTaxable = Math.max(0, order.subtotal - (order.discount || 0));
+      const treatment = (order.taxTreatment || '').toUpperCase();
+      const isZeroRated =
+        order.taxRate === 0 ||
+        ['ZERO_RATED', 'EXEMPT', 'FREE_ZONE', 'EXPORT'].includes(treatment) ||
+        (order.tax === 0 && (order.taxRate === undefined || order.taxRate === 0));
+
+      if (isZeroRated) {
+        zeroRatedNetTaxable += netTaxable;
+      } else {
+        standardNetTaxable += netTaxable;
+        const rate = order.taxRate != null && order.taxRate > 0 ? (order.taxRate > 1 ? order.taxRate / 100 : order.taxRate) : 0.05;
+        standardOutputVat += order.tax != null && order.tax > 0 ? order.tax : Number((netTaxable * rate).toFixed(2));
+      }
     }
 
     const now = new Date();
@@ -78,11 +90,11 @@ export class VatService {
       zeroRatedSupplies: {
         boxNumber: 'Box 4',
         boxTitle: 'Zero-rated supplies (Direct Exports & Free Zone Commercial)',
-        taxableAmountAED: 0,
+        taxableAmountAED: Number(zeroRatedNetTaxable.toFixed(2)),
         vatAmountAED: 0,
         rateDescription: '0% Export Relief',
       },
-      totalTaxableSuppliesAED: Number(standardNetTaxable.toFixed(2)),
+      totalTaxableSuppliesAED: Number((standardNetTaxable + zeroRatedNetTaxable).toFixed(2)),
       totalOutputVatAED: Number(standardOutputVat.toFixed(2)),
       totalOrdersProcessed: relevantOrders.length,
       generatedAt: new Date().toISOString(),

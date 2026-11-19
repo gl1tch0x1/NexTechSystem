@@ -41,7 +41,7 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "lowStockThreshold": 5,
     "images": [
       "/images/intel_i9_14900k.jpg",
-      "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80"
+
     ],
     "thumbnail": "/images/intel_i9_14900k.jpg",
     "specifications": {
@@ -93,10 +93,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 30,
     "reservedStock": 0,
     "lowStockThreshold": 5,
-    "images": [
-      "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "processor": "AMD Ryzen 9 7950X",
       "socket": "AM5",
@@ -144,10 +142,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 20,
     "reservedStock": 1,
     "lowStockThreshold": 4,
-    "images": [
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "socket": "LGA1700",
       "ramType": "DDR5",
@@ -196,10 +192,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 18,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "socket": "AM5",
       "ramType": "DDR5",
@@ -249,10 +243,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 12,
     "reservedStock": 1,
     "lowStockThreshold": 3,
-    "images": [
-      "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "gpu": "NVIDIA GeForce RTX 4090",
       "vram": "24GB GDDR6X",
@@ -302,10 +294,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 35,
     "reservedStock": 0,
     "lowStockThreshold": 5,
-    "images": [
-      "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "ramType": "DDR5",
       "capacity": "64GB (2x32GB)",
@@ -354,10 +344,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 40,
     "reservedStock": 2,
     "lowStockThreshold": 5,
-    "images": [
-      "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "capacity": "4TB",
       "interface": "PCIe Gen 4.0 x4, NVMe 2.0",
@@ -406,10 +394,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 25,
     "reservedStock": 1,
     "lowStockThreshold": 4,
-    "images": [
-      "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "wattage": "1000W",
       "efficiency": "80 PLUS Gold Certified",
@@ -456,10 +442,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 15,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "formFactor": "ATX Mid-Tower (Dual-Chamber)",
       "gpuClearance": "Up to 435 mm",
@@ -506,10 +490,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 22,
     "reservedStock": 1,
     "lowStockThreshold": 4,
-    "images": [
-      "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "coolerType": "360mm AIO Liquid Cooler",
       "socketCompatibility": "Intel LGA 1700, 1200, 115X / AMD AM5, AM4",
@@ -557,10 +539,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 8,
     "reservedStock": 1,
     "lowStockThreshold": 2,
-    "images": [
-      "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "processor": "Intel Core Ultra 9 185H",
       "gpu": "NVIDIA GeForce RTX 4090 16GB GDDR6 (115W TGP)",
@@ -612,10 +592,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 5,
     "reservedStock": 0,
     "lowStockThreshold": 2,
-    "images": [
-      "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "processor": "2x Intel Xeon Gold 6430 (64 Cores Total, 2.1 GHz Base)",
       "ram": "128GB (4x 32GB) DDR5-4800 ECC Registered RDIMM",
@@ -667,10 +645,8 @@ export const _LEGACY_FALLBACK_PRODUCTS: Product[] = [
     "stock": 7,
     "reservedStock": 0,
     "lowStockThreshold": 2,
-    "images": [
-      "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80"
-    ],
-    "thumbnail": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "ports": "48x 10/100/1000 Gigabit Ethernet PoE+ Ports",
       "poeBudget": "437W (Expandable to 1440W with secondary PSU)",
@@ -734,7 +710,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "rtx-4090",
       "geforce"
     ],
-    "defaultImage": "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80",
+    "defaultImage": "",
     "defaultPrice": 7499,
     "tagline": "World-leading graphics compute for 4K ray tracing & LLM inference.",
     "powerRating": "450W TDP",
@@ -772,7 +748,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "i9-14900k",
       "intel core i9"
     ],
-    "defaultImage": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80",
+    "defaultImage": "",
     "defaultPrice": 2099,
     "tagline": "Extreme single-thread frequency and 32-thread multi-tasking power.",
     "powerRating": "253W Max",
@@ -811,7 +787,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "rack server",
       "dell poweredge"
     ],
-    "defaultImage": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
+    "defaultImage": "",
     "defaultPrice": 18499,
     "tagline": "Redundant high-density virtualization and enterprise database compute.",
     "powerRating": "Dual 1400W",
@@ -849,7 +825,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "samsung 990",
       "990-pro"
     ],
-    "defaultImage": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80",
+    "defaultImage": "",
     "defaultPrice": 1699,
     "tagline": "Instant boot times, sub-second 4K video asset scrubbing, and gaming speed.",
     "powerRating": "7.8W Max",
@@ -1293,7 +1269,7 @@ export const FALLBACK_ORDERS: Order[] = [
         "productName": "ASUS ROG Strix GeForce RTX 4090 24GB GDDR6X OC Edition",
         "sku": "GPU-ASUS-4090-STRIX",
         "slug": "asus-rog-strix-rtx-4090-24gb",
-        "thumbnail": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80",
+        "thumbnail": "",
         "quantity": 2,
         "unitPrice": 8499,
         "discount": 0,
@@ -1357,7 +1333,7 @@ export const FALLBACK_ORDERS: Order[] = [
         "productName": "Intel Xeon Platinum 8480+ Sapphire Rapids 56-Core Workstation",
         "sku": "CPU-INT-XEON-8480",
         "slug": "intel-xeon-platinum-8480-plus",
-        "thumbnail": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80",
+        "thumbnail": "",
         "quantity": 1,
         "unitPrice": 34999,
         "discount": 0,
@@ -1369,7 +1345,7 @@ export const FALLBACK_ORDERS: Order[] = [
         "productName": "Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 6000MHz",
         "sku": "RAM-COR-DDR5-64G",
         "slug": "corsair-dominator-titanium-ddr5-64gb",
-        "thumbnail": "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80",
+        "thumbnail": "",
         "quantity": 2,
         "unitPrice": 1199,
         "discount": 0,
@@ -1432,7 +1408,7 @@ export const FALLBACK_ORDERS: Order[] = [
         "productName": "Intel Core i9-14900K 24-Core 6.0GHz Raptor Lake Refresh",
         "sku": "CPU-INT-14900K",
         "slug": "intel-core-i9-14900k-cpu",
-        "thumbnail": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80",
+        "thumbnail": "",
         "quantity": 4,
         "unitPrice": 2249,
         "discount": 0,
@@ -1495,7 +1471,7 @@ export const FALLBACK_ORDERS: Order[] = [
         "productName": "Samsung 990 PRO 4TB PCIe Gen4 NVMe M.2 2280 Internal SSD",
         "sku": "SSD-SAM-990PRO-4TB",
         "slug": "samsung-990-pro-4tb-nvme-ssd",
-        "thumbnail": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80",
+        "thumbnail": "",
         "quantity": 5,
         "unitPrice": 1399,
         "discount": 0,

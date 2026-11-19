@@ -8,6 +8,7 @@ import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import { ApiClient } from '@/lib/api-client';
 import { Order, PaymentMethod, Address } from '@/types';
+import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 import { getSecureRandomHex } from '@/lib/utils';
 import OrderOtpModal from '@/components/checkout/OrderOtpModal';
 import CodLocationModal from '@/components/checkout/CodLocationModal';
@@ -934,7 +935,7 @@ export default function CheckoutPage() {
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <img
-                      src={it.image || (it as any).thumbnail || 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=100&q=80'}
+                      src={it.image || (it as any).thumbnail || DEFAULT_PRODUCT_PLACEHOLDER}
                       alt=""
                       className="w-9 h-9 rounded-xl object-cover bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0"
                     />

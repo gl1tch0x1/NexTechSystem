@@ -172,12 +172,55 @@ export class PaymentController {
     }
 
     try {
+      if (!order_reference_id) {
+        res.status(400).json({ error: 'Missing order_reference_id in webhook payload' });
+        return;
+      }
+
+      const order = await orderService.getOrderById(order_reference_id);
+      if (!order) {
+        console.warn(`[Tamara Webhook] Order reference not found: ${sanitizeLog(order_reference_id)}`);
+        res.status(404).json({ error: 'Order not found' });
+        return;
+      }
+
+      if (order.paymentMethod !== 'TAMARA') {
+        console.warn(`[Tamara Webhook] Mismatched payment method for order ${order.id}: expected TAMARA, got ${order.paymentMethod}`);
+        res.status(400).json({ error: 'Mismatched payment method' });
+        return;
+      }
+
+      const webhookAmount = Number(total_amount?.amount ?? 0);
+      if (total_amount?.amount != null && Math.abs(order.total - webhookAmount) > 0.05) {
+        console.warn(`[Tamara Webhook] Total amount mismatch for order ${order.id}: expected ${order.total}, got ${webhookAmount}`);
+        res.status(400).json({ error: 'Amount mismatch' });
+        return;
+      }
+
       if (event_type === 'order_approved' || event_type === 'order_captured') {
+        let captureSuccess = true;
         if (safeOrderId && total_amount?.amount) {
-          await tamaraService.capturePayment(safeOrderId, total_amount.amount, total_amount.currency || 'AED').catch(() => {});
+          try {
+            await tamaraService.capturePayment(safeOrderId, webhookAmount, total_amount.currency || order.currency || 'AED');
+          } catch (captureErr) {
+            console.error(`[Tamara Webhook] Capture failed for order ${order.id}:`, captureErr);
+            captureSuccess = false;
+          }
         }
+        if (!captureSuccess) {
+          await orderService.updatePaymentStatus(
+            order.id,
+            'FAILED',
+            safeOrderId,
+            { provider: 'TAMARA', failureReason: 'Payment capture failed' },
+            'Tamara payment capture failed'
+          );
+          res.status(502).json({ error: 'Tamara capture failed' });
+          return;
+        }
+
         await orderService.updatePaymentStatus(
-          order_reference_id,
+          order.id,
           'PAID',
           safeOrderId,
           { provider: 'TAMARA', captureId: `tamara_cap_${Date.now()}` },
@@ -185,7 +228,7 @@ export class PaymentController {
         );
       } else if (event_type === 'order_declined' || event_type === 'order_expired') {
         await orderService.updatePaymentStatus(
-          order_reference_id,
+          order.id,
           'FAILED',
           safeOrderId,
           { provider: 'TAMARA' },
@@ -193,7 +236,7 @@ export class PaymentController {
         );
       } else if (event_type === 'order_refunded') {
         await orderService.updatePaymentStatus(
-          order_reference_id,
+          order.id,
           'REFUNDED',
           safeOrderId,
           { provider: 'TAMARA' },
@@ -240,12 +283,50 @@ export class PaymentController {
         return;
       }
 
+      const targetOrder = await orderService.getOrderById(orderRef);
+      if (!targetOrder) {
+        console.warn(`[Tabby Webhook] Order reference not found: ${sanitizeLog(orderRef)}`);
+        res.status(404).json({ error: 'Order not found' });
+        return;
+      }
+
+      if (targetOrder.paymentMethod !== 'TABBY') {
+        console.warn(`[Tabby Webhook] Mismatched payment method for order ${targetOrder.id}: expected TABBY, got ${targetOrder.paymentMethod}`);
+        res.status(400).json({ error: 'Mismatched payment method' });
+        return;
+      }
+
+      const webhookAmount = Number(amount ?? 0);
+      if (amount != null && Math.abs(targetOrder.total - webhookAmount) > 0.05) {
+        console.warn(`[Tabby Webhook] Total amount mismatch for order ${targetOrder.id}: expected ${targetOrder.total}, got ${webhookAmount}`);
+        res.status(400).json({ error: 'Amount mismatch' });
+        return;
+      }
+
       if (status === 'AUTHORIZED' || status === 'CLOSED') {
+        let captureSuccess = true;
         if (safePaymentId && amount) {
-          await tabbyService.capturePayment(safePaymentId, Number(amount)).catch(() => {});
+          try {
+            await tabbyService.capturePayment(safePaymentId, webhookAmount);
+          } catch (captureErr) {
+            console.error(`[Tabby Webhook] Capture failed for order ${targetOrder.id}:`, captureErr);
+            captureSuccess = false;
+          }
         }
+        if (!captureSuccess) {
+          await orderService.updatePaymentStatus(
+            targetOrder.id,
+            'FAILED',
+            safePaymentId,
+            { provider: 'TABBY', failureReason: 'Payment capture failed' },
+            'Tabby payment capture failed'
+          );
+          res.status(502).json({ error: 'Tabby capture failed' });
+          return;
+        }
+
         await orderService.updatePaymentStatus(
-          orderRef,
+          targetOrder.id,
           'PAID',
           safePaymentId,
           { provider: 'TABBY', captureId: `tabby_cap_${Date.now()}` },
@@ -253,7 +334,7 @@ export class PaymentController {
         );
       } else if (status === 'REJECTED' || status === 'EXPIRED') {
         await orderService.updatePaymentStatus(
-          orderRef,
+          targetOrder.id,
           'FAILED',
           safePaymentId,
           { provider: 'TABBY' },
@@ -261,7 +342,7 @@ export class PaymentController {
         );
       } else if (status === 'REFUNDED') {
         await orderService.updatePaymentStatus(
-          orderRef,
+          targetOrder.id,
           'REFUNDED',
           safePaymentId,
           { provider: 'TABBY' },
@@ -393,8 +474,13 @@ export class PaymentController {
           }
           const authResult = await tamaraService.authoriseOrder(refId);
           if (authResult?.status === 'AUTHORISED' || authResult?.status === 'APPROVED' || (!isProd && authResult?.isSimulated)) {
-            await tamaraService.capturePayment(refId, order.total).catch(() => {});
-            isSettlementVerified = true;
+            try {
+              await tamaraService.capturePayment(refId, order.total);
+              isSettlementVerified = true;
+            } catch (capErr) {
+              console.error(`[PaymentController] Tamara capturePayment failed for order ${order.id}:`, capErr);
+              isSettlementVerified = false;
+            }
           }
         } else if (order.paymentMethod === 'TABBY') {
           if (!ENV.TABBY_SECRET_KEY) {

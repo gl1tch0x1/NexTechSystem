@@ -2,6 +2,9 @@ import { Response } from 'express';
 import { orderService } from '../services/order.service.js';
 import { ebillService } from '../services/ebill.service.js';
 import { emailOtpService } from '../services/email-otp.service.js';
+import { pricingService } from '../services/pricing.service.js';
+import { productRepository } from '../repositories/product.repository.js';
+import { walletService } from '../services/wallet.service.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { ENV } from '../config/env.js';
 import { idempotencyService } from '../services/idempotency.service.js';
@@ -42,7 +45,7 @@ export class OrderController {
       return;
     }
 
-    const { code } = req.body;
+    const { code, total, currency, itemsCount } = req.body;
     if (!code || typeof code !== 'string') {
       res.status(400).json({ success: false, error: { code: 'INVALID_CODE', message: 'A 6-digit verification code is required.' } });
       return;
@@ -52,6 +55,9 @@ export class OrderController {
       userId: req.user.id,
       userEmail: req.user.email,
       code: code.trim(),
+      expectedTotal: total != null ? Number(total) : undefined,
+      expectedCurrency: currency || 'AED',
+      expectedItemsCount: itemsCount != null ? Number(itemsCount) : undefined,
       consumeOnSuccess: false,
     });
 
@@ -124,10 +130,53 @@ export class OrderController {
         return;
       }
 
+      // Authoritative pricing check to bind OTP to the cart total and prevent checkout price tampering
+      let authoritativeTotal: number | undefined;
+      try {
+        const productIds = Array.from(new Set(items.map((i: any) => i.productId)));
+        const products = await Promise.all(productIds.map(id => productRepository.findById(id)));
+        const productsMap = new Map<string, any>();
+        products.forEach(p => {
+          if (p) productsMap.set(p.id, p);
+        });
+
+        let userWalletBalance = 0;
+        const requestedWallet = walletAmountToUse ? parseFloat(walletAmountToUse) : undefined;
+        if (requestedWallet && requestedWallet > 0) {
+          const wallet = await walletService.getOrCreateWallet(req.user.id);
+          userWalletBalance = wallet.balance || 0;
+        }
+
+        const pricing = await pricingService.calculateOrderTotals({
+          items,
+          productsMap,
+          couponCode,
+          paymentMethod: paymentMethod || 'CREDIT_CARD',
+          shippingAddress,
+          userId: req.user.id,
+          requestedWalletDeduction: requestedWallet,
+          userWalletBalance,
+        });
+        authoritativeTotal = pricing.total;
+      } catch (pricingErr: any) {
+        if (idempotencyKey) idempotencyService.release(req.user.id, idempotencyKey);
+        res.status(400).json({
+          success: false,
+          error: {
+            code: 'PRICING_CALCULATION_FAILED',
+            message: pricingErr.message || 'Failed to calculate order pricing for verification.',
+          },
+        });
+        return;
+      }
+
       const otpResult = await emailOtpService.verifyOtp({
         userId: req.user.id,
         userEmail: req.user.email,
         code: otpCode.trim(),
+        expectedTotal: authoritativeTotal,
+        expectedCurrency: 'AED',
+        expectedItemsCount: items.length,
         consumeOnSuccess: true,
       });
 

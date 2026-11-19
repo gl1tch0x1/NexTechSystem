@@ -305,8 +305,8 @@ export class ExcelImportService {
         categoryName: matchedCategory?.name || mappedData.categoryName || 'Hardware',
         brandId: matchedBrand?.id || 'brand_general',
         brandName: matchedBrand?.name || mappedData.brandName || 'OEM',
-        images: mappedData.images ? [mappedData.images] : ['https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80'],
-        thumbnail: mappedData.images || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80',
+        images: mappedData.images ? [mappedData.images] : [],
+        thumbnail: mappedData.images || '',
         specifications: normalizedSpecs,
         warranty: mappedData.warranty || '1 Year Manufacturer Warranty',
         sellerType: 'RESELLER',
@@ -445,8 +445,8 @@ export class ExcelImportService {
           stock: prodData.stock || 0,
           reservedStock: 0,
           lowStockThreshold: 5,
-          images: prodData.images && prodData.images.length > 0 ? prodData.images : ['https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80'],
-          thumbnail: prodData.thumbnail || prodData.images?.[0] || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80',
+          images: prodData.images && prodData.images.length > 0 ? prodData.images : [],
+          thumbnail: prodData.thumbnail || prodData.images?.[0] || '',
           specifications: prodData.specifications || {},
           features: prodData.features || [],
           tags: prodData.tags || [],
@@ -601,7 +601,7 @@ export class ExcelImportService {
         warranty: '3 Years Manufacturer Warranty',
         origin: 'Taiwan',
         description: 'Flagship enthusiast graphics card with axial-tech fans, diecast shroud, and 24GB GDDR6X VRAM.',
-        image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80',
+        image: '',
       },
       {
         name: 'Intel Core i9-14900K 24-Core Desktop Processor',
@@ -633,7 +633,7 @@ export class ExcelImportService {
         warranty: '3 Years Manufacturer Warranty',
         origin: 'Vietnam',
         description: 'Ultimate performance unlocked desktop processor up to 6.0 GHz Intel Thermal Velocity Boost.',
-        image: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80',
+        image: '',
       },
       {
         name: 'AMD Ryzen 9 7950X 16-Core 32-Thread Processor',
@@ -665,7 +665,7 @@ export class ExcelImportService {
         warranty: '3 Years Manufacturer Warranty',
         origin: 'Malaysia',
         description: 'Elite gaming and workstation processor built on TSMC 5nm Zen 4 architecture with PCIe 5.0 support.',
-        image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80',
+        image: '',
       },
       {
         name: 'Samsung 990 PRO 4TB PCIe 4.0 M.2 NVMe SSD',
@@ -697,7 +697,7 @@ export class ExcelImportService {
         warranty: '5 Years Manufacturer Warranty',
         origin: 'South Korea',
         description: 'Blazing read speeds up to 7,450 MB/s and write speeds up to 6,900 MB/s with thermal heat spreader.',
-        image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=800&q=80',
+        image: '',
       },
       {
         name: 'Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5-6000',
@@ -729,7 +729,7 @@ export class ExcelImportService {
         warranty: 'Limited Lifetime Warranty',
         origin: 'Taiwan',
         description: 'Premium forged aluminum DDR5 memory with customizable top bars and patented DHX cooling.',
-        image: 'https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?auto=format&fit=crop&w=800&q=80',
+        image: '',
       },
       {
         name: 'Dell PowerEdge R760 2U Enterprise Rackmount Server',
@@ -761,7 +761,7 @@ export class ExcelImportService {
         warranty: '3 Years Dell ProSupport Next Business Day Onsite',
         origin: 'Ireland',
         description: 'High-density 2U dual-socket enterprise rack server optimized for virtualization, database, and cloud workloads.',
-        image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
+        image: '',
       },
       {
         name: 'ASUS ROG Zephyrus G16 OLED Gaming Laptop',
@@ -793,7 +793,7 @@ export class ExcelImportService {
         warranty: '2 Years ASUS International Warranty',
         origin: 'China',
         description: 'Ultra-slim CNC aluminum chassis with 2.5K 240Hz ROG Nebula OLED display and dedicated Intel AI Boost NPU.',
-        image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=800&q=80',
+        image: '',
       },
     ];
 

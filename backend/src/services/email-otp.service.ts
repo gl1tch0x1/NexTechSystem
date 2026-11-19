@@ -19,6 +19,26 @@ export interface OrderVerificationOtpRecord {
     itemsCount?: number;
     currency?: string;
   };
+  cartHash?: string;
+}
+
+/**
+ * Computes a deterministic SHA-256 integrity hash for checkout cart parameters
+ * to cryptographically bind OTP issuance and verification to specific order totals.
+ */
+export function computeCheckoutCartHash(
+  userId: string,
+  total: number,
+  currency: string = 'AED',
+  itemsCount?: number
+): string {
+  const normTotal = Number(total || 0).toFixed(2);
+  const normCurrency = (currency || 'AED').toUpperCase().trim();
+  const normCount = itemsCount != null ? Number(itemsCount) : 0;
+  return crypto
+    .createHash('sha256')
+    .update(`${userId.trim()}:${normTotal}:${normCurrency}:${normCount}`)
+    .digest('hex');
 }
 
 export interface RequestOtpResult {
@@ -152,6 +172,16 @@ export class EmailOtpService {
     const expiresAt = new Date(now.getTime() + this.OTP_EXPIRY_MINUTES * 60 * 1000).toISOString();
     const resendAvailableAt = new Date(now.getTime() + this.RESEND_COOLDOWN_SECONDS * 1000).toISOString();
 
+    const cartHash =
+      cartSummary?.total != null
+        ? computeCheckoutCartHash(
+            userId,
+            cartSummary.total,
+            cartSummary.currency || 'AED',
+            cartSummary.itemsCount
+          )
+        : undefined;
+
     const newRecord: OrderVerificationOtpRecord = {
       id: `otp_${uuidv4()}`,
       userId,
@@ -163,6 +193,7 @@ export class EmailOtpService {
       consumed: false,
       resendAvailableAt,
       cartSummary,
+      cartHash,
     };
 
     await dbStore.create<OrderVerificationOtpRecord>('order_verification_otps', newRecord);
@@ -212,9 +243,21 @@ export class EmailOtpService {
     userEmail: string;
     code: string;
     expectedTotal?: number;
+    expectedCurrency?: string;
+    expectedItemsCount?: number;
+    expectedCartHash?: string;
     consumeOnSuccess?: boolean;
   }): Promise<VerifyOtpResult> {
-    const { userId, userEmail, code, expectedTotal, consumeOnSuccess = true } = params;
+    const {
+      userId,
+      userEmail,
+      code,
+      expectedTotal,
+      expectedCurrency,
+      expectedItemsCount,
+      expectedCartHash,
+      consumeOnSuccess = true,
+    } = params;
     const normalizedEmail = userEmail.replace(/[\r\n]/g, '').toLowerCase().trim();
     const cleanCode = (code || '').trim();
 
@@ -263,6 +306,30 @@ export class EmailOtpService {
         valid: false,
         error: 'The order total has changed since your verification code was issued. Please request a fresh verification code.',
       };
+    }
+
+    // Verify cart hash integrity if provided
+    if (expectedCartHash && activeRecord.cartHash && expectedCartHash !== activeRecord.cartHash) {
+      return {
+        valid: false,
+        error: 'The checkout cart items or total have changed since your verification code was issued. Please request a new code.',
+      };
+    }
+
+    // Check computed cart hash if authoritative checkout parameters were provided
+    if (activeRecord.cartHash && expectedTotal != null && !expectedCartHash) {
+      const computedHash = computeCheckoutCartHash(
+        userId,
+        expectedTotal,
+        expectedCurrency || activeRecord.cartSummary?.currency || 'AED',
+        expectedItemsCount ?? activeRecord.cartSummary?.itemsCount
+      );
+      if (computedHash !== activeRecord.cartHash && Math.abs(Number(activeRecord.cartSummary?.total || 0) - Number(expectedTotal)) > 0.05) {
+        return {
+          valid: false,
+          error: 'The checkout cart parameters have changed since your verification code was issued. Please request a new code.',
+        };
+      }
     }
 
     const now = new Date();

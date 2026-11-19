@@ -16,48 +16,48 @@ export interface CategoryMapping {
 }
 
 export const CATEGORY_MAP: Record<string, CategoryMapping> = {
-  'ACER BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Acer', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'All in One': { id: 'cat_all_in_one', name: 'All-in-One PCs', slug: 'all-in-one-pcs', brand: null, order: 2, image: 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=800&auto=format&fit=crop&q=80' },
-  'All in One ': { id: 'cat_all_in_one', name: 'All-in-One PCs', slug: 'all-in-one-pcs', brand: null, order: 2, image: 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=800&auto=format&fit=crop&q=80' },
-  'ASUS BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'ASUS', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'Dell ALIENWARE & PRECISION': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: 'Dell', order: 3, image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80' },
-  'DELL BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Dell', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'DELL XPS BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Dell', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'DESKTOPS': { id: 'cat_desktops', name: 'Desktops', slug: 'desktops', brand: null, order: 4, image: 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=800&auto=format&fit=crop&q=80' },
-  'GAMING LAPTOP BRAND NEW': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: null, order: 3, image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80' },
-  'HEADSET': { id: 'cat_headsets', name: 'Headsets & Audio', slug: 'headsets-audio', brand: null, order: 5, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80' },
-  'HP BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'HP', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'HP DOCKING STATION': { id: 'cat_accessories', name: 'Accessories', slug: 'accessories', brand: 'HP', order: 6, image: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=800&auto=format&fit=crop&q=80' },
-  'HP OMEN': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: 'HP', order: 3, image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80' },
-  'HP REFURBISHED / OPEN BOX': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'HP', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'LENOVO BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Lenovo', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'MONITORS': { id: 'cat_monitors', name: 'Monitors', slug: 'monitors', brand: null, order: 7, image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80' },
-  'MSI BRAND NEW': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: 'MSI', order: 3, image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80' },
-  'OPEN BOX REFURB': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: null, order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'SCANNER': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80' },
-  'UBIQUITI': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: 'Ubiquiti', order: 9, image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&auto=format&fit=crop&q=80' },
-  'USED APPLE': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Apple', order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'USED LAPTOP': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: null, order: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-  'Z ACCESSORIES': { id: 'cat_accessories', name: 'Accessories', slug: 'accessories', brand: null, order: 6, image: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=800&auto=format&fit=crop&q=80' },
-  'Z ADATA BRAND NEW': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: 'ADATA', order: 10, image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80' },
-  'Z CISCO': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: 'Cisco', order: 9, image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&auto=format&fit=crop&q=80' },
-  'Z CPU': { id: 'cat_components', name: 'Components', slug: 'components', brand: 'Intel', order: 11, image: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=800&auto=format&fit=crop&q=80' },
-  'Z GAMING ACCESSORIES': { id: 'cat_gaming_accessories', name: 'Gaming Accessories', slug: 'gaming-accessories', brand: null, order: 12, image: 'https://images.unsplash.com/photo-1612287232230-05e8346f32e6?w=800&auto=format&fit=crop&q=80' },
-  'Z HAND BAGS': { id: 'cat_bags_cases', name: 'Bags & Cases', slug: 'bags-cases', brand: null, order: 13, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80' },
-  'Z HARD DISK DRIVE': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: null, order: 10, image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80' },
-  'Z IDEAL NETWORKS NETWORK CABLE TESTER': { id: 'cat_accessories', name: 'Accessories', slug: 'accessories', brand: null, order: 6, image: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=800&auto=format&fit=crop&q=80' },
-  'Z KEYBOARD & MOUSE': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80' },
-  'Z LOGITECH  ACCESSORIES': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: 'Logitech', order: 8, image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80' },
-  'Z MIKROTIK': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: 'MikroTik', order: 9, image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&auto=format&fit=crop&q=80' },
-  'Z PEN': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80' },
-  'Z PROJECTOR': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80' },
-  'Z PULL OUT HDD SSD RAMS': { id: 'cat_components', name: 'Components', slug: 'components', brand: null, order: 11, image: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=800&auto=format&fit=crop&q=80' },
-  'Z RACK & CABINET': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: null, order: 9, image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&auto=format&fit=crop&q=80' },
-  'Z RAMDOM ACCESS MEMORY': { id: 'cat_components', name: 'Components', slug: 'components', brand: null, order: 11, image: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=800&auto=format&fit=crop&q=80' },
-  'Z RANDOM ACCESS MEMORY': { id: 'cat_components', name: 'Components', slug: 'components', brand: null, order: 11, image: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=800&auto=format&fit=crop&q=80' },
-  'Z SANDISK FLASH DRIVE': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: 'SanDisk', order: 10, image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80' },
-  'Z SOLID STATE DRIVE': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: null, order: 10, image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80' },
-  'Z UPS': { id: 'cat_ups', name: 'UPS & Power', slug: 'ups-power', brand: null, order: 14, image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80' },
+  'ACER BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Acer', order: 1, image: '' },
+  'All in One': { id: 'cat_all_in_one', name: 'All-in-One PCs', slug: 'all-in-one-pcs', brand: null, order: 2, image: '' },
+  'All in One ': { id: 'cat_all_in_one', name: 'All-in-One PCs', slug: 'all-in-one-pcs', brand: null, order: 2, image: '' },
+  'ASUS BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'ASUS', order: 1, image: '' },
+  'Dell ALIENWARE & PRECISION': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: 'Dell', order: 3, image: '' },
+  'DELL BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Dell', order: 1, image: '' },
+  'DELL XPS BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Dell', order: 1, image: '' },
+  'DESKTOPS': { id: 'cat_desktops', name: 'Desktops', slug: 'desktops', brand: null, order: 4, image: '' },
+  'GAMING LAPTOP BRAND NEW': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: null, order: 3, image: '' },
+  'HEADSET': { id: 'cat_headsets', name: 'Headsets & Audio', slug: 'headsets-audio', brand: null, order: 5, image: '' },
+  'HP BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'HP', order: 1, image: '' },
+  'HP DOCKING STATION': { id: 'cat_accessories', name: 'Accessories', slug: 'accessories', brand: 'HP', order: 6, image: '' },
+  'HP OMEN': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: 'HP', order: 3, image: '' },
+  'HP REFURBISHED / OPEN BOX': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'HP', order: 1, image: '' },
+  'LENOVO BRAND NEW': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Lenovo', order: 1, image: '' },
+  'MONITORS': { id: 'cat_monitors', name: 'Monitors', slug: 'monitors', brand: null, order: 7, image: '' },
+  'MSI BRAND NEW': { id: 'cat_gaming_laptops', name: 'Gaming Laptops', slug: 'gaming-laptops', brand: 'MSI', order: 3, image: '' },
+  'OPEN BOX REFURB': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: null, order: 1, image: '' },
+  'SCANNER': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: '' },
+  'UBIQUITI': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: 'Ubiquiti', order: 9, image: '' },
+  'USED APPLE': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: 'Apple', order: 1, image: '' },
+  'USED LAPTOP': { id: 'cat_laptops', name: 'Laptops', slug: 'laptops', brand: null, order: 1, image: '' },
+  'Z ACCESSORIES': { id: 'cat_accessories', name: 'Accessories', slug: 'accessories', brand: null, order: 6, image: '' },
+  'Z ADATA BRAND NEW': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: 'ADATA', order: 10, image: '' },
+  'Z CISCO': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: 'Cisco', order: 9, image: '' },
+  'Z CPU': { id: 'cat_components', name: 'Components', slug: 'components', brand: 'Intel', order: 11, image: '' },
+  'Z GAMING ACCESSORIES': { id: 'cat_gaming_accessories', name: 'Gaming Accessories', slug: 'gaming-accessories', brand: null, order: 12, image: '' },
+  'Z HAND BAGS': { id: 'cat_bags_cases', name: 'Bags & Cases', slug: 'bags-cases', brand: null, order: 13, image: '' },
+  'Z HARD DISK DRIVE': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: null, order: 10, image: '' },
+  'Z IDEAL NETWORKS NETWORK CABLE TESTER': { id: 'cat_accessories', name: 'Accessories', slug: 'accessories', brand: null, order: 6, image: '' },
+  'Z KEYBOARD & MOUSE': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: '' },
+  'Z LOGITECH  ACCESSORIES': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: 'Logitech', order: 8, image: '' },
+  'Z MIKROTIK': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: 'MikroTik', order: 9, image: '' },
+  'Z PEN': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: '' },
+  'Z PROJECTOR': { id: 'cat_peripherals', name: 'Peripherals', slug: 'peripherals', brand: null, order: 8, image: '' },
+  'Z PULL OUT HDD SSD RAMS': { id: 'cat_components', name: 'Components', slug: 'components', brand: null, order: 11, image: '' },
+  'Z RACK & CABINET': { id: 'cat_networking', name: 'Networking', slug: 'networking', brand: null, order: 9, image: '' },
+  'Z RAMDOM ACCESS MEMORY': { id: 'cat_components', name: 'Components', slug: 'components', brand: null, order: 11, image: '' },
+  'Z RANDOM ACCESS MEMORY': { id: 'cat_components', name: 'Components', slug: 'components', brand: null, order: 11, image: '' },
+  'Z SANDISK FLASH DRIVE': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: 'SanDisk', order: 10, image: '' },
+  'Z SOLID STATE DRIVE': { id: 'cat_storage', name: 'Storage & Drives', slug: 'storage-drives', brand: null, order: 10, image: '' },
+  'Z UPS': { id: 'cat_ups', name: 'UPS & Power', slug: 'ups-power', brand: null, order: 14, image: '' },
 };
 
 export const BRAND_PATTERNS = [
@@ -487,106 +487,12 @@ export class InventoryImportService {
   }
 
   /**
-   * Determine authentic hardware photography matching the actual product type.
-   * Gives RAM pictures to RAM modules, SSD pictures to M.2/SSDs, Laptop pictures to Laptops, etc.
+   * Hardware photography resolver.
+   * Products strictly use authentic assets uploaded by Admin, Product Editor, or verified Reseller.
+   * Pre-loaded external stock photography is disallowed by security & catalog policy.
    */
-  public resolveItemImage(text: string, categoryId: string, brandName: string): string {
-    const t = text.toUpperCase();
-    const b = (brandName || '').toUpperCase();
-
-    // 1. Pull-out spare components (RAM, SSDs, HDDs pulled from machines)
-    if (t.includes('PULL OUT') || b.includes('PULL OUT')) {
-      if (t.includes('RAM') || t.includes('DDR') || t.includes('DIMM') || t.includes('SODIMM')) {
-        return 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=800&auto=format&fit=crop&q=80';
-      }
-      if (t.includes('SSD') || t.includes('NVME') || t.includes('M.2') || t.includes('SOLID STATE')) {
-        return 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80';
-      }
-      if (t.includes('HDD') || t.includes('HARD DISK') || t.includes('TB') || t.includes('3.5') || t.includes('PURPLE') || t.includes('SEAGATE') || t.includes('SATA')) {
-        return 'https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=800&auto=format&fit=crop&q=80';
-      }
-      return 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80';
-    }
-
-    // 2. Gaming Laptops (Alienware, ROG, Omen, MSI Gaming, Nitro, Predator)
-    if (
-      categoryId === 'cat_gaming_laptops' ||
-      t.includes('ALIENWARE') ||
-      t.includes('OMEN') ||
-      t.includes('ROG') ||
-      t.includes('PREDATOR HELIOS') ||
-      t.includes('NITRO') ||
-      t.includes('LEGION') ||
-      (t.includes('RTX') && (categoryId === 'cat_laptops' || t.includes('LAPTOP')))
-    ) {
-      return 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80';
-    }
-
-    // 3. Apple MacBooks
-    if (b.includes('APPLE') || t.includes('MACBOOK') || t.includes('APPLE M')) {
-      return 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80';
-    }
-
-    // 4. Laptops (Dell XPS, Asus ZenBook, Lenovo ThinkPad, HP EliteBook)
-    if (categoryId === 'cat_laptops' || (t.includes('LAPTOP') && !t.includes('MOUSE') && !t.includes('BAG') && !t.includes('CASE'))) {
-      if (b.includes('DELL') || t.includes('XPS') || t.includes('LATITUDE') || t.includes('INSPIRON')) {
-        return 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&auto=format&fit=crop&q=80';
-      }
-      if (b.includes('ASUS') || t.includes('ZENBOOK') || t.includes('VIVOBOOK') || t.includes('EXPERTBOOK')) {
-        return 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&auto=format&fit=crop&q=80';
-      }
-      if (b.includes('LENOVO') || t.includes('THINKPAD') || t.includes('YOGA') || t.includes('IDEAPAD')) {
-        return 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&auto=format&fit=crop&q=80';
-      }
-      if (b.includes('HP') || t.includes('ELITEBOOK') || t.includes('PROBOOK') || t.includes('PAVILION') || t.includes('SPECTRE')) {
-        return 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&auto=format&fit=crop&q=80';
-      }
-      return 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80';
-    }
-
-    // 5. All-in-One PCs & Desktop Workstations
-    if (categoryId === 'cat_all_in_one' || t.includes('ALL IN ONE') || t.includes('AIO')) {
-      return 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=800&auto=format&fit=crop&q=80';
-    }
-    if (categoryId === 'cat_desktops' || t.includes('DESKTOP') || t.includes('TOWER') || t.includes('OPTIPLEX')) {
-      return 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&auto=format&fit=crop&q=80';
-    }
-
-    // 6. Accessories / Mice / Bags / Peripherals
-    if (categoryId === 'cat_gaming_accessories' || categoryId === 'cat_accessories' || t.includes('CESTUS') || t.includes('MOUSE') || t.includes('DOCKING')) {
-      return 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=800&auto=format&fit=crop&q=80';
-    }
-    if (categoryId === 'cat_bags_cases' || t.includes('BAG') || t.includes('BACKPACK') || t.includes('CASE')) {
-      return 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80';
-    }
-    if (categoryId === 'cat_networking' || b.includes('CISCO') || b.includes('UBIQUITI') || b.includes('MIKROTIK')) {
-      return 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&auto=format&fit=crop&q=80';
-    }
-    if (categoryId === 'cat_monitors' || t.includes('MONITOR') || t.includes('DISPLAY')) {
-      return 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80';
-    }
-    if (categoryId === 'cat_headsets' || t.includes('HEADSET') || t.includes('HEADPHONE') || t.includes('EARPHONE')) {
-      return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80';
-    }
-    if (categoryId === 'cat_ups' || t.includes('UPS') || t.includes('SANTAK') || t.includes('APC')) {
-      return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80';
-    }
-
-    // 7. Core Components & Loose Storage (CPUs, RAM, SSDs, HDDs)
-    if (categoryId === 'cat_components' && (t.includes('CPU') || t.includes('INTEL CORE') || t.includes('RYZEN') || t.includes('PROCESSOR'))) {
-      return 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=800&auto=format&fit=crop&q=80';
-    }
-    if (t.includes('RAM') || t.includes('DDR4') || t.includes('DDR5') || t.includes('SODIMM') || t.includes('DIMM')) {
-      return 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=800&auto=format&fit=crop&q=80';
-    }
-    if (t.includes('SSD') || t.includes('NVME') || t.includes('M.2') || t.includes('SOLID STATE')) {
-      return 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80';
-    }
-    if (t.includes('HDD') || t.includes('HARD DISK') || t.includes('SATA HARD')) {
-      return 'https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=800&auto=format&fit=crop&q=80';
-    }
-
-    return CATEGORY_MAP[categoryId]?.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80';
+  public resolveItemImage(_text: string, _categoryId: string, _brandName: string): string {
+    return '';
   }
 
   /**
@@ -739,7 +645,7 @@ export class InventoryImportService {
         slug: 'other-hardware',
         brand: null,
         order: 99,
-        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+        image: '',
       };
 
       const brand = this.detectBrand(text, catMapping.brand);
@@ -784,8 +690,7 @@ export class InventoryImportService {
 
       const cleanSlug = `${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${sku.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-      // Resolve realistic hardware photography and computing device featured status
-      const resolvedImage = this.resolveItemImage(text, catMapping.id, brand.name);
+      // Compute featured status for computing devices
       const isItemFeatured = this.isFeaturedComputingDevice(text, catMapping.id, brand.name);
 
       // Check if product exists in database by SKU
@@ -810,8 +715,8 @@ export class InventoryImportService {
             tags,
             stock: finalStock,
             locations: finalLocations,
-            images: [resolvedImage],
-            thumbnail: resolvedImage,
+            images: existingProduct.images && existingProduct.images.length > 0 ? existingProduct.images : [],
+            thumbnail: existingProduct.thumbnail || existingProduct.images?.[0] || '',
             isFeatured: isItemFeatured,
             ...(options.assignPricing ? pricing : {}),
             updatedAt: new Date().toISOString(),
@@ -841,8 +746,8 @@ export class InventoryImportService {
           reservedStock: 0,
           lowStockThreshold: 3,
           locations,
-          images: [resolvedImage],
-          thumbnail: resolvedImage,
+          images: [],
+          thumbnail: '',
           specifications,
           features: [
             'Enterprise Certified Hardware',
