@@ -11,6 +11,7 @@ import {
   Reseller
 } from '@/types';
 import { ApiClient } from '@/lib/api-client';
+import { convertImageFileToWebP } from '@/lib/image-utils';
 import { formatPrice, getSecureRandomInt } from '@/lib/utils';
 import {
   SPECIFICATION_FIELDS,
@@ -572,8 +573,9 @@ export function AdminProductModal({
     setIsUploading(true);
     setFormError('');
     try {
+      const optimizedFile = await convertImageFileToWebP(file);
       const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
+      uploadFormData.append('file', optimizedFile);
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -589,7 +591,7 @@ export function AdminProductModal({
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(optimizedFile);
         });
       }
       if (finalUrl) {
@@ -604,11 +606,12 @@ export function AdminProductModal({
       }
     } catch {
       try {
+        const optimizedFile = await convertImageFileToWebP(file);
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(optimizedFile);
         });
         if (base64) {
           setFormData(prev => {

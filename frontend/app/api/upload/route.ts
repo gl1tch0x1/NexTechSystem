@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { proxyToBackend } from '@/lib/proxy-helper';
+import sharp from 'sharp';
 
 const ALLOWED_MIME_TYPES = new Set([
   'image/png',
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
       return upstream;
     }
 
-    // If backend route returned an error or 404, fall back to safe Base64 Data URL
+    // If backend route returned an error or 404, fall back to safe WebP Base64 Data URL
     const formData = await clonedRequest.formData();
     const file = formData.get('file') as File | null;
     if (!file) {
@@ -46,8 +47,23 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const base64 = buffer.toString('base64');
-    const dataUrl = `data:${mimeType};base64,${base64}`;
+    let finalBuffer = buffer;
+    let finalMime = mimeType;
+
+    // Automatically convert any raster image (PNG, JPEG, GIF) to optimized WebP
+    if (mimeType.startsWith('image/') && mimeType !== 'image/svg+xml') {
+      try {
+        finalBuffer = await sharp(buffer)
+          .webp({ quality: 85, effort: 4 })
+          .toBuffer();
+        finalMime = 'image/webp';
+      } catch {
+        finalBuffer = buffer;
+        finalMime = mimeType;
+      }
+    }
+
+    const dataUrl = `data:${finalMime};base64,${finalBuffer.toString('base64')}`;
 
     return NextResponse.json({
       success: true,
@@ -65,9 +81,21 @@ export async function POST(request: NextRequest) {
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
+      let finalBuffer = buffer;
+      let finalMime = file.type.toLowerCase();
+
+      if (finalMime.startsWith('image/') && finalMime !== 'image/svg+xml') {
+        try {
+          finalBuffer = await sharp(buffer)
+            .webp({ quality: 85, effort: 4 })
+            .toBuffer();
+          finalMime = 'image/webp';
+        } catch {}
+      }
+
       return NextResponse.json({
         success: true,
-        url: `data:${file.type.toLowerCase()};base64,${buffer.toString('base64')}`,
+        url: `data:${finalMime};base64,${finalBuffer.toString('base64')}`,
       });
     } catch {
       return NextResponse.json(

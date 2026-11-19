@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AdminNotificationCenter } from '@/components/admin/AdminNotificationCenter';
 import { OnlineStaffPill } from '@/components/admin/OnlineStaffPill';
+import { convertImageFileToWebP } from '@/lib/image-utils';
 import {
   LayoutDashboard,
   Package,
@@ -217,8 +218,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     try {
       setAvatarUploading(true);
+      const optimizedFile = await convertImageFileToWebP(file);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', optimizedFile);
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},

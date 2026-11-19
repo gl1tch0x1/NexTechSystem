@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
 import { Reseller } from '@/types';
+import { convertImageFileToWebP } from '@/lib/image-utils';
 import {
   Settings,
   Building2,
@@ -93,8 +94,9 @@ export default function ResellerSettingsPage() {
 
     try {
       setLogoUploading(true);
+      const optimizedFile = await convertImageFileToWebP(file);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', optimizedFile);
 
       const res = await fetch('/api/upload', {
         method: 'POST',

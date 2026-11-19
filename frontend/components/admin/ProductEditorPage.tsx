@@ -61,6 +61,7 @@ import {
   Monitor
 } from 'lucide-react';
 import { NextechLogo } from '@/components/ui/NextechLogo';
+import { convertImageFileToWebP } from '@/lib/image-utils';
 
 const WAREHOUSE_LOCATIONS = [
   { id: 'loc_dxb_main', name: 'Dubai Logistics Hub (JAFZA)', city: 'Dubai', code: 'DXB-01' },
@@ -1216,8 +1217,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     setImageUrlError('');
 
     try {
+      const optimizedFile = await convertImageFileToWebP(file);
       const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
+      uploadFormData.append('file', optimizedFile);
 
       const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
       const res = await fetch('/api/upload', {
@@ -1240,7 +1242,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(optimizedFile);
         });
       }
 
@@ -1257,11 +1259,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       }
     } catch {
       try {
+        const optimizedFile = await convertImageFileToWebP(file);
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(optimizedFile);
         });
         if (base64) {
           setFormData(prev => {

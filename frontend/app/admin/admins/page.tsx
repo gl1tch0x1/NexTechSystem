@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
+import { convertImageFileToWebP } from '@/lib/image-utils';
 import {
   ShieldCheck,
   UserPlus,
@@ -246,8 +247,9 @@ export default function AdminAdminsPage() {
     try {
       setAvatarUploading(true);
       setFormError('');
+      const optimizedFile = await convertImageFileToWebP(file);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', optimizedFile);
 
       const res = await fetch('/api/upload', {
         method: 'POST',

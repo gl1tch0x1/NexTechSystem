@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 import { DEFAULT_BRANDS } from '@/lib/default-taxonomy';
+import { convertImageFileToWebP } from '@/lib/image-utils';
 
 const PRESET_BRAND_LOGOS = [
   { name: 'Intel', logo: '/brands/intel.svg' },
@@ -160,8 +161,9 @@ export default function AdminBrandsPage() {
     setFormError('');
 
     try {
+      const optimizedFile = await convertImageFileToWebP(file);
       const bodyFormData = new FormData();
-      bodyFormData.append('file', file);
+      bodyFormData.append('file', optimizedFile);
       bodyFormData.append('folder', 'brands');
 
       const res = await fetch('/api/upload', {

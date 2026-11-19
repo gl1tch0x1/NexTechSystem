@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import sharp from 'sharp';
 import { authenticate } from '../middleware/auth.js';
 import { requireRole } from '../middleware/rbac.js';
 
@@ -48,7 +49,7 @@ const upload = multer({
   },
 });
 
-router.get('/:filename', (req, res) => {
+router.get('/:filename', async (req, res) => {
   const filename = path.basename(String(req.params.filename || ''));
   if (!/^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|gif|pdf)$/.test(filename)) {
     res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
@@ -61,23 +62,34 @@ router.get('/:filename', (req, res) => {
     path.resolve(process.cwd(), '..', 'uploads'),
   ];
 
+  const baseUuid = path.parse(filename).name;
+  const requestedExt = path.extname(filename).slice(1).toLowerCase();
+
+  // If a legacy .png or .jpg was requested, prefer serving the existing .webp version
+  const checkFilenames = (['png', 'jpg', 'jpeg'].includes(requestedExt))
+    ? [`${baseUuid}.webp`, filename]
+    : [filename];
+
   let foundPath: string | null = null;
   for (const dir of candidateDirs) {
-    const candidate = path.resolve(dir, filename);
-    if (candidate.startsWith(dir) && !candidate.includes('..')) {
-      let fd: number | null = null;
-      try {
-        fd = fs.openSync(candidate, 'r');
-        foundPath = candidate;
-        break;
-      } catch {
-        // Path does not exist or cannot be read; continue
-      } finally {
-        if (fd !== null) {
-          try { fs.closeSync(fd); } catch {}
+    for (const candFilename of checkFilenames) {
+      const candidate = path.resolve(dir, candFilename);
+      if (candidate.startsWith(dir) && !candidate.includes('..')) {
+        let fd: number | null = null;
+        try {
+          fd = fs.openSync(candidate, 'r');
+          foundPath = candidate;
+          break;
+        } catch {
+          // Path does not exist or cannot be read; continue
+        } finally {
+          if (fd !== null) {
+            try { fs.closeSync(fd); } catch {}
+          }
         }
       }
     }
+    if (foundPath) break;
   }
 
   if (!foundPath) {
@@ -86,9 +98,14 @@ router.get('/:filename', (req, res) => {
   }
 
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  if (filename.endsWith('.pdf')) {
+  if (foundPath.endsWith('.webp')) {
+    res.setHeader('Content-Type', 'image/webp');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  } else if (foundPath.endsWith('.pdf')) {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline');
+  } else {
+    res.setHeader('Cache-Control', 'public, max-age=86400');
   }
   res.sendFile(foundPath, error => {
     if (error && !res.headersSent) res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
@@ -143,7 +160,34 @@ async function handleFileUpload(req: any, res: any) {
     return;
   }
 
-  res.status(201).json({ success: true, url: `/api/upload/${rawFilename}` });
+  // Automatic WebP Conversion for all raster images (PNG, JPG, JPEG, GIF)
+  // Guarantees fast rendering, lightweight payload, and instant caching
+  const ext = path.extname(rawFilename).slice(1).toLowerCase();
+  let finalFilename = rawFilename;
+
+  if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+    const baseUuid = path.parse(rawFilename).name;
+    const webpFilename = `${baseUuid}.webp`;
+    const webpPath = path.resolve(directory, webpFilename);
+
+    try {
+      const inputBuffer = await fsPromises.readFile(filePath);
+      await sharp(inputBuffer)
+        .webp({ quality: 85, effort: 4 })
+        .toFile(webpPath);
+
+      // Clean up original file if it had a different extension
+      if (rawFilename !== webpFilename) {
+        await fsPromises.unlink(filePath).catch(() => {});
+      }
+      finalFilename = webpFilename;
+    } catch {
+      // In case of conversion failure, gracefully fallback to original valid file
+      finalFilename = rawFilename;
+    }
+  }
+
+  res.status(201).json({ success: true, url: `/api/upload/${finalFilename}` });
 }
 
 // Reseller onboarding document upload (unauthenticated for registration, protected by file verification & limit)

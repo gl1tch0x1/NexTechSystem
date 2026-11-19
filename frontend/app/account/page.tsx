@@ -10,6 +10,7 @@ import { formatPrice, formatDate } from '@/lib/utils';
 import { Order, Address } from '@/types';
 import { CustomerPortalHeader } from '@/components/account/CustomerPortalHeader';
 import { AddressManagementModal } from '@/components/account/AddressManagementModal';
+import { convertImageFileToWebP } from '@/lib/image-utils';
 import {
   User,
   ShoppingBag,
@@ -129,8 +130,9 @@ function CustomerAccountContent() {
     try {
       setAvatarUploading(true);
       setProfileError(null);
+      const optimizedFile = await convertImageFileToWebP(file);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', optimizedFile);
 
       const res = await fetch('/api/upload', {
         method: 'POST',
