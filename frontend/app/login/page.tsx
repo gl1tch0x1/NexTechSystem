@@ -23,7 +23,6 @@ import {
   CheckCircle2,
   Store,
   MapPin,
-  Sparkles,
   KeyRound,
   RefreshCw,
   Check,
@@ -821,10 +820,6 @@ function AuthContent() {
                 <label className="text-[11px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Select Account Role
                 </label>
-                <span className="text-[10px] font-bold text-tech-blue dark:text-blue-400 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  {accountType === 'CUSTOMER' ? 'Instant Self-Registration' : 'Verified B2B Wholesale'}
-                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -857,7 +852,7 @@ function AuthContent() {
                     )}
                   </div>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Zero-friction instant signup. Just your name, email, and password to start shopping.
+                    Standard retail account for personal purchases and order tracking.
                   </p>
                 </button>
 
@@ -895,7 +890,7 @@ function AuthContent() {
                     )}
                   </div>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Wholesale margins, credit facility, dedicated storefront, and verified commercial terms.
+                    Commercial account for verified distributors, hardware resellers, and corporate procurement.
                   </p>
                 </button>
               </div>
