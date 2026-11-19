@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import jwt from 'jsonwebtoken';
 
 test('Security & Policy Suite: Reseller Vetting and IP Brute Force Protection', async (t) => {
   const originalCwd = process.cwd();
@@ -22,8 +21,7 @@ test('Security & Policy Suite: Reseller Vetting and IP Brute Force Protection', 
     ALLOWED_ORIGINS: '',
   });
 
-  const { authController, hashPassword } = await import('../src/controllers/auth.controller.js');
-  const { userRepository } = await import('../src/repositories/user.repository.js');
+  const { authController } = await import('../src/controllers/auth.controller.js');
   const { resellerRepository } = await import('../src/repositories/reseller.repository.js');
   const { resellerService } = await import('../src/services/reseller.service.js');
   const { requireApprovedReseller } = await import('../src/middleware/rbac.js');
