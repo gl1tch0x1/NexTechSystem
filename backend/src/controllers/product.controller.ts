@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { productService } from '../services/product.service.js';
+import { productRepository } from '../repositories/product.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
 import { brandRepository } from '../repositories/brand.repository.js';
 import { bannerRepository } from '../repositories/banner.repository.js';
@@ -171,7 +172,16 @@ export class ProductController {
 
   async getCategories(_req: Request, res: Response): Promise<void> {
     const categories = await categoryRepository.findActive();
-    res.json({ success: true, data: categories });
+    const allProducts = await productRepository.find();
+    const activeProducts = allProducts.filter(p => p.isActive && (p.approvalStatus === 'APPROVED' || p.approvalStatus === 'ACTIVE'));
+    const enriched = categories.map(cat => {
+      const count = activeProducts.filter(p => productService.matchesCategory(p, cat.id, cat.id)).length;
+      return {
+        ...cat,
+        productCount: count > 0 ? count : (cat.productCount && cat.productCount > 0 ? cat.productCount : count),
+      };
+    });
+    res.json({ success: true, data: enriched });
   }
 
   async getBrands(_req: Request, res: Response): Promise<void> {

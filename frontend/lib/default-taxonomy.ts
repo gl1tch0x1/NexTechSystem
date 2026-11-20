@@ -39,7 +39,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Database',
     order: 4,
     isActive: true,
-    productCount: 6,
+    productCount: 40,
   },
   {
     id: 'cat_storage',
@@ -49,7 +49,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'HardDrive',
     order: 5,
     isActive: true,
-    productCount: 7,
+    productCount: 69,
   },
   {
     id: 'cat_psus',
@@ -59,7 +59,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Zap',
     order: 6,
     isActive: true,
-    productCount: 4,
+    productCount: 8,
   },
   {
     id: 'cat_servers',
@@ -79,7 +79,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Laptop',
     order: 8,
     isActive: true,
-    productCount: 6,
+    productCount: 100,
   },
   {
     id: 'cat_desktops',

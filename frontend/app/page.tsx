@@ -17,6 +17,7 @@ import {
   getAllCatalogProducts,
   getCatalogCategories,
   getCatalogBrands,
+  matchesCategoryFilter,
 } from '@/lib/catalog-service';
 
 export const dynamic = 'force-dynamic';
@@ -72,9 +73,19 @@ async function getHomeData(): Promise<{
     const finalCategories = categories.length >= 5 ? categories : getCatalogCategories();
     const finalBrands = brands.length >= 5 ? brands : getCatalogBrands();
 
+    const effectiveProducts = finalProducts.length > 0 ? finalProducts : catalogProducts;
+    const baseCategories = finalCategories.length > 0 ? finalCategories : DEFAULT_CATEGORIES;
+    const enrichedCategories = baseCategories.map(cat => {
+      const matchedCount = effectiveProducts.filter(p => matchesCategoryFilter(p, cat.id)).length;
+      return {
+        ...cat,
+        productCount: matchedCount > 0 ? matchedCount : (cat.productCount && cat.productCount > 0 ? cat.productCount : matchedCount),
+      };
+    });
+
     return {
-      products: finalProducts.length > 0 ? finalProducts : catalogProducts,
-      categories: finalCategories.length > 0 ? finalCategories : DEFAULT_CATEGORIES,
+      products: effectiveProducts,
+      categories: enrichedCategories,
       brands: finalBrands.length > 0 ? finalBrands : DEFAULT_BRANDS,
       content: content ? {
         heroHighlights: (content.heroHighlights && content.heroHighlights.length > 0)
@@ -156,7 +167,7 @@ export default async function HomePage() {
 
         {/* 7. HARDWARE TAXONOMY EXPLORER */}
         {isEnabled('categories_grid') && (
-          <TaxonomyExplorer categories={categories} />
+          <TaxonomyExplorer categories={categories} products={products} />
         )}
 
         {/* 8. LIVE BENCHMARKS & HARDWARE TELEMETRY */}

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-11-20
+
+### Fixed
+- **Hardware Taxonomy Product Count & Resolution Engine**:
+  - Resolved issue where homepage hardware category cards (Processors, GPUs, Motherboards, RAM, Storage, PSUs, Servers, Laptops) displayed "0 verified products" despite inventory containing matching hardware.
+  - Implemented semantic category matching (`matchesCategoryFilter` on frontend, `matchesCategory` on backend) to accurately match products by ID, slug, title, specifications, and hardware architecture keywords.
+  - Dynamically compute verified product counts in `/api/products/categories` and frontend SSR pages.
+  - Seeded missing flagship hardware entries for enterprise servers (Dell PowerEdge R760), motherboards (ASUS ROG Maximus Z790 Dark Hero), and titanium power supplies (Seasonic PRIME TX-1600).
+  - Ensured category links (`/products?category=cat_...`) correctly display filtered catalog items.
+
 ## [1.2.0] - 2026-11-19
 
 ### Added

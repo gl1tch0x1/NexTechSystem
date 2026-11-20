@@ -350,6 +350,109 @@ export function updateCatalogProduct(id: string, updates: Partial<Product>): Pro
   return updated;
 }
 
+/**
+ * Resilient semantic category matching across catalog IDs, slugs, and hardware classifications.
+ */
+export function matchesCategoryFilter(
+  p: { categoryId?: string; categoryName?: string; name?: string; description?: string; title?: string },
+  term: string
+): boolean {
+  if (!term) return true;
+  const t = term.toLowerCase().trim();
+  const cId = (p.categoryId || '').toLowerCase().trim();
+  const cName = (p.categoryName || '').toLowerCase().trim();
+  const name = (p.name || p.title || '').toLowerCase();
+  const desc = (p.description || '').toLowerCase();
+
+  // Direct match by ID, slug, or normalized name
+  if (cId === t || cName === t || cId.replace(/[^a-z0-9]/g, '') === t.replace(/[^a-z0-9]/g, '')) {
+    return true;
+  }
+
+  // 1. Processors / CPUs
+  if (t === 'cat_processors' || t === 'processors' || t === 'cpu' || t === 'cpus' || t.includes('processor')) {
+    if (cId === 'cat_processors' || cName.includes('processor') || cName.includes('cpu')) return true;
+    return (name.includes('cpu') || name.includes('processor') || name.includes('core i') || name.includes('ryzen') || name.includes('xeon') || name.includes('lga1700') || name.includes('14900k') || name.includes('7950x') || name.includes('13900k') || name.includes('11900k')) &&
+      !name.includes('laptop') && !name.includes('notebook') && !name.includes('aio');
+  }
+
+  // 2. Graphics Cards / GPUs
+  if (t === 'cat_gpus' || t === 'gpus' || t === 'graphics' || t.includes('graphic') || t.includes('gpu')) {
+    if (cId === 'cat_gpus' || cName.includes('graphics') || cName.includes('gpu')) return true;
+    return (name.includes('geforce') || name.includes('rtx 40') || name.includes('rtx 30') || name.includes('radeon rx') || name.includes('graphics card') || name.includes('rtx 4090')) &&
+      !name.includes('laptop') && !name.includes('notebook');
+  }
+
+  // 3. Motherboards
+  if (t === 'cat_motherboards' || t === 'motherboards' || t.includes('motherboard') || t.includes('mainboard')) {
+    if (cId === 'cat_motherboards' || cName.includes('motherboard')) return true;
+    return name.includes('motherboard') || name.includes('mainboard') || name.includes('z790') || name.includes('b650') || name.includes('x670') || name.includes('dark hero');
+  }
+
+  // 4. Memory / RAM
+  if (t === 'cat_ram' || t === 'ram' || t === 'memory' || t.includes('memory') || t.includes('ram')) {
+    if (cId === 'cat_ram' || cName.includes('memory') || cName.includes('ram')) return true;
+    return (name.includes('ddr4') || name.includes('ddr5') || name.includes('ddr3') || name.includes('ddr2') || name.includes('ram ') || name.includes('memory') || name.includes('crucial ct') || name.includes('server ram') || name.includes('dominator') || name.includes('dimm')) &&
+      !name.includes('laptop') && !name.includes('notebook') && !name.includes('desktop');
+  }
+
+  // 5. Storage (NVMe / SSD / HDD)
+  if (t === 'cat_storage' || t === 'storage' || t.includes('storage') || t.includes('nvme') || t.includes('ssd') || t.includes('hdd') || t === 'storage-drives') {
+    if (cId === 'cat_storage' || cName.includes('storage') || cName.includes('drives')) return true;
+    return (name.includes('ssd') || name.includes('hdd') || name.includes('hard disk') || name.includes('nvme') || name.includes('flash drive') || name.includes('optane') || name.includes('990 pro') || name.includes('m.2')) &&
+      !name.includes('laptop') && !name.includes('notebook');
+  }
+
+  // 6. Power Supplies (PSUs / UPS)
+  if (t === 'cat_psus' || t === 'power-supplies' || t.includes('power') || t.includes('psu') || t === 'cat_ups' || t === 'ups-power' || t.includes('ups')) {
+    if (cId === 'cat_psus' || cId === 'cat_ups' || cName.includes('power') || cName.includes('ups')) return true;
+    return name.includes('power supply') || name.includes('psu') || name.includes('seasonic') || name.includes('smart - ups') || name.includes('ups ') || name.includes('santak') || name.includes('titanium');
+  }
+
+  // 7. Enterprise Rackmount Servers
+  if (t === 'cat_servers' || t === 'servers' || t.includes('server')) {
+    if (cId === 'cat_servers' || cName.includes('server')) return true;
+    return name.includes('poweredge') || name.includes('proliant') || name.includes('thinksystem') || name.includes('rack server') || name.includes('1u server') || name.includes('2u server') || name.includes('rackmount') || name.includes('server ram') || desc.includes('rack server');
+  }
+
+  // 8. Laptops & Workstations
+  if (t === 'cat_laptops' || t === 'laptops' || t.includes('laptop') || t === 'cat_gaming_laptops' || t === 'gaming-laptops') {
+    if (cId === 'cat_laptops' || cId === 'cat_gaming_laptops' || cName.includes('laptop')) return true;
+    return name.includes('laptop') || name.includes('notebook') || name.includes('macbook') || name.includes('alienware') || name.includes('legion') || name.includes('rog ') || name.includes('strix') || name.includes('thinkpad') || name.includes('zenbook') || name.includes('aspire') || name.includes('probook') || name.includes('expertbook') || name.includes('omen') || name.includes('predator helios');
+  }
+
+  // 9. All-in-One & Desktops
+  if (t === 'cat_desktops' || t === 'cat_all_in_one' || t.includes('desktop') || t.includes('all-in-one') || t === 'all-in-one-pcs') {
+    if (cId === 'cat_desktops' || cId === 'cat_all_in_one' || cName.includes('desktop') || cName.includes('all-in-one')) return true;
+    return name.includes('desktop') || name.includes('ideacentre') || name.includes('aio ');
+  }
+
+  // 10. Networking
+  if (t === 'cat_networking' || t === 'networking' || t.includes('network')) {
+    if (cId === 'cat_networking' || cName.includes('network')) return true;
+    return name.includes('cisco') || name.includes('ubiquiti') || name.includes('mikrotik') || name.includes('switch') || name.includes('router') || name.includes('sg350');
+  }
+
+  // 11. Monitors & Displays
+  if (t === 'cat_monitors' || t === 'monitors' || t.includes('monitor') || t.includes('display')) {
+    if (cId === 'cat_monitors' || cName.includes('monitor') || cName.includes('display')) return true;
+    return name.includes('monitor') || name.includes('display');
+  }
+
+  // 12. Components
+  if (t === 'cat_components' || t === 'components' || t.includes('component')) {
+    return cId === 'cat_components' || cName.includes('component');
+  }
+
+  // 13. Accessories & Peripherals
+  if (t === 'cat_accessories' || t === 'accessories' || t.includes('accessor') || t.includes('peripheral')) {
+    return cId === 'cat_accessories' || cId === 'cat_peripherals' || cId === 'cat_headsets' || cId === 'cat_gaming_accessories' || cId === 'cat_bags_cases' ||
+      cName.includes('accessor') || cName.includes('peripheral') || cName.includes('headphone') || cName.includes('headset') || cName.includes('bag');
+  }
+
+  return false;
+}
+
 export interface CatalogFilterOptions {
   category?: string;
   subCategory?: string;
@@ -538,15 +641,7 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
     if (maxPrice !== null && !isNaN(maxPrice) && price > maxPrice) return false;
 
     if (categoryFilter) {
-      const matchCat =
-        p.categoryId?.toLowerCase() === categoryFilter ||
-        p.categoryName?.toLowerCase() === categoryFilter ||
-        p.categoryName?.toLowerCase().includes(categoryFilter) ||
-        (categoryFilter.includes('laptop') && ((p.categoryName || '').toLowerCase().includes('laptop') || (p.categoryId || '').toLowerCase().includes('laptop'))) ||
-        (categoryFilter.includes('storage') && ((p.categoryName || '').toLowerCase().includes('storage') || (p.categoryId || '').toLowerCase().includes('storage'))) ||
-        ((categoryFilter.includes('all-in-one') || categoryFilter.includes('all_in_one') || categoryFilter.includes('desktop')) &&
-          ((p.categoryName || '').toLowerCase().includes('desktop') || (p.categoryName || '').toLowerCase().includes('all-in-one') || (p.categoryId || '').toLowerCase().includes('desktop') || (p.categoryId || '').toLowerCase().includes('all_in_one')));
-      if (!matchCat) return false;
+      if (!matchesCategoryFilter(p, categoryFilter)) return false;
     }
 
     if (brandFilter) {
@@ -623,11 +718,14 @@ export function filterCatalogProducts(options: CatalogFilterOptions = {}): Catal
     if (pPrice > maxP) maxP = pPrice;
   }
 
-  const categoryFacets = rawCategories.map(c => ({
-    id: c.id,
-    name: c.name,
-    count: catCounts[c.id] || 0,
-  }));
+  const categoryFacets = rawCategories.map(c => {
+    const matchedCount = catalogProductsStore.filter(p => matchesCategoryFilter(p, c.id)).length;
+    return {
+      id: c.id,
+      name: c.name,
+      count: matchedCount > 0 ? matchedCount : (catCounts[c.id] || c.productCount || 0),
+    };
+  });
 
   const brandFacets = rawBrands.map(b => ({
     id: b.id,

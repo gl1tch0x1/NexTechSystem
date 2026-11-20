@@ -18,10 +18,12 @@ import {
   ArrowRight,
   ChevronRight
 } from 'lucide-react';
-import { Category } from '@/types';
+import { Category, Product } from '@/types';
+import { matchesCategoryFilter } from '@/lib/catalog-service';
 
 interface TaxonomyExplorerProps {
   categories?: Category[];
+  products?: Product[];
 }
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
@@ -49,7 +51,7 @@ const COLOR_PALETTES = [
   'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800',
 ];
 
-export function TaxonomyExplorer({ categories = [] }: TaxonomyExplorerProps) {
+export function TaxonomyExplorer({ categories = [], products = [] }: TaxonomyExplorerProps) {
   if (!categories || categories.length === 0) {
     return null;
   }
@@ -112,9 +114,13 @@ export function TaxonomyExplorer({ categories = [] }: TaxonomyExplorerProps) {
         {categories.slice(0, 8).map((cat, idx) => {
           const Icon = getCategoryIcon(cat);
           const colorClass = COLOR_PALETTES[idx % COLOR_PALETTES.length];
-          const productCountText = cat.productCount !== undefined
-            ? `${cat.productCount} verified products`
-            : cat.description || 'Enterprise grade';
+          let count = (cat.productCount !== undefined && cat.productCount > 0) ? cat.productCount : 0;
+          if (count === 0 && products && products.length > 0) {
+            count = products.filter(p => matchesCategoryFilter(p, cat.id)).length;
+          }
+          const productCountText = count > 0
+            ? `${count} verified product${count === 1 ? '' : 's'}`
+            : (cat.description || 'Enterprise hardware catalog');
 
           return (
             <motion.div

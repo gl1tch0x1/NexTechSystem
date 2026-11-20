@@ -1,142 +1,182 @@
 [
   {
-    "id": "cat_laptops",
-    "name": "Laptops",
-    "slug": "laptops",
-    "parentId": null,
+    "id": "cat_processors",
+    "name": "Processors (CPUs)",
+    "slug": "processors",
+    "description": "High-performance desktop, workstation, and server CPUs from Intel and AMD",
+    "icon": "Cpu",
+    "order": 1,
     "isActive": true,
-    "createdAt": "2026-11-12T14:00:00.000Z",
-    "updatedAt": "2026-11-16T14:25:27.709Z",
-    "productCount": 78
+    "productCount": 4
+  },
+  {
+    "id": "cat_gpus",
+    "name": "Graphics Cards (GPUs)",
+    "slug": "gpus",
+    "description": "Discrete desktop and AI workstation accelerators from NVIDIA and AMD",
+    "icon": "Zap",
+    "order": 2,
+    "isActive": true,
+    "productCount": 1
+  },
+  {
+    "id": "cat_motherboards",
+    "name": "Motherboards",
+    "slug": "motherboards",
+    "description": "Enthusiast and workstation motherboards across LGA1700, LGA1851, and AM5",
+    "icon": "Cpu",
+    "order": 3,
+    "isActive": true,
+    "productCount": 1
+  },
+  {
+    "id": "cat_ram",
+    "name": "Memory (RAM)",
+    "slug": "ram",
+    "description": "High-speed DDR5, DDR4, and ECC Registered server memory kits",
+    "icon": "Database",
+    "order": 4,
+    "isActive": true,
+    "productCount": 40
   },
   {
     "id": "cat_storage",
-    "name": "Storage & Drives",
+    "name": "Storage (NVMe/SSD/HDD)",
     "slug": "storage-drives",
-    "parentId": null,
+    "description": "High-speed PCIe Gen5 NVMe SSDs, Enterprise SAS drives, and U.2/U.3 drives",
+    "icon": "HardDrive",
+    "order": 5,
     "isActive": true,
-    "createdAt": "2026-11-12T14:00:00.000Z",
-    "updatedAt": "2026-11-16T14:25:27.711Z",
-    "productCount": 46
+    "productCount": 69
   },
   {
-    "id": "cat_all_in_one",
-    "name": "All-in-One PCs",
-    "slug": "all-in-one-pcs",
-    "parentId": null,
+    "id": "cat_psus",
+    "name": "Power Supplies (PSUs)",
+    "slug": "power-supplies",
+    "description": "ATX 3.0, PCIe 5.0 80 Plus Gold, Platinum, and Titanium power supplies",
+    "icon": "Zap",
+    "order": 6,
     "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.015Z",
-    "updatedAt": "2026-11-16T14:25:27.714Z",
+    "productCount": 8
+  },
+  {
+    "id": "cat_servers",
+    "name": "Enterprise Rackmount Servers",
+    "slug": "servers",
+    "description": "1U/2U/4U Rack servers, Dual Xeon/EPYC compute nodes, and SAN/NAS storage",
+    "icon": "Server",
+    "order": 7,
+    "isActive": true,
     "productCount": 1
+  },
+  {
+    "id": "cat_laptops",
+    "name": "Laptops & Workstations",
+    "slug": "laptops",
+    "description": "Mobile workstations, ultrabooks, and high-performance gaming laptops",
+    "icon": "Laptop",
+    "order": 8,
+    "isActive": true,
+    "productCount": 101
+  },
+  {
+    "id": "cat_desktops",
+    "name": "All-in-One Desktops",
+    "slug": "desktops",
+    "description": "Pre-built precision workstations and all-in-one desktop computing systems",
+    "icon": "Monitor",
+    "order": 9,
+    "isActive": true,
+    "productCount": 2
+  },
+  {
+    "id": "cat_networking",
+    "name": "Enterprise Networking",
+    "slug": "networking",
+    "description": "10GbE/100GbE managed switches, enterprise routers, and firewalls",
+    "icon": "Network",
+    "order": 10,
+    "isActive": true,
+    "productCount": 6
+  },
+  {
+    "id": "cat_monitors",
+    "name": "Monitors & Displays",
+    "slug": "monitors",
+    "description": "Color-calibrated 4K UHD, 5K2K, OLED, and ultrawide enterprise displays",
+    "icon": "Monitor",
+    "order": 11,
+    "isActive": true,
+    "productCount": 7
+  },
+  {
+    "id": "cat_components",
+    "name": "PC Components & Hardware",
+    "slug": "components",
+    "description": "Comprehensive computer components, cooling, cases, and expansion kits",
+    "icon": "Cpu",
+    "order": 12,
+    "isActive": true,
+    "productCount": 4
+  },
+  {
+    "id": "cat_accessories",
+    "name": "Accessories & Peripherals",
+    "slug": "accessories",
+    "description": "Mechanical keyboards, precision mice, docks, and enterprise accessories",
+    "icon": "Keyboard",
+    "order": 13,
+    "isActive": true,
+    "productCount": 70
   },
   {
     "id": "cat_gaming_laptops",
     "name": "Gaming Laptops",
     "slug": "gaming-laptops",
-    "parentId": null,
+    "description": "High-FPS performance gaming laptops from ASUS ROG, Alienware, and Legion",
+    "icon": "Laptop",
+    "order": 14,
     "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.016Z",
-    "updatedAt": "2026-11-16T14:25:27.716Z",
-    "productCount": 15
-  },
-  {
-    "id": "cat_desktops",
-    "name": "Desktops",
-    "slug": "desktops",
-    "parentId": null,
-    "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.017Z",
-    "updatedAt": "2026-11-16T14:25:27.718Z",
-    "productCount": 1
-  },
-  {
-    "id": "cat_headsets",
-    "name": "Headsets & Audio",
-    "slug": "headsets-audio",
-    "parentId": null,
-    "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.017Z",
-    "updatedAt": "2026-11-16T14:25:27.721Z",
-    "productCount": 5
-  },
-  {
-    "id": "cat_accessories",
-    "name": "Accessories",
-    "slug": "accessories",
-    "parentId": null,
-    "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.018Z",
-    "updatedAt": "2026-11-16T14:25:27.723Z",
-    "productCount": 37
-  },
-  {
-    "id": "cat_monitors",
-    "name": "Monitors",
-    "slug": "monitors",
-    "parentId": null,
-    "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.019Z",
-    "updatedAt": "2026-11-16T14:25:27.726Z",
-    "productCount": 6
+    "productCount": 16
   },
   {
     "id": "cat_peripherals",
     "name": "Peripherals",
     "slug": "peripherals",
-    "parentId": null,
+    "description": "Barcode scanners, pointing devices, and input hardware",
+    "icon": "Keyboard",
+    "order": 15,
     "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.019Z",
-    "updatedAt": "2026-11-16T14:25:27.729Z",
     "productCount": 15
   },
   {
-    "id": "cat_networking",
-    "name": "Networking",
-    "slug": "networking",
-    "parentId": null,
+    "id": "cat_headsets",
+    "name": "Headsets & Audio",
+    "slug": "headsets-audio",
+    "description": "Enterprise ANC headsets, studio monitoring, and acoustic hardware",
+    "icon": "Keyboard",
+    "order": 16,
     "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.019Z",
-    "updatedAt": "2026-11-16T14:25:27.733Z",
-    "productCount": 7
-  },
-  {
-    "id": "cat_components",
-    "name": "Components",
-    "slug": "components",
-    "parentId": null,
-    "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.022Z",
-    "updatedAt": "2026-11-16T14:25:27.735Z",
-    "productCount": 66
-  },
-  {
-    "id": "cat_gaming_accessories",
-    "name": "Gaming Accessories",
-    "slug": "gaming-accessories",
-    "parentId": null,
-    "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.022Z",
-    "updatedAt": "2026-11-16T14:25:27.737Z",
-    "productCount": 1
+    "productCount": 5
   },
   {
     "id": "cat_bags_cases",
     "name": "Bags & Cases",
     "slug": "bags-cases",
-    "parentId": null,
+    "description": "Reinforced travel bags, laptop sleeves, and equipment protection",
+    "icon": "Box",
+    "order": 17,
     "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.022Z",
-    "updatedAt": "2026-11-16T14:25:27.740Z",
     "productCount": 18
   },
   {
     "id": "cat_ups",
     "name": "UPS & Power",
     "slug": "ups-power",
-    "parentId": null,
+    "description": "Uninterruptible power supplies, line conditioners, and surge protection",
+    "icon": "Zap",
+    "order": 18,
     "isActive": true,
-    "createdAt": "2026-11-15T13:18:40.023Z",
-    "updatedAt": "2026-11-16T14:25:27.741Z",
     "productCount": 6
   }
 ]
