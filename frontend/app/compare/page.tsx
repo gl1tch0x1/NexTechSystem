@@ -67,7 +67,7 @@ export default function ComparePage() {
       </div>
 
       {comparedProducts.length > 0 ? (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full bg-white dark:bg-tech-card rounded-3xl border border-slate-200 dark:border-tech-slate overflow-hidden border-collapse text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-tech-slate bg-slate-50 dark:bg-tech-darker">

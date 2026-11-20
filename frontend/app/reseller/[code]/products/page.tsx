@@ -475,8 +475,8 @@ export default function ResellerProductsPage() {
             <p className="text-xs text-slate-500 font-mono">Querying verified vendor product records...</p>
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full min-w-[700px] text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
                   <th className="py-3 px-3">Product / Hardware SKU</th>

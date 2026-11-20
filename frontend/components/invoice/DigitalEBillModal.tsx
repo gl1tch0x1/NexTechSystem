@@ -299,8 +299,8 @@ export default function DigitalEBillModal({ order, isOpen, onClose }: DigitalEBi
           </div>
 
           {/* Hardware Line Items Table */}
-          <div className="py-6 border-b border-slate-200">
-            <table className="w-full text-left text-xs border-collapse">
+          <div className="py-6 border-b border-slate-200 overflow-x-auto custom-scrollbar">
+            <table className="w-full min-w-[580px] text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b-2 border-slate-300 text-[10px] uppercase font-bold text-slate-500">
                   <th className="py-2.5 px-2 w-8">#</th>

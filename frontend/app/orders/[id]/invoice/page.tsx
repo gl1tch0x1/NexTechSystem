@@ -245,8 +245,8 @@ export default function TaxInvoicePage() {
         </div>
 
         {/* Itemized Line Items Table */}
-        <div className="py-6 overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse font-sans">
+        <div className="py-6 overflow-x-auto custom-scrollbar">
+          <table className="w-full min-w-[580px] text-left text-xs border-collapse font-sans">
             <thead>
               <tr className="border-b-2 border-slate-300 text-slate-500 font-black uppercase text-[10px] tracking-wider">
                 <th className="py-3">#</th>

@@ -137,8 +137,8 @@ export default function ResellerPayoutsPage() {
           <span className="text-xs text-slate-500 font-mono">Cycle: Semi-Monthly (Net-15)</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full min-w-[700px] text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
                 <th className="py-3 px-3">Settlement Batch</th>

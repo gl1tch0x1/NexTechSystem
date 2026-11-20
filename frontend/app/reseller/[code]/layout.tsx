@@ -20,7 +20,9 @@ import {
   CheckCircle2,
   ExternalLink,
   LogOut,
-  Clock
+  Clock,
+  Menu,
+  X
 } from 'lucide-react';
 
 export default function ResellerLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +32,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
   const resellerCode = (params.code as string)?.toLowerCase();
   const { user, role, reseller, token, logout, isLoading } = useAuth();
   const [resellerData, setResellerData] = useState<Reseller | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Send live presence heartbeat for active reseller sessions
   useStaffPresence({ autoPoll: false });
@@ -70,9 +73,80 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col md:flex-row antialiased selection:bg-amber-100 selection:text-amber-900">
-      {/* Reseller Left Sidebar - Crisp Enterprise Light Theme */}
-      <aside className="w-full md:w-72 bg-white border-r border-slate-200/80 p-5 flex flex-col justify-between shrink-0 shadow-sm">
+      {/* Mobile Top Navigation Bar (Visible on < md) */}
+      <header className="md:hidden sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-2xs">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 border border-slate-200 shrink-0"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center font-black text-xs shrink-0 overflow-hidden">
+              {resellerData?.logo || user?.avatar ? (
+                <img
+                  src={resellerData?.logo || user?.avatar}
+                  alt={resellerData?.displayName || 'Vendor Logo'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Store className="w-4 h-4" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-black text-slate-900 truncate max-w-[140px] sm:max-w-[200px]">
+                {resellerData?.displayName || reseller?.displayName || 'Vendor Portal'}
+              </div>
+              <div className="text-[10px] font-mono text-amber-700 truncate">
+                {resellerCode}.store.com
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Link
+          href={`/reseller/${resellerCode}/products/new`}
+          className="p-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-2xs shrink-0"
+          title="Add Hardware Product SKU"
+        >
+          <Plus className="w-4 h-4" />
+        </Link>
+      </header>
+
+      {/* Backdrop overlay on mobile when drawer is open */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-slate-950/60 z-40 md:hidden backdrop-blur-xs transition-opacity"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Reseller Left Sidebar - Slide-in Drawer on mobile, persistent column on md+ */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200/80 p-5 flex flex-col justify-between shadow-2xl transition-transform duration-300 overflow-y-auto
+          md:static md:translate-x-0 md:shadow-sm md:w-72 md:shrink-0 md:z-auto
+          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
         <div className="space-y-6">
+          {/* Mobile Drawer Header with Close Button */}
+          <div className="flex md:hidden items-center justify-between pb-3 border-b border-slate-100">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400 font-mono">
+              Vendor Navigation
+            </span>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
           {/* Admin Impersonation Banner */}
           {role === 'ADMIN' && (
             <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 text-xs">
@@ -85,6 +159,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
               </p>
               <Link
                 href="/admin/resellers"
+                onClick={() => setMobileMenuOpen(false)}
                 className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-900 hover:text-amber-700 hover:underline"
               >
                 <ArrowLeft className="w-3 h-3" />
@@ -142,6 +217,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
           ) : (
             <Link
               href={`/reseller/${resellerCode}/products/new`}
+              onClick={() => setMobileMenuOpen(false)}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-sm hover:shadow transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -162,6 +238,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
                     <Link
                       key={href}
                       href={href}
+                      onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                         isActive
                           ? 'bg-slate-900 text-white shadow-sm font-bold'
@@ -189,6 +266,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
         <div className="pt-6 border-t border-slate-200 space-y-2.5">
           <Link
             href="/"
+            onClick={() => setMobileMenuOpen(false)}
             className="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors font-medium"
           >
             <span>Public Storefront</span>
@@ -196,6 +274,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
           </Link>
           <button
             onClick={() => {
+              setMobileMenuOpen(false);
               logout();
               router.push('/');
             }}
@@ -208,7 +287,7 @@ export default function ResellerLayout({ children }: { children: React.ReactNode
       </aside>
 
       {/* Main Vendor Content Area - White Background Canvas */}
-      <main className="flex-1 bg-white p-6 sm:p-8 lg:p-10 overflow-y-auto">
+      <main className="flex-1 min-w-0 bg-white p-4 sm:p-6 lg:p-8 overflow-y-auto">
         {resellerData?.status === 'PENDING_APPROVAL' && (
           <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 shadow-xs">
             <div className="flex items-start gap-3.5">
