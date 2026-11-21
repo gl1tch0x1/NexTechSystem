@@ -200,7 +200,7 @@ export default function DetailedLiveAnalyticsPage() {
               className="hover:text-blue-600 dark:hover:text-cyan-400 flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Analytics Overview</span>
+              <span>Commercial & Traffic Analytics</span>
             </Link>
             <span>/</span>
             <span className="text-slate-900 dark:text-white font-bold">
@@ -285,17 +285,17 @@ export default function DetailedLiveAnalyticsPage() {
       {/* 2. REAL-TIME TELEMETRY HUD (5 EXECUTIVE STAT CARDS) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Active Concurrent Visitors */}
-        <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 text-white relative overflow-hidden shadow-xl shadow-slate-950/20 group">
-          <div className="absolute -top-12 -right-12 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none" />
-          <div className="flex items-center justify-between text-slate-400 mb-2">
+        <div className="p-5 rounded-3xl bg-blue-600 dark:bg-slate-900 border border-blue-500/80 dark:border-slate-800 text-white relative overflow-hidden shadow-md shadow-blue-600/20 group">
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 dark:bg-cyan-500/20 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-center justify-between text-blue-100 dark:text-slate-400 mb-2">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider">Active Concurrency</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-emerald-300 dark:bg-emerald-400 animate-ping" />
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white flex items-baseline gap-1.5">
             <span>{liveUsers}</span>
-            <span className="text-xs text-slate-400 font-normal font-sans">Visitors</span>
+            <span className="text-xs text-blue-100 dark:text-slate-400 font-normal font-sans">Visitors</span>
           </div>
-          <div className="mt-2 flex items-center gap-1 text-[11px] font-mono text-emerald-400 font-bold">
+          <div className="mt-2 flex items-center gap-1 text-[11px] font-mono text-emerald-200 dark:text-emerald-400 font-bold">
             <TrendingUp className="w-3 h-3" />
             <span>{velocityTrend >= 0 ? `+${velocityTrend}%` : `${velocityTrend}%`} Concurrency Velocity</span>
           </div>

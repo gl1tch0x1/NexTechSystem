@@ -27,7 +27,6 @@ import {
   Clock,
   Server,
   BarChart3,
-  Globe,
   Menu,
   X,
   FileText,
@@ -159,8 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           title: 'OVERVIEW & CORE',
           items: [
             { href: '/admin', label: 'Command Center', icon: LayoutDashboard },
-            { href: '/admin/analytics', label: 'Sales & Purchase Analytics', icon: BarChart3 },
-            { href: '/admin/analytics/live', label: 'Live Visitors & Heatmap', icon: Globe },
+            { href: '/admin/analytics', label: 'Commercial & Traffic Analytics', icon: BarChart3 },
           ],
         },
         {
