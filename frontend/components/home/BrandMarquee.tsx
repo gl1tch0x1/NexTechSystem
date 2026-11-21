@@ -15,7 +15,6 @@ export interface OEMPartner {
   search: string;
   role: string;
   logo: string;
-  badge?: string;
 }
 
 const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
@@ -25,7 +24,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Intel',
     role: 'Xeon Scalable & Core Ultra',
     logo: '/brands/intel.svg',
-    badge: 'Tier-1 Direct',
   },
   {
     name: 'NVIDIA Enterprise',
@@ -33,7 +31,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'NVIDIA',
     role: 'Ada Lovelace & Hopper AI',
     logo: '/brands/nvidia.svg',
-    badge: 'Elite Partner',
   },
   {
     name: 'AMD',
@@ -41,7 +38,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'AMD',
     role: 'EPYC Server & Ryzen Direct',
     logo: '/brands/amd.svg',
-    badge: 'Authorized',
   },
   {
     name: 'ASUS Republic of Gamers',
@@ -49,7 +45,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'ASUS',
     role: 'ROG & ProArt Workstation',
     logo: '/brands/asus.svg',
-    badge: 'Official Distributor',
   },
   {
     name: 'Dell Technologies',
@@ -57,7 +52,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Dell',
     role: 'PowerEdge Server Infrastructure',
     logo: '/brands/dell.svg',
-    badge: 'Titanium OEM',
   },
   {
     name: 'HP Enterprise',
@@ -65,7 +59,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'HP',
     role: 'ProLiant & Apollo Compute',
     logo: '/brands/hpe.svg',
-    badge: 'Platinum Direct',
   },
   {
     name: 'Lenovo',
@@ -73,7 +66,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Lenovo',
     role: 'ThinkSystem & Workstations',
     logo: '/brands/lenovo.svg',
-    badge: 'Premier Partner',
   },
   {
     name: 'Cisco Systems',
@@ -81,7 +73,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Cisco',
     role: 'Catalyst & Nexus Switching',
     logo: '/brands/cisco.svg',
-    badge: 'Gold Integrator',
   },
   {
     name: 'Supermicro',
@@ -89,7 +80,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Supermicro',
     role: 'AI SuperServer Systems',
     logo: '/brands/supermicro.svg',
-    badge: 'Direct System Integrator',
   },
   {
     name: 'Samsung Semiconductor',
@@ -97,7 +87,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Samsung',
     role: 'Enterprise NVMe Gen5 SSDs',
     logo: '/brands/samsung.svg',
-    badge: 'OEM Direct',
   },
   {
     name: 'Kingston Technology',
@@ -105,7 +94,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Kingston',
     role: 'Server Premier DDR5 ECC',
     logo: '/brands/kingston.svg',
-    badge: 'Official Partner',
   },
   {
     name: 'Corsair Memory',
@@ -113,7 +101,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Corsair',
     role: 'Dominator DDR5 & Enclosures',
     logo: '/brands/corsair.svg',
-    badge: 'Tier-1 Direct',
   },
   {
     name: 'Seasonic Power',
@@ -121,7 +108,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Seasonic',
     role: 'PRIME Titanium PSU Architect',
     logo: '/brands/seasonic.svg',
-    badge: 'Master Distributor',
   },
   {
     name: 'Western Digital',
@@ -129,7 +115,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Western Digital',
     role: 'Ultrastar Data Center Drives',
     logo: '/brands/wd.svg',
-    badge: 'Enterprise Authorized',
   },
   {
     name: 'Seagate Technology',
@@ -137,7 +122,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Seagate',
     role: 'Exos Enterprise & IronWolf Pro',
     logo: '/brands/seagate.svg',
-    badge: 'Tier-1 Authorized',
   },
   {
     name: 'Gigabyte Technology',
@@ -145,7 +129,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Gigabyte',
     role: 'AORUS & HPC Server Boards',
     logo: '/brands/gigabyte.svg',
-    badge: 'Authorized GCC',
   },
   {
     name: 'MSI Enterprise',
@@ -153,7 +136,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'MSI',
     role: 'MEG & Creator Workstations',
     logo: '/brands/msi.svg',
-    badge: 'Direct OEM',
   },
   {
     name: 'Synology',
@@ -161,7 +143,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Synology',
     role: 'Enterprise NAS & SAN Array',
     logo: '/brands/synology.svg',
-    badge: 'Certified Solution',
   },
   {
     name: 'Fortinet',
@@ -169,7 +150,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Fortinet',
     role: 'FortiGate Network Security',
     logo: '/brands/fortinet.svg',
-    badge: 'Hardware Alliance',
   },
   {
     name: 'Crucial by Micron',
@@ -177,7 +157,6 @@ const TIER1_HARDWARE_PARTNERS: OEMPartner[] = [
     search: 'Crucial',
     role: 'Pro Overclocking & Server DRAM',
     logo: '/brands/crucial.svg',
-    badge: 'Direct Tier-1',
   },
 ];
 
@@ -212,7 +191,6 @@ export function BrandMarquee({ brands }: BrandMarqueeProps) {
           search: b.name,
           role: b.description || matchingPreset?.role || 'Authorized GCC Supply Partner',
           logo: resolvedLogo,
-          badge: b.tier === 'TIER_1' ? 'Tier-1 Direct' : b.tier === 'TIER_2' ? 'Certified' : 'Official Partner',
         };
       });
     }
@@ -280,16 +258,9 @@ export function BrandMarquee({ brands }: BrandMarqueeProps) {
 
               {/* Brand Metadata */}
               <div className="min-w-0 flex-1 flex flex-col justify-center">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors truncate">
-                    {partner.name.split(' ')[0]}
-                  </span>
-                  {partner.badge && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-tech-blue dark:text-tech-cyan border border-blue-200/60 dark:border-blue-800/50 hidden xs:inline-block shrink-0">
-                      {partner.badge}
-                    </span>
-                  )}
-                </div>
+                <span className="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+                  {partner.search || partner.name}
+                </span>
                 <div className="text-xs text-slate-500 dark:text-slate-400 truncate font-mono mt-1">
                   {partner.role}
                 </div>
