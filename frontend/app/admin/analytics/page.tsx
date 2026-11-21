@@ -245,33 +245,20 @@ export default function AdminAnalyticsPage() {
         const areaD = `${pathD} L 100 100 L 0 100 Z`;
 
         return (
-          <div className="relative rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white p-6 sm:p-7 shadow-xs overflow-hidden group transition-colors">
-            {/* Subtle Enterprise Ambient Glow */}
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/5 dark:bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/5 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
+          <div className="relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white p-6 shadow-xs transition-colors">
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
               {/* Left Column: Real-time Concurrency & Stream Status */}
               <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
-                <div className="flex items-start gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/25 shrink-0">
-                    <Globe className="w-6 h-6 animate-pulse" />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 text-[10px] font-mono font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>LIVE TELEMETRY STREAM</span>
+                    </div>
                   </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 text-[10px] font-mono font-bold uppercase tracking-wider">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                        <span>LIVE TELEMETRY STREAM</span>
-                      </div>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded-md border border-purple-200/80 dark:border-purple-900/40">
-                        <Zap className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400" />
-                        <span>Real-Time Sensor Active</span>
-                      </span>
-                    </div>
-                    <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono tracking-tight flex items-baseline gap-2">
-                      <span>{currentActiveUsers}</span>
-                      <span className="text-xs font-sans text-slate-500 dark:text-slate-400 font-normal">Active Concurrent Visitors</span>
-                    </div>
+                  <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono tracking-tight flex items-baseline gap-2">
+                    <span>{currentActiveUsers}</span>
+                    <span className="text-xs font-sans text-slate-500 dark:text-slate-400 font-normal">Active Concurrent Visitors</span>
                   </div>
                 </div>
 

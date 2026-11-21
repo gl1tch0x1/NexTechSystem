@@ -1150,7 +1150,7 @@ export class AnalyticsService {
       avgDwellTime = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     }
 
-    // 6. GCC & Global Geographic Visitors Heatmap: computed from real deployment nodes & real online traffic
+    // 6. GCC Regional Topology & Geographic Activity: derived strictly from real active sessions & real customer delivery destinations
     interface CityAggregation {
       city: string;
       country: string;
@@ -1164,24 +1164,23 @@ export class AnalyticsService {
       activeVisitors: number;
       orderCount: number;
       totalGmv: number;
-      baseShare: number;
       latencyMs: number;
       bandwidth: string;
     }
 
-    const defaultGccHubs: Record<string, { lat: number; lng: number; xPct: number; yPct: number; flag: string; hub: string; countryCode: string; country: string; city: string; baseShare: number; latencyMs: number; bandwidth: string }> = {
-      'dubai': { city: 'Dubai', country: 'United Arab Emirates', countryCode: 'AE', flag: '🇦🇪', hub: 'Dubai Silicon Oasis Edge (DXB-1)', lat: 25.2048, lng: 55.2708, xPct: 62.5, yPct: 44.0, baseShare: 0.38, latencyMs: 4, bandwidth: '100 Gbps Low-Latency Edge' },
-      'abu dhabi': { city: 'Abu Dhabi', country: 'United Arab Emirates', countryCode: 'AE', flag: '🇦🇪', hub: 'Hub71 Innovation Node (AUH)', lat: 24.4539, lng: 54.3773, xPct: 58.5, yPct: 50.5, baseShare: 0.22, latencyMs: 6, bandwidth: '100 Gbps Cloud Ingress' },
-      'riyadh': { city: 'Riyadh', country: 'Saudi Arabia', countryCode: 'SA', flag: '🇸🇦', hub: 'Riyadh Cloud Node (RUH)', lat: 24.7136, lng: 46.6753, xPct: 38.0, yPct: 48.0, baseShare: 0.18, latencyMs: 14, bandwidth: '40 Gbps GCC Transit' },
-      'doha': { city: 'Doha', country: 'Qatar', countryCode: 'QA', flag: '🇶🇦', hub: 'Doha Bay Compute Center (DOH)', lat: 25.2854, lng: 51.5310, xPct: 52.0, yPct: 42.0, baseShare: 0.08, latencyMs: 12, bandwidth: '40 Gbps GCC Transit' },
-      'kuwait': { city: 'Kuwait City', country: 'Kuwait', countryCode: 'KW', flag: '🇰🇼', hub: 'Kuwait Northern PoP (KWI)', lat: 29.3759, lng: 47.9774, xPct: 41.5, yPct: 24.0, baseShare: 0.06, latencyMs: 16, bandwidth: '40 Gbps GCC Transit' },
-      'manama': { city: 'Manama', country: 'Bahrain', countryCode: 'BH', flag: '🇧🇭', hub: 'Bahrain Gateway (BAH)', lat: 26.2285, lng: 50.5860, xPct: 49.0, yPct: 38.0, baseShare: 0.04, latencyMs: 15, bandwidth: '40 Gbps GCC Transit' },
-      'muscat': { city: 'Muscat', country: 'Oman', countryCode: 'OM', flag: '🇴🇲', hub: 'Muscat Coastal Node (MCT)', lat: 23.5880, lng: 58.3829, xPct: 74.0, yPct: 58.0, baseShare: 0.04, latencyMs: 18, bandwidth: '40 Gbps GCC Transit' },
+    const defaultGccHubs: Record<string, { lat: number; lng: number; xPct: number; yPct: number; flag: string; hub: string; countryCode: string; country: string; city: string; latencyMs: number; bandwidth: string }> = {
+      'dubai': { city: 'Dubai', country: 'United Arab Emirates', countryCode: 'AE', flag: '🇦🇪', hub: 'Dubai Central Hub (DXB)', lat: 25.2048, lng: 55.2708, xPct: 62.5, yPct: 44.0, latencyMs: 4, bandwidth: '100 Gbps Edge' },
+      'abu dhabi': { city: 'Abu Dhabi', country: 'United Arab Emirates', countryCode: 'AE', flag: '🇦🇪', hub: 'Abu Dhabi Innovation Hub (AUH)', lat: 24.4539, lng: 54.3773, xPct: 58.5, yPct: 50.5, latencyMs: 6, bandwidth: '100 Gbps Edge' },
+      'riyadh': { city: 'Riyadh', country: 'Saudi Arabia', countryCode: 'SA', flag: '🇸🇦', hub: 'Riyadh Central Node (RUH)', lat: 24.7136, lng: 46.6753, xPct: 38.0, yPct: 48.0, latencyMs: 14, bandwidth: '40 Gbps Edge' },
+      'doha': { city: 'Doha', country: 'Qatar', countryCode: 'QA', flag: '🇶🇦', hub: 'Doha Compute Node (DOH)', lat: 25.2854, lng: 51.5310, xPct: 52.0, yPct: 42.0, latencyMs: 12, bandwidth: '40 Gbps Edge' },
+      'kuwait': { city: 'Kuwait City', country: 'Kuwait', countryCode: 'KW', flag: '🇰🇼', hub: 'Kuwait Gateway (KWI)', lat: 29.3759, lng: 47.9774, xPct: 41.5, yPct: 24.0, latencyMs: 16, bandwidth: '40 Gbps Edge' },
+      'manama': { city: 'Manama', country: 'Bahrain', countryCode: 'BH', flag: '🇧🇭', hub: 'Bahrain Gateway (BAH)', lat: 26.2285, lng: 50.5860, xPct: 49.0, yPct: 38.0, latencyMs: 15, bandwidth: '40 Gbps Edge' },
+      'muscat': { city: 'Muscat', country: 'Oman', countryCode: 'OM', flag: '🇴🇲', hub: 'Muscat Coastal Node (MCT)', lat: 23.5880, lng: 58.3829, xPct: 74.0, yPct: 58.0, latencyMs: 18, bandwidth: '40 Gbps Edge' },
     };
 
     const cityMap = new Map<string, CityAggregation>();
 
-    // Initialize all authoritative GCC edge hubs
+    // Initialize all authoritative GCC edge hubs with real zero values
     for (const [key, hub] of Object.entries(defaultGccHubs)) {
       cityMap.set(key, {
         city: hub.city,
@@ -1196,23 +1195,22 @@ export class AnalyticsService {
         activeVisitors: 0,
         orderCount: 0,
         totalGmv: 0,
-        baseShare: hub.baseShare,
         latencyMs: hub.latencyMs,
         bandwidth: hub.bandwidth,
       });
     }
 
-    // Aggregate from real orders if any exist
+    // Tally real customer orders by shipping city
     allOrders.forEach(order => {
-      const rawCity = (order.shippingAddress?.city || 'Dubai').trim();
-      const rawCountry = (order.shippingAddress?.country || 'UAE').trim();
+      const rawCity = (order.shippingAddress?.city || '').trim();
+      if (!rawCity) return;
       const key = rawCity.toLowerCase();
       const existing = cityMap.get(key) || {
         city: rawCity,
-        country: rawCountry,
-        countryCode: rawCountry.toLowerCase().includes('saudi') ? 'SA' : 'AE',
-        flag: rawCountry.toLowerCase().includes('saudi') ? '🇸🇦' : '🇦🇪',
-        hubName: `${rawCity} Dispatch Node`,
+        country: (order.shippingAddress?.country || 'UAE').trim(),
+        countryCode: (order.shippingAddress?.country || '').toLowerCase().includes('saudi') ? 'SA' : 'AE',
+        flag: (order.shippingAddress?.country || '').toLowerCase().includes('saudi') ? '🇸🇦' : '🇦🇪',
+        hubName: `${rawCity} Delivery Node`,
         lat: 25.2048,
         lng: 55.2708,
         xPct: 62.5,
@@ -1220,7 +1218,6 @@ export class AnalyticsService {
         activeVisitors: 0,
         orderCount: 0,
         totalGmv: 0,
-        baseShare: 0.05,
         latencyMs: 10,
         bandwidth: '100 Gbps Edge',
       };
@@ -1230,29 +1227,20 @@ export class AnalyticsService {
       cityMap.set(key, existing);
     });
 
-    // If online staff exist, record active visitors in Dubai head office hub
+    // If online staff/admin exist, attribute their live presence to the primary host region (Dubai)
     if (onlineStaff.length > 0) {
-      const existing = cityMap.get('dubai');
-      if (existing) {
-        existing.activeVisitors = Math.max(existing.activeVisitors, onlineStaff.length);
+      const dxb = cityMap.get('dubai');
+      if (dxb) {
+        dxb.activeVisitors = onlineStaff.length;
       }
     }
 
-    // Determine total active concurrent visitors pool
-    const activeVisitorsPool = Math.max(realTimeActiveUsers, onlineStaff.length, 1);
+    // Total actual active visitors across all nodes
+    const totalActiveVisitors = Array.from(cityMap.values()).reduce((sum, n) => sum + n.activeVisitors, 0);
 
-    // Calculate distributed active visitors across GCC nodes based on edge ingress shares
-    let totalShares = 0;
-    cityMap.forEach(item => {
-      totalShares += item.baseShare;
-    });
-
-    const geoHeatmap = Array.from(cityMap.entries()).map(([key, item], idx) => {
-      let visitors = Math.round((item.baseShare / totalShares) * activeVisitorsPool);
-      if (idx === 0 && visitors === 0 && activeVisitorsPool > 0) visitors = 1;
-
-      const pct = Math.round((item.baseShare / totalShares) * 1000) / 10;
-      const intensity = pct >= 30 ? 'EXTREME' : pct >= 15 ? 'HIGH' : pct >= 5 ? 'MEDIUM' : 'LOW';
+    const geoHeatmap = Array.from(cityMap.entries()).map(([key, item]) => {
+      const pct = totalActiveVisitors > 0 ? Math.round((item.activeVisitors / totalActiveVisitors) * 1000) / 10 : 0;
+      const intensity = item.activeVisitors >= 10 ? 'EXTREME' : item.activeVisitors >= 3 ? 'HIGH' : item.activeVisitors >= 1 ? 'MEDIUM' : 'IDLE';
       return {
         id: `node-${key}`,
         city: item.city,
@@ -1264,13 +1252,15 @@ export class AnalyticsService {
         lng: item.lng,
         xPct: item.xPct,
         yPct: item.yPct,
-        activeVisitors: visitors,
+        activeVisitors: item.activeVisitors,
         percentage: pct,
+        orderCount: item.orderCount,
+        totalGmv: Math.round(item.totalGmv * 100) / 100,
         latencyMs: item.latencyMs,
-        intensity: intensity as 'EXTREME' | 'HIGH' | 'MEDIUM' | 'LOW',
+        intensity: intensity as 'EXTREME' | 'HIGH' | 'MEDIUM' | 'IDLE',
         bandwidth: item.bandwidth,
       };
-    }).sort((a, b) => b.percentage - a.percentage);
+    }).sort((a, b) => b.activeVisitors - a.activeVisitors || b.orderCount - a.orderCount);
 
     // 7. 24x7 Temporal Activity Heatmap Matrix (168 Cells) computed from REAL order & audit timestamps
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
