@@ -254,7 +254,7 @@ export default function AdminAnalyticsPage() {
               {/* Left Column: Real-time Concurrency & Stream Status */}
               <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-400 border border-blue-200/70 dark:border-blue-900/50 flex items-center justify-center shadow-xs shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/25 shrink-0">
                     <Globe className="w-6 h-6 animate-pulse" />
                   </div>
                   <div>
@@ -263,8 +263,8 @@ export default function AdminAnalyticsPage() {
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                         <span>LIVE TELEMETRY STREAM</span>
                       </div>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium text-blue-700 dark:text-cyan-300 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md border border-blue-200/80 dark:border-blue-900/40">
-                        <Zap className="w-2.5 h-2.5 text-blue-600 dark:text-cyan-400" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded-md border border-purple-200/80 dark:border-purple-900/40">
+                        <Zap className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400" />
                         <span>Real-Time Sensor Active</span>
                       </span>
                     </div>
@@ -279,7 +279,7 @@ export default function AdminAnalyticsPage() {
                 <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
                   <div className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 text-[11px] font-mono flex items-center gap-1.5">
                     <span className="text-slate-500 dark:text-slate-400">Peak:</span>
-                    <span className="text-blue-600 dark:text-cyan-400 font-bold">{peakPulse}</span>
+                    <span className="text-purple-600 dark:text-purple-400 font-bold">{peakPulse}</span>
                   </div>
                   <div className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 text-[11px] font-mono flex items-center gap-1.5">
                     <span className="text-slate-500 dark:text-slate-400">30m Vol:</span>
@@ -293,13 +293,13 @@ export default function AdminAnalyticsPage() {
               </div>
 
               {/* Right Column: Clean Telemetry Chart & Detailed View Option */}
-              <div className="lg:col-span-7 flex flex-col justify-between space-y-3 bg-slate-50 dark:bg-slate-950/60 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+              <div className="lg:col-span-7 flex flex-col justify-between space-y-3 bg-slate-50/60 dark:bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-800/80">
                 {/* Header Row with Chart Controls & Detailed View CTA */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-slate-200/80 dark:border-slate-800/60">
                   <div className="flex items-center gap-2 text-xs font-mono">
-                    <Activity className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
+                    <Activity className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
                     <span className="font-bold text-slate-800 dark:text-slate-200">Page Views in Last 30 Minutes</span>
-                    <span className="hidden sm:inline-block text-[10px] text-slate-500 dark:text-slate-400 font-mono">(100% Real-Time Resolution)</span>
+                    <span className="hidden sm:inline-block text-[10px] text-slate-500 dark:text-slate-400 font-mono">100% Real-Time Sensor Resolution</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ export default function AdminAnalyticsPage() {
                         onClick={() => setTelemetryViewMode('bars')}
                         className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                           telemetryViewMode === 'bars'
-                            ? 'bg-blue-600 text-white shadow-xs'
+                            ? 'bg-purple-600 text-white shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                         }`}
                       >
@@ -321,7 +321,7 @@ export default function AdminAnalyticsPage() {
                         onClick={() => setTelemetryViewMode('wave')}
                         className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                           telemetryViewMode === 'wave'
-                            ? 'bg-blue-600 text-white shadow-xs'
+                            ? 'bg-purple-600 text-white shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                         }`}
                       >
@@ -332,7 +332,7 @@ export default function AdminAnalyticsPage() {
                     {/* Detailed View CTA Button */}
                     <Link
                       href="/admin/analytics/live"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs hover:shadow-sm active:scale-98 group cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs hover:shadow-sm active:scale-98 group cursor-pointer"
                       title="Open full detailed analytics with real-time visitors heat map in another page"
                     >
                       <Flame className="w-3.5 h-3.5 text-amber-300" />
@@ -370,15 +370,15 @@ export default function AdminAnalyticsPage() {
                             <div
                               className={`w-full rounded-t-sm transition-all duration-200 relative ${
                                 isLatest
-                                  ? 'bg-blue-600 dark:bg-gradient-to-t dark:from-cyan-600 dark:via-cyan-400 dark:to-white ring-2 ring-blue-400/50 dark:ring-cyan-300 shadow-sm animate-pulse'
+                                  ? 'bg-purple-600 dark:bg-purple-500 ring-2 ring-purple-400/50 dark:ring-purple-300 shadow-sm animate-pulse'
                                   : isHovered
-                                  ? 'bg-blue-700 dark:bg-gradient-to-t dark:from-blue-500 dark:via-indigo-400 dark:to-cyan-300 scale-y-105 shadow-xs'
-                                  : 'bg-blue-600/75 hover:bg-blue-600 dark:bg-gradient-to-t dark:from-blue-700/80 dark:via-indigo-500/90 dark:to-cyan-400'
+                                  ? 'bg-purple-700 dark:bg-purple-400 scale-y-105 shadow-xs'
+                                  : 'bg-purple-600/85 hover:bg-purple-600 dark:bg-purple-600/90 dark:hover:bg-purple-500'
                               }`}
                               style={{ height: `${heightPct}%` }}
                             />
                             {isLatest && (
-                              <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-cyan-300 shadow-sm animate-ping pointer-events-none" />
+                              <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-300 shadow-sm animate-ping pointer-events-none" />
                             )}
                           </div>
                         );
@@ -390,13 +390,13 @@ export default function AdminAnalyticsPage() {
                       <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <defs>
                           <linearGradient id="telemetryWaveGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#2563EB" stopOpacity="0.25" />
-                            <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
+                            <stop offset="0%" stopColor="#9333ea" stopOpacity="0.25" />
+                            <stop offset="100%" stopColor="#9333ea" stopOpacity="0.0" />
                           </linearGradient>
                           <linearGradient id="telemetryLineGrad" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#2563EB" />
-                            <stop offset="50%" stopColor="#4F46E5" />
-                            <stop offset="100%" stopColor="#0284C7" />
+                            <stop offset="0%" stopColor="#9333ea" />
+                            <stop offset="50%" stopColor="#7c3aed" />
+                            <stop offset="100%" stopColor="#6366f1" />
                           </linearGradient>
                         </defs>
                         <path d={areaD} fill="url(#telemetryWaveGrad)" />

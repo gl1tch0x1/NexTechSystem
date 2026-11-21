@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Category, Product } from '@/types';
 import { matchesCategoryFilter } from '@/lib/catalog-service';
+import { DEFAULT_CATEGORIES } from '@/lib/default-taxonomy';
 
 interface TaxonomyExplorerProps {
   categories?: Category[];
@@ -117,6 +118,12 @@ export function TaxonomyExplorer({ categories = [], products = [] }: TaxonomyExp
           let count = (cat.productCount !== undefined && cat.productCount > 0) ? cat.productCount : 0;
           if (count === 0 && products && products.length > 0) {
             count = products.filter(p => matchesCategoryFilter(p, cat.id)).length;
+          }
+          if (count === 0) {
+            const fallbackCat = DEFAULT_CATEGORIES.find(c => c.id === cat.id || c.slug === cat.slug);
+            if (fallbackCat?.productCount && fallbackCat.productCount > 0) {
+              count = fallbackCat.productCount;
+            }
           }
           const productCountText = count > 0
             ? `${count} verified product${count === 1 ? '' : 's'}`

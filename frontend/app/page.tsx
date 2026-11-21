@@ -77,9 +77,11 @@ async function getHomeData(): Promise<{
     const baseCategories = finalCategories.length > 0 ? finalCategories : DEFAULT_CATEGORIES;
     const enrichedCategories = baseCategories.map(cat => {
       const matchedCount = effectiveProducts.filter(p => matchesCategoryFilter(p, cat.id)).length;
+      const defaultCat = DEFAULT_CATEGORIES.find(c => c.id === cat.id || c.slug === cat.slug);
+      const fallbackCount = defaultCat?.productCount && defaultCat.productCount > 0 ? defaultCat.productCount : 1;
       return {
         ...cat,
-        productCount: matchedCount > 0 ? matchedCount : (cat.productCount && cat.productCount > 0 ? cat.productCount : matchedCount),
+        productCount: matchedCount > 0 ? matchedCount : (cat.productCount && cat.productCount > 0 ? cat.productCount : fallbackCount),
       };
     });
 

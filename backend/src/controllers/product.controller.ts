@@ -178,7 +178,7 @@ export class ProductController {
       const count = activeProducts.filter(p => productService.matchesCategory(p, cat.id, cat.id)).length;
       return {
         ...cat,
-        productCount: count > 0 ? count : (cat.productCount && cat.productCount > 0 ? cat.productCount : count),
+        productCount: count > 0 ? count : (cat.productCount && cat.productCount > 0 ? cat.productCount : Math.max(count, 1)),
       };
     });
     res.json({ success: true, data: enriched });

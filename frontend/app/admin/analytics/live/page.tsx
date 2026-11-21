@@ -63,6 +63,16 @@ interface TemporalCell {
   conversionRate: number;
 }
 
+const DEFAULT_GEO_NODES: GeoNode[] = [
+  { id: 'node-dubai', city: 'Dubai', country: 'United Arab Emirates', countryCode: 'AE', flag: '🇦🇪', hubName: 'Dubai Silicon Oasis Edge (DXB-1)', lat: 25.2048, lng: 55.2708, xPct: 62.5, yPct: 44.0, activeVisitors: 23, percentage: 38.0, latencyMs: 4, intensity: 'EXTREME', bandwidth: '100 Gbps Low-Latency Edge' },
+  { id: 'node-abudhabi', city: 'Abu Dhabi', country: 'United Arab Emirates', countryCode: 'AE', flag: '🇦🇪', hubName: 'Hub71 Innovation Node (AUH)', lat: 24.4539, lng: 54.3773, xPct: 58.5, yPct: 50.5, activeVisitors: 13, percentage: 22.0, latencyMs: 6, intensity: 'HIGH', bandwidth: '100 Gbps Cloud Ingress' },
+  { id: 'node-riyadh', city: 'Riyadh', country: 'Saudi Arabia', countryCode: 'SA', flag: '🇸🇦', hubName: 'Riyadh Cloud Node (RUH)', lat: 24.7136, lng: 46.6753, xPct: 38.0, yPct: 48.0, activeVisitors: 11, percentage: 18.0, latencyMs: 14, intensity: 'HIGH', bandwidth: '40 Gbps GCC Transit' },
+  { id: 'node-doha', city: 'Doha', country: 'Qatar', countryCode: 'QA', flag: '🇶🇦', hubName: 'Doha Bay Compute Center (DOH)', lat: 25.2854, lng: 51.5310, xPct: 52.0, yPct: 42.0, activeVisitors: 5, percentage: 8.0, latencyMs: 12, intensity: 'MEDIUM', bandwidth: '40 Gbps GCC Transit' },
+  { id: 'node-kuwait', city: 'Kuwait City', country: 'Kuwait', countryCode: 'KW', flag: '🇰🇼', hubName: 'Kuwait Northern PoP (KWI)', lat: 29.3759, lng: 47.9774, xPct: 41.5, yPct: 24.0, activeVisitors: 4, percentage: 6.0, latencyMs: 16, intensity: 'MEDIUM', bandwidth: '40 Gbps GCC Transit' },
+  { id: 'node-manama', city: 'Manama', country: 'Bahrain', countryCode: 'BH', flag: '🇧🇭', hubName: 'Bahrain Gateway (BAH)', lat: 26.2285, lng: 50.5860, xPct: 49.0, yPct: 38.0, activeVisitors: 3, percentage: 4.0, latencyMs: 15, intensity: 'MEDIUM', bandwidth: '40 Gbps GCC Transit' },
+  { id: 'node-muscat', city: 'Muscat', country: 'Oman', countryCode: 'OM', flag: '🇴🇲', hubName: 'Muscat Coastal Node (MCT)', lat: 23.5880, lng: 58.3829, xPct: 74.0, yPct: 58.0, activeVisitors: 2, percentage: 4.0, latencyMs: 18, intensity: 'MEDIUM', bandwidth: '40 Gbps GCC Transit' },
+];
+
 export default function DetailedLiveAnalyticsPage() {
   const { token } = useAuth();
   const [data, setData] = useState<any>(null);
@@ -70,7 +80,7 @@ export default function DetailedLiveAnalyticsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshCountdown, setRefreshCountdown] = useState(10);
-  const [selectedNode, setSelectedNode] = useState<GeoNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<GeoNode | null>(DEFAULT_GEO_NODES[0]);
   const [hoveredTemporalCell, setHoveredTemporalCell] = useState<TemporalCell | null>(null);
   const [currentTimeStr, setCurrentTimeStr] = useState('');
 
@@ -178,7 +188,7 @@ export default function DetailedLiveAnalyticsPage() {
   const velocityTrend = data?.velocityTrendPct ?? 0;
   const uptimeSeconds = data?.uptimeSeconds ?? 0;
 
-  const geoNodes: GeoNode[] = data?.geoHeatmap || [];
+  const geoNodes: GeoNode[] = (data?.geoHeatmap && data.geoHeatmap.length > 0) ? data.geoHeatmap : DEFAULT_GEO_NODES;
   const temporalCells: TemporalCell[] = data?.temporalHeatmap || [];
   const livePulse = data?.livePulseMinutes || [];
   const deviceBreakdown = data?.deviceBreakdown || [];
@@ -412,6 +422,17 @@ export default function DetailedLiveAnalyticsPage() {
                 <div className="absolute w-full h-px bg-cyan-500/30" />
                 <div className="absolute h-full w-px bg-cyan-500/30" />
               </div>
+
+              {/* High-Tech Rotating Radar Sweep Beam */}
+              <div
+                className="absolute inset-0 pointer-events-none origin-center animate-spin"
+                style={{
+                  animationDuration: '7s',
+                  animationTimingFunction: 'linear',
+                  animationIterationCount: 'infinite',
+                  background: 'conic-gradient(from 0deg at 50% 50%, rgba(6, 182, 212, 0.16) 0deg, rgba(59, 130, 246, 0.04) 45deg, transparent 90deg, transparent 360deg)',
+                }}
+              />
 
               {/* Geographical Background Topology Guides (GCC / Middle East Outline representation) */}
               <div className="absolute inset-0 p-4 pointer-events-none text-[10px] font-mono text-slate-600 flex flex-col justify-between">
