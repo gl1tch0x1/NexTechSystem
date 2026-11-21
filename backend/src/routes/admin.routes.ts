@@ -12,6 +12,7 @@ router.use(adminLimiter, authenticate);
 // 1. Dashboard & Real-Time Analytics (Strictly ADMIN only)
 router.get('/dashboard', requireRole('ADMIN'), (req, res, next) => adminController.getDashboard(req, res).catch(next));
 router.get('/analytics', requireRole('ADMIN'), (req, res, next) => adminController.getAnalytics(req, res).catch(next));
+router.get('/analytics/live', requireRole('ADMIN'), (req, res, next) => adminController.getLiveAnalytics(req, res).catch(next));
 
 // 2. Products & Approvals (Accessible by ADMIN and PRODUCT_EDITOR)
 router.get('/products', requireRole('ADMIN', 'PRODUCT_EDITOR'), (req, res, next) => adminController.getProducts(req, res).catch(next));

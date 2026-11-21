@@ -22,7 +22,8 @@ import {
   Flame,
   ArrowRight,
   Sliders,
-  Server
+  Server,
+  ExternalLink
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -41,6 +42,8 @@ export default function AdminAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '90d' | '1y'>('30d');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [telemetryViewMode, setTelemetryViewMode] = useState<'bars' | 'wave'>('bars');
+  const [hoveredPulse, setHoveredPulse] = useState<{ minute: string; activeUsers: number; pageViews?: number } | null>(null);
 
   const fetchAnalytics = async (range = timeRange) => {
     if (!token) return;
@@ -192,52 +195,231 @@ export default function AdminAnalyticsPage() {
         </div>
       </div>
 
-      {/* 1. Real-Time Google Analytics Traffic Pulse Hero Bar */}
-      <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          {/* Real-time users count */}
-          <div className="md:col-span-4 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-600/30 shrink-0">
-              <Globe className="w-7 h-7 animate-pulse" />
-            </div>
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold uppercase tracking-wider mb-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                <span>LIVE TELEMETRY STREAM</span>
+      {/* 1. Real-Time Google Analytics Traffic Pulse Hero Bar — Redesigned High-Tech Mission Control */}
+      {(() => {
+        const livePulse = (traffic.livePulseMinutes && traffic.livePulseMinutes.length > 0)
+          ? traffic.livePulseMinutes
+          : Array.from({ length: 30 }, (_, i) => ({
+              minute: 29 - i === 0 ? 'Just now' : `${29 - i}m ago`,
+              activeUsers: 0,
+              pageViews: 0,
+            }));
+
+        const peakPulse = Math.max(...livePulse.map((p: any) => p.activeUsers || 0), traffic.realTimeActiveUsers || 0);
+        const totalViews30m = livePulse.reduce((acc: number, p: any) => acc + (p.pageViews || 0), 0);
+        const currentActiveUsers = traffic.realTimeActiveUsers ?? (livePulse[livePulse.length - 1]?.activeUsers || 0);
+
+        // Calculate real traffic velocity across the 30-minute window
+        const firstHalfViews = livePulse.slice(0, 15).reduce((acc: number, p: any) => acc + (p.pageViews || 0), 0);
+        const secondHalfViews = livePulse.slice(15).reduce((acc: number, p: any) => acc + (p.pageViews || 0), 0);
+        const velocityPct = firstHalfViews > 0
+          ? Math.round(((secondHalfViews - firstHalfViews) / firstHalfViews) * 100)
+          : (secondHalfViews > 0 ? 100 : 0);
+
+        // SVG Path generator for wave mode
+        const maxVal = Math.max(peakPulse * 1.15, 1);
+        const svgPoints = livePulse.map((p: any, idx: number) => {
+          const x = (idx / (livePulse.length - 1)) * 100;
+          const y = maxVal > 0 ? 100 - (p.activeUsers / maxVal) * 85 : 100;
+          return { x, y };
+        });
+        const pathD = svgPoints.reduce((acc: string, pt: { x: number; y: number }, idx: number, arr: Array<{ x: number; y: number }>) => {
+          if (idx === 0) return `M ${pt.x} ${pt.y}`;
+          const prev = arr[idx - 1];
+          const cX1 = prev.x + (pt.x - prev.x) / 2;
+          const cY1 = prev.y;
+          const cX2 = prev.x + (pt.x - prev.x) / 2;
+          const cY2 = pt.y;
+          return `${acc} C ${cX1} ${cY1}, ${cX2} ${cY2}, ${pt.x} ${pt.y}`;
+        }, '');
+        const areaD = `${pathD} L 100 100 L 0 100 Z`;
+
+        return (
+          <div className="relative rounded-3xl bg-slate-900 border border-slate-800 text-white p-6 sm:p-7 shadow-xl shadow-slate-950/20 overflow-hidden group">
+            {/* Ambient Background Glow */}
+            <div className="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              {/* Left Column: Real-time Concurrency & Stream Status */}
+              <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="relative flex items-center justify-center shrink-0">
+                    <span className="absolute w-12 h-12 rounded-2xl bg-cyan-400/20 animate-ping opacity-75" />
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 relative z-10">
+                      <Globe className="w-6 h-6 animate-pulse text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        <span>LIVE TELEMETRY STREAM</span>
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/25">
+                        <Zap className="w-2.5 h-2.5 text-cyan-400" />
+                        <span>Real-Time Sensor Active</span>
+                      </span>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight flex items-baseline gap-2">
+                      <span>{currentActiveUsers}</span>
+                      <span className="text-xs font-sans text-slate-400 font-normal">Active Concurrent Visitors</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Micro-Telemetry Telemetry Chips */}
+                <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-800/80">
+                  <div className="px-2.5 py-1 rounded-xl bg-slate-800/60 border border-slate-700/60 text-[11px] font-mono flex items-center gap-1.5">
+                    <span className="text-slate-400">Peak:</span>
+                    <span className="text-cyan-400 font-bold">{peakPulse}</span>
+                  </div>
+                  <div className="px-2.5 py-1 rounded-xl bg-slate-800/60 border border-slate-700/60 text-[11px] font-mono flex items-center gap-1.5">
+                    <span className="text-slate-400">30m Vol:</span>
+                    <span className="text-indigo-300 font-bold">{Math.round(totalViews30m).toLocaleString()} views</span>
+                  </div>
+                  <div className="px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-mono text-emerald-400 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    <span className="font-bold">{velocityPct >= 0 ? `+${velocityPct}%` : `${velocityPct}%`} 15m trend</span>
+                  </div>
+                </div>
               </div>
-              <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono">
-                {traffic.realTimeActiveUsers ?? 0} <span className="text-xs font-sans text-slate-500 dark:text-slate-400 font-normal">Active Concurrent Visitors</span>
+
+              {/* Right Column: Upgraded Telemetry Chart & Detailed View Option */}
+              <div className="lg:col-span-7 flex flex-col justify-between space-y-3 bg-slate-950/60 p-4 sm:p-5 rounded-2xl border border-slate-800/80">
+                {/* Header Row with Chart Controls & Detailed View CTA */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-slate-800/60">
+                  <div className="flex items-center gap-2 text-xs font-mono">
+                    <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="font-bold text-slate-200">Page Views in Last 30 Minutes</span>
+                    <span className="hidden sm:inline-block text-[10px] text-slate-400 font-mono">(100% Real-Time Resolution)</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* View Switcher: Bars or Wave */}
+                    <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-800 border border-slate-700 text-[10px] font-mono font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setTelemetryViewMode('bars')}
+                        className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                          telemetryViewMode === 'bars'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Bars
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTelemetryViewMode('wave')}
+                        className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                          telemetryViewMode === 'wave'
+                            ? 'bg-cyan-600 text-white shadow-xs'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Wave
+                      </button>
+                    </div>
+
+                    {/* Detailed View CTA Button */}
+                    <Link
+                      href="/admin/analytics/live"
+                      target="_blank"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 hover:scale-102 active:scale-98 group cursor-pointer"
+                      title="Open full detailed analytics with real-time visitors heat map in another page"
+                    >
+                      <Flame className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                      <span>Detailed View & Heatmap</span>
+                      <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Chart Area */}
+                <div className="relative pt-2">
+                  {/* Subtle Reference Grid Lines */}
+                  <div className="absolute inset-x-0 top-3 border-b border-dashed border-slate-800/80 pointer-events-none">
+                    <span className="absolute -top-2.5 right-0 text-[9px] font-mono text-slate-500">Peak {peakPulse}</span>
+                  </div>
+                  <div className="absolute inset-x-0 top-1/2 border-b border-dashed border-slate-800/50 pointer-events-none">
+                    <span className="absolute -top-2.5 right-0 text-[9px] font-mono text-slate-600">Mid {Math.round(peakPulse / 2)}</span>
+                  </div>
+
+                  {telemetryViewMode === 'bars' ? (
+                    /* Redesigned Sleek Slender Gradient Bars */
+                    <div className="h-16 flex items-end gap-1 sm:gap-1.5 pt-2 relative z-10">
+                      {livePulse.map((m: any, idx: number) => {
+                        const heightPct = Math.min(100, Math.max(12, (m.activeUsers / maxVal) * 100));
+                        const isLatest = idx === livePulse.length - 1;
+                        const isHovered = hoveredPulse?.minute === m.minute;
+
+                        return (
+                          <div
+                            key={idx}
+                            onMouseEnter={() => setHoveredPulse(m)}
+                            onMouseLeave={() => setHoveredPulse(null)}
+                            className="flex-1 h-full flex items-end group relative cursor-pointer"
+                          >
+                            <div
+                              className={`w-full rounded-t-sm transition-all duration-200 relative ${
+                                isLatest
+                                  ? 'bg-gradient-to-t from-cyan-600 via-cyan-400 to-white shadow-lg shadow-cyan-400/40 ring-1 ring-cyan-300 animate-pulse'
+                                  : isHovered
+                                  ? 'bg-gradient-to-t from-blue-500 via-indigo-400 to-cyan-300 scale-y-105 shadow-md shadow-cyan-500/30'
+                                  : 'bg-gradient-to-t from-blue-700/80 via-indigo-500/90 to-cyan-400 hover:to-cyan-300'
+                              }`}
+                              style={{ height: `${heightPct}%` }}
+                            />
+                            {isLatest && (
+                              <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-sm animate-ping pointer-events-none" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    /* Waveform Mode (High-Tech SVG Spline) */
+                    <div className="h-16 w-full pt-2 relative z-10">
+                      <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="telemetryWaveGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.45" />
+                            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.0" />
+                          </linearGradient>
+                          <linearGradient id="telemetryLineGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#3B82F6" />
+                            <stop offset="50%" stopColor="#6366F1" />
+                            <stop offset="100%" stopColor="#06B6D4" />
+                          </linearGradient>
+                        </defs>
+                        <path d={areaD} fill="url(#telemetryWaveGrad)" />
+                        <path d={pathD} fill="none" stroke="url(#telemetryLineGrad)" strokeWidth="2.5" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                  )}
+
+                  {/* Active Tooltip / Inspect Pill */}
+                  <div className="h-5 flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-slate-800/80">
+                    <span>30m ago</span>
+                    {hoveredPulse ? (
+                      <span className="text-cyan-300 font-bold bg-slate-800/90 px-2 py-0.5 rounded border border-cyan-500/30 animate-in fade-in">
+                        {hoveredPulse.minute}: {hoveredPulse.activeUsers} active visitors • {hoveredPulse.pageViews ?? 0} views
+                      </span>
+                    ) : (
+                      <span className="text-slate-500">Hover any minute column for granular sensor telemetry</span>
+                    )}
+                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      <span>Now • Live</span>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Real-time 30-minute pulse sparkline */}
-          <div className="md:col-span-8 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-mono">
-              <span className="font-bold flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-tech-blue dark:text-tech-cyan" />
-                <span>Page Views in Last 30 Minutes</span>
-              </span>
-              <span>100% Real-Time Sensor Resolution</span>
-            </div>
-
-            {/* Sparkline Visual Bars */}
-            <div className="h-10 flex items-end gap-1 pt-1">
-              {(traffic.livePulseMinutes || []).map((m: any, idx: number) => {
-                const heightPct = Math.min(100, Math.max(15, (m.activeUsers / 60) * 100));
-                return (
-                  <div
-                    key={idx}
-                    className="flex-1 bg-purple-600 rounded-t-sm transition-all duration-300 hover:opacity-80 group relative cursor-pointer"
-                    style={{ height: `${heightPct}%` }}
-                    title={`${m.minute}: ${m.activeUsers} active visitors`}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* 2. Top-Level Commercial Performance KPIs (4 Cards) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

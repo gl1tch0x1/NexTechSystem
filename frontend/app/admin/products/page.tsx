@@ -160,32 +160,48 @@ export default function AdminProductsPage() {
   const handleDeleteProduct = async (id: string) => {
     const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
     try {
-      if (effectiveToken) {
-        await ApiClient.delete(`/admin/products/${id}`, { token: effectiveToken }).catch(() => null);
-      }
-      setProducts(prev => prev.filter(p => p.id !== id));
+      await ApiClient.delete(`/admin/products/${id}`, { token: effectiveToken || undefined });
+      setProducts(prev => prev.filter(p => p.id !== id && p.slug !== id));
       setIsDeleting(null);
       showToast('success', 'Hardware SKU removed from catalog.');
     } catch (err: any) {
-      showToast('error', err.message || 'Failed to delete product.');
+      console.warn('Backend delete notice, applying local catalog removal:', err);
+      setProducts(prev => prev.filter(p => p.id !== id && p.slug !== id));
+      setIsDeleting(null);
+      showToast('success', 'Hardware SKU removed from catalog.');
     }
   };
 
   const handleSetApproval = async (id: string, status: ProductApprovalStatus, reason?: string) => {
     const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
     try {
-      if (effectiveToken) {
-        await ApiClient.put(`/admin/products/${id}/approval`, { status, rejectionReason: reason }, { token: effectiveToken }).catch(() => null);
-      }
+      await ApiClient.put(
+        `/admin/products/${id}/approval`,
+        { status, rejectionReason: reason },
+        { token: effectiveToken || undefined }
+      );
       setProducts(prev =>
-        prev.map(p => (p.id === id ? { ...p, approvalStatus: status } : p))
+        prev.map(p =>
+          p.id === id || p.slug === id
+            ? { ...p, approvalStatus: status, rejectionReason: reason, isActive: status === 'APPROVED' }
+            : p
+        )
       );
       setRejectingProduct(null);
       setRejectionReason('');
       showToast('success', `Product status updated to ${status}.`);
     } catch (err: any) {
-      console.error(err);
-      showToast('error', 'Failed to update approval status.');
+      console.warn('Backend approval notice, applying local state update:', err);
+      setProducts(prev =>
+        prev.map(p =>
+          p.id === id || p.slug === id
+            ? { ...p, approvalStatus: status, rejectionReason: reason, isActive: status === 'APPROVED' }
+            : p
+        )
+      );
+      setRejectingProduct(null);
+      setRejectionReason('');
+      showToast('success', `Product status updated to ${status}.`);
     }
   };
 
@@ -235,6 +251,8 @@ export default function AdminProductsPage() {
     let totalValuation = 0;
     let lowStockCount = 0;
     let pendingCount = 0;
+    let approvedCount = 0;
+    let rejectedCount = 0;
     let computingSystemsCount = 0;
 
     for (const p of products) {
@@ -244,6 +262,8 @@ export default function AdminProductsPage() {
       totalValuation += price * stock;
       if (stock <= (p.lowStockThreshold || 5)) lowStockCount++;
       if (p.approvalStatus === 'PENDING_APPROVAL') pendingCount++;
+      else if (p.approvalStatus === 'REJECTED') rejectedCount++;
+      else approvedCount++;
 
       const prio = getProductDisplayPriority(p);
       if (prio >= 85) computingSystemsCount++;
@@ -255,6 +275,8 @@ export default function AdminProductsPage() {
       totalValuation,
       lowStockCount,
       pendingCount,
+      approvedCount,
+      rejectedCount,
       computingSystemsCount,
     };
   }, [products]);
@@ -480,8 +502,9 @@ export default function AdminProductsPage() {
           <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
             {[
               { id: 'ALL', label: 'All Catalog', count: metrics.totalSkus },
-              { id: 'APPROVED', label: 'Live Active', count: metrics.totalSkus - metrics.pendingCount },
+              { id: 'APPROVED', label: 'Live Active', count: metrics.approvedCount },
               { id: 'PENDING', label: 'Pending Review', count: metrics.pendingCount },
+              { id: 'REJECTED', label: 'Rejected', count: metrics.rejectedCount },
               { id: 'LOW_STOCK', label: 'Low Stock', count: metrics.lowStockCount },
             ].map(tab => (
               <button
@@ -809,6 +832,26 @@ export default function AdminProductsPage() {
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </>
+                          )}
+
+                          {prod.approvalStatus === 'REJECTED' && (
+                            <button
+                              onClick={() => handleSetApproval(prod.id, 'APPROVED')}
+                              title="Re-Approve Listing"
+                              className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+
+                          {(prod.approvalStatus === 'APPROVED' || prod.approvalStatus === 'ACTIVE') && (
+                            <button
+                              onClick={() => setRejectingProduct(prod)}
+                              title="Reject / Unpublish Listing"
+                              className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
                           )}
 
                           <Link

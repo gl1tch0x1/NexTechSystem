@@ -248,13 +248,57 @@ function persistCatalogToFile(): void {
   }
 }
 
-export function updateCatalogProduct(id: string, updates: Partial<Product>): Product | null {
+export function deleteCatalogProduct(id: string): boolean {
+  if (!id) return false;
+  syncCatalogStoreFromDisk();
+  const cleanId = (id || '').trim().toLowerCase();
+  let decodedId = cleanId;
+  try { decodedId = decodeURIComponent(id || '').trim().toLowerCase(); } catch {}
+  const slugifiedId = decodedId.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  const initialLength = catalogProductsStore.length;
+  catalogProductsStore = catalogProductsStore.filter(p => {
+    const pId = p.id?.toLowerCase() || '';
+    const pSlug = p.slug?.toLowerCase() || '';
+    const pSku = p.sku?.toLowerCase() || '';
+
+    if (cleanId && (pId === cleanId || pSlug === cleanId || pSku === cleanId)) return false;
+    if (decodedId && (pId === decodedId || pSlug === decodedId || pSku === decodedId)) return false;
+    if (slugifiedId && (pSlug === slugifiedId || pId === slugifiedId)) return false;
+
+    return true;
+  });
+
+  const deleted = catalogProductsStore.length < initialLength;
+  if (deleted) {
+    persistCatalogToFile();
+  }
+  return deleted;
+}
+
+export function updateCatalogProduct(id: string, updates: Partial<Product> & { status?: string }): Product | null {
   if (!id && !updates.id && !updates.slug && !updates.name && !updates.title && !updates.sku) return null;
   syncCatalogStoreFromDisk();
   const cleanId = (id || '').trim().toLowerCase();
   let decodedId = cleanId;
   try { decodedId = decodeURIComponent(id || '').trim().toLowerCase(); } catch {}
   const slugifiedId = decodedId.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  // Normalize status / approvalStatus
+  const rawStatus = (updates.status || updates.approvalStatus || '').toUpperCase();
+  if (rawStatus === 'APPROVED' || rawStatus === 'ACTIVE') {
+    updates.approvalStatus = 'APPROVED';
+    updates.status = 'ACTIVE';
+    updates.isActive = true;
+  } else if (rawStatus === 'REJECTED') {
+    updates.approvalStatus = 'REJECTED';
+    updates.status = 'ARCHIVED';
+    updates.isActive = false;
+  } else if (rawStatus === 'PENDING' || rawStatus === 'PENDING_APPROVAL') {
+    updates.approvalStatus = 'PENDING_APPROVAL';
+    updates.status = 'DRAFT';
+    updates.isActive = false;
+  }
 
   const updateId = (updates.id || '').trim().toLowerCase();
   const updateSlug = (updates.slug || '').trim().toLowerCase();

@@ -40,6 +40,11 @@ export class AdminController {
     res.json({ success: true, data: analytics });
   }
 
+  async getLiveAnalytics(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    const liveAnalytics = await analyticsService.getDetailedLiveAnalytics();
+    res.json({ success: true, data: liveAnalytics });
+  }
+
 
   // ==========================================
   // 1. PRODUCT MANAGEMENT CRUD
@@ -124,7 +129,12 @@ export class AdminController {
 
   async setProductApproval(req: AuthenticatedRequest, res: Response): Promise<void> {
     const id = req.params.id as string;
-    const { status, rejectionReason } = req.body;
+    const status = req.body.status || req.body.approvalStatus;
+    const rejectionReason = req.body.rejectionReason || req.body.reason;
+    if (!status) {
+      res.status(400).json({ success: false, error: { message: 'Approval status is required (APPROVED, REJECTED, or PENDING_APPROVAL).' } });
+      return;
+    }
     const updated = await productService.setApprovalStatus(id, status, rejectionReason, req.user?.id);
     await auditService.log({
       userId: req.user?.id || 'admin',

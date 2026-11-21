@@ -916,14 +916,17 @@ export class ProductService {
   }
 
   async deleteProduct(id: string): Promise<boolean> {
-    return productRepository.delete(id);
+    const product = (await productRepository.findById(id)) || (await productRepository.findBySlug(id)) || (await productRepository.findBySku(id));
+    const targetId = product ? product.id : id;
+    return productRepository.delete(targetId);
   }
 
   async setApprovalStatus(id: string, status: ProductApprovalStatus, rejectionReason?: string, adminUserId?: string): Promise<Product | null> {
-    const product = await productRepository.findById(id);
+    const product = (await productRepository.findById(id)) || (await productRepository.findBySlug(id)) || (await productRepository.findBySku(id));
     if (!product) return null;
+    const targetId = product.id;
 
-    const updated = await productRepository.update(id, {
+    const updated = await productRepository.update(targetId, {
       approvalStatus: status,
       rejectionReason: status === 'REJECTED' ? rejectionReason : undefined,
       isActive: status === 'APPROVED',
@@ -937,7 +940,7 @@ export class ProductService {
         userRole: 'ADMIN',
         action: `PRODUCT_STATUS_${status}`,
         resource: 'products',
-        resourceId: id,
+        resourceId: targetId,
         details: { status, rejectionReason, productName: product.name },
       });
     }

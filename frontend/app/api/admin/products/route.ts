@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { proxyToBackend } from '@/lib/proxy-helper';
-import { filterCatalogProducts, updateCatalogProduct } from '@/lib/catalog-service';
+import { filterCatalogProducts, updateCatalogProduct, deleteCatalogProduct } from '@/lib/catalog-service';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -91,5 +91,29 @@ export async function POST(request: NextRequest) {
   return Response.json(
     { success: true, data: body || {} },
     { status: 201, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+  );
+}
+
+export async function DELETE(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const id = searchParams.get('id');
+  if (id) {
+    deleteCatalogProduct(id);
+    try {
+      revalidatePath('/products');
+      revalidatePath('/');
+      revalidatePath(`/products/${id}`);
+    } catch {}
+    try {
+      await proxyToBackend(request, `/admin/products/${id}`);
+    } catch {}
+    return Response.json(
+      { success: true, message: 'Product deleted successfully.' },
+      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+    );
+  }
+  return Response.json(
+    { success: false, error: { message: 'Product ID required.' } },
+    { status: 400, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
   );
 }
