@@ -4,11 +4,11 @@ import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 const rawApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-// Valid Google API keys always start with AIza and are not demo placeholders
-export const isLiveKey = !!rawApiKey && rawApiKey.startsWith('AIza') && rawApiKey.length > 20 && !rawApiKey.includes('DemoStore');
+// Valid Google API keys always start with AIza and are not empty
+export const isLiveKey = !!rawApiKey && rawApiKey.startsWith('AIza') && rawApiKey.length > 20;
 
 export const firebaseConfig = {
-  apiKey: isLiveKey ? rawApiKey : 'AIzaSyDemoStoreSSRSafeKey2026NexTechEnterprise',
+  apiKey: isLiveKey ? rawApiKey : '',
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'nextech-store-demo.firebaseapp.com',
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nextech-store-demo',
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'nextech-store-demo.appspot.com',

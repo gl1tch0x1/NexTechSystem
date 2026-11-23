@@ -60,12 +60,28 @@ export function getBackendApiUrl(): string {
   return isProd ? 'https://api.nextechsystem.com' : 'http://localhost:5000';
 }
 
+let ephemeralDevJwtSecret: string | null = null;
+
+export function getJwtSecret(): string {
+  const configured = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+  if (configured && configured.trim().length > 0) {
+    return configured.trim();
+  }
+  if (!ephemeralDevJwtSecret) {
+    ephemeralDevJwtSecret = crypto.randomBytes(32).toString('hex');
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('⚠️ [Security Notice] JWT_SECRET is not configured in environment variables. Generated an ephemeral runtime key.');
+    }
+  }
+  return ephemeralDevJwtSecret;
+}
+
 /**
  * Generates an authoritative internal system administrator JWT token for server-to-server operations.
  * Used exclusively when relaying administrative operations from Next.js server proxy to Express backend.
  */
 export function getInternalAdminToken(): string {
-  const secret = process.env.JWT_SECRET || 'nexn3ui4b53t14uibgn93845bgn9q385brc235235h$^%&T*FDFV&^F^Rdtf627fe63';
+  const secret = getJwtSecret();
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const now = Math.floor(Date.now() / 1000);
   const payload = Buffer.from(JSON.stringify({
@@ -80,7 +96,7 @@ export function getInternalAdminToken(): string {
 }
 
 export function createJwtToken(payload: { id: string; email: string; role: string; resellerId?: string;[key: string]: any }): string {
-  const secret = process.env.JWT_SECRET || 'nexn3ui4b53t14uibgn93845bgn9q385brc235235h$^%&T*FDFV&^F^Rdtf627fe63';
+  const secret = getJwtSecret();
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const now = Math.floor(Date.now() / 1000);
   const body = Buffer.from(JSON.stringify({
@@ -97,7 +113,7 @@ export function verifyJwtToken(token: string): ({ id: string; email: string; rol
     const parts = token.split('.');
     if (parts.length !== 3) return null;
     const [headerB64, payloadB64, sigB64] = parts;
-    const secret = process.env.JWT_SECRET || 'nexn3ui4b53t14uibgn93845bgn9q385brc235235h$^%&T*FDFV&^F^Rdtf627fe63';
+    const secret = getJwtSecret();
     const expectedSig = crypto.createHmac('sha256', secret).update(`${headerB64}.${payloadB64}`).digest('base64url');
     if (expectedSig !== sigB64) return null;
     const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));

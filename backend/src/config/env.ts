@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import crypto from 'crypto';
 
 // Try loading environment files in order of precedence: backend .env.local, backend .env, and workspace root .env
 const candidateEnvPaths = [
@@ -21,10 +22,14 @@ for (const envPath of candidateEnvPaths) {
 }
 
 const nodeEnv = process.env.NODE_ENV || 'development';
-let jwtSecret = process.env.JWT_SECRET || 'nexn3ui4b53t14uibgn93845bgn9q385brc235235h$^%&T*FDFV&^F^Rdtf627fe63';
+let jwtSecret = process.env.JWT_SECRET || '';
 
 if (!jwtSecret) {
-  console.warn('⚠️ [Notice] JWT_SECRET is not configured in environment variables.');
+  if (nodeEnv === 'production') {
+    console.warn('⚠️ [Security Warning] JWT_SECRET is not configured in production environment variables.');
+  }
+  // Cryptographically random 256-bit runtime key prevents hardcoded credential exposure
+  jwtSecret = crypto.randomBytes(32).toString('hex');
 }
 
 const rawAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
