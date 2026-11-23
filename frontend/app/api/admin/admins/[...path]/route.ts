@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { proxyToBackend, getBackendApiUrl } from '@/lib/proxy-helper';
+import {
+  proxyToBackend,
+  fetchBackendSettings,
+  saveBackendSettings,
+} from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
 type RouteContext = { params: Promise<{ path: string[] }> };
@@ -17,38 +21,6 @@ function sanitizeUser(u: any) {
     createdAt: u.createdAt || new Date().toISOString(),
     updatedAt: u.updatedAt,
   };
-}
-
-async function fetchBackendSettings(token: string) {
-  try {
-    const target = `${getBackendApiUrl()}/api/admin/settings`;
-    const res = await fetch(target, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      const json = await res.json();
-      return json?.data || json;
-    }
-  } catch {}
-  return null;
-}
-
-async function saveBackendSettings(token: string, payload: any) {
-  try {
-    const target = `${getBackendApiUrl()}/api/admin/settings`;
-    const res = await fetch(target, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-      cache: 'no-store',
-    });
-    return res.ok;
-  } catch {}
-  return false;
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {

@@ -91,5 +91,55 @@ test('authentication and origin regressions (isolated store)', async t => {
       assert.equal(blocked.status, 403);
     } finally { await new Promise<void>(resolve => server.close(() => resolve())); }
   });
+  await t.test('admin created via coAdmins settings can log in and passes authentication', async () => {
+    const { settingsRepository } = await import('../src/repositories/settings.repository.js');
+    const newAdminPass = 'Admin#Master$2026!Key';
+    const newAdminDoc = {
+      id: 'user_admin_test_co',
+      name: 'Secondary Admin',
+      email: 'secondary_admin@example.invalid',
+      username: 'secadmin',
+      role: 'ADMIN',
+      isActive: true,
+      passwordHash: hashPassword(newAdminPass),
+      createdAt: new Date().toISOString(),
+    };
+
+    const { UserRepository } = await import('../src/repositories/user.repository.js');
+    const realRepo = new UserRepository();
+    // Simulate coAdmins storage in settings repository
+    settingsRepository.getSettings = async () => ({ coAdmins: [newAdminDoc] } as any);
+
+    // Test findByEmail fallback on real UserRepository
+    const foundByEmail = await realRepo.findByEmail('secondary_admin@example.invalid');
+    assert.ok(foundByEmail);
+    assert.equal(foundByEmail.id, 'user_admin_test_co');
+    assert.equal(foundByEmail.role, 'ADMIN');
+
+    // Test findById fallback on real UserRepository
+    const foundById = await realRepo.findById('user_admin_test_co');
+    assert.ok(foundById);
+    assert.equal(foundById.username, 'secadmin');
+
+    // Test login with email using real repository methods
+    userRepository.findByEmail = realRepo.findByEmail.bind(realRepo);
+    userRepository.findByUsername = realRepo.findByUsername.bind(realRepo);
+    userRepository.findById = realRepo.findById.bind(realRepo);
+
+    const loginRes = response();
+    await authController.login({ body: { email: 'secondary_admin@example.invalid', password: newAdminPass } } as any, loginRes as any);
+    assert.equal(loginRes.statusCode, 200);
+    assert.ok(loginRes.body.data.token);
+    assert.equal(loginRes.body.data.user.role, 'ADMIN');
+
+    // Test authenticate middleware with the issued token
+    const authReq = { headers: { authorization: `Bearer ${loginRes.body.data.token}` } } as any;
+    const authRes = response();
+    let authPassed = false;
+    await authenticate(authReq, authRes as any, () => { authPassed = true; });
+    assert.equal(authPassed, true);
+    assert.equal(authReq.user.id, 'user_admin_test_co');
+    assert.equal(authReq.user.role, 'ADMIN');
+  });
   process.chdir(originalCwd);
 });

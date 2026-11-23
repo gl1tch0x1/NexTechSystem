@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { proxyToBackend, getBackendApiUrl } from '@/lib/proxy-helper';
+import {
+  proxyToBackend,
+  fetchBackendSettings,
+  saveBackendSettings,
+  hashPassword,
+} from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 import crypto from 'node:crypto';
 
@@ -16,44 +21,6 @@ function sanitizeUser(u: any) {
     createdAt: u.createdAt || new Date().toISOString(),
     updatedAt: u.updatedAt,
   };
-}
-
-function hashPassword(password: string): string {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
-  return `${salt}:${hash}`;
-}
-
-async function fetchBackendSettings(token: string) {
-  try {
-    const target = `${getBackendApiUrl()}/api/admin/settings`;
-    const res = await fetch(target, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      const json = await res.json();
-      return json?.data || json;
-    }
-  } catch {}
-  return null;
-}
-
-async function saveBackendSettings(token: string, payload: any) {
-  try {
-    const target = `${getBackendApiUrl()}/api/admin/settings`;
-    const res = await fetch(target, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-      cache: 'no-store',
-    });
-    return res.ok;
-  } catch {}
-  return false;
 }
 
 export async function GET(request: NextRequest) {
@@ -184,7 +151,7 @@ export async function POST(request: NextRequest) {
             { status: 409 }
           );
         }
-        await db.collection('users').insertOne(newAdmin);
+        await db.collection('users').insertOne({ ...newAdmin });
       }
     } catch {}
 

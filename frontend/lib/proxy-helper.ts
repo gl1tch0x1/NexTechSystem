@@ -37,6 +37,98 @@ export function getInternalAdminToken(): string {
   return `${header}.${payload}.${sig}`;
 }
 
+export function createJwtToken(payload: { id: string; email: string; role: string; resellerId?: string }): string {
+  const secret = process.env.JWT_SECRET || 'nexn3ui4b53t14uibgn93845bgn9q385brc235235h$^%&T*FDFV&^F^Rdtf627fe63';
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const now = Math.floor(Date.now() / 1000);
+  const body = Buffer.from(JSON.stringify({
+    ...payload,
+    iat: now,
+    exp: now + 30 * 86400,
+  })).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(`${header}.${body}`).digest('base64url');
+  return `${header}.${body}.${sig}`;
+}
+
+export function verifyJwtToken(token: string): { id: string; email: string; role: string; resellerId?: string } | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const [headerB64, payloadB64, sigB64] = parts;
+    const secret = process.env.JWT_SECRET || 'nexn3ui4b53t14uibgn93845bgn9q385brc235235h$^%&T*FDFV&^F^Rdtf627fe63';
+    const expectedSig = crypto.createHmac('sha256', secret).update(`${headerB64}.${payloadB64}`).digest('base64url');
+    if (expectedSig !== sigB64) return null;
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+export function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(candidate: string, stored: string): boolean {
+  if (!stored) return false;
+  try {
+    if (stored.includes(':')) {
+      const colonIdx = stored.indexOf(':');
+      const salt = stored.slice(0, colonIdx);
+      const expectedHash = stored.slice(colonIdx + 1);
+      const candidateHash = crypto.pbkdf2Sync(candidate, salt, 100000, 64, 'sha512').toString('hex');
+      const storedBuf = Buffer.from(expectedHash, 'hex');
+      const candidateBuf = Buffer.from(candidateHash, 'hex');
+      return storedBuf.length === candidateBuf.length && crypto.timingSafeEqual(storedBuf, candidateBuf);
+    } else {
+      const legacySalt = process.env.PASSWORD_SALT || '';
+      const candidateHash = crypto.pbkdf2Sync(candidate, legacySalt, 100000, 64, 'sha512').toString('hex');
+      const storedBuf = Buffer.from(stored, 'hex');
+      const candidateBuf = Buffer.from(candidateHash, 'hex');
+      return storedBuf.length === candidateBuf.length && crypto.timingSafeEqual(storedBuf, candidateBuf);
+    }
+  } catch {
+    return false;
+  }
+}
+
+export async function fetchBackendSettings(token?: string) {
+  try {
+    const adminToken = token || getInternalAdminToken();
+    const target = `${getBackendApiUrl()}/api/admin/settings`;
+    const res = await fetch(target, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json?.data || json;
+    }
+  } catch {}
+  return null;
+}
+
+export async function saveBackendSettings(token: string | undefined, payload: any) {
+  try {
+    const adminToken = token || getInternalAdminToken();
+    const target = `${getBackendApiUrl()}/api/admin/settings`;
+    const res = await fetch(target, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify(payload),
+      cache: 'no-store',
+    });
+    return res.ok;
+  } catch {}
+  return false;
+}
+
 /** Forward authoritative responses, including binary exports and error statuses. */
 export async function proxyToBackend(
   request: NextRequest,
