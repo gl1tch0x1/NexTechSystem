@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from './auth-context';
 import { usePathname } from 'next/navigation';
 
@@ -24,9 +24,26 @@ export function useStaffPresence(options: { pollInterval?: number; autoPoll?: bo
   const pathname = usePathname();
   const [onlineStaff, setOnlineStaff] = useState<OnlineStaffUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const pollInterval = options.pollInterval || 20000; // 20s
+  const pollInterval = options.pollInterval || 15000; // 15s poll
   const autoPoll = options.autoPoll !== false;
   const isHeartbeating = useRef(false);
+
+  // Derive current user representation
+  const currentUserEntry = useMemo<OnlineStaffUser | null>(() => {
+    if (!user || !role || !ALLOWED_STAFF_ROLES.has(role)) return null;
+    return {
+      id: user.id || 'admin',
+      userId: user.id || 'admin',
+      name: user.name || (role === 'ADMIN' ? 'Administrator' : role === 'PRODUCT_EDITOR' ? 'Product Editor' : 'Reseller Partner'),
+      email: user.email || '',
+      username: user.username || (user.email ? user.email.split('@')[0] : 'admin'),
+      role: role as 'ADMIN' | 'PRODUCT_EDITOR' | 'RESELLER',
+      avatar: user.avatar || '',
+      currentPath: pathname || '/admin',
+      lastSeen: Date.now(),
+      status: 'ONLINE',
+    };
+  }, [user, role, pathname]);
 
   // Send a heartbeat ping to register presence
   const sendHeartbeat = useCallback(async () => {
@@ -85,24 +102,16 @@ export function useStaffPresence(options: { pollInterval?: number; autoPoll?: bo
         const json = await res.json();
         const list: OnlineStaffUser[] = Array.isArray(json?.data) ? json.data : [];
 
-        // Ensure current active user is included in the list
-        if (user && ALLOWED_STAFF_ROLES.has(role)) {
+        // Ensure current active user is always included in the list
+        if (currentUserEntry) {
           const hasCurrent = list.some(
-            u => u.id === user.id || u.userId === user.id || (user.email && u.email?.toLowerCase() === user.email.toLowerCase())
+            u =>
+              u.id === currentUserEntry.id ||
+              u.userId === currentUserEntry.id ||
+              (currentUserEntry.email && u.email?.toLowerCase() === currentUserEntry.email.toLowerCase())
           );
           if (!hasCurrent) {
-            list.unshift({
-              id: user.id,
-              userId: user.id,
-              name: user.name || (role === 'ADMIN' ? 'Administrator' : 'Product Editor'),
-              email: user.email || '',
-              username: user.username || 'admin',
-              role: role as 'ADMIN' | 'PRODUCT_EDITOR' | 'RESELLER',
-              avatar: user.avatar || '',
-              currentPath: pathname || '/admin',
-              lastSeen: Date.now(),
-              status: 'ONLINE',
-            });
+            list.unshift(currentUserEntry);
           }
         }
 
@@ -113,24 +122,24 @@ export function useStaffPresence(options: { pollInterval?: number; autoPoll?: bo
     } finally {
       setIsLoading(false);
     }
-  }, [token, role, user, pathname]);
+  }, [token, role, currentUserEntry]);
 
   // Initial heartbeat and periodic presence pulse
   useEffect(() => {
     if (!token || !role || !ALLOWED_STAFF_ROLES.has(role)) return;
 
-    // Send initial heartbeat
+    // Send initial heartbeat immediately
     sendHeartbeat();
     if (autoPoll && (role === 'ADMIN' || role === 'PRODUCT_EDITOR')) {
       fetchOnlineStaff();
     }
 
-    // Heartbeat timer (every 30 seconds)
+    // Heartbeat timer (every 20 seconds)
     const heartbeatTimer = setInterval(() => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         sendHeartbeat();
       }
-    }, 30000);
+    }, 20000);
 
     // Staff roster polling timer
     let pollTimer: NodeJS.Timeout | null = null;
@@ -163,12 +172,30 @@ export function useStaffPresence(options: { pollInterval?: number; autoPoll?: bo
     };
   }, [token, role, autoPoll, pollInterval, sendHeartbeat, fetchOnlineStaff]);
 
+  // Combine fetched staff with current user to guarantee presence is never 0 when logged in
+  const combinedStaff = useMemo(() => {
+    const list = [...onlineStaff];
+    if (currentUserEntry) {
+      const exists = list.some(
+        s =>
+          s.id === currentUserEntry.id ||
+          s.userId === currentUserEntry.id ||
+          (currentUserEntry.email && s.email?.toLowerCase() === currentUserEntry.email.toLowerCase())
+      );
+      if (!exists) {
+        list.unshift(currentUserEntry);
+      }
+    }
+    return list;
+  }, [onlineStaff, currentUserEntry]);
+
+  const effectiveCount = Math.max(combinedStaff.length, currentUserEntry ? 1 : 0);
+
   return {
-    onlineStaff,
-    onlineCount: onlineStaff.length,
+    onlineStaff: combinedStaff,
+    onlineCount: effectiveCount,
     isLoading,
     refreshPresence: fetchOnlineStaff,
     sendHeartbeat,
   };
 }
-

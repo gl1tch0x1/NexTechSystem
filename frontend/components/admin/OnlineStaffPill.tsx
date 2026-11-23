@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
 import { useStaffPresence } from '@/lib/useStaffPresence';
 import {
-  Users,
   ShieldCheck,
   Edit3,
   Store,
@@ -56,6 +54,9 @@ export function OnlineStaffPill() {
   const [activeTab, setActiveTab] = useState<'ALL' | 'ADMIN' | 'PRODUCT_EDITOR' | 'RESELLER'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Compute guaranteed active count (at least 1 when logged in)
+  const displayCount = Math.max(onlineCount, onlineStaff.length, 1);
 
   // Close on outside click
   useEffect(() => {
@@ -138,14 +139,13 @@ export function OnlineStaffPill() {
     if (!path) return 'Active';
     if (path === '/admin') return 'Command Center';
     if (path.includes('/admin/orders')) return 'Sales Orders';
-    if (path.includes('/admin/products')) return 'Hardware Catalog';
-    if (path.includes('/admin/admins')) return 'Admin Governance';
-    if (path.includes('/admin/editors')) return 'Staff Editors';
-    if (path.includes('/admin/resellers')) return 'Reseller Desk';
-    if (path.includes('/admin/quotes')) return 'Quotes Engine';
-    if (path.includes('/admin/settings')) return 'Store Settings';
-    if (path.includes('/reseller/')) return 'Reseller Portal';
-    return path.replace(/^\//, '');
+    if (path.includes('/admin/products')) return 'Catalog Products';
+    if (path.includes('/admin/admins')) return 'Admin Directory';
+    if (path.includes('/admin/editors')) return 'Staff & Editors';
+    if (path.includes('/admin/resellers')) return 'B2B Resellers';
+    if (path.includes('/admin/quotes')) return 'B2B Quotes';
+    if (path.includes('/admin/purchase-orders')) return 'Procurement POs';
+    return path;
   };
 
   return (
@@ -170,7 +170,7 @@ export function OnlineStaffPill() {
 
         {/* Text count */}
         <span className="flex items-center gap-1 font-mono text-[11px] font-bold">
-          <span>{onlineCount}</span>
+          <span>{displayCount}</span>
           <span className="hidden sm:inline font-sans text-slate-600 dark:text-slate-300">
             Online
           </span>
@@ -181,7 +181,7 @@ export function OnlineStaffPill() {
           <div className="hidden lg:flex items-center -space-x-1.5 pl-0.5">
             {onlineStaff.slice(0, 3).map((staff, i) => (
               <div
-                key={staff.id || i}
+                key={staff.id || staff.userId || i}
                 className="w-5 h-5 rounded-full ring-1 ring-white dark:ring-slate-900 bg-slate-200 dark:bg-slate-700 text-[9px] font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center overflow-hidden shrink-0"
                 title={`${staff.name} (${staff.role})`}
               >
@@ -216,11 +216,11 @@ export function OnlineStaffPill() {
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     Live Active Personnel
                     <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
-                      {onlineCount}
+                      {displayCount}
                     </span>
                   </h4>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                    Staff & Reseller sessions active in the last 3 minutes
+                    Staff & Reseller sessions active in real time
                   </p>
                 </div>
               </div>
@@ -249,155 +249,106 @@ export function OnlineStaffPill() {
                 onClick={() => setActiveTab('ALL')}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
                   activeTab === 'ALL'
-                    ? 'bg-slate-900 text-white dark:bg-blue-600'
+                    ? 'bg-blue-600 text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
                 }`}
               >
-                All ({onlineCount})
+                All ({displayCount})
               </button>
               <button
                 onClick={() => setActiveTab('ADMIN')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
                   activeTab === 'ADMIN'
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-600 text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
                 }`}
               >
-                <ShieldCheck className="w-3 h-3" />
-                Admins ({adminCount})
+                Admins ({Math.max(adminCount, 1)})
               </button>
-              <button
-                onClick={() => setActiveTab('PRODUCT_EDITOR')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 flex items-center gap-1 ${
-                  activeTab === 'PRODUCT_EDITOR'
-                    ? 'bg-amber-600 text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
-                }`}
-              >
-                <Edit3 className="w-3 h-3" />
-                Editors ({editorCount})
-              </button>
-              <button
-                onClick={() => setActiveTab('RESELLER')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 flex items-center gap-1 ${
-                  activeTab === 'RESELLER'
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
-                }`}
-              >
-                <Store className="w-3 h-3" />
-                Resellers ({resellerCount})
-              </button>
+              {editorCount > 0 && (
+                <button
+                  onClick={() => setActiveTab('PRODUCT_EDITOR')}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
+                    activeTab === 'PRODUCT_EDITOR'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  Editors ({editorCount})
+                </button>
+              )}
+              {resellerCount > 0 && (
+                <button
+                  onClick={() => setActiveTab('RESELLER')}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
+                    activeTab === 'RESELLER'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  Resellers ({resellerCount})
+                </button>
+              )}
             </div>
 
-            {/* Quick Search */}
+            {/* Search filter input */}
             <div className="relative mt-2">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-3 h-3 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search by name, email, or page..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Filter active personnel..."
+                className="w-full h-7 pl-7 pr-3 text-[11px] rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          {/* User List */}
+          {/* Roster List */}
           <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
             {filteredStaff.length === 0 ? (
-              <div className="py-8 px-4 text-center">
-                <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  No active personnel found
-                </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  {searchQuery ? 'Try matching another name or filter.' : 'Only authorized staff & resellers are tracked.'}
-                </div>
+              <div className="p-6 text-center text-xs text-slate-400">
+                No active personnel matching filter
               </div>
             ) : (
-              filteredStaff.map((staff) => (
+              filteredStaff.map((staff, i) => (
                 <div
-                  key={staff.id || staff.userId}
-                  className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors flex items-start gap-3"
+                  key={staff.id || staff.userId || i}
+                  className="p-3 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-3"
                 >
-                  {/* Avatar with Live Indicator */}
-                  <div className="relative shrink-0">
-                    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center overflow-hidden">
-                      {staff.avatar ? (
-                        <img src={getSafeImageUrl(staff.avatar)} alt={staff.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{staff.name ? staff.name.slice(0, 2).toUpperCase() : 'ST'}</span>
-                      )}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="relative shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center overflow-hidden">
+                        {staff.avatar ? (
+                          <img src={getSafeImageUrl(staff.avatar)} alt={staff.name} className="w-full h-full object-cover" />
+                        ) : (
+                          staff.name.slice(0, 1).toUpperCase()
+                        )}
+                      </div>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-slate-900 bg-emerald-500" />
                     </div>
-                    {/* Live Online Badge */}
-                    <span
-                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white dark:ring-slate-900 ${
-                        staff.status === 'ONLINE' ? 'bg-emerald-500' : 'bg-amber-400'
-                      }`}
-                      title={staff.status === 'ONLINE' ? 'Active Now' : 'Away (Idle)'}
-                    />
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                          {staff.name}
+                        </span>
+                        {getRoleBadge(staff.role)}
+                      </div>
+                      <div className="text-[11px] text-slate-400 truncate font-mono">
+                        {staff.email || staff.username}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1 mb-0.5">
-                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                        {staff.name}
-                      </div>
-                      {getRoleBadge(staff.role)}
-                    </div>
-
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                      {staff.email || `@${staff.username}`}
-                    </div>
-
-                    <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-                      <span className="truncate max-w-[170px]" title={staff.currentPath}>
-                        {formatPath(staff.currentPath)}
-                      </span>
-                      <span className="text-slate-300 dark:text-slate-600">•</span>
-                      <span className="font-mono text-emerald-600 dark:text-emerald-400">
-                        {staff.status === 'ONLINE' ? 'Active' : 'Away'}
-                      </span>
-                    </div>
+                  <div className="text-right shrink-0">
+                    <span className="inline-block text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                      {formatPath(staff.currentPath)}
+                    </span>
                   </div>
                 </div>
               ))
             )}
-          </div>
-
-          {/* Popover Footer Links */}
-          <div className="p-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-300">
-            <Link
-              href="/admin/admins"
-              onClick={() => setIsOpen(false)}
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admins</span>
-            </Link>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <Link
-              href="/admin/editors"
-              onClick={() => setIsOpen(false)}
-              className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>Editors</span>
-            </Link>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <Link
-              href="/admin/resellers"
-              onClick={() => setIsOpen(false)}
-              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1"
-            >
-              <Store className="w-3.5 h-3.5" />
-              <span>Resellers</span>
-            </Link>
           </div>
         </div>
       )}
