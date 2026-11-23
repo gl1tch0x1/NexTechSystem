@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         );
         if (bundledMatch) {
           user = user ? { ...user, passwordHash: bundledMatch.passwordHash || user.passwordHash } : bundledMatch;
-          if (user && user.role === 'ADMIN') {
+          if (user.role === 'ADMIN') {
             registerDynamicAdmin(user);
           }
         }
