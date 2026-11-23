@@ -130,6 +130,7 @@ export async function GET(request: NextRequest) {
           $or: [
             { id: decoded.id },
             { email: decoded.email?.toLowerCase() },
+            ...(decoded.username ? [{ username: decoded.username?.toLowerCase() }] : []),
           ],
         });
         if (!user) {
@@ -140,6 +141,9 @@ export async function GET(request: NextRequest) {
               a.id === decoded.id ||
               (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
           );
+        }
+        if (user && user.role === 'ADMIN') {
+          registerDynamicAdmin(user);
         }
       }
     } catch {}

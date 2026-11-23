@@ -115,41 +115,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Step 3: Check bundled and local users.json store (0ms instant resolution)
-  if (!user) {
-    try {
-      const users = await readLocalStoreJson<any[]>('users.json');
-      if (Array.isArray(users)) {
-        user = users.find(
-          (u: any) =>
-            u.email?.toLowerCase() === cleanIdentifier ||
-            u.username?.toLowerCase() === cleanIdentifier ||
-            u.email?.toLowerCase() === rawIdentifier ||
-            u.username?.toLowerCase() === rawIdentifier
-        );
-      }
-    } catch {}
-  }
-
-  // Step 4: Check backend settings coAdmins (including bundled settings fallback)
-  if (!user) {
-    try {
-      const settings = await fetchBackendSettings();
-      const coAdmins: any[] = settings?.coAdmins || [];
-      const matched = coAdmins.find(
-        (a: any) =>
-          a.email?.toLowerCase() === cleanIdentifier ||
-          a.username?.toLowerCase() === cleanIdentifier ||
-          a.email?.toLowerCase() === rawIdentifier ||
-          a.username?.toLowerCase() === rawIdentifier
-      );
-      if (matched) {
-        user = matched;
-      }
-    } catch {}
-  }
-
-  // Step 5: Query MongoDB users and settings collections (if available)
+  // Step 3: Query MongoDB users and settings collections in nextech_ecommerce
   if (!user) {
     try {
       const db = await getMongoDb();
@@ -171,10 +137,51 @@ export async function POST(request: NextRequest) {
               a.username?.toLowerCase() === cleanIdentifier
           );
         }
+        if (user && user.role === 'ADMIN') {
+          registerDynamicAdmin(user);
+        }
       }
     } catch (err: any) {
       console.warn('[Auth Login MongoDB Error]:', err?.message || err);
     }
+  }
+
+  // Step 4: Check bundled and local users.json store (0ms instant resolution)
+  if (!user) {
+    try {
+      const users = await readLocalStoreJson<any[]>('users.json');
+      if (Array.isArray(users)) {
+        user = users.find(
+          (u: any) =>
+            u.email?.toLowerCase() === cleanIdentifier ||
+            u.username?.toLowerCase() === cleanIdentifier ||
+            u.email?.toLowerCase() === rawIdentifier ||
+            u.username?.toLowerCase() === rawIdentifier
+        );
+        if (user && user.role === 'ADMIN') {
+          registerDynamicAdmin(user);
+        }
+      }
+    } catch {}
+  }
+
+  // Step 5: Check backend settings coAdmins (including bundled settings fallback)
+  if (!user) {
+    try {
+      const settings = await fetchBackendSettings();
+      const coAdmins: any[] = settings?.coAdmins || [];
+      const matched = coAdmins.find(
+        (a: any) =>
+          a.email?.toLowerCase() === cleanIdentifier ||
+          a.username?.toLowerCase() === cleanIdentifier ||
+          a.email?.toLowerCase() === rawIdentifier ||
+          a.username?.toLowerCase() === rawIdentifier
+      );
+      if (matched) {
+        user = matched;
+        registerDynamicAdmin(user);
+      }
+    } catch {}
   }
 
   if (!user) {

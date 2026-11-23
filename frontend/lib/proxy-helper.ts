@@ -60,20 +60,19 @@ export function getBackendApiUrl(): string {
   return isProd ? 'https://api.nextechsystem.com' : 'http://localhost:5000';
 }
 
-let ephemeralDevJwtSecret: string | null = null;
+let cachedJwtSecret: string | null = null;
 
 export function getJwtSecret(): string {
+  if (cachedJwtSecret) return cachedJwtSecret;
   const configured = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
   if (configured && configured.trim().length > 0) {
-    return configured.trim();
+    cachedJwtSecret = configured.trim();
+    return cachedJwtSecret;
   }
-  if (!ephemeralDevJwtSecret) {
-    ephemeralDevJwtSecret = crypto.randomBytes(32).toString('hex');
-    if (process.env.NODE_ENV === 'production') {
-      console.warn('⚠️ [Security Notice] JWT_SECRET is not configured in environment variables. Generated an ephemeral runtime key.');
-    }
-  }
-  return ephemeralDevJwtSecret;
+  // Deterministic stable secret so across serverless cold starts / different lambda containers, tokens remain valid:
+  const seed = process.env.MONGODB_URI || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nextech_enterprise_auth_2026';
+  cachedJwtSecret = crypto.createHash('sha256').update(`nextech_auth_jwt_stable_${seed}`).digest('hex');
+  return cachedJwtSecret;
 }
 
 /**

@@ -41,96 +41,82 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const upstream = await proxyToBackend(request, '/admin/admins');
-    if (upstream.ok) {
-      try {
-        const json = await upstream.clone().json();
+    const mergedMap = new Map<string, any>();
+
+    // 1. Attempt to fetch administrators from upstream Express backend
+    try {
+      const upstream = await proxyToBackend(request, '/admin/admins');
+      if (upstream.ok) {
+        const json = await upstream.json();
         if (json && Array.isArray(json.data)) {
-          const upstreamAdmins = json.data;
-          const mergedMap = new Map<string, any>();
-          for (const a of upstreamAdmins) {
+          for (const a of json.data) {
             if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
           }
-          let localAdmins: any[] = [];
-          try {
-            const users = await readLocalStoreJson<any[]>('users.json');
-            if (Array.isArray(users)) {
-              localAdmins = users.filter((u: any) => u.role === 'ADMIN');
-            }
-          } catch {}
-          for (const a of localAdmins) {
-            if (a?.email || a?.id) {
-              const k = (a.email || a.id).toLowerCase();
-              if (!mergedMap.has(k)) mergedMap.set(k, a);
-            }
-          }
-          for (const a of getDynamicAdmins()) {
-            if (a?.email || a?.id) {
-              const k = (a.email || a.id).toLowerCase();
-              if (!mergedMap.has(k)) mergedMap.set(k, a);
-            }
-          }
-          const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
-          if (vaultCookie) {
-            const vaultList = verifyVaultToken(vaultCookie);
-            for (const a of vaultList) {
-              if (a?.email || a?.id) {
-                const k = (a.email || a.id).toLowerCase();
-                if (!mergedMap.has(k)) mergedMap.set(k, a);
-              }
-            }
-          }
-          const allAdmins = Array.from(mergedMap.values()).map(sanitizeUser);
-          return NextResponse.json({ success: true, data: allAdmins });
         }
-      } catch {}
-      return upstream;
-    }
-    if (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504) {
-      return upstream;
-    }
+      }
+    } catch {}
 
-    // Fallback Tier 1: Query MongoDB directly if connection string is configured
+    // 2. Direct MongoDB query: authoritative cluster data in nextech_ecommerce database
     try {
       const db = await getMongoDb();
       if (db) {
-        const users = await db.collection('users').find({ role: 'ADMIN' }).toArray();
-        if (users && users.length > 0) {
-          return NextResponse.json({ success: true, data: users.map(sanitizeUser) });
+        const mongoAdmins = await db.collection('users').find({ role: 'ADMIN' }).toArray();
+        for (const a of mongoAdmins) {
+          if (a?.email || a?.id) {
+            const k = (a.email || a.id).toLowerCase();
+            if (!mergedMap.has(k)) mergedMap.set(k, a);
+          }
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Admins GET Mongo Warning]:', err?.message || err);
+    }
+
+    // 3. Fallback: coAdmins stored in backend settings repository
+    try {
+      const settings = await fetchBackendSettings(token);
+      const coAdmins: any[] = settings?.coAdmins || [];
+      for (const a of coAdmins) {
+        if (a?.email || a?.id) {
+          const k = (a.email || a.id).toLowerCase();
+          if (!mergedMap.has(k)) mergedMap.set(k, a);
         }
       }
     } catch {}
 
-    // Fallback Tier 2: Query coAdmins stored securely in backend settings repository
-    const settings = await fetchBackendSettings(token);
-    const coAdmins: any[] = settings?.coAdmins || [];
-
-    // Fallback Tier 3: Local data_store fallback
-    let localAdmins: any[] = [];
+    // 4. Fallback: Bundled and local users.json data store
     try {
       const users = await readLocalStoreJson<any[]>('users.json');
       if (Array.isArray(users)) {
-        localAdmins = users.filter((u: any) => u.role === 'ADMIN');
+        for (const a of users.filter((u: any) => u.role === 'ADMIN')) {
+          if (a?.email || a?.id) {
+            const k = (a.email || a.id).toLowerCase();
+            if (!mergedMap.has(k)) mergedMap.set(k, a);
+          }
+        }
       }
     } catch {}
 
-    // Merge and deduplicate administrators across all tiers
-    const mergedMap = new Map<string, any>();
-    for (const a of localAdmins) {
-      if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
-    }
-    for (const a of coAdmins) {
-      if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
-    }
+    // 5. Dynamic in-memory administrator registry (active warm instance)
     for (const a of getDynamicAdmins()) {
-      if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
+      if (a?.email || a?.id) {
+        const k = (a.email || a.id).toLowerCase();
+        if (!mergedMap.has(k)) mergedMap.set(k, a);
+      }
     }
+
+    // 6. Resilient cookie vault for browser persistence
     const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
     if (vaultCookie) {
-      const vaultList = verifyVaultToken(vaultCookie);
-      for (const a of vaultList) {
-        if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
-      }
+      try {
+        const vaultList = verifyVaultToken(vaultCookie);
+        for (const a of vaultList) {
+          if (a?.email || a?.id) {
+            const k = (a.email || a.id).toLowerCase();
+            if (!mergedMap.has(k)) mergedMap.set(k, a);
+          }
+        }
+      } catch {}
     }
 
     const allAdmins = Array.from(mergedMap.values()).map(sanitizeUser);
@@ -155,170 +141,130 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const cloned = request.clone();
-
+  let body: any = null;
   try {
-    const upstream = await proxyToBackend(request, '/admin/admins');
-    if (upstream.ok) {
-      try {
-        const body = await cloned.json();
-        const { name, email, username, password, phone, avatar } = body || {};
-        if (email && password) {
-          const cleanEmail = String(email).trim().toLowerCase();
-          const cleanUsername = (username ? String(username).trim().toLowerCase() : cleanEmail.split('@')[0])
-            .replace(/[^a-z0-9_]/g, '')
-            .slice(0, 30);
-          const newAdmin = {
-            id: `user_admin_${crypto.randomUUID().slice(0, 8)}`,
-            name: String(name || cleanUsername).trim(),
-            email: cleanEmail,
-            username: cleanUsername,
-            role: 'ADMIN',
-            phone: phone ? String(phone).trim() : '',
-            avatar: avatar ? String(avatar).trim() : '',
-            addresses: [],
-            passwordHash: hashPassword(password),
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          registerDynamicAdmin(newAdmin);
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid JSON request payload.' } },
+      { status: 400 }
+    );
+  }
 
-          const currentVault = request.cookies.get('nextech_coadmins_vault')?.value;
-          const existingVaultAdmins = currentVault ? verifyVaultToken(currentVault) : [];
-          const updatedVaultAdmins = [
-            ...existingVaultAdmins.filter((a: any) => a.id !== newAdmin.id && a.email?.toLowerCase() !== cleanEmail),
-            newAdmin,
-          ];
-          const vaultToken = createVaultToken(updatedVaultAdmins);
+  const { name, email, username, password, phone, avatar } = body || {};
 
-          const resHeaders = new Headers(upstream.headers);
-          const resBody = await upstream.arrayBuffer();
-          const modifiedRes = new NextResponse(resBody, {
-            status: upstream.status,
-            statusText: upstream.statusText,
-            headers: resHeaders,
-          });
-          modifiedRes.cookies.set('nextech_coadmins_vault', vaultToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60,
-            path: '/',
-          });
-          return modifiedRes;
-        }
-      } catch {}
-      return upstream;
-    }
-    if (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504) {
-      return upstream;
-    }
+  if (!name || !email || !password || typeof password !== 'string' || password.length < 8) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Name, valid email, and password of at least 8 characters are required.' } },
+      { status: 400 }
+    );
+  }
 
-    // Fallback: If cPanel backend returns 404, insert administrator directly
-    const body = await cloned.json();
-    const { name, email, username, password, phone, avatar } = body;
+  const cleanEmail = String(email).trim().toLowerCase();
+  const cleanName = String(name).trim();
+  const cleanUsername = (username ? String(username).trim().toLowerCase() : cleanEmail.split('@')[0])
+    .replace(/[^a-z0-9_]/g, '')
+    .slice(0, 30);
 
-    if (!name || !email || !password || typeof password !== 'string' || password.length < 8) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Name, valid email, and password of at least 8 characters are required.' } },
-        { status: 400 }
-      );
-    }
+  const newAdmin = {
+    id: `user_admin_${crypto.randomUUID().slice(0, 8)}`,
+    name: cleanName,
+    email: cleanEmail,
+    username: cleanUsername,
+    role: 'ADMIN',
+    phone: phone ? String(phone).trim() : '',
+    avatar: avatar ? String(avatar).trim() : '',
+    addresses: [],
+    passwordHash: hashPassword(password),
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 
-    const cleanEmail = String(email).trim().toLowerCase();
-    const cleanName = String(name).trim();
-    const cleanUsername = (username ? String(username).trim().toLowerCase() : cleanEmail.split('@')[0])
-      .replace(/[^a-z0-9_]/g, '')
-      .slice(0, 30);
-
-    const newAdmin = {
-      id: `user_admin_${crypto.randomUUID().slice(0, 8)}`,
-      name: cleanName,
-      email: cleanEmail,
-      username: cleanUsername,
-      role: 'ADMIN',
-      phone: phone ? String(phone).trim() : '',
-      avatar: avatar ? String(avatar).trim() : '',
-      addresses: [],
-      passwordHash: hashPassword(password),
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    // 1. Direct MongoDB insert if connected
-    try {
-      const db = await getMongoDb();
-      if (db) {
-        const existing = await db.collection('users').findOne({
-          $or: [{ email: cleanEmail }, { username: cleanUsername }],
-        });
-        if (existing) {
-          return NextResponse.json(
-            { success: false, error: { message: 'An account with this email or username already exists.' } },
-            { status: 409 }
-          );
-        }
-        await db.collection('users').insertOne({ ...newAdmin });
+  // 1. Authoritative direct insert into MongoDB Atlas database "nextech_ecommerce", collection "users"
+  try {
+    const db = await getMongoDb();
+    if (db) {
+      const usersCol = db.collection('users');
+      const existing = await usersCol.findOne({
+        $or: [{ email: cleanEmail }, { username: cleanUsername }],
+      });
+      if (existing) {
+        return NextResponse.json(
+          { success: false, error: { message: 'An account with this email or username already exists in database.' } },
+          { status: 409 }
+        );
       }
-    } catch {}
+      await usersCol.insertOne({ ...newAdmin });
+      console.log(`[MongoDB] Created admin ${cleanEmail} directly in nextech_ecommerce.users`);
 
-    // 2. Dual persistence into backend settings repository via authenticated admin API
+      // Also persist to settings collection coAdmins
+      try {
+        const settingsCol = db.collection('settings');
+        await settingsCol.updateOne(
+          { id: 'global_settings' },
+          { $addToSet: { coAdmins: sanitizeUser(newAdmin) } } as any,
+          { upsert: false }
+        );
+      } catch {}
+    }
+  } catch (mongoErr: any) {
+    console.warn('[MongoDB Insert Admin Warning]:', mongoErr?.message || mongoErr);
+  }
+
+  // 2. Relay creation to upstream backend API if available
+  try {
+    await proxyToBackend(request, '/admin/admins', {
+      body: JSON.stringify({
+        name: cleanName,
+        email: cleanEmail,
+        username: cleanUsername,
+        password,
+        phone: newAdmin.phone,
+        avatar: newAdmin.avatar,
+      }),
+    });
+  } catch {}
+
+  // 3. Save into backend settings coAdmins
+  try {
     const settings = await fetchBackendSettings(token);
     const existingCoAdmins: any[] = settings?.coAdmins || [];
-    const duplicate = existingCoAdmins.some(
-      (a: any) =>
-        a.email?.toLowerCase() === cleanEmail ||
-        (a.username && a.username.toLowerCase() === cleanUsername)
-    );
-    if (duplicate) {
-      return NextResponse.json(
-        { success: false, error: { message: 'An account with this email or username already exists.' } },
-        { status: 409 }
-      );
-    }
-
     const updatedCoAdmins = [
-      ...existingCoAdmins.filter((a: any) => a.id !== newAdmin.id && a.email !== newAdmin.email),
+      ...existingCoAdmins.filter((a: any) => a.id !== newAdmin.id && a.email?.toLowerCase() !== cleanEmail),
       newAdmin,
     ];
     await saveBackendSettings(token, { coAdmins: updatedCoAdmins });
+  } catch {}
 
-    // Register dynamically in memory immediately
-    registerDynamicAdmin(newAdmin);
+  // 4. Register dynamically in memory
+  registerDynamicAdmin(newAdmin);
 
-    // Prepare updated cookie vault list
-    const currentVault = request.cookies.get('nextech_coadmins_vault')?.value;
-    const existingVaultAdmins = currentVault ? verifyVaultToken(currentVault) : [];
-    const updatedVaultAdmins = [
-      ...existingVaultAdmins.filter((a: any) => a.id !== newAdmin.id && a.email?.toLowerCase() !== cleanEmail),
-      newAdmin,
-    ];
-    const vaultToken = createVaultToken(updatedVaultAdmins);
+  // 5. Update browser cookie vault
+  const currentVault = request.cookies.get('nextech_coadmins_vault')?.value;
+  const existingVaultAdmins = currentVault ? verifyVaultToken(currentVault) : [];
+  const updatedVaultAdmins = [
+    ...existingVaultAdmins.filter((a: any) => a.id !== newAdmin.id && a.email?.toLowerCase() !== cleanEmail),
+    newAdmin,
+  ];
+  const vaultToken = createVaultToken(updatedVaultAdmins);
 
-    const response = NextResponse.json(
-      {
-        success: true,
-        data: sanitizeUser(newAdmin),
-        message: 'New administrator account created successfully with full administrative permissions.',
-      },
-      { status: 201 }
-    );
+  const response = NextResponse.json(
+    {
+      success: true,
+      data: sanitizeUser(newAdmin),
+      message: 'New administrator account created successfully with full administrative permissions.',
+    },
+    { status: 201 }
+  );
 
-    response.cookies.set('nextech_coadmins_vault', vaultToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60,
-      path: '/',
-    });
+  response.cookies.set('nextech_coadmins_vault', vaultToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 30 * 24 * 60 * 60,
+    path: '/',
+  });
 
-    return response;
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: { message: err?.message || 'Failed to create administrator.' } },
-      { status: 500 }
-    );
-  }
+  return response;
 }

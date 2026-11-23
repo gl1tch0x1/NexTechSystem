@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 
   try {
     const upstream = await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
-    if (upstream.ok || (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504)) return upstream;
+    if (upstream.ok) return upstream;
 
     const [adminId] = path;
 
@@ -68,7 +68,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 
   try {
     const upstream = await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
-    if (upstream.ok || (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504)) return upstream;
+    if (upstream.ok) return upstream;
 
     // Fallback: If cPanel backend returns 404, toggle status
     const [adminId, subAction] = path;
@@ -129,7 +129,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
 
   try {
     const upstream = await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
-    if (upstream.ok || (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504)) return upstream;
+    if (upstream.ok) return upstream;
 
     // Fallback: If cPanel backend returns 404, delete from storage
     const [adminId] = path;
