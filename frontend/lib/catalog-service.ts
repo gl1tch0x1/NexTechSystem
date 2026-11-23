@@ -251,9 +251,9 @@ function persistCatalogToFile(): void {
 export function deleteCatalogProduct(id: string): boolean {
   if (!id) return false;
   syncCatalogStoreFromDisk();
-  const cleanId = (id || '').trim().toLowerCase();
+  const cleanId = id.trim().toLowerCase();
   let decodedId = cleanId;
-  try { decodedId = decodeURIComponent(id || '').trim().toLowerCase(); } catch {}
+  try { decodedId = decodeURIComponent(id).trim().toLowerCase(); } catch {}
   const slugifiedId = decodedId.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   const initialLength = catalogProductsStore.length;
