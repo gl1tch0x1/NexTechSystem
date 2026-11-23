@@ -265,6 +265,7 @@ export async function saveBackendSettings(token: string | undefined, payload: { 
           role: 'ADMIN',
           phone: String(a?.phone || ''),
           avatar: String(a?.avatar || ''),
+          passwordHash: a?.passwordHash ? String(a.passwordHash) : undefined,
           isActive: a?.isActive !== false,
           createdAt: String(a?.createdAt || new Date().toISOString()),
           updatedAt: String(a?.updatedAt || new Date().toISOString()),
@@ -313,9 +314,14 @@ export async function proxyToBackend(
     headers.set('origin', 'http://localhost:3000');
   }
 
+  // Ensure content-type header is explicitly application/json when body is a JSON string
+  if (options?.body !== undefined && typeof options.body === 'string' && (!headers.has('content-type') || !headers.get('content-type')?.includes('application/json'))) {
+    headers.set('content-type', 'application/json');
+  }
+
   // For administrative or upload proxy calls, ensure authoritative admin authorization header is present
   const isAdminOrUpload = cleanPath.startsWith('/admin') || cleanPath.startsWith('/upload');
-  if (isAdminOrUpload && (!headers.has('authorization') || !headers.get('authorization')?.startsWith('Bearer '))) {
+  if (isAdminOrUpload) {
     headers.set('authorization', `Bearer ${getInternalAdminToken()}`);
   }
 

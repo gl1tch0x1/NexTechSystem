@@ -209,16 +209,24 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
 
       // Remove from global settings coAdmins in MongoDB
       try {
+        const idTargets = [cleanId, targetAdminId].filter(Boolean);
+        const emailTargets = [cleanLower, targetEmail].filter(Boolean);
         await db.collection('settings').updateOne(
           { id: 'global_settings' },
           {
             $pull: {
               coAdmins: {
-                $or: [
-                  { id: cleanId },
-                  { id: targetAdminId },
-                  ...(targetEmail ? [{ email: targetEmail }] : [{ email: cleanLower }]),
-                ],
+                id: { $in: idTargets },
+              },
+            },
+          } as any
+        );
+        await db.collection('settings').updateOne(
+          { id: 'global_settings' },
+          {
+            $pull: {
+              coAdmins: {
+                email: { $in: emailTargets },
               },
             },
           } as any

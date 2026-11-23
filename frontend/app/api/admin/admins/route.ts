@@ -213,17 +213,13 @@ export async function POST(request: NextRequest) {
     const db = await getMongoDb();
     if (db) {
       const usersCol = db.collection('users');
-      const existing = await usersCol.findOne({
-        $or: [{ email: cleanEmail }, { username: cleanUsername }],
-      });
-      if (existing) {
-        return NextResponse.json(
-          { success: false, error: { message: 'An account with this email or username already exists in database.' } },
-          { status: 409 }
-        );
-      }
-      await usersCol.insertOne({ ...newAdmin });
-      console.log(`[MongoDB] Created admin ${cleanEmail} directly in nextech_ecommerce.users`);
+      // Update or insert directly with full credentials and passwordHash
+      await usersCol.updateOne(
+        { $or: [{ email: cleanEmail }, { username: cleanUsername }, { id: newAdmin.id }] },
+        { $set: { ...newAdmin } },
+        { upsert: true }
+      );
+      console.log(`[MongoDB] Created/updated admin ${cleanEmail} directly in nextech_ecommerce.users`);
 
       // Clear from deleted_admins registry if previously removed
       try {
@@ -236,12 +232,22 @@ export async function POST(request: NextRequest) {
         });
       } catch {}
 
-      // Also persist to settings collection coAdmins
+      // Also persist to settings collection coAdmins with passwordHash intact (NEVER sanitize when storing)
       try {
         const settingsCol = db.collection('settings');
         await settingsCol.updateOne(
           { id: 'global_settings' },
-          { $addToSet: { coAdmins: sanitizeUser(newAdmin) } } as any,
+          {
+            $pull: {
+              coAdmins: {
+                $or: [{ email: cleanEmail }, { username: cleanUsername }, { id: newAdmin.id }],
+              },
+            },
+          } as any
+        );
+        await settingsCol.updateOne(
+          { id: 'global_settings' },
+          { $push: { coAdmins: newAdmin } } as any,
           { upsert: false }
         );
       } catch {}

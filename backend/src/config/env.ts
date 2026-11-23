@@ -25,11 +25,8 @@ const nodeEnv = process.env.NODE_ENV || 'development';
 let jwtSecret = process.env.JWT_SECRET || '';
 
 if (!jwtSecret) {
-  if (nodeEnv === 'production') {
-    console.warn('⚠️ [Security Warning] JWT_SECRET is not configured in production environment variables.');
-  }
-  // Cryptographically random 256-bit runtime key prevents hardcoded credential exposure
-  jwtSecret = crypto.randomBytes(32).toString('hex');
+  const seed = process.env.MONGODB_URI || process.env.FIREBASE_PROJECT_ID || 'nextech_enterprise_auth_2026';
+  jwtSecret = crypto.createHash('sha256').update(`nextech_auth_jwt_stable_${seed}`).digest('hex');
 }
 
 const rawAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')

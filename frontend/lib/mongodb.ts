@@ -37,18 +37,12 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
     } catch {}
 
     const allBundledUsers = Array.isArray(bundledUsersData) ? (bundledUsersData as any[]) : [];
+    const userBulkOps: any[] = [];
     for (const u of allBundledUsers) {
       if (!u.email && !u.id) continue;
       const cleanEmail = u.email ? String(u.email).toLowerCase().trim() : '';
       if (cleanEmail && deletedSet.has(cleanEmail)) continue;
       if (u.id && deletedSet.has(String(u.id).toLowerCase().trim())) continue;
-
-      const existing = await usersCol.findOne({
-        $or: [
-          ...(u.id ? [{ id: u.id }] : []),
-          ...(cleanEmail ? [{ email: cleanEmail }] : []),
-        ],
-      });
 
       const userDoc = {
         id: u.id,
@@ -69,16 +63,24 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
         updatedAt: u.updatedAt || new Date().toISOString(),
       };
 
-      if (!existing) {
-        await usersCol.insertOne(userDoc);
-        usersSynced++;
-      } else if (!existing.passwordHash && u.passwordHash) {
-        await usersCol.updateOne(
-          { _id: existing._id },
-          { $set: { passwordHash: u.passwordHash, updatedAt: new Date().toISOString() } }
-        );
-        usersSynced++;
-      }
+      userBulkOps.push({
+        updateOne: {
+          filter: { $or: [{ id: u.id }, ...(cleanEmail ? [{ email: cleanEmail }] : [])] },
+          update: {
+            $setOnInsert: userDoc,
+            $set: {
+              ...(u.passwordHash ? { passwordHash: u.passwordHash } : {}),
+              updatedAt: new Date().toISOString(),
+            },
+          },
+          upsert: true,
+        },
+      });
+    }
+
+    if (userBulkOps.length > 0) {
+      const res = await usersCol.bulkWrite(userBulkOps, { ordered: false });
+      usersSynced = (res.upsertedCount || 0) + (res.modifiedCount || 0);
     }
 
     // 2. Synchronize categories taxonomy if collection is underpopulated
@@ -86,18 +88,16 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
     const catCount = await categoriesCol.countDocuments({});
     const allBundledCategories = Array.isArray(bundledCategoriesData) ? (bundledCategoriesData as any[]) : [];
     if (catCount < allBundledCategories.length) {
-      for (const cat of allBundledCategories) {
-        if (!cat.id && !cat.slug) continue;
-        const existing = await categoriesCol.findOne({
-          $or: [
-            ...(cat.id ? [{ id: cat.id }] : []),
-            ...(cat.slug ? [{ slug: cat.slug }] : []),
-          ],
-        });
-        if (!existing) {
-          await categoriesCol.insertOne({ ...cat });
-          categoriesSynced++;
-        }
+      const catOps = allBundledCategories.map(cat => ({
+        updateOne: {
+          filter: { $or: [{ id: cat.id }, { slug: cat.slug }] },
+          update: { $setOnInsert: cat },
+          upsert: true,
+        },
+      }));
+      if (catOps.length > 0) {
+        const res = await categoriesCol.bulkWrite(catOps, { ordered: false });
+        categoriesSynced = res.upsertedCount || 0;
       }
     }
 
@@ -106,18 +106,16 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
     const brandCount = await brandsCol.countDocuments({});
     const allBundledBrands = Array.isArray(bundledBrandsData) ? (bundledBrandsData as any[]) : [];
     if (brandCount < allBundledBrands.length) {
-      for (const brand of allBundledBrands) {
-        if (!brand.id && !brand.slug) continue;
-        const existing = await brandsCol.findOne({
-          $or: [
-            ...(brand.id ? [{ id: brand.id }] : []),
-            ...(brand.slug ? [{ slug: brand.slug }] : []),
-          ],
-        });
-        if (!existing) {
-          await brandsCol.insertOne({ ...brand });
-          brandsSynced++;
-        }
+      const brandOps = allBundledBrands.map(brand => ({
+        updateOne: {
+          filter: { $or: [{ id: brand.id }, { slug: brand.slug }] },
+          update: { $setOnInsert: brand },
+          upsert: true,
+        },
+      }));
+      if (brandOps.length > 0) {
+        const res = await brandsCol.bulkWrite(brandOps, { ordered: false });
+        brandsSynced = res.upsertedCount || 0;
       }
     }
 
@@ -126,11 +124,12 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
     const allBundledSettings = Array.isArray(bundledSettingsData) ? (bundledSettingsData as any[]) : [];
     for (const setting of allBundledSettings) {
       if (!setting.id) continue;
-      const existing = await settingsCol.findOne({ id: setting.id });
-      if (!existing) {
-        await settingsCol.insertOne({ ...setting });
-        settingsSynced++;
-      }
+      const res = await settingsCol.updateOne(
+        { id: setting.id },
+        { $setOnInsert: setting },
+        { upsert: true }
+      );
+      if (res.upsertedCount) settingsSynced++;
     }
   } catch (err: any) {
     console.warn('[MongoDB Full Auto-Sync Warning]:', err?.message || err);
