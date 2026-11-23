@@ -112,14 +112,9 @@ export default function AdminAdminsPage() {
       const res = await ApiClient.get<AdminUser[]>('/admin/admins', { token: token || undefined });
       const list = Array.isArray(res) ? res : [];
 
-      setAdmins(prev => {
+      setAdmins(() => {
         const map = new Map<string, AdminUser>();
-        // Preserve any admin accounts already present in local state
-        for (const a of prev) {
-          if (a?.email) map.set(a.email.toLowerCase(), a);
-          else if (a?.id) map.set(a.id, a);
-        }
-        // Merge in authoritative API accounts
+        // Populate from authoritative API response
         for (const a of list) {
           if (a?.email) map.set(a.email.toLowerCase(), a);
           else if (a?.id) map.set(a.id, a);
@@ -141,11 +136,11 @@ export default function AdminAdminsPage() {
             });
           }
         }
-        const merged = Array.from(map.values());
+        const updated = Array.from(map.values());
         try {
-          localStorage.setItem('nextech_cached_admins', JSON.stringify(merged));
+          localStorage.setItem('nextech_cached_admins', JSON.stringify(updated));
         } catch {}
-        return merged;
+        return updated;
       });
     } catch (err: any) {
       console.warn('[Admin Roster Notice]:', err.message);
@@ -365,7 +360,10 @@ export default function AdminAdminsPage() {
 
   const handleDeleteAdmin = async () => {
     if (!deletingAdmin) return;
-    if (deletingAdmin.id === currentAdmin?.id) {
+    if (
+      deletingAdmin.id === currentAdmin?.id ||
+      (currentAdmin?.email && deletingAdmin.email?.toLowerCase() === currentAdmin.email.toLowerCase())
+    ) {
       setToastMessage({ type: 'error', text: 'You cannot delete your own administrative account.' });
       setDeletingAdmin(null);
       return;
@@ -373,19 +371,22 @@ export default function AdminAdminsPage() {
 
     try {
       setIsDeleting(true);
-      await ApiClient.delete<any>(`/admin/admins/${deletingAdmin.id}`, { token: token || undefined });
+      await ApiClient.delete<any>(`/admin/admins/${encodeURIComponent(deletingAdmin.id)}`, { token: token || undefined });
       setToastMessage({
         type: 'success',
         text: `Administrator "${deletingAdmin.name}" has been permanently removed.`,
       });
       setAdmins(prev => {
-        const next = prev.filter(a => a.id !== deletingAdmin.id);
+        const next = prev.filter(
+          a => a.id !== deletingAdmin.id && a.email?.toLowerCase() !== deletingAdmin.email?.toLowerCase()
+        );
         try {
           localStorage.setItem('nextech_cached_admins', JSON.stringify(next));
         } catch {}
         return next;
       });
       setDeletingAdmin(null);
+      fetchAdmins();
     } catch (err: any) {
       setToastMessage({ type: 'error', text: err.message || 'Failed to remove administrator.' });
     } finally {

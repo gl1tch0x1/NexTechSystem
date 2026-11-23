@@ -3,12 +3,13 @@ import {
   proxyToBackend,
   fetchBackendSettings,
   saveBackendSettings,
-  removeDynamicAdmin,
   updateDynamicAdmin,
+  markAdminDeleted,
   createVaultToken,
   verifyVaultToken,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
 type RouteContext = { params: Promise<{ path: string[] }> };
 
@@ -169,18 +170,90 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     request.cookies.get('auth_token')?.value || '';
 
   const [adminId] = path;
+  const cleanId = String(adminId || '').trim();
+  const cleanLower = cleanId.toLowerCase();
+
+  let targetEmail = '';
+  let targetAdminId = cleanId;
 
   // 1. Authoritative delete from MongoDB collection 'users'
   try {
     const db = await getMongoDb();
     if (db) {
-      await db.collection('users').deleteOne({ id: adminId, role: 'ADMIN' });
-      // Also remove from settings coAdmins in MongoDB
+      const usersCol = db.collection('users');
+      const orConditions: any[] = [
+        { id: cleanId },
+        { email: cleanLower },
+        { username: cleanLower },
+      ];
+      if (ObjectId.isValid(cleanId) && cleanId.length === 24) {
+        orConditions.push({ _id: new ObjectId(cleanId) });
+      }
+
+      // Find user first so we have canonical id and email
+      const existing = await usersCol.findOne({
+        role: 'ADMIN',
+        $or: orConditions,
+      });
+
+      if (existing) {
+        targetEmail = String(existing.email || '').toLowerCase().trim();
+        targetAdminId = String(existing.id || cleanId);
+      }
+
+      // Remove from users collection
+      await usersCol.deleteMany({
+        role: 'ADMIN',
+        $or: orConditions,
+      });
+
+      // Remove from global settings coAdmins in MongoDB
       try {
         await db.collection('settings').updateOne(
           { id: 'global_settings' },
-          { $pull: { coAdmins: { id: adminId } } } as any
+          {
+            $pull: {
+              coAdmins: {
+                $or: [
+                  { id: cleanId },
+                  { id: targetAdminId },
+                  ...(targetEmail ? [{ email: targetEmail }] : [{ email: cleanLower }]),
+                ],
+              },
+            },
+          } as any
         );
+      } catch {}
+
+      // Register in deleted_admins collection so auto-sync never resurrects this account
+      try {
+        const deletedCol = db.collection('deleted_admins');
+        await deletedCol.updateOne(
+          { target: cleanLower },
+          {
+            $set: {
+              target: cleanLower,
+              id: targetAdminId,
+              email: targetEmail || cleanLower,
+              deletedAt: new Date().toISOString(),
+            },
+          },
+          { upsert: true }
+        );
+        if (targetEmail && targetEmail !== cleanLower) {
+          await deletedCol.updateOne(
+            { target: targetEmail },
+            {
+              $set: {
+                target: targetEmail,
+                id: targetAdminId,
+                email: targetEmail,
+                deletedAt: new Date().toISOString(),
+              },
+            },
+            { upsert: true }
+          );
+        }
       } catch {}
     }
   } catch (err: any) {
@@ -191,12 +264,21 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
     const settings = await fetchBackendSettings(token);
     const coAdmins: any[] = settings?.coAdmins || [];
-    const updatedCoAdmins = coAdmins.filter((a: any) => a.id !== adminId);
+    const updatedCoAdmins = coAdmins.filter(
+      (a: any) =>
+        a.id !== cleanId &&
+        a.id !== targetAdminId &&
+        a.email?.toLowerCase() !== cleanLower &&
+        (!targetEmail || a.email?.toLowerCase() !== targetEmail)
+    );
     await saveBackendSettings(token, { coAdmins: updatedCoAdmins });
   } catch {}
 
-  // 3. Delete from dynamic in-memory registry
-  removeDynamicAdmin(adminId);
+  // 3. Mark as deleted in dynamic in-memory registry
+  markAdminDeleted(cleanId);
+  markAdminDeleted(cleanLower);
+  if (targetAdminId) markAdminDeleted(targetAdminId);
+  if (targetEmail) markAdminDeleted(targetEmail);
 
   // 4. Relay delete to upstream backend
   try {
@@ -209,7 +291,13 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
   if (vaultCookie) {
     try {
       const vaultAdmins = verifyVaultToken(vaultCookie);
-      const updatedVault = vaultAdmins.filter((a: any) => a.id !== adminId);
+      const updatedVault = vaultAdmins.filter(
+        (a: any) =>
+          a.id !== cleanId &&
+          a.id !== targetAdminId &&
+          a.email?.toLowerCase() !== cleanLower &&
+          (!targetEmail || a.email?.toLowerCase() !== targetEmail)
+      );
       vaultToken = createVaultToken(updatedVault);
     } catch {}
   }

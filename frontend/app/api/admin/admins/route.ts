@@ -7,6 +7,7 @@ import {
   readLocalStoreJson,
   registerDynamicAdmin,
   getDynamicAdmins,
+  isDeletedAdmin,
   createVaultToken,
   verifyVaultToken,
 } from '@/lib/proxy-helper';
@@ -119,7 +120,33 @@ export async function GET(request: NextRequest) {
       } catch {}
     }
 
-    const allAdmins = Array.from(mergedMap.values()).map(sanitizeUser);
+    // 7. Filter out any administrator accounts recorded in deleted_admins registry
+    const deletedIdentifiers = new Set<string>();
+    try {
+      const db = await getMongoDb();
+      if (db) {
+        const deletedDocs = await db.collection('deleted_admins').find().toArray();
+        for (const doc of deletedDocs) {
+          if (doc.target) deletedIdentifiers.add(String(doc.target).toLowerCase().trim());
+          if (doc.id) deletedIdentifiers.add(String(doc.id).toLowerCase().trim());
+          if (doc.email) deletedIdentifiers.add(String(doc.email).toLowerCase().trim());
+        }
+      }
+    } catch {}
+
+    const allAdmins = Array.from(mergedMap.values())
+      .filter((a: any) => {
+        const emailKey = (a.email || '').toLowerCase().trim();
+        const idKey = (a.id || '').toLowerCase().trim();
+        const userKey = (a.username || '').toLowerCase().trim();
+
+        if (emailKey && (deletedIdentifiers.has(emailKey) || isDeletedAdmin(emailKey))) return false;
+        if (idKey && (deletedIdentifiers.has(idKey) || isDeletedAdmin(idKey))) return false;
+        if (userKey && (deletedIdentifiers.has(userKey) || isDeletedAdmin(userKey))) return false;
+        return true;
+      })
+      .map(sanitizeUser);
+
     return NextResponse.json({ success: true, data: allAdmins });
   } catch (err: any) {
     return NextResponse.json(
@@ -197,6 +224,17 @@ export async function POST(request: NextRequest) {
       }
       await usersCol.insertOne({ ...newAdmin });
       console.log(`[MongoDB] Created admin ${cleanEmail} directly in nextech_ecommerce.users`);
+
+      // Clear from deleted_admins registry if previously removed
+      try {
+        await db.collection('deleted_admins').deleteMany({
+          $or: [
+            { target: cleanEmail },
+            { email: cleanEmail },
+            { target: cleanUsername },
+          ]
+        });
+      } catch {}
 
       // Also persist to settings collection coAdmins
       try {

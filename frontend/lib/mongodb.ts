@@ -25,10 +25,24 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
   try {
     // 1. Authoritative synchronization of ALL users (Admins, Resellers, Verified Clients)
     const usersCol = db.collection('users');
+    const deletedCol = db.collection('deleted_admins');
+    let deletedSet = new Set<string>();
+    try {
+      const deletedDocs = await deletedCol.find().toArray();
+      for (const d of deletedDocs) {
+        if (d.target) deletedSet.add(String(d.target).toLowerCase().trim());
+        if (d.email) deletedSet.add(String(d.email).toLowerCase().trim());
+        if (d.id) deletedSet.add(String(d.id).toLowerCase().trim());
+      }
+    } catch {}
+
     const allBundledUsers = Array.isArray(bundledUsersData) ? (bundledUsersData as any[]) : [];
     for (const u of allBundledUsers) {
       if (!u.email && !u.id) continue;
       const cleanEmail = u.email ? String(u.email).toLowerCase().trim() : '';
+      if (cleanEmail && deletedSet.has(cleanEmail)) continue;
+      if (u.id && deletedSet.has(String(u.id).toLowerCase().trim())) continue;
+
       const existing = await usersCol.findOne({
         $or: [
           ...(u.id ? [{ id: u.id }] : []),

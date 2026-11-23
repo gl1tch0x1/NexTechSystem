@@ -15,21 +15,6 @@
     "lastLoginAt": "2026-10-30T06:16:41.718Z"
   },
   {
-    "id": "user_admin_jawad",
-    "email": "jawad@comnet-cni.com",
-    "role": "ADMIN",
-    "name": "Jawad Sayed",
-    "username": "jawad_sayed",
-    "phone": "+971509103838",
-    "addresses": [],
-    "passwordHash": "14c90170e61fce2599138b17375a76fe6e67ae3f2fd88c8e7d5319413279b1da:f74cb2eecad98eb4522b30556c5b09bf7f6dd3fd33d74c1adb4a805dc9c576bf9fbc9b5d12f0ea621c30985a36f10ab1740225afe3cf59f9aac2eb7160d39ace",
-    "isActive": true,
-    "createdAt": "2026-11-23T07:22:50.000Z",
-    "updatedAt": "2026-11-23T07:22:50.000Z",
-    "passwordChangedAt": "2026-11-23T07:22:50.000Z",
-    "lastLoginAt": null
-  },
-  {
     "id": "user_edbf0ee5-0759-4193-b9f5-c82ac72b15e4",
     "email": "ahmad@apexsystems.ae",
     "role": "RESELLER",
@@ -1082,5 +1067,36 @@
     "isActive": true,
     "createdAt": "2026-11-23T08:43:47.232Z",
     "updatedAt": "2026-11-23T08:43:47.233Z"
+  },
+  {
+    "id": "user_bbf7bd51-0ef5-45c1-8f77-f38dc01fbb58",
+    "email": "apex_1795448965738@apexsystems.ae",
+    "role": "RESELLER",
+    "resellerId": "res_9e1d6bba-e31f-4a9c-b01c-b2f89542148f",
+    "company": "Apex Systems LLC",
+    "tradeLicense": "CN-904218",
+    "taxRegistrationNumber": "100987654300003",
+    "name": "Ahmad Al Nuaimi",
+    "username": "apexsystemsllc289",
+    "phone": "",
+    "addresses": [
+      {
+        "id": "addr_7962d76b-36f9-4e93-b14c-8e927d3f190a",
+        "fullName": "Ahmad Al Nuaimi",
+        "phone": "",
+        "addressLine1": "Commercial Business Bay",
+        "addressLine2": "",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "00000",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "19e15bef9775ca2a686ff30aebda7d5977fd20e4b7dd92b190381fd5d41a9955:f491afb58688b3fd221ba447d754d50b314d4956c201d75405684447c8106b699f70c3387bb7f4a7abf41479dec533391336203c342677619fb7645796e92882",
+    "isActive": true,
+    "createdAt": "2026-11-23T15:49:25.803Z",
+    "updatedAt": "2026-11-23T15:49:25.805Z"
   }
 ]

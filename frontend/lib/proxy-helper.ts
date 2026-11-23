@@ -29,6 +29,21 @@ export function getDynamicAdmins(): any[] {
   return list;
 }
 
+const deletedAdminIdentifiers = new Set<string>();
+
+export function markAdminDeleted(idOrEmail: string): void {
+  if (!idOrEmail) return;
+  const target = idOrEmail.trim().toLowerCase();
+  deletedAdminIdentifiers.add(target);
+  removeDynamicAdmin(idOrEmail);
+}
+
+export function isDeletedAdmin(idOrEmail: string): boolean {
+  if (!idOrEmail) return false;
+  const target = idOrEmail.trim().toLowerCase();
+  return deletedAdminIdentifiers.has(target);
+}
+
 export function removeDynamicAdmin(idOrEmail: string): void {
   if (!idOrEmail) return;
   const target = idOrEmail.trim().toLowerCase();
@@ -189,18 +204,20 @@ export function getBundledStoreJson<T = any>(filename: string): T | null {
   if (filename === 'users.json') {
     const bundled = Array.isArray(bundledUsersData) ? [...(bundledUsersData as any[])] : [];
     for (const dyn of getDynamicAdmins()) {
+      if (isDeletedAdmin(dyn.email) || isDeletedAdmin(dyn.id)) continue;
       if (!bundled.some(u => u.email?.toLowerCase() === dyn.email?.toLowerCase())) {
         bundled.push(dyn);
       }
     }
-    return bundled as unknown as T;
+    return bundled.filter(u => !isDeletedAdmin(u.email) && !isDeletedAdmin(u.id)) as unknown as T;
   }
   if (filename === 'settings.json') {
     const settings = Array.isArray(bundledSettingsData) ? JSON.parse(JSON.stringify(bundledSettingsData)) : [];
     const global = settings.find((s: any) => s.id === 'global_settings');
     if (global) {
-      global.coAdmins = global.coAdmins || [];
+      global.coAdmins = (global.coAdmins || []).filter((a: any) => !isDeletedAdmin(a.email) && !isDeletedAdmin(a.id));
       for (const dyn of getDynamicAdmins()) {
+        if (isDeletedAdmin(dyn.email) || isDeletedAdmin(dyn.id)) continue;
         if (!global.coAdmins.some((a: any) => a.email?.toLowerCase() === dyn.email?.toLowerCase())) {
           global.coAdmins.push(dyn);
         }

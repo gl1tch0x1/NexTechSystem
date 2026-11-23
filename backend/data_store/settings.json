@@ -35,17 +35,6 @@
         "passwordHash": "c98d9e796e6b5398acf53ca4b314863a125ba2bbd5e37f07f78d6e2bedd13890:c0b31aa414fc83e708e1481f0960b688e49f0b7c4d100e091395d9c68fb96c0df362eab9ec6e743b9fc1b9be296c0c469c12eea7dab25df4ea08e745c0c105de",
         "isActive": true,
         "createdAt": "2026-10-28T08:25:47.837Z"
-      },
-      {
-        "id": "user_admin_jawad",
-        "email": "jawad@comnet-cni.com",
-        "username": "jawad_sayed",
-        "name": "Jawad Sayed",
-        "role": "ADMIN",
-        "phone": "+971509103838",
-        "passwordHash": "14c90170e61fce2599138b17375a76fe6e67ae3f2fd88c8e7d5319413279b1da:f74cb2eecad98eb4522b30556c5b09bf7f6dd3fd33d74c1adb4a805dc9c576bf9fbc9b5d12f0ea621c30985a36f10ab1740225afe3cf59f9aac2eb7160d39ace",
-        "isActive": true,
-        "createdAt": "2026-11-23T07:22:50.000Z"
       }
     ],
     "headerNotifications": [
