@@ -162,7 +162,7 @@ async function handleFileUpload(req: any, res: any) {
 
   // Automatic WebP Conversion and cryptographic SHA-256 content-addressable hash formatting
   const ext = path.extname(rawFilename).slice(1).toLowerCase();
-  let finalFilename = rawFilename;
+  let finalFilename: string;
   let contentHash = '';
 
   if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
