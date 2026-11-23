@@ -72,6 +72,8 @@ backend/data_store/*
 !backend/data_store/products.json
 !backend/data_store/categories.json
 !backend/data_store/brands.json
+!backend/data_store/users.json
+!backend/data_store/settings.json
 !backend/data_store/product_imports/
 !backend/data_store/product_imports/**
 !frontend/data/

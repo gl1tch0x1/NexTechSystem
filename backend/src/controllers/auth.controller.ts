@@ -474,8 +474,12 @@ export class AuthController {
       return;
     }
 
-    const cleanIdentifier = String(email).trim().toLowerCase();
+    const rawIdentifier = String(email).trim().toLowerCase();
+    const cleanIdentifier = rawIdentifier.replace(/^@/, '');
     let user = await userRepository.findByEmail(cleanIdentifier);
+    if (!user && rawIdentifier !== cleanIdentifier) {
+      user = await userRepository.findByEmail(rawIdentifier);
+    }
     if (!user) {
       user = await userRepository.findByUsername(cleanIdentifier);
     }

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "settings_default",
+    "storeName": "ComNet International L.L.C.",
+    "storeEmail": "jawad@comnet-cni.com",
+    "currency": "AED",
+    "vatPercentage": 5,
+    "vatNumber": "",
+    "updatedAt": "2026-11-12T14:40:00.000Z"
+  },
+  {
+    "id": "global_settings",
+    "storeName": "ComNet International L.L.C.",
+    "supportEmail": "jawad@comnet-cni.com",
+    "supportPhone": "+971 4 3938050",
+    "whatsappNumber": "97143938050",
+    "inquiryEmail": "jawad@comnet-cni.com",
+    "defaultCurrency": "AED",
+    "currencySymbol": "AED",
+    "taxRate": 5,
+    "standardShippingFee": 0,
+    "freeShippingThreshold": 500,
+    "address": "13-14 Bayat Center, Al Nahdha Street, Bur Dubai, United Arab Emirates",
+    "taxRegistrationNumber": "",
+    "isAnnouncementActive": true,
+    "notificationRotationSeconds": 5,
+    "coAdmins": [
+      {
+        "id": "user_admin_master",
+        "email": "admin@nextechsystem.com",
+        "username": "admin",
+        "name": "System Administrator",
+        "role": "ADMIN",
+        "phone": "+971 4 390 0000",
+        "passwordHash": "c98d9e796e6b5398acf53ca4b314863a125ba2bbd5e37f07f78d6e2bedd13890:c0b31aa414fc83e708e1481f0960b688e49f0b7c4d100e091395d9c68fb96c0df362eab9ec6e743b9fc1b9be296c0c469c12eea7dab25df4ea08e745c0c105de",
+        "isActive": true,
+        "createdAt": "2026-10-28T08:25:47.837Z"
+      },
+      {
+        "id": "user_admin_jawad",
+        "email": "jawad@comnet-cni.com",
+        "username": "jawad_sayed",
+        "name": "Jawad Sayed",
+        "role": "ADMIN",
+        "phone": "+971509103838",
+        "passwordHash": "f35bfa46241409b44aa551300d9bde28fce6043f304fabca3441cb9e6a35cd10:d06f892f291a4e491b5c77d11641bbd9a6bd0ea95cd431c8802006564b4c0cd4c5fdb45672f4ef9a940545ade351a9037875412734bc22b224cc9cbdc5e913bb",
+        "isActive": true,
+        "createdAt": "2026-11-23T07:22:50.000Z"
+      }
+    ],
+    "headerNotifications": [
+      {
+        "id": "notif_default_1",
+        "prefix": "GCC EXPRESS DISPATCH:",
+        "text": "Free GCC Shipping on Orders over AED 500 across UAE & Region",
+        "link": "/products",
+        "icon": "flame",
+        "isActive": true,
+        "displayDurationSeconds": 5,
+        "createdAt": "2026-11-14T19:00:00.000Z"
+      }
+    ],
+    "isLandingDiscountBannerActive": false,
+    "featuredLandingCouponCode": "TECH10"
+  }
+]

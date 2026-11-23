@@ -71,7 +71,7 @@ export class UserRepository extends BaseRepository<User> {
 
   async findByUsername(username: string): Promise<User | null> {
     if (!username) return null;
-    const cleanUsername = username.trim().toLowerCase();
+    const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
     const user = await this.findOne([{ field: 'username', operator: '==', value: cleanUsername }]);
     if (user) return user;
 
@@ -79,7 +79,11 @@ export class UserRepository extends BaseRepository<User> {
     try {
       const settings: any = await settingsRepository.getSettings();
       const coAdmins: any[] = settings?.coAdmins || [];
-      const matched = coAdmins.find((a: any) => a.username?.toLowerCase() === cleanUsername);
+      const matched = coAdmins.find(
+        (a: any) =>
+          a.username?.toLowerCase().replace(/^@/, '') === cleanUsername ||
+          a.username?.toLowerCase() === cleanUsername
+      );
       if (matched) {
         return {
           id: matched.id,

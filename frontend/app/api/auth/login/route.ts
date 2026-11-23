@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+ import { NextRequest, NextResponse } from 'next/server';
 import { proxyAuth } from '../../../../lib/auth-proxy';
 import { getMongoDb } from '@/lib/mongodb';
 import {
   createJwtToken,
   verifyPassword,
   fetchBackendSettings,
+  readLocalStoreJson,
 } from '@/lib/proxy-helper';
 
 function sanitizeUser(u: any) {
@@ -74,12 +75,12 @@ export async function POST(request: NextRequest) {
   }
 
   // 2. Resilient Fallback: Authenticate directly against MongoDB users and coAdmins settings
-  const cleanIdentifier = String(email).trim().toLowerCase();
+  const cleanIdentifier = String(email).trim().toLowerCase().replace(/^@/, '');
   const rawPassword = String(password);
 
   let user: any = null;
 
-  // Tier 1: Query MongoDB users collection
+  // Tier 1: Query MongoDB users and settings collections
   try {
     const db = await getMongoDb();
     if (db) {
@@ -89,12 +90,21 @@ export async function POST(request: NextRequest) {
           { username: cleanIdentifier },
         ],
       });
+      if (!user) {
+        const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
+        const coAdmins: any[] = settingsDoc?.coAdmins || [];
+        user = coAdmins.find(
+          (a: any) =>
+            a.email?.toLowerCase() === cleanIdentifier ||
+            a.username?.toLowerCase() === cleanIdentifier
+        );
+      }
     }
   } catch (err: any) {
     console.warn('[Auth Login MongoDB Error]:', err?.message || err);
   }
 
-  // Tier 2: Check backend settings coAdmins
+  // Tier 2: Check backend settings coAdmins (including bundled settings fallback)
   if (!user) {
     try {
       const settings = await fetchBackendSettings();
@@ -110,19 +120,17 @@ export async function POST(request: NextRequest) {
     } catch {}
   }
 
-  // Tier 3: Check local users.json store if running locally
+  // Tier 3: Check bundled and local users.json store via readLocalStoreJson
   if (!user) {
     try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const p = path.resolve(process.cwd(), 'backend', 'data_store', 'users.json');
-      const raw = await fs.readFile(p, 'utf8');
-      const users = JSON.parse(raw);
-      user = users.find(
-        (u: any) =>
-          u.email?.toLowerCase() === cleanIdentifier ||
-          u.username?.toLowerCase() === cleanIdentifier
-      );
+      const users = await readLocalStoreJson<any[]>('users.json');
+      if (Array.isArray(users)) {
+        user = users.find(
+          (u: any) =>
+            u.email?.toLowerCase() === cleanIdentifier ||
+            u.username?.toLowerCase() === cleanIdentifier
+        );
+      }
     } catch {}
   }
 

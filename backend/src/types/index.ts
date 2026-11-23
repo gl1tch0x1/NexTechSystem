@@ -662,6 +662,7 @@ export interface StoreSettings {
   showStampOnEBill?: boolean;
   showSignatureOnEBill?: boolean;
   invoiceTermsAndConditions?: string;
+  coAdmins?: any[];
 }
 
 export interface ApiResponse<T = any> {

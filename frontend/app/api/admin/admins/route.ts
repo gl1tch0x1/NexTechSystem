@@ -4,6 +4,7 @@ import {
   fetchBackendSettings,
   saveBackendSettings,
   hashPassword,
+  readLocalStoreJson,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 import crypto from 'node:crypto';
@@ -56,15 +57,13 @@ export async function GET(request: NextRequest) {
     const settings = await fetchBackendSettings(token);
     const coAdmins: any[] = settings?.coAdmins || [];
 
-    // Fallback Tier 3: Local data_store fallback if running locally
+    // Fallback Tier 3: Local data_store fallback
     let localAdmins: any[] = [];
     try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const p = path.resolve(process.cwd(), 'backend', 'data_store', 'users.json');
-      const raw = await fs.readFile(p, 'utf8');
-      const users = JSON.parse(raw);
-      localAdmins = users.filter((u: any) => u.role === 'ADMIN');
+      const users = await readLocalStoreJson<any[]>('users.json');
+      if (Array.isArray(users)) {
+        localAdmins = users.filter((u: any) => u.role === 'ADMIN');
+      }
     } catch {}
 
     // Merge and deduplicate administrators by ID or Email

@@ -140,6 +140,12 @@ test('authentication and origin regressions (isolated store)', async t => {
     assert.equal(authPassed, true);
     assert.equal(authReq.user.id, 'user_admin_test_co');
     assert.equal(authReq.user.role, 'ADMIN');
+
+    // Test handle with leading @ resolves cleanly
+    const atLoginRes = response();
+    await authController.login({ body: { email: '@secadmin', password: newAdminPass } } as any, atLoginRes as any);
+    assert.equal(atLoginRes.statusCode, 200);
+    assert.equal(atLoginRes.body.data.user.username, 'secadmin');
   });
   process.chdir(originalCwd);
 });

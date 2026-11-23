@@ -95,6 +95,27 @@ export function verifyPassword(candidate: string, stored: string): boolean {
   }
 }
 
+export async function readLocalStoreJson<T = any>(filename: string): Promise<T | null> {
+  try {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const candidatePaths = [
+      path.resolve(process.cwd(), 'frontend', 'data', filename),
+      path.resolve(process.cwd(), 'data', filename),
+      path.resolve(process.cwd(), 'backend', 'data_store', filename),
+      path.resolve(process.cwd(), '..', 'backend', 'data_store', filename),
+      path.resolve(process.cwd(), 'data_store', filename),
+    ];
+    for (const p of candidatePaths) {
+      try {
+        const raw = await fs.readFile(p, 'utf8');
+        if (raw) return JSON.parse(raw);
+      } catch {}
+    }
+  } catch {}
+  return null;
+}
+
 export async function fetchBackendSettings(token?: string) {
   try {
     const adminToken = token || getInternalAdminToken();
@@ -108,6 +129,16 @@ export async function fetchBackendSettings(token?: string) {
       return json?.data || json;
     }
   } catch {}
+
+  // Resilient fallback: read from bundled settings.json store
+  try {
+    const local = await readLocalStoreJson<any[]>('settings.json');
+    if (Array.isArray(local)) {
+      const global = local.find(s => s.id === 'global_settings') || local[0];
+      if (global) return global;
+    }
+  } catch {}
+
   return null;
 }
 

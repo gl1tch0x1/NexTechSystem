@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { proxyAuth } from '../../../../lib/auth-proxy';
 import { getMongoDb } from '@/lib/mongodb';
-import { verifyJwtToken, fetchBackendSettings } from '@/lib/proxy-helper';
+import {
+  verifyJwtToken,
+  fetchBackendSettings,
+  readLocalStoreJson,
+} from '@/lib/proxy-helper';
 
 function sanitizeUser(u: any) {
   return {
@@ -69,10 +73,19 @@ export async function GET(request: NextRequest) {
           { email: decoded.email?.toLowerCase() },
         ],
       });
+      if (!user) {
+        const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
+        const coAdmins: any[] = settingsDoc?.coAdmins || [];
+        user = coAdmins.find(
+          (a: any) =>
+            a.id === decoded.id ||
+            (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
+        );
+      }
     }
   } catch {}
 
-  // Look up user in settings coAdmins
+  // Look up user in settings coAdmins (including bundled settings fallback)
   if (!user) {
     try {
       const settings = await fetchBackendSettings();
@@ -85,19 +98,17 @@ export async function GET(request: NextRequest) {
     } catch {}
   }
 
-  // Look up user in local users.json
+  // Look up user in bundled and local users.json store
   if (!user) {
     try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const p = path.resolve(process.cwd(), 'backend', 'data_store', 'users.json');
-      const raw = await fs.readFile(p, 'utf8');
-      const users = JSON.parse(raw);
-      user = users.find(
-        (u: any) =>
-          u.id === decoded.id ||
-          (decoded.email && u.email?.toLowerCase() === decoded.email.toLowerCase())
-      );
+      const users = await readLocalStoreJson<any[]>('users.json');
+      if (Array.isArray(users)) {
+        user = users.find(
+          (u: any) =>
+            u.id === decoded.id ||
+            (decoded.email && u.email?.toLowerCase() === decoded.email.toLowerCase())
+        );
+      }
     } catch {}
   }
 
