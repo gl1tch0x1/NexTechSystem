@@ -51,14 +51,6 @@ export async function POST(request: NextRequest) {
   const cleanIdentifier = rawIdentifier.replace(/^@/, '');
   const rawPassword = String(password);
 
-  // ─── LOCAL-FIRST AUTHENTICATION ───────────────────────────────────────────────
-  // Authenticate against all local data sources FIRST so that admins created
-  // via the frontend admin panel (persisted to MongoDB) can always log in,
-  // regardless of whether the Express backend knows about them or not.
-  // This eliminates the JWT_SECRET mismatch problem entirely because the
-  // token is always issued by the frontend using its own stable secret.
-  // ──────────────────────────────────────────────────────────────────────────────
-
   let user: any = null;
 
   // 1. MongoDB Atlas — the authoritative store for frontend-created admins

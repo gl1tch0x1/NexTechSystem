@@ -36,12 +36,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // ─── LOCAL-FIRST TOKEN VERIFICATION ───────────────────────────────────────────
-  // Try verifying the token with the frontend's own JWT secret first.
-  // This ensures that tokens issued by the frontend login route are always valid,
-  // regardless of whether the backend uses a different JWT_SECRET.
-  // ──────────────────────────────────────────────────────────────────────────────
-
   const decoded = verifyJwtToken(token);
 
   if (decoded && decoded.id) {
