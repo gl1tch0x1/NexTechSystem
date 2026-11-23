@@ -5,6 +5,9 @@ import {
   verifyJwtToken,
   fetchBackendSettings,
   readLocalStoreJson,
+  getDynamicAdmins,
+  verifyVaultToken,
+  registerDynamicAdmin,
 } from '@/lib/proxy-helper';
 
 function sanitizeUser(u: any) {
@@ -62,30 +65,50 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Look up user in MongoDB
+  // Look up user across persistent tiers:
   let user: any = null;
-  try {
-    const db = await getMongoDb();
-    if (db) {
-      user = await db.collection('users').findOne({
-        $or: [
-          { id: decoded.id },
-          { email: decoded.email?.toLowerCase() },
-        ],
-      });
-      if (!user) {
-        const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
-        const coAdmins: any[] = settingsDoc?.coAdmins || [];
-        user = coAdmins.find(
+
+  // Tier 1: Check dynamic in-memory co-admins registry
+  const dynamicList = getDynamicAdmins();
+  user = dynamicList.find(
+    (a: any) =>
+      a.id === decoded.id ||
+      (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
+  );
+
+  // Tier 2: Check cookie vault for co-admins registered in this browser
+  if (!user) {
+    const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
+    if (vaultCookie) {
+      try {
+        const vaultAdmins = verifyVaultToken(vaultCookie);
+        user = vaultAdmins.find(
           (a: any) =>
             a.id === decoded.id ||
             (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
         );
-      }
+        if (user) {
+          registerDynamicAdmin(user);
+        }
+      } catch {}
     }
-  } catch {}
+  }
 
-  // Look up user in settings coAdmins (including bundled settings fallback)
+  // Tier 3: Look up user in bundled and local users.json store (0ms instant resolution)
+  if (!user) {
+    try {
+      const users = await readLocalStoreJson<any[]>('users.json');
+      if (Array.isArray(users)) {
+        user = users.find(
+          (u: any) =>
+            u.id === decoded.id ||
+            (decoded.email && u.email?.toLowerCase() === decoded.email.toLowerCase())
+        );
+      }
+    } catch {}
+  }
+
+  // Tier 4: Look up user in settings coAdmins (including bundled settings fallback)
   if (!user) {
     try {
       const settings = await fetchBackendSettings();
@@ -98,18 +121,41 @@ export async function GET(request: NextRequest) {
     } catch {}
   }
 
-  // Look up user in bundled and local users.json store
+  // Tier 5: Look up user in MongoDB (if connected)
   if (!user) {
     try {
-      const users = await readLocalStoreJson<any[]>('users.json');
-      if (Array.isArray(users)) {
-        user = users.find(
-          (u: any) =>
-            u.id === decoded.id ||
-            (decoded.email && u.email?.toLowerCase() === decoded.email.toLowerCase())
-        );
+      const db = await getMongoDb();
+      if (db) {
+        user = await db.collection('users').findOne({
+          $or: [
+            { id: decoded.id },
+            { email: decoded.email?.toLowerCase() },
+          ],
+        });
+        if (!user) {
+          const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
+          const coAdmins: any[] = settingsDoc?.coAdmins || [];
+          user = coAdmins.find(
+            (a: any) =>
+              a.id === decoded.id ||
+              (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
+          );
+        }
       }
     } catch {}
+  }
+
+  // Fallback: If token was cryptographically verified as an ADMIN, ensure access is not blocked
+  if (!user && decoded.role === 'ADMIN' && decoded.email) {
+    user = {
+      id: decoded.id || 'admin_session',
+      name: decoded.name || 'Administrator',
+      email: decoded.email,
+      username: decoded.username || decoded.email.split('@')[0],
+      role: 'ADMIN',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
   }
 
   if (!user || user.isActive === false) {

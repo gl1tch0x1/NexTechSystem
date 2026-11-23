@@ -22,7 +22,7 @@
     "username": "jawad_sayed",
     "phone": "+971509103838",
     "addresses": [],
-    "passwordHash": "f35bfa46241409b44aa551300d9bde28fce6043f304fabca3441cb9e6a35cd10:d06f892f291a4e491b5c77d11641bbd9a6bd0ea95cd431c8802006564b4c0cd4c5fdb45672f4ef9a940545ade351a9037875412734bc22b224cc9cbdc5e913bb",
+    "passwordHash": "14c90170e61fce2599138b17375a76fe6e67ae3f2fd88c8e7d5319413279b1da:f74cb2eecad98eb4522b30556c5b09bf7f6dd3fd33d74c1adb4a805dc9c576bf9fbc9b5d12f0ea621c30985a36f10ab1740225afe3cf59f9aac2eb7160d39ace",
     "isActive": true,
     "createdAt": "2026-11-23T07:22:50.000Z",
     "updatedAt": "2026-11-23T07:22:50.000Z",
@@ -989,5 +989,98 @@
     "isActive": true,
     "createdAt": "2026-11-23T07:43:56.988Z",
     "updatedAt": "2026-11-23T07:43:56.989Z"
+  },
+  {
+    "id": "user_071cdbbd-3d06-49fc-a692-aef1f5c1f615",
+    "email": "apex_1795422500779@apexsystems.ae",
+    "role": "RESELLER",
+    "resellerId": "res_8cc1f68d-94cc-4d9e-ad50-5f35c80791b2",
+    "company": "Apex Systems LLC",
+    "tradeLicense": "CN-904218",
+    "taxRegistrationNumber": "100987654300003",
+    "name": "Ahmad Al Nuaimi",
+    "username": "apexsystemsllc398",
+    "phone": "",
+    "addresses": [
+      {
+        "id": "addr_cfbf8de0-6adc-49a5-9acf-bf46c6768564",
+        "fullName": "Ahmad Al Nuaimi",
+        "phone": "",
+        "addressLine1": "Commercial Business Bay",
+        "addressLine2": "",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "00000",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "b585eb60faf8dbafa9ac4f954a2afc4343c39544b9d734c0286888b30a70904c:82de829625b2e847b754798951e25747ffc78e28a0ac4093ebf5b2fa613df66a14eef801f6d730407256621531c7205d9c4704e189840bd231cad82114e001a2",
+    "isActive": true,
+    "createdAt": "2026-11-23T08:28:20.875Z",
+    "updatedAt": "2026-11-23T08:28:20.877Z"
+  },
+  {
+    "id": "user_f93a2778-2182-44f6-bc1e-15a534d966ed",
+    "email": "apex_1795422564711@apexsystems.ae",
+    "role": "RESELLER",
+    "resellerId": "res_9d72e40a-3857-4cd9-bb47-b3cb022ac3ad",
+    "company": "Apex Systems LLC",
+    "tradeLicense": "CN-904218",
+    "taxRegistrationNumber": "100987654300003",
+    "name": "Ahmad Al Nuaimi",
+    "username": "apexsystemsllc664",
+    "phone": "",
+    "addresses": [
+      {
+        "id": "addr_bd559f5c-0f10-48bb-b660-3664bdf0a43d",
+        "fullName": "Ahmad Al Nuaimi",
+        "phone": "",
+        "addressLine1": "Commercial Business Bay",
+        "addressLine2": "",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "00000",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "7d294054ab275a64890975b8d1e179ab54ba35d588aa6a372092e683174de0d9:c85e85a406aa7ed5e29b970b5cef1f23c39174d863b282f589f510e17fbde7c053839759bde5686fc0368b7b3cd49047bb397c5eb6b506391344c8c55246512e",
+    "isActive": true,
+    "createdAt": "2026-11-23T08:29:24.782Z",
+    "updatedAt": "2026-11-23T08:29:24.784Z"
+  },
+  {
+    "id": "user_9200626c-766d-4be2-acee-32054b4e6e3f",
+    "email": "apex_1795423427171@apexsystems.ae",
+    "role": "RESELLER",
+    "resellerId": "res_405a8090-a269-4ad4-8d3b-32bcffa64658",
+    "company": "Apex Systems LLC",
+    "tradeLicense": "CN-904218",
+    "taxRegistrationNumber": "100987654300003",
+    "name": "Ahmad Al Nuaimi",
+    "username": "apexsystemsllc710",
+    "phone": "",
+    "addresses": [
+      {
+        "id": "addr_9b9b3fea-4177-439d-81ae-32d6707daecf",
+        "fullName": "Ahmad Al Nuaimi",
+        "phone": "",
+        "addressLine1": "Commercial Business Bay",
+        "addressLine2": "",
+        "city": "Dubai",
+        "state": "Dubai",
+        "country": "United Arab Emirates",
+        "postalCode": "00000",
+        "isDefaultShipping": true,
+        "isDefaultBilling": true
+      }
+    ],
+    "passwordHash": "0f916302dd7f7c17ac68e10e0c20571fbc458e6dc33d007ccd8009949c517bbc:63fb1fb92a81301cdf4f719428ff2c98fc731f623d34760580e1af76e03c7a8c77846d5d2bf22f5e222dd7b4c57d956f19f8fe4f08643b64fc4135f9bca3c33e",
+    "isActive": true,
+    "createdAt": "2026-11-23T08:43:47.232Z",
+    "updatedAt": "2026-11-23T08:43:47.233Z"
   }
 ]

@@ -5,6 +5,10 @@ import {
   saveBackendSettings,
   hashPassword,
   readLocalStoreJson,
+  registerDynamicAdmin,
+  getDynamicAdmins,
+  createVaultToken,
+  verifyVaultToken,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 import crypto from 'node:crypto';
@@ -38,7 +42,51 @@ export async function GET(request: NextRequest) {
 
   try {
     const upstream = await proxyToBackend(request, '/admin/admins');
-    if (upstream.ok || (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504)) {
+    if (upstream.ok) {
+      try {
+        const json = await upstream.clone().json();
+        if (json && Array.isArray(json.data)) {
+          const upstreamAdmins = json.data;
+          const mergedMap = new Map<string, any>();
+          for (const a of upstreamAdmins) {
+            if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
+          }
+          let localAdmins: any[] = [];
+          try {
+            const users = await readLocalStoreJson<any[]>('users.json');
+            if (Array.isArray(users)) {
+              localAdmins = users.filter((u: any) => u.role === 'ADMIN');
+            }
+          } catch {}
+          for (const a of localAdmins) {
+            if (a?.email || a?.id) {
+              const k = (a.email || a.id).toLowerCase();
+              if (!mergedMap.has(k)) mergedMap.set(k, a);
+            }
+          }
+          for (const a of getDynamicAdmins()) {
+            if (a?.email || a?.id) {
+              const k = (a.email || a.id).toLowerCase();
+              if (!mergedMap.has(k)) mergedMap.set(k, a);
+            }
+          }
+          const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
+          if (vaultCookie) {
+            const vaultList = verifyVaultToken(vaultCookie);
+            for (const a of vaultList) {
+              if (a?.email || a?.id) {
+                const k = (a.email || a.id).toLowerCase();
+                if (!mergedMap.has(k)) mergedMap.set(k, a);
+              }
+            }
+          }
+          const allAdmins = Array.from(mergedMap.values()).map(sanitizeUser);
+          return NextResponse.json({ success: true, data: allAdmins });
+        }
+      } catch {}
+      return upstream;
+    }
+    if (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504) {
       return upstream;
     }
 
@@ -66,13 +114,23 @@ export async function GET(request: NextRequest) {
       }
     } catch {}
 
-    // Merge and deduplicate administrators by ID or Email
+    // Merge and deduplicate administrators across all tiers
     const mergedMap = new Map<string, any>();
     for (const a of localAdmins) {
-      mergedMap.set(a.id || a.email, a);
+      if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
     }
     for (const a of coAdmins) {
-      mergedMap.set(a.id || a.email, a);
+      if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
+    }
+    for (const a of getDynamicAdmins()) {
+      if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
+    }
+    const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
+    if (vaultCookie) {
+      const vaultList = verifyVaultToken(vaultCookie);
+      for (const a of vaultList) {
+        if (a?.email || a?.id) mergedMap.set((a.email || a.id).toLowerCase(), a);
+      }
     }
 
     const allAdmins = Array.from(mergedMap.values()).map(sanitizeUser);
@@ -101,7 +159,59 @@ export async function POST(request: NextRequest) {
 
   try {
     const upstream = await proxyToBackend(request, '/admin/admins');
-    if (upstream.ok || (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504)) {
+    if (upstream.ok) {
+      try {
+        const body = await cloned.json();
+        const { name, email, username, password, phone, avatar } = body || {};
+        if (email && password) {
+          const cleanEmail = String(email).trim().toLowerCase();
+          const cleanUsername = (username ? String(username).trim().toLowerCase() : cleanEmail.split('@')[0])
+            .replace(/[^a-z0-9_]/g, '')
+            .slice(0, 30);
+          const newAdmin = {
+            id: `user_admin_${crypto.randomUUID().slice(0, 8)}`,
+            name: String(name || cleanUsername).trim(),
+            email: cleanEmail,
+            username: cleanUsername,
+            role: 'ADMIN',
+            phone: phone ? String(phone).trim() : '',
+            avatar: avatar ? String(avatar).trim() : '',
+            addresses: [],
+            passwordHash: hashPassword(password),
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          registerDynamicAdmin(newAdmin);
+
+          const currentVault = request.cookies.get('nextech_coadmins_vault')?.value;
+          const existingVaultAdmins = currentVault ? verifyVaultToken(currentVault) : [];
+          const updatedVaultAdmins = [
+            ...existingVaultAdmins.filter((a: any) => a.id !== newAdmin.id && a.email?.toLowerCase() !== cleanEmail),
+            newAdmin,
+          ];
+          const vaultToken = createVaultToken(updatedVaultAdmins);
+
+          const resHeaders = new Headers(upstream.headers);
+          const resBody = await upstream.arrayBuffer();
+          const modifiedRes = new NextResponse(resBody, {
+            status: upstream.status,
+            statusText: upstream.statusText,
+            headers: resHeaders,
+          });
+          modifiedRes.cookies.set('nextech_coadmins_vault', vaultToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60,
+            path: '/',
+          });
+          return modifiedRes;
+        }
+      } catch {}
+      return upstream;
+    }
+    if (upstream.status !== 404 && upstream.status !== 502 && upstream.status !== 503 && upstream.status !== 504) {
       return upstream;
     }
 
@@ -188,7 +298,19 @@ export async function POST(request: NextRequest) {
       }
     } catch {}
 
-    return NextResponse.json(
+    // Register dynamically in memory immediately
+    registerDynamicAdmin(newAdmin);
+
+    // Prepare updated cookie vault list
+    const currentVault = request.cookies.get('nextech_coadmins_vault')?.value;
+    const existingVaultAdmins = currentVault ? verifyVaultToken(currentVault) : [];
+    const updatedVaultAdmins = [
+      ...existingVaultAdmins.filter((a: any) => a.id !== newAdmin.id && a.email?.toLowerCase() !== cleanEmail),
+      newAdmin,
+    ];
+    const vaultToken = createVaultToken(updatedVaultAdmins);
+
+    const response = NextResponse.json(
       {
         success: true,
         data: sanitizeUser(newAdmin),
@@ -196,6 +318,16 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
+
+    response.cookies.set('nextech_coadmins_vault', vaultToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/',
+    });
+
+    return response;
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: { message: err?.message || 'Failed to create administrator.' } },

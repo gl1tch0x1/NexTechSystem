@@ -6,6 +6,9 @@ import {
   verifyPassword,
   fetchBackendSettings,
   readLocalStoreJson,
+  getDynamicAdmins,
+  registerDynamicAdmin,
+  verifyVaultToken,
 } from '@/lib/proxy-helper';
 
 function sanitizeUser(u: any) {
@@ -74,53 +77,45 @@ export async function POST(request: NextRequest) {
     // Upstream service unavailable; continue to resilient fallback
   }
 
-  // 2. Resilient Fallback: Authenticate directly against MongoDB users and coAdmins settings
-  const cleanIdentifier = String(email).trim().toLowerCase().replace(/^@/, '');
+  // 2. Resilient Fallback: Authenticate directly against bundled users, settings, and vault
+  const rawIdentifier = String(email).trim().toLowerCase();
+  const cleanIdentifier = rawIdentifier.replace(/^@/, '');
   const rawPassword = String(password);
 
   let user: any = null;
 
-  // Tier 1: Query MongoDB users and settings collections
-  try {
-    const db = await getMongoDb();
-    if (db) {
-      user = await db.collection('users').findOne({
-        $or: [
-          { email: cleanIdentifier },
-          { username: cleanIdentifier },
-        ],
-      });
-      if (!user) {
-        const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
-        const coAdmins: any[] = settingsDoc?.coAdmins || [];
-        user = coAdmins.find(
+  // Step 1: Check dynamic in-memory co-admins
+  const dynamicList = getDynamicAdmins();
+  user = dynamicList.find(
+    (a: any) =>
+      a.email?.toLowerCase() === cleanIdentifier ||
+      a.username?.toLowerCase() === cleanIdentifier ||
+      a.email?.toLowerCase() === rawIdentifier ||
+      a.username?.toLowerCase() === rawIdentifier
+  );
+
+  // Step 2: Check cookie vault for co-admins registered from this browser
+  if (!user) {
+    const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
+    if (vaultCookie) {
+      try {
+        const vaultAdmins = verifyVaultToken(vaultCookie);
+        const matched = vaultAdmins.find(
           (a: any) =>
             a.email?.toLowerCase() === cleanIdentifier ||
-            a.username?.toLowerCase() === cleanIdentifier
+            a.username?.toLowerCase() === cleanIdentifier ||
+            a.email?.toLowerCase() === rawIdentifier ||
+            a.username?.toLowerCase() === rawIdentifier
         );
-      }
+        if (matched) {
+          user = matched;
+          registerDynamicAdmin(matched);
+        }
+      } catch {}
     }
-  } catch (err: any) {
-    console.warn('[Auth Login MongoDB Error]:', err?.message || err);
   }
 
-  // Tier 2: Check backend settings coAdmins (including bundled settings fallback)
-  if (!user) {
-    try {
-      const settings = await fetchBackendSettings();
-      const coAdmins: any[] = settings?.coAdmins || [];
-      const matched = coAdmins.find(
-        (a: any) =>
-          a.email?.toLowerCase() === cleanIdentifier ||
-          a.username?.toLowerCase() === cleanIdentifier
-      );
-      if (matched) {
-        user = matched;
-      }
-    } catch {}
-  }
-
-  // Tier 3: Check bundled and local users.json store via readLocalStoreJson
+  // Step 3: Check bundled and local users.json store (0ms instant resolution)
   if (!user) {
     try {
       const users = await readLocalStoreJson<any[]>('users.json');
@@ -128,10 +123,58 @@ export async function POST(request: NextRequest) {
         user = users.find(
           (u: any) =>
             u.email?.toLowerCase() === cleanIdentifier ||
-            u.username?.toLowerCase() === cleanIdentifier
+            u.username?.toLowerCase() === cleanIdentifier ||
+            u.email?.toLowerCase() === rawIdentifier ||
+            u.username?.toLowerCase() === rawIdentifier
         );
       }
     } catch {}
+  }
+
+  // Step 4: Check backend settings coAdmins (including bundled settings fallback)
+  if (!user) {
+    try {
+      const settings = await fetchBackendSettings();
+      const coAdmins: any[] = settings?.coAdmins || [];
+      const matched = coAdmins.find(
+        (a: any) =>
+          a.email?.toLowerCase() === cleanIdentifier ||
+          a.username?.toLowerCase() === cleanIdentifier ||
+          a.email?.toLowerCase() === rawIdentifier ||
+          a.username?.toLowerCase() === rawIdentifier
+      );
+      if (matched) {
+        user = matched;
+      }
+    } catch {}
+  }
+
+  // Step 5: Query MongoDB users and settings collections (if available)
+  if (!user) {
+    try {
+      const db = await getMongoDb();
+      if (db) {
+        user = await db.collection('users').findOne({
+          $or: [
+            { email: cleanIdentifier },
+            { username: cleanIdentifier },
+            { email: rawIdentifier },
+            { username: rawIdentifier },
+          ],
+        });
+        if (!user) {
+          const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
+          const coAdmins: any[] = settingsDoc?.coAdmins || [];
+          user = coAdmins.find(
+            (a: any) =>
+              a.email?.toLowerCase() === cleanIdentifier ||
+              a.username?.toLowerCase() === cleanIdentifier
+          );
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Auth Login MongoDB Error]:', err?.message || err);
+    }
   }
 
   if (!user) {

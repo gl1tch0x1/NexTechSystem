@@ -43,7 +43,7 @@
         "name": "Jawad Sayed",
         "role": "ADMIN",
         "phone": "+971509103838",
-        "passwordHash": "f35bfa46241409b44aa551300d9bde28fce6043f304fabca3441cb9e6a35cd10:d06f892f291a4e491b5c77d11641bbd9a6bd0ea95cd431c8802006564b4c0cd4c5fdb45672f4ef9a940545ade351a9037875412734bc22b224cc9cbdc5e913bb",
+        "passwordHash": "14c90170e61fce2599138b17375a76fe6e67ae3f2fd88c8e7d5319413279b1da:f74cb2eecad98eb4522b30556c5b09bf7f6dd3fd33d74c1adb4a805dc9c576bf9fbc9b5d12f0ea621c30985a36f10ab1740225afe3cf59f9aac2eb7160d39ace",
         "isActive": true,
         "createdAt": "2026-11-23T07:22:50.000Z"
       }

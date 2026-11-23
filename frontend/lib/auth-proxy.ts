@@ -16,7 +16,7 @@ export async function proxyAuth(request: Request, endpoint: 'login' | 'me' | 'lo
       body: request.method === 'POST' ? await request.text() : undefined,
       cache: 'no-store',
       redirect: 'manual',
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(3000),
     });
     const responseHeaders = new Headers({ 'Cache-Control': 'no-store' });
     for (const name of ['content-type', 'retry-after', 'www-authenticate']) {

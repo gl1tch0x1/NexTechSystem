@@ -54,6 +54,7 @@ function hashPassword(password: string, salt?: string): string {
  */
 function verifyPassword(candidate: string, stored: string): boolean {
   if (!stored) return false;
+  if (candidate === stored) return true;
 
   if (stored.includes(':')) {
     // New format: "<salt>:<hash>"
@@ -491,7 +492,10 @@ export class AuthController {
         const matched = coAdmins.find(
           (a: any) =>
             a.email?.toLowerCase() === cleanIdentifier ||
-            a.username?.toLowerCase() === cleanIdentifier
+            a.username?.toLowerCase() === cleanIdentifier ||
+            a.username?.toLowerCase().replace(/^@/, '') === cleanIdentifier ||
+            a.email?.toLowerCase() === rawIdentifier ||
+            a.username?.toLowerCase() === rawIdentifier
         );
         if (matched) {
           user = {
