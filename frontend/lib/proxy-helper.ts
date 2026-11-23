@@ -29,6 +29,38 @@ export function getDynamicAdmins(): any[] {
   return list;
 }
 
+export function removeDynamicAdmin(idOrEmail: string): void {
+  if (!idOrEmail) return;
+  const target = idOrEmail.trim().toLowerCase();
+  for (const [key, admin] of dynamicAdminsMap.entries()) {
+    if (
+      key === target ||
+      admin.id?.toLowerCase() === target ||
+      admin.email?.toLowerCase() === target ||
+      admin.username?.toLowerCase() === target
+    ) {
+      dynamicAdminsMap.delete(key);
+    }
+  }
+}
+
+export function updateDynamicAdmin(adminId: string, updates: Record<string, any>): any | null {
+  if (!adminId) return null;
+  const target = adminId.trim().toLowerCase();
+  for (const [key, admin] of dynamicAdminsMap.entries()) {
+    if (
+      key === target ||
+      admin.id?.toLowerCase() === target ||
+      admin.email?.toLowerCase() === target
+    ) {
+      const updated = { ...admin, ...updates };
+      dynamicAdminsMap.set(key, updated);
+      return updated;
+    }
+  }
+  return null;
+}
+
 export function createVaultToken(admins: any[]): string {
   return createJwtToken({
     id: 'vault_system',

@@ -3,6 +3,10 @@ import {
   proxyToBackend,
   fetchBackendSettings,
   saveBackendSettings,
+  removeDynamicAdmin,
+  updateDynamicAdmin,
+  createVaultToken,
+  verifyVaultToken,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
@@ -29,35 +33,36 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
     request.cookies.get('auth_token')?.value || '';
 
+  const [adminId] = path;
+
+  // 1. Check direct MongoDB
+  try {
+    const db = await getMongoDb();
+    if (db) {
+      const user = await db.collection('users').findOne({ id: adminId, role: 'ADMIN' });
+      if (user) {
+        return NextResponse.json({ success: true, data: sanitizeUser(user) });
+      }
+    }
+  } catch {}
+
+  // 2. Check upstream Express backend
   try {
     const upstream = await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
     if (upstream.ok) return upstream;
+  } catch {}
 
-    const [adminId] = path;
-
-    // Check direct MongoDB
-    try {
-      const db = await getMongoDb();
-      if (db) {
-        const user = await db.collection('users').findOne({ id: adminId, role: 'ADMIN' });
-        if (user) {
-          return NextResponse.json({ success: true, data: sanitizeUser(user) });
-        }
-      }
-    } catch {}
-
-    // Check backend settings coAdmins
+  // 3. Check backend settings coAdmins
+  try {
     const settings = await fetchBackendSettings(token);
     const coAdmins: any[] = settings?.coAdmins || [];
     const matched = coAdmins.find((a: any) => a.id === adminId);
     if (matched) {
       return NextResponse.json({ success: true, data: sanitizeUser(matched) });
     }
+  } catch {}
 
-    return upstream;
-  } catch {
-    return NextResponse.json({ success: false, error: { message: 'Administrator not found.' } }, { status: 404 });
-  }
+  return NextResponse.json({ success: false, error: { message: 'Administrator not found.' } }, { status: 404 });
 }
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
@@ -66,59 +71,95 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
     request.cookies.get('auth_token')?.value || '';
 
-  try {
-    const upstream = await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
-    if (upstream.ok) return upstream;
+  const [adminId, subAction] = path;
 
-    // Fallback: If cPanel backend returns 404, toggle status
-    const [adminId, subAction] = path;
-    if (subAction === 'status') {
-      let updatedUser: any = null;
+  if (subAction === 'status') {
+    let newStatus = false;
+    let targetAdmin: any = null;
 
-      // Update in MongoDB
-      try {
-        const db = await getMongoDb();
-        if (db) {
-          const admin = await db.collection('users').findOne({ id: adminId, role: 'ADMIN' });
-          if (admin) {
-            const newStatus = !admin.isActive;
-            await db.collection('users').updateOne(
-              { id: adminId },
-              { $set: { isActive: newStatus, updatedAt: new Date().toISOString() } }
-            );
-            updatedUser = { ...admin, isActive: newStatus };
-          }
+    // 1. Authoritative update in MongoDB
+    try {
+      const db = await getMongoDb();
+      if (db) {
+        const admin = await db.collection('users').findOne({ id: adminId, role: 'ADMIN' });
+        if (admin) {
+          targetAdmin = admin;
+          newStatus = !admin.isActive;
+          await db.collection('users').updateOne(
+            { id: adminId },
+            { $set: { isActive: newStatus, updatedAt: new Date().toISOString() } }
+          );
         }
-      } catch {}
+      }
+    } catch (err: any) {
+      console.warn('[MongoDB Admin Status Update Warning]:', err?.message || err);
+    }
 
-      // Update in backend settings coAdmins
+    // 2. Update in backend settings coAdmins
+    try {
       const settings = await fetchBackendSettings(token);
       const coAdmins: any[] = settings?.coAdmins || [];
-      const targetAdmin = coAdmins.find((a: any) => a.id === adminId);
-      if (targetAdmin) {
-        const newStatus = !targetAdmin.isActive;
+      const foundInSettings = coAdmins.find((a: any) => a.id === adminId);
+      if (foundInSettings) {
+        if (!targetAdmin) {
+          targetAdmin = foundInSettings;
+          newStatus = !foundInSettings.isActive;
+        }
         const updatedCoAdmins = coAdmins.map((a: any) =>
           a.id === adminId ? { ...a, isActive: newStatus, updatedAt: new Date().toISOString() } : a
         );
         await saveBackendSettings(token, { coAdmins: updatedCoAdmins });
-        if (!updatedUser) {
-          updatedUser = { ...targetAdmin, isActive: newStatus };
-        }
       }
+    } catch {}
 
-      if (updatedUser) {
-        return NextResponse.json({
-          success: true,
-          data: sanitizeUser(updatedUser),
-          message: `Administrator status updated to ${updatedUser.isActive ? 'Active' : 'Suspended'}.`,
-        });
-      }
+    // 3. Update dynamic in-memory registry
+    updateDynamicAdmin(adminId, { isActive: newStatus });
+
+    // 4. Relay to upstream backend
+    try {
+      await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
+    } catch {}
+
+    // 5. Update browser cookie vault
+    const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
+    let vaultToken = '';
+    if (vaultCookie) {
+      try {
+        const vaultAdmins = verifyVaultToken(vaultCookie);
+        const updatedVault = vaultAdmins.map((a: any) =>
+          a.id === adminId ? { ...a, isActive: newStatus, updatedAt: new Date().toISOString() } : a
+        );
+        vaultToken = createVaultToken(updatedVault);
+      } catch {}
     }
 
-    return upstream;
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: { message: err?.message || 'Failed to update status.' } }, { status: 500 });
+    const updatedUser = {
+      ...(targetAdmin || { id: adminId }),
+      isActive: newStatus,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const response = NextResponse.json({
+      success: true,
+      data: sanitizeUser(updatedUser),
+      message: `Administrator status updated to ${newStatus ? 'Active' : 'Suspended'}.`,
+    });
+
+    if (vaultToken) {
+      response.cookies.set('nextech_coadmins_vault', vaultToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60,
+        path: '/',
+      });
+    }
+
+    return response;
   }
+
+  // Generic PUT relay
+  return proxyToBackend(request, `/admin/admins/${path.join('/')}`);
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
@@ -127,29 +168,66 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
     request.cookies.get('auth_token')?.value || '';
 
+  const [adminId] = path;
+
+  // 1. Authoritative delete from MongoDB collection 'users'
   try {
-    const upstream = await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
-    if (upstream.ok) return upstream;
+    const db = await getMongoDb();
+    if (db) {
+      await db.collection('users').deleteOne({ id: adminId, role: 'ADMIN' });
+      // Also remove from settings coAdmins in MongoDB
+      try {
+        await db.collection('settings').updateOne(
+          { id: 'global_settings' },
+          { $pull: { coAdmins: { id: adminId } } } as any
+        );
+      } catch {}
+    }
+  } catch (err: any) {
+    console.warn('[MongoDB Admin Delete Warning]:', err?.message || err);
+  }
 
-    // Fallback: If cPanel backend returns 404, delete from storage
-    const [adminId] = path;
-
-    // Delete from MongoDB
-    try {
-      const db = await getMongoDb();
-      if (db) {
-        await db.collection('users').deleteOne({ id: adminId, role: 'ADMIN' });
-      }
-    } catch {}
-
-    // Delete from backend settings coAdmins
+  // 2. Delete from backend settings coAdmins
+  try {
     const settings = await fetchBackendSettings(token);
     const coAdmins: any[] = settings?.coAdmins || [];
     const updatedCoAdmins = coAdmins.filter((a: any) => a.id !== adminId);
     await saveBackendSettings(token, { coAdmins: updatedCoAdmins });
+  } catch {}
 
-    return NextResponse.json({ success: true, message: 'Administrator permanently removed.' });
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: { message: err?.message || 'Failed to remove administrator.' } }, { status: 500 });
+  // 3. Delete from dynamic in-memory registry
+  removeDynamicAdmin(adminId);
+
+  // 4. Relay delete to upstream backend
+  try {
+    await proxyToBackend(request, `/admin/admins/${path.join('/')}`);
+  } catch {}
+
+  // 5. Update browser cookie vault
+  const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
+  let vaultToken = '';
+  if (vaultCookie) {
+    try {
+      const vaultAdmins = verifyVaultToken(vaultCookie);
+      const updatedVault = vaultAdmins.filter((a: any) => a.id !== adminId);
+      vaultToken = createVaultToken(updatedVault);
+    } catch {}
   }
+
+  const response = NextResponse.json({
+    success: true,
+    message: 'Administrator permanently removed.',
+  });
+
+  if (vaultToken) {
+    response.cookies.set('nextech_coadmins_vault', vaultToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/',
+    });
+  }
+
+  return response;
 }

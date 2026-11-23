@@ -609,13 +609,41 @@ export class DbStore {
   public async syncToMongoIfEmpty(): Promise<void> {
     if (!mongoDb.isConnected()) return;
     try {
+      let needsSync = false;
       const productCol = mongoDb.getCollection('products');
       if (productCol) {
         const count = await productCol.countDocuments({});
         if (count < 300) {
-          console.log('📦 [MongoDB Bootstrapper] MongoDB catalog has fewer than 300 items (found %d). Synchronizing full enterprise catalog...', count);
-          await this.syncAllToMongo();
+          console.log('📦 [MongoDB Bootstrapper] MongoDB catalog has fewer than 300 items (found %d).', count);
+          needsSync = true;
         }
+      }
+
+      const userCol = mongoDb.getCollection('users');
+      if (userCol) {
+        const userCount = await userCol.countDocuments({});
+        const localUsers = this.getCollectionMap('users');
+        if (userCount < localUsers.size || userCount <= 1) {
+          console.log('👥 [MongoDB Bootstrapper] MongoDB users collection has only %d records (local store has %d).', userCount, localUsers.size);
+          needsSync = true;
+        }
+      }
+
+      const categoryCol = mongoDb.getCollection('categories');
+      if (categoryCol) {
+        const catCount = await categoryCol.countDocuments({});
+        if (catCount < 10) needsSync = true;
+      }
+
+      const brandCol = mongoDb.getCollection('brands');
+      if (brandCol) {
+        const brandCount = await brandCol.countDocuments({});
+        if (brandCount < 20) needsSync = true;
+      }
+
+      if (needsSync) {
+        console.log('🔄 [MongoDB Bootstrapper] Initializing authoritative synchronization of all collections to MongoDB Atlas...');
+        await this.syncAllToMongo();
       }
     } catch (err: any) {
       console.warn('[MongoDB Bootstrapper Notice]: %s', err?.message || err);
