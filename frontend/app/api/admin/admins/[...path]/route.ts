@@ -106,21 +106,6 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
         }
       }
 
-      // Update in local users.json if present
-      try {
-        const fs = await import('fs/promises');
-        const p = (await import('path')).resolve(process.cwd(), 'backend', 'data_store', 'users.json');
-        const raw = await fs.readFile(p, 'utf8');
-        const users = JSON.parse(raw);
-        const idx = users.findIndex((u: any) => u.id === adminId);
-        if (idx !== -1) {
-          users[idx].isActive = !users[idx].isActive;
-          users[idx].updatedAt = new Date().toISOString();
-          await fs.writeFile(p, JSON.stringify(users, null, 2), 'utf8');
-          if (!updatedUser) updatedUser = users[idx];
-        }
-      } catch {}
-
       if (updatedUser) {
         return NextResponse.json({
           success: true,
@@ -162,16 +147,6 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     const coAdmins: any[] = settings?.coAdmins || [];
     const updatedCoAdmins = coAdmins.filter((a: any) => a.id !== adminId);
     await saveBackendSettings(token, { coAdmins: updatedCoAdmins });
-
-    // Delete from local users.json
-    try {
-      const fs = await import('fs/promises');
-      const p = (await import('path')).resolve(process.cwd(), 'backend', 'data_store', 'users.json');
-      const raw = await fs.readFile(p, 'utf8');
-      const users = JSON.parse(raw);
-      const filtered = users.filter((u: any) => u.id !== adminId);
-      await fs.writeFile(p, JSON.stringify(filtered, null, 2), 'utf8');
-    } catch {}
 
     return NextResponse.json({ success: true, message: 'Administrator permanently removed.' });
   } catch (err: any) {

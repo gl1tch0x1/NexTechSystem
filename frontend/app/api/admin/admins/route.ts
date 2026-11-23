@@ -285,19 +285,6 @@ export async function POST(request: NextRequest) {
     ];
     await saveBackendSettings(token, { coAdmins: updatedCoAdmins });
 
-    // 3. Local data_store fallback if present
-    try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const p = path.resolve(process.cwd(), 'backend', 'data_store', 'users.json');
-      const raw = await fs.readFile(p, 'utf8');
-      const users = JSON.parse(raw);
-      if (!users.some((u: any) => u.email === cleanEmail || u.username === cleanUsername)) {
-        users.push(newAdmin);
-        await fs.writeFile(p, JSON.stringify(users, null, 2), 'utf8');
-      }
-    } catch {}
-
     // Register dynamically in memory immediately
     registerDynamicAdmin(newAdmin);
 

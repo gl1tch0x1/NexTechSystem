@@ -181,27 +181,7 @@ export function getBundledStoreJson<T = any>(filename: string): T | null {
 }
 
 export async function readLocalStoreJson<T = any>(filename: string): Promise<T | null> {
-  const bundled = getBundledStoreJson<T>(filename);
-  if (bundled) return bundled;
-
-  try {
-    const fs = await import('fs/promises');
-    const path = await import('path');
-    const candidatePaths = [
-      path.resolve(process.cwd(), 'frontend', 'data', filename),
-      path.resolve(process.cwd(), 'data', filename),
-      path.resolve(process.cwd(), 'backend', 'data_store', filename),
-      path.resolve(process.cwd(), '..', 'backend', 'data_store', filename),
-      path.resolve(process.cwd(), 'data_store', filename),
-    ];
-    for (const p of candidatePaths) {
-      try {
-        const raw = await fs.readFile(p, 'utf8');
-        if (raw) return JSON.parse(raw);
-      } catch { }
-    }
-  } catch { }
-  return null;
+  return getBundledStoreJson<T>(filename);
 }
 
 export async function fetchBackendSettings(token?: string) {
@@ -219,30 +199,39 @@ export async function fetchBackendSettings(token?: string) {
     }
   } catch { }
 
-  // Resilient fallback: read from bundled settings.json store
-  try {
-    const local = await readLocalStoreJson<any[]>('settings.json');
-    if (Array.isArray(local)) {
-      const global = local.find(s => s.id === 'global_settings') || local[0];
-      if (global) return global;
-    }
-  } catch { }
-
   return null;
 }
 
-export async function saveBackendSettings(token: string | undefined, payload: any) {
+export async function saveBackendSettings(token: string | undefined, payload: { coAdmins?: any[] }) {
   try {
     const adminToken = token || getInternalAdminToken();
     const target = `${getBackendApiUrl()}/api/admin/settings`;
+
+    // Strictly sanitize and validate incoming payload to prevent CWE-200 file-access-to-http
+    const safeCoAdmins = Array.isArray(payload?.coAdmins)
+      ? payload.coAdmins.map((a: any) => ({
+          id: String(a?.id || ''),
+          name: String(a?.name || ''),
+          email: String(a?.email || '').toLowerCase().trim(),
+          username: String(a?.username || '').toLowerCase().trim(),
+          role: 'ADMIN',
+          phone: String(a?.phone || ''),
+          avatar: String(a?.avatar || ''),
+          isActive: a?.isActive !== false,
+          createdAt: String(a?.createdAt || new Date().toISOString()),
+          updatedAt: String(a?.updatedAt || new Date().toISOString()),
+        }))
+      : [];
+
     const res = await fetch(target, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${adminToken}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ coAdmins: safeCoAdmins }),
       cache: 'no-store',
+      signal: AbortSignal.timeout(3000),
     });
     return res.ok;
   } catch { }
