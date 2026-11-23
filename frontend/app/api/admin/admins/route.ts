@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
         { $set: { ...newAdmin } },
         { upsert: true }
       );
-      console.log(`[MongoDB] Created/updated admin ${cleanEmail} directly in nextech_ecommerce.users`);
+      console.log(`[MongoDB] Created/updated admin directly in nextech_ecommerce.users (id: ${newAdmin.id})`);
 
       // Clear from deleted_admins registry if previously removed
       try {
