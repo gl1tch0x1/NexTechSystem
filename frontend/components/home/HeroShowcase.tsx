@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Product, HeroHighlight } from '@/types';
@@ -13,7 +13,9 @@ import {
   Clock,
   ExternalLink,
   Check,
-  ChevronUp
+  ChevronUp,
+  X,
+  ZoomIn
 } from 'lucide-react';
 import { getAuthenticProductImage, DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 
@@ -50,9 +52,22 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
   const [selectedTabId, setSelectedTabId] = useState<string>(activeHighlights[0]?.id || '');
   const [isHovered, setIsHovered] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const { addToCart } = useCart();
   const { formatPrice, convertPrice, currentCurrency } = useCurrency();
+
+  // Close lightbox on Escape key
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsLightboxOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLightboxOpen]);
 
   // Interactive 3D perspective tilt & parallax physics
   const cardRef = useRef<HTMLDivElement>(null);
@@ -246,7 +261,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 transformStyle: 'preserve-3d',
                 perspective: 1000,
               }}
-              className="w-full max-w-[500px] h-[480px] sm:h-[520px] relative rounded-3xl overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.55)] transition-colors duration-200 select-none group"
+              className="w-full max-w-[540px] h-[480px] sm:h-[520px] relative rounded-3xl overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.55)] transition-colors duration-200 select-none group"
             >
               {/* Diffused Depth-of-Field Blur Ring: focuses 100% on foreground hardware */}
               <div className="absolute inset-8 rounded-3xl bg-slate-500/5 dark:bg-white/5 backdrop-blur-3xl pointer-events-none" />
@@ -297,7 +312,11 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
               </div>
 
               {/* Full-Card Immersive Hardware Visual Stage with 3D Parallax & Depth */}
-              <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-8 pt-14 pb-14 pointer-events-none">
+              <div
+                onClick={() => setIsLightboxOpen(true)}
+                className="absolute inset-0 flex items-center justify-center p-6 sm:p-8 pt-14 pb-14 pointer-events-auto cursor-zoom-in"
+                title="Click to inspect full-resolution hardware image"
+              >
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={selectedTabId}
@@ -322,6 +341,17 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                     className="w-full h-full object-contain filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.18)] dark:drop-shadow-[0_25px_45px_rgba(0,0,0,0.75)] select-none pointer-events-none"
                   />
                 </AnimatePresence>
+
+                {/* Subtle visual zoom affordance badge on hover */}
+                <motion.div
+                  initial={false}
+                  animate={{ opacity: isHovered ? 0.9 : 0, scale: isHovered ? 1 : 0.85 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute bottom-16 right-4 px-2.5 py-1 rounded-full bg-slate-900/75 dark:bg-white/10 backdrop-blur-md text-white text-[10px] font-medium flex items-center gap-1 border border-white/20 pointer-events-none shadow-md"
+                >
+                  <ZoomIn className="w-3 h-3" />
+                  <span>Click to expand</span>
+                </motion.div>
               </div>
 
               {/* Bottom Slide-Up Hardware Intelligence & Telemetry Drawer */}
@@ -440,6 +470,110 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
           </div>
         </div>
       </div>
+
+      {/* High-Resolution Hardware Inspection Lightbox Modal */}
+      <AnimatePresence>
+        {isLightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            onClick={() => setIsLightboxOpen(false)}
+            className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-2xl flex flex-col items-center justify-between p-4 sm:p-6 md:p-8 cursor-zoom-out select-none"
+          >
+            {/* Top Bar */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-5xl flex items-center justify-between gap-4 py-2.5 px-4 rounded-2xl bg-white/10 dark:bg-slate-900/60 backdrop-blur-xl border border-white/15 text-white z-10 cursor-default"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="px-2.5 py-0.5 rounded-md bg-blue-600 text-[10px] font-mono font-bold tracking-wider uppercase">
+                  High-Res OEM
+                </span>
+                <div className="min-w-0">
+                  <h4 className="font-heading text-sm sm:text-base font-bold truncate text-white">
+                    {displayName}
+                  </h4>
+                  <p className="text-[11px] text-slate-300 dark:text-slate-400 truncate">
+                    {currentHighlight.brand} • {currentHighlight.category}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsLightboxOpen(false)}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  title="Close (Esc)"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Central High-Resolution Inspection Stage */}
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-5xl w-full h-[62vh] sm:h-[70vh] flex items-center justify-center p-4 cursor-default select-none my-auto"
+            >
+              <img
+                src={resolvedImage}
+                alt={displayName}
+                className="max-w-full max-h-full object-contain filter drop-shadow-[0_30px_60px_rgba(0,0,0,0.85)]"
+              />
+            </motion.div>
+
+            {/* Bottom Bar: Specs & Actions */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-5xl flex flex-wrap items-center justify-between gap-3 py-3 px-5 rounded-2xl bg-white/10 dark:bg-slate-900/60 backdrop-blur-xl border border-white/15 text-white z-10 cursor-default"
+            >
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs text-slate-300">Authorized Price:</span>
+                <span className="font-mono text-base sm:text-lg font-bold text-white">
+                  AED {formattedCurrentAmount}
+                </span>
+                <span className="text-[11px] text-emerald-400 ml-2 font-medium font-mono">
+                  • In Stock ({stockCount} units)
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  {justAdded ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Added!</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Add to Order</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsLightboxOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white font-medium text-xs transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
