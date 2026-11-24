@@ -277,18 +277,42 @@ export function Navbar() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [expandedMobileCategory, setExpandedMobileCategory] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currencyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currencyRef = useRef<HTMLDivElement>(null);
 
   const activeCategoryData = useMemo(
     () => NAV_CATEGORIES.find((c) => c.id === activeCategory),
     [activeCategory]
   );
 
+  const handleCurrencyMouseEnter = () => {
+    if (currencyTimeoutRef.current) {
+      clearTimeout(currencyTimeoutRef.current);
+      currencyTimeoutRef.current = null;
+    }
+    setCurrencyDropdownOpen(true);
+  };
+
+  const handleCurrencyMouseLeave = () => {
+    if (currencyTimeoutRef.current) {
+      clearTimeout(currencyTimeoutRef.current);
+    }
+    currencyTimeoutRef.current = setTimeout(() => {
+      setCurrencyDropdownOpen(false);
+    }, 180);
+  };
+
   const handleMouseEnter = (catId: string) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    setActiveCategory(catId);
+    const cat = NAV_CATEGORIES.find((c) => c.id === catId);
+    if (cat?.sections && cat.sections.length > 0) {
+      setActiveCategory(catId);
+    } else {
+      setActiveCategory(null);
+    }
   };
 
   const handleMouseLeave = () => {
@@ -297,7 +321,7 @@ export function Navbar() {
     }
     timeoutRef.current = setTimeout(() => {
       setActiveCategory(null);
-    }, 160);
+    }, 200);
   };
 
   const handleSubmenuMouseEnter = () => {
@@ -309,41 +333,63 @@ export function Navbar() {
 
   useEffect(() => {
     setActiveCategory(null);
+    setCurrencyDropdownOpen(false);
     setMobileMenuOpen(false);
+    if (currencyTimeoutRef.current) clearTimeout(currencyTimeoutRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, [pathname]);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
+        setCurrencyDropdownOpen(false);
+      }
+    };
+    if (currencyDropdownOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [currencyDropdownOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setActiveCategory(null);
+        setCurrencyDropdownOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (currencyTimeoutRef.current) clearTimeout(currencyTimeoutRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   const submenuVariants = {
     hidden: {
       opacity: 0,
-      y: shouldReduceMotion ? 0 : -8,
-      scale: shouldReduceMotion ? 1 : 0.98,
+      y: shouldReduceMotion ? 0 : -10,
+      scale: shouldReduceMotion ? 1 : 0.985,
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
       transition: {
-        duration: shouldReduceMotion ? 0.05 : 0.2,
+        duration: shouldReduceMotion ? 0.05 : 0.22,
         ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
       },
     },
     exit: {
       opacity: 0,
-      y: shouldReduceMotion ? 0 : -5,
-      scale: shouldReduceMotion ? 1 : 0.99,
+      y: shouldReduceMotion ? 0 : -8,
+      scale: shouldReduceMotion ? 1 : 0.985,
       transition: {
-        duration: shouldReduceMotion ? 0.05 : 0.16,
-        ease: 'easeIn' as const,
+        duration: shouldReduceMotion ? 0.05 : 0.18,
+        ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
       },
     },
   };
@@ -426,14 +472,22 @@ export function Navbar() {
 
         {/* Right Navigation Actions (Sleek Modern Segment) */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          {/* Multi-Currency FX Selector (Enterprise Switcher - visible on sm+) */}
-          <div className="relative hidden sm:block">
+          {/* Multi-Currency FX Selector (Enterprise Switcher - Hover-in to show, hover-out to close with Framer Motion) */}
+          <div
+            ref={currencyRef}
+            className="relative hidden sm:block"
+            onMouseEnter={handleCurrencyMouseEnter}
+            onMouseLeave={handleCurrencyMouseLeave}
+          >
             <button
               type="button"
-              onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
+              onClick={() => setCurrencyDropdownOpen((prev) => !prev)}
+              onFocus={handleCurrencyMouseEnter}
               className="p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 shrink-0 cursor-pointer group"
               title={`Active Currency: ${currentCurrency.name} (${currentCurrency.code})`}
               aria-label="Currency Selector"
+              aria-expanded={currencyDropdownOpen}
+              aria-haspopup="listbox"
             >
               {currentCurrency.code === 'AED' ? (
                 <DirhamSymbol
@@ -446,22 +500,34 @@ export function Navbar() {
                   {currentCurrency.symbol || currentCurrency.code}
                 </span>
               )}
-              <ChevronDown className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200 ${currencyDropdownOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200 ${
+                  currencyDropdownOpen ? 'rotate-180 text-tech-blue dark:text-cyan-400' : ''
+                }`}
+              />
             </button>
 
-            {currencyDropdownOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setCurrencyDropdownOpen(false)}
-                />
-                <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95">
+            <AnimatePresence>
+              {currencyDropdownOpen && (
+                <motion.div
+                  key="currency-dropdown-card"
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.95 }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0.05 : 0.2,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  onMouseEnter={handleCurrencyMouseEnter}
+                  onMouseLeave={handleCurrencyMouseLeave}
+                  className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl py-2 z-50 origin-top-right overflow-hidden before:absolute before:-top-3 before:left-0 before:right-0 before:h-3 before:content-['']"
+                >
                   <div className="px-3.5 py-1.5 text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <span>Select Currency</span>
-                    <span className="text-[9px] font-mono text-tech-blue">GCC & Global</span>
+                    <span className="text-[9px] font-mono text-tech-blue font-bold">GCC & Global</span>
                   </div>
-                  <div className="max-h-64 overflow-y-auto py-1">
-                    {availableCurrencies.map(cur => {
+                  <div className="max-h-64 overflow-y-auto py-1 custom-scrollbar">
+                    {availableCurrencies.map((cur) => {
                       const isSelected = cur.code === currentCurrency.code;
                       return (
                         <button
@@ -471,17 +537,21 @@ export function Navbar() {
                             setCurrency(cur.code);
                             setCurrencyDropdownOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3.5 py-2 text-xs transition-colors cursor-pointer ${
+                          className={`w-full flex items-center justify-between px-3.5 py-2 text-xs transition-colors cursor-pointer group/cur ${
                             isSelected
-                              ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold'
+                              ? 'bg-slate-100 dark:bg-slate-800/90 text-slate-900 dark:text-white font-bold'
                               : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="text-base leading-none">{cur.flag}</span>
+                            <span className="text-base leading-none transition-transform duration-150 group-hover/cur:scale-110">
+                              {cur.flag}
+                            </span>
                             <div className="text-left">
                               <div className="font-bold text-xs leading-none">{cur.code}</div>
-                              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-normal mt-0.5">{cur.name}</div>
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-normal mt-0.5">
+                                {cur.name}
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -493,16 +563,19 @@ export function Navbar() {
                               )}
                             </span>
                             {isSelected && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-tech-blue" />
+                              <motion.span
+                                layoutId="active-currency-dot"
+                                className="w-1.5 h-1.5 rounded-full bg-tech-blue"
+                              />
                             )}
                           </div>
                         </button>
                       );
                     })}
                   </div>
-                </div>
-              </>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Mobile Quick Search Button */}
@@ -850,15 +923,16 @@ export function Navbar() {
               exit="exit"
               onMouseEnter={handleSubmenuMouseEnter}
               onMouseLeave={handleMouseLeave}
-              className="absolute top-full left-0 right-0 z-50 pt-1 pointer-events-auto origin-top"
+              className="absolute top-full left-0 right-0 z-50 pt-1 pointer-events-auto origin-top before:absolute before:-top-3 before:left-0 before:right-0 before:h-3 before:content-['']"
             >
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-white/98 dark:bg-[#0B101D]/98 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-2xl shadow-2xl shadow-slate-900/10 dark:shadow-black/60 p-6 overflow-hidden">
                   <motion.div
                     key={activeCategoryData.id}
-                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: shouldReduceMotion ? 0.05 : 0.16, ease: 'easeOut' }}
+                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                    transition={{ duration: shouldReduceMotion ? 0.05 : 0.18, ease: [0.16, 1, 0.3, 1] }}
                     className="grid grid-cols-12 gap-6"
                   >
                     {/* Left & Middle: Category Sections */}
