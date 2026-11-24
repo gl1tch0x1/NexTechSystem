@@ -7,17 +7,13 @@ import { Product, HeroHighlight } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
 import {
-  Cpu,
-  Zap,
-  Server,
-  HardDrive,
   ShieldCheck,
   ArrowRight,
-  Layers,
   ShoppingCart,
   Clock,
   ExternalLink,
-  Check
+  Check,
+  ChevronUp
 } from 'lucide-react';
 import { getAuthenticProductImage, DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 
@@ -26,13 +22,6 @@ interface HeroShowcaseProps {
   highlights?: HeroHighlight[];
 }
 
-const ICON_MAP: Record<string, React.ElementType> = {
-  Zap,
-  Cpu,
-  Server,
-  HardDrive,
-  Layers,
-};
 
 export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   const activeHighlights: HeroHighlight[] = (highlights && highlights.length > 0)
@@ -60,6 +49,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   }
 
   const [selectedTabId, setSelectedTabId] = useState<string>(activeHighlights[0]?.id || '');
+  const [isHovered, setIsHovered] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const { addToCart } = useCart();
   const { formatPrice, convertPrice, currentCurrency } = useCurrency();
@@ -132,9 +122,8 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
     <section className="relative overflow-hidden bg-white dark:bg-[#060A13] border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-200">
       {/* Precision Engineered Background Grid Overlay */}
       <div 
-        className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" 
+        className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" 
       />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(37,99,235,0.08),transparent_100%)] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -146,15 +135,15 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
             className="lg:col-span-6 space-y-6"
           >
             {/* Enterprise Tag */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-cyan-400 text-xs font-mono font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-cyan-400" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-mono font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
               <span>GCC AUTHORIZED ENTERPRISE HARDWARE</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="font-heading text-[clamp(2.4rem,4.8vw,3.85rem)] font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.06]">
               Mission-Critical <br />
-              <span className="text-blue-600 dark:text-cyan-400">
+              <span className="text-blue-600 dark:text-blue-400">
                 Compute Infrastructure.
               </span>
             </h1>
@@ -217,161 +206,194 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
           {/* Right Column: Unified Sleek Hardware Showcase Terminal */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
-            <div className="w-full max-w-[480px] relative rounded-xl p-4 sm:p-5 bg-white dark:bg-[#0B101D] border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all space-y-3">
-              {/* Top Navigation Bar: Precision Architectural Segmented Switcher */}
-              <div className="flex items-center justify-between gap-2 pb-0.5">
-                <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar max-w-full relative">
+            <div
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              className="w-full max-w-[500px] h-[480px] sm:h-[520px] relative rounded-2xl overflow-hidden bg-[#0A0E17] border border-slate-800 shadow-xl transition-all select-none group"
+            >
+              {/* Natural Realistic Soft Neutral Studio Vignette */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.035)_0%,transparent_70%)] pointer-events-none" />
+
+              {/* Floating Minimalist Category Switcher & Stock Indicator */}
+              <div className="absolute top-3.5 inset-x-3.5 z-20 flex items-center justify-between gap-2 pointer-events-auto">
+                <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-sm overflow-x-auto no-scrollbar max-w-[calc(100%-115px)] relative">
                   {activeHighlights.map(item => {
-                    const ItemIcon = ICON_MAP[item.iconName] || Zap;
                     const isActive = item.id === selectedTabId;
                     return (
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => setSelectedTabId(item.id)}
-                        className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-colors cursor-pointer shrink-0 z-10 ${isActive
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTabId(item.id);
+                        }}
+                        className={`relative px-3 py-1 rounded-md text-[11px] font-mono font-medium transition-colors cursor-pointer shrink-0 z-10 ${isActive
                           ? 'text-white font-semibold'
-                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                          : 'text-slate-400 hover:text-slate-200'
                           }`}
                       >
                         {isActive && (
                           <motion.span
                             layoutId="activeHeroTabIndicator"
-                            className="absolute inset-0 rounded-md bg-blue-600 shadow-xs -z-10"
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                            className="absolute inset-0 rounded-md bg-blue-600 shadow-sm -z-10"
+                            transition={{ type: 'spring', stiffness: 420, damping: 28 }}
                           />
                         )}
-                        <ItemIcon className="w-3 h-3" />
                         <span>{item.tabLabel}</span>
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="shrink-0 flex items-center gap-1.5 ml-auto text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-800 text-[11px] font-mono font-medium text-emerald-400 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   <span>In Stock ({stockCount})</span>
                 </div>
               </div>
 
-              {/* Hardware Visual Presentation Stage with smooth tab crossfade */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={selectedTabId}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.22, ease: 'easeOut' }}
-                  className="space-y-3"
+              {/* Top Right Realistic Spec Tag */}
+              <div className="absolute top-14 right-3.5 z-10 pointer-events-none">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-slate-300 text-[10px] font-mono font-semibold shadow-sm">
+                  <span>{currentHighlight.powerRating}</span>
+                </span>
+              </div>
+
+              {/* Full-Card Immersive Hardware Visual Stage */}
+              <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-8 pt-14 pb-14 pointer-events-none">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={selectedTabId}
+                    src={resolvedImage}
+                    alt={displayName}
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    animate={{
+                      opacity: 1,
+                      scale: isHovered ? 1.08 : 1,
+                      y: isHovered ? -14 : 0,
+                    }}
+                    exit={{ opacity: 0, scale: 0.94 }}
+                    transition={{
+                      scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                      y: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                      opacity: { duration: 0.22 },
+                    }}
+                    className="w-full h-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.6)] select-none pointer-events-none"
+                  />
+                </AnimatePresence>
+              </div>
+
+              {/* Bottom Slide-Up Hardware Intelligence & Telemetry Drawer */}
+              <motion.div
+                initial={false}
+                animate={{
+                  y: isHovered ? 0 : 'calc(100% - 48px)',
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 350,
+                  damping: 32,
+                  mass: 0.8,
+                }}
+                className="absolute inset-x-0 bottom-0 z-30 rounded-b-2xl bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 shadow-2xl p-4 sm:p-5 text-white pointer-events-auto"
+              >
+                {/* Always-visible top handle bar */}
+                <div
+                  onClick={() => setIsHovered(prev => !prev)}
+                  className="flex items-center justify-between gap-3 pb-1 cursor-pointer"
                 >
-                  <div className="relative aspect-[16/9] max-h-[220px] rounded-lg bg-slate-950 border border-slate-800 overflow-hidden group shadow-inner flex items-center justify-center">
-                    {/* Ambient Radial Spotlight */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.22)_0%,_transparent_70%)] pointer-events-none" />
-
-                    {/* Top Right Floating Power Tag */}
-                    <div className="absolute top-2.5 right-2.5 z-10">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900/85 border border-slate-700/80 text-amber-300 text-[9.5px] font-mono font-bold backdrop-blur-md shadow-xs">
-                        <Zap className="w-2.5 h-2.5" />
-                        <span>{currentHighlight.powerRating}</span>
-                      </span>
-                    </div>
-
-                    {/* Hardware Photo Canvas */}
-                    <img
-                      src={resolvedImage}
-                      alt={displayName}
-                      className="w-full h-full object-contain p-2 filter brightness-105 contrast-105 group-hover:scale-102 transition-transform duration-500 rounded-xl"
-                    />
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h3 className="font-heading text-xs sm:text-[13px] font-semibold text-slate-100 truncate tracking-tight">
+                      {displayName}
+                    </h3>
                   </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="font-mono text-xs sm:text-sm font-bold text-white whitespace-nowrap">
+                      AED {formattedCurrentAmount}
+                    </span>
+                    <motion.div
+                      animate={{ rotate: isHovered ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <ChevronUp className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                    </motion.div>
+                  </div>
+                </div>
 
-                  {/* Hardware Metadata & Title/Price Row */}
-                  <div className="space-y-0.5">
-                    {/* Brand & Category Breadcrumb / GCC Stock */}
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] sm:text-[10.5px] font-semibold tracking-normal text-blue-600 dark:text-cyan-400 truncate max-w-[260px]">
-                        {currentHighlight.brand} • {currentHighlight.category}
-                      </span>
-                      <span className="text-[10px] sm:text-[10.5px] font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
+                {/* Expanded Hardware Specs & Actions Drawer */}
+                <motion.div
+                  animate={{ opacity: isHovered ? 1 : 0 }}
+                  transition={{ duration: 0.22, delay: isHovered ? 0.06 : 0 }}
+                  className="space-y-3 pt-2"
+                >
+                  {/* Category & Official Stock Badge */}
+                  <div className="flex items-center justify-between gap-2 text-[10.5px]">
+                    <span className="font-semibold text-slate-400 truncate max-w-[240px]">
+                      {currentHighlight.brand} • {currentHighlight.category}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {originalPrice && originalPrice > currentPrice && (
+                        <span className="font-mono text-slate-500 line-through">
+                          {formatPrice(originalPrice)}
+                        </span>
+                      )}
+                      <span className="font-medium text-emerald-400 shrink-0">
                         Official GCC Stock
                       </span>
                     </div>
-
-                    {/* Title and Price Side-by-Side */}
-                    <div className="flex items-start justify-between gap-3 pt-0.5">
-                      <h3
-                        className="font-heading text-[13.5px] sm:text-sm font-semibold text-slate-800 dark:text-slate-100 tracking-tight leading-snug line-clamp-1 flex-1 min-w-0"
-                        title={displayName}
-                      >
-                        {displayName}
-                      </h3>
-
-                      <div className="text-right shrink-0">
-                        <div className="font-mono text-[15px] sm:text-base font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap leading-none">
-                          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 mr-1">
-                            AED
-                          </span>
-                          {formattedCurrentAmount}
-                        </div>
-                        {originalPrice && originalPrice > currentPrice && (
-                          <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 line-through whitespace-nowrap mt-0.5">
-                            {formatPrice(originalPrice)}
-                          </div>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
-                  {/* 4 Separate Technical Spec Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
+                  {/* 4 Technical Spec Cards in 2x2 grid */}
+                  <div className="grid grid-cols-2 gap-1.5 pt-0.5">
                     {currentHighlight.specs?.map((spec, i) => (
                       <div
                         key={i}
-                        className="p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 text-xs flex flex-col justify-center min-w-0"
+                        className="p-1.5 px-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex flex-col justify-center min-w-0"
                       >
-                        <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium">
+                        <span className="text-[9.5px] text-slate-400 font-medium truncate">
                           {spec.label}
                         </span>
-                        <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px] mt-0.5 truncate tracking-tight font-sans" title={spec.value}>
+                        <span className="font-bold text-slate-200 text-[11px] mt-0.5 truncate tracking-tight font-sans" title={spec.value}>
                           {spec.value}
                         </span>
                       </div>
                     ))}
                   </div>
+
+                  {/* Action Buttons Row */}
+                  <div className="pt-1 flex items-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleAddToCart}
+                      className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${
+                        justAdded
+                          ? 'bg-emerald-600 text-white shadow-emerald-600/30'
+                          : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/25'
+                      }`}
+                    >
+                      {justAdded ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Added to Order!</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="w-3.5 h-3.5" />
+                          <span>Add to Order ({formatPrice(currentPrice)})</span>
+                        </>
+                      )}
+                    </motion.button>
+
+                    <Link
+                      href={matchedProduct?.slug ? `/products/${matchedProduct.slug}` : '/products'}
+                      className="py-2.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-slate-800 shadow-xs hover:border-slate-700 hover:text-white"
+                    >
+                      <span>Datasheet</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
                 </motion.div>
-              </AnimatePresence>
-
-              {/* Action Buttons Bar */}
-              <div className="pt-1.5 flex items-center gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleAddToCart}
-                  className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${justAdded
-                    ? 'bg-emerald-600 text-white scale-101 shadow-emerald-600/25'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-md'
-                    }`}
-                >
-                  {justAdded ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Added to Order!</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-3.5 h-3.5" />
-                      <span>Add to Order ({formatPrice(currentPrice)})</span>
-                    </>
-                  )}
-                </motion.button>
-
-                <Link
-                  href={matchedProduct?.slug ? `/products/${matchedProduct.slug}` : '/products'}
-                  className="py-2.5 px-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs hover:scale-101 active:scale-98"
-                >
-                  <span>Datasheet</span>
-                  <ExternalLink className="w-3 h-3" />
-                </Link>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
