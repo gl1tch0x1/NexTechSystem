@@ -354,11 +354,11 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 </motion.div>
               </div>
 
-              {/* Bottom Slide-Up Hardware Intelligence & Telemetry Drawer */}
+              {/* Bottom Slide-Up Hardware Intelligence & Telemetry Drawer with Frosted Glassmorphic Depth */}
               <motion.div
                 initial={false}
                 animate={{
-                  y: isHovered ? 0 : 'calc(100% - 50px)',
+                  y: isHovered ? 0 : 'calc(100% - 54px)',
                 }}
                 transition={{
                   type: 'spring',
@@ -366,15 +366,21 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   damping: 32,
                   mass: 0.8,
                 }}
-                className="absolute inset-x-0 bottom-0 z-30 rounded-b-3xl bg-white/85 dark:bg-slate-950/88 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-15px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-15px_40px_rgba(0,0,0,0.7)] p-4 sm:p-5 text-slate-900 dark:text-white pointer-events-auto"
+                className="absolute inset-x-0 bottom-0 z-30 rounded-b-3xl bg-white/45 dark:bg-slate-950/55 backdrop-blur-3xl border-t border-white/60 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_-15px_35px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_-20px_45px_rgba(0,0,0,0.6)] p-4 sm:p-5 text-slate-900 dark:text-white pointer-events-auto overflow-hidden"
               >
+                {/* Internal Frosted Gradient Glow */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/20 to-white/40 dark:from-white/5 dark:via-transparent dark:to-slate-950/40 pointer-events-none rounded-b-3xl -z-10" />
+
+                {/* Micro Grab Handle Indicator */}
+                <div className="w-9 h-1 rounded-full bg-slate-300/80 dark:bg-slate-600/80 mx-auto -mt-1 mb-2.5 transition-opacity" />
+
                 {/* Always-visible top handle bar */}
                 <div
                   onClick={() => setIsHovered(prev => !prev)}
-                  className="flex items-center justify-between gap-3 pb-1 cursor-pointer"
+                  className="flex items-center justify-between gap-3 pb-1 cursor-pointer select-none"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <h3 className="font-heading text-xs sm:text-[13px] font-bold text-slate-900 dark:text-slate-100 truncate tracking-tight">
+                    <h3 className="font-heading text-xs sm:text-[13px] font-bold text-slate-900 dark:text-slate-100 truncate tracking-tight drop-shadow-xs">
                       {displayName}
                     </h3>
                   </div>
@@ -399,7 +405,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 >
                   {/* Category & Official Stock Badge */}
                   <div className="flex items-center justify-between gap-2 text-[10.5px]">
-                    <span className="font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[240px]">
+                    <span className="font-semibold text-slate-600 dark:text-slate-400 truncate max-w-[240px]">
                       {currentHighlight.brand} • {currentHighlight.category}
                     </span>
                     <div className="flex items-center gap-2">
@@ -408,18 +414,18 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                           {formatPrice(originalPrice)}
                         </span>
                       )}
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
                         Official GCC Stock
                       </span>
                     </div>
                   </div>
 
-                  {/* 4 Technical Spec Cards in 2x2 grid */}
+                  {/* 4 Technical Spec Cards in 2x2 grid - Frosted Translucent Glass */}
                   <div className="grid grid-cols-2 gap-1.5 pt-0.5">
                     {currentHighlight.specs?.map((spec, i) => (
                       <div
                         key={i}
-                        className="p-1.5 px-2.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/70 text-xs flex flex-col justify-center min-w-0"
+                        className="p-1.5 px-2.5 rounded-xl bg-white/55 dark:bg-slate-900/45 backdrop-blur-md border border-white/70 dark:border-slate-800/70 text-xs flex flex-col justify-center min-w-0 shadow-[0_2px_8px_rgba(0,0,0,0.03)] dark:shadow-none hover:bg-white/75 dark:hover:bg-slate-800/60 transition-all"
                       >
                         <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium truncate">
                           {spec.label}
@@ -458,7 +464,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
                     <Link
                       href={matchedProduct?.slug ? `/products/${matchedProduct.slug}` : '/products'}
-                      className="py-2.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700"
+                      className="py-2.5 px-3.5 rounded-xl bg-white/60 hover:bg-white/80 dark:bg-slate-900/60 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-white/70 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 backdrop-blur-md"
                     >
                       <span>Datasheet</span>
                       <ExternalLink className="w-3 h-3" />
