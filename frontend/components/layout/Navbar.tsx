@@ -299,7 +299,7 @@ export function Navbar() {
     }
     currencyTimeoutRef.current = setTimeout(() => {
       setCurrencyDropdownOpen(false);
-    }, 180);
+    }, 110);
   };
 
   const handleMouseEnter = (catId: string) => {
@@ -321,7 +321,7 @@ export function Navbar() {
     }
     timeoutRef.current = setTimeout(() => {
       setActiveCategory(null);
-    }, 200);
+    }, 130);
   };
 
   const handleSubmenuMouseEnter = () => {
@@ -371,25 +371,30 @@ export function Navbar() {
   const submenuVariants = {
     hidden: {
       opacity: 0,
-      y: shouldReduceMotion ? 0 : -10,
+      y: shouldReduceMotion ? 0 : -8,
       scale: shouldReduceMotion ? 1 : 0.985,
+      filter: shouldReduceMotion ? 'none' : 'blur(4px)',
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
+      filter: 'blur(0px)',
       transition: {
-        duration: shouldReduceMotion ? 0.05 : 0.22,
-        ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+        type: 'spring' as const,
+        stiffness: 420,
+        damping: 26,
+        mass: 0.75,
       },
     },
     exit: {
       opacity: 0,
-      y: shouldReduceMotion ? 0 : -8,
+      y: shouldReduceMotion ? 0 : -6,
       scale: shouldReduceMotion ? 1 : 0.985,
+      filter: shouldReduceMotion ? 'none' : 'blur(3px)',
       transition: {
-        duration: shouldReduceMotion ? 0.05 : 0.18,
-        ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+        duration: shouldReduceMotion ? 0.05 : 0.12,
+        ease: [0.32, 0, 0.67, 0] as [number, number, number, number],
       },
     },
   };
@@ -479,8 +484,11 @@ export function Navbar() {
             onMouseEnter={handleCurrencyMouseEnter}
             onMouseLeave={handleCurrencyMouseLeave}
           >
-            <button
+            <motion.button
               type="button"
+              whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
               onClick={() => setCurrencyDropdownOpen((prev) => !prev)}
               onFocus={handleCurrencyMouseEnter}
               className="p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 shrink-0 cursor-pointer group"
@@ -502,21 +510,23 @@ export function Navbar() {
               )}
               <ChevronDown
                 className={`w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200 ${
-                  currencyDropdownOpen ? 'rotate-180 text-tech-blue dark:text-cyan-400' : ''
+                  currencyDropdownOpen ? 'rotate-180 text-tech-blue dark:text-cyan-400 scale-110' : ''
                 }`}
               />
-            </button>
+            </motion.button>
 
             <AnimatePresence>
               {currencyDropdownOpen && (
                 <motion.div
                   key="currency-dropdown-card"
-                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.95 }}
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.95, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 5, scale: 0.96, filter: 'blur(2px)' }}
                   transition={{
-                    duration: shouldReduceMotion ? 0.05 : 0.2,
-                    ease: [0.16, 1, 0.3, 1],
+                    type: 'spring',
+                    stiffness: 440,
+                    damping: 27,
+                    mass: 0.7,
                   }}
                   onMouseEnter={handleCurrencyMouseEnter}
                   onMouseLeave={handleCurrencyMouseLeave}
@@ -530,9 +540,12 @@ export function Navbar() {
                     {availableCurrencies.map((cur) => {
                       const isSelected = cur.code === currentCurrency.code;
                       return (
-                        <button
+                        <motion.button
                           key={cur.code}
                           type="button"
+                          whileHover={shouldReduceMotion ? undefined : { x: 3 }}
+                          whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                           onClick={() => {
                             setCurrency(cur.code);
                             setCurrencyDropdownOpen(false);
@@ -544,7 +557,7 @@ export function Navbar() {
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="text-base leading-none transition-transform duration-150 group-hover/cur:scale-110">
+                            <span className="text-base leading-none transition-transform duration-150 group-hover/cur:scale-115">
                               {cur.flag}
                             </span>
                             <div className="text-left">
@@ -569,7 +582,7 @@ export function Navbar() {
                               />
                             )}
                           </div>
-                        </button>
+                        </motion.button>
                       );
                     })}
                   </div>
@@ -929,10 +942,15 @@ export function Navbar() {
                 <div className="bg-white/98 dark:bg-[#0B101D]/98 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-2xl shadow-2xl shadow-slate-900/10 dark:shadow-black/60 p-6 overflow-hidden">
                   <motion.div
                     key={activeCategoryData.id}
-                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                    transition={{ duration: shouldReduceMotion ? 0.05 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, filter: 'blur(4px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4, filter: 'blur(2px)' }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 420,
+                      damping: 26,
+                      mass: 0.75,
+                    }}
                     className="grid grid-cols-12 gap-6"
                   >
                     {/* Left & Middle: Category Sections */}
@@ -944,43 +962,44 @@ export function Navbar() {
                           </div>
                           <div className="space-y-0.5">
                             {section.links.map((link) => (
-                              <Link
+                              <motion.div
                                 key={link.title}
-                                href={link.href}
-                                onClick={() => setActiveCategory(null)}
-                                className="group/item flex items-start gap-2.5 p-2 rounded-xl transition-colors duration-150 hover:bg-slate-100/80 dark:hover:bg-slate-800/70 cursor-pointer block"
+                                whileHover={shouldReduceMotion ? undefined : { x: 4 }}
+                                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                               >
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5">
-                                    <motion.span
-                                      className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover/item:text-tech-blue dark:group-hover/item:text-cyan-400 transition-colors duration-150 inline-block"
-                                      whileHover={shouldReduceMotion ? undefined : { x: 3 }}
-                                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                                    >
-                                      {link.title}
-                                    </motion.span>
-                                    {link.badge && (
-                                      <span
-                                        className={`text-[9.5px] font-mono font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider shrink-0 ${
-                                          link.badgeColor === 'amber'
-                                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50'
-                                            : link.badgeColor === 'emerald'
-                                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50'
-                                            : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-cyan-400 border border-blue-200 dark:border-blue-900/50'
-                                        }`}
-                                      >
-                                        {link.badge}
+                                <Link
+                                  href={link.href}
+                                  onClick={() => setActiveCategory(null)}
+                                  className="group/item flex items-start gap-2.5 p-2 rounded-xl transition-colors duration-150 hover:bg-slate-100/90 dark:hover:bg-slate-800/80 cursor-pointer block"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover/item:text-tech-blue dark:group-hover/item:text-cyan-400 transition-colors duration-150 inline-block">
+                                        {link.title}
                                       </span>
+                                      {link.badge && (
+                                        <span
+                                          className={`text-[9.5px] font-mono font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider shrink-0 ${
+                                            link.badgeColor === 'amber'
+                                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50'
+                                              : link.badgeColor === 'emerald'
+                                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50'
+                                              : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-cyan-400 border border-blue-200 dark:border-blue-900/50'
+                                          }`}
+                                        >
+                                          {link.badge}
+                                        </span>
+                                      )}
+                                      <ChevronRight className="w-3.5 h-3.5 text-tech-blue dark:text-cyan-400 opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200 shrink-0 ml-auto" />
+                                    </div>
+                                    {link.description && (
+                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5 leading-snug">
+                                        {link.description}
+                                      </p>
                                     )}
-                                    <ChevronRight className="w-3 h-3 text-tech-blue dark:text-cyan-400 opacity-0 -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-150 shrink-0 ml-auto" />
                                   </div>
-                                  {link.description && (
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5 leading-snug">
-                                      {link.description}
-                                    </p>
-                                  )}
-                                </div>
-                              </Link>
+                                </Link>
+                              </motion.div>
                             ))}
                           </div>
                         </div>
@@ -990,7 +1009,11 @@ export function Navbar() {
                     {/* Right: Featured Showcase Card */}
                     {activeCategoryData.featuredCard && (
                       <div className="col-span-4 border-l border-slate-100 dark:border-slate-800/80 pl-6 flex flex-col justify-between">
-                        <div className="p-4 rounded-xl bg-slate-50/90 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between h-full group/card hover:border-tech-blue/50 dark:hover:border-cyan-500/50 transition-colors">
+                        <motion.div
+                          whileHover={shouldReduceMotion ? undefined : { y: -3, scale: 1.01 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                          className="p-4 rounded-xl bg-slate-50/90 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between h-full group/card hover:border-tech-blue/50 dark:hover:border-cyan-500/50 hover:shadow-lg hover:shadow-tech-blue/5 transition-all duration-200"
+                        >
                           <div>
                             <span className="inline-block text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-tech-blue dark:bg-blue-950/60 dark:text-cyan-400 border border-blue-200 dark:border-blue-900/50 mb-2.5">
                               {activeCategoryData.featuredCard.tag}
@@ -1011,7 +1034,7 @@ export function Navbar() {
                             <span>{activeCategoryData.featuredCard.ctaText}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </Link>
-                        </div>
+                        </motion.div>
                       </div>
                     )}
                   </motion.div>
