@@ -710,7 +710,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "rtx-4090",
       "geforce"
     ],
-    "defaultImage": "",
+    "defaultImage": "/images/hero_rtx4090.webp",
     "defaultPrice": 7499,
     "tagline": "World-leading graphics compute for 4K ray tracing & LLM inference.",
     "powerRating": "450W TDP",
@@ -748,7 +748,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "i9-14900k",
       "intel core i9"
     ],
-    "defaultImage": "",
+    "defaultImage": "/images/intel_i9_14900k.jpg",
     "defaultPrice": 2099,
     "tagline": "Extreme single-thread frequency and 32-thread multi-tasking power.",
     "powerRating": "253W Max",
@@ -787,7 +787,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "rack server",
       "dell poweredge"
     ],
-    "defaultImage": "",
+    "defaultImage": "/products/dell-r760.webp",
     "defaultPrice": 18499,
     "tagline": "Redundant high-density virtualization and enterprise database compute.",
     "powerRating": "Dual 1400W",
@@ -825,7 +825,7 @@ export const FALLBACK_HERO_HIGHLIGHTS: HeroHighlight[] = [
       "samsung 990",
       "990-pro"
     ],
-    "defaultImage": "",
+    "defaultImage": "/images/samsung_990_pro.jpg",
     "defaultPrice": 1699,
     "tagline": "Instant boot times, sub-second 4K video asset scrubbing, and gaming speed.",
     "powerRating": "7.8W Max",
