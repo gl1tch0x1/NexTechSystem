@@ -31,12 +31,10 @@
       "ai",
       "intel-ultra9"
     ],
-    "primaryImage": "/images/products/acer-laptop.webp",
-    "thumbnail": "/images/products/acer-laptop.webp",
-    "image": "/images/products/acer-laptop.webp",
-    "images": [
-      "/images/products/acer-laptop.webp"
-    ],
+    "primaryImage": "",
+    "thumbnail": "",
+    "image": "",
+    "images": [],
     "categoryId": "cat_laptops",
     "categoryName": "Laptops & Workstations",
     "brandId": "brand_acer",
@@ -104,11 +102,11 @@
       "rtx5060",
       "intel-i7"
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
-    "thumbnail": "/images/products/gaming-laptop.webp",
-    "image": "/images/products/gaming-laptop.webp",
+    "primaryImage": "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
+    "thumbnail": "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
+    "image": "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
     "images": [
-      "/images/products/gaming-laptop.webp",
+      "https://m.media-amazon.com/images/I/CHOSEN_COVER_ASSET.jpg",
       "https://m.media-amazon.com/images/I/GALLERY_ASSET_1.jpg",
       "https://m.media-amazon.com/images/I/GALLERY_ASSET_2.jpg"
     ],
@@ -177,9 +175,7 @@
     "features": [],
     "hasVariants": true,
     "hsCode": "8471.30.01",
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
+    "images": [],
     "inventoryTracked": true,
     "isActive": true,
     "isFeatured": false,
@@ -239,7 +235,7 @@
       "DOS",
       "FHD"
     ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "thumbnail": "",
     "title": "HP ProBook 460 G11 Intel Core Ultra 5 16.1\" FHD BL ENG DOS",
     "unitMeasure": "unit",
     "unitPrice": 3360,
@@ -297,8 +293,7 @@
       }
     ],
     "weight": 1.74,
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_adacfa43-8dae-4886-ba7d-73f5450f3c6e",
@@ -312,9 +307,7 @@
     "createdAt": "2026-09-26T16:38:26.846Z",
     "description": "High performance PCIe 5.0 Enterprise Grade NVMe drive with 14,000 MB/s read speeds.",
     "features": [],
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
+    "images": [],
     "inventoryTracked": true,
     "isActive": true,
     "isFeatured": false,
@@ -334,10 +327,9 @@
     "specifications": {},
     "stock": 28,
     "tags": [],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "thumbnail": "",
     "updatedAt": "2026-10-21T18:04:22.918Z",
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "name": "<img src=x onerror=alert(1)> Fraud Product",
@@ -369,14 +361,11 @@
     "features": [],
     "tags": [],
     "collections": [],
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "createdAt": "2026-10-22T06:41:52.200Z",
     "updatedAt": "2026-10-22T06:41:52.200Z",
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "name": "Self-Approved Probe mvj6bczm",
@@ -405,14 +394,11 @@
     "features": [],
     "tags": [],
     "collections": [],
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "createdAt": "2026-10-22T06:42:09.521Z",
     "updatedAt": "2026-10-22T06:42:10.553Z",
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_asus_b1502cva_b7acjl",
@@ -478,10 +464,8 @@
       "ASUS",
       "Business Laptops"
     ],
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "locations": [
       {
         "locationId": "loc_dxb_main",
@@ -516,8 +500,7 @@
     "hasVariants": false,
     "createdAt": "2026-11-12T14:55:03.272Z",
     "updatedAt": "2026-11-12T14:55:03.272Z",
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_dell_pv15250_j1a0bg",
@@ -586,10 +569,8 @@
       "Dell",
       "Business Laptops"
     ],
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "locations": [
       {
         "locationId": "loc_dxb_main",
@@ -624,8 +605,7 @@
     "hasVariants": false,
     "createdAt": "2026-11-12T14:55:03.272Z",
     "updatedAt": "2026-11-12T14:55:03.272Z",
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_dell_dc15250_kn4ipb",
@@ -693,10 +673,8 @@
       "Dell",
       "Touchscreen Laptops"
     ],
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "locations": [
       {
         "locationId": "loc_dxb_main",
@@ -731,8 +709,7 @@
     "hasVariants": false,
     "createdAt": "2026-11-12T14:55:03.272Z",
     "updatedAt": "2026-11-12T14:55:03.272Z",
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0df93b9e-5c18-4777-a712-2d26e75ab60c",
@@ -754,10 +731,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/acer-laptop.webp"
-    ],
-    "thumbnail": "/images/products/acer-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 9-288V",
       "LAPTOPS | RAM": "32GB",
@@ -824,8 +799,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/acer-laptop.webp",
-    "image": "/images/products/acer-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a94024af-5033-40d6-a251-70bc4ddaee24",
@@ -847,10 +821,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/all-in-one-pc.webp"
-    ],
-    "thumbnail": "/images/products/all-in-one-pc.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "ALL-IN-ONE PCS | Processor": "ULTRA 7-256V",
       "ALL-IN-ONE PCS | RAM": "16GB",
@@ -914,8 +886,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/all-in-one-pc.webp",
-    "image": "/images/products/all-in-one-pc.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_5aa7595f-1362-47e1-a015-12f1070ab782",
@@ -937,10 +908,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "AMD RYZEN AI 9 465",
       "LAPTOPS | RAM": "512GB",
@@ -1005,8 +974,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2b029b0c-8481-43c3-92de-06b7e7bd9cfd",
@@ -1028,10 +996,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 9 285H",
       "LAPTOPS | RAM": "32GB",
@@ -1097,8 +1063,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_03eb9538-ac7e-461c-b285-cd4530e77de3",
@@ -1120,10 +1085,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 5-226V",
       "LAPTOPS | RAM": "16GB",
@@ -1188,8 +1151,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_add990f1-d499-42b2-8ff0-ecd8d1fc39c3",
@@ -1211,10 +1173,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 5 12OU",
       "LAPTOPS | RAM": "8GB",
@@ -1278,8 +1238,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_872bc274-7b3d-4db2-98ae-a712173781d2",
@@ -1301,10 +1260,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 7-150U",
       "LAPTOPS | RAM": "8GB",
@@ -1369,8 +1326,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_98acba68-5b07-47bc-8894-75011e4527da",
@@ -1392,10 +1348,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-258V",
       "LAPTOPS | RAM": "32GB",
@@ -1461,8 +1415,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f4facb92-b6fb-46b0-9a91-f45d8e49945c",
@@ -1484,10 +1437,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "SNAPDRAGON X X126100",
       "LAPTOPS | RAM": "16GB",
@@ -1552,8 +1503,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3ef85f38-285a-460a-8602-898776c4c959",
@@ -1575,10 +1525,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1335U",
       "LAPTOPS | RAM": "8GB",
@@ -1644,8 +1592,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1f1dc1d9-388a-4873-90aa-b048fcda0775",
@@ -1667,10 +1614,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "INTEL CORE 5-120U",
       "LAPTOPS | RAM": "8GB",
@@ -1736,8 +1681,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9cf20c35-3d2b-4393-9070-c52423d9fe09",
@@ -1759,10 +1703,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i3-1315U",
       "LAPTOPS | RAM": "8GB",
@@ -1826,8 +1768,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_139a93a7-1483-470f-8f52-94297995fec6",
@@ -1849,10 +1790,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 5 315",
       "LAPTOPS | RAM": "256GB",
@@ -1915,8 +1854,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_65d2794d-10c9-43f5-be87-3ee1cea554d6",
@@ -1938,10 +1876,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/alienware-laptop.webp"
-    ],
-    "thumbnail": "/images/products/alienware-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "CORE 9- 270H",
       "GAMING LAPTOPS | RAM": "32GB",
@@ -2006,8 +1942,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/alienware-laptop.webp",
-    "image": "/images/products/alienware-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_84cb7810-8487-4d5d-9ac8-15ae7352ab37",
@@ -2029,10 +1964,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "AMD RYZEN 7-7730U",
       "LAPTOPS | RAM": "16GB",
@@ -2098,8 +2031,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_805a54db-9ba8-4c79-859c-6cb31554836a",
@@ -2121,10 +2053,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i5-1135G7",
       "LAPTOPS | RAM": "8GB",
@@ -2189,8 +2119,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_67c68278-70cb-4ceb-841d-103e1492882e",
@@ -2212,10 +2141,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1265U",
       "LAPTOPS | RAM": "16GB",
@@ -2281,8 +2208,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_68436e66-55ba-4745-a83d-79db2a20f9c8",
@@ -2304,10 +2230,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 5 320",
       "LAPTOPS | RAM": "8GB",
@@ -2371,8 +2295,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_d2d9b395-0981-4517-8956-cd6f649b0e94",
@@ -2394,10 +2317,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i5-1334U",
       "LAPTOPS | RAM": "8GB",
@@ -2463,8 +2384,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_dc5bfa46-a36b-47aa-96d8-ccc68b7465a3",
@@ -2486,10 +2406,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1355U",
       "LAPTOPS | RAM": "16GB",
@@ -2553,8 +2471,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e11896d7-3aa3-4025-9a8a-3a78a78dda66",
@@ -2576,10 +2493,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i5-1334U",
       "LAPTOPS | RAM": "8GB",
@@ -2644,8 +2559,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_101188d6-119b-4270-9816-ef9436018760",
@@ -2667,10 +2581,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 3-100U",
       "LAPTOPS | RAM": "8GB",
@@ -2734,8 +2646,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2da95aea-8e69-45a4-b8fb-b0e31391ea39",
@@ -2757,10 +2668,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "I7-1355U",
       "LAPTOPS | RAM": "16GB",
@@ -2826,8 +2735,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ca48fe8c-294f-4ec5-84bd-8db6930fc0d4",
@@ -2849,10 +2757,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1355U",
       "LAPTOPS | RAM": "8GB",
@@ -2916,8 +2822,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f2a5ca4a-5c24-46c1-ae27-59d0f9c3b0b7",
@@ -2939,10 +2844,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "SNAPDRAGON X ELITE 12 CORE",
       "LAPTOPS | RAM": "16GB",
@@ -3010,8 +2913,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_fc1108e4-895c-4118-98a5-cbe2184704b3",
@@ -3033,10 +2935,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/desktop-tower.webp"
-    ],
-    "thumbnail": "/images/products/desktop-tower.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "DESKTOPS | Processor": "INTEL N-3050",
       "DESKTOPS | RAM": "4GB",
@@ -3094,8 +2994,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/desktop-tower.webp",
-    "image": "/images/products/desktop-tower.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_248f6c33-562a-4bf9-85c6-329dbd79af41",
@@ -3117,10 +3016,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-rog-laptop.webp"
-    ],
-    "thumbnail": "/images/products/asus-rog-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "I7-14650HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -3184,8 +3081,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-rog-laptop.webp",
-    "image": "/images/products/asus-rog-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_402ef992-0bc9-4c5f-a83e-9f792e1a873f",
@@ -3207,10 +3103,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-rog-laptop.webp"
-    ],
-    "thumbnail": "/images/products/asus-rog-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "AMD RYZEN 9 8940HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -3274,8 +3168,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-rog-laptop.webp",
-    "image": "/images/products/asus-rog-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_10801f17-4df0-406e-88c6-ba2a82f086aa",
@@ -3297,10 +3190,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-rog-laptop.webp"
-    ],
-    "thumbnail": "/images/products/asus-rog-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 9-275HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -3364,8 +3255,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-rog-laptop.webp",
-    "image": "/images/products/asus-rog-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cdaff8dc-2f00-464f-bfee-cc58d213281d",
@@ -3387,10 +3277,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/gaming-laptop.webp"
-    ],
-    "thumbnail": "/images/products/gaming-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "i7-13650HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -3455,8 +3343,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
-    "image": "/images/products/gaming-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b6b0afb0-f3a4-4fb2-b375-fb43ea517f16",
@@ -3478,10 +3365,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/msi-gaming.webp"
-    ],
-    "thumbnail": "/images/products/msi-gaming.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 7 255HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -3546,8 +3431,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/msi-gaming.webp",
-    "image": "/images/products/msi-gaming.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2ebba7ac-adc1-4611-aac5-28425991e75a",
@@ -3569,10 +3453,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-rog-laptop.webp"
-    ],
-    "thumbnail": "/images/products/asus-rog-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 9-275HX",
       "GAMING LAPTOPS | RAM": "32GB",
@@ -3636,8 +3518,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-rog-laptop.webp",
-    "image": "/images/products/asus-rog-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cb5c553c-f8e9-4eb0-9199-c50a9400fbe4",
@@ -3659,10 +3540,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/msi-gaming.webp"
-    ],
-    "thumbnail": "/images/products/msi-gaming.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "CORE 7-240H",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -3726,8 +3605,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/msi-gaming.webp",
-    "image": "/images/products/msi-gaming.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a1d13ed1-9a49-4726-b55d-afc4fedf9bbe",
@@ -3749,10 +3627,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/gaming-laptop.webp"
-    ],
-    "thumbnail": "/images/products/gaming-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "i5-13420H",
       "GAMING LAPTOPS | RAM": "8GB",
@@ -3817,8 +3693,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
-    "image": "/images/products/gaming-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0ad0b258-dca5-4128-98f1-7b61162b3861",
@@ -3840,10 +3715,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-rog-laptop.webp"
-    ],
-    "thumbnail": "/images/products/asus-rog-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "AMD RYZEN 7 260",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -3908,8 +3781,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-rog-laptop.webp",
-    "image": "/images/products/asus-rog-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_d9f907d5-df3f-49ab-809b-08d6fe075d63",
@@ -3931,10 +3803,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/headphones-anc.webp"
-    ],
-    "thumbnail": "/images/products/headphones-anc.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -3983,8 +3853,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/headphones-anc.webp",
-    "image": "/images/products/headphones-anc.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_dec50fe2-fc2d-404b-b185-6875039949dc",
@@ -4006,10 +3875,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/headphones-anc.webp"
-    ],
-    "thumbnail": "/images/products/headphones-anc.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -4058,8 +3925,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/headphones-anc.webp",
-    "image": "/images/products/headphones-anc.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c9407a22-271a-428c-82dc-18092b5242cd",
@@ -4081,10 +3947,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/headphones-anc.webp"
-    ],
-    "thumbnail": "/images/products/headphones-anc.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -4133,8 +3997,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/headphones-anc.webp",
-    "image": "/images/products/headphones-anc.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_609023da-66d0-411e-9861-1e72198d3438",
@@ -4156,10 +4019,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/headphones-anc.webp"
-    ],
-    "thumbnail": "/images/products/headphones-anc.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -4208,8 +4069,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/headphones-anc.webp",
-    "image": "/images/products/headphones-anc.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e279d491-33e5-4bc9-ba14-446fde7e5e80",
@@ -4231,10 +4091,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/headphones-anc.webp"
-    ],
-    "thumbnail": "/images/products/headphones-anc.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -4283,8 +4141,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/headphones-anc.webp",
-    "image": "/images/products/headphones-anc.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ea2a8881-d8ee-493c-a55c-83d8e176f09d",
@@ -4306,10 +4163,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i5-1235U",
       "LAPTOPS | RAM": "8GB",
@@ -4375,8 +4230,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a3d34b42-91a2-43f9-9a21-80b626abc6e5",
@@ -4398,10 +4252,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1355U",
       "LAPTOPS | RAM": "16GB",
@@ -4469,8 +4321,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e9d88f8a-b77d-4417-bba5-bc8c68a15bf7",
@@ -4492,10 +4343,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "AMD RYZEN 5-7520U",
       "LAPTOPS | RAM": "8GB",
@@ -4558,8 +4407,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c4418f62-4578-4f8b-93cc-4f687851a871",
@@ -4581,10 +4429,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-255U",
       "LAPTOPS | RAM": "16GB",
@@ -4651,8 +4497,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f6e395ab-217d-4e16-ad53-14f930a2bda9",
@@ -4674,10 +4519,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 5 12OU",
       "LAPTOPS | Storage": "512GB SSD",
@@ -4740,8 +4583,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_955629e8-4dae-44e3-8231-f24501d28d0c",
@@ -4763,10 +4605,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i5-1235U",
       "LAPTOPS | RAM": "8GB",
@@ -4832,8 +4672,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2a5de8ec-ff5d-4b90-8d94-8a3b0568b137",
@@ -4855,10 +4694,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-155H",
       "LAPTOPS | RAM": "32GB",
@@ -4924,8 +4761,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_99c67f26-a9aa-450b-b82f-ffbe5ff5eb7e",
@@ -4947,10 +4783,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-155H",
       "LAPTOPS | RAM": "32GB",
@@ -5018,8 +4852,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_bdd182e9-1ead-48d7-9de3-468377868290",
@@ -5041,10 +4874,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "I7-1355U",
       "LAPTOPS | RAM": "16GB",
@@ -5110,8 +4941,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_dd967b10-d5ab-42f1-8d45-d067d5d76021",
@@ -5133,10 +4963,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 5-135U",
       "LAPTOPS | RAM": "16GB",
@@ -5198,8 +5026,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6a75b0d8-bcc9-4801-b204-1c2ee11e0012",
@@ -5221,10 +5048,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-256H VPRO",
       "LAPTOPS | RAM": "32GB",
@@ -5290,8 +5115,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_527951df-5821-4771-83cc-f28ae4525a2e",
@@ -5313,10 +5137,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-256V",
       "LAPTOPS | RAM": "16GB",
@@ -5383,8 +5205,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_491c2412-501b-40e9-a7f7-1f0da70e8420",
@@ -5406,10 +5227,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-155U",
       "LAPTOPS | RAM": "512GB",
@@ -5472,8 +5291,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_898f057c-cd56-4fc7-8038-29e6464cc613",
@@ -5495,10 +5313,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 3-100U",
       "LAPTOPS | RAM": "8GB",
@@ -5562,8 +5378,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_aace3d02-31c9-4578-b748-c88b9fc5a849",
@@ -5585,10 +5400,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 5 226V",
       "LAPTOPS | RAM": "16GB",
@@ -5655,8 +5468,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a9f49426-c17f-4a4e-a50e-8e96da5fa43e",
@@ -5678,10 +5490,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | RAM": "128GB",
       "LAPTOPS | Graphics": "INTERGRATED INTEL GRAPHICS",
@@ -5742,8 +5552,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_43544d04-9f29-4cb9-ab30-19db1e1d8871",
@@ -5765,10 +5574,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 5-225U",
       "LAPTOPS | RAM": "8GB",
@@ -5833,8 +5640,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a2a2d1d0-58a4-47ca-920e-a850153fee11",
@@ -5856,10 +5662,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7 255U",
       "LAPTOPS | RAM": "8GB",
@@ -5924,8 +5728,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_22f4ca70-d02a-4d5b-ab86-5fdcaa183946",
@@ -5947,10 +5750,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 5 12OU",
       "LAPTOPS | RAM": "16GB",
@@ -6015,8 +5816,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_835a68cd-fe0d-494c-b152-b354f9748380",
@@ -6038,10 +5838,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-355",
       "LAPTOPS | RAM": "16GB",
@@ -6108,8 +5906,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1513eb08-2a91-4e46-a92c-8b5836a1e782",
@@ -6131,10 +5928,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "AMD RYZEN 5 40 APU",
       "LAPTOPS | RAM": "256GB",
@@ -6199,8 +5994,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2a87ce35-bce3-446b-8a94-76ff5eb839fc",
@@ -6222,10 +6016,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -6275,8 +6067,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3f6f9ba5-af08-4aef-a136-1dfa9712598c",
@@ -6299,9 +6090,9 @@
     "reservedStock": 0,
     "lowStockThreshold": 3,
     "images": [
-      "/images/products/gaming-laptop.webp"
+      "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg"
     ],
-    "thumbnail": "/images/products/gaming-laptop.webp",
+    "thumbnail": "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 7 255H",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -6365,9 +6156,9 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
+    "primaryImage": "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg",
     "stockStatus": "IN_STOCK",
-    "image": "/images/products/gaming-laptop.webp"
+    "image": "https://m.media-amazon.com/images/I/AUTHENTIC_HP_OMEN_14_TRANSCEND.jpg"
   },
   {
     "id": "prod_5459dff8-6c3a-4c1a-89b4-6ff03aa8a63c",
@@ -6389,10 +6180,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/gaming-laptop.webp"
-    ],
-    "thumbnail": "/images/products/gaming-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "i7-14650HX",
       "GAMING LAPTOPS | RAM": "24GB",
@@ -6456,8 +6245,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
-    "image": "/images/products/gaming-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a3413d29-cfa4-43bb-b952-0b8488b8e3d9",
@@ -6479,10 +6267,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/gaming-laptop.webp"
-    ],
-    "thumbnail": "/images/products/gaming-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 7 255H",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -6547,8 +6333,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
-    "image": "/images/products/gaming-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b6fa1e1b-2ff6-466d-b306-d1bd8ac720fd",
@@ -6570,10 +6355,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "SNAPDRAGON X X126100 8 CORE",
       "LAPTOPS | RAM": "16GB",
@@ -6639,8 +6422,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c5a7fd25-602b-45d5-90c0-bccac69c17fc",
@@ -6662,10 +6444,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/thinkpad.webp"
-    ],
-    "thumbnail": "/images/products/thinkpad.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1180G7",
       "LAPTOPS | RAM": "16GB",
@@ -6733,8 +6513,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/thinkpad.webp",
-    "image": "/images/products/thinkpad.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f2ece066-afd4-444c-a8c1-3f9170a1b18c",
@@ -6756,10 +6535,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | RAM": "128GB",
       "LAPTOPS | Screen Size": "11\"",
@@ -6815,8 +6592,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_19065c54-dae7-471e-b4d9-3127d6e650bd",
@@ -6838,10 +6614,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/gaming-laptop.webp"
-    ],
-    "thumbnail": "/images/products/gaming-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "AMD RYZEN 7-250",
       "LAPTOPS | RAM": "16GB",
@@ -6905,8 +6679,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
-    "image": "/images/products/gaming-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a478c9e7-f938-4cbd-b0d3-1d4c64826d4b",
@@ -6928,10 +6701,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "I5-13420H",
       "LAPTOPS | RAM": "8GB",
@@ -6995,8 +6766,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9f366d7d-f774-4d2f-8b34-520f6e00a2ea",
@@ -7018,10 +6788,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-13620H",
       "LAPTOPS | RAM": "8GB",
@@ -7085,8 +6853,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_83eac1b2-ee59-4a40-bf33-4c4c32066beb",
@@ -7108,10 +6875,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "I7-13620H",
       "LAPTOPS | RAM": "16GB",
@@ -7175,8 +6940,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a0f4cf24-31e1-484a-be60-bf845a3075b0",
@@ -7198,10 +6962,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA  7-256V",
       "LAPTOPS | RAM": "512GB",
@@ -7267,8 +7029,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9fa0002b-e458-4c8f-8056-cc4cd350109a",
@@ -7290,10 +7051,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE I5-13420H",
       "LAPTOPS | RAM": "8GB",
@@ -7357,8 +7116,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_56ca08ea-11ed-40ad-b530-b4734cac8951",
@@ -7380,10 +7138,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "CORE 3-100U",
       "LAPTOPS | RAM": "8GB",
@@ -7447,8 +7203,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0f8ddcbd-e3e3-40be-a32c-a1994aca0924",
@@ -7470,10 +7225,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/monitor-ultrawide.webp"
-    ],
-    "thumbnail": "/images/products/monitor-ultrawide.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "MONITORS | Display Resolution": "FHD (1920x1080)",
       "MONITORS | Color": "BLACK",
@@ -7527,8 +7280,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/monitor-ultrawide.webp",
-    "image": "/images/products/monitor-ultrawide.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_74f83e5a-a3a1-4496-a411-f315d7714932",
@@ -7550,10 +7302,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/monitor-ultrawide.webp"
-    ],
-    "thumbnail": "/images/products/monitor-ultrawide.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "MONITORS | Warranty": "MANUFACTURE WARRANTY ONLY"
     },
@@ -7604,8 +7354,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/monitor-ultrawide.webp",
-    "image": "/images/products/monitor-ultrawide.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b6e8a5d8-3ddc-44c7-912f-5aaa339935d4",
@@ -7627,10 +7376,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/monitor-gaming.webp"
-    ],
-    "thumbnail": "/images/products/monitor-gaming.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "MONITORS | Screen Size": "32\"",
       "MONITORS | Color": "BLACK"
@@ -7683,8 +7430,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/monitor-gaming.webp",
-    "image": "/images/products/monitor-gaming.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0508e528-e27e-4ba6-b73b-bc805b3419c8",
@@ -7706,10 +7452,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/monitor-ultrawide.webp"
-    ],
-    "thumbnail": "/images/products/monitor-ultrawide.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "MONITORS | Display Resolution": "WQHD-144HZ",
       "MONITORS | Color": "BLACK",
@@ -7763,8 +7507,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/monitor-ultrawide.webp",
-    "image": "/images/products/monitor-ultrawide.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ed5d7492-565d-457a-98e0-f448d0852a3e",
@@ -7786,10 +7529,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/monitor-ultrawide.webp"
-    ],
-    "thumbnail": "/images/products/monitor-ultrawide.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "MONITORS | Screen Size": "27\"",
       "MONITORS | Display Resolution": "QHD (2560x1440)",
@@ -7842,8 +7583,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/monitor-ultrawide.webp",
-    "image": "/images/products/monitor-ultrawide.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3edc38eb-9590-4ed4-b1ff-a3261aa6d0a3",
@@ -7865,10 +7605,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/monitor-ultrawide.webp"
-    ],
-    "thumbnail": "/images/products/monitor-ultrawide.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "MONITORS | Display Resolution": "FHD(1920x1080",
       "MONITORS | Color": "BLACK",
@@ -7922,8 +7660,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/monitor-ultrawide.webp",
-    "image": "/images/products/monitor-ultrawide.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1e6aa679-8bce-481b-b069-9ae335579d1c",
@@ -7946,9 +7683,9 @@
     "reservedStock": 0,
     "lowStockThreshold": 3,
     "images": [
-      "/images/products/msi-gaming.webp"
+      "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg"
     ],
-    "thumbnail": "/images/products/msi-gaming.webp",
+    "thumbnail": "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg",
     "specifications": {
       "GAMING LAPTOPS | Processor": "ULTRA 9 275HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -8012,8 +7749,8 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/msi-gaming.webp",
-    "image": "/images/products/msi-gaming.webp",
+    "primaryImage": "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg",
+    "image": "https://m.media-amazon.com/images/I/TEST_VECTOR_IMAGE.jpg",
     "stockStatus": "IN_STOCK"
   },
   {
@@ -8036,10 +7773,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/msi-gaming.webp"
-    ],
-    "thumbnail": "/images/products/msi-gaming.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "GAMING LAPTOPS | Processor": "i7-14650HX",
       "GAMING LAPTOPS | RAM": "16GB",
@@ -8104,8 +7839,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/msi-gaming.webp",
-    "image": "/images/products/msi-gaming.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6b4f5598-3240-4b00-8e46-67e4d289aad2",
@@ -8127,10 +7861,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "AMD RYZEN 7 5700U",
       "LAPTOPS | RAM": "16GB",
@@ -8196,8 +7928,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_d4d27a11-2088-473b-bc38-f28d556b0438",
@@ -8219,10 +7950,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 5-125H",
       "LAPTOPS | RAM": "8GB",
@@ -8284,8 +8013,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_01ecb162-b1ab-409e-b236-1b908071ebdf",
@@ -8307,10 +8035,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 5-135U vPRO",
       "LAPTOPS | RAM": "16GB",
@@ -8375,8 +8101,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cd59b3ab-433b-4ac8-99b0-e6db02dcb31f",
@@ -8398,10 +8123,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i5-1145G7",
       "LAPTOPS | RAM": "8GB",
@@ -8465,8 +8188,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_685696d0-71b5-4f25-9c48-e5647ccb1cee",
@@ -8488,10 +8210,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i5-1145G7",
       "LAPTOPS | RAM": "8GB",
@@ -8557,8 +8277,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_571ddc20-6c03-4503-8d06-dcd1e434237d",
@@ -8580,10 +8299,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1365U",
       "LAPTOPS | RAM": "16GB",
@@ -8652,8 +8369,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ae9fc178-4d39-4d29-8dc0-91c63064fdda",
@@ -8675,10 +8391,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -8727,8 +8441,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c390ebde-8660-4b2b-9665-d7f21140c217",
@@ -8750,10 +8463,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/network-switch.webp"
-    ],
-    "thumbnail": "/images/products/network-switch.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -8802,8 +8513,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/network-switch.webp",
-    "image": "/images/products/network-switch.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_7ea98760-fbf0-475f-a0d4-43df63f3163f",
@@ -8825,10 +8535,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/macbook-pro.webp"
-    ],
-    "thumbnail": "/images/products/macbook-pro.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | RAM": "32GB RAM",
       "LAPTOPS | Storage": "1TB SSD",
@@ -8892,8 +8600,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/macbook-pro.webp",
-    "image": "/images/products/macbook-pro.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3740bd72-1e2d-483c-ba15-69784d0a0dd2",
@@ -8915,10 +8622,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/macbook-pro.webp"
-    ],
-    "thumbnail": "/images/products/macbook-pro.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | RAM": "16GB RAM",
       "LAPTOPS | Storage": "1TB SSD",
@@ -8982,8 +8687,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/macbook-pro.webp",
-    "image": "/images/products/macbook-pro.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_58238b04-9ba5-4bfa-9eb0-56495afaa401",
@@ -9005,10 +8709,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-6500",
       "LAPTOPS | RAM": "8GB",
@@ -9072,8 +8774,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_43f09430-7956-428f-9fcb-2db79d9c8040",
@@ -9095,10 +8796,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/thinkpad.webp"
-    ],
-    "thumbnail": "/images/products/thinkpad.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-5600U",
       "LAPTOPS | RAM": "4GB",
@@ -9161,8 +8860,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/thinkpad.webp",
-    "image": "/images/products/thinkpad.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9b9e2efa-55b9-487e-a87e-b98cc47da187",
@@ -9184,10 +8882,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/asus-zenbook.webp"
-    ],
-    "thumbnail": "/images/products/asus-zenbook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-6500U",
       "LAPTOPS | RAM": "12GB",
@@ -9254,8 +8950,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/asus-zenbook.webp",
-    "image": "/images/products/asus-zenbook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_faba5016-504a-4671-9ecb-5fc4932ef9ab",
@@ -9277,10 +8972,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/dell-xps.webp"
-    ],
-    "thumbnail": "/images/products/dell-xps.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1185G7",
       "LAPTOPS | RAM": "32GB",
@@ -9347,8 +9040,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/dell-xps.webp",
-    "image": "/images/products/dell-xps.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_67128bc5-7c80-428d-911e-396af3b0cf28",
@@ -9370,10 +9062,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/thinkpad.webp"
-    ],
-    "thumbnail": "/images/products/thinkpad.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1255U",
       "LAPTOPS | RAM": "512GB",
@@ -9437,8 +9127,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/thinkpad.webp",
-    "image": "/images/products/thinkpad.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ff8501bb-db32-401c-8e12-567c56394285",
@@ -9460,10 +9149,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1355U",
       "LAPTOPS | RAM": "16GB",
@@ -9529,8 +9216,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3edf1014-aee8-4251-b39e-fb120d337f33",
@@ -9552,10 +9238,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/surface-laptop.webp"
-    ],
-    "thumbnail": "/images/products/surface-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "PENTIUM GOLD 4415Y",
       "LAPTOPS | RAM": "4GB",
@@ -9621,8 +9305,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/surface-laptop.webp",
-    "image": "/images/products/surface-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_46a0d3f8-77ca-431b-8c1d-0b03a7da3c5a",
@@ -9644,10 +9327,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "ULTRA 7-165U",
       "LAPTOPS | RAM": "16GB",
@@ -9713,8 +9394,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_59c26cb7-2d03-497b-9305-ceb263763257",
@@ -9736,10 +9416,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/thinkpad.webp"
-    ],
-    "thumbnail": "/images/products/thinkpad.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-6700HQ",
       "LAPTOPS | RAM": "16GB",
@@ -9802,8 +9480,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/thinkpad.webp",
-    "image": "/images/products/thinkpad.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a1de2ca0-05c3-4c66-b0bb-a1db169c53bf",
@@ -9825,10 +9502,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1185G7",
       "LAPTOPS | RAM": "32GB",
@@ -9894,8 +9569,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c11e169c-06ea-4519-b665-9eca7711f6fe",
@@ -9917,10 +9591,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i7-1185G7",
       "LAPTOPS | RAM": "16GB",
@@ -9986,8 +9658,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cb1b425b-8bf0-41f8-a815-6edc022d70ed",
@@ -10009,10 +9680,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "LAPTOPS | Processor": "i3-1215U",
       "LAPTOPS | RAM": "8GB",
@@ -10079,8 +9748,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_62cd870b-2e35-481b-b169-51ed09048f1a",
@@ -10102,10 +9770,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10154,8 +9820,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_42681d8b-df28-47e0-87cd-9879ae50b715",
@@ -10177,10 +9842,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10228,8 +9891,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_26ed62d9-0aa9-4d46-84ad-b7386eb7757c",
@@ -10251,10 +9913,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10303,8 +9963,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2f134dd3-0e49-4e80-a130-fb3618655c5a",
@@ -10326,10 +9985,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10378,8 +10035,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_d57a7fcc-a1dc-484a-8d2a-175f9d0fe3a3",
@@ -10401,10 +10057,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10453,8 +10107,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_120673d8-5b5b-4e53-a2e4-e85cb91c97a9",
@@ -10476,10 +10129,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10528,8 +10179,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6cf2104e-2ab5-44eb-bdc5-c99d864c42ea",
@@ -10551,10 +10201,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10603,8 +10251,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_47fdbac6-0834-4c83-b047-3bbb86fb3071",
@@ -10626,10 +10273,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10679,8 +10324,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_12674136-1412-4020-877b-3ebb90af119b",
@@ -10702,10 +10346,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10754,8 +10396,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3138952f-9e39-47c3-b3cd-778d408f0980",
@@ -10777,10 +10418,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10829,8 +10468,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ca188adf-77c0-46db-b371-a7253ca5570f",
@@ -10852,10 +10490,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10904,8 +10540,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9f64db60-b7cb-476e-8878-96d86dad90e5",
@@ -10927,10 +10562,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/all-in-one-pc.webp"
-    ],
-    "thumbnail": "/images/products/all-in-one-pc.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -10978,8 +10611,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/all-in-one-pc.webp",
-    "image": "/images/products/all-in-one-pc.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9d42d119-bfe5-4388-9590-bd56712d5aba",
@@ -11001,10 +10633,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11053,8 +10683,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9383d058-cf4d-498b-ba38-a7e5e5ed2091",
@@ -11076,10 +10705,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "ACCESSORIES | Color": "BLACK"
     },
@@ -11131,8 +10758,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ef24de37-de65-4803-bee5-80a313b64d95",
@@ -11154,10 +10780,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11206,8 +10830,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f3fcbad2-d96d-4b27-bca3-ddf5b6678af3",
@@ -11229,10 +10852,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11281,8 +10902,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_362c7ae0-23da-4d0d-8b93-4c2ecc8caa5c",
@@ -11304,10 +10924,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11356,8 +10974,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_07c28654-3546-47db-af3c-df42b3c83565",
@@ -11379,10 +10996,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11431,8 +11046,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1ecbfb1a-decb-42a3-b2f8-8e1f4ad73333",
@@ -11454,10 +11068,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11506,8 +11118,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_78beba21-960c-4da0-8ff0-3e832b04a000",
@@ -11529,10 +11140,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11581,8 +11190,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_baf9a7ef-adc9-4f35-8d11-67098ecb714c",
@@ -11604,10 +11212,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11656,8 +11262,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_46389385-ab60-4d5b-91c9-019536f5ff92",
@@ -11679,10 +11284,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11731,8 +11334,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_dfeae37e-d163-4f37-9e37-8df1e205e825",
@@ -11754,10 +11356,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11806,8 +11406,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c978ed56-603e-44ae-88a5-aed9e5323643",
@@ -11829,10 +11428,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11880,8 +11477,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1098b578-afc1-4b9b-a314-2eb390fb4fa5",
@@ -11903,10 +11499,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -11955,8 +11549,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6bae7931-1419-406f-9956-97ebf26c4f15",
@@ -11978,10 +11571,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12030,8 +11621,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0be97afc-c417-4b7d-a346-66ab84e2c064",
@@ -12053,10 +11643,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12105,8 +11693,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1ba0ae04-94af-4677-aca3-37152822bf69",
@@ -12128,10 +11715,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12180,8 +11765,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_14b4764b-c2dd-4ffc-832a-3be2ddb7c2a6",
@@ -12203,10 +11787,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12255,8 +11837,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3783e3a9-c704-46c5-aec9-d69385feec70",
@@ -12278,10 +11859,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12330,8 +11909,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2116f2c5-44b6-4e3b-929f-4caf554da188",
@@ -12353,10 +11931,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12405,8 +11981,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_bfbe8095-fb28-409c-af02-ef21484c3f9f",
@@ -12428,10 +12003,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12480,8 +12053,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9e53c262-13ca-43bd-903c-1331c7f3d581",
@@ -12503,10 +12075,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12555,8 +12125,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_658d05ee-3a59-48a6-8761-7036cae2e445",
@@ -12578,10 +12147,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "ACCESSORIES | Manufacturer Part No": "LAPTOP"
     },
@@ -12631,8 +12198,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_7dcaeab2-f486-40da-a6a0-7b29fe014019",
@@ -12654,10 +12220,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/usb-c-dock.webp"
-    ],
-    "thumbnail": "/images/products/usb-c-dock.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12705,8 +12269,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/usb-c-dock.webp",
-    "image": "/images/products/usb-c-dock.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ca3474d2-b956-4e9b-982d-f93c641e68d2",
@@ -12728,10 +12291,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12780,8 +12341,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6d254eb4-c5bc-452a-a1e9-324bd3b1ce63",
@@ -12803,10 +12363,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12855,8 +12413,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2a68ebe6-9334-46a9-9253-cc080b883379",
@@ -12878,10 +12435,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/network-switch.webp"
-    ],
-    "thumbnail": "/images/products/network-switch.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -12930,8 +12485,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/network-switch.webp",
-    "image": "/images/products/network-switch.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1eb87359-b54d-4ed9-b6f4-d3abc22fa429",
@@ -12953,10 +12507,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/network-switch.webp"
-    ],
-    "thumbnail": "/images/products/network-switch.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13005,8 +12557,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/network-switch.webp",
-    "image": "/images/products/network-switch.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_4bdb4c70-b3be-479d-aefc-34433442f852",
@@ -13028,10 +12579,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/network-switch.webp"
-    ],
-    "thumbnail": "/images/products/network-switch.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13080,8 +12629,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/network-switch.webp",
-    "image": "/images/products/network-switch.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_244ef084-fc30-41ff-8659-bfae1109a2e5",
@@ -13103,10 +12651,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/intel_i9_14900k.jpg"
-    ],
-    "thumbnail": "/images/intel_i9_14900k.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13155,8 +12701,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/intel_i9_14900k.jpg",
-    "image": "/images/intel_i9_14900k.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_d9ee8af9-174b-47db-9590-298e2ac181ee",
@@ -13178,10 +12723,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/intel_i9_14900k.jpg"
-    ],
-    "thumbnail": "/images/intel_i9_14900k.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13230,8 +12773,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/intel_i9_14900k.jpg",
-    "image": "/images/intel_i9_14900k.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_030b7327-39cb-486b-86fd-10c772e3b22d",
@@ -13253,10 +12795,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/gaming-laptop.webp"
-    ],
-    "thumbnail": "/images/products/gaming-laptop.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13305,8 +12845,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/gaming-laptop.webp",
-    "image": "/images/products/gaming-laptop.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c80f8082-327d-4098-aa8f-0c37a39be6ee",
@@ -13328,10 +12867,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13380,8 +12917,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c87fd8ae-0816-4bec-a8b3-cd5fe7317725",
@@ -13403,10 +12939,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/macbook-pro.webp"
-    ],
-    "thumbnail": "/images/products/macbook-pro.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13455,8 +12989,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/macbook-pro.webp",
-    "image": "/images/products/macbook-pro.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_21ca3b2f-26f5-4400-83a8-fddcbbe17428",
@@ -13478,10 +13011,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13530,8 +13061,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b12e0e7e-efd9-42f0-af3a-499d3c229582",
@@ -13553,10 +13083,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/macbook-pro.webp"
-    ],
-    "thumbnail": "/images/products/macbook-pro.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13605,8 +13133,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/macbook-pro.webp",
-    "image": "/images/products/macbook-pro.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1df0a2c6-bd66-4521-a0ce-ee0fd3b55594",
@@ -13628,10 +13155,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13680,8 +13205,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e6793f68-2874-493c-92d0-f3eb23a025c3",
@@ -13703,10 +13227,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "BAGS & CASES | Color": "GRAY"
     },
@@ -13758,8 +13280,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_14547c80-fbb2-4a08-bf24-556f4a741c70",
@@ -13781,10 +13302,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13833,8 +13352,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9028dd01-dc96-456a-b8f1-868970beae1b",
@@ -13856,10 +13374,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "BAGS & CASES | Color": "BLACK ROW"
     },
@@ -13911,8 +13427,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ff68770e-51f0-4eee-a9a9-3c32fef0a28f",
@@ -13934,10 +13449,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -13986,8 +13499,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3822a46d-a8bf-4f69-8ef5-a30d6a864740",
@@ -14009,10 +13521,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "BAGS & CASES | Color": "GRAY"
     },
@@ -14064,8 +13574,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_aacd6b95-547f-4aaa-bb1e-98f849ef9ff0",
@@ -14087,10 +13596,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14139,8 +13646,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_eef9e5be-a104-40b6-98a7-120aacb3e8cb",
@@ -14162,10 +13668,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14214,8 +13718,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0d346007-4cc7-446f-8bbf-31f5dc69d6c6",
@@ -14237,10 +13740,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14289,8 +13790,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_020f5722-2c1a-4fc9-8672-4b0149b0f493",
@@ -14312,10 +13812,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14364,8 +13862,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_32296177-94e6-4a7e-9cfb-3f4324d24d65",
@@ -14387,10 +13884,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14439,8 +13934,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cfa608db-2e1b-4935-8180-d927a584f10f",
@@ -14462,10 +13956,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "BAGS & CASES | Manufacturer Part No": "BROWN"
     },
@@ -14516,8 +14008,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ae5cce52-746e-4e8c-8325-5d21fe214e4d",
@@ -14539,10 +14030,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14591,8 +14080,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_703ab6c0-e087-4f05-804f-62d83120204e",
@@ -14614,10 +14102,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/laptop-backpack.webp"
-    ],
-    "thumbnail": "/images/products/laptop-backpack.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14666,8 +14152,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/laptop-backpack.webp",
-    "image": "/images/products/laptop-backpack.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9c5e5254-f6b8-48ef-8bd1-7d7295dd9962",
@@ -14689,10 +14174,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14741,8 +14224,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_5a7ac242-09db-4916-abb2-54a9c669b198",
@@ -14764,10 +14246,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14816,8 +14296,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f69dac36-e441-4f71-b696-eaaa6b58f29e",
@@ -14839,10 +14318,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14891,8 +14368,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1a2e51d9-ae38-4dcf-8f5e-d691f7d3e2d5",
@@ -14914,10 +14390,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -14967,8 +14441,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e332a6de-3c1a-4ea2-afed-fad35ccb27f2",
@@ -14990,10 +14463,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15042,8 +14513,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_41f9e1b8-c6c7-4b07-bb3e-8e4a9c8a5ca7",
@@ -15065,10 +14535,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15117,8 +14585,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a0bbcae3-5028-4ef2-a4fe-6a1f141de7b7",
@@ -15140,10 +14607,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15192,8 +14657,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_91c72838-984c-4aa7-8599-e5ba9c884516",
@@ -15215,10 +14679,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15267,8 +14729,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_81ee3885-957d-4b83-93ad-c607e8418bf2",
@@ -15290,10 +14751,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "STORAGE & DRIVES | Screen Size": "15\""
     },
@@ -15344,8 +14803,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_189fca93-7a7d-4cdf-b88e-d558ef841870",
@@ -15367,10 +14825,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15419,8 +14875,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_77661d75-75bf-49c5-aea5-9d84f5dc0e05",
@@ -15442,10 +14897,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15494,8 +14947,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_4faa670d-d774-4be5-8a0e-c770baba90e9",
@@ -15517,10 +14969,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15569,8 +15019,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_76044941-39b8-45b4-a060-afd2a967b58d",
@@ -15592,10 +15041,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15644,8 +15091,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_5783a3e8-4a7e-443b-907e-f6ec94b56953",
@@ -15667,10 +15113,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15720,8 +15164,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cdfaa846-c87a-4cf9-891d-bdd14bebe778",
@@ -15743,10 +15186,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15796,8 +15237,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2e42fb8a-f229-43a5-93cf-4de694124db0",
@@ -15819,10 +15259,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15871,8 +15309,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6dbd9158-962b-409c-9659-7fb9abf59c53",
@@ -15894,10 +15331,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -15946,8 +15381,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_aa7817c3-69fd-4efb-9fc5-1ade4ea9eba4",
@@ -15969,10 +15403,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "STORAGE & DRIVES | Warranty": "MANUFACTURE WARRANTY ONLY"
     },
@@ -16023,8 +15455,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_ef3e8a4d-7e9c-4979-93fa-c1977a339f6f",
@@ -16046,10 +15477,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16098,8 +15527,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_23b49552-e9bb-40d2-8767-2d76d3ace7ab",
@@ -16121,10 +15549,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16173,8 +15599,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a5cc6778-cc74-420e-93ab-77dbe6fc2c4c",
@@ -16196,10 +15621,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16247,8 +15670,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cdceb97d-996c-43f0-a739-0ebd0fe31f38",
@@ -16270,10 +15692,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16322,8 +15742,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_5d76a070-2d8d-4a1f-a990-0551e128cbd8",
@@ -16345,10 +15764,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/mouse-gaming.webp"
-    ],
-    "thumbnail": "/images/products/mouse-gaming.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16397,8 +15814,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/mouse-gaming.webp",
-    "image": "/images/products/mouse-gaming.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_861659ad-6c19-4d42-961c-cebe86d66d8a",
@@ -16420,10 +15836,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/mouse-ergonomic.webp"
-    ],
-    "thumbnail": "/images/products/mouse-ergonomic.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16472,8 +15886,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/mouse-ergonomic.webp",
-    "image": "/images/products/mouse-ergonomic.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0998e20d-ce24-4e12-b6dc-8a54ff8efaef",
@@ -16495,10 +15908,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/keyboard-mechanical.webp"
-    ],
-    "thumbnail": "/images/products/keyboard-mechanical.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "PERIPHERALS | Color": "BLACK"
     },
@@ -16550,8 +15961,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/keyboard-mechanical.webp",
-    "image": "/images/products/keyboard-mechanical.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_79c2de19-e394-47b7-9196-185adbb63d73",
@@ -16573,10 +15983,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/mouse-ergonomic.webp"
-    ],
-    "thumbnail": "/images/products/mouse-ergonomic.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "PERIPHERALS | Manufacturer Part No": "2HU84AA#ABL"
     },
@@ -16627,8 +16035,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/mouse-ergonomic.webp",
-    "image": "/images/products/mouse-ergonomic.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e874ebae-782b-43a1-a0d3-5e9243c81386",
@@ -16650,10 +16057,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16702,8 +16107,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c1f34bc7-ad48-4ada-8af7-95935d3e09af",
@@ -16725,10 +16129,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16777,8 +16179,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ee4e4fe0-6c1f-4be3-b179-4184905ae672",
@@ -16800,10 +16201,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/mouse-ergonomic.webp"
-    ],
-    "thumbnail": "/images/products/mouse-ergonomic.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16852,8 +16251,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/mouse-ergonomic.webp",
-    "image": "/images/products/mouse-ergonomic.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cadaab47-9c6d-47a1-af40-6a9c9c5f3e4e",
@@ -16875,10 +16273,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/network-switch.webp"
-    ],
-    "thumbnail": "/images/products/network-switch.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -16927,8 +16323,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/network-switch.webp",
-    "image": "/images/products/network-switch.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ea43d366-7134-4b0a-9a2e-60fc7ccbc688",
@@ -16950,10 +16345,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17002,8 +16395,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b65749be-01dd-4611-bc30-354f02bb85fd",
@@ -17025,10 +16417,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17077,8 +16467,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_3f6aae20-d5af-467b-8097-fb66291fb8bb",
@@ -17100,10 +16489,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17152,8 +16539,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_01e0930d-acfd-4a32-9b57-2e43aa30f4f2",
@@ -17175,10 +16561,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "PERIPHERALS | Color": "BLACK"
     },
@@ -17230,8 +16614,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e2911f3c-1d42-4c13-a299-d30280558411",
@@ -17253,10 +16636,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "PERIPHERALS | Color": "SILVER",
       "PERIPHERALS | Manufacturer Part No": "COMPATIBILITY"
@@ -17309,8 +16690,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_efb999de-87f9-4107-8312-f0905d3d82c8",
@@ -17332,10 +16712,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17384,8 +16762,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a48358bc-b33f-411a-a451-0ededb542bc6",
@@ -17407,10 +16784,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17460,8 +16835,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_4094c9b5-48d4-408a-8cdc-ca27b8b87953",
@@ -17483,10 +16857,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17536,8 +16908,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_bc78047c-c76b-4125-9833-0c9a02197bfe",
@@ -17559,10 +16930,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17612,8 +16981,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c5ac3ce6-37f3-4225-8750-4559068e6db3",
@@ -17635,10 +17003,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17688,8 +17054,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a1c322d8-9f9e-4943-b5d4-16297c030924",
@@ -17711,10 +17076,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17764,8 +17127,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_8e9baebd-bf9f-428c-8ed1-62f8672980d8",
@@ -17787,10 +17149,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17840,8 +17200,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f78d9ecf-7e94-40e1-99e8-986499d973a5",
@@ -17863,10 +17222,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17916,8 +17273,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_5328e0c9-0977-4490-a013-a69e7734707e",
@@ -17939,10 +17295,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -17992,8 +17346,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_113c94a3-1cd9-47ea-b37d-68625fbf0947",
@@ -18015,10 +17368,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18068,8 +17419,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_60aae58f-0d49-4384-a986-875417473431",
@@ -18091,10 +17441,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18144,8 +17492,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_fc67d9d9-e148-49e0-9f9c-dafea7eb93db",
@@ -18167,10 +17514,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18220,8 +17565,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cd75a282-98cd-4193-bdd4-a773e160026e",
@@ -18243,10 +17587,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18296,8 +17638,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9390330b-5476-483b-af8c-9fba90e4291e",
@@ -18319,10 +17660,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18372,8 +17711,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_38b1b7f6-750c-43aa-9b0f-319732c54e1b",
@@ -18395,10 +17733,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18448,8 +17784,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_edc864fb-5a7f-4c70-9546-76e1be4e2362",
@@ -18471,10 +17806,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18524,8 +17857,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6423d0be-7a3f-48a1-b327-4b7010761902",
@@ -18547,10 +17879,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18600,8 +17930,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_8c4de95a-c1e6-421d-a09e-584febaac07b",
@@ -18623,10 +17952,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18676,8 +18003,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_06e72bf7-8cfc-4ed0-811c-68f0bf026b86",
@@ -18699,10 +18025,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18752,8 +18076,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_2893f05c-93b2-4c7f-aa15-3205d0022b9e",
@@ -18775,10 +18098,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18828,8 +18149,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1886c217-4798-4672-84b0-3b495bbd2535",
@@ -18851,10 +18171,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18904,8 +18222,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_954c70b2-a930-420f-a5f4-859ee63fef22",
@@ -18927,10 +18244,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -18980,8 +18295,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_36b50139-6ddf-4de5-a2cf-e0f7ceca005e",
@@ -19003,10 +18317,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19056,8 +18368,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_2c986d08-b182-4239-ab58-a8230dc9070a",
@@ -19079,10 +18390,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19132,8 +18441,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a3ab7b8d-7aba-4bd9-8d77-9acc8cb90455",
@@ -19155,10 +18463,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19208,8 +18514,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_feb99cfe-6253-4166-b472-ff29dea1666f",
@@ -19231,10 +18536,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19284,8 +18587,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_66418071-97e2-4200-a889-8c74171b5a1e",
@@ -19307,10 +18609,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19360,8 +18660,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_52a7ba0c-4b97-4ea4-b231-683c8dd94343",
@@ -19383,10 +18682,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19436,8 +18733,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_6d29b428-3e51-4e16-bd04-4f212ea7dcd9",
@@ -19459,10 +18755,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hdd-enterprise.webp"
-    ],
-    "thumbnail": "/images/products/hdd-enterprise.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19512,8 +18806,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hdd-enterprise.webp",
-    "image": "/images/products/hdd-enterprise.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cc661e0e-2c59-4d03-997f-3bbd29db0221",
@@ -19535,10 +18828,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19588,8 +18879,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b1f69d22-1672-41cb-b6d1-0ecf0bfa032e",
@@ -19611,10 +18901,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19664,8 +18952,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_25cd16bb-8e50-41b1-a928-0d78089aab90",
@@ -19687,10 +18974,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19740,8 +19025,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b650f49a-1a9f-4d51-90a5-da7da978c147",
@@ -19763,10 +19047,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19816,8 +19098,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_9e8c22b6-c502-4658-86a1-7f28f2ef471e",
@@ -19839,10 +19120,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19892,8 +19171,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a1ee8245-40b3-4089-bd6e-28c10a5bd73c",
@@ -19915,10 +19193,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -19968,8 +19244,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_41780171-612e-4f73-86e3-f02a82743263",
@@ -19991,10 +19266,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/hp-probook.webp"
-    ],
-    "thumbnail": "/images/products/hp-probook.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20044,8 +19317,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/hp-probook.webp",
-    "image": "/images/products/hp-probook.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b6a841c7-26a0-49c7-bc1b-0406655aefd3",
@@ -20067,10 +19339,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20120,8 +19390,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_837b45ee-cd75-4ab3-a059-a730e7b38689",
@@ -20143,10 +19412,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20196,8 +19463,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_55a6c344-ba3c-45af-b779-0090da437732",
@@ -20219,10 +19485,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20272,8 +19536,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_23ff48b6-f5ff-4fe1-814b-f3d3c88156d0",
@@ -20295,10 +19558,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20348,8 +19609,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2eff76c5-e7cf-43b6-934d-ea06016446c9",
@@ -20371,10 +19631,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20424,8 +19682,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_d6e3e73c-0ace-431b-9dfc-3265cac855e1",
@@ -20447,10 +19704,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20500,8 +19755,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_949aff68-fcf6-470f-8c21-d68aecd92f3e",
@@ -20523,10 +19777,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20576,8 +19828,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_06245c1f-358f-44c2-8748-c7999d87f741",
@@ -20599,10 +19850,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/network-switch.webp"
-    ],
-    "thumbnail": "/images/products/network-switch.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20650,8 +19899,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/network-switch.webp",
-    "image": "/images/products/network-switch.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_26f9eedc-acdd-4477-8358-d632fa92b2df",
@@ -20673,10 +19921,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/apc-ups.webp"
-    ],
-    "thumbnail": "/images/products/apc-ups.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20725,8 +19971,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/apc-ups.webp",
-    "image": "/images/products/apc-ups.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c8aa18df-e784-45a5-93e5-47b15322b2a4",
@@ -20748,10 +19993,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20800,8 +20043,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_48e0b55e-c387-4a9a-9708-267c5e6eb643",
@@ -20823,10 +20065,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20875,8 +20115,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_85291297-8b46-4d1e-aa2e-0c6206fcff8c",
@@ -20898,10 +20137,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -20950,8 +20187,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_ba2fad0d-f9f9-40ce-9c04-2827c4bfafd1",
@@ -20973,10 +20209,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21025,8 +20259,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_748c2917-f641-4b36-b835-346430f88c3c",
@@ -21048,10 +20281,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21100,8 +20331,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_23b8f221-ce2b-4fe4-a6c5-79dfd12cd5fa",
@@ -21123,10 +20353,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21175,8 +20403,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c23e9be0-bb01-4179-8613-85d38272729c",
@@ -21198,10 +20425,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21250,8 +20475,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_70161cb7-26ae-4ce1-bfa3-463631aae362",
@@ -21273,10 +20497,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21325,8 +20547,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_bc69c24b-69d3-413f-a378-4de7e6d14436",
@@ -21348,10 +20569,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21400,8 +20619,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a39838d4-69ee-4342-886c-196c186e96d4",
@@ -21423,10 +20641,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21475,8 +20691,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c1fbc35d-4398-4851-bf00-2f667ac86d22",
@@ -21498,10 +20713,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21550,8 +20763,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_b35d4c58-dfea-43d0-a163-b60365df03da",
@@ -21573,10 +20785,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21626,8 +20836,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_5ed7380b-d75c-4abd-881c-e0768b5d5bb7",
@@ -21649,10 +20858,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21701,8 +20908,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_bb5e541e-5b0f-4123-bc1b-3a3f9b98661a",
@@ -21724,10 +20930,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21776,8 +20980,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_30f17717-4d9e-4f2a-ac2d-7e49f5ea9e7b",
@@ -21799,10 +21002,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21851,8 +21052,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_418486b7-f719-4dc8-aace-5aaf6261d5d5",
@@ -21874,10 +21074,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -21927,8 +21125,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1a16dee4-9fe7-41af-be6b-38a0790e5a9e",
@@ -21950,10 +21147,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22003,8 +21198,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_8b9a41bf-82e1-4a79-acad-b69f2f8210a4",
@@ -22026,10 +21220,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22078,8 +21270,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_64a1c6d5-0df7-4e7a-8b9c-efd40731568f",
@@ -22101,10 +21292,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22153,8 +21342,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_9cb4618e-1189-450c-8423-4ce69d45de03",
@@ -22176,10 +21364,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22229,8 +21415,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_42e19d88-d309-4fcf-afb0-8d9bce615eb8",
@@ -22252,10 +21437,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22304,8 +21487,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a109710e-9c85-4421-b712-a5692d922d16",
@@ -22327,10 +21509,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ram-module.webp"
-    ],
-    "thumbnail": "/images/products/ram-module.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22380,8 +21560,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ram-module.webp",
-    "image": "/images/products/ram-module.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_f56b835f-ae41-43ff-aa82-c1e2d92819a8",
@@ -22403,10 +21582,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22455,8 +21632,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_997af6c2-cf93-4ddc-8029-f07ea423d5a2",
@@ -22478,10 +21654,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22530,8 +21704,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_67f2e21c-3d11-4035-bb5e-6c63b6e1d1db",
@@ -22553,10 +21726,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22605,8 +21776,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_6aab9fda-91cc-4d1d-ace1-44334bbbe095",
@@ -22628,10 +21798,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22680,8 +21848,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_94935d15-f280-4c25-87b3-61132ca7e0e7",
@@ -22703,10 +21870,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22755,8 +21920,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_80014a1c-8a0e-4a4f-be37-e505fe0a677b",
@@ -22778,10 +21942,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22830,8 +21992,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_5478bd14-197d-4bb9-b902-cd5b347f31de",
@@ -22853,10 +22014,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22905,8 +22064,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_7a51ade4-cc03-49c1-9610-50473b9ac778",
@@ -22928,10 +22086,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -22980,8 +22136,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a250394d-6bca-4824-bf66-5566fa881c20",
@@ -23003,10 +22158,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23055,8 +22208,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_014758e2-a555-4438-9234-0841797f0057",
@@ -23078,10 +22230,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23130,8 +22280,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_26b51d0f-d1a8-4a0b-8cd7-7e525e99e29a",
@@ -23153,10 +22302,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23205,8 +22352,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_783458bf-5b4e-4e38-a072-952ab89def62",
@@ -23228,10 +22374,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23281,8 +22425,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_d1a7bb20-78b7-4960-b04a-5697ddc1504b",
@@ -23304,10 +22447,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23356,8 +22497,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_61f7eead-cbef-42ad-b4e7-46b3eb509277",
@@ -23379,10 +22519,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23432,8 +22570,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_a7811de4-aaa7-4280-ab6e-d18ffbcfed1d",
@@ -23455,10 +22592,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23508,8 +22643,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2cae47ec-18e2-47e9-bdba-e3cdc7677700",
@@ -23531,10 +22665,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23583,8 +22715,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_a4d52b2b-7784-46d4-a857-e11655f8bd8b",
@@ -23606,10 +22737,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23658,8 +22787,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_c1cd3d72-45e9-4ecb-a2c0-77647244cfff",
@@ -23681,10 +22809,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23733,8 +22859,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_fed6e9c4-38ae-4c2f-a0e5-e3ad4a270ef7",
@@ -23756,10 +22881,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23808,8 +22931,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_4744afb2-ca6a-475a-a5aa-f2b874f5845c",
@@ -23831,10 +22953,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/samsung_990_pro.jpg"
-    ],
-    "thumbnail": "/images/samsung_990_pro.jpg",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23883,8 +23003,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/samsung_990_pro.jpg",
-    "image": "/images/samsung_990_pro.jpg"
+    "primaryImage": ""
   },
   {
     "id": "prod_fd934429-6d47-421b-aaf8-1dd2fdf0ed8c",
@@ -23906,10 +23025,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/ssd-sata.webp"
-    ],
-    "thumbnail": "/images/products/ssd-sata.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -23958,8 +23075,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/ssd-sata.webp",
-    "image": "/images/products/ssd-sata.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_bd4f5121-4d81-43d6-b459-63b80d5a7e17",
@@ -23981,10 +23097,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/apc-ups.webp"
-    ],
-    "thumbnail": "/images/products/apc-ups.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "UPS & POWER | Manufacturer Part No": "SMC3000I"
     },
@@ -24035,8 +23149,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/apc-ups.webp",
-    "image": "/images/products/apc-ups.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_1c40a930-7ada-454e-926e-765ce91f08b4",
@@ -24058,10 +23171,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/apc-ups.webp"
-    ],
-    "thumbnail": "/images/products/apc-ups.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "UPS & POWER | Manufacturer Part No": "SMT1500IC"
     },
@@ -24112,8 +23223,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/apc-ups.webp",
-    "image": "/images/products/apc-ups.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_2406c80f-02ef-47f7-8490-2a996de1fb74",
@@ -24135,10 +23245,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/apc-ups.webp"
-    ],
-    "thumbnail": "/images/products/apc-ups.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {},
     "features": [],
     "tags": [
@@ -24187,8 +23295,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/apc-ups.webp",
-    "image": "/images/products/apc-ups.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_e9871cf1-8529-44bd-b60f-73cb6ed2bb0f",
@@ -24210,10 +23317,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/apc-ups.webp"
-    ],
-    "thumbnail": "/images/products/apc-ups.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "UPS & POWER | Manufacturer Part No": "SMC1000IC"
     },
@@ -24264,8 +23369,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/apc-ups.webp",
-    "image": "/images/products/apc-ups.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_0be705b4-feaf-481a-a929-f900f85e6d1e",
@@ -24287,10 +23391,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/apc-ups.webp"
-    ],
-    "thumbnail": "/images/products/apc-ups.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "UPS & POWER | Manufacturer Part No": "BV650I-MSX"
     },
@@ -24341,8 +23443,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/apc-ups.webp",
-    "image": "/images/products/apc-ups.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_00465fb7-1b38-4113-b67a-85dcafcd6237",
@@ -24364,10 +23465,8 @@
     "stock": 10,
     "reservedStock": 0,
     "lowStockThreshold": 3,
-    "images": [
-      "/images/products/apc-ups.webp"
-    ],
-    "thumbnail": "/images/products/apc-ups.webp",
+    "images": [],
+    "thumbnail": "",
     "specifications": {
       "UPS & POWER | Display Resolution": "IEC - 86L3KH BRAND NEW",
       "UPS & POWER | Manufacturer Part No": "BX750MI"
@@ -24419,8 +23518,7 @@
         "committed": 0
       }
     ],
-    "primaryImage": "/images/products/apc-ups.webp",
-    "image": "/images/products/apc-ups.webp"
+    "primaryImage": ""
   },
   {
     "id": "prod_cpu_14900k",
@@ -24454,8 +23552,7 @@
     },
     "isFeatured": true,
     "isActive": true,
-    "approvalStatus": "APPROVED",
-    "image": "/images/intel_i9_14900k.jpg"
+    "approvalStatus": "APPROVED"
   },
   {
     "id": "prod_cpu_7950x",
@@ -24489,8 +23586,7 @@
     },
     "isFeatured": true,
     "isActive": true,
-    "approvalStatus": "APPROVED",
-    "image": "/images/amd_ryzen_7950x.jpg"
+    "approvalStatus": "APPROVED"
   },
   {
     "id": "prod_gpu_4090",
@@ -24523,8 +23619,7 @@
     },
     "isFeatured": true,
     "isActive": true,
-    "approvalStatus": "APPROVED",
-    "image": "/images/hero_rtx4090.webp"
+    "approvalStatus": "APPROVED"
   },
   {
     "id": "prod_ssd_990pro",
@@ -24557,8 +23652,7 @@
     },
     "isFeatured": true,
     "isActive": true,
-    "approvalStatus": "APPROVED",
-    "image": "/images/samsung_990_pro.jpg"
+    "approvalStatus": "APPROVED"
   },
   {
     "id": "prod_inv_1",
@@ -24600,8 +23694,8 @@
     "isFeatured": false,
     "isActive": true,
     "approvalStatus": "APPROVED",
-    "createdAt": "2026-11-24T14:18:34.379Z",
-    "updatedAt": "2026-11-24T14:18:34.402Z"
+    "createdAt": "2026-11-24T08:34:20.970Z",
+    "updatedAt": "2026-11-24T08:34:20.989Z"
   },
   {
     "id": "prod_srv_r760",
@@ -24628,10 +23722,7 @@
       "/products/dell-r760.webp"
     ],
     "createdAt": "2026-11-20T07:23:58.756Z",
-    "updatedAt": "2026-11-20T07:23:58.756Z",
-    "primaryImage": "/products/dell-r760.webp",
-    "thumbnail": "/products/dell-r760.webp",
-    "image": "/products/dell-r760.webp"
+    "updatedAt": "2026-11-20T07:23:58.756Z"
   },
   {
     "id": "prod_mb_z790_dark_hero",
@@ -24658,10 +23749,7 @@
       "/products/asus-dark-hero.webp"
     ],
     "createdAt": "2026-11-20T07:23:58.756Z",
-    "updatedAt": "2026-11-20T07:23:58.756Z",
-    "primaryImage": "/products/asus-dark-hero.webp",
-    "thumbnail": "/products/asus-dark-hero.webp",
-    "image": "/products/asus-dark-hero.webp"
+    "updatedAt": "2026-11-20T07:23:58.756Z"
   },
   {
     "id": "prod_psu_tx1600",
@@ -24688,9 +23776,6 @@
       "/products/seasonic-tx1600.webp"
     ],
     "createdAt": "2026-11-20T07:23:58.756Z",
-    "updatedAt": "2026-11-20T07:23:58.756Z",
-    "primaryImage": "/products/seasonic-tx1600.webp",
-    "thumbnail": "/products/seasonic-tx1600.webp",
-    "image": "/products/seasonic-tx1600.webp"
+    "updatedAt": "2026-11-20T07:23:58.756Z"
   }
 ]
