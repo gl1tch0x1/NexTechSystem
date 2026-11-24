@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Product, HeroHighlight } from '@/types';
 import { useCart } from '@/lib/cart-context';
 import { useCurrency } from '@/lib/currency-context';
@@ -53,6 +53,35 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   const [justAdded, setJustAdded] = useState(false);
   const { addToCart } = useCart();
   const { formatPrice, convertPrice, currentCurrency } = useCurrency();
+
+  // Interactive 3D perspective tilt & parallax physics
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+
+  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
+  const smoothMouseX = useSpring(mouseX, springConfig);
+  const smoothMouseY = useSpring(mouseY, springConfig);
+
+  const rotateX = useTransform(smoothMouseY, [0, 1], [5, -5]);
+  const rotateY = useTransform(smoothMouseX, [0, 1], [-5, 5]);
+  const imageX = useTransform(smoothMouseX, [0, 1], [-8, 8]);
+  const imageY = useTransform(smoothMouseY, [0, 1], [-8, 8]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    mouseX.set(0.5);
+    mouseY.set(0.5);
+  };
 
   const currentHighlight = activeHighlights.find(h => h.id === selectedTabId) || activeHighlights[0];
 
@@ -206,17 +235,26 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
           {/* Right Column: Unified Sleek Hardware Showcase Terminal */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
-            <div
+            <motion.div
+              ref={cardRef}
+              onMouseMove={handleMouseMove}
               onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              className="w-full max-w-[500px] h-[480px] sm:h-[520px] relative rounded-2xl overflow-hidden bg-[#0A0E17] border border-slate-800 shadow-xl transition-all select-none group"
+              onMouseLeave={handleMouseLeave}
+              style={{
+                rotateX,
+                rotateY,
+                transformStyle: 'preserve-3d',
+                perspective: 1000,
+              }}
+              className="w-full max-w-[500px] h-[480px] sm:h-[520px] relative rounded-3xl overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.55)] transition-colors duration-200 select-none group"
             >
-              {/* Natural Realistic Soft Neutral Studio Vignette */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.035)_0%,transparent_70%)] pointer-events-none" />
+              {/* Diffused Depth-of-Field Blur Ring: focuses 100% on foreground hardware */}
+              <div className="absolute inset-8 rounded-3xl bg-slate-500/5 dark:bg-white/5 backdrop-blur-3xl pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(37,99,235,0.06)_0%,transparent_70%)] pointer-events-none dark:opacity-60" />
 
-              {/* Floating Minimalist Category Switcher & Stock Indicator */}
+              {/* Floating Architectural Segmented Switcher & Stock Radar */}
               <div className="absolute top-3.5 inset-x-3.5 z-20 flex items-center justify-between gap-2 pointer-events-auto">
-                <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-sm overflow-x-auto no-scrollbar max-w-[calc(100%-115px)] relative">
+                <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-x-auto no-scrollbar max-w-[calc(100%-115px)] relative">
                   {activeHighlights.map(item => {
                     const isActive = item.id === selectedTabId;
                     return (
@@ -227,15 +265,15 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                           e.stopPropagation();
                           setSelectedTabId(item.id);
                         }}
-                        className={`relative px-3 py-1 rounded-md text-[11px] font-mono font-medium transition-colors cursor-pointer shrink-0 z-10 ${isActive
+                        className={`relative px-3 py-1 rounded-lg text-[11px] font-mono font-medium transition-colors cursor-pointer shrink-0 z-10 ${isActive
                           ? 'text-white font-semibold'
-                          : 'text-slate-400 hover:text-slate-200'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                       >
                         {isActive && (
                           <motion.span
                             layoutId="activeHeroTabIndicator"
-                            className="absolute inset-0 rounded-md bg-blue-600 shadow-sm -z-10"
+                            className="absolute inset-0 rounded-lg bg-blue-600 shadow-md shadow-blue-600/30 -z-10"
                             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
                           />
                         )}
@@ -245,7 +283,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   })}
                 </div>
 
-                <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-800 text-[11px] font-mono font-medium text-emerald-400 shadow-sm">
+                <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400 shadow-xs">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   <span>In Stock ({stockCount})</span>
                 </div>
@@ -253,12 +291,12 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
               {/* Top Right Realistic Spec Tag */}
               <div className="absolute top-14 right-3.5 z-10 pointer-events-none">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-slate-300 text-[10px] font-mono font-semibold shadow-sm">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-white/70 dark:bg-slate-900/75 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 text-[10px] font-mono font-semibold shadow-xs backdrop-blur-md">
                   <span>{currentHighlight.powerRating}</span>
                 </span>
               </div>
 
-              {/* Full-Card Immersive Hardware Visual Stage */}
+              {/* Full-Card Immersive Hardware Visual Stage with 3D Parallax & Depth */}
               <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-8 pt-14 pb-14 pointer-events-none">
                 <AnimatePresence mode="wait">
                   <motion.img
@@ -268,16 +306,20 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                     initial={{ opacity: 0, scale: 0.94 }}
                     animate={{
                       opacity: 1,
-                      scale: isHovered ? 1.08 : 1,
+                      scale: isHovered ? 1.09 : 1,
                       y: isHovered ? -14 : 0,
                     }}
                     exit={{ opacity: 0, scale: 0.94 }}
+                    style={{
+                      x: imageX,
+                      y: imageY,
+                    }}
                     transition={{
-                      scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                      y: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                      scale: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+                      y: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
                       opacity: { duration: 0.22 },
                     }}
-                    className="w-full h-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.6)] select-none pointer-events-none"
+                    className="w-full h-full object-contain filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.18)] dark:drop-shadow-[0_25px_45px_rgba(0,0,0,0.75)] select-none pointer-events-none"
                   />
                 </AnimatePresence>
               </div>
@@ -286,7 +328,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
               <motion.div
                 initial={false}
                 animate={{
-                  y: isHovered ? 0 : 'calc(100% - 48px)',
+                  y: isHovered ? 0 : 'calc(100% - 50px)',
                 }}
                 transition={{
                   type: 'spring',
@@ -294,7 +336,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   damping: 32,
                   mass: 0.8,
                 }}
-                className="absolute inset-x-0 bottom-0 z-30 rounded-b-2xl bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 shadow-2xl p-4 sm:p-5 text-white pointer-events-auto"
+                className="absolute inset-x-0 bottom-0 z-30 rounded-b-3xl bg-white/85 dark:bg-slate-950/88 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-15px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-15px_40px_rgba(0,0,0,0.7)] p-4 sm:p-5 text-slate-900 dark:text-white pointer-events-auto"
               >
                 {/* Always-visible top handle bar */}
                 <div
@@ -302,19 +344,19 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   className="flex items-center justify-between gap-3 pb-1 cursor-pointer"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <h3 className="font-heading text-xs sm:text-[13px] font-semibold text-slate-100 truncate tracking-tight">
+                    <h3 className="font-heading text-xs sm:text-[13px] font-bold text-slate-900 dark:text-slate-100 truncate tracking-tight">
                       {displayName}
                     </h3>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-mono text-xs sm:text-sm font-bold text-white whitespace-nowrap">
+                    <span className="font-mono text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
                       AED {formattedCurrentAmount}
                     </span>
                     <motion.div
                       animate={{ rotate: isHovered ? 180 : 0 }}
                       transition={{ duration: 0.25 }}
                     >
-                      <ChevronUp className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                      <ChevronUp className="w-4 h-4 text-slate-400 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-white transition-colors" />
                     </motion.div>
                   </div>
                 </div>
@@ -327,16 +369,16 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                 >
                   {/* Category & Official Stock Badge */}
                   <div className="flex items-center justify-between gap-2 text-[10.5px]">
-                    <span className="font-semibold text-slate-400 truncate max-w-[240px]">
+                    <span className="font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[240px]">
                       {currentHighlight.brand} • {currentHighlight.category}
                     </span>
                     <div className="flex items-center gap-2">
                       {originalPrice && originalPrice > currentPrice && (
-                        <span className="font-mono text-slate-500 line-through">
+                        <span className="font-mono text-slate-400 dark:text-slate-500 line-through">
                           {formatPrice(originalPrice)}
                         </span>
                       )}
-                      <span className="font-medium text-emerald-400 shrink-0">
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
                         Official GCC Stock
                       </span>
                     </div>
@@ -347,12 +389,12 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                     {currentHighlight.specs?.map((spec, i) => (
                       <div
                         key={i}
-                        className="p-1.5 px-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex flex-col justify-center min-w-0"
+                        className="p-1.5 px-2.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/70 text-xs flex flex-col justify-center min-w-0"
                       >
-                        <span className="text-[9.5px] text-slate-400 font-medium truncate">
+                        <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium truncate">
                           {spec.label}
                         </span>
-                        <span className="font-bold text-slate-200 text-[11px] mt-0.5 truncate tracking-tight font-sans" title={spec.value}>
+                        <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px] mt-0.5 truncate tracking-tight font-sans" title={spec.value}>
                           {spec.value}
                         </span>
                       </div>
@@ -386,7 +428,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
                     <Link
                       href={matchedProduct?.slug ? `/products/${matchedProduct.slug}` : '/products'}
-                      className="py-2.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-slate-800 shadow-xs hover:border-slate-700 hover:text-white"
+                      className="py-2.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700"
                     >
                       <span>Datasheet</span>
                       <ExternalLink className="w-3 h-3" />
@@ -394,7 +436,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   </div>
                 </motion.div>
               </motion.div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
