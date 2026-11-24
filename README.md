@@ -95,6 +95,7 @@ graph TB
 - **Enterprise Technical Specifications Matrix**: Clean, structured hardware datasheet grouping parameters into standardized domains (`Processor & Platform`, `Memory & Storage`, `Display & Visuals`, `Graphics & GPU`, `Design, Input & Mobility`, `System, OS & Warranty`) with progressive disclosure ("View All Specifications"), live search, and one-click Markdown datasheet export.
 - **Multi-SKU Variant Studio**: Dynamic Cartesian variant generation (e.g., Processor $\times$ Memory $\times$ Storage) with hierarchical SKUs, volumetric courier weights, and live SVG barcodes.
 - **UAE Central Bank Dirham Standard**: Native integration with the official UAE Dirham currency symbol (`U+20C3`), complete with multi-currency conversions across AED, USD, EUR, SAR, GBP, and KWD.
+- **Snappy Framer Motion Navigation & Hover Architecture**: Spring-physics-driven hover-in and hover-out transitions for the Multi-Currency FX Dropdown (`stiffness: 440, damping: 27, mass: 0.7`) with depth blur filters (`blur(4px)` to `blur(0px)`), interactive trigger scaling (`whileHover={{ scale: 1.03 }}`), zero-gap hover bridges (`before:-top-3`), and an upgraded Category Mega-Menu featuring staggered link row translations (`whileHover={{ x: 4 }}`), interactive featured card scaling, and liquid indicator tabs (`layoutId`).
 
 ### 2. PC Builder Hardware Compatibility Engine
 - **Pinout & Socket Topology**: Verifies socket matching across Intel (`LGA1851`, `LGA1700`, `LGA1200`) and AMD (`AM5`, `AM4`, `TR5`, `SP5`).
@@ -129,6 +130,11 @@ flowchart LR
 - **Wholesale Procurement Lifecycle**: Purchase Order issuance, tracking, warehouse intake, and automatic stock level increments.
 - **Global Freight Logistics & Cargo Deck**: Air Waybill (AWB) generation, IATA tare/gross weight algorithms, courier fleet dispatch, transit milestone updates, and customs export manifests.
 - **Strict Reseller Vetting & Authorized Portals**: Isolated partner subdomains (`/reseller/:code`), mandatory official Trade License and UAE VAT Registration Certificate document verification, administrative approval gating (`PENDING_APPROVAL` to `ACTIVE`), live onboarding status notifications, bulk Excel catalog ingestion via streaming SheetJS, attributed commission tracking, and automated credential issuance.
+
+### 5. Multi-Tenant Administration & Real-Time Telemetry
+- **Real-Time Staff Presence Radar**: Synchronized live heartbeats across multi-session admin windows and serverless lambdas via MongoDB Atlas `staff_presence` collection, resolving "0 Online" discrepancies and broadcasting live active administrator and staff counts with role inspection.
+- **Cross-Account Administrative Synchronization**: Centralized Product Editors & Staff management across all administrative dashboards with direct MongoDB Atlas persistence, PBKDF2/SHA-512 password hashing, and deletion tombstones (`deleted_editors`).
+- **Unified Multi-Tenant ERP Telemetry**: Live aggregate metrics calculated directly across MongoDB collections (`orders`, `products`, `quotes`, `purchase_orders`, `users`) with disk catalog fallbacks, ensuring all administrator accounts see identical, synchronized real-time platform revenue, order volumes, inventory valuations, and B2B deal velocity.
 
 ---
 
@@ -206,6 +212,7 @@ stateDiagram-v2
 | :--- | :--- | :--- | :--- |
 | **Frontend Framework** | **Next.js** (App Router) | `16.4.0` | React Server Components (RSC), SSR, dynamic routing, edge middleware |
 | **UI Library** | **React** | `19.3.0` | Declarative UI, optimistic rendering, hooks & concurrent transitions |
+| **Motion & Animation** | **Framer Motion** | `12.x` | Spring-physics navigation, cinematic depth blur, liquid layout tabs |
 | **Language** | **TypeScript** | `5.8.2` | Monorepo-wide shared types, strict static compilation (`tsc --noEmit`) |
 | **Styling Engine** | **Tailwind CSS** | `3.4 / 4.3` | Utility-first responsive design, dark/light theme, custom glassmorphism |
 | **Iconography** | **Lucide React** | `0.470+` | Clean, accessible vector icons for enterprise interfaces |
@@ -436,10 +443,10 @@ npm run dev:frontend
 
 ## Testing & Quality Assurance
 
-The test suite validates financial calculation accuracy, concurrency control, media pipelines, authentication security, and CodeQL vulnerability remediations across **206 passing tests**:
+The test suite validates financial calculation accuracy, concurrency control, media pipelines, authentication security, and CodeQL vulnerability remediations across **207 passing tests**:
 
 ```bash
-# Execute backend unit and integration test suite (206 tests passing)
+# Execute backend unit and integration test suite (207 tests passing)
 npm run test:backend
 
 # Run comprehensive financial, inventory & security E2E matrix

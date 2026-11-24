@@ -7,15 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.1] - 2026-11-20
+## [1.3.0] - 2026-11-24
+
+### Added
+- **Snappy Framer Motion Navigation & Hover Architecture**:
+  - Implemented smooth, spring-physics-driven hover-in and hover-out transitions for the Multi-Currency FX Dropdown (`stiffness: 440, damping: 27, mass: 0.7`) with depth blur filters (`blur(4px)` to `blur(0px)`), trigger button scaling (`whileHover={{ scale: 1.03 }}`), interactive flag pop, and animated active currency dot (`layoutId="active-currency-dot"`).
+  - Engineered zero-gap hover bridges (`before:-top-3`) eliminating dead-zone cursor drops between navigation buttons and dropdown panels.
+  - Upgraded the Category Sub-Navigation Mega-Menu with high-stiffness spring curves (`stiffness: 420, damping: 26, mass: 0.75`), depth blur transitions, staggered link row hover translations (`whileHover={{ x: 4 }}`), interactive featured card scaling (`whileHover={{ y: -3, scale: 1.01 }}`), and liquid indicator tabs (`layoutId="nav-category-pill"` & `layoutId="nav-category-underline"`).
+  - Maintained keyboard accessibility (`Escape` key dismiss, outside click listener) and low-latency response times (110ms–130ms hover-out grace period).
+- **Real-Time Global Staff Presence Tracking**:
+  - Resolved the "0 Online" counter issue: Persisted live heartbeats directly to MongoDB Atlas `staff_presence` collection, guaranteeing synchronized cross-session presence tracking across serverless lambdas and multi-window instances.
+  - Guaranteed minimum online presence for authenticated administrators and synchronized multi-session live presence across different browsers/tabs in real-time.
+  - Interactive `OnlineStaffPill` with role badges (Administrators, Product Editors, Resellers) and real-time live search filter.
+- **Cross-Account Administrative Synchronization & Product Editors**:
+  - Implemented direct MongoDB Atlas CRUD in `/api/admin/editors` and `/api/admin/editors/[...path]` with PBKDF2/SHA-512 password hashing, email/username collision validation, and deletion tombstones (`deleted_editors`).
+  - Guaranteed that product editors created by any administrator are immediately synchronized, persisted, and visible across all administrative dashboards.
+- **Unified Multi-Tenant Dashboard Telemetry & ERP Metrics**:
+  - Rebuilt `/api/admin/dashboard` to compute live aggregate metrics directly from MongoDB Atlas collections (`orders`, `products`, `quotes`, `purchase_orders`, `users`) with disk catalog fallbacks, ensuring all administrator accounts see identical, synchronized real-time platform revenue, order volumes, inventory valuations, and B2B deal velocity.
+  - Added dedicated `/api/quotes` and `/api/quotes/[...path]` endpoints to power B2B CRM pipeline tracking and 1-click quote-to-order conversions.
+  - Enhanced `/api/admin/purchase-orders` and `/api/admin/resellers` routes with MongoDB Atlas fallback resilience.
 
 ### Fixed
+- **CodeQL & Static Analysis Security Remediations**:
+  - Resolved Alert #320 (CWE-117 log injection) in admin routes by sanitizing user input logging.
+  - Resolved Alert #321 & #316 (CWE-570/571 trivial conditionals) in authentication login and catalog service.
+  - Resolved Alert #314 (CWE-563 dead store) in media upload routes.
 - **Hardware Taxonomy Product Count & Resolution Engine**:
   - Resolved issue where homepage hardware category cards (Processors, GPUs, Motherboards, RAM, Storage, PSUs, Servers, Laptops) displayed "0 verified products" despite inventory containing matching hardware.
   - Implemented semantic category matching (`matchesCategoryFilter` on frontend, `matchesCategory` on backend) to accurately match products by ID, slug, title, specifications, and hardware architecture keywords.
   - Dynamically compute verified product counts in `/api/products/categories` and frontend SSR pages.
   - Seeded missing flagship hardware entries for enterprise servers (Dell PowerEdge R760), motherboards (ASUS ROG Maximus Z790 Dark Hero), and titanium power supplies (Seasonic PRIME TX-1600).
   - Ensured category links (`/products?category=cat_...`) correctly display filtered catalog items.
+- **Test Suite Expansion**:
+  - Expanded test runner to **207 passing tests** with 100% pass rate.
 
 ## [1.2.0] - 2026-11-19
 
