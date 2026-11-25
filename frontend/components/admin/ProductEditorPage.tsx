@@ -37,7 +37,6 @@ import {
   RefreshCw,
   AlertTriangle,
   Percent,
-  Zap,
   ArrowLeft,
   Save,
   ChevronRight,
@@ -45,7 +44,6 @@ import {
   Eye,
   Star,
   Warehouse,
-  TrendingUp,
   MapPin,
   MoveLeft,
   MoveRight,
@@ -535,7 +533,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
 
   // Studio 2.0 State Enhancements
   const [previewCurrency, setPreviewCurrency] = useState<keyof typeof FX_RATES>('AED');
-  const [targetMarginInput, setTargetMarginInput] = useState<number>(20);
   const [galleryUrlInput, setGalleryUrlInput] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -1353,23 +1350,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   };
 
   // Target Margin & B2B Tiered Volume Pricing Handlers
-  const handleApplyTargetMargin = (marginPct: number) => {
-    const cost = Number(formData.costPrice) || 0;
-    if (cost <= 0 || marginPct >= 100) return;
-    const calculatedPrice = Math.round(cost / (1 - marginPct / 100));
-    setFormData(prev => ({
-      ...prev,
-      price: calculatedPrice,
-      originalPrice: Math.max(prev.originalPrice, Math.round(calculatedPrice * 1.15)),
-      unitPrice: calculatedPrice,
-      tieredPricing: [
-        { minQty: 1, discountPercent: 0, unitPrice: calculatedPrice },
-        { minQty: 5, discountPercent: 5, unitPrice: Math.round(calculatedPrice * 0.95) },
-        { minQty: 20, discountPercent: 10, unitPrice: Math.round(calculatedPrice * 0.9) },
-        { minQty: 50, discountPercent: 15, unitPrice: Math.round(calculatedPrice * 0.85) },
-      ],
-    }));
-  };
 
   const handleUpdateTierPrice = (tierIndex: number, discountPercent: number) => {
     setFormData(prev => {
@@ -2541,106 +2521,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   </div>
                 </div>
               )}
-
-              {/* Dynamic Financial Profitability Card */}
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 shadow-sm">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-600/20">
-                    %
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">Commercial Margin Breakdown</div>
-                    <div className="text-xs text-slate-500">Real-time profitability calculated against unit wholesale cost</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-8">
-                  <div>
-                    <span className="text-xs text-slate-400 block font-medium">Gross Profit</span>
-                    <span className="text-sm font-mono font-black text-emerald-600 dark:text-emerald-400">
-                      +{profitMetrics.profit} AED
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-400 block font-medium">Gross Margin</span>
-                    <span className={`text-sm font-mono font-black ${profitMetrics.margin >= 15 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
-                      }`}>
-                      {profitMetrics.margin}% {profitMetrics.margin >= 15 ? '(Healthy)' : '(Moderate)'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-400 block font-medium">Cost Markup</span>
-                    <span className="text-sm font-mono font-black text-indigo-600 dark:text-indigo-400">
-                      {profitMetrics.markup}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Target Gross Margin Calculator ── */}
-              <div className="p-5 rounded-2xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 space-y-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="w-4 h-4 text-emerald-600" />
-                  <span className="text-xs font-black text-slate-900 dark:text-white">Target Gross Margin Calculator</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">Auto-Price from COGS</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Target Margin %</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min="0"
-                        max="90"
-                        step="1"
-                        value={targetMarginInput}
-                        onChange={e => setTargetMarginInput(parseFloat(e.target.value) || 0)}
-                        className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-sm font-mono font-black border border-emerald-200 dark:border-emerald-800 focus:outline-none focus:border-emerald-500"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Target Price (computed)</label>
-                    <div className="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-sm font-mono font-black text-emerald-700 dark:text-emerald-300">
-                      {formData.costPrice > 0 && targetMarginInput < 100
-                        ? `AED ${Math.round(formData.costPrice / (1 - targetMarginInput / 100)).toLocaleString()}`
-                        : '—'}
-                    </div>
-                  </div>
-                  <div className="pt-5">
-                    <button
-                      type="button"
-                      onClick={() => handleApplyTargetMargin(targetMarginInput)}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
-                    >
-                      <Zap className="w-3.5 h-3.5" /> Apply & Sync
-                    </button>
-                  </div>
-                </div>
-                {formData.mapPrice !== undefined && (
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">MAP Floor (Min. Advertised Price)</label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          min="0"
-                          value={formData.mapPrice || ''}
-                          onChange={e => setFormData(prev => ({ ...prev, mapPrice: parseFloat(e.target.value) || 0 }))}
-                          className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">AED</span>
-                      </div>
-                    </div>
-                    {formData.mapPrice > 0 && formData.price < formData.mapPrice && (
-                      <div className="pt-5 text-[10px] font-bold text-red-500 flex items-center gap-1">
-                        <AlertTriangle className="w-3.5 h-3.5" /> Below MAP!
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
 
               {/* ── B2B Volume Tiered Pricing Matrix ── */}
               {formData.tieredPricing && formData.tieredPricing.length > 0 && (
@@ -4082,36 +3962,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
             </div>
           </div>
 
-          {/* SIDEBAR CARD 4: QUICK JUMP NAVIGATOR */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white block mb-2">
-              Fast Section Navigator
-            </span>
-            <div className="space-y-1">
-              {TABS.map((tab, idx) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
-                      isActive
-                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-blue-800 shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-blue-600'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-blue-600 dark:text-cyan-400' : 'text-slate-400'}`} />
-                      <span>{idx + 1}. {tab.label}</span>
-                    </div>
-                    <ChevronRight className={`w-3.5 h-3.5 ${isActive ? 'text-blue-600 dark:text-cyan-400 opacity-100' : 'opacity-40'}`} />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </div>
     </div>
