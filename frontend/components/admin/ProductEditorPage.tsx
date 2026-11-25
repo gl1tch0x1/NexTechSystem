@@ -40,13 +40,11 @@ import {
   Zap,
   ArrowLeft,
   Save,
-  Barcode,
   ChevronRight,
   CheckCircle2,
   Eye,
   Star,
   Warehouse,
-  Wand2,
   TrendingUp,
   MapPin,
   MoveLeft,
@@ -1177,27 +1175,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     });
   };
 
-  // Standardized Title Auto-Constructor
-  const handleGenerateStandardTitle = () => {
-    const brand = formData.brandName || '';
-    const cat = formData.categoryName || '';
-    const modelSpec =
-      formData.specifications['Processor Model'] ||
-      formData.specifications['GPU Chipset'] ||
-      formData.specifications['Storage Capacity'] ||
-      formData.specifications['RAM Capacity'] ||
-      '';
-    const series = formData.tags[0] || '';
-    const built = [brand, series, modelSpec, cat].filter(Boolean).join(' ').slice(0, 80);
-    if (built) {
-      setFormData(prev => ({
-        ...prev,
-        title: built,
-        slug: built.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-      }));
-    }
-  };
-
   // Multi-Asset Gallery Handlers (Strictly Sanitized via getSafeImageUrl)
   const handleFileUpload = async (file: File, _isCoverAsset: boolean = true) => {
     if (!file) return;
@@ -1442,37 +1419,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         price: Math.round(v.price * (1 + markupPercent / 100)),
       })),
     }));
-  };
-
-  // SVG Barcode Renderer
-  const renderBarcodeSvg = (code: string) => {
-    if (!code) return null;
-    const clean = code.replace(/[^0-9A-Z]/gi, '') || '000000000000';
-    const bars = clean.split('').map((char, idx) => {
-      const digit = parseInt(char, 10) || (char.charCodeAt(0) % 10);
-      const width = (digit % 3) + 1.6;
-      return (
-        <rect
-          key={idx}
-          x={idx * 11 + 6}
-          y="0"
-          width={width}
-          height="38"
-          fill="currentColor"
-        />
-      );
-    });
-
-    return (
-      <div className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800 max-w-sm mx-auto shadow-sm">
-        <svg viewBox={`0 0 ${clean.length * 11 + 16} 38`} className="h-7 text-slate-900 dark:text-slate-100">
-          {bars}
-        </svg>
-        <span className="font-mono text-[11px] font-black tracking-widest text-slate-700 dark:text-slate-300 mt-1">
-          {code}
-        </span>
-      </div>
-    );
   };
 
   // Save / Publish
@@ -1745,24 +1691,34 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end shrink-0">
 
             {/* Status Selector */}
-            <select
-              value={formData.status}
-              onChange={e => setFormData({ ...formData, status: e.target.value as any })}
-              className={`h-9 text-xs font-bold px-3 rounded-xl border cursor-pointer focus:outline-none transition-all whitespace-nowrap shrink-0 ${formData.status === 'ACTIVE'
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
+            <div className="relative inline-flex items-center">
+              <span className={`absolute left-3 w-2 h-2 rounded-full pointer-events-none transition-colors ${
+                formData.status === 'ACTIVE'
+                  ? 'bg-emerald-500 ring-2 ring-emerald-500/20'
                   : formData.status === 'DRAFT'
-                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                  ? 'bg-amber-500 ring-2 ring-amber-500/20'
+                  : 'bg-slate-400'
+              }`} />
+              <select
+                value={formData.status}
+                onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+                className={`h-9 text-xs font-bold pl-7 pr-3 rounded-xl border cursor-pointer focus:outline-none transition-all whitespace-nowrap shrink-0 shadow-2xs ${
+                  formData.status === 'ACTIVE'
+                    ? 'bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                    : formData.status === 'DRAFT'
+                    ? 'bg-amber-50/80 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
                 }`}
-            >
-              <option value="ACTIVE">● ACTIVE (Catalog Live)</option>
-              <option value="DRAFT">○ DRAFT (Unpublished)</option>
-              <option value="ARCHIVED">⊘ ARCHIVED (Hidden)</option>
-            </select>
+              >
+                <option value="ACTIVE">Active (Live in Catalog)</option>
+                <option value="DRAFT">Draft (Unpublished)</option>
+                <option value="ARCHIVED">Archived (Hidden)</option>
+              </select>
+            </div>
 
             <Link
               href={returnPath}
-              className="h-9 px-3.5 flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors whitespace-nowrap shrink-0"
+              className="h-9 px-3.5 flex items-center rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               Discard
             </Link>
@@ -1771,7 +1727,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               type="button"
               onClick={() => handleSaveProduct('DRAFT')}
               disabled={isSubmitting}
-              className="h-9 px-3.5 flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              className="h-9 px-3.5 flex items-center rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               Save Draft
             </button>
@@ -1799,43 +1755,50 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         </div>
 
         {/* Live SKU Summary Ribbon */}
-        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-5 overflow-x-auto text-xs text-slate-500 scrollbar-none">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-400">SKU:</span>
-            <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{formData.sku}</span>
+        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 overflow-x-auto text-xs scrollbar-none">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">SKU</span>
+            <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">{formData.sku || 'N/A'}</span>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-400">Price:</span>
-            <span className="font-mono font-bold text-blue-600 dark:text-cyan-400">{formatPrice(formData.price)}</span>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/40 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-500 dark:text-blue-400">Price</span>
+            <span className="font-mono text-xs font-bold text-blue-700 dark:text-cyan-300">{formatPrice(formData.price)}</span>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-400">Margin:</span>
-            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Margin</span>
+            <span className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-300">
               {profitMetrics.margin}% (+{profitMetrics.profit} AED)
             </span>
           </div>
+
           {portal !== 'admin' && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-slate-400">Stock:</span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{formData.stock} units</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 shrink-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Stock</span>
+              <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">{formData.stock} units</span>
             </div>
           )}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-400">VAT:</span>
-            <span className="font-bold text-indigo-600 dark:text-indigo-400">{formData.chargeTax ? '5% Standard' : 'Tax Exempt'}</span>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-900/40 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">VAT</span>
+            <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">{formData.chargeTax ? '5% Standard' : 'Tax Exempt'}</span>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-400">Billable Weight:</span>
-            <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{volumetricMetrics.billableWeight} kg</span>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Billable Weight</span>
+            <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">{volumetricMetrics.billableWeight} kg</span>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-400">Specs:</span>
-            <span className="font-bold text-slate-800 dark:text-slate-200">{configuredSpecsCount} defined</span>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Specs</span>
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{configuredSpecsCount} defined</span>
           </div>
+
           {formData.hasVariants && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-slate-400">Variants:</span>
-              <span className="font-bold text-blue-600 dark:text-cyan-400">{formData.variants.length} active</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50/60 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900/40 shrink-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-500 dark:text-purple-400">Variants</span>
+              <span className="text-xs font-bold text-purple-700 dark:text-purple-300">{formData.variants.length} active</span>
             </div>
           )}
         </div>
@@ -1916,34 +1879,24 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </span>
               </div>
 
-              {/* Title & Slug */}
+              {/* Title */}
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                       Product Title / Commercial Model Name *
                     </label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={handleGenerateStandardTitle}
-                        className="text-[11px] text-blue-600 dark:text-cyan-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                        title="Auto-build title from brand, category, and specifications (max 80 chars)"
-                      >
-                        <Wand2 className="w-3 h-3" /> Auto-Construct Title
-                      </button>
-                      <span
-                        className={`text-[10px] font-mono px-2 py-0.5 rounded-md transition-colors ${
-                          formData.title.length >= 80
-                            ? 'bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-900'
-                            : formData.title.length >= 70
-                            ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-900'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
-                        }`}
-                      >
-                        {formData.title.length} / 80 characters
-                      </span>
-                    </div>
+                    <span
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-md transition-colors ${
+                        formData.title.length >= 80
+                          ? 'bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-900'
+                          : formData.title.length >= 70
+                          ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-900'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {formData.title.length} / 80 characters
+                    </span>
                   </div>
                   <input
                     type="text"
@@ -1958,65 +1911,9 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         slug: prev.slug ? prev.slug : val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
                       }));
                     }}
-                    className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-sm font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 shadow-inner"
+                    className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-xl text-sm font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 shadow-inner"
                   />
-                  <div className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-400 font-mono">
-                    <span>Slug:</span>
-                    <span className="text-blue-600 dark:text-cyan-400">/shop/product/{formData.slug || 'product-slug'}</span>
-                  </div>
                 </div>
-
-                {/* SKU & Barcode with Live Barcode Preview */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Base SKU (Stock Keeping Unit) *
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setFormData(p => ({ ...p, sku: generateRandomSku(p.categoryId) }))}
-                        className="text-xs text-blue-600 dark:text-cyan-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <RefreshCw className="w-3.5 h-3.5" /> Randomize
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.sku}
-                      onChange={e => setFormData({ ...formData, sku: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs font-mono font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Barcode (EAN-13 / GTIN / UPC)
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setFormData(p => ({ ...p, barcode: generateRandomBarcode() }))}
-                        className="text-xs text-blue-600 dark:text-cyan-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <Barcode className="w-3.5 h-3.5" /> Generate EAN
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.barcode}
-                      onChange={e => setFormData({ ...formData, barcode: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-xl text-xs font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Barcode Graphic Preview */}
-                {formData.barcode && (
-                  <div className="pt-2">
-                    {renderBarcodeSvg(formData.barcode)}
-                  </div>
-                )}
 
                 {taxonomyError && <div role="alert" className="text-sm text-red-600">{taxonomyError} <button type="button" onClick={() => setTaxonomyRetry(n => n + 1)} className="underline">Retry</button></div>}
                 {!taxonomyLoading && !taxonomyError && categories.length === 0 && <p className="text-sm text-amber-700">No hardware categories are configured. <Link href="/admin/categories" className="underline">Manage categories</Link></p>}
@@ -2107,19 +2004,54 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 </div>
 
                 {/* ── Multi-Asset Gallery Manager ── */}
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-blue-600" />
-                      <span>Multi-Asset Gallery Studio</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-300">
-                        {formData.images.length} asset{formData.images.length !== 1 ? 's' : ''}
-                      </span>
-                    </h3>
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-5">
+                  {/* Studio Header */}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-cyan-400 shadow-2xs">
+                        <ImageIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          <span>Multi-Asset Gallery Studio</span>
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-cyan-300">
+                            {formData.images.length} asset{formData.images.length !== 1 ? 's' : ''}
+                          </span>
+                        </h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          Configure primary storefront hero photography and supplementary multi-angle hardware visual assets.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {formData.images.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, images: [], primaryImage: '' }))}
+                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Clear All</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        disabled={isUploading}
+                        onClick={() => galleryFileInputRef.current?.click()}
+                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs shadow-blue-600/20 flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-50"
+                      >
+                        {isUploading ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <UploadCloud className="w-3.5 h-3.5" />
+                        )}
+                        <span>Upload Files</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Primary Cover Preview */}
-                  {/* Hidden File Input for Native File System Cover Asset Ingestion */}
+                  {/* Hidden File Inputs for Native Asset Ingestion */}
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -2132,58 +2064,80 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       e.target.value = '';
                     }}
                   />
-                  {/* Hidden File Input for Native File System Gallery Asset Ingestion */}
                   <input
                     type="file"
                     ref={galleryFileInputRef}
                     className="hidden"
+                    multiple
                     accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
                     onChange={e => {
                       if (e.target.files && e.target.files[0]) {
-                        handleFileUpload(e.target.files[0], false);
+                        Array.from(e.target.files).forEach(f => handleFileUpload(f, false));
                       }
                       e.target.value = '';
                     }}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
+                  {/* Unified URL Quick-Input Bar */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="url"
+                        placeholder="Paste direct image URL (PNG, WEBP, JPG) or upload file on right..."
+                        value={galleryUrlInput}
+                        onChange={e => { setGalleryUrlInput(e.target.value); setImageUrlError(''); }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddGalleryImage(galleryUrlInput, true);
+                          }
+                        }}
+                        className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAddGalleryImage(galleryUrlInput, true)}
+                      className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add URL</span>
+                    </button>
+                  </div>
+                  {imageUrlError && <p role="alert" className="text-xs font-medium text-rose-600 dark:text-rose-400">{imageUrlError}</p>}
+
+                  {/* Two-Column Studio Layout */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    {/* Left: Primary Storefront Cover Asset (5 Cols) */}
+                    <div className="lg:col-span-5 space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                          Primary Cover Asset
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <span>Primary Cover Asset</span>
+                          <span className="text-[10px] text-blue-600 dark:text-cyan-400 font-mono font-normal">(Storefront Hero)</span>
                         </label>
-                        <div className="flex items-center gap-2">
+                        {formData.primaryImage && (
                           <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className="text-[10px] text-blue-600 dark:text-cyan-400 hover:underline font-semibold cursor-pointer flex items-center gap-1"
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, primaryImage: '' }));
+                              setFailedPreviewUrl(null);
+                            }}
+                            className="text-[10px] text-rose-500 hover:text-rose-600 font-bold hover:underline cursor-pointer"
                           >
-                            <UploadCloud className="w-3 h-3" />
-                            {isUploading ? 'Uploading...' : 'Upload'}
+                            Remove Cover
                           </button>
-                          {formData.primaryImage && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFormData(prev => ({ ...prev, primaryImage: '' }));
-                                setFailedPreviewUrl(null);
-                              }}
-                              className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
-                            >
-                              Clear Cover
-                            </button>
-                          )}
-                        </div>
+                        )}
                       </div>
+
+                      {/* Cover Viewport Frame */}
                       <div
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={e => handleDrop(e, true)}
-                        className={`aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 relative shadow-sm group flex items-center justify-center transition-all ${
+                        className={`aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 relative shadow-xs group flex items-center justify-center transition-all ${
                           isDragging
                             ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 ring-4 ring-blue-500/20'
-                            : 'border-slate-200 dark:border-slate-800'
+                            : 'border-slate-200/90 dark:border-slate-800/90'
                         }`}
                       >
                         {formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
@@ -2191,29 +2145,32 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             <img
                               src={getSafeImageUrl(formData.primaryImage)}
                               alt="Primary Cover"
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              className="w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
                               key={getSafeImageUrl(formData.primaryImage)}
                               onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
                             />
-                            <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-blue-600/90 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
-                              <Check className="w-3 h-3 text-white" /> Cover
+                            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-blue-600/95 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
+                              <Star className="w-3 h-3 fill-white text-white" />
+                              <span>Storefront Cover</span>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => fileInputRef.current?.click()}
-                              className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-bold gap-1.5 cursor-pointer backdrop-blur-[2px]"
-                            >
-                              <UploadCloud className="w-6 h-6 text-blue-400" />
-                              <span>Replace Cover Image</span>
-                              <span className="text-[10px] text-slate-300 font-normal">Click or drag & drop</span>
-                            </button>
+                            <div className="absolute inset-0 bg-slate-950/65 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-bold gap-2 cursor-pointer backdrop-blur-[2px]">
+                              <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105"
+                              >
+                                <UploadCloud className="w-4 h-4" />
+                                <span>Replace Cover</span>
+                              </button>
+                              <span className="text-[10px] text-slate-300 font-normal">Click or drop new file to replace</span>
+                            </div>
                           </>
                         ) : (
                           <div
                             onClick={() => fileInputRef.current?.click()}
-                            className="p-4 text-center space-y-1.5 text-slate-400 cursor-pointer w-full h-full flex flex-col items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+                            className="p-6 text-center space-y-2 text-slate-400 cursor-pointer w-full h-full flex flex-col items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
                           >
-                            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center mx-auto text-blue-600 dark:text-cyan-400 shadow-xs">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center mx-auto text-blue-600 dark:text-cyan-400 shadow-2xs">
                               {isUploading ? (
                                 <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
                               ) : (
@@ -2224,168 +2181,24 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                               {isUploading
                                 ? 'Uploading visual asset...'
                                 : formData.primaryImage
-                                ? 'Image could not be loaded'
-                                : 'Upload or Drag & Drop Cover Asset'}
+                                ? 'Image preview unavailable'
+                                : 'Select or Drop Cover Photo'}
                             </div>
-                            <p className="text-[10px] text-slate-400 max-w-[220px] mx-auto">
-                              Click to select PNG, WEBP, or JPG from your computer, or drop file here.
+                            <p className="text-[11px] text-slate-400 max-w-[200px] mx-auto leading-relaxed">
+                              Drop primary PNG, WEBP, or JPG here, or click to browse.
                             </p>
                           </div>
                         )}
                       </div>
-                    </div>
 
-                    {/* Gallery Thumbnails + Add URL */}
-                    <div className="md:col-span-2 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                          Gallery Queue ({formData.images.length})
-                        </label>
-                        {formData.images.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, images: [] }))}
-                            className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
-                          >
-                            Clear All
-                          </button>
-                        )}
-                      </div>
-                      {/* Thumbnail Strip */}
-                      {formData.images.length > 0 ? (
-                        <div
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={e => handleDrop(e, false)}
-                          className="flex gap-2 overflow-x-auto pb-1"
-                        >
-                          {formData.images.map((imgUrl, imgIdx) => {
-                            const isPrimary = imgUrl === formData.primaryImage;
-                            return (
-                              <div
-                                key={imgIdx}
-                                className={`relative flex-shrink-0 w-20 rounded-xl overflow-hidden border-2 transition-all ${isPrimary ? 'border-blue-500 shadow-lg shadow-blue-500/20' : 'border-slate-200 dark:border-slate-800'
-                                  }`}
-                              >
-                                <div className="aspect-video">
-                                  <img
-                                    src={getSafeImageUrl(imgUrl)}
-                                    alt={`Asset ${imgIdx + 1}`}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                {isPrimary && (
-                                  <div className="absolute top-1 left-1 w-3.5 h-3.5 rounded-full bg-blue-600 flex items-center justify-center">
-                                    <Check className="w-2 h-2 text-white" />
-                                  </div>
-                                )}
-                                {/* Thumbnail Controls */}
-                                <div className="absolute bottom-0 inset-x-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-between px-1 py-0.5">
-                                  <button
-                                    type="button"
-                                    disabled={imgIdx === 0}
-                                    onClick={() => handleMoveImage(imgIdx, 'left')}
-                                    className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 cursor-pointer"
-                                    title="Move Left"
-                                  >
-                                    <MoveLeft className="w-2.5 h-2.5" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSetPrimaryImage(imgIdx)}
-                                    disabled={isPrimary}
-                                    className="p-0.5 text-amber-400/70 hover:text-amber-400 disabled:opacity-30 cursor-pointer"
-                                    title="Set as Cover"
-                                  >
-                                    <Star className="w-2.5 h-2.5" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveGalleryImage(imgIdx)}
-                                    className="p-0.5 text-red-400/70 hover:text-red-400 cursor-pointer"
-                                    title="Remove"
-                                  >
-                                    <X className="w-2.5 h-2.5" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    disabled={imgIdx === formData.images.length - 1}
-                                    onClick={() => handleMoveImage(imgIdx, 'right')}
-                                    className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 cursor-pointer"
-                                    title="Move Right"
-                                  >
-                                    <MoveRight className="w-2.5 h-2.5" />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={e => handleDrop(e, false)}
-                          onClick={() => galleryFileInputRef.current?.click()}
-                          className="p-3.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-center text-slate-400 space-y-0.5 cursor-pointer hover:bg-blue-50/20 transition-colors"
-                        >
-                          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">Gallery queue is empty</p>
-                          <p className="text-[10px] text-slate-400">Click to upload image files or drag & drop photography angles here.</p>
-                        </div>
-                      )}
-                      {/* Add Asset URL & Direct Upload Controls */}
-                      <div className="flex gap-2">
-                        <input
-                          type="url"
-                          placeholder="Paste image URL (PNG, WEBP, JPG) or upload below..."
-                          value={galleryUrlInput}
-                          onChange={e => { setGalleryUrlInput(e.target.value); setImageUrlError(''); }}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddGalleryImage(galleryUrlInput, true);
-                            }
-                          }}
-                          className="flex-1 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleAddGalleryImage(galleryUrlInput, true)}
-                          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-                          title="Add this image to the gallery queue"
-                        >
-                          <Plus className="w-3.5 h-3.5" /> Add to Gallery
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleAddGalleryImage(galleryUrlInput, true)}
-                          className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-                          title="Set this image as primary product cover"
-                        >
-                          <Star className="w-3.5 h-3.5 fill-current" /> Set as Cover
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isUploading}
-                          onClick={() => galleryFileInputRef.current?.click()}
-                          className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 border border-slate-700"
-                        >
-                          {isUploading ? (
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-cyan-400" />
-                          ) : (
-                            <UploadCloud className="w-3.5 h-3.5 text-cyan-400" />
-                          )}
-                          <span>{isUploading ? 'Uploading...' : 'Upload File'}</span>
-                        </button>
-                      </div>
-
-                      {imageUrlError && <p role="alert" className="text-xs text-red-600">{imageUrlError}</p>}
-                      {/* Primary Image URL Direct Edit */}
+                      {/* Direct URL Inspector Field */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-500 mb-1">Cover Asset URL / Path</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                          Cover Image Path / URL
+                        </label>
                         <input
                           type="text"
-                          placeholder="e.g. /api/upload/... or https://domain.com/hardware-cover.webp"
+                          placeholder="e.g. /images/products/... or https://..."
                           value={formData.primaryImage}
                           onChange={e => {
                             const val = e.target.value.trim();
@@ -2399,9 +2212,136 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             });
                             setFailedPreviewUrl(null);
                           }}
-                          className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
+                          className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
                         />
                       </div>
+                    </div>
+
+                    {/* Right: Gallery Queue & Secondary Angles (7 Cols) */}
+                    <div className="lg:col-span-7 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <span>Gallery Queue</span>
+                          <span className="text-[10px] font-mono text-slate-400 font-normal">({formData.images.length} in carousel)</span>
+                        </label>
+                        <span className="text-[10px] text-slate-400 hidden sm:inline">
+                          ★ = Set as Cover • Drag or use arrows to reorder
+                        </span>
+                      </div>
+
+                      {/* Gallery Cards Grid */}
+                      {formData.images.length > 0 ? (
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={e => handleDrop(e, false)}
+                          className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[380px] overflow-y-auto p-1 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40"
+                        >
+                          {formData.images.map((imgUrl, imgIdx) => {
+                            const isPrimary = imgUrl === formData.primaryImage;
+                            return (
+                              <div
+                                key={imgIdx}
+                                className={`group/card relative rounded-xl overflow-hidden border-2 transition-all bg-white dark:bg-slate-900 shadow-2xs ${
+                                  isPrimary
+                                    ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-blue-500/10'
+                                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                                }`}
+                              >
+                                <div className="aspect-[4/3] flex items-center justify-center p-2 relative">
+                                  <img
+                                    src={getSafeImageUrl(imgUrl)}
+                                    alt={`Asset ${imgIdx + 1}`}
+                                    className="w-full h-full object-contain"
+                                  />
+                                  {isPrimary && (
+                                    <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-blue-600 text-[9px] font-bold text-white shadow-xs flex items-center gap-0.5">
+                                      <Star className="w-2.5 h-2.5 fill-white" />
+                                      <span>Cover</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Floating Action Bar */}
+                                <div className="p-1 bg-slate-100/90 dark:bg-slate-800/90 border-t border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between text-xs">
+                                  <div className="flex items-center gap-0.5">
+                                    <button
+                                      type="button"
+                                      disabled={imgIdx === 0}
+                                      onClick={() => handleMoveImage(imgIdx, 'left')}
+                                      className="p-1 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
+                                      title="Move earlier"
+                                    >
+                                      <MoveLeft className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={imgIdx === formData.images.length - 1}
+                                      onClick={() => handleMoveImage(imgIdx, 'right')}
+                                      className="p-1 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
+                                      title="Move later"
+                                    >
+                                      <MoveRight className="w-3 h-3" />
+                                    </button>
+                                  </div>
+
+                                  <div className="flex items-center gap-0.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSetPrimaryImage(imgIdx)}
+                                      disabled={isPrimary}
+                                      className={`p-1 rounded-md transition-colors cursor-pointer ${
+                                        isPrimary
+                                          ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/60'
+                                          : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                                      }`}
+                                      title={isPrimary ? 'Already Cover' : 'Set as Storefront Cover'}
+                                    >
+                                      <Star className={`w-3 h-3 ${isPrimary ? 'fill-current' : ''}`} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveGalleryImage(imgIdx)}
+                                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                                      title="Remove from gallery"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+
+                          {/* Inline Add More Card */}
+                          <div
+                            onClick={() => galleryFileInputRef.current?.click()}
+                            className="aspect-[4/3] rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 flex flex-col items-center justify-center p-3 text-center cursor-pointer transition-all group"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-950/80 text-slate-500 group-hover:text-blue-600 flex items-center justify-center mb-1.5 transition-colors">
+                              <Plus className="w-4 h-4" />
+                            </div>
+                            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Add Angles</span>
+                            <span className="text-[9px] text-slate-400">Upload more</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={e => handleDrop(e, false)}
+                          onClick={() => galleryFileInputRef.current?.click()}
+                          className="h-[280px] rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-blue-50/20 hover:border-blue-300 dark:hover:border-blue-800 transition-all group"
+                        >
+                          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-950/70 text-slate-400 group-hover:text-blue-600 flex items-center justify-center mb-2.5 transition-colors">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Gallery queue is empty</p>
+                          <p className="text-[11px] text-slate-400 max-w-[240px] mt-1">
+                            Click to upload supplementary photos, rear I/O port shots, and packaging, or drag & drop files here.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

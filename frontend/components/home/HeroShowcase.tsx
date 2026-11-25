@@ -194,8 +194,8 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   return (
     <section className="relative overflow-hidden bg-white dark:bg-[#060A13] border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-200">
       {/* Precision Engineered Background Grid Overlay */}
-      <div 
-        className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" 
+      <div
+        className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
@@ -511,11 +511,10 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleAddToCart}
-                      className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${
-                        justAdded
+                      className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${justAdded
                           ? 'bg-emerald-600 text-white shadow-emerald-600/30'
                           : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/25'
-                      }`}
+                        }`}
                     >
                       {justAdded ? (
                         <>
