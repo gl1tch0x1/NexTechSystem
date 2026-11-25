@@ -95,3 +95,6 @@ backend-cpanel.zip
 # Uploaded Assets
 backend/uploads/*
 !backend/uploads/.gitkeep
+frontend/uploads/*
+!frontend/uploads/.gitkeep
+uploads/*

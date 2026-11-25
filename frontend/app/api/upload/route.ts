@@ -24,7 +24,7 @@ function getUploadDirs(): string[] {
   ];
 }
 
-async function saveLocalUpload(file: File): Promise<Response> {
+async function saveLocalUpload(file: Blob): Promise<Response> {
   if (!ALLOWED_MIME_TYPES.has(file.type.toLowerCase())) {
     return NextResponse.json(
       { success: false, error: { message: 'Unsupported file type. Please upload a PNG, JPG, WEBP, GIF, or PDF document.' } },
@@ -116,15 +116,18 @@ export async function POST(request: NextRequest) {
 
     // If the backend upload route is missing/unavailable, fall back to local storage.
     // Propagate real auth/validation errors from a live backend.
-    const isMissingRoute = upstream.status === 404;
-    const isUnavailable = upstream.status === 503;
+    const responseText = new TextDecoder().decode(responseBody).toLowerCase();
+    const isMissingRoute =
+      upstream.status === 404 &&
+      (responseText.includes('route not found') || responseText.includes('not_found') || responseText.includes('cannot post'));
+    const isUnavailable = upstream.status === 502 || upstream.status === 503 || upstream.status === 504;
     if (!isMissingRoute && !isUnavailable) {
       return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
     }
 
     const formData = await clonedRequest.formData().catch(() => null);
     const file = formData?.get('file');
-    if (!(file instanceof File)) {
+    if (!(file instanceof Blob)) {
       return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
     }
     return await saveLocalUpload(file);
@@ -132,7 +135,7 @@ export async function POST(request: NextRequest) {
     try {
       const formData = await clonedRequest.formData().catch(() => null);
       const file = formData?.get('file');
-      if (file instanceof File) {
+      if (file instanceof Blob) {
         return await saveLocalUpload(file);
       }
     } catch {
