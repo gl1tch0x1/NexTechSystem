@@ -180,6 +180,10 @@ export class ResellerController {
     };
 
     const updated = await productService.updateProduct(id, safeUpdates);
+    if (!updated) {
+      res.status(404).json({ success: false, error: { message: 'Product not found.' } });
+      return;
+    }
     res.json({ success: true, data: updated });
   }
 

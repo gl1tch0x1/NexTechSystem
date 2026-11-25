@@ -60,28 +60,44 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
   const isApproval = path.length >= 2 && path[1] === 'approval';
   const productId = path[0];
 
-  let upstreamSuccess = false;
-  let upstreamData: any = null;
-
   try {
     const upstreamRes = await proxyToBackend(request, upstreamPath, {
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    const responseBody = await upstreamRes.clone().arrayBuffer();
+    const responseHeaders = new Headers({ 'Cache-Control': 'no-store, no-cache, must-revalidate' });
+    const contentType = upstreamRes.headers.get('content-type');
+    if (contentType) responseHeaders.set('content-type', contentType);
+
     if (upstreamRes.ok) {
-      const cloned = upstreamRes.clone();
       try {
-        const json = await cloned.json();
+        const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
-          upstreamSuccess = true;
-          upstreamData = json.data;
           updateCatalogProduct(productId, json.data);
+          try {
+            revalidatePath('/products');
+            revalidatePath('/');
+            revalidatePath(`/products/${productId}`);
+            if (body?.slug) revalidatePath(`/products/${body.slug}`);
+            if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
+          } catch {}
+          return Response.json(json, { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } });
+        }
+        if (json && json.success === false) {
+          return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
         }
       } catch {}
     }
+
+    // Upstream responded with an error - propagate it instead of masking as success.
+    if (upstreamRes.status !== 503) {
+      return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
+    }
   } catch {}
 
-  // Always sync local catalog with approval/rejection or updates
-  let updatedProduct: any = upstreamData;
+  // Upstream unreachable: fall back to local catalog sync for resilience.
+  let updatedProduct: any = null;
   if (productId && body) {
     const updates = isApproval
       ? {
@@ -91,8 +107,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
           isActive: (body.status || body.approvalStatus) === 'APPROVED',
         }
       : body;
-    const localUpdated = updateCatalogProduct(productId, updates);
-    if (!updatedProduct) updatedProduct = localUpdated;
+    updatedProduct = updateCatalogProduct(productId, updates);
   }
 
   try {
@@ -108,7 +123,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     {
       success: true,
       data: finalProd || body || { id: productId },
-      source: upstreamSuccess ? 'upstream_backend' : 'authoritative_catalog_sync',
+      source: 'authoritative_catalog_sync',
     },
     { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
   );
@@ -123,48 +138,59 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
   const cleanSubpath = path.map(segment => encodeURIComponent(segment)).join('/');
   const upstreamPath = `/admin/products/${cleanSubpath}`;
+  const productId = path[0];
 
   try {
     const upstreamRes = await proxyToBackend(request, upstreamPath, {
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    const responseBody = await upstreamRes.clone().arrayBuffer();
+    const responseHeaders = new Headers({ 'Cache-Control': 'no-store, no-cache, must-revalidate' });
+    const contentType = upstreamRes.headers.get('content-type');
+    if (contentType) responseHeaders.set('content-type', contentType);
+
     if (upstreamRes.ok) {
-      const cloned = upstreamRes.clone();
       try {
-        const json = await cloned.json();
+        const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
-          updateCatalogProduct(path[0], json.data);
+          updateCatalogProduct(productId, json.data);
           try {
             revalidatePath('/products');
             revalidatePath('/');
-            revalidatePath(`/products/${path[0]}`);
-            if (json.data?.id && json.data.id !== path[0]) revalidatePath(`/products/${json.data.id}`);
+            revalidatePath(`/products/${productId}`);
+            if (json.data?.id && json.data.id !== productId) revalidatePath(`/products/${json.data.id}`);
             if (body?.slug) revalidatePath(`/products/${body.slug}`);
             if (json.data?.slug) revalidatePath(`/products/${json.data.slug}`);
           } catch {}
-          return Response.json(json, {
-            headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
-          });
+          return Response.json(json, { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } });
+        }
+        if (json && json.success === false) {
+          return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
         }
       } catch {}
     }
+
+    if (upstreamRes.status !== 503) {
+      return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
+    }
   } catch {}
 
-  // Fallback if backend is unavailable
+  // Upstream unreachable: fall back to local catalog sync for resilience.
   let updatedProduct: any = null;
-  if (path.length >= 1 && body) {
-    updatedProduct = updateCatalogProduct(path[0], body);
+  if (productId && body) {
+    updatedProduct = updateCatalogProduct(productId, body);
   }
 
   try {
     revalidatePath('/products');
     revalidatePath('/');
-    revalidatePath(`/products/${path[0]}`);
+    revalidatePath(`/products/${productId}`);
     if (body?.slug) revalidatePath(`/products/${body.slug}`);
     if (updatedProduct?.slug) revalidatePath(`/products/${updatedProduct.slug}`);
   } catch {}
 
-  const finalProd = updatedProduct || (path.length >= 1 ? getCatalogProductBySlug(path[0]) : null);
+  const finalProd = updatedProduct || (productId ? getCatalogProductBySlug(productId) : null);
   if (finalProd) {
     return Response.json(
       {
@@ -177,7 +203,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
   }
 
   return Response.json(
-    { success: true, data: body || { id: path[0] } },
+    { success: true, data: body || { id: productId } },
     { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
   );
 }
@@ -194,10 +220,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const upstreamRes = await proxyToBackend(request, `/admin/products/${cleanSubpath}`, {
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    const responseBody = await upstreamRes.clone().arrayBuffer();
+    const responseHeaders = new Headers({ 'Cache-Control': 'no-store, no-cache, must-revalidate' });
+    const contentType = upstreamRes.headers.get('content-type');
+    if (contentType) responseHeaders.set('content-type', contentType);
+
     if (upstreamRes.ok) {
       try {
-        const cloned = upstreamRes.clone();
-        const json = await cloned.json();
+        const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
           updateCatalogProduct(json.data.id || json.data.slug || path[0] || '', json.data);
         }
@@ -206,11 +237,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         revalidatePath('/products');
         revalidatePath('/');
       } catch {}
-      return upstreamRes;
+      return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
+    }
+
+    if (upstreamRes.status !== 503) {
+      return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
     }
   } catch {}
 
-  // Fallback if backend is unavailable
+  // Upstream unreachable: fall back to local catalog sync for resilience.
   if (body) {
     updateCatalogProduct(body.id || body.slug || path[0] || '', body);
   }
@@ -229,7 +264,23 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
   const { path } = await params;
   const productId = path[0];
 
-  // 1. Delete from authoritative local catalog store immediately
+  try {
+    const upstreamRes = await proxyToBackend(request, `/admin/products/${path.join('/')}`);
+    if (upstreamRes.ok) {
+      if (productId) deleteCatalogProduct(productId);
+      try {
+        revalidatePath('/products');
+        revalidatePath('/');
+        if (productId) revalidatePath(`/products/${productId}`);
+      } catch {}
+      return upstreamRes;
+    }
+    if (upstreamRes.status !== 503) {
+      return upstreamRes;
+    }
+  } catch {}
+
+  // Upstream unreachable: fall back to local catalog delete for resilience.
   let locallyDeleted = false;
   if (productId) {
     locallyDeleted = deleteCatalogProduct(productId);
@@ -239,14 +290,6 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     revalidatePath('/products');
     revalidatePath('/');
     if (productId) revalidatePath(`/products/${productId}`);
-  } catch {}
-
-  // 2. Also forward to upstream backend if reachable
-  try {
-    const upstreamRes = await proxyToBackend(request, `/admin/products/${path.join('/')}`);
-    if (upstreamRes.ok) {
-      return upstreamRes;
-    }
   } catch {}
 
   return Response.json(

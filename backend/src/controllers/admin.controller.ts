@@ -101,6 +101,10 @@ export class AdminController {
     if (body.title && !body.name) body.name = body.title;
     if (body.name && !body.title) body.title = body.name;
     const updated = await productService.updateProduct(id, body);
+    if (!updated) {
+      res.status(404).json({ success: false, error: { message: 'Product not found.' } });
+      return;
+    }
     await auditService.log({
       userId: req.user?.id || 'admin',
       userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,

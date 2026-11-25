@@ -63,10 +63,15 @@ export async function POST(request: NextRequest) {
     const upstreamRes = await proxyToBackend(request, '/admin/products', {
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    const responseBody = await upstreamRes.clone().arrayBuffer();
+    const responseHeaders = new Headers({ 'Cache-Control': 'no-store, no-cache, must-revalidate' });
+    const contentType = upstreamRes.headers.get('content-type');
+    if (contentType) responseHeaders.set('content-type', contentType);
+
     if (upstreamRes.ok) {
       try {
-        const cloned = upstreamRes.clone();
-        const json = await cloned.json();
+        const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
           updateCatalogProduct(json.data.id || json.data.slug || '', json.data);
         }
@@ -75,11 +80,15 @@ export async function POST(request: NextRequest) {
         revalidatePath('/products');
         revalidatePath('/');
       } catch {}
-      return upstreamRes;
+      return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
+    }
+
+    if (upstreamRes.status !== 503) {
+      return new Response(responseBody, { status: upstreamRes.status, headers: responseHeaders });
     }
   } catch {}
 
-  // Fallback if backend is unavailable
+  // Upstream unreachable: fall back to local catalog sync for resilience.
   if (body) {
     updateCatalogProduct(body.id || body.slug || '', body);
   }

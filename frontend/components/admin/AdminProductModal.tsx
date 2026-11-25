@@ -581,51 +581,22 @@ export function AdminProductModal({
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: uploadFormData,
       });
-      let finalUrl = '';
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.url) finalUrl = data.url;
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.url) {
+        setFormError(data?.error?.message || data?.message || 'Image upload failed. Please try again.');
+        return;
       }
-      if (!finalUrl) {
-        finalUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(optimizedFile);
-        });
-      }
-      if (finalUrl) {
-        setFormData(prev => {
-          const existing = prev.images.filter(img => img !== finalUrl && img !== DEFAULT_FALLBACK_IMAGE);
-          return {
-            ...prev,
-            primaryImage: finalUrl,
-            images: [finalUrl, ...existing],
-          };
-        });
-      }
+      const finalUrl = String(data.url);
+      setFormData(prev => {
+        const existing = prev.images.filter(img => img !== finalUrl && img !== DEFAULT_FALLBACK_IMAGE);
+        return {
+          ...prev,
+          primaryImage: finalUrl,
+          images: [finalUrl, ...existing],
+        };
+      });
     } catch {
-      try {
-        const optimizedFile = await convertImageFileToWebP(file);
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(optimizedFile);
-        });
-        if (base64) {
-          setFormData(prev => {
-            const existing = prev.images.filter(img => img !== base64 && img !== DEFAULT_FALLBACK_IMAGE);
-            return {
-              ...prev,
-              primaryImage: base64,
-              images: [base64, ...existing],
-            };
-          });
-        }
-      } catch {
-        setFormError('Failed to read image file.');
-      }
+      setFormError('Failed to upload image. Please check your connection and try again.');
     } finally {
       setIsUploading(false);
     }

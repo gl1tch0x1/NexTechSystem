@@ -1347,58 +1347,28 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         body: uploadFormData,
       });
 
-      let finalUrl = '';
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.url) {
-          finalUrl = data.url;
-        }
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.url) {
+        const message =
+          data?.error?.message ||
+          data?.message ||
+          'Image upload failed. Please try again.';
+        setImageUrlError(message);
+        return;
       }
 
-      // If network upload route failed or offline, seamlessly fallback to local base64 data URL
-      if (!finalUrl) {
-        finalUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(optimizedFile);
-        });
-      }
-
-      if (finalUrl) {
-        setFormData(prev => {
-          const cleanExisting = prev.images.filter(img => img !== finalUrl && !isPlaceholderImageUrl(img));
-          return {
-            ...prev,
-            primaryImage: finalUrl,
-            images: [finalUrl, ...cleanExisting],
-          };
-        });
-        setFailedPreviewUrl(null);
-      }
+      const finalUrl = String(data.url);
+      setFormData(prev => {
+        const cleanExisting = prev.images.filter(img => img !== finalUrl && !isPlaceholderImageUrl(img));
+        return {
+          ...prev,
+          primaryImage: finalUrl,
+          images: [finalUrl, ...cleanExisting],
+        };
+      });
+      setFailedPreviewUrl(null);
     } catch {
-      try {
-        const optimizedFile = await convertImageFileToWebP(file);
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(optimizedFile);
-        });
-        if (base64) {
-          setFormData(prev => {
-            const cleanExisting = prev.images.filter(img => img !== base64 && !isPlaceholderImageUrl(img));
-            return {
-              ...prev,
-              primaryImage: base64,
-              images: [base64, ...cleanExisting],
-            };
-          });
-          setFailedPreviewUrl(null);
-        }
-      } catch {
-        setImageUrlError('Failed to read image file. Please try again.');
-      }
+      setImageUrlError('Failed to upload image. Please check your connection and try again.');
     } finally {
       setIsUploading(false);
     }

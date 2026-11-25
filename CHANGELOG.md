@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.1] - 2026-11-25
+
+### Fixed
+- **Admin/Editor Product Image Updates**: Fixed the admin and editor product image add/update flow so failed uploads or failed saves are no longer masked as success.
+  - Next.js admin product proxy routes now propagate upstream API errors for create/update requests instead of returning synthetic `success: true` local-catalog fallbacks.
+  - The Next.js upload proxy no longer converts failed backend uploads into base64 data URLs; it returns actionable upload errors.
+  - `ProductEditorPage` and `AdminProductModal` now surface upload failures to the user and no longer inject oversized base64 images into product payloads on upload failure.
+  - Admin and reseller product update controllers now return `404` when the target product cannot be updated.
+
 ## [1.4.0] - 2026-11-25
 
 ### Added
