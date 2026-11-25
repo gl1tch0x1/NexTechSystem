@@ -37,9 +37,9 @@ import {
   RefreshCw,
   AlertTriangle,
   UploadCloud,
-  Percent
+  Percent,
+  Cpu
 } from 'lucide-react';
-import { NextechLogo } from '@/components/ui/NextechLogo';
 import { DEFAULT_PRODUCT_PLACEHOLDER } from '@/lib/product-image-url';
 
 export type AdminModalStep =
@@ -1029,7 +1029,7 @@ export function AdminProductModal({
     { id: 'pricing', label: '4. Pricing & Tax', icon: DollarSign },
     { id: 'inventory', label: '5. Inventory & Hubs', icon: Boxes },
     { id: 'shipping', label: '6. Shipping & Logistics', icon: Truck },
-    { id: 'specs', label: '7. Specifications', icon: NextechLogo },
+    { id: 'specs', label: '7. Specifications', icon: Cpu },
     { id: 'variants', label: '8. Variants Matrix', icon: Sparkles },
     { id: 'status', label: '9. Status & Publishing', icon: ShieldCheck },
   ];
@@ -2021,9 +2021,8 @@ export function AdminProductModal({
               <div className="space-y-5 animate-fadeIn">
                 <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                    <NextechLogo className="w-4 h-4" size={16} alt="Specifications" />
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                      Technical Specifications & Architecture
+                      Technical Specifications &amp; Architecture
                     </h3>
                   </div>
 
@@ -2064,26 +2063,28 @@ export function AdminProductModal({
                               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title={specField.label}>
                                 {specField.label}
                               </label>
-                              {presets.length > 0 ? (
-                                <select
-                                  value={currentValue}
-                                  onChange={e => handleSpecChange(specField.key, e.target.value)}
-                                  className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
-                                >
-                                  <option value="">-- Select {specField.label} --</option>
-                                  {presets.map(opt => (
-                                    <option key={opt} value={opt}>{opt}</option>
-                                  ))}
-                                </select>
-                              ) : (
-                                <input
-                                  type="text"
-                                  placeholder={specField.placeholder || `Enter ${specField.label}...`}
-                                  value={currentValue}
-                                  onChange={e => handleSpecChange(specField.key, e.target.value)}
-                                  className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-medium"
-                                />
-                              )}
+                              {(() => {
+                                const presetListId = `spec-modal-${specField.key}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+                                return (
+                                  <>
+                                    <input
+                                      type="text"
+                                      list={presets.length > 0 ? presetListId : undefined}
+                                      placeholder={presets.length > 0 ? `Select or enter ${specField.label}...` : (specField.placeholder || `Enter ${specField.label}...`)}
+                                      value={currentValue}
+                                      onChange={e => handleSpecChange(specField.key, e.target.value)}
+                                      className="w-full bg-white dark:bg-slate-900 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 font-medium"
+                                    />
+                                    {presets.length > 0 && (
+                                      <datalist id={presetListId}>
+                                        {presets.map(opt => (
+                                          <option key={opt} value={opt} />
+                                        ))}
+                                      </datalist>
+                                    )}
+                                  </>
+                                );
+                              })()}
                             </div>
                           );
                         })}
