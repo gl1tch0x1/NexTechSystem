@@ -2003,345 +2003,396 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                   />
                 </div>
 
-                {/* ── Multi-Asset Gallery Manager ── */}
-                <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-5">
-                  {/* Studio Header */}
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-cyan-400 shadow-2xs">
-                        <ImageIcon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                          <span>Multi-Asset Gallery Studio</span>
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-cyan-300">
-                            {formData.images.length} asset{formData.images.length !== 1 ? 's' : ''}
-                          </span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          Configure primary storefront hero photography and supplementary multi-angle hardware visual assets.
-                        </p>
-                      </div>
-                    </div>
+                {/* ── Multi-Asset Gallery Studio ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
 
-                    <div className="flex items-center gap-2">
-                      {formData.images.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setFormData(prev => ({ ...prev, images: [], primaryImage: '' }))}
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>Clear All</span>
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        disabled={isUploading}
-                        onClick={() => galleryFileInputRef.current?.click()}
-                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs shadow-blue-600/20 flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-50"
-                      >
-                        {isUploading ? (
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <UploadCloud className="w-3.5 h-3.5" />
-                        )}
-                        <span>Upload Files</span>
-                      </button>
-                    </div>
-                  </div>
+                  {/* Studio Container Card */}
+                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-slate-50/80 to-white dark:from-slate-900/60 dark:to-slate-900 overflow-hidden shadow-sm">
 
-                  {/* Hidden File Inputs for Native Asset Ingestion */}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) {
-                        handleFileUpload(e.target.files[0], true);
-                      }
-                      e.target.value = '';
-                    }}
-                  />
-                  <input
-                    type="file"
-                    ref={galleryFileInputRef}
-                    className="hidden"
-                    multiple
-                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) {
-                        Array.from(e.target.files).forEach(f => handleFileUpload(f, false));
-                      }
-                      e.target.value = '';
-                    }}
-                  />
-
-                  {/* Unified URL Quick-Input Bar */}
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        type="url"
-                        placeholder="Paste direct image URL (PNG, WEBP, JPG) or upload file on right..."
-                        value={galleryUrlInput}
-                        onChange={e => { setGalleryUrlInput(e.target.value); setImageUrlError(''); }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddGalleryImage(galleryUrlInput, true);
-                          }
-                        }}
-                        className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-mono border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleAddGalleryImage(galleryUrlInput, true)}
-                      className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add URL</span>
-                    </button>
-                  </div>
-                  {imageUrlError && <p role="alert" className="text-xs font-medium text-rose-600 dark:text-rose-400">{imageUrlError}</p>}
-
-                  {/* Two-Column Studio Layout */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                    {/* Left: Primary Storefront Cover Asset (5 Cols) */}
-                    <div className="lg:col-span-5 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                          <span>Primary Cover Asset</span>
-                          <span className="text-[10px] text-blue-600 dark:text-cyan-400 font-mono font-normal">(Storefront Hero)</span>
-                        </label>
-                        {formData.primaryImage && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setFormData(prev => ({ ...prev, primaryImage: '' }));
-                              setFailedPreviewUrl(null);
-                            }}
-                            className="text-[10px] text-rose-500 hover:text-rose-600 font-bold hover:underline cursor-pointer"
-                          >
-                            Remove Cover
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Cover Viewport Frame */}
-                      <div
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={e => handleDrop(e, true)}
-                        className={`aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border-2 relative shadow-xs group flex items-center justify-center transition-all ${
-                          isDragging
-                            ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 ring-4 ring-blue-500/20'
-                            : 'border-slate-200/90 dark:border-slate-800/90'
-                        }`}
-                      >
-                        {formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
-                          <>
-                            <img
-                              src={getSafeImageUrl(formData.primaryImage)}
-                              alt="Primary Cover"
-                              className="w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
-                              key={getSafeImageUrl(formData.primaryImage)}
-                              onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
-                            />
-                            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-blue-600/95 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm">
-                              <Star className="w-3 h-3 fill-white text-white" />
-                              <span>Storefront Cover</span>
-                            </div>
-                            <div className="absolute inset-0 bg-slate-950/65 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-bold gap-2 cursor-pointer backdrop-blur-[2px]">
-                              <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105"
-                              >
-                                <UploadCloud className="w-4 h-4" />
-                                <span>Replace Cover</span>
-                              </button>
-                              <span className="text-[10px] text-slate-300 font-normal">Click or drop new file to replace</span>
-                            </div>
-                          </>
-                        ) : (
-                          <div
-                            onClick={() => fileInputRef.current?.click()}
-                            className="p-6 text-center space-y-2 text-slate-400 cursor-pointer w-full h-full flex flex-col items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
-                          >
-                            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center mx-auto text-blue-600 dark:text-cyan-400 shadow-2xs">
-                              {isUploading ? (
-                                <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
-                              ) : (
-                                <UploadCloud className="w-6 h-6" />
-                              )}
-                            </div>
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                              {isUploading
-                                ? 'Uploading visual asset...'
-                                : formData.primaryImage
-                                ? 'Image preview unavailable'
-                                : 'Select or Drop Cover Photo'}
-                            </div>
-                            <p className="text-[11px] text-slate-400 max-w-[200px] mx-auto leading-relaxed">
-                              Drop primary PNG, WEBP, or JPG here, or click to browse.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Direct URL Inspector Field */}
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                          Cover Image Path / URL
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. /images/products/... or https://..."
-                          value={formData.primaryImage}
-                          onChange={e => {
-                            const val = e.target.value.trim();
-                            setFormData(prev => {
-                              const cleanExisting = prev.images.filter(img => img !== val && !isPlaceholderImageUrl(img));
-                              return {
-                                ...prev,
-                                primaryImage: val,
-                                images: val ? [val, ...cleanExisting] : cleanExisting,
-                              };
-                            });
-                            setFailedPreviewUrl(null);
-                          }}
-                          className="w-full bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Right: Gallery Queue & Secondary Angles (7 Cols) */}
-                    <div className="lg:col-span-7 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                          <span>Gallery Queue</span>
-                          <span className="text-[10px] font-mono text-slate-400 font-normal">({formData.images.length} in carousel)</span>
-                        </label>
-                        <span className="text-[10px] text-slate-400 hidden sm:inline">
-                          ★ = Set as Cover • Drag or use arrows to reorder
-                        </span>
-                      </div>
-
-                      {/* Gallery Cards Grid */}
-                      {formData.images.length > 0 ? (
-                        <div
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={e => handleDrop(e, false)}
-                          className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[380px] overflow-y-auto p-1 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40"
-                        >
-                          {formData.images.map((imgUrl, imgIdx) => {
-                            const isPrimary = imgUrl === formData.primaryImage;
-                            return (
-                              <div
-                                key={imgIdx}
-                                className={`group/card relative rounded-xl overflow-hidden border-2 transition-all bg-white dark:bg-slate-900 shadow-2xs ${
-                                  isPrimary
-                                    ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-blue-500/10'
-                                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                                }`}
-                              >
-                                <div className="aspect-[4/3] flex items-center justify-center p-2 relative">
-                                  <img
-                                    src={getSafeImageUrl(imgUrl)}
-                                    alt={`Asset ${imgIdx + 1}`}
-                                    className="w-full h-full object-contain"
-                                  />
-                                  {isPrimary && (
-                                    <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-blue-600 text-[9px] font-bold text-white shadow-xs flex items-center gap-0.5">
-                                      <Star className="w-2.5 h-2.5 fill-white" />
-                                      <span>Cover</span>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Floating Action Bar */}
-                                <div className="p-1 bg-slate-100/90 dark:bg-slate-800/90 border-t border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between text-xs">
-                                  <div className="flex items-center gap-0.5">
-                                    <button
-                                      type="button"
-                                      disabled={imgIdx === 0}
-                                      onClick={() => handleMoveImage(imgIdx, 'left')}
-                                      className="p-1 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
-                                      title="Move earlier"
-                                    >
-                                      <MoveLeft className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      disabled={imgIdx === formData.images.length - 1}
-                                      onClick={() => handleMoveImage(imgIdx, 'right')}
-                                      className="p-1 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
-                                      title="Move later"
-                                    >
-                                      <MoveRight className="w-3 h-3" />
-                                    </button>
-                                  </div>
-
-                                  <div className="flex items-center gap-0.5">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleSetPrimaryImage(imgIdx)}
-                                      disabled={isPrimary}
-                                      className={`p-1 rounded-md transition-colors cursor-pointer ${
-                                        isPrimary
-                                          ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/60'
-                                          : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40'
-                                      }`}
-                                      title={isPrimary ? 'Already Cover' : 'Set as Storefront Cover'}
-                                    >
-                                      <Star className={`w-3 h-3 ${isPrimary ? 'fill-current' : ''}`} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveGalleryImage(imgIdx)}
-                                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
-                                      title="Remove from gallery"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-
-                          {/* Inline Add More Card */}
-                          <div
-                            onClick={() => galleryFileInputRef.current?.click()}
-                            className="aspect-[4/3] rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 flex flex-col items-center justify-center p-3 text-center cursor-pointer transition-all group"
-                          >
-                            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-950/80 text-slate-500 group-hover:text-blue-600 flex items-center justify-center mb-1.5 transition-colors">
-                              <Plus className="w-4 h-4" />
-                            </div>
-                            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Add Angles</span>
-                            <span className="text-[9px] text-slate-400">Upload more</span>
-                          </div>
+                    {/* Studio Top Bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-sm shadow-blue-600/30">
+                          <ImageIcon className="w-4.5 h-4.5" />
                         </div>
-                      ) : (
-                        <div
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={e => handleDrop(e, false)}
-                          onClick={() => galleryFileInputRef.current?.click()}
-                          className="h-[280px] rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-blue-50/20 hover:border-blue-300 dark:hover:border-blue-800 transition-all group"
-                        >
-                          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-950/70 text-slate-400 group-hover:text-blue-600 flex items-center justify-center mb-2.5 transition-colors">
-                            <ImageIcon className="w-6 h-6" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">Multi-Asset Gallery Studio</h3>
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                              formData.images.length > 0
+                                ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-950/60 dark:border-blue-800 dark:text-cyan-300'
+                                : 'bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${formData.images.length > 0 ? 'bg-blue-500' : 'bg-slate-400'}`} />
+                              {formData.images.length} asset{formData.images.length !== 1 ? 's' : ''}
+                            </span>
                           </div>
-                          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Gallery queue is empty</p>
-                          <p className="text-[11px] text-slate-400 max-w-[240px] mt-1">
-                            Click to upload supplementary photos, rear I/O port shots, and packaging, or drag & drop files here.
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                            Storefront hero photography &amp; supplementary multi-angle hardware visuals
                           </p>
                         </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {formData.images.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, images: [], primaryImage: '' }))}
+                            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 transition-all cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Clear All</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          disabled={isUploading}
+                          onClick={() => galleryFileInputRef.current?.click()}
+                          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-[11px] font-bold shadow-sm shadow-blue-600/25 flex items-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                        >
+                          {isUploading ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <UploadCloud className="w-3.5 h-3.5" />
+                          )}
+                          <span>Upload Files</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Hidden File Inputs */}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                      onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleFileUpload(e.target.files[0], true);
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                    <input
+                      type="file"
+                      ref={galleryFileInputRef}
+                      className="hidden"
+                      multiple
+                      accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                      onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          Array.from(e.target.files).forEach(f => handleFileUpload(f, false));
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+
+                    {/* URL Import Bar */}
+                    <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40">
+                      <div className="flex gap-2 items-center">
+                        <div className="relative flex-1 group">
+                          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                          </div>
+                          <input
+                            type="url"
+                            placeholder="Paste image URL (PNG, WEBP, JPG) and press Enter or click Add…"
+                            value={galleryUrlInput}
+                            onChange={e => { setGalleryUrlInput(e.target.value); setImageUrlError(''); }}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddGalleryImage(galleryUrlInput, true);
+                              }
+                            }}
+                            className="w-full bg-slate-50 dark:bg-slate-950 pl-9 pr-3.5 py-2 rounded-xl text-[11px] font-mono text-slate-700 dark:text-slate-300 placeholder:text-slate-400 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleAddGalleryImage(galleryUrlInput, true)}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-[11px] font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 border border-slate-700 dark:border-slate-600"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          Add URL
+                        </button>
+                      </div>
+                      {imageUrlError && (
+                        <p role="alert" className="mt-2 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                          {imageUrlError}
+                        </p>
                       )}
+                    </div>
+
+                    {/* Two-Column Canvas */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-800">
+
+                      {/* Left: Primary Cover (5 cols) */}
+                      <div className="lg:col-span-5 p-5 space-y-3">
+                        {/* Column Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center">
+                              <Star className="w-3 h-3 text-blue-600 dark:text-cyan-400" />
+                            </span>
+                            <div>
+                              <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 tracking-wide">Primary Cover</p>
+                              <p className="text-[9.5px] text-slate-400 font-medium tracking-wider uppercase">Storefront Hero Image</p>
+                            </div>
+                          </div>
+                          {formData.primaryImage && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, primaryImage: '' }));
+                                setFailedPreviewUrl(null);
+                              }}
+                              className="text-[10px] text-rose-500 hover:text-rose-700 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50"
+                            >
+                              ✕ Remove
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Cover Dropzone */}
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={e => handleDrop(e, true)}
+                          className={`relative rounded-2xl overflow-hidden border-2 transition-all group ${
+                            isDragging
+                              ? 'border-blue-500 ring-4 ring-blue-500/15 bg-blue-50/40 dark:bg-blue-950/30'
+                              : formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage)
+                              ? 'border-blue-400/60 dark:border-blue-700/60 bg-white dark:bg-slate-950 shadow-sm'
+                              : 'border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-950/40 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/20'
+                          }`}
+                          style={{ aspectRatio: '4/3' }}
+                        >
+                          {formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
+                            <>
+                              <img
+                                src={getSafeImageUrl(formData.primaryImage)}
+                                alt="Primary Cover"
+                                className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                                key={getSafeImageUrl(formData.primaryImage)}
+                                onError={e => setFailedPreviewUrl(e.currentTarget.getAttribute('src'))}
+                              />
+                              {/* Cover Badge */}
+                              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-blue-600/90 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1 shadow-md">
+                                <Star className="w-2.5 h-2.5 fill-white text-white" />
+                                Storefront Cover
+                              </div>
+                              {/* Hover Replace Overlay */}
+                              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-2 backdrop-blur-[2px]">
+                                <button
+                                  type="button"
+                                  onClick={() => fileInputRef.current?.click()}
+                                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg transition-all hover:scale-105 active:scale-100"
+                                >
+                                  <UploadCloud className="w-4 h-4" />
+                                  Replace Cover
+                                </button>
+                                <span className="text-[10px] text-slate-300 font-normal">Drop a new file to replace</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer p-6 text-center"
+                            >
+                              <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center text-blue-500 dark:text-cyan-400 group-hover:scale-110 transition-transform">
+                                {isUploading ? (
+                                  <RefreshCw className="w-6 h-6 animate-spin" />
+                                ) : (
+                                  <UploadCloud className="w-6 h-6" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                                  {isUploading ? 'Uploading…' : formData.primaryImage ? 'Preview unavailable' : 'Drop or Select Cover'}
+                                </p>
+                                <p className="text-[10.5px] text-slate-400 mt-0.5">PNG · WEBP · JPG accepted</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* URL Path Field */}
+                        <div className="space-y-1">
+                          <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            Cover URL / Path
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="/images/products/… or https://…"
+                            value={formData.primaryImage}
+                            onChange={e => {
+                              const val = e.target.value.trim();
+                              setFormData(prev => {
+                                const cleanExisting = prev.images.filter(img => img !== val && !isPlaceholderImageUrl(img));
+                                return {
+                                  ...prev,
+                                  primaryImage: val,
+                                  images: val ? [val, ...cleanExisting] : cleanExisting,
+                                };
+                              });
+                              setFailedPreviewUrl(null);
+                            }}
+                            className="w-full bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl text-[11px] font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right: Gallery Queue (7 cols) */}
+                      <div className="lg:col-span-7 p-5 space-y-3">
+                        {/* Column Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                              <ImageIcon className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 tracking-wide">Gallery Queue</p>
+                                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                  {formData.images.length} in carousel
+                                </span>
+                              </div>
+                              <p className="text-[9.5px] text-slate-400 font-medium tracking-wider uppercase">Secondary Angles &amp; Supplementary</p>
+                            </div>
+                          </div>
+                          <span className="text-[9.5px] text-slate-400 hidden sm:flex items-center gap-1">
+                            <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                            Set cover · arrows to reorder
+                          </span>
+                        </div>
+
+                        {/* Gallery Grid or Empty State */}
+                        {formData.images.length > 0 ? (
+                          <div
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={e => handleDrop(e, false)}
+                            className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[360px] overflow-y-auto rounded-xl"
+                          >
+                            {formData.images.map((imgUrl, imgIdx) => {
+                              const isPrimary = imgUrl === formData.primaryImage;
+                              return (
+                                <div
+                                  key={imgIdx}
+                                  className={`group/card relative rounded-xl overflow-hidden border-2 transition-all bg-white dark:bg-slate-900 shadow-xs ${
+                                    isPrimary
+                                      ? 'border-blue-500 ring-2 ring-blue-500/20'
+                                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm'
+                                  }`}
+                                >
+                                  <div className="aspect-[4/3] flex items-center justify-center p-2 relative bg-slate-50 dark:bg-slate-950">
+                                    <img
+                                      src={getSafeImageUrl(imgUrl)}
+                                      alt={`Asset ${imgIdx + 1}`}
+                                      className="w-full h-full object-contain"
+                                    />
+                                    {isPrimary && (
+                                      <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full bg-blue-600 text-[9px] font-bold text-white flex items-center gap-0.5 shadow-xs">
+                                        <Star className="w-2 h-2 fill-white" />
+                                        Cover
+                                      </div>
+                                    )}
+                                    {/* Quick Action Overlay */}
+                                    <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSetPrimaryImage(imgIdx)}
+                                        disabled={isPrimary}
+                                        className={`p-1.5 rounded-lg transition-colors ${
+                                          isPrimary
+                                            ? 'bg-amber-500 text-white cursor-default'
+                                            : 'bg-white/90 hover:bg-amber-500 text-slate-700 hover:text-white cursor-pointer'
+                                        }`}
+                                        title={isPrimary ? 'Already Cover' : 'Set as Cover'}
+                                      >
+                                        <Star className={`w-3 h-3 ${isPrimary ? 'fill-white' : ''}`} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveGalleryImage(imgIdx)}
+                                        className="p-1.5 rounded-lg bg-white/90 hover:bg-rose-500 text-slate-700 hover:text-white cursor-pointer transition-colors"
+                                        title="Remove"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Reorder Footer */}
+                                  <div className="px-1.5 py-1 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/80 dark:bg-slate-900/80">
+                                    <div className="flex items-center gap-0.5">
+                                      <button
+                                        type="button"
+                                        disabled={imgIdx === 0}
+                                        onClick={() => handleMoveImage(imgIdx, 'left')}
+                                        className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 cursor-pointer transition-colors"
+                                        title="Move earlier"
+                                      >
+                                        <MoveLeft className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={imgIdx === formData.images.length - 1}
+                                        onClick={() => handleMoveImage(imgIdx, 'right')}
+                                        className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 cursor-pointer transition-colors"
+                                        title="Move later"
+                                      >
+                                        <MoveRight className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                    <span className="text-[9px] font-mono text-slate-400">{imgIdx + 1}/{formData.images.length}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+
+                            {/* Add More Tile */}
+                            <div
+                              onClick={() => galleryFileInputRef.current?.click()}
+                              className="aspect-[4/3] rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 flex flex-col items-center justify-center p-3 text-center cursor-pointer transition-all group"
+                            >
+                              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-950/80 text-slate-400 group-hover:text-blue-600 flex items-center justify-center mb-1.5 transition-all group-hover:scale-110">
+                                <Plus className="w-4 h-4" />
+                              </div>
+                              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 group-hover:text-blue-600 transition-colors">Add More</span>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Empty Gallery State */
+                          <div
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={e => handleDrop(e, false)}
+                            onClick={() => galleryFileInputRef.current?.click()}
+                            className={`rounded-xl border-2 border-dashed transition-all cursor-pointer group flex flex-col items-center justify-center p-8 text-center ${
+                              isDragging
+                                ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-950/20'
+                                : 'border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 bg-slate-50/40 dark:bg-slate-950/30 hover:bg-blue-50/20'
+                            }`}
+                            style={{ minHeight: '280px' }}
+                          >
+                            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center text-slate-400 group-hover:text-blue-500 group-hover:border-blue-200 dark:group-hover:border-blue-700 transition-all group-hover:scale-105 mb-3">
+                              <ImageIcon className="w-6 h-6" />
+                            </div>
+                            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Gallery queue is empty</p>
+                            <p className="text-[11px] text-slate-400 max-w-[220px] mt-1.5 leading-relaxed">
+                              Upload supplementary angles, rear I/O shots, and packaging photos here
+                            </p>
+                            <div className="mt-4 px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold flex items-center gap-1.5 group-hover:bg-blue-500 transition-colors shadow-sm shadow-blue-600/20">
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              Browse Files
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
