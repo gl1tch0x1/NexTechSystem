@@ -107,17 +107,30 @@ export async function DELETE(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const id = searchParams.get('id');
   if (id) {
+    try {
+      const upstreamRes = await proxyToBackend(request, `/admin/products/${id}`);
+      if (upstreamRes.ok) {
+        deleteCatalogProduct(id);
+        try {
+          revalidatePath('/products');
+          revalidatePath('/');
+          revalidatePath(`/products/${id}`);
+        } catch {}
+        return upstreamRes;
+      }
+      if (upstreamRes.status !== 503) {
+        return upstreamRes;
+      }
+    } catch {}
+
     deleteCatalogProduct(id);
     try {
       revalidatePath('/products');
       revalidatePath('/');
       revalidatePath(`/products/${id}`);
     } catch {}
-    try {
-      await proxyToBackend(request, `/admin/products/${id}`);
-    } catch {}
     return Response.json(
-      { success: true, message: 'Product deleted successfully.' },
+      { success: true, message: 'Product deleted successfully.', source: 'authoritative_catalog_sync' },
       { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
     );
   }
