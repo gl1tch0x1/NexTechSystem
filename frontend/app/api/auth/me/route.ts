@@ -159,22 +159,25 @@ export async function GET(request: NextRequest) {
       return upstream;
     }
 
-    // Pass through non-auth errors
-    if (
-      upstream.status !== 401 &&
-      upstream.status !== 404 &&
-      upstream.status !== 502 &&
-      upstream.status !== 503 &&
-      upstream.status !== 504
-    ) {
-      return upstream;
+    if (upstream.status === 401 || upstream.status === 403) {
+      return NextResponse.json(
+        { success: false, error: { code: 'INVALID_TOKEN', message: 'Token is invalid or has expired.' } },
+        { status: 401 }
+      );
     }
-  } catch {
-    // Backend unavailable
-  }
 
-  return NextResponse.json(
-    { success: false, error: { code: 'INVALID_TOKEN', message: 'Token is invalid or has expired.' } },
-    { status: 401 }
-  );
+    if (upstream.status === 404 || upstream.status === 502 || upstream.status === 503 || upstream.status === 504) {
+      return NextResponse.json(
+        { success: false, error: { code: 'AUTH_SERVICE_UNAVAILABLE', message: 'Unable to verify session right now. Please try again.' } },
+        { status: 503 }
+      );
+    }
+
+    return upstream;
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: 'AUTH_SERVICE_UNAVAILABLE', message: 'Unable to verify session right now. Please try again.' } },
+      { status: 503 }
+    );
+  }
 }

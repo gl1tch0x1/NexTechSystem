@@ -130,13 +130,8 @@ export async function POST(request: NextRequest) {
       upstream.status === 404 &&
       (responseText.includes('route not found') || responseText.includes('not_found') || responseText.includes('cannot post'));
     const isUnavailable = upstream.status === 502 || upstream.status === 503 || upstream.status === 504;
-    const isAuthInfraFailure =
-      upstream.status === 401 &&
-      (responseText.includes('invalid_token') ||
-        responseText.includes('token is invalid') ||
-        responseText.includes('token has expired') ||
-        responseText.includes('authentication token missing'));
-    if (!isMissingRoute && !isUnavailable && !isAuthInfraFailure) {
+    const isAuthFailure = upstream.status === 401 || upstream.status === 403;
+    if (!isMissingRoute && !isUnavailable && !isAuthFailure) {
       return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
     }
 

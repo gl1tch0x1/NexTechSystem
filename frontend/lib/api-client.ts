@@ -122,9 +122,22 @@ export class ApiClient {
       }
 
       if (!response.ok || !json.success) {
-        // If 401 Unauthorized, automatically clear stale / expired token from client storage
+        // Only clear local session on definitive auth failures. Transient 401s from
+        // proxies/backends with mismatched secrets should not log the user out.
         if (response.status === 401 && typeof window !== 'undefined' && localStorage.getItem('auth_token') === token) {
-          localStorage.removeItem('auth_token');
+          const code = String(json.error?.code || '').toUpperCase();
+          const message = String(json.error?.message || '').toLowerCase();
+          const definitiveAuthFailure =
+            code === 'INVALID_TOKEN' ||
+            code === 'TOKEN_EXPIRED' ||
+            code === 'SESSION_EXPIRED' ||
+            message.includes('token is invalid') ||
+            message.includes('token has expired') ||
+            message.includes('session expired') ||
+            message.includes('authentication token missing');
+          if (definitiveAuthFailure) {
+            localStorage.removeItem('auth_token');
+          }
         }
 
         const errorMsg = json.error?.message || `Request failed with status ${response.status}`;

@@ -67,6 +67,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pendingLogout = useRef<Promise<unknown>>(Promise.resolve());
   const pendingAuthentication = useRef<Promise<unknown>>(Promise.resolve());
 
+  const AUTH_USER_CACHE_KEY = 'auth_user_cache';
+
+  const readCachedProfile = (): { user: User; reseller: Reseller | null } | null => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(AUTH_USER_CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed?.user?.id) return { user: parsed.user as User, reseller: (parsed.reseller as Reseller | null) || null };
+    } catch {
+      localStorage.removeItem(AUTH_USER_CACHE_KEY);
+    }
+    return null;
+  };
+
+  const writeCachedProfile = (profile: { user: User; reseller: Reseller | null }) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(AUTH_USER_CACHE_KEY, JSON.stringify(profile));
+    } catch {
+      // Ignore storage failures
+    }
+  };
+
   const fetchCurrentUser = async (authToken: string, revision = sessionRevision.current): Promise<{ user: User; reseller: Reseller | null } | null> => {
     if (revision !== sessionRevision.current) return null;
     if (authToken.startsWith('demo_token_')) {
@@ -78,11 +102,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (revision !== sessionRevision.current) return null;
       setUser(data.user);
       setReseller(data.reseller || null);
+      writeCachedProfile({ user: data.user, reseller: data.reseller || null });
       return data;
-    } catch {
-      // Stale or expired token from previous database session: cleanly reset to guest state
-      if (revision === sessionRevision.current) logout();
-      return null;
+    } catch (err: any) {
+      if (revision !== sessionRevision.current) return null;
+      const status = err?.status;
+      const code = String(err?.code || '').toUpperCase();
+      const message = String(err?.message || '').toLowerCase();
+      const definitiveAuthFailure =
+        status === 401 &&
+        (code === 'INVALID_TOKEN' ||
+          code === 'UNAUTHORIZED' ||
+          code === 'TOKEN_EXPIRED' ||
+          code === 'SESSION_EXPIRED' ||
+          message.includes('token is invalid') ||
+          message.includes('token has expired') ||
+          message.includes('not authenticated'));
+
+      if (definitiveAuthFailure) {
+        logout();
+        return null;
+      }
+
+      console.warn('[Auth] Session verification failed; keeping local session.', err);
+      return readCachedProfile();
     }
   };
 
@@ -90,8 +133,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const savedToken = localStorage.getItem('auth_token');
     if (savedToken) {
       setToken(savedToken);
+      const cachedProfile = readCachedProfile();
+      if (cachedProfile?.user) {
+        setUser(cachedProfile.user);
+        setReseller(cachedProfile.reseller || null);
+      }
       fetchCurrentUser(savedToken)
-        .catch(() => logout())
+        .catch((err) => {
+          console.warn('[Auth] Initial session verification failed.', err);
+        })
         .finally(() => setIsLoading(false));
     } else {
       setIsLoading(false);
@@ -233,12 +283,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch(() => {});
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
+      localStorage.removeItem(AUTH_USER_CACHE_KEY);
       localStorage.removeItem('demo_user');
       localStorage.removeItem('tech_cart_items');
       localStorage.removeItem('tech_coupon_code');
       window.dispatchEvent(new Event('auth_logout'));
     } else {
       localStorage.removeItem('auth_token');
+      localStorage.removeItem(AUTH_USER_CACHE_KEY);
       localStorage.removeItem('demo_user');
       localStorage.removeItem('tech_cart_items');
       localStorage.removeItem('tech_coupon_code');
