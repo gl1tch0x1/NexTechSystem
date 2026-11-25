@@ -133,14 +133,20 @@ export async function POST(request: NextRequest) {
       return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
     }
 
-    // If the backend upload route is missing/unavailable, fall back to local storage.
-    // Propagate real auth/validation errors from a live backend.
+    // If the backend upload route is missing/unavailable, or backend auth is misconfigured,
+    // fall back to local storage. Propagate real validation/permission errors from a live backend.
     const responseText = new TextDecoder().decode(responseBody).toLowerCase();
     const isMissingRoute =
       upstream.status === 404 &&
       (responseText.includes('route not found') || responseText.includes('not_found') || responseText.includes('cannot post'));
     const isUnavailable = upstream.status === 502 || upstream.status === 503 || upstream.status === 504;
-    if (!isMissingRoute && !isUnavailable) {
+    const isAuthInfraFailure =
+      upstream.status === 401 &&
+      (responseText.includes('invalid_token') ||
+        responseText.includes('token is invalid') ||
+        responseText.includes('token has expired') ||
+        responseText.includes('authentication token missing'));
+    if (!isMissingRoute && !isUnavailable && !isAuthInfraFailure) {
       return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
     }
 

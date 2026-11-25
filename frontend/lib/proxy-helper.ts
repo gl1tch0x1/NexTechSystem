@@ -319,9 +319,10 @@ export async function proxyToBackend(
     headers.set('content-type', 'application/json');
   }
 
-  // For administrative or upload proxy calls, ensure authoritative admin authorization header is present
+  // For administrative or upload proxy calls, prefer the caller's token and fall back to internal admin auth.
   const isAdminOrUpload = cleanPath.startsWith('/admin') || cleanPath.startsWith('/upload');
-  if (isAdminOrUpload) {
+  const hasAuthHeader = Boolean(headers.get('authorization'));
+  if (isAdminOrUpload && !hasAuthHeader) {
     headers.set('authorization', `Bearer ${getInternalAdminToken()}`);
   }
 
