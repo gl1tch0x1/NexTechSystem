@@ -179,8 +179,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
             className="lg:col-span-6 space-y-6"
           >
             {/* Enterprise Tag */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-mono font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+            <div className="inline-flex items-center px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-mono font-semibold">
               <span>GCC AUTHORIZED ENTERPRISE HARDWARE</span>
             </div>
 

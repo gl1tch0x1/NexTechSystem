@@ -431,7 +431,6 @@ export function Navbar() {
             <div className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1 leading-none">
               <span>NEXTECH</span>
               <span className="text-tech-blue dark:text-cyan-400 hidden xs:inline">SYSTEMS</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block ml-0.5"></span>
             </div>
             <div className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 hidden sm:block truncate">
               Enterprise Technology Platform
