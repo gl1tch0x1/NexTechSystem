@@ -41,6 +41,7 @@ import {
   Save,
   ChevronRight,
   CheckCircle2,
+  ListChecks,
   Eye,
   Star,
   Warehouse,
@@ -2975,7 +2976,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                 <div className="pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20">
-                      <span className="text-lg leading-none" aria-hidden="true">⚡</span>
+                      <ListChecks className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <div>
                       <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">

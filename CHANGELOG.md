@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Spec Combobox Dropdown Clipping**: Removed matrix card overflow clipping and moved rounding to inner header/footer so animated combobox menus render correctly.
-- **Admin Spec UI Cleanup**: Replaced misplaced Technical Specs/matrix logos with appropriate icons and removed the AI-style sparkles indicator from Category Key Highlights in favor of a clean emoji badge.
+- **Admin Spec UI Cleanup**: Replaced misplaced Technical Specs/matrix logos with appropriate icons and removed the AI-style sparkles indicator from Category Key Highlights in favor of a professional list-check icon badge.
 
 ---
 
