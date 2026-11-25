@@ -1,16 +1,20 @@
 import type { NextRequest } from 'next/server';
 import { proxyToBackend } from '@/lib/proxy-helper';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 function getUploadDirs(): string[] {
   const cwd = process.cwd();
-  return [
+  const dirs = [
     path.resolve(cwd, 'uploads'),
     path.resolve(cwd, 'backend', 'uploads'),
     path.resolve(cwd, '..', 'uploads'),
     path.resolve(cwd, '..', 'backend', 'uploads'),
+    path.resolve(os.tmpdir(), 'nextech-uploads'),
   ];
+  if (process.env.VERCEL) dirs.push('/tmp/nextech-uploads');
+  return Array.from(new Set(dirs));
 }
 
 function contentTypeFor(filename: string): string {

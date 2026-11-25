@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { proxyToBackend } from '@/lib/proxy-helper';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
 
@@ -16,12 +17,17 @@ const ALLOWED_MIME_TYPES = new Set([
 
 function getUploadDirs(): string[] {
   const cwd = process.cwd();
-  return [
+  const dirs = [
     path.resolve(cwd, 'uploads'),
     path.resolve(cwd, 'backend', 'uploads'),
     path.resolve(cwd, '..', 'uploads'),
     path.resolve(cwd, '..', 'backend', 'uploads'),
+    path.resolve(os.tmpdir(), 'nextech-uploads'),
   ];
+  if (process.env.VERCEL) {
+    dirs.push('/tmp/nextech-uploads');
+  }
+  return Array.from(new Set(dirs));
 }
 
 async function saveLocalUpload(file: Blob): Promise<Response> {
@@ -86,8 +92,21 @@ async function saveLocalUpload(file: Blob): Promise<Response> {
   }
 
   if (!saved) {
+    // Last-resort fallback: return an optimized data URL when no writable storage is available.
+    // This keeps uploads working in read-only serverless environments; upstream save errors are surfaced by callers.
+    const dataUrl = `data:${ext === 'pdf' ? 'application/pdf' : `image/${ext === 'jpg' ? 'jpeg' : ext}`};base64,${finalBuffer.toString('base64')}`;
+    if (dataUrl.length <= 2_500_000) {
+      return NextResponse.json({
+        success: true,
+        url: dataUrl,
+        hash: contentHash,
+        imageHash: contentHash,
+        filename,
+        storage: 'inline-data-url',
+      });
+    }
     return NextResponse.json(
-      { success: false, error: { message: 'Failed to store uploaded file. Please try again.' } },
+      { success: false, error: { message: 'Failed to store uploaded file. Please try again with a smaller image.' } },
       { status: 503 }
     );
   }
