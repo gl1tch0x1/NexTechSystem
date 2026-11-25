@@ -41,8 +41,15 @@ async function saveLocalUpload(file: Blob): Promise<Response> {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const mimeType = file.type.toLowerCase();
+  const extByMime: Record<string, string> = {
+    'image/png': 'png',
+    'image/jpeg': 'jpg',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+    'application/pdf': 'pdf',
+  };
   let finalBuffer = buffer;
-  let ext = 'bin';
+  let ext = extByMime[mimeType] ?? 'bin';
 
   if (mimeType.startsWith('image/') && mimeType !== 'image/svg+xml') {
     try {
@@ -50,19 +57,8 @@ async function saveLocalUpload(file: Blob): Promise<Response> {
       ext = 'webp';
     } catch {
       finalBuffer = buffer;
-      ext =
-        mimeType === 'image/png'
-          ? 'png'
-          : mimeType === 'image/webp'
-            ? 'webp'
-            : mimeType === 'image/gif'
-              ? 'gif'
-              : 'jpg';
     }
-  } else if (mimeType === 'application/pdf') {
-    ext = 'pdf';
-    finalBuffer = buffer;
-  } else {
+  } else if (mimeType !== 'application/pdf') {
     return NextResponse.json(
       { success: false, error: { message: 'Unsupported file type. Please upload a PNG, JPG, WEBP, GIF, or PDF document.' } },
       { status: 400 }
