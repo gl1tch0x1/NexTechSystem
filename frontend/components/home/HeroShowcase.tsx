@@ -54,6 +54,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const [rotationDirection, setRotationDirection] = useState<1 | -1>(1);
   const { addToCart } = useCart();
   const { formatPrice, convertPrice, currentCurrency } = useCurrency();
 
@@ -68,6 +69,34 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isLightboxOpen]);
+
+  // Automatic 10-second hardware rotation (GPU -> CPU -> Server -> SSD and vice versa)
+  useEffect(() => {
+    // Pause auto-rotation when user is interacting with card or inspecting in lightbox
+    if (isHovered || isLightboxOpen || activeHighlights.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setSelectedTabId((prevId) => {
+        const currentIndex = activeHighlights.findIndex(h => h.id === prevId);
+        const idx = currentIndex >= 0 ? currentIndex : 0;
+
+        let nextIdx = idx + rotationDirection;
+
+        // Bounce back and forth smoothly between ends
+        if (nextIdx >= activeHighlights.length - 1) {
+          nextIdx = activeHighlights.length - 1;
+          setRotationDirection(-1);
+        } else if (nextIdx <= 0) {
+          nextIdx = 0;
+          setRotationDirection(1);
+        }
+
+        return activeHighlights[nextIdx]?.id || prevId;
+      });
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, [isHovered, isLightboxOpen, rotationDirection, activeHighlights]);
 
   // Interactive 3D perspective tilt & parallax physics
   const cardRef = useRef<HTMLDivElement>(null);
@@ -269,7 +298,7 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
               {/* Floating Architectural Segmented Switcher & Stock Radar */}
               <div className="absolute top-3.5 inset-x-3.5 z-20 flex items-center justify-between gap-2 pointer-events-auto">
                 <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-x-auto no-scrollbar max-w-[calc(100%-115px)] relative">
-                  {activeHighlights.map(item => {
+                  {activeHighlights.map((item, idx) => {
                     const isActive = item.id === selectedTabId;
                     return (
                       <button
@@ -278,6 +307,8 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedTabId(item.id);
+                          if (idx === 0) setRotationDirection(1);
+                          else if (idx === activeHighlights.length - 1) setRotationDirection(-1);
                         }}
                         className={`relative px-3 py-1 rounded-lg text-[11px] font-mono font-medium transition-colors cursor-pointer shrink-0 z-10 ${isActive
                           ? 'text-white font-semibold'
@@ -287,9 +318,20 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                         {isActive && (
                           <motion.span
                             layoutId="activeHeroTabIndicator"
-                            className="absolute inset-0 rounded-lg bg-blue-600 shadow-md shadow-blue-600/30 -z-10"
+                            className="absolute inset-0 rounded-lg bg-blue-600 shadow-md shadow-blue-600/30 -z-10 overflow-hidden"
                             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-                          />
+                          >
+                            {!isHovered && !isLightboxOpen && (
+                              <motion.span
+                                key={selectedTabId}
+                                initial={{ scaleX: 0 }}
+                                animate={{ scaleX: 1 }}
+                                transition={{ duration: 10, ease: 'linear' }}
+                                style={{ originX: 0 }}
+                                className="absolute bottom-0 inset-x-0 h-[2px] bg-white/50 pointer-events-none"
+                              />
+                            )}
+                          </motion.span>
                         )}
                         <span>{item.tabLabel}</span>
                       </button>
@@ -305,9 +347,18 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
 
               {/* Top Right Realistic Spec Tag */}
               <div className="absolute top-14 right-3.5 z-10 pointer-events-none">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-white/70 dark:bg-slate-900/75 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 text-[10px] font-mono font-semibold shadow-xs backdrop-blur-md">
-                  <span>{currentHighlight.powerRating}</span>
-                </span>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={selectedTabId}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.2 }}
+                    className="inline-flex items-center px-2.5 py-1 rounded-lg bg-white/70 dark:bg-slate-900/75 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 text-[10px] font-mono font-semibold shadow-xs backdrop-blur-md"
+                  >
+                    <span>{currentHighlight.powerRating}</span>
+                  </motion.span>
+                </AnimatePresence>
               </div>
 
               {/* Full-Card Immersive Hardware Visual Stage with 3D Parallax & Depth */}
@@ -379,14 +430,32 @@ export function HeroShowcase({ products = [], highlights }: HeroShowcaseProps) {
                   className="flex items-center justify-between gap-3 pb-1 cursor-pointer select-none"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <h3 className="font-heading text-xs sm:text-[13px] font-bold text-slate-900 dark:text-slate-100 truncate tracking-tight drop-shadow-xs">
-                      {displayName}
-                    </h3>
+                    <AnimatePresence mode="wait">
+                      <motion.h3
+                        key={selectedTabId}
+                        initial={{ opacity: 0, y: 3 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -3 }}
+                        transition={{ duration: 0.18 }}
+                        className="font-heading text-xs sm:text-[13px] font-bold text-slate-900 dark:text-slate-100 truncate tracking-tight drop-shadow-xs"
+                      >
+                        {displayName}
+                      </motion.h3>
+                    </AnimatePresence>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-mono text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
-                      AED {formattedCurrentAmount}
-                    </span>
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={selectedTabId}
+                        initial={{ opacity: 0, y: 3 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -3 }}
+                        transition={{ duration: 0.18 }}
+                        className="font-mono text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap"
+                      >
+                        AED {formattedCurrentAmount}
+                      </motion.span>
+                    </AnimatePresence>
                     <motion.div
                       animate={{ rotate: isHovered ? 180 : 0 }}
                       transition={{ duration: 0.25 }}
