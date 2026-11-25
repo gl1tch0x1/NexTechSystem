@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-11-25
+
+### Added
+- **Admin Technical Specifications Matrix Combobox**:
+  - Replaced preset-only spec inputs in the admin product editor Technical Specifications & Hardware Matrix with a professional Framer Motion combobox (`SpecCombobox`) supporting preset selection, live filtering, and manual value entry.
+  - Applied shadcn-style Tailwind UI patterns (rounded surfaces, focus rings, shadow depth, backdrop blur, selected-state indicators) for a polished, enterprise-grade dropdown experience.
+- **Custom Definitions Card**:
+  - Added a dedicated “Custom Definitions” card/tab after “Display, OS & Regional Compliance” in the Technical Specifications & Hardware Matrix.
+  - Admins and editors can add ad-hoc hardware metadata with an “Add Definition” button, animated definition rows, key/value inputs, and removal controls.
+
+### Changed
+- **Admin Spec Matrix Layout**: Updated matrix header copy and container rounding to accommodate the new combobox and custom definitions workflow.
+
+### Fixed
+- **Spec Combobox Dropdown Clipping**: Removed matrix card overflow clipping and moved rounding to inner header/footer so animated combobox menus render correctly.
+- **Admin Spec UI Cleanup**: Replaced misplaced Technical Specs/matrix logos with appropriate icons and removed the AI-style sparkles indicator from Category Key Highlights in favor of a clean emoji badge.
+
+---
+
 ## [1.3.0] - 2026-11-24
 
 ### Added

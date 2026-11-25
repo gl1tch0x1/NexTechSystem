@@ -494,6 +494,151 @@ export interface ProductFormData {
 
 type TabKey = 'general' | 'pricing' | 'inventory' | 'specs' | 'variants' | 'logistics';
 
+interface SpecComboboxProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  placeholder?: string;
+  ariaLabel: string;
+}
+
+function SpecCombobox({ value, onChange, options, placeholder, ariaLabel }: SpecComboboxProps) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) setQuery('');
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [open]);
+
+  const filteredOptions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter((option) => option.toLowerCase().includes(q));
+  }, [options, query]);
+
+  const displayValue = open ? query : value;
+
+  const commitValue = (next: string) => {
+    onChange(next);
+    setOpen(false);
+    setQuery('');
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className={`group flex items-center rounded-xl border bg-slate-50 dark:bg-slate-950 transition-all ${open ? 'border-blue-600 ring-2 ring-blue-500/20 shadow-sm' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}`}>
+        <input
+          ref={inputRef}
+          type="text"
+          role="combobox"
+          aria-label={ariaLabel}
+          aria-expanded={open}
+          aria-autocomplete="list"
+          autoComplete="off"
+          value={displayValue}
+          placeholder={placeholder || 'Select or enter value...'}
+          onFocus={() => {
+            setOpen(true);
+            setQuery(value);
+          }}
+          onChange={(e) => {
+            const next = e.target.value;
+            setQuery(next);
+            onChange(next);
+            if (!open) setOpen(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              setOpen(false);
+              setQuery('');
+              inputRef.current?.blur();
+            }
+            if (e.key === 'Enter' && open && filteredOptions.length === 1) {
+              e.preventDefault();
+              commitValue(filteredOptions[0]);
+            }
+          }}
+          className="w-full bg-transparent px-3.5 py-2.5 pr-10 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
+        />
+        <button
+          type="button"
+          aria-label={open ? `Close ${ariaLabel} options` : `Open ${ariaLabel} options`}
+          onClick={() => {
+            const nextOpen = !open;
+            setOpen(nextOpen);
+            if (nextOpen) {
+              setQuery(value);
+              inputRef.current?.focus();
+            }
+          }}
+          className="absolute right-2.5 inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-colors cursor-pointer"
+        >
+          <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${open ? '-rotate-90 text-blue-600' : 'rotate-90'}`} />
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-700/90 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-slate-900/8 backdrop-blur-xl"
+          >
+            <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/50">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Suggestions</p>
+            </div>
+            <div className="max-h-56 overflow-y-auto p-1.5">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => {
+                  const selected = option === value;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => commitValue(option)}
+                      className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-medium transition-colors cursor-pointer ${selected ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80'}`}
+                    >
+                      <span className="truncate">{option}</span>
+                      {selected && <Check className="w-3.5 h-3.5 shrink-0 text-blue-600 dark:text-cyan-400" />}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="px-3 py-6 text-center">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">No preset match</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Keep typing to use a custom value.</p>
+                </div>
+              )}
+            </div>
+            {value.trim() && !options.includes(value) && (
+              <div className="border-t border-slate-100 dark:border-slate-800 px-3 py-2 bg-blue-50/50 dark:bg-blue-950/20">
+                <p className="text-[10px] font-semibold text-blue-700 dark:text-cyan-300 truncate">Custom value: {value}</p>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 interface ProductEditorPageProps {
   mode: 'create' | 'edit';
   productId?: string;
@@ -2898,13 +3043,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
               </div>
 
               {/* 2. COMPLETE ENGINEERING SPECIFICATION MATRIX (ALL 60+ FIELDS) */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
 
               {/* Section Header */}
-              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-slate-50 dark:bg-slate-900/60">
+              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-slate-50 dark:bg-slate-900/60 rounded-t-3xl">
                 <div>
                   <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Technical Specifications &amp; Hardware Matrix</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Configure hardware parameters across 6 namespaced engineering groups.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Configure hardware parameters across engineering groups and custom definitions.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
@@ -2962,11 +3107,158 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       </button>
                     );
                   })}
+
+                  {(() => {
+                    const isActive = activeSpecTab === 'custom';
+                    const filledCount = formData.customSpecs.filter((cs) => cs.key.trim() && cs.value.trim()).length;
+                    const totalCount = Math.max(formData.customSpecs.length, 1);
+                    const fillPct = Math.round((filledCount / totalCount) * 100);
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => setActiveSpecTab('custom')}
+                        className={`w-full text-left p-3 rounded-xl transition-all cursor-pointer group ${isActive ? 'bg-white dark:bg-slate-900 shadow-sm border border-violet-200 dark:border-violet-700/70' : 'hover:bg-white/60 dark:hover:bg-slate-900/60 border border-transparent'}`}
+                      >
+                        <div className="flex items-start justify-between gap-1 mb-2">
+                          <span className={`text-xs font-bold leading-snug ${isActive ? 'text-violet-600 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
+                            Custom Definitions
+                          </span>
+                          {filledCount > 0 && (
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full text-white bg-violet-600 shrink-0 mt-0.5">{filledCount}</span>
+                          )}
+                        </div>
+                        <div className="h-1 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-500 bg-violet-600" style={{ width: `${fillPct}%` }} />
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-medium">
+                          {formData.customSpecs.length > 0 ? `${filledCount}/${formData.customSpecs.length} definitions filled` : 'Add custom definitions'}
+                        </div>
+                      </button>
+                    );
+                  })()}
                 </div>
 
                 {/* Right: Spec Field Panel */}
                 <div className="flex-1 p-6 sm:p-8 space-y-6 min-w-0">
                   {(() => {
+                    if (activeSpecTab === 'custom') {
+                      const filledCustom = formData.customSpecs.filter((cs) => cs.key.trim() && cs.value.trim()).length;
+                      return (
+                        <div className="space-y-6">
+                          <div className="relative overflow-hidden rounded-2xl border border-violet-200/80 dark:border-violet-800/60 bg-gradient-to-br from-violet-50 via-white to-blue-50 dark:from-violet-950/30 dark:via-slate-900 dark:to-blue-950/20 p-5 sm:p-6 shadow-sm">
+                            <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-violet-400/10 blur-3xl" />
+                            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                              <div className="min-w-0 space-y-1.5">
+                                <div className="flex flex-wrap items-center gap-2.5">
+                                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-600/20">
+                                    <Plus className="w-4 h-4" />
+                                  </span>
+                                  <div>
+                                    <h3 className="text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white">Custom Definitions</h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Add further information and product-specific details beyond the standard specification groups.</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3 shrink-0">
+                                <div className="text-right">
+                                  <div className="text-lg font-black text-slate-900 dark:text-white leading-none">{filledCustom}<span className="text-xs font-normal text-slate-400 dark:text-slate-500">/{formData.customSpecs.length}</span></div>
+                                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">completed</div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={handleAddCustomSpec}
+                                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-sm shadow-violet-600/20 transition-all cursor-pointer"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  Add Definition
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {formData.customSpecs.length > 0 ? (
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                              <AnimatePresence initial={false}>
+                                {formData.customSpecs.map((cs, i) => {
+                                  const isFilled = Boolean(cs.key.trim() && cs.value.trim());
+                                  return (
+                                    <motion.div
+                                      key={i}
+                                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                                      exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                                      className={`relative group rounded-2xl border p-4 space-y-3 transition-all ${isFilled ? 'border-violet-200 dark:border-violet-800/70 bg-white dark:bg-slate-900 shadow-sm' : 'border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/40'}`}
+                                    >
+                                      <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-950/60 text-[10px] font-black text-violet-700 dark:text-violet-300 shrink-0">{i + 1}</span>
+                                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{cs.key.trim() || 'New Definition'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                          {isFilled && (
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 flex items-center gap-1">
+                                              <Check className="w-2.5 h-2.5" /> Set
+                                            </span>
+                                          )}
+                                          <button
+                                            type="button"
+                                            onClick={() => handleRemoveCustomSpec(i)}
+                                            className="p-1 text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                                            title="Remove definition"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                      <div className="space-y-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Definition Name</label>
+                                        <input
+                                          type="text"
+                                          placeholder="e.g. TPM Security Chip, Cooling System, Certifications"
+                                          value={cs.key}
+                                          onChange={(e) => handleCustomSpecChange(i, 'key', e.target.value)}
+                                          className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all placeholder:text-slate-400"
+                                        />
+                                      </div>
+                                      <div className="space-y-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Definition Value</label>
+                                        <input
+                                          type="text"
+                                          placeholder="Enter the detail or value for this definition"
+                                          value={cs.value}
+                                          onChange={(e) => handleCustomSpecChange(i, 'value', e.target.value)}
+                                          className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all placeholder:text-slate-400"
+                                        />
+                                      </div>
+                                    </motion.div>
+                                  );
+                                })}
+                              </AnimatePresence>
+                            </div>
+                          ) : (
+                            <div className="rounded-2xl border-2 border-dashed border-violet-200 dark:border-violet-800/60 bg-violet-50/30 dark:bg-violet-950/10 p-10 text-center space-y-3">
+                              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 dark:bg-violet-950/60 text-violet-600 dark:text-violet-300">
+                                <Plus className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <div className="text-sm font-bold text-slate-800 dark:text-slate-200">No custom definitions yet</div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">Add extra product information such as certifications, included accessories, compliance notes, or any specification not covered by the standard groups.</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleAddCustomSpec}
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-sm shadow-violet-600/20 transition-all cursor-pointer"
+                              >
+                                <Plus className="w-4 h-4" />
+                                Add Definition
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
                     const groupIndex = Math.max(0, SPECIFICATION_GROUPS.findIndex(g => g.id === activeSpecTab));
                     const currentGroup = SPECIFICATION_GROUPS[groupIndex] || SPECIFICATION_GROUPS[0];
                     const filledInGroup = currentGroup.fields.filter(f => Boolean(formData.specifications[f.key])).length;
@@ -3014,7 +3306,6 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                             const presets = field.presetKey ? (SPECIFICATION_PRESETS[field.presetKey] || []) : (SPECIFICATION_PRESETS[field.key as keyof typeof SPECIFICATION_PRESETS] || []);
                             const currentValue = formData.specifications[field.key] || '';
                             const isFilled = Boolean(currentValue);
-                            const presetListId = `spec-preset-${currentGroup.id}-${field.key}`.replace(/[^a-zA-Z0-9_-]/g, '-');
                             return (
                               <div key={field.key} className={`relative group rounded-2xl border transition-all p-4 space-y-2.5 ${isFilled ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm' : 'border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/40'
                                 }`}>
@@ -3040,26 +3331,23 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                                     )}
                                   </div>
                                 </div>
-                                <div className="relative">
+                                {presets.length > 0 ? (
+                                  <SpecCombobox
+                                    value={currentValue}
+                                    onChange={(next) => handleSpecChange(field.key, next)}
+                                    options={presets}
+                                    placeholder={`Select or enter ${field.label}…`}
+                                    ariaLabel={field.label}
+                                  />
+                                ) : (
                                   <input
                                     type="text"
-                                    list={presets.length > 0 ? presetListId : undefined}
-                                    placeholder={presets.length > 0 ? `Select or enter ${field.label}…` : (field.placeholder || `Enter ${field.label}…`)}
+                                    placeholder={field.placeholder || `Enter ${field.label}…`}
                                     value={currentValue}
                                     onChange={e => handleSpecChange(field.key, e.target.value)}
-                                    className={`w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 ${presets.length > 0 ? 'pr-8' : ''}`}
+                                    className="w-full bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400"
                                   />
-                                  {presets.length > 0 && (
-                                    <>
-                                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 rotate-90 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                                      <datalist id={presetListId}>
-                                        {presets.map(p => (
-                                          <option key={p} value={p} />
-                                        ))}
-                                      </datalist>
-                                    </>
-                                  )}
-                                </div>
+                                )}
                               </div>
                             );
                           })}
@@ -3095,58 +3383,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       </div>
                     );
                   })()}
-
-                  {/* Custom Dynamic Metafields Builder */}
-                  <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800">
-                          <Plus className="w-3.5 h-3.5 text-indigo-600" />
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-black text-slate-900 dark:text-white">Custom Dynamic Metafields</h3>
-                          <p className="text-[11px] text-slate-400">Arbitrary parameters not in standard spec groups</p>
-                        </div>
-                      </div>
-                      <button type="button" onClick={handleAddCustomSpec}
-                        className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer flex items-center gap-1.5 transition-all shadow-sm">
-                        <Plus className="w-3.5 h-3.5" /> Add Metafield
-                      </button>
-                    </div>
-                    {formData.customSpecs.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {formData.customSpecs.map((cs, i) => (
-                          <div key={i} className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 group">
-                            <div className="flex-1 space-y-1.5">
-                              <input type="text" placeholder="Key (e.g. TPM 2.0 Chip)" value={cs.key}
-                                onChange={e => handleCustomSpecChange(i, 'key', e.target.value)}
-                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
-                              <input type="text" placeholder="Value" value={cs.value}
-                                onChange={e => handleCustomSpecChange(i, 'value', e.target.value)}
-                                className="w-full bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg text-[11px] text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500" />
-                            </div>
-                            <button type="button" onClick={() => handleRemoveCustomSpec(i)}
-                              className="p-2 text-slate-300 hover:text-red-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-all mt-0.5">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-8 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30 space-y-2">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto">
-                          <Plus className="w-5 h-5 text-slate-400" />
-                        </div>
-                        <div className="text-xs font-bold text-slate-500">No custom metafields yet</div>
-                        <div className="text-[11px] text-slate-400">Add TPM version, cooling config, certifications, etc.</div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
 
               {/* Section 4 Footer Navigation */}
-              <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between rounded-b-3xl">
                 <button
                   type="button"
                   onClick={() => setActiveTab(portal === 'admin' ? 'pricing' : 'inventory')}
