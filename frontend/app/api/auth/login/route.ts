@@ -283,12 +283,6 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      if (!backendJson) {
-        return NextResponse.json(
-          { success: false, error: { code: 'AUTH_SERVICE_INVALID_RESPONSE', message: 'Authentication service returned an invalid response.' } },
-          { status: 502 },
-        );
-      }
     }
 
     if ([404, 502, 503, 504].includes(upstream.status)) {
@@ -301,6 +295,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: { code: 'AUTH_SERVICE_UNAVAILABLE', message: 'Authentication service is temporarily unavailable. Please try again.' } },
         { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
+    if (!backendJson) {
+      return NextResponse.json(
+        { success: false, error: { code: 'AUTH_SERVICE_INVALID_RESPONSE', message: 'Authentication service returned an invalid response.' } },
+        { status: upstream.status >= 500 ? 502 : upstream.status, headers: { 'Cache-Control': 'no-store' } },
       );
     }
 
@@ -329,12 +330,21 @@ export async function POST(request: NextRequest) {
  * Issue a successful login response with a frontend-signed JWT and httpOnly cookie.
  */
 function issueLoginResponse(user: any): NextResponse {
-  const token = createJwtToken({
-    id: user.id || String(user._id),
-    email: user.email,
-    role: user.role || 'CUSTOMER',
-    resellerId: user.resellerId,
-  });
+  let token: string;
+  try {
+    token = createJwtToken({
+      id: user.id || String(user._id),
+      email: user.email,
+      role: user.role || 'CUSTOMER',
+      resellerId: user.resellerId,
+    });
+  } catch (error) {
+    console.error('[Auth Login] Could not issue session token:', error);
+    return NextResponse.json(
+      { success: false, error: { code: 'AUTH_CONFIGURATION_ERROR', message: 'Authentication service is temporarily unavailable. Please try again later.' } },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
 
   const response = NextResponse.json({
     success: true,
