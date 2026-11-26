@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { authorizeActiveRequestRoles, getRequestToken, verifyJwtToken } from '@/lib/proxy-helper';
+import { authorizeActiveRequestRoles, getAuthoritativeSessionRole, getRequestToken, verifyJwtToken } from '@/lib/proxy-helper';
 
 function isEditorPath(pathname: string): boolean {
   return /^\/admin\/(?:products|categories|brands)(?:\/|$)/.test(pathname);
@@ -10,6 +10,11 @@ function isEditorApiPath(pathname: string): boolean {
   return /^\/api\/admin\/(?:products|categories|brands|presence)(?:\/|$)/.test(pathname);
 }
 
+/**
+ * Password sessions are signed by the API service.  A Vercel deployment must
+ * never reject them merely because its own optional JWT_SECRET differs from
+ * the API secret, so use the API's lightweight authoritative session check.
+ */
 /**
  * Next.js 16 Proxy (replaces deprecated "middleware" file convention).
  * Handles multi-tenant reseller subdomain routing.
@@ -24,9 +29,11 @@ export async function proxy(request: NextRequest) {
   if (isAdminPage || isAdminApi) {
     const token = getRequestToken(request);
     const user = token ? verifyJwtToken(token) : null;
+    const authoritativeRole = !user && token ? await getAuthoritativeSessionRole(token) : null;
+    const role = user?.role || authoritativeRole;
     const allowed =
-      user?.role === 'ADMIN' ||
-      (user?.role === 'PRODUCT_EDITOR' &&
+      role === 'ADMIN' ||
+      (role === 'PRODUCT_EDITOR' &&
         (isAdminPage ? isEditorPath(pathname) : isEditorApiPath(pathname)));
 
     if (!allowed) {
@@ -35,18 +42,18 @@ export async function proxy(request: NextRequest) {
           {
             success: false,
             error: {
-              code: user ? 'FORBIDDEN' : 'UNAUTHORIZED',
-              message: user ? 'Administrator access required.' : 'Authentication required.',
+              code: token ? 'FORBIDDEN' : 'UNAUTHORIZED',
+              message: token ? 'Administrator access required.' : 'Authentication required.',
             },
           },
-          { status: user ? 403 : 401, headers: { 'Cache-Control': 'no-store' } }
+          { status: token ? 403 : 401, headers: { 'Cache-Control': 'no-store' } }
         );
       }
 
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (isAdminApi) {
+    if (isAdminApi && user) {
       const activeAuthError = await authorizeActiveRequestRoles(
         request,
         user?.role === 'PRODUCT_EDITOR' ? ['ADMIN', 'PRODUCT_EDITOR'] : ['ADMIN']

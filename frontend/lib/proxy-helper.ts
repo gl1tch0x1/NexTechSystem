@@ -107,6 +107,23 @@ export function getBackendApiUrl(): string {
   return isProd ? 'https://api.nextechsystem.com' : 'http://localhost:5000';
 }
 
+/** Resolve API-issued roles when the frontend and API use separate JWT keys. */
+export async function getAuthoritativeSessionRole(token: string): Promise<string | null> {
+  try {
+    const response = await fetch(`${getBackendApiUrl()}/api/admin/session`, {
+      headers: { authorization: `Bearer ${token}`, accept: 'application/json' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    const role = payload?.data?.user?.role;
+    return role === 'ADMIN' || role === 'PRODUCT_EDITOR' ? role : null;
+  } catch {
+    return null;
+  }
+}
+
 let cachedJwtSecret: string | null = null;
 
 export function getJwtSecret(): string {
@@ -443,7 +460,8 @@ export async function proxyToBackend(
 
   if (isAdminOrUpload) {
     const decoded = token ? verifyJwtToken(token) : null;
-    if (!decoded) {
+    const authenticatedRole = decoded?.role || (token ? await getAuthoritativeSessionRole(token) : null);
+    if (!authenticatedRole) {
       return Response.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
         { status: 401, headers: { 'Cache-Control': 'no-store' } }
@@ -451,7 +469,7 @@ export async function proxyToBackend(
     }
     if (cleanPath.startsWith('/admin')) {
       const editorAllowed = /^\/admin\/(?:products|categories|brands|presence)(?:\/|$)/.test(cleanPath);
-      if (decoded.role !== 'ADMIN' && !(decoded.role === 'PRODUCT_EDITOR' && editorAllowed)) {
+      if (authenticatedRole !== 'ADMIN' && !(authenticatedRole === 'PRODUCT_EDITOR' && editorAllowed)) {
         return Response.json(
           { success: false, error: { code: 'FORBIDDEN', message: 'Administrator access required.' } },
           { status: 403, headers: { 'Cache-Control': 'no-store' } }
