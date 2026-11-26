@@ -4,7 +4,6 @@ import multer from 'multer';
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
-import sharp from 'sharp';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
 
@@ -160,48 +159,28 @@ async function handleFileUpload(req: any, res: any) {
     return;
   }
 
-  // Automatic WebP Conversion and cryptographic SHA-256 content-addressable hash formatting
+  // Use a cryptographic content address for durable media storage.  Do not
+  // transcode at request time: the cPanel Node runtime does not ship a
+  // compatible native `sharp` binary, and an eager import of it prevents the
+  // entire API from starting.  The magic-byte check above still ensures that
+  // only the claimed image/document type is persisted.
   const ext = path.extname(rawFilename).slice(1).toLowerCase();
   let finalFilename: string;
   let contentHash = '';
 
-  if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
-    try {
-      const inputBuffer = await fsPromises.readFile(filePath);
-      const webpBuffer = await sharp(inputBuffer)
-        .webp({ quality: 85, effort: 4 })
-        .toBuffer();
+  try {
+    const inputBuffer = await fsPromises.readFile(filePath);
+    contentHash = crypto.createHash('sha256').update(inputBuffer).digest('hex');
+    const hashFilename = `${contentHash}.${ext}`;
+    const hashPath = path.resolve(directory, hashFilename);
 
-      contentHash = crypto.createHash('sha256').update(webpBuffer).digest('hex');
-      const hashFilename = `${contentHash}.webp`;
-      const hashPath = path.resolve(directory, hashFilename);
-
-      await fsPromises.writeFile(hashPath, webpBuffer);
-
-      // Clean up uploaded temp file if name differs
-      if (rawFilename !== hashFilename) {
-        await fsPromises.unlink(filePath).catch(() => {});
-      }
-      finalFilename = hashFilename;
-    } catch {
-      finalFilename = rawFilename;
+    await fsPromises.writeFile(hashPath, inputBuffer);
+    if (rawFilename !== hashFilename) {
+      await fsPromises.unlink(filePath).catch(() => {});
     }
-  } else {
-    // Non-image document (e.g. PDF trade license)
-    try {
-      const inputBuffer = await fsPromises.readFile(filePath);
-      contentHash = crypto.createHash('sha256').update(inputBuffer).digest('hex');
-      const hashFilename = `${contentHash}.${ext}`;
-      const hashPath = path.resolve(directory, hashFilename);
-
-      await fsPromises.writeFile(hashPath, inputBuffer);
-      if (rawFilename !== hashFilename) {
-        await fsPromises.unlink(filePath).catch(() => {});
-      }
-      finalFilename = hashFilename;
-    } catch {
-      finalFilename = rawFilename;
-    }
+    finalFilename = hashFilename;
+  } catch {
+    finalFilename = rawFilename;
   }
 
   res.status(201).json({
