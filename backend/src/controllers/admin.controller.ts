@@ -1483,6 +1483,27 @@ export class AdminController {
     }
   }
 
+  async syncProductsToMongo(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const result = await dbStore.syncCollectionToMongo('products');
+      await auditService.log({
+        action: 'UPDATE',
+        resource: 'PRODUCT_CATALOG',
+        userId: req.user?.id || 'admin',
+        userEmail: req.user?.email || ENV.ADMIN_DEFAULT_EMAIL,
+        userRole: 'ADMIN',
+        details: { action: 'SYNC_PRODUCTS_TO_MONGO', result },
+      });
+      res.json({
+        success: true,
+        message: `Successfully synchronized ${result.records} product records to MongoDB Atlas.`,
+        data: result,
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: { message: err?.message || 'Product catalog sync failed' } });
+    }
+  }
+
   async syncFromMongo(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const result = await dbStore.syncAllFromMongo();

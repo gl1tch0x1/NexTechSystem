@@ -159,16 +159,39 @@ async function handleFileUpload(req: any, res: any) {
     return;
   }
 
-  // Use a cryptographic content address for durable media storage.  Do not
-  // transcode at request time: the cPanel Node runtime does not ship a
-  // compatible native `sharp` binary, and an eager import of it prevents the
-  // entire API from starting.  The magic-byte check above still ensures that
-  // only the claimed image/document type is persisted.
+  // Use a cryptographic content address for durable media storage.  `sharp`
+  // is loaded only while processing an image: cPanel's Node runtime may not
+  // have a compatible native binary, and an eager import would otherwise
+  // prevent the entire API from starting. The magic-byte check above still
+  // ensures that only the claimed image/document type is persisted.
   const ext = path.extname(rawFilename).slice(1).toLowerCase();
   let finalFilename: string;
   let contentHash = '';
 
-  try {
+  if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+    try {
+      const inputBuffer = await fsPromises.readFile(filePath);
+      const { default: sharp } = await import('sharp');
+      const webpBuffer = await sharp(inputBuffer).webp({ quality: 85, effort: 4 }).toBuffer();
+      contentHash = crypto.createHash('sha256').update(webpBuffer).digest('hex');
+      const hashFilename = `${contentHash}.webp`;
+      await fsPromises.writeFile(path.resolve(directory, hashFilename), webpBuffer);
+      if (rawFilename !== hashFilename) await fsPromises.unlink(filePath).catch(() => {});
+      finalFilename = hashFilename;
+    } catch {
+      // Keep the valid original when optional native conversion is unavailable.
+      try {
+        const inputBuffer = await fsPromises.readFile(filePath);
+        contentHash = crypto.createHash('sha256').update(inputBuffer).digest('hex');
+        const hashFilename = `${contentHash}.${ext}`;
+        await fsPromises.writeFile(path.resolve(directory, hashFilename), inputBuffer);
+        if (rawFilename !== hashFilename) await fsPromises.unlink(filePath).catch(() => {});
+        finalFilename = hashFilename;
+      } catch {
+        finalFilename = rawFilename;
+      }
+    }
+  } else try {
     const inputBuffer = await fsPromises.readFile(filePath);
     contentHash = crypto.createHash('sha256').update(inputBuffer).digest('hex');
     const hashFilename = `${contentHash}.${ext}`;

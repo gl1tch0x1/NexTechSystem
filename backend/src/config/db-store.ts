@@ -548,6 +548,45 @@ export class DbStore {
   }
 
   // --- Enterprise MongoDB Synchronization & Seeding ---
+  /**
+   * Synchronize one authoritative disk-backed collection without touching
+   * unrelated records (orders, users, settings, and so on).
+   */
+  public async syncCollectionToMongo(collectionName: string): Promise<{ success: boolean; collection: string; records: number }> {
+    if (!/^[a-zA-Z0-9_-]{1,128}$/.test(collectionName)) {
+      throw new Error('Invalid collection name.');
+    }
+    if (!mongoDb.isConnected()) {
+      throw new Error('MongoDB is not currently connected. Please verify cluster accessibility & IP allowlist in Atlas.');
+    }
+
+    this.loadFromDisk();
+    const db = mongoDb.getDb();
+    if (!db) throw new Error('MongoDB database instance is null.');
+
+    const items = Array.from(this.getCollectionMap(collectionName).values());
+    if (items.length === 0) {
+      throw new Error(`No ${collectionName} records are available to synchronize.`);
+    }
+
+    const operations = items.map(item => {
+      const copy = JSON.parse(JSON.stringify(item));
+      delete copy._id;
+      const safeId = typeof item.id === 'string' ? item.id : String(item.id);
+      return {
+        updateOne: {
+          filter: { id: { $eq: safeId } },
+          update: { $set: copy },
+          upsert: true,
+        },
+      };
+    });
+
+    await db.collection(collectionName).bulkWrite(operations, { ordered: false });
+    console.log('✅ [MongoDB Sync] Synced %d %s records to MongoDB Atlas.', items.length, collectionName);
+    return { success: true, collection: collectionName, records: items.length };
+  }
+
   public async syncAllToMongo(): Promise<{ success: boolean; collectionsSynced: number; totalRecords: number }> {
     if (!mongoDb.isConnected()) {
       throw new Error('MongoDB is not currently connected. Please verify cluster accessibility & IP allowlist in Atlas.');
