@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authorizeRequestRoles, proxyToBackend } from '@/lib/proxy-helper';
+import { authorizeAuthoritativeRequestRoles, proxyToBackend } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
 type RouteContext = { params: Promise<{ path: string[] }> };
@@ -11,7 +11,7 @@ function sanitizeEditor(u: any): any {
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const { path } = await params;
   const id = path[0];
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const { path } = await params;
   const id = path[0];
@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const { path } = await params;
   const id = path[0];

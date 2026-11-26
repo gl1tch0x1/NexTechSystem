@@ -10,7 +10,7 @@ import {
   isDeletedAdmin,
   createVaultToken,
   verifyVaultToken,
-  authorizeRequestRoles,
+  authorizeAuthoritativeRequestRoles,
   getRequestToken,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
@@ -32,7 +32,7 @@ function sanitizeUser(u: any) {
 }
 
 export async function GET(request: NextRequest) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const token = getRequestToken(request)!;
 
@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const token = getRequestToken(request)!;
 

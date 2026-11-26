@@ -7,7 +7,7 @@ import {
   markAdminDeleted,
   createVaultToken,
   verifyVaultToken,
-  authorizeRequestRoles,
+  authorizeAuthoritativeRequestRoles,
   getRequestToken,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
@@ -31,7 +31,7 @@ function sanitizeUser(u: any) {
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const { path } = await params;
   const token = getRequestToken(request)!;
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const { path } = await params;
   const token = getRequestToken(request)!;
@@ -166,7 +166,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const { path } = await params;
   const token = getRequestToken(request)!;

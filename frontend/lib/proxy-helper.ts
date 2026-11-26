@@ -226,6 +226,34 @@ export function authorizeRequestRoles(
   return null;
 }
 
+/**
+ * Route handlers may receive an API-issued JWT whose key is intentionally not
+ * shared with the frontend. Resolve its role from the API before denying a
+ * privileged request.
+ */
+export async function authorizeAuthoritativeRequestRoles(
+  request: NextRequest,
+  allowedRoles: string[] = ['ADMIN'],
+): Promise<Response | null> {
+  const token = getRequestToken(request);
+  const localUser = token ? verifyJwtToken(token) : null;
+  const role = localUser?.role || (token ? await getAuthoritativeSessionRole(token) : null);
+
+  if (!role) {
+    return Response.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
+      { status: 401, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+  if (!allowedRoles.includes(role)) {
+    return Response.json(
+      { success: false, error: { code: 'FORBIDDEN', message: 'Administrator access required.' } },
+      { status: 403, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+  return null;
+}
+
 export async function authorizeActiveRequestRoles(
   request: NextRequest,
   allowedRoles: string[] = ['ADMIN']

@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import {
   proxyToBackend,
   hashPassword,
-  authorizeRequestRoles,
+  authorizeAuthoritativeRequestRoles,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
@@ -17,7 +17,7 @@ function sanitizeEditor(u: any): any {
 }
 
 export async function GET(request: NextRequest) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = authorizeRequestRoles(request);
+  const authError = await authorizeAuthoritativeRequestRoles(request);
   if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||

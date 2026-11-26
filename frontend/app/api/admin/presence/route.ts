@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authorizeRequestRoles, proxyToBackend, verifyJwtToken } from '@/lib/proxy-helper';
+import { authorizeAuthoritativeRequestRoles, proxyToBackend, verifyJwtToken } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
 interface OnlineSession {
@@ -25,7 +25,7 @@ function isAllowedStaffRole(role: string): role is OnlineSession['role'] {
 }
 
 export async function GET(request: NextRequest) {
-  const authError = authorizeRequestRoles(request, ['ADMIN', 'PRODUCT_EDITOR']);
+  const authError = await authorizeAuthoritativeRequestRoles(request, ['ADMIN', 'PRODUCT_EDITOR']);
   if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = authorizeRequestRoles(request, ['ADMIN', 'PRODUCT_EDITOR']);
+  const authError = await authorizeAuthoritativeRequestRoles(request, ['ADMIN', 'PRODUCT_EDITOR']);
   if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
