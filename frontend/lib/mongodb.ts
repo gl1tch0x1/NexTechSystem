@@ -68,10 +68,7 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
           filter: { $or: [{ id: u.id }, ...(cleanEmail ? [{ email: cleanEmail }] : [])] },
           update: {
             $setOnInsert: userDoc,
-            $set: {
-              ...(u.passwordHash ? { passwordHash: u.passwordHash } : {}),
-              updatedAt: new Date().toISOString(),
-            },
+            $set: { updatedAt: new Date().toISOString() },
           },
           upsert: true,
         },

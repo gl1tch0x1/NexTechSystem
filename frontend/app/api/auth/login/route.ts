@@ -228,49 +228,60 @@ export async function POST(request: NextRequest) {
       body: rawBodyText,
       cache: 'no-store',
       redirect: 'manual',
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(10000),
     });
 
+    const upstreamBody = await upstream.text();
+    let backendJson: any = null;
+    try {
+      backendJson = JSON.parse(upstreamBody);
+    } catch {}
+
     if (upstream.ok) {
-      // Backend authenticated successfully. Parse its response, extract the user,
-      // then re-issue a frontend JWT so subsequent /api/auth/me calls verify
-      // correctly with the frontend's own secret.
-      try {
-        const backendJson = await upstream.json();
-        if (backendJson?.success && backendJson?.data?.user) {
-          const backendUser = backendJson.data.user;
-          registerDynamicAdmin(backendUser);
-          return issueLoginResponse(backendUser);
-        }
-      } catch {}
-      // If we can't parse the backend response, something is off — fall through
-    }
-
-    // If backend returned a non-auth error (rate limit, bad request, etc.), pass it through
-    if (
-      upstream.status !== 401 &&
-      upstream.status !== 404 &&
-      upstream.status !== 502 &&
-      upstream.status !== 503 &&
-      upstream.status !== 504
-    ) {
-      const responseHeaders = new Headers({ 'Cache-Control': 'no-store' });
-      for (const name of ['content-type', 'retry-after', 'www-authenticate']) {
-        const value = upstream.headers.get(name);
-        if (value !== null) responseHeaders.set(name, value);
+      const backendUser = backendJson?.success ? backendJson?.data?.user : null;
+      if (backendUser && (backendUser.id || backendUser._id)) {
+        registerDynamicAdmin(backendUser);
+        return issueLoginResponse(backendUser);
       }
-      const body = await upstream.arrayBuffer();
-      return new Response(body, { status: upstream.status, headers: responseHeaders });
-    }
-  } catch {
-    // Backend unavailable — already checked all local sources above
-  }
 
-  // ─── ALL SOURCES EXHAUSTED ────────────────────────────────────────────────────
-  return NextResponse.json(
-    { success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } },
-    { status: 401 }
-  );
+      if (backendJson?.success && backendJson?.data?.requiresMfa) {
+        return new Response(upstreamBody, {
+          status: upstream.status,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Content-Type': upstream.headers.get('content-type') || 'application/json',
+          },
+        });
+      }
+
+      if (!backendJson) {
+        return NextResponse.json(
+          { success: false, error: { code: 'AUTH_SERVICE_INVALID_RESPONSE', message: 'Authentication service returned an invalid response.' } },
+          { status: 502 }
+        );
+      }
+    }
+
+    if ([404, 502, 503, 504].includes(upstream.status)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'AUTH_SERVICE_UNAVAILABLE', message: 'Authentication service is temporarily unavailable. Please try again.' } },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    const responseHeaders = new Headers({ 'Cache-Control': 'no-store' });
+    for (const name of ['content-type', 'retry-after', 'www-authenticate']) {
+      const value = upstream.headers.get(name);
+      if (value !== null) responseHeaders.set(name, value);
+    }
+    return new Response(upstreamBody, { status: upstream.status, headers: responseHeaders });
+  } catch (error) {
+    console.error('[Auth Login] Authentication service request failed:', error);
+    return NextResponse.json(
+      { success: false, error: { code: 'AUTH_SERVICE_UNAVAILABLE', message: 'Authentication service is temporarily unavailable. Please try again.' } },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } }
+    );
+  }
 }
 
 /**
