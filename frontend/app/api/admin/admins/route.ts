@@ -10,6 +10,8 @@ import {
   isDeletedAdmin,
   createVaultToken,
   verifyVaultToken,
+  authorizeRequestRoles,
+  getRequestToken,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 import crypto from 'node:crypto';
@@ -30,16 +32,9 @@ function sanitizeUser(u: any) {
 }
 
 export async function GET(request: NextRequest) {
-  const token =
-    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
-    request.cookies.get('auth_token')?.value;
-
-  if (!token) {
-    return NextResponse.json(
-      { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
-      { status: 401 }
-    );
-  }
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
+  const token = getRequestToken(request)!;
 
   try {
     const mergedMap = new Map<string, any>();
@@ -157,16 +152,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const token =
-    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
-    request.cookies.get('auth_token')?.value;
-
-  if (!token) {
-    return NextResponse.json(
-      { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
-      { status: 401 }
-    );
-  }
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
+  const token = getRequestToken(request)!;
 
   let body: any = null;
   try {

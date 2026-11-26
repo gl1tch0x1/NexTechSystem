@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { proxyToBackend, verifyJwtToken } from '@/lib/proxy-helper';
+import { authorizeRequestRoles, proxyToBackend } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
 type RouteContext = { params: Promise<{ path: string[] }> };
@@ -11,6 +11,8 @@ function sanitizeEditor(u: any): any {
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const { path } = await params;
   const id = path[0];
 
@@ -35,28 +37,11 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const { path } = await params;
   const id = path[0];
   const isStatusToggle = path[1] === 'status';
-
-  const token =
-    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
-    request.cookies.get('auth_token')?.value;
-
-  if (!token) {
-    return NextResponse.json(
-      { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
-      { status: 401 }
-    );
-  }
-
-  const callerUser = verifyJwtToken(token);
-  if (callerUser && callerUser.role !== 'ADMIN') {
-    return NextResponse.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Admin privileges required.' } },
-      { status: 403 }
-    );
-  }
 
   let body: any = {};
   try {
@@ -115,27 +100,10 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const { path } = await params;
   const id = path[0];
-
-  const token =
-    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
-    request.cookies.get('auth_token')?.value;
-
-  if (!token) {
-    return NextResponse.json(
-      { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
-      { status: 401 }
-    );
-  }
-
-  const callerUser = verifyJwtToken(token);
-  if (callerUser && callerUser.role !== 'ADMIN') {
-    return NextResponse.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Admin privileges required.' } },
-      { status: 403 }
-    );
-  }
 
   let deleted = false;
 

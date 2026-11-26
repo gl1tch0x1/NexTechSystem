@@ -1,13 +1,59 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { authorizeActiveRequestRoles, getRequestToken, verifyJwtToken } from '@/lib/proxy-helper';
+
+function isEditorPath(pathname: string): boolean {
+  return /^\/admin\/(?:products|categories|brands)(?:\/|$)/.test(pathname);
+}
+
+function isEditorApiPath(pathname: string): boolean {
+  return /^\/api\/admin\/(?:products|categories|brands|presence)(?:\/|$)/.test(pathname);
+}
 
 /**
  * Next.js 16 Proxy (replaces deprecated "middleware" file convention).
  * Handles multi-tenant reseller subdomain routing.
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get('host') || '';
+  const pathname = url.pathname;
+  const isAdminPage = pathname === '/admin' || pathname.startsWith('/admin/');
+  const isAdminApi = pathname === '/api/admin' || pathname.startsWith('/api/admin/');
+
+  if (isAdminPage || isAdminApi) {
+    const token = getRequestToken(request);
+    const user = token ? verifyJwtToken(token) : null;
+    const allowed =
+      user?.role === 'ADMIN' ||
+      (user?.role === 'PRODUCT_EDITOR' &&
+        (isAdminPage ? isEditorPath(pathname) : isEditorApiPath(pathname)));
+
+    if (!allowed) {
+      if (isAdminApi) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: user ? 'FORBIDDEN' : 'UNAUTHORIZED',
+              message: user ? 'Administrator access required.' : 'Authentication required.',
+            },
+          },
+          { status: user ? 403 : 401, headers: { 'Cache-Control': 'no-store' } }
+        );
+      }
+
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    if (isAdminApi) {
+      const activeAuthError = await authorizeActiveRequestRoles(
+        request,
+        user?.role === 'PRODUCT_EDITOR' ? ['ADMIN', 'PRODUCT_EDITOR'] : ['ADMIN']
+      );
+      if (activeAuthError) return activeAuthError;
+    }
+  }
 
   // Extract subdomain: e.g. "comnet101.store.com" or "comnet101.localhost:3000"
   let subdomain = '';
@@ -47,6 +93,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/api/admin/:path*',
     /*
      * Match all request paths except for:
      * - api routes

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import {
   proxyToBackend,
-  verifyJwtToken,
   hashPassword,
+  authorizeRequestRoles,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
@@ -17,6 +17,8 @@ function sanitizeEditor(u: any): any {
 }
 
 export async function GET(request: NextRequest) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
     request.cookies.get('auth_token')?.value;
@@ -25,14 +27,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
       { status: 401 }
-    );
-  }
-
-  const callerUser = verifyJwtToken(token);
-  if (callerUser && callerUser.role !== 'ADMIN') {
-    return NextResponse.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required.' } },
-      { status: 403 }
     );
   }
 
@@ -88,6 +82,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
     request.cookies.get('auth_token')?.value;
@@ -96,14 +92,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
       { status: 401 }
-    );
-  }
-
-  const callerUser = verifyJwtToken(token);
-  if (callerUser && callerUser.role !== 'ADMIN') {
-    return NextResponse.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Admin privileges required.' } },
-      { status: 403 }
     );
   }
 

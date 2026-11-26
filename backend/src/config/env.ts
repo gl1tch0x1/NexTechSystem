@@ -22,12 +22,11 @@ for (const envPath of candidateEnvPaths) {
 }
 
 const nodeEnv = process.env.NODE_ENV || 'development';
-let jwtSecret = process.env.JWT_SECRET || '';
-
-if (!jwtSecret) {
-  const seed = process.env.MONGODB_URI || process.env.FIREBASE_PROJECT_ID || 'nextech_enterprise_auth_2026';
-  jwtSecret = crypto.createHash('sha256').update(`nextech_auth_jwt_stable_${seed}`).digest('hex');
+const configuredJwtSecret = process.env.JWT_SECRET?.trim() || '';
+if (nodeEnv === 'production' && configuredJwtSecret.length < 32) {
+  throw new Error('JWT_SECRET must be configured with at least 32 characters in production.');
 }
+const jwtSecret = configuredJwtSecret || crypto.randomBytes(32).toString('hex');
 
 const rawAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')

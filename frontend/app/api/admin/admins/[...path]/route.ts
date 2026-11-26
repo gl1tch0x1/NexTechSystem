@@ -7,6 +7,8 @@ import {
   markAdminDeleted,
   createVaultToken,
   verifyVaultToken,
+  authorizeRequestRoles,
+  getRequestToken,
 } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
@@ -29,10 +31,10 @@ function sanitizeUser(u: any) {
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const { path } = await params;
-  const token =
-    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
-    request.cookies.get('auth_token')?.value || '';
+  const token = getRequestToken(request)!;
 
   const [adminId] = path;
 
@@ -67,10 +69,10 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const { path } = await params;
-  const token =
-    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
-    request.cookies.get('auth_token')?.value || '';
+  const token = getRequestToken(request)!;
 
   const [adminId, subAction] = path;
 
@@ -164,10 +166,10 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
+  const authError = authorizeRequestRoles(request);
+  if (authError) return authError;
   const { path } = await params;
-  const token =
-    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
-    request.cookies.get('auth_token')?.value || '';
+  const token = getRequestToken(request)!;
 
   const [adminId] = path;
   const cleanId = String(adminId || '').trim();

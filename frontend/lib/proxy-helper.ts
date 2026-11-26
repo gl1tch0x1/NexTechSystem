@@ -112,20 +112,18 @@ let cachedJwtSecret: string | null = null;
 export function getJwtSecret(): string {
   if (cachedJwtSecret) return cachedJwtSecret;
   const configured = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
-  if (configured && configured.trim().length > 0) {
+  if (configured && configured.trim().length >= 32) {
     cachedJwtSecret = configured.trim();
     return cachedJwtSecret;
   }
-  // Deterministic stable secret so across serverless cold starts / different lambda containers, tokens remain valid:
-  const seed = process.env.MONGODB_URI || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nextech_enterprise_auth_2026';
-  cachedJwtSecret = crypto.createHash('sha256').update(`nextech_auth_jwt_stable_${seed}`).digest('hex');
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+    throw new Error('A JWT_SECRET of at least 32 characters must be configured in production.');
+  }
+  cachedJwtSecret = crypto.randomBytes(32).toString('hex');
   return cachedJwtSecret;
 }
 
-/**
- * Generates an authoritative internal system administrator JWT token for server-to-server operations.
- * Used exclusively when relaying administrative operations from Next.js server proxy to Express backend.
- */
+/** Generates an internal admin JWT for trusted server-side settings operations. */
 export function getInternalAdminToken(): string {
   const secret = getJwtSecret();
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
@@ -159,14 +157,128 @@ export function verifyJwtToken(token: string): ({ id: string; email: string; rol
     const parts = token.split('.');
     if (parts.length !== 3) return null;
     const [headerB64, payloadB64, sigB64] = parts;
+    const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString('utf8'));
+    if (header?.alg !== 'HS256') return null;
     const secret = getJwtSecret();
     const expectedSig = crypto.createHmac('sha256', secret).update(`${headerB64}.${payloadB64}`).digest('base64url');
-    if (expectedSig !== sigB64) return null;
+    const expectedBuffer = Buffer.from(expectedSig);
+    const actualBuffer = Buffer.from(sigB64);
+    if (expectedBuffer.length !== actualBuffer.length || !crypto.timingSafeEqual(expectedBuffer, actualBuffer)) return null;
     const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      typeof payload.id !== 'string' ||
+      !payload.id ||
+      typeof payload.exp !== 'number' ||
+      !Number.isFinite(payload.exp) ||
+      payload.exp <= Math.floor(Date.now() / 1000)
+    ) return null;
     return payload;
   } catch {
     return null;
+  }
+}
+
+export function getRequestToken(request: NextRequest): string | undefined {
+  const authorization = request.headers.get('authorization');
+  if (authorization) {
+    return authorization.match(/^Bearer\s+(.+)$/i)?.[1];
+  }
+  return request.cookies.get('auth_token')?.value;
+}
+
+export function authorizeRequestRoles(
+  request: NextRequest,
+  allowedRoles: string[] = ['ADMIN']
+): Response | null {
+  const token = getRequestToken(request);
+  const user = token ? verifyJwtToken(token) : null;
+  if (!user) {
+    return Response.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
+      { status: 401, headers: { 'Cache-Control': 'no-store' } }
+    );
+  }
+  if (!allowedRoles.includes(user.role)) {
+    return Response.json(
+      { success: false, error: { code: 'FORBIDDEN', message: 'Administrator access required.' } },
+      { status: 403, headers: { 'Cache-Control': 'no-store' } }
+    );
+  }
+  return null;
+}
+
+export async function authorizeActiveRequestRoles(
+  request: NextRequest,
+  allowedRoles: string[] = ['ADMIN']
+): Promise<Response | null> {
+  const token = getRequestToken(request);
+  const user = token ? verifyJwtToken(token) : null;
+  const roleError = authorizeRequestRoles(request, allowedRoles);
+  if (roleError) return roleError;
+  if (!token || !user) {
+    return Response.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
+      { status: 401, headers: { 'Cache-Control': 'no-store' } }
+    );
+  }
+
+  try {
+    const response = await fetch(`${getBackendApiUrl()}/api/admin/session`, {
+      headers: { authorization: `Bearer ${token}`, accept: 'application/json' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (response.status === 401) {
+      return Response.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Administrator account is inactive or no longer exists.' } },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+    if (response.status === 403) {
+      return Response.json(
+        { success: false, error: { code: 'FORBIDDEN', message: 'Administrator access required.' } },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+    if (!response.ok) {
+      return Response.json(
+        { success: false, error: { code: 'AUTHORIZATION_UNAVAILABLE', message: 'Could not verify the current account status.' } },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    const payload = await response.json();
+    const currentUser = payload?.data?.user;
+    if (
+      payload?.success !== true ||
+      typeof currentUser?.id !== 'string' ||
+      typeof currentUser?.role !== 'string'
+    ) {
+      throw new Error('Backend returned an invalid session response.');
+    }
+    if (currentUser.id !== user?.id || currentUser.role !== user.role) {
+      return Response.json(
+        { success: false, error: { code: 'TOKEN_STALE', message: 'Account permissions changed. Please sign in again.' } },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+    if (!allowedRoles.includes(currentUser.role)) {
+      return Response.json(
+        { success: false, error: { code: 'FORBIDDEN', message: 'Administrator access required.' } },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[Admin authorization] Failed to verify account status:', error);
+    return Response.json(
+      { success: false, error: { code: 'AUTHORIZATION_UNAVAILABLE', message: 'Could not verify the current account status.' } },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } }
+    );
   }
 }
 
@@ -319,11 +431,36 @@ export async function proxyToBackend(
     headers.set('content-type', 'application/json');
   }
 
-  // For administrative or upload proxy calls, prefer the caller's token and fall back to internal admin auth.
-  const isAdminOrUpload = cleanPath.startsWith('/admin') || cleanPath.startsWith('/upload');
-  const hasAuthHeader = Boolean(headers.get('authorization'));
-  if (isAdminOrUpload && !hasAuthHeader) {
-    headers.set('authorization', `Bearer ${getInternalAdminToken()}`);
+  // Public admin and upload proxies must always carry the caller's own signed token.
+  const isAdminOrUpload =
+    cleanPath === '/admin' ||
+    cleanPath.startsWith('/admin/') ||
+    cleanPath === '/upload' ||
+    cleanPath.startsWith('/upload/');
+  const authorization = headers.get('authorization');
+  const bearerToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  const token = bearerToken || request.cookies.get('auth_token')?.value;
+
+  if (isAdminOrUpload) {
+    const decoded = token ? verifyJwtToken(token) : null;
+    if (!decoded) {
+      return Response.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required.' } },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+    if (cleanPath.startsWith('/admin')) {
+      const editorAllowed = /^\/admin\/(?:products|categories|brands|presence)(?:\/|$)/.test(cleanPath);
+      if (decoded.role !== 'ADMIN' && !(decoded.role === 'PRODUCT_EDITOR' && editorAllowed)) {
+        return Response.json(
+          { success: false, error: { code: 'FORBIDDEN', message: 'Administrator access required.' } },
+          { status: 403, headers: { 'Cache-Control': 'no-store' } }
+        );
+      }
+    }
+    if (!bearerToken && token) {
+      headers.set('authorization', `Bearer ${token}`);
+    }
   }
 
   try {
@@ -340,17 +477,6 @@ export async function proxyToBackend(
       body: reqBody,
       cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(15000),
     });
-
-    // If administrative request failed with 401 Unauthorized (e.g. stale client token from localStorage),
-    // retry once with authoritative internal admin token
-    if (upstream.status === 401 && isAdminOrUpload) {
-      headers.set('authorization', `Bearer ${getInternalAdminToken()}`);
-      upstream = await fetch(target, {
-        method: request.method, headers,
-        body: reqBody,
-        cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(15000),
-      });
-    }
 
     const responseHeaders = new Headers({ 'Cache-Control': 'no-store' });
     for (const name of ['content-type', 'content-disposition', 'retry-after', 'www-authenticate', 'location']) {

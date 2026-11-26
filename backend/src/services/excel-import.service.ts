@@ -1,6 +1,5 @@
 import { randomUUID as uuidv4 } from 'crypto';
 import ExcelJS from 'exceljs';
-import * as XLSX from 'xlsx';
 import { Readable } from 'node:stream';
 import { productRepository } from '../repositories/product.repository.js';
 import { categoryRepository } from '../repositories/category.repository.js';
@@ -98,9 +97,9 @@ export class ExcelImportService {
   }> {
     const cleanFileName = (fileName || '').trim();
     const extension = cleanFileName.toLowerCase().split('.').pop() || '';
-    const allowedExtensions = ['xlsx', 'xls', 'csv', 'tsv'];
+    const allowedExtensions = ['xlsx', 'csv', 'tsv'];
     if (!allowedExtensions.includes(extension)) {
-      throw new Error('Only .xlsx, .xls, and .csv files are supported.');
+      throw new Error('Only .xlsx, .csv, and .tsv files are supported.');
     }
 
     // Verify magic bytes / file signatures to block polyglots and executable payloads
@@ -113,13 +112,6 @@ export class ExcelImportService {
       if (!isZip) {
         throw new Error('File content does not match .xlsx format (invalid file signature).');
       }
-    } else if (extension === 'xls') {
-      const isOle = buffer[0] === 0xd0 && buffer[1] === 0xcf && buffer[2] === 0x11 && buffer[3] === 0xe0;
-      const snippet = buffer.subarray(0, 100).toString('utf8').toLowerCase();
-      const isHtmlTable = snippet.includes('<html') || snippet.includes('<table');
-      if (!isOle && !isHtmlTable) {
-        throw new Error('File content does not match .xls format (invalid file signature).');
-      }
     } else if (extension === 'csv' || extension === 'tsv') {
       const isMz = buffer[0] === 0x4d && buffer[1] === 0x5a;
       const isElf = buffer[0] === 0x7f && buffer[1] === 0x45 && buffer[2] === 0x4c && buffer[3] === 0x46;
@@ -130,27 +122,11 @@ export class ExcelImportService {
 
     const workbook = new ExcelJS.Workbook();
     if (extension === 'csv' || extension === 'tsv') {
-      try {
-        await workbook.csv.read(Readable.from([buffer]));
-      } catch {
-        const wb = XLSX.read(buffer, { type: 'buffer' });
-        const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-        await workbook.xlsx.load(xlsxBuffer);
-      }
-    } else if (extension === 'xls') {
-      // Legacy Excel (.xls / BIFF8 / HTML table): parse via SheetJS and normalize to xlsx buffer
-      const wb = XLSX.read(buffer, { type: 'buffer' });
-      const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-      await workbook.xlsx.load(xlsxBuffer);
+      await workbook.csv.read(Readable.from([buffer]), {
+        parserOptions: { delimiter: extension === 'tsv' ? '\t' : ',' },
+      });
     } else {
-      // Modern Excel (.xlsx) with resilient SheetJS fallback
-      try {
-        await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
-      } catch {
-        const wb = XLSX.read(buffer, { type: 'buffer' });
-        const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-        await workbook.xlsx.load(xlsxBuffer);
-      }
+      await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
     }
     const worksheet = workbook.worksheets[0];
     if (!worksheet) throw new Error('The uploaded file contains no worksheet.');

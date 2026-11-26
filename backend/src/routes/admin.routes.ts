@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { adminController } from '../controllers/admin.controller.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, type AuthenticatedRequest } from '../middleware/auth.js';
 import { requireRole } from '../middleware/rbac.js';
 import { adminLimiter } from '../middlewares/rate-limiter.middleware.js';
 
@@ -8,6 +8,12 @@ const router = Router();
 
 // Apply dedicated admin rate limiter and authentication
 router.use(adminLimiter, authenticate);
+
+router.get('/session', requireRole('ADMIN', 'PRODUCT_EDITOR'), (req, res) => {
+  const user = (req as AuthenticatedRequest).user!;
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ success: true, data: { user: { id: user.id, role: user.role } } });
+});
 
 // 1. Dashboard & Real-Time Analytics (Strictly ADMIN only)
 router.get('/dashboard', requireRole('ADMIN'), (req, res, next) => adminController.getDashboard(req, res).catch(next));

@@ -37,8 +37,8 @@ export default function ResellerProductImportPage() {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       const ext = selectedFile.name.toLowerCase().split('.').pop() || '';
-      if (!['xlsx', 'xls', 'csv', 'tsv'].includes(ext)) {
-        setErrorMessage('Only .xlsx, .xls, and .csv files are supported. Please select a valid spreadsheet file.');
+      if (!['xlsx', 'csv', 'tsv'].includes(ext)) {
+        setErrorMessage('Only .xlsx, .csv, and .tsv files are supported. Please select a valid spreadsheet file.');
         setFile(null);
         return;
       }
@@ -164,7 +164,7 @@ export default function ResellerProductImportPage() {
           <div>
             <h3 className="text-base font-black text-slate-900">Upload Your Hardware Spreadsheet</h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-              Supports Microsoft Excel (<code>.xlsx</code>, <code>.xls</code>) and standard CSV files. Our schema engine automatically maps SKU, Title, MSRP, Stock, Category, and Specs.
+              Supports Microsoft Excel (<code>.xlsx</code>) and standard CSV or TSV files. Our schema engine automatically maps SKU, Title, MSRP, Stock, Category, and Specs.
             </p>
           </div>
 
@@ -172,7 +172,7 @@ export default function ResellerProductImportPage() {
             <input
               type="file"
               id="excel-upload"
-              accept=".xlsx, .xls, .csv"
+              accept=".xlsx, .csv, .tsv"
               onChange={handleFileChange}
               className="hidden"
             />

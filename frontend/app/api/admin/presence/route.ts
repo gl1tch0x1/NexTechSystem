@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { proxyToBackend, verifyJwtToken } from '@/lib/proxy-helper';
+import { authorizeRequestRoles, proxyToBackend, verifyJwtToken } from '@/lib/proxy-helper';
 import { getMongoDb } from '@/lib/mongodb';
 
 interface OnlineSession {
@@ -20,19 +20,13 @@ const fallbackSessions = new Map<string, OnlineSession>();
 const ALLOWED_STAFF_ROLES = new Set(['ADMIN', 'PRODUCT_EDITOR', 'RESELLER']);
 const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 
-function parseTokenPayloadSafely(token: string): any {
-  try {
-    const verified = verifyJwtToken(token);
-    if (verified) return verified;
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      return JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-    }
-  } catch {}
-  return null;
+function isAllowedStaffRole(role: string): role is OnlineSession['role'] {
+  return ALLOWED_STAFF_ROLES.has(role);
 }
 
 export async function GET(request: NextRequest) {
+  const authError = authorizeRequestRoles(request, ['ADMIN', 'PRODUCT_EDITOR']);
+  if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
     request.cookies.get('auth_token')?.value;
@@ -44,7 +38,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const callerUser = parseTokenPayloadSafely(token);
+  const callerUser = verifyJwtToken(token);
   const now = Date.now();
   const cutoff = now - ONLINE_THRESHOLD_MS;
   const sessionMap = new Map<string, OnlineSession>();
@@ -59,6 +53,7 @@ export async function GET(request: NextRequest) {
         }).toArray();
 
         for (const doc of mongoSessions) {
+          if (!isAllowedStaffRole(doc.role)) continue;
           const uId = String(doc.userId || doc.id || doc.email);
           const elapsed = now - Number(doc.lastSeen || 0);
           const status = elapsed > 2 * 60 * 1000 ? 'AWAY' : 'ONLINE';
@@ -68,7 +63,7 @@ export async function GET(request: NextRequest) {
             name: String(doc.name || 'Staff'),
             email: String(doc.email || ''),
             username: String(doc.username || (doc.email ? String(doc.email).split('@')[0] : 'staff')),
-            role: (doc.role || 'ADMIN') as any,
+            role: doc.role,
             avatar: doc.avatar || '',
             currentPath: doc.currentPath || '/admin',
             lastSeen: Number(doc.lastSeen || now),
@@ -112,7 +107,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Always ensure the currently authenticated caller is reflected in the active roster
-    if (callerUser && callerUser.id && (!callerUser.role || ALLOWED_STAFF_ROLES.has(callerUser.role))) {
+    if (callerUser && callerUser.id && isAllowedStaffRole(callerUser.role)) {
       const callerKey = (callerUser.id || callerUser.email || '').toLowerCase();
       if (!sessionMap.has(callerKey)) {
         sessionMap.set(callerKey, {
@@ -121,7 +116,7 @@ export async function GET(request: NextRequest) {
           name: callerUser.name || (callerUser.role === 'ADMIN' ? 'Administrator' : 'Staff Member'),
           email: callerUser.email || '',
           username: callerUser.username || (callerUser.email ? callerUser.email.split('@')[0] : 'admin'),
-          role: (callerUser.role || 'ADMIN') as any,
+          role: callerUser.role,
           avatar: callerUser.avatar || '',
           currentPath: '/admin',
           lastSeen: now,
@@ -147,6 +142,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authError = authorizeRequestRoles(request, ['ADMIN', 'PRODUCT_EDITOR']);
+  if (authError) return authError;
   const token =
     request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
     request.cookies.get('auth_token')?.value;
@@ -158,7 +155,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const callerUser = parseTokenPayloadSafely(token);
+  const callerUser = verifyJwtToken(token);
 
   let body: any = null;
   try {
@@ -167,11 +164,14 @@ export async function POST(request: NextRequest) {
     body = {};
   }
 
-  const { user: bodyUser, currentPath = '/admin', device = 'desktop' } = body || {};
-  const effectiveUser = bodyUser && bodyUser.id ? bodyUser : callerUser;
+  const { currentPath = '/admin', device = 'desktop' } = body || {};
+  const effectiveUser = callerUser;
 
-  if (!effectiveUser || !effectiveUser.id || (effectiveUser.role && !ALLOWED_STAFF_ROLES.has(effectiveUser.role))) {
-    return NextResponse.json({ success: true, message: 'Presence skipped for non-staff role.' });
+  if (!effectiveUser || !effectiveUser.id || !isAllowedStaffRole(effectiveUser.role)) {
+    return NextResponse.json(
+      { success: false, error: { code: 'FORBIDDEN', message: 'Staff authentication required.' } },
+      { status: 403 }
+    );
   }
 
   const session: OnlineSession = {
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
     name: effectiveUser.name || (effectiveUser.role === 'ADMIN' ? 'Administrator' : effectiveUser.role === 'PRODUCT_EDITOR' ? 'Product Editor' : 'Reseller Partner'),
     email: effectiveUser.email || '',
     username: effectiveUser.username || (effectiveUser.email ? effectiveUser.email.split('@')[0] : 'staff'),
-    role: effectiveUser.role || 'ADMIN',
+    role: effectiveUser.role,
     avatar: effectiveUser.avatar || '',
     currentPath: String(currentPath || '/admin').slice(0, 100),
     lastSeen: Date.now(),

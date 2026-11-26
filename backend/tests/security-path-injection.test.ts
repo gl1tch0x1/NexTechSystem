@@ -1,17 +1,32 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { inventoryImportService } from '../src/services/inventory-import.service.js';
+import { excelImportService } from '../src/services/excel-import.service.js';
 import { adminController } from '../src/controllers/admin.controller.js';
 
 test('inventory importer CWE-022 path traversal defense', async (t) => {
   await t.test('resolves default safe inventory file successfully', () => {
     const resolved = inventoryImportService.resolveExcelPath();
-    assert.ok(resolved.endsWith('.xls') || resolved.endsWith('.xlsx'));
+    assert.ok(resolved.endsWith('ComNet_Inventory_Fixed.xlsx') || resolved.endsWith('ComNet_Inventory_Fixed.csv'));
   });
 
   await t.test('resolves valid inventory filename within safe directory', () => {
-    const resolved = inventoryImportService.resolveExcelPath('ComNet_Inventory.xls');
-    assert.ok(resolved.endsWith('ComNet_Inventory.xls'));
+    const resolved = inventoryImportService.resolveExcelPath('ComNet_Inventory_Fixed.xlsx');
+    assert.ok(resolved.endsWith('ComNet_Inventory_Fixed.xlsx'));
+  });
+
+  await t.test('rejects legacy XLS files after removing the vulnerable parser', () => {
+    assert.throws(
+      () => inventoryImportService.resolveExcelPath('ComNet_Inventory.xls'),
+      /Invalid file extension/i
+    );
+  });
+
+  await t.test('rejects legacy XLS uploads before parsing', async () => {
+    await assert.rejects(
+      excelImportService.parseAndValidateBuffer(Buffer.from('not-an-xls-file'), 'reseller_1', 'R-1', 'legacy.xls'),
+      /Only \.xlsx, \.csv, and \.tsv files are supported/
+    );
   });
 
   await t.test('rejects path traversal attempt with unauthorized extension', () => {
@@ -80,8 +95,8 @@ test('inventory importer CWE-022 path traversal defense', async (t) => {
 
   await t.test('strips newline and carriage return characters to prevent CWE-117 log injection', () => {
     // If a valid filename contains CRLF sequences, resolveExcelPath sanitizes them without crashing or forging lines
-    const resolved = inventoryImportService.resolveExcelPath('ComNet_Inventory.xls\r\n');
-    assert.ok(resolved.endsWith('ComNet_Inventory.xls'));
+    const resolved = inventoryImportService.resolveExcelPath('ComNet_Inventory_Fixed.xlsx\r\n');
+    assert.ok(resolved.endsWith('ComNet_Inventory_Fixed.xlsx'));
     assert.ok(!resolved.includes('\r') && !resolved.includes('\n'));
   });
 });

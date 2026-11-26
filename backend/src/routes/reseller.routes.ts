@@ -14,7 +14,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'application/octet-stream',
 ]);
 
-const ALLOWED_EXTENSIONS = new Set(['.xlsx', '.xls', '.csv', '.tsv']);
+const ALLOWED_EXTENSIONS = new Set(['.xlsx', '.csv', '.tsv']);
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -22,7 +22,7 @@ const upload = multer({
   fileFilter: (_req, file, cb) => {
     const ext = '.' + (file.originalname.split('.').pop() || '').toLowerCase();
     if (!ALLOWED_EXTENSIONS.has(ext)) {
-      return cb(new Error('Invalid file type. Only .xlsx, .xls, and .csv files are supported.'));
+      return cb(new Error('Invalid file type. Only .xlsx, .csv, and .tsv files are supported.'));
     }
     if (file.mimetype && !ALLOWED_MIME_TYPES.has(file.mimetype.toLowerCase())) {
       return cb(new Error('Invalid MIME type. Only Excel and CSV formats are allowed.'));

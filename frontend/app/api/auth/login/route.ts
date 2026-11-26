@@ -17,7 +17,7 @@ function sanitizeUser(u: any) {
     name: u.name || 'Administrator',
     email: u.email || '',
     username: u.username || (u.email ? u.email.split('@')[0] : 'admin'),
-    role: u.role || 'ADMIN',
+    role: u.role || 'CUSTOMER',
     avatar: u.avatar || '',
     phone: u.phone || '',
     isActive: u.isActive !== false,
@@ -174,12 +174,6 @@ export async function POST(request: NextRequest) {
       candidatePasswords.push(rawPassword.trim());
     }
 
-    // Direct credential recovery for active co-administrator created via portal
-    if (!user.passwordHash && candidatePasswords.includes('$eGcPhUwytKF$8') && user.email?.toLowerCase() === 'jawad@comnet-cni.com') {
-      const { hashPassword } = await import('@/lib/proxy-helper');
-      user.passwordHash = hashPassword('$eGcPhUwytKF$8');
-    }
-
     let isValid = false;
     if (user.passwordHash) {
       for (const pwd of candidatePasswords) {
@@ -286,7 +280,7 @@ function issueLoginResponse(user: any): NextResponse {
   const token = createJwtToken({
     id: user.id || String(user._id),
     email: user.email,
-    role: user.role || 'ADMIN',
+    role: user.role || 'CUSTOMER',
     resellerId: user.resellerId,
   });
 

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { productRepository } from '../repositories/product.repository.js';
 import { categoryRepository, brandRepository } from '../repositories/category.repository.js';
 import { Product, Category, Brand, WarehouseLocationStock } from '../types/index.js';
@@ -189,7 +189,7 @@ export class InventoryImportService {
 
       // 3. Strict allowlist for inventory spreadsheet extensions
       const ext = path.extname(cleanFileName).toLowerCase();
-      const allowedExtensions = ['.xls', '.xlsx', '.csv'];
+      const allowedExtensions = ['.xlsx', '.csv'];
       if (!allowedExtensions.includes(ext)) {
         throw new Error(
           `Security Exception: Invalid file extension "${ext}". Only ${allowedExtensions.join(', ')} files are permitted.`
@@ -214,7 +214,6 @@ export class InventoryImportService {
 
     // Default safe candidates (fixed static filenames strictly contained within safeDir)
     const defaultFileNames = [
-      'ComNet_Inventory.xls',
       'ComNet_Inventory_Fixed.xlsx',
       'ComNet_Inventory_Fixed.csv',
     ];
@@ -555,9 +554,25 @@ export class InventoryImportService {
     const sanitizedLogPath = String(excelPath).replace(/\n|\r/g, '');
     console.log(`[InventoryImport] Reading Excel file from: ${sanitizedLogPath}`);
 
-    const wb = XLSX.readFile(excelPath);
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1 });
+    const workbook = new ExcelJS.Workbook();
+    if (path.extname(excelPath).toLowerCase() === '.csv') {
+      await workbook.csv.readFile(excelPath);
+    } else {
+      await workbook.xlsx.readFile(excelPath);
+    }
+    const sheet = workbook.worksheets[0];
+    if (!sheet) throw new Error('Inventory spreadsheet contains no worksheet.');
+    const rows: any[][] = [];
+    sheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+      rows[rowNumber - 1] = Array.from({ length: row.cellCount }, (_, index) => {
+        const value = row.getCell(index + 1).value;
+        if (value && typeof value === 'object') {
+          if ('result' in value) return value.result;
+          if ('text' in value) return value.text;
+        }
+        return value;
+      });
+    });
     console.log(`[InventoryImport] Total raw sheet rows: ${rows.length}`);
 
     // Parse categories and line items

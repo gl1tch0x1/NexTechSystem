@@ -15,7 +15,7 @@ function sanitizeUser(u: any) {
     name: u.name || 'Administrator',
     email: u.email || '',
     username: u.username || (u.email ? u.email.split('@')[0] : 'admin'),
-    role: u.role || 'ADMIN',
+    role: u.role || 'CUSTOMER',
     avatar: u.avatar || '',
     phone: u.phone || '',
     isActive: u.isActive !== false,
@@ -46,20 +46,11 @@ export async function GET(request: NextRequest) {
     try {
       const db = await getMongoDb();
       if (db) {
-        user = await db.collection('users').findOne({
-          $or: [
-            { id: decoded.id },
-            ...(decoded.email ? [{ email: decoded.email.toLowerCase() }] : []),
-          ],
-        });
+        user = await db.collection('users').findOne({ id: decoded.id });
         if (!user) {
           const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
           const coAdmins: any[] = settingsDoc?.coAdmins || [];
-          user = coAdmins.find(
-            (a: any) =>
-              a.id === decoded.id ||
-              (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
-          );
+          user = coAdmins.find((a: any) => a.id === decoded.id);
         }
         if (user && user.role === 'ADMIN') {
           registerDynamicAdmin(user);
@@ -70,11 +61,7 @@ export async function GET(request: NextRequest) {
     // 2. Dynamic in-memory co-admins
     if (!user) {
       const dynamicList = getDynamicAdmins();
-      user = dynamicList.find(
-        (a: any) =>
-          a.id === decoded.id ||
-          (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
-      );
+      user = dynamicList.find((a: any) => a.id === decoded.id);
     }
 
     // 3. Cookie vault
@@ -83,11 +70,7 @@ export async function GET(request: NextRequest) {
       if (vaultCookie) {
         try {
           const vaultAdmins = verifyVaultToken(vaultCookie);
-          user = vaultAdmins.find(
-            (a: any) =>
-              a.id === decoded.id ||
-              (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
-          );
+          user = vaultAdmins.find((a: any) => a.id === decoded.id);
           if (user) {
             registerDynamicAdmin(user);
           }
@@ -100,11 +83,7 @@ export async function GET(request: NextRequest) {
       try {
         const users = await readLocalStoreJson<any[]>('users.json');
         if (Array.isArray(users)) {
-          user = users.find(
-            (u: any) =>
-              u.id === decoded.id ||
-              (decoded.email && u.email?.toLowerCase() === decoded.email.toLowerCase())
-          );
+          user = users.find((u: any) => u.id === decoded.id);
         }
       } catch {}
     }
@@ -114,25 +93,8 @@ export async function GET(request: NextRequest) {
       try {
         const settings = await fetchBackendSettings();
         const coAdmins: any[] = settings?.coAdmins || [];
-        user = coAdmins.find(
-          (a: any) =>
-            a.id === decoded.id ||
-            (decoded.email && a.email?.toLowerCase() === decoded.email.toLowerCase())
-        );
+        user = coAdmins.find((a: any) => a.id === decoded.id);
       } catch {}
-    }
-
-    // 6. If token is valid and has ADMIN role, trust it even if no record found
-    if (!user && decoded.role === 'ADMIN' && decoded.email) {
-      user = {
-        id: decoded.id,
-        name: decoded.name || 'Administrator',
-        email: decoded.email,
-        username: decoded.username || decoded.email.split('@')[0],
-        role: 'ADMIN',
-        isActive: true,
-        createdAt: new Date().toISOString(),
-      };
     }
 
     if (user && user.isActive !== false) {

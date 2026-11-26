@@ -177,7 +177,7 @@ export class AdminController {
 
         const baseName = path.basename(rawPath);
         const ext = path.extname(baseName).toLowerCase();
-        const allowedExtensions = ['.xls', '.xlsx', '.csv'];
+        const allowedExtensions = ['.xlsx', '.csv'];
         if (!allowedExtensions.includes(ext)) {
           res.status(400).json({
             success: false,
