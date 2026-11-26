@@ -110,7 +110,7 @@ export function getBackendApiUrl(): string {
 /** Resolve API-issued roles when the frontend and API use separate JWT keys. */
 export async function getAuthoritativeSessionRole(token: string): Promise<string | null> {
   try {
-    const response = await fetch(`${getBackendApiUrl()}/api/admin/session`, {
+    const response = await fetch(`${getBackendApiUrl()}/api/auth/me`, {
       headers: { authorization: `Bearer ${token}`, accept: 'application/json' },
       cache: 'no-store',
       signal: AbortSignal.timeout(3000),
