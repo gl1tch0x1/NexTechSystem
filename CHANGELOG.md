@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.2] - 2026-11-26
+
+### Fixed
+- **Administrator Sign-In Outage**: Fixed the login gateway returning `503 Authentication service is temporarily unavailable` even when the submitted password matched a locally bundled administrator credential while MongoDB/backend was unreachable.
+  - Local credentials are now verified across every known source (`MongoDB`, backend settings, bundled stores, runtime registrations, cookie vault) instead of trusting only the first record found.
+  - Invalid passwords now return `401 INVALID_CREDENTIALS` whenever a local account exists; `503` is reserved for identities that cannot be verified locally and whose backend is unreachable.
+  - A successful fallback login repairs the MongoDB password hash (guarded by `updatedAt`) so subsequent logins verify directly.
+  - Snapshots superseded by a newer authoritative record are rejected, preventing a previous password from being revived after an account password change.
+
+### Changed
+- **Admin Spec Matrix Manual Entry**: Replaced the read-only spec combobox with a dual-mode field that switches between dropdown presets and free-form input, keeps custom values visible, and offers quick preset chips.
+- **Login Latency**: Locally verified logins wait at most 800 ms for MongoDB to veto a deactivated account, and failed MongoDB connections are cached for 15 seconds instead of re-paying the 5-second connect timeout on every request.
+
 ## [1.4.1] - 2026-11-25
 
 ### Fixed

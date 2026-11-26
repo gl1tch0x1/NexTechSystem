@@ -7,7 +7,7 @@
     "username": "admin",
     "phone": "+971 4 390 0000",
     "addresses": [],
-    "passwordHash": "c98d9e796e6b5398acf53ca4b314863a125ba2bbd5e37f07f78d6e2bedd13890:c0b31aa414fc83e708e1481f0960b688e49f0b7c4d100e091395d9c68fb96c0df362eab9ec6e743b9fc1b9be296c0c469c12eea7dab25df4ea08e745c0c105de",
+    "passwordHash": "e85a635e8e3794da690b9b7f5fc95320:8aa7c757ceedff6a15df38041dc530f985272bc7006b033a9e9e9a99f21d953130b411fc232c33ee82f4f6e7fcf2f816ec4e3eae668dbd2c5cacff700ce59d6e",
     "isActive": true,
     "createdAt": "2026-10-28T08:25:47.837Z",
     "updatedAt": "2026-10-30T06:16:41.718Z",

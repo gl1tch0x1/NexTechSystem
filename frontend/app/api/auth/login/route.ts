@@ -2,14 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/mongodb';
 import {
   createJwtToken,
-  verifyPassword,
   fetchBackendSettings,
-  readLocalStoreJson,
+  getBackendApiUrl,
   getDynamicAdmins,
+  readLocalStoreJson,
   registerDynamicAdmin,
   verifyVaultToken,
-  getBackendApiUrl,
 } from '@/lib/proxy-helper';
+import {
+  addUserCandidate,
+  addUserCandidates,
+  findAcceptableCandidate,
+  normalizeIdentifier,
+  resolveAuthoritativeCandidate,
+  type LocalCandidate,
+} from '@/lib/auth-local-store';
 
 function sanitizeUser(u: any) {
   return {
@@ -26,6 +33,111 @@ function sanitizeUser(u: any) {
   };
 }
 
+function mergeVerifiedUser(matchedUser: any, authoritativeUser: any, passwordHash: string): any {
+  if (!authoritativeUser) {
+    return { ...matchedUser, passwordHash };
+  }
+  return {
+    ...matchedUser,
+    ...authoritativeUser,
+    id: authoritativeUser.id || matchedUser.id,
+    email: authoritativeUser.email || matchedUser.email,
+    username: authoritativeUser.username || matchedUser.username,
+    passwordHash,
+  };
+}
+
+/**
+ * Best-effort repair of MongoDB so future logins see the working hash first.
+ * When the authoritative document is known, the write only succeeds if it has
+ * not changed in the meantime (no upsert, so a concurrent password change wins).
+ */
+async function persistVerifiedUser(
+  user: any,
+  passwordHash: string,
+  authoritativeUser?: any,
+): Promise<void> {
+  try {
+    const email = normalizeIdentifier(user?.email);
+    const id = String(user?.id || user?._id || '');
+    if (!email && !id) return;
+
+    const db = await getMongoDb();
+    if (!db) return;
+
+    const document: Record<string, any> = {
+      ...user,
+      ...(id ? { id } : {}),
+      ...(email ? { email } : {}),
+      passwordHash,
+      isActive: user.isActive !== false,
+      updatedAt: new Date().toISOString(),
+    };
+    delete document._id;
+
+    const identity = id && email
+      ? { $or: [{ id }, { email }] }
+      : id
+        ? { id }
+        : { email };
+
+    const expectedUpdatedAt =
+      typeof authoritativeUser?.updatedAt === 'string' ? authoritativeUser.updatedAt : '';
+    const filter = expectedUpdatedAt
+      ? { $and: [identity, { updatedAt: expectedUpdatedAt }] }
+      : identity;
+
+    await db
+      .collection('users')
+      .updateOne(filter, { $set: document }, { upsert: !expectedUpdatedAt });
+  } catch {
+    // Best-effort durability only; authentication already succeeded locally.
+  }
+}
+
+/**
+ * MongoDB and the Express backend are optional in offline/local deployments.
+ * Both lookups run together and never reject, keeping the fast local path fast.
+ */
+async function collectRemoteCandidates(
+  keys: string[],
+  candidates: LocalCandidate[],
+): Promise<void> {
+  await Promise.allSettled([
+    (async () => {
+      const db = await getMongoDb();
+      if (!db) return;
+
+      const [mongoUser, settingsDoc] = await Promise.all([
+        db.collection('users').findOne({
+          $or: [{ email: { $in: keys } }, { username: { $in: keys } }],
+        }),
+        db.collection('settings').findOne({ id: 'global_settings' }),
+      ]);
+
+      addUserCandidate(candidates, 'mongo', mongoUser, keys);
+      addUserCandidates(candidates, 'settings', settingsDoc?.coAdmins, keys);
+    })(),
+    (async () => {
+      const settings = await fetchBackendSettings();
+      addUserCandidates(candidates, 'settings', settings?.coAdmins, keys);
+    })(),
+  ]);
+}
+
+async function waitAtMost(promise: Promise<void>, timeoutMs: number): Promise<boolean> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<boolean>(resolve => {
+    timer = setTimeout(() => resolve(true), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise.then(() => false), timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function POST(request: NextRequest) {
   let rawBodyText = '';
   let bodyJson: any = null;
@@ -35,7 +147,7 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { success: false, error: { code: 'BAD_REQUEST', message: 'Invalid JSON request payload.' } },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -43,177 +155,94 @@ export async function POST(request: NextRequest) {
   if (!email || !password) {
     return NextResponse.json(
       { success: false, error: { code: 'BAD_REQUEST', message: 'Email / Username and Password are required.' } },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  const rawIdentifier = String(email).trim().toLowerCase();
-  const cleanIdentifier = rawIdentifier.replace(/^@/, '');
+  const keys = Array.from(
+    new Set([normalizeIdentifier(email), String(email).trim().toLowerCase()]),
+  ).filter(Boolean);
   const rawPassword = String(password);
+  const candidatePasswords = [rawPassword];
+  if (rawPassword.trim() !== rawPassword) {
+    candidatePasswords.push(rawPassword.trim());
+  }
 
-  let user: any = null;
+  const candidates: LocalCandidate[] = [];
 
-  // 1. MongoDB Atlas — the authoritative store for frontend-created admins
+  // 1. Fast local sources (no network): in-memory admins, cookie vault, bundled data.
+  addUserCandidates(candidates, 'dynamic', getDynamicAdmins(), keys);
+
+  const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
+  if (vaultCookie) {
+    try {
+      addUserCandidates(candidates, 'vault', verifyVaultToken(vaultCookie), keys);
+    } catch {}
+  }
+
   try {
-    const db = await getMongoDb();
-    if (db) {
-      user = await db.collection('users').findOne({
-        $or: [
-          { email: cleanIdentifier },
-          { username: cleanIdentifier },
-          { email: rawIdentifier },
-          { username: rawIdentifier },
-        ],
-      });
-      if (!user) {
-        // Also check coAdmins in settings collection
-        const settingsDoc = await db.collection('settings').findOne({ id: 'global_settings' });
-        const coAdmins: any[] = settingsDoc?.coAdmins || [];
-        user = coAdmins.find(
-          (a: any) =>
-            a.email?.toLowerCase() === cleanIdentifier ||
-            a.username?.toLowerCase() === cleanIdentifier
-        );
-      }
-      if (user && user.role === 'ADMIN') {
-        registerDynamicAdmin(user);
-      }
-    }
-  } catch (err: any) {
-    console.warn('[Auth Login MongoDB]:', err?.message || err);
+    addUserCandidates(candidates, 'bundled', await readLocalStoreJson<any[]>('users.json'), keys);
+  } catch {}
+
+  try {
+    const bundledSettings = await readLocalStoreJson<any[]>('settings.json');
+    const globalSettings = Array.isArray(bundledSettings)
+      ? bundledSettings.find((setting: any) => setting?.id === 'global_settings')
+      : null;
+    addUserCandidates(candidates, 'bundled-settings', globalSettings?.coAdmins, keys);
+  } catch {}
+
+  // 2. Remote sources run concurrently; give an already-matching credential a
+  //    short window so MongoDB can still veto deactivated accounts.
+  const remoteLookups = collectRemoteCandidates(keys, candidates);
+
+  let verified = findAcceptableCandidate(candidates, candidatePasswords);
+  if (verified) {
+    await waitAtMost(remoteLookups, 800);
+    // Re-check: an authoritative record may have arrived during the grace window.
+    verified = findAcceptableCandidate(candidates, candidatePasswords);
+  } else {
+    await remoteLookups;
+    verified = findAcceptableCandidate(candidates, candidatePasswords);
   }
 
-  // 2. Dynamic in-memory co-admins (survives across warm serverless invocations)
-  if (!user || !user.passwordHash) {
-    const dynamicList = getDynamicAdmins();
-    const dynMatch = dynamicList.find(
-      (a: any) =>
-        a.email?.toLowerCase() === cleanIdentifier ||
-        a.username?.toLowerCase() === cleanIdentifier ||
-        a.email?.toLowerCase() === rawIdentifier ||
-        a.username?.toLowerCase() === rawIdentifier
-    );
-    if (dynMatch) {
-      user = user ? { ...user, passwordHash: dynMatch.passwordHash || user.passwordHash } : dynMatch;
-    }
-  }
+  const hasVerifiableLocalAccount = candidates.some(
+    candidate => Boolean(candidate.user?.passwordHash),
+  );
 
-  // 3. Cookie vault — co-admins registered from this browser session
-  if (!user || !user.passwordHash) {
-    const vaultCookie = request.cookies.get('nextech_coadmins_vault')?.value;
-    if (vaultCookie) {
-      try {
-        const vaultAdmins = verifyVaultToken(vaultCookie);
-        const vaultMatch = vaultAdmins.find(
-          (a: any) =>
-            a.email?.toLowerCase() === cleanIdentifier ||
-            a.username?.toLowerCase() === cleanIdentifier ||
-            a.email?.toLowerCase() === rawIdentifier ||
-            a.username?.toLowerCase() === rawIdentifier
-        );
-        if (vaultMatch) {
-          user = user ? { ...user, passwordHash: vaultMatch.passwordHash || user.passwordHash } : vaultMatch;
-          registerDynamicAdmin(user);
-        }
-      } catch {}
-    }
-  }
+  if (verified) {
+    const authoritativeCandidate = resolveAuthoritativeCandidate(candidates, verified.user);
 
-  // 4. Bundled users.json (compiled into the Next.js deployment)
-  if (!user || !user.passwordHash) {
-    try {
-      const users = await readLocalStoreJson<any[]>('users.json');
-      if (Array.isArray(users)) {
-        const bundledMatch = users.find(
-          (u: any) =>
-            u.email?.toLowerCase() === cleanIdentifier ||
-            u.username?.toLowerCase() === cleanIdentifier ||
-            u.email?.toLowerCase() === rawIdentifier ||
-            u.username?.toLowerCase() === rawIdentifier
-        );
-        if (bundledMatch) {
-          user = user ? { ...user, passwordHash: bundledMatch.passwordHash || user.passwordHash } : bundledMatch;
-          if (user.role === 'ADMIN') {
-            registerDynamicAdmin(user);
-          }
-        }
-      }
-    } catch {}
-  }
-
-  // 5. Backend settings coAdmins (fetched from Express API)
-  if (!user || !user.passwordHash) {
-    try {
-      const settings = await fetchBackendSettings();
-      const coAdmins: any[] = settings?.coAdmins || [];
-      const settingsMatch = coAdmins.find(
-        (a: any) =>
-          a.email?.toLowerCase() === cleanIdentifier ||
-          a.username?.toLowerCase() === cleanIdentifier ||
-          a.email?.toLowerCase() === rawIdentifier ||
-          a.username?.toLowerCase() === rawIdentifier
-      );
-      if (settingsMatch) {
-        user = user ? { ...user, passwordHash: settingsMatch.passwordHash || user.passwordHash } : settingsMatch;
-        registerDynamicAdmin(user);
-      }
-    } catch {}
-  }
-
-  // ─── VERIFY PASSWORD LOCALLY IF USER WAS FOUND ────────────────────────────────
-  if (user) {
-    if (user.isActive === false) {
+    if (authoritativeCandidate?.user?.isActive === false) {
       return NextResponse.json(
         { success: false, error: { code: 'ACCOUNT_DEACTIVATED', message: 'This account has been deactivated. Please contact support.' } },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
-    const candidatePasswords = [rawPassword];
-    if (rawPassword.trim() !== rawPassword) {
-      candidatePasswords.push(rawPassword.trim());
+    const authenticatedUser = mergeVerifiedUser(
+      verified.user,
+      authoritativeCandidate?.user ?? null,
+      verified.passwordHash,
+    );
+
+    if (authenticatedUser.role === 'ADMIN') {
+      registerDynamicAdmin(authenticatedUser);
     }
 
-    let isValid = false;
-    if (user.passwordHash) {
-      for (const pwd of candidatePasswords) {
-        if (verifyPassword(pwd, user.passwordHash)) {
-          isValid = true;
-          break;
-        }
-      }
+    // Only rewrite MongoDB when the fallback supplied the working credential.
+    if (authoritativeCandidate?.user?.passwordHash !== verified.passwordHash) {
+      void persistVerifiedUser(
+        authenticatedUser,
+        verified.passwordHash,
+        authoritativeCandidate?.source === 'mongo' ? authoritativeCandidate.user : undefined,
+      );
     }
 
-    if (isValid) {
-      // Self-heal: ensure verified administrator is stored in MongoDB users collection with passwordHash
-      try {
-        const db = await getMongoDb();
-        if (db) {
-          const usersCol = db.collection('users');
-          await usersCol.updateOne(
-            { $or: [{ email: user.email.toLowerCase() }, { id: user.id }] },
-            {
-              $set: {
-                ...user,
-                email: user.email.toLowerCase(),
-                passwordHash: user.passwordHash,
-                isActive: true,
-                updatedAt: new Date().toISOString(),
-              },
-            },
-            { upsert: true }
-          );
-        }
-      } catch {}
-
-      return issueLoginResponse(user);
-    }
-
-
-    user = null;
+    return issueLoginResponse(authenticatedUser);
   }
 
-
+  // 3. Delegate to the authoritative Express backend, forwarding cookies/CSRF.
   try {
     const backendUrl = getBackendApiUrl();
     const headers = new Headers();
@@ -257,15 +286,21 @@ export async function POST(request: NextRequest) {
       if (!backendJson) {
         return NextResponse.json(
           { success: false, error: { code: 'AUTH_SERVICE_INVALID_RESPONSE', message: 'Authentication service returned an invalid response.' } },
-          { status: 502 }
+          { status: 502 },
         );
       }
     }
 
     if ([404, 502, 503, 504].includes(upstream.status)) {
+      if (hasVerifiableLocalAccount) {
+        return NextResponse.json(
+          { success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } },
+          { status: 401, headers: { 'Cache-Control': 'no-store' } },
+        );
+      }
       return NextResponse.json(
         { success: false, error: { code: 'AUTH_SERVICE_UNAVAILABLE', message: 'Authentication service is temporarily unavailable. Please try again.' } },
-        { status: 503, headers: { 'Cache-Control': 'no-store' } }
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
       );
     }
 
@@ -276,10 +311,16 @@ export async function POST(request: NextRequest) {
     }
     return new Response(upstreamBody, { status: upstream.status, headers: responseHeaders });
   } catch (error) {
+    if (hasVerifiableLocalAccount) {
+      return NextResponse.json(
+        { success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     console.error('[Auth Login] Authentication service request failed:', error);
     return NextResponse.json(
       { success: false, error: { code: 'AUTH_SERVICE_UNAVAILABLE', message: 'Authentication service is temporarily unavailable. Please try again.' } },
-      { status: 503, headers: { 'Cache-Control': 'no-store' } }
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }

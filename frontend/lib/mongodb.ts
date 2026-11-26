@@ -11,6 +11,11 @@ let client: MongoClient | null = null;
 let clientPromise: Promise<MongoClient> | null = null;
 let syncPromise: Promise<any> | null = null;
 
+// Mongo is optional in local/offline deployments. After a failed connection,
+// stay quiet for a short cooldown so every request does not pay the 5s timeout.
+const MONGO_RETRY_COOLDOWN_MS = 15_000;
+let mongoUnavailableUntil = 0;
+
 export async function syncAllBundledDataToMongo(db: Db): Promise<{
   usersSynced: number;
   categoriesSynced: number;
@@ -137,6 +142,8 @@ export async function syncAllBundledDataToMongo(db: Db): Promise<{
 
 export async function getMongoDb(): Promise<Db | null> {
   if (!uri) return null;
+  if (Date.now() < mongoUnavailableUntil) return null;
+
   try {
     if (!clientPromise) {
       client = new MongoClient(uri, {
@@ -148,6 +155,7 @@ export async function getMongoDb(): Promise<Db | null> {
     }
     const c = await clientPromise;
     const db = c.db(dbName);
+    mongoUnavailableUntil = 0;
 
     // Auto-sync bundled users, categories, brands, and settings if missing from MongoDB
     if (!syncPromise) {
@@ -158,6 +166,7 @@ export async function getMongoDb(): Promise<Db | null> {
   } catch (err: any) {
     console.warn('[MongoDB Frontend Client Warning]:', err?.message || err);
     clientPromise = null;
+    mongoUnavailableUntil = Date.now() + MONGO_RETRY_COOLDOWN_MS;
     return null;
   }
 }
