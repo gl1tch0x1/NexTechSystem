@@ -27,7 +27,8 @@
       "/api/upload/7cda84525f3f7741f72c9b1d5843cecc10684c2a5e0fcadc685299d6439134c3.webp",
       "/api/upload/6b0aeaaf9e63d1d9365d345b",
       "/api/upload/6b0afb6afb06eb32e54cdc31",
-      "/api/upload/6b0afd94fb06eb32e54cdc35"
+      "/api/upload/6b0afd94fb06eb32e54cdc35",
+      "/api/upload/6b0afefd21a7cb43dfd2e4b7"
     ],
     "inventoryTracked": true,
     "isActive": true,
@@ -76,7 +77,7 @@
     "thumbnail": "/api/upload/7cda84525f3f7741f72c9b1d5843cecc10684c2a5e0fcadc685299d6439134c3.webp",
     "title": "ACER ASPIRE 14 AI A14-52MT-94H5 - C75EPF",
     "unitMeasure": "unit",
-    "updatedAt": "2026-11-28T16:13:08.446Z",
+    "updatedAt": "2026-11-28T16:19:09.985Z",
     "variantOptions": [],
     "variants": [],
     "warranty": "1 Year Official Warranty",
@@ -136,6 +137,20 @@
         "order": 3,
         "isPrimary": false,
         "url": "/api/upload/6b0afd94fb06eb32e54cdc35"
+      },
+      {
+        "id": "6b0afefd21a7cb43dfd2e4b7",
+        "assetId": "6b0afefd21a7cb43dfd2e4b7",
+        "originalFilename": "test-cover.png",
+        "mimeType": "image/webp",
+        "size": 950,
+        "width": 800,
+        "height": 600,
+        "uploadedAt": "2026-11-28T16:19:09.983Z",
+        "altText": "ACER ASPIRE 14 AI A14-52MT-94H5 - C75EPF",
+        "order": 4,
+        "isPrimary": false,
+        "url": "/api/upload/6b0afefd21a7cb43dfd2e4b7"
       }
     ],
     "costPrice": 2799,

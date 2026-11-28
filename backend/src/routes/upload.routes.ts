@@ -113,16 +113,16 @@ async function handleFileUpload(req: any, res: any) {
   const ext = path.extname(file.originalname || '').slice(1).toLowerCase();
   const buffer: Buffer = file.buffer;
   const header = buffer.subarray(0, 16);
-  const signatures: Record<string, (b: Buffer) => boolean> = {
-    png: b => b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
-    jpg: b => b[0] === 255 && b[1] === 216,
-    jpeg: b => b[0] === 255 && b[1] === 216,
-    gif: b => /^GIF8[79]a$/.test(b.subarray(0, 6).toString()),
-    webp: b => b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP',
-    pdf: b => b.subarray(0, 5).toString() === '%PDF-',
-  };
-  const check = signatures[ext];
-  if (!check || !check(header) || !ALLOWED_MIME_TYPES.has(file.mimetype)) {
+  const signatures = new Map<string, (b: Buffer) => boolean>([
+    ['png', b => b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))],
+    ['jpg', b => b[0] === 255 && b[1] === 216],
+    ['jpeg', b => b[0] === 255 && b[1] === 216],
+    ['gif', b => /^GIF8[79]a$/.test(b.subarray(0, 6).toString())],
+    ['webp', b => b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP'],
+    ['pdf', b => b.subarray(0, 5).toString() === '%PDF-'],
+  ]);
+  const check = signatures.get(ext);
+  if (typeof check !== 'function' || !check(header) || !ALLOWED_MIME_TYPES.has(file.mimetype)) {
     res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
     return;
   }
