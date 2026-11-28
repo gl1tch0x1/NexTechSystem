@@ -35,14 +35,33 @@ export function productImageUrl(value: unknown): string | null {
   if (/^[a-f0-9]{64}$/i.test(input)) {
     return `/api/upload/${input}.webp`;
   }
+  if (/^\/api\/upload\/[a-f0-9]{24}$/i.test(input)) {
+    return input;
+  }
+
+  // Migrate legacy Firebase emulator/production URLs to the content-addressed backend route.
+  // This provides a compatibility bridge until each record is migrated to a GridFS ObjectId.
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/v0\/b\/[^/]+\/o\/|^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/[^/]+\/o\//i.test(input)) {
+    try {
+      const parsed = new URL(input);
+      const match = parsed.pathname.match(/\/o\/([^/?]+)(?:$|\?)/);
+      if (match) {
+        const objectPath = decodeURIComponent(match[1]);
+        const filename = objectPath.split('/').pop() || '';
+        const hash = filename.match(/^([a-f0-9]{64})(?:\.[a-z0-9]+)?$/i)?.[1];
+        if (hash) return `/api/upload/${hash}.webp`;
+      }
+    } catch {}
+  }
 
   // Support protocol-relative URLs
   if (input.startsWith('//')) {
     input = `https:${input}`;
   }
 
-  // Automatically upgrade insecure http to https
-  if (/^http:\/\//i.test(input)) {
+  // Allow localhost/127.0.0.1 http URLs for local dev and Firebase emulators.
+  const isLocalHttp = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(input);
+  if (/^http:\/\//i.test(input) && !isLocalHttp) {
     input = input.replace(/^http:\/\//i, 'https://');
   }
 
@@ -52,11 +71,12 @@ export function productImageUrl(value: unknown): string | null {
   }
 
   const relative = input.startsWith('/') && !input.startsWith('//');
-  if (!relative && !/^https:\/\//i.test(input)) return null;
+  if (!relative && !/^https:\/\//i.test(input) && !isLocalHttp) return null;
 
   try {
     const url = new URL(input, 'https://nextechsystem.com');
-    if (url.protocol !== 'https:' || url.username || url.password) return null;
+    const allowedProtocol = url.protocol === 'https:' || (url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1'));
+    if (!allowedProtocol || url.username || url.password) return null;
     return relative ? url.pathname + url.search + url.hash : url.href;
   } catch {
     return null;

@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { getFirestore } from './firebase.js';
 import { mongoDb } from './mongodb.js';
 import { ENV } from './env.js';
 import { DbSnapshot } from '../types/index.js';
@@ -68,6 +67,12 @@ function resolveDataDir(): string {
 }
 
 const DATA_DIR = resolveDataDir();
+
+function requireMongoDbForProduction(operation: string): void {
+  if (ENV.NODE_ENV === 'production' && !mongoDb.isConnected()) {
+    throw new Error(`MongoDB is unavailable. Cannot ${operation} because MongoDB is the authoritative production database.`);
+  }
+}
 
 function buildMongoFilter(where?: QueryFilter['where']): any {
   if (!where || where.length === 0) return {};
@@ -178,28 +183,11 @@ export class DbStore {
         try { fs.unlinkSync(tmpPath); } catch {}
       }
 
-      // Synchronize hardware product catalog directly to frontend static catalog file
-      if (collectionName === 'products') {
-        const frontendPaths = [
-          path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
-          path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
-        ];
-        for (const fp of frontendPaths) {
-          let fd: number | null = null;
-          try {
-            fd = fs.openSync(fp, 'r+');
-            const buf = Buffer.from(data, 'utf-8');
-            fs.ftruncateSync(fd, 0);
-            fs.writeSync(fd, buf, 0, buf.length, 0);
-          } catch {
-            // Target path not present in current directory layout
-          } finally {
-            if (fd !== null) {
-              try { fs.closeSync(fd); } catch {}
-            }
-          }
-        }
-      }
+      // NOTE: The frontend syncs its catalog directly from this store
+      // (frontend/lib/catalog-service.ts reads backend/data_store/products.json).
+      // Never write into the frontend source tree from here: files under
+      // frontend/ are part of the Next.js module graph, and runtime writes
+      // trigger Turbopack rebuilds / page reloads in dev.
     } catch (err) {
       console.error('[DbStore] Error persisting %s:', collectionName, err);
     } finally {
@@ -264,41 +252,12 @@ export class DbStore {
     return this.collections.get(name)!;
   }
 
-  // --- Firestore Cloud Synchronization Handlers ---
-  private async syncDocToFirestore(collection: string, id: string, data: any) {
-    if (!ENV.ENABLE_FIRESTORE_SYNC) return;
-    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
-    try {
-      const db = getFirestore();
-      if (db) {
-        const cleanData = JSON.parse(JSON.stringify(data));
-        await db.collection(collection).doc(id).set(cleanData, { merge: true });
-      }
-    } catch (err: any) {
-      if (process.env.DEBUG_FIRESTORE) {
-        console.warn('[Firestore Sync Notice]:', err?.message || 'Sync error');
-      }
-    }
-  }
-
-  private async deleteDocFromFirestore(collection: string, id: string) {
-    if (!ENV.ENABLE_FIRESTORE_SYNC) return;
-    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
-    try {
-      const db = getFirestore();
-      if (db) {
-        await db.collection(collection).doc(id).delete();
-      }
-    } catch (err: any) {
-      if (process.env.DEBUG_FIRESTORE) {
-        console.warn('[Firestore Delete Notice]:', err?.message || 'Delete error');
-      }
-    }
-  }
-
   // --- MongoDB Operations ---
   private async syncDocToMongo(collection: string, id: string, data: any) {
-    if (!mongoDb.isConnected()) return;
+    if (!mongoDb.isConnected()) {
+      requireMongoDbForProduction(`persist ${collection}/${id}`);
+      return;
+    }
     if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
     const safeId = id;
 
@@ -317,12 +276,16 @@ export class DbStore {
         await col.replaceOne({ id: { $eq: safeId } } as any, cleanDoc as any, { upsert: true });
       }
     } catch (err: any) {
+      if (ENV.NODE_ENV === 'production') throw err;
       console.warn('[MongoDB Sync Notice]:', err?.message || 'Sync error');
     }
   }
 
   private async deleteDocFromMongo(collection: string, id: string) {
-    if (!mongoDb.isConnected()) return;
+    if (!mongoDb.isConnected()) {
+      requireMongoDbForProduction(`delete ${collection}/${id}`);
+      return;
+    }
     if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return;
     const safeId = id;
 
@@ -332,6 +295,7 @@ export class DbStore {
         await col.deleteOne({ id: { $eq: safeId } } as any);
       }
     } catch (err: any) {
+      if (ENV.NODE_ENV === 'production') throw err;
       console.warn('[MongoDB Delete Notice]:', err?.message || 'Delete error');
     }
   }
@@ -342,6 +306,9 @@ export class DbStore {
       return null;
     }
     const safeId = id;
+    if (!mongoDb.isConnected()) {
+      requireMongoDbForProduction(`read ${collection}/${id}`);
+    }
 
     // 1. If MongoDB is connected, attempt to read directly from MongoDB
     if (mongoDb.isConnected()) {
@@ -355,8 +322,13 @@ export class DbStore {
             map.set(safeId, doc);
             return doc as T;
           }
+          // MongoDB is authoritative. Do not resurrect a missing record from disk/memory.
+          if (ENV.NODE_ENV === 'production') return null;
         }
       } catch (err: any) {
+        if (ENV.NODE_ENV === 'production') {
+          throw new Error(`MongoDB read failed for ${collection}/${safeId}: ${err?.message || 'unknown database error'}`);
+        }
         console.warn('[DbStore MongoDB read error]:', err?.message || 'Read error');
       }
     }
@@ -368,6 +340,9 @@ export class DbStore {
   }
 
   public async find<T = any>(collection: string, query?: QueryFilter<T>): Promise<T[]> {
+    if (!mongoDb.isConnected()) {
+      requireMongoDbForProduction(`query ${collection}`);
+    }
     // 1. If MongoDB is connected, query MongoDB with projection, sorting & limits
     if (mongoDb.isConnected()) {
       try {
@@ -399,6 +374,9 @@ export class DbStore {
           }
         }
       } catch (err: any) {
+        if (ENV.NODE_ENV === 'production') {
+          throw new Error(`MongoDB query failed for ${collection}: ${err?.message || 'unknown database error'}`);
+        }
         console.warn('[DbStore MongoDB query error]:', err?.message || 'Query error');
       }
     }
@@ -459,64 +437,60 @@ export class DbStore {
   }
 
   public async create<T extends { id: string }>(collection: string, item: T): Promise<T> {
-    const map = this.getCollectionMap(collection);
-    const copy = JSON.parse(JSON.stringify(item));
-    map.set(item.id, copy);
-    this.persistCollection(collection);
+    requireMongoDbForProduction(`create ${collection}/${item.id}`);
+    return await this.transactionLock.acquire(async () => {
+      const map = this.getCollectionMap(collection);
+      const copy = JSON.parse(JSON.stringify(item));
+      map.set(item.id, copy);
+      this.persistCollection(collection);
 
-    // Synchronous/Awaited Dual Cloud Persistence to guarantee durability
-    await Promise.allSettled([
-      this.syncDocToMongo(collection, item.id, copy),
-      this.syncDocToFirestore(collection, item.id, copy),
-    ]);
-
-    return item;
+      await this.syncDocToMongo(collection, item.id, copy);
+      return item;
+    });
   }
 
   public async update<T = any>(collection: string, id: string, updates: Partial<T>): Promise<T | null> {
-    const map = this.getCollectionMap(collection);
-    let existing = map.get(id);
-    if (!existing && mongoDb.isConnected()) {
-      existing = await this.findById(collection, id);
-    }
-    if (!existing) return null;
-    const updated = {
-      ...existing,
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    map.set(id, updated);
-    this.persistCollection(collection);
+    requireMongoDbForProduction(`update ${collection}/${id}`);
+    return await this.transactionLock.acquire(async () => {
+      // Always read MongoDB first in authoritative mode; the local map is only a development cache.
+      let existing = mongoDb.isConnected()
+        ? await this.findById(collection, id)
+        : this.getCollectionMap(collection).get(id);
+      if (!existing) return null;
+      const updated = {
+        ...existing,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      const map = this.getCollectionMap(collection);
+      map.set(id, updated);
+      this.persistCollection(collection);
 
-    // Synchronous/Awaited Dual Cloud Persistence to guarantee durability across container recycling
-    await Promise.allSettled([
-      this.syncDocToMongo(collection, id, updated),
-      this.syncDocToFirestore(collection, id, updated),
-    ]);
-
-    return updated as T;
+      await this.syncDocToMongo(collection, id, updated);
+      return updated as T;
+    });
   }
 
   public async delete(collection: string, id: string): Promise<boolean> {
-    const map = this.getCollectionMap(collection);
-    const existed = map.delete(id);
-    if (existed) {
-      this.persistCollection(collection);
-      await Promise.allSettled([
-        this.deleteDocFromMongo(collection, id),
-        this.deleteDocFromFirestore(collection, id),
-      ]);
-    } else if (mongoDb.isConnected()) {
-      await Promise.allSettled([
-        this.deleteDocFromMongo(collection, id),
-        this.deleteDocFromFirestore(collection, id),
-      ]);
-      return true;
-    }
-    return existed;
+    requireMongoDbForProduction(`delete ${collection}/${id}`);
+    return await this.transactionLock.acquire(async () => {
+      const map = this.getCollectionMap(collection);
+      const existed = map.delete(id);
+      if (existed) {
+        this.persistCollection(collection);
+        await this.deleteDocFromMongo(collection, id);
+      } else if (mongoDb.isConnected()) {
+        await this.deleteDocFromMongo(collection, id);
+        return true;
+      }
+      return existed;
+    });
   }
 
   public async count<T = any>(collection: string, query?: QueryFilter<T>): Promise<number> {
+    if (!mongoDb.isConnected()) {
+      requireMongoDbForProduction(`count ${collection}`);
+    }
     if (mongoDb.isConnected()) {
       try {
         const col = mongoDb.getCollection(collection);

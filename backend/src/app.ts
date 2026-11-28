@@ -50,7 +50,6 @@ export function createApp(): Express {
             'data:',
             'blob:',
             'https://images.unsplash.com',
-            'https://*.firebasestorage.app',
             'https://challenges.cloudflare.com',
             'https://res.cloudinary.com',
           ],

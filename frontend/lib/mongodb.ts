@@ -9,7 +9,6 @@ const dbName = process.env.MONGODB_DB_NAME || 'nextech_ecommerce';
 
 let client: MongoClient | null = null;
 let clientPromise: Promise<MongoClient> | null = null;
-let syncPromise: Promise<any> | null = null;
 
 // Mongo is optional in local/offline deployments. After a failed connection,
 // stay quiet for a short cooldown so every request does not pay the 5s timeout.
@@ -156,11 +155,6 @@ export async function getMongoDb(): Promise<Db | null> {
     const c = await clientPromise;
     const db = c.db(dbName);
     mongoUnavailableUntil = 0;
-
-    // Auto-sync bundled users, categories, brands, and settings if missing from MongoDB
-    if (!syncPromise) {
-      syncPromise = syncAllBundledDataToMongo(db).catch(() => {});
-    }
 
     return db;
   } catch (err: any) {

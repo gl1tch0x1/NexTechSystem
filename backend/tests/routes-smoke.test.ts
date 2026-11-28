@@ -239,7 +239,6 @@ test('every declared backend route: anonymous dispatch and authenticated GET smo
     NODE_ENV: 'test',
     JWT_SECRET: 'route-test-key',
     ENABLE_MONGODB: 'false',
-    ENABLE_FIRESTORE_SYNC: 'false',
     CLOUDFLARE_SECURITY_ENABLED: 'false',
     ALLOW_DEV_OTP: 'true',
     ALLOW_DEV_WEBHOOK_BYPASS: 'true',

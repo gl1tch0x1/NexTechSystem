@@ -18,6 +18,8 @@ import paymentRoutes from './payment.routes.js';
 import uploadRoutes from './upload.routes.js';
 import { authenticate } from '../middleware/auth.js';
 import { adminController } from '../controllers/admin.controller.js';
+import { mongoDb } from '../config/mongodb.js';
+import { ENV } from '../config/env.js';
 
 const router = Router();
 
@@ -44,12 +46,25 @@ router.use('/admin/quotes', quoteRoutes);
 router.post('/presence/heartbeat', authenticate, (req, res, next) => adminController.recordHeartbeat(req, res).catch(next));
 
 // Health check endpoint
-router.get('/health', (_req, res) => {
-  res.json({
-    status: 'healthy',
+router.get('/health', async (_req, res) => {
+  const mongoStatus = await mongoDb.getStatus();
+  const healthy = mongoStatus.connected || ENV.NODE_ENV !== 'production';
+  res.status(healthy ? 200 : 503).json({
+    status: healthy ? 'healthy' : 'degraded',
     platform: 'Enterprise Computer & Technology E-Commerce API',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
+    env: {
+      MONGODB_URI: ENV.MONGODB_URI ? 'configured' : 'MISSING',
+      MONGODB_DB_NAME: ENV.MONGODB_DB_NAME || '(default: nextech_ecommerce)',
+      ENABLE_MONGODB: ENV.ENABLE_MONGODB,
+      NODE_ENV: ENV.NODE_ENV,
+    },
+    mongo: {
+      connected: mongoStatus.connected,
+      dbName: mongoStatus.dbName,
+      lastError: mongoStatus.lastError,
+    },
   });
 });
 

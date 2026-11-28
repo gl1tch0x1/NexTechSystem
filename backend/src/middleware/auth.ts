@@ -80,6 +80,13 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
     };
     next();
   } catch (err: any) {
+    if (/MongoDB (read|query|persist|unavailable)/i.test(String(err?.message || err))) {
+      res.status(503).json({
+        success: false,
+        error: { code: 'MONGODB_UNAVAILABLE', message: 'Authentication could not be verified because MongoDB is unavailable.' },
+      });
+      return;
+    }
     // 2. Token invalid / expired
     res.status(401).json({
       success: false,

@@ -73,7 +73,8 @@ export async function POST(request: NextRequest) {
       try {
         const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
-          updateCatalogProduct(json.data.id || json.data.slug || '', json.data);
+          // Backend write will sync its own store; frontend mirror updates memory only.
+          updateCatalogProduct(json.data.id || json.data.slug || '', json.data, { persist: false });
         }
       } catch {}
       try {
@@ -89,8 +90,9 @@ export async function POST(request: NextRequest) {
   } catch {}
 
   // Upstream unreachable: fall back to local catalog sync for resilience.
+// Memory-only update; backend is the source of truth and will sync its own store.
   if (body) {
-    updateCatalogProduct(body.id || body.slug || '', body);
+    updateCatalogProduct(body.id || body.slug || '', body, { persist: false });
   }
   try {
     revalidatePath('/products');
@@ -110,7 +112,7 @@ export async function DELETE(request: NextRequest) {
     try {
       const upstreamRes = await proxyToBackend(request, `/admin/products/${id}`);
       if (upstreamRes.ok) {
-        deleteCatalogProduct(id);
+        deleteCatalogProduct(id, { persist: false });
         try {
           revalidatePath('/products');
           revalidatePath('/');
@@ -123,7 +125,7 @@ export async function DELETE(request: NextRequest) {
       }
     } catch {}
 
-    deleteCatalogProduct(id);
+    deleteCatalogProduct(id, { persist: false });
     try {
       revalidatePath('/products');
       revalidatePath('/');

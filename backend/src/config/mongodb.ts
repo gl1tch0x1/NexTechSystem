@@ -38,25 +38,46 @@ class MongoDbManager {
     if (!uri) {
       this.lastError = 'MONGODB_URI environment variable is not defined.';
       console.warn('⚠️ [MongoDB] MONGODB_URI is not set. Operating in local-resilient storage mode.');
+      console.warn('⚠️ [MongoDB] Set MONGODB_URI in your deployment environment variables.');
       return false;
     }
+    
+    console.log('🔄 [MongoDB] MONGODB_URI is configured (length:', uri.length, ')');
+    console.log('🔄 [MongoDB] MONGODB_DB_NAME:', ENV.MONGODB_DB_NAME || '(default: nextech_ecommerce)');
+    console.log('🔄 [MongoDB] ENABLE_MONGODB:', ENV.ENABLE_MONGODB);
 
     this.isConnecting = true;
     try {
+      let parsedUri: URL;
+      try {
+        parsedUri = new URL(uri);
+      } catch {
+        throw new Error('MONGODB_URI is malformed. Use a valid mongodb:// or mongodb+srv:// connection string.');
+      }
+      if (!/^mongodb(?:\+srv)?:$/i.test(parsedUri.protocol)) {
+        throw new Error('MONGODB_URI must use mongodb:// or mongodb+srv://.');
+      }
       console.log('🔄 [MongoDB] Initializing enterprise connection to MongoDB Atlas...');
-      this.client = new MongoClient(uri, {
+      const isSrv = uri.startsWith('mongodb+srv://');
+      const clientOptions: any = {
         serverApi: {
           version: ServerApiVersion.v1,
-          strict: true,
-          deprecationErrors: true,
+          strict: false,
+          deprecationErrors: false,
         },
-        serverSelectionTimeoutMS: 5000,
-        connectTimeoutMS: 10000,
+        serverSelectionTimeoutMS: 15000,
+        connectTimeoutMS: 20000,
         maxPoolSize: 50,
         minPoolSize: 5,
         retryWrites: true,
         w: 'majority',
-      });
+      };
+      // Enable TLS only for SRV (Atlas) connections; local MongoDB runs without TLS
+      if (isSrv) {
+        clientOptions.tls = true;
+        clientOptions.tlsAllowInvalidCertificates = false;
+      }
+      this.client = new MongoClient(uri, clientOptions);
 
       await this.client.connect();
       const dbName = ENV.MONGODB_DB_NAME || 'nextech_ecommerce';

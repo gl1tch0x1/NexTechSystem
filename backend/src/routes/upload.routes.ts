@@ -1,14 +1,15 @@
-import crypto, { randomUUID } from 'node:crypto';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Router, Response, NextFunction } from 'express';
 import multer from 'multer';
-import fs from 'node:fs';
-import fsPromises from 'node:fs/promises';
-import path from 'node:path';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.js';
 import { resellerRepository } from '../repositories/reseller.repository.js';
+import { productRepository } from '../repositories/product.repository.js';
+import { deleteGridFsAsset, openGridFsAsset, uploadMediaAsset } from '../services/media-storage.service.js';
+import { mongoDb } from '../config/mongodb.js';
 
 const router = Router();
-const directory = path.resolve(process.cwd(), 'uploads');
 
 const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'gif', 'pdf']);
 const ALLOWED_MIME_TYPES = new Set([
@@ -19,21 +20,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'application/pdf',
 ]);
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    try {
-      fs.mkdirSync(directory, { recursive: true });
-    } catch {
-      // Directory exists or created
-    }
-    cb(null, directory);
-  },
-  filename: (_req, file, cb) => {
-    const rawExt = path.extname(file.originalname || '').slice(1).toLowerCase();
-    const safeExt = ALLOWED_EXTENSIONS.has(rawExt) ? rawExt : 'bin';
-    cb(null, `${randomUUID()}.${safeExt}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -49,170 +36,251 @@ const upload = multer({
 });
 
 router.get('/:filename', async (req, res) => {
-  const filename = path.basename(String(req.params.filename || ''));
-  if (!/^[a-f0-9-]{32,64}\.(png|jpg|jpeg|webp|gif|pdf)$/i.test(filename)) {
-    res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
-    return;
-  }
+  const requested = path.basename(String(req.params.filename || ''));
 
-  const candidateDirs = [
-    directory,
-    path.resolve(process.cwd(), 'backend', 'uploads'),
-    path.resolve(process.cwd(), '..', 'uploads'),
-  ];
-
-  const baseHash = path.parse(filename).name;
-  const requestedExt = path.extname(filename).slice(1).toLowerCase();
-
-  // If a legacy .png or .jpg was requested, prefer serving the existing .webp version
-  const checkFilenames = (['png', 'jpg', 'jpeg'].includes(requestedExt))
-    ? [`${baseHash}.webp`, filename]
-    : [filename];
-
-  let foundPath: string | null = null;
-  for (const dir of candidateDirs) {
-    for (const candFilename of checkFilenames) {
-      const candidate = path.resolve(dir, candFilename);
-      if (candidate.startsWith(dir) && !candidate.includes('..')) {
-        let fd: number | null = null;
+  // Compatibility retrieval for assets created before GridFS migration.
+  const legacyMatch = requested.match(/^([a-f0-9]{64})(?:\.(webp|png|jpg|jpeg|gif|pdf))?$/i);
+  if (legacyMatch) {
+    const hash = legacyMatch[1].toLowerCase();
+    const requestedExt = legacyMatch[2]?.toLowerCase();
+    const candidateNames = requestedExt === 'webp'
+      ? [`${hash}.webp`, `${hash}.png`, `${hash}.jpg`, `${hash}.jpeg`, `${hash}.gif`, `${hash}.pdf`]
+      : requestedExt
+        ? [`${hash}.${requestedExt}`]
+        : [`${hash}.webp`, `${hash}.png`, `${hash}.jpg`, `${hash}.jpeg`, `${hash}.gif`, `${hash}.pdf`];
+    const candidateDirs = [
+      path.resolve(process.cwd(), 'backend', 'uploads'),
+      path.resolve(process.cwd(), 'uploads'),
+      path.resolve(process.cwd(), '..', 'uploads'),
+    ];
+    for (const dir of candidateDirs) {
+      for (const candidateName of candidateNames) {
+        const candidate = path.resolve(dir, candidateName);
+        if (!candidate.startsWith(dir) || candidate.includes('..')) continue;
         try {
-          fd = fs.openSync(candidate, 'r');
-          foundPath = candidate;
-          break;
-        } catch {
-          // Path does not exist or cannot be read; continue
-        } finally {
-          if (fd !== null) {
-            try { fs.closeSync(fd); } catch {}
-          }
-        }
+          const stat = fs.statSync(candidate);
+          if (!stat.isFile()) continue;
+          const ext = path.extname(candidateName).toLowerCase();
+          const contentType = ext === '.pdf' ? 'application/pdf'
+            : ext === '.png' ? 'image/png'
+            : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg'
+            : ext === '.gif' ? 'image/gif'
+            : 'image/webp';
+          res.setHeader('Content-Type', contentType);
+          res.setHeader('Content-Length', String(stat.size));
+          res.setHeader('Cache-Control', contentType.startsWith('image/') ? 'public, max-age=86400' : 'private, max-age=3600');
+          res.setHeader('X-Content-Type-Options', 'nosniff');
+          fs.createReadStream(candidate).pipe(res);
+          return;
+        } catch {}
       }
     }
-    if (foundPath) break;
   }
 
-  if (!foundPath) {
+  const assetId = requested.replace(/[^a-f0-9]/gi, '');
+  if (!/^[a-f0-9]{24}$/i.test(assetId)) {
     res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
     return;
   }
-
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  if (foundPath.endsWith('.webp')) {
-    res.setHeader('Content-Type', 'image/webp');
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  } else if (foundPath.endsWith('.pdf')) {
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline');
-  } else {
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+  try {
+    const opened = await openGridFsAsset(assetId);
+    if (!opened) {
+      res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
+      return;
+    }
+    const contentType = String(opened.file.metadata?.contentType || opened.file.contentType || 'application/octet-stream');
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Length', String(opened.file.length));
+    res.setHeader('Cache-Control', contentType.startsWith('image/') ? 'public, max-age=31536000, immutable' : 'private, max-age=3600');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    opened.stream.on('error', () => {
+      if (!res.headersSent) res.status(404).json({ success: false, error: { message: 'Asset could not be read.' } });
+      else res.end();
+    });
+    opened.stream.pipe(res);
+  } catch {
+    res.status(503).json({ success: false, error: { code: 'MONGODB_UNAVAILABLE', message: 'MongoDB is unavailable.' } });
   }
-  res.sendFile(foundPath, error => {
-    if (error && !res.headersSent) res.status(404).json({ success: false, error: { message: 'Asset not found.' } });
-  });
 });
 
 async function handleFileUpload(req: any, res: any) {
   const file = req.file;
-  if (!file || !file.filename) {
+  if (!file || !file.buffer) {
     res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
     return;
   }
 
-  // Strictly validate filename against allowlist pattern to prevent path traversal (CWE-22 / js/path-injection)
-  const rawFilename = path.basename(String(file.filename));
-  if (!/^[a-f0-9-]{32,64}\.(png|jpg|jpeg|webp|gif|pdf)$/i.test(rawFilename)) {
+  const ext = path.extname(file.originalname || '').slice(1).toLowerCase();
+  const buffer: Buffer = file.buffer;
+  const header = buffer.subarray(0, 16);
+  const signatures: Record<string, (b: Buffer) => boolean> = {
+    png: b => b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
+    jpg: b => b[0] === 255 && b[1] === 216,
+    jpeg: b => b[0] === 255 && b[1] === 216,
+    gif: b => /^GIF8[79]a$/.test(b.subarray(0, 6).toString()),
+    webp: b => b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP',
+    pdf: b => b.subarray(0, 5).toString() === '%PDF-',
+  };
+  const check = signatures[ext];
+  if (!check || !check(header) || !ALLOWED_MIME_TYPES.has(file.mimetype)) {
     res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
     return;
   }
 
-  const filePath = path.resolve(directory, rawFilename);
-  if (!filePath.startsWith(directory) || filePath.includes('..')) {
-    res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
-    return;
-  }
-
-  let isValid = false;
-  try {
-    const fd = await fsPromises.open(filePath, 'r');
-    const header = Buffer.alloc(16);
-    await fd.read(header, 0, 16, 0);
-    await fd.close();
-
-    const ext = path.extname(rawFilename).slice(1).toLowerCase();
-    const signatures: Record<string, (b: Buffer) => boolean> = {
-      png: b => b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
-      jpg: b => b[0] === 255 && b[1] === 216 && b[2] === 255,
-      jpeg: b => b[0] === 255 && b[1] === 216 && b[2] === 255,
-      gif: b => /^GIF8[79]a$/.test(b.subarray(0, 6).toString()),
-      webp: b => b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP',
-      pdf: b => b.subarray(0, 5).toString() === '%PDF-',
-    };
-    const check = signatures[ext];
-    isValid = Boolean(check && check(header));
-  } catch {
-    isValid = false;
-  }
-
-  if (!isValid) {
-    await fsPromises.unlink(filePath).catch(() => {});
-    res.status(400).json({ success: false, error: { message: 'Provide a valid PNG, JPG, WEBP, GIF, or PDF file.' } });
-    return;
-  }
-
-  // Use a cryptographic content address for durable media storage.  `sharp`
-  // is loaded only while processing an image: cPanel's Node runtime may not
-  // have a compatible native binary, and an eager import would otherwise
-  // prevent the entire API from starting. The magic-byte check above still
-  // ensures that only the claimed image/document type is persisted.
-  const ext = path.extname(rawFilename).slice(1).toLowerCase();
-  let finalFilename: string;
-  let contentHash = '';
-
+  let finalBuffer = buffer;
+  let finalExt = ext;
+  let contentType = file.mimetype;
   if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
     try {
-      const inputBuffer = await fsPromises.readFile(filePath);
       const { default: sharp } = await import('sharp');
-      const webpBuffer = await sharp(inputBuffer).webp({ quality: 85, effort: 4 }).toBuffer();
-      contentHash = crypto.createHash('sha256').update(webpBuffer).digest('hex');
-      const hashFilename = `${contentHash}.webp`;
-      await fsPromises.writeFile(path.resolve(directory, hashFilename), webpBuffer);
-      if (rawFilename !== hashFilename) await fsPromises.unlink(filePath).catch(() => {});
-      finalFilename = hashFilename;
+      finalBuffer = await sharp(buffer).rotate().webp({ quality: 85, effort: 4 }).toBuffer();
+      finalExt = 'webp';
+      contentType = 'image/webp';
     } catch {
-      // Keep the valid original when optional native conversion is unavailable.
-      try {
-        const inputBuffer = await fsPromises.readFile(filePath);
-        contentHash = crypto.createHash('sha256').update(inputBuffer).digest('hex');
-        const hashFilename = `${contentHash}.${ext}`;
-        await fsPromises.writeFile(path.resolve(directory, hashFilename), inputBuffer);
-        if (rawFilename !== hashFilename) await fsPromises.unlink(filePath).catch(() => {});
-        finalFilename = hashFilename;
-      } catch {
-        finalFilename = rawFilename;
-      }
+      res.status(400).json({ success: false, error: { message: 'The uploaded image is corrupted or unsupported.' } });
+      return;
     }
-  } else try {
-    const inputBuffer = await fsPromises.readFile(filePath);
-    contentHash = crypto.createHash('sha256').update(inputBuffer).digest('hex');
-    const hashFilename = `${contentHash}.${ext}`;
-    const hashPath = path.resolve(directory, hashFilename);
-
-    await fsPromises.writeFile(hashPath, inputBuffer);
-    if (rawFilename !== hashFilename) {
-      await fsPromises.unlink(filePath).catch(() => {});
-    }
-    finalFilename = hashFilename;
-  } catch {
-    finalFilename = rawFilename;
   }
 
-  res.status(201).json({
-    success: true,
-    url: `/api/upload/${finalFilename}`,
-    hash: contentHash,
-    imageHash: contentHash,
-    filename: finalFilename,
-  });
+  const contentHash = crypto.createHash('sha256').update(finalBuffer).digest('hex');
+
+  let storedAssetId: string | null = null;
+  try {
+    if (!mongoDb.isConnected()) {
+      res.status(503).json({ success: false, error: { code: 'MONGODB_UNAVAILABLE', message: 'MongoDB is unavailable. The image was not persisted.' } });
+      return;
+    }
+    const stored = await uploadMediaAsset({
+      buffer: finalBuffer,
+      contentType,
+      originalExtension: finalExt,
+      hash: contentHash,
+      originalFilename: file.originalname,
+    });
+    storedAssetId = stored.assetId;
+
+    const productId = String(req.query.productId || '').trim();
+    if (productId) {
+      const product = await productRepository.findById(productId);
+      if (!product) {
+        await deleteGridFsAsset(stored.assetId);
+        res.status(404).json({ success: false, error: { message: 'Product not found.' } });
+        return;
+      }
+      if (req.user?.role === 'RESELLER') {
+        const resellerId = req.user.resellerId;
+        if (!resellerId || (product as any).resellerId !== resellerId) {
+          await deleteGridFsAsset(stored.assetId);
+          res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'You can only manage images for your own products.' } });
+          return;
+        }
+      }
+      const existingAssets = Array.isArray((product as any).imageAssets) ? (product as any).imageAssets : [];
+      const existingImages = Array.isArray((product as any).images) ? (product as any).images : [];
+      const replaceAssetId = String(req.query.replaceAssetId || '').trim();
+      let replaceIndex = -1;
+      let oldAssetUrl = '';
+      if (replaceAssetId) {
+        if (!/^[a-f0-9]{24}$/i.test(replaceAssetId)) {
+          await deleteGridFsAsset(stored.assetId);
+          res.status(400).json({ success: false, error: { message: 'Invalid replacement asset ID.' } });
+          return;
+        }
+        replaceIndex = existingAssets.findIndex((asset: any) => String(asset.id || asset.assetId || '') === replaceAssetId);
+        if (replaceIndex < 0) {
+          await deleteGridFsAsset(stored.assetId);
+          res.status(404).json({ success: false, error: { message: 'The asset to replace is not associated with this product.' } });
+          return;
+        }
+        oldAssetUrl = `/api/upload/${replaceAssetId}`;
+      }
+      const asset = {
+        id: stored.assetId,
+        assetId: stored.assetId,
+        originalFilename: stored.originalFilename,
+        mimeType: stored.contentType,
+        size: stored.size,
+        width: stored.width,
+        height: stored.height,
+        uploadedAt: new Date().toISOString(),
+        altText: (product as any).name || (product as any).title || '',
+        order: existingAssets.length,
+        isPrimary: existingAssets.length === 0 && existingImages.length === 0,
+        url: stored.url,
+      };
+      const nextAssets = replaceIndex >= 0
+        ? existingAssets.map((existing: any, index: number) => index === replaceIndex ? {
+            ...asset,
+            order: Number.isInteger(existing.order) ? existing.order : index,
+            isPrimary: Boolean(existing.isPrimary),
+            altText: existing.altText || asset.altText,
+          } : existing)
+        : [...existingAssets, asset];
+      const nextImages = replaceIndex >= 0
+        ? existingImages.map((image: string) => image === oldAssetUrl ? stored.url : image)
+        : [...existingImages, stored.url];
+      const replacingPrimary = replaceIndex >= 0 &&
+        (Boolean(existingAssets[replaceIndex]?.isPrimary) || String((product as any).primaryImage || '') === oldAssetUrl);
+      const nextPrimary = replacingPrimary
+        ? stored.url
+        : (replaceIndex >= 0
+          ? (String((product as any).primaryImage || '') || nextImages[0] || '')
+          : (existingAssets.length === 0 && existingImages.length === 0 ? stored.url : ((product as any).primaryImage || existingImages[0] || stored.url)));
+      const updated = await productRepository.update(productId, {
+        images: nextImages,
+        primaryImage: nextPrimary,
+        thumbnail: nextPrimary,
+        image: nextPrimary,
+        imageAssets: nextAssets,
+      } as any);
+      if (!updated) {
+        await deleteGridFsAsset(stored.assetId);
+        res.status(500).json({ success: false, error: { message: 'Failed to persist the product image association.' } });
+        return;
+      }
+      if (replaceIndex >= 0) {
+        const db = mongoDb.getDb();
+        let shared = false;
+        if (db) {
+          shared = Boolean(await db.collection('products').findOne({
+            $or: [
+              { 'imageAssets.id': replaceAssetId },
+              { 'imageAssets.assetId': replaceAssetId },
+              { images: oldAssetUrl },
+            ],
+          }, { projection: { _id: 1 } }));
+        }
+        if (!shared) {
+          await deleteGridFsAsset(replaceAssetId);
+        }
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      url: stored.url,
+      assetId: stored.assetId,
+      hash: contentHash,
+      imageHash: contentHash,
+      filename: stored.filename,
+      provider: stored.provider,
+      contentType: stored.contentType,
+      size: stored.size,
+      width: stored.width,
+      height: stored.height,
+    });
+  } catch (err: any) {
+    if (storedAssetId) {
+      await deleteGridFsAsset(storedAssetId).catch(() => undefined);
+    }
+    console.error('[Upload] Failed to persist media asset:', err?.message || err);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to persist uploaded media to storage. Please verify storage configuration and retry.',
+      },
+    });
+  }
 }
 
 /**
@@ -257,21 +325,6 @@ async function requireMediaUploadAuthorized(req: AuthenticatedRequest, res: Resp
   });
 }
 
-// Reseller onboarding document upload (for initial registration documents verification)
-router.post(
-  '/reseller-document',
-  (req, res, next) => {
-    upload.single('file')(req, res, error => {
-      if (error) {
-        res.status(400).json({ success: false, error: { message: 'Document upload must contain one file no larger than 5 MB.' } });
-        return;
-      }
-      next();
-    });
-  },
-  handleFileUpload
-);
-
 // Protected image & media asset upload: Strictly Admin, Product Editor, or Verified Reseller
 router.post(
   '/',
@@ -287,6 +340,78 @@ router.post(
     });
   },
   handleFileUpload
+);
+
+// Delete a managed GridFS asset only after removing it from the product association.
+router.delete(
+  '/',
+  authenticate,
+  requireMediaUploadAuthorized,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const url = String((req.body as any)?.url || '').trim();
+    const assetId = String((req.body as any)?.assetId || '').trim();
+    const productId = String((req.body as any)?.productId || '').trim();
+    const match = url.match(/^\/api\/upload\/([a-f0-9]{24})$/i);
+    const resolvedAssetId = assetId || match?.[1] || '';
+    if (!/^[a-f0-9]{24}$/i.test(resolvedAssetId) || !productId) {
+      res.status(400).json({ success: false, error: { message: 'Provide a productId and a managed GridFS assetId.' } });
+      return;
+    }
+    const product = await productRepository.findById(productId);
+    if (!product) {
+      res.status(404).json({ success: false, error: { message: 'Product not found.' } });
+      return;
+    }
+    if (req.user?.role === 'RESELLER') {
+      if (!req.user.resellerId || (product as any).resellerId !== req.user.resellerId) {
+        res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'You can only manage images for your own products.' } });
+        return;
+      }
+    }
+    const assets = Array.isArray((product as any).imageAssets) ? (product as any).imageAssets : [];
+    const nextAssets = assets.filter((asset: any) => String(asset.id || asset.assetId || '') !== resolvedAssetId);
+    const managedUrl = `/api/upload/${resolvedAssetId}`;
+    const nextImages = (Array.isArray((product as any).images) ? (product as any).images : []).filter((image: string) => image !== managedUrl);
+    let nextPrimary = String((product as any).primaryImage || '');
+    const removedPrimary = nextPrimary === managedUrl ||
+      assets.some((asset: any) => (asset.id || asset.assetId) === resolvedAssetId && asset.isPrimary);
+    if (removedPrimary) {
+      nextPrimary = nextImages[0] || '';
+      nextAssets.forEach((asset: any, index: number) => {
+        asset.isPrimary = index === 0;
+        asset.order = index;
+      });
+    }
+    const updated = await productRepository.update(productId, {
+      images: nextImages,
+      primaryImage: nextPrimary,
+      thumbnail: nextPrimary,
+      image: nextPrimary,
+      imageAssets: nextAssets,
+    } as any);
+    if (!updated) {
+      res.status(500).json({ success: false, error: { message: 'Failed to persist gallery deletion.' } });
+      return;
+    }
+
+    const db = mongoDb.getDb();
+    let shared = false;
+    if (db) {
+      shared = Boolean(await db.collection('products').findOne({
+        $or: [
+          { 'imageAssets.id': resolvedAssetId },
+          { 'imageAssets.assetId': resolvedAssetId },
+          { images: managedUrl },
+        ],
+      }, { projection: { _id: 1 } }));
+    }
+    if (!shared) {
+      const result = await deleteGridFsAsset(resolvedAssetId);
+      res.status(200).json({ success: true, deleted: result.deleted, provider: result.provider, reason: result.reason });
+      return;
+    }
+    res.status(200).json({ success: true, deleted: false, provider: 'mongodb-gridfs', reason: 'shared-by-another-product' });
+  }
 );
 
 export default router;

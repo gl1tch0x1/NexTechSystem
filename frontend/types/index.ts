@@ -127,6 +127,21 @@ export interface ProductPackageDimensions {
   unit: 'cm' | 'in';
 }
 
+export interface ProductImageAsset {
+  id: string;
+  assetId: string;
+  originalFilename: string;
+  mimeType: string;
+  size: number;
+  width?: number;
+  height?: number;
+  uploadedAt: string;
+  altText: string;
+  order: number;
+  isPrimary: boolean;
+  url: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -159,6 +174,7 @@ export interface Product {
   lowStockThreshold: number;
   locations?: WarehouseLocationStock[];
   images: string[];
+  imageAssets?: ProductImageAsset[];
   thumbnail: string;
   primaryImage?: string;
   image?: string;

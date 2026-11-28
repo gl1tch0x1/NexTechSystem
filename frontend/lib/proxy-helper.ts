@@ -477,16 +477,15 @@ export async function proxyToBackend(
   }
 
   // Public admin and upload proxies must always carry the caller's own signed token.
-  const isAdminOrUpload =
+  const isAdminOrProtectedUpload =
     cleanPath === '/admin' ||
     cleanPath.startsWith('/admin/') ||
-    cleanPath === '/upload' ||
-    cleanPath.startsWith('/upload/');
+    ((cleanPath === '/upload' || cleanPath.startsWith('/upload/')) && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method));
   const authorization = headers.get('authorization');
   const bearerToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
   const token = bearerToken || request.cookies.get('auth_token')?.value;
 
-  if (isAdminOrUpload) {
+  if (isAdminOrProtectedUpload) {
     const decoded = token ? verifyJwtToken(token) : null;
     const authenticatedRole = decoded?.role || (token ? await getAuthoritativeSessionRole(token) : null);
     if (!authenticatedRole) {

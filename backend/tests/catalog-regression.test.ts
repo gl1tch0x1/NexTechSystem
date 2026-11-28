@@ -12,7 +12,7 @@ test('catalog and editor API lifecycle in an isolated disk store', async t => {
   process.chdir(dir);
   Object.assign(process.env, {
     NODE_ENV: 'test', JWT_SECRET: 'isolated-catalog-test-secret',
-    MONGODB_URI: '', ENABLE_MONGODB: 'false', ENABLE_FIRESTORE_SYNC: 'false',
+    MONGODB_URI: '', ENABLE_MONGODB: 'false',
     FIREBASE_PROJECT_ID: '', NEXT_PUBLIC_FIREBASE_PROJECT_ID: '', FIREBASE_CLIENT_EMAIL: '',
     FIREBASE_PRIVATE_KEY: '', CLOUDFLARE_SECURITY_ENABLED: 'false', ALLOWED_ORIGINS: '',
   });

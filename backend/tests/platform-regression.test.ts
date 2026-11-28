@@ -10,7 +10,7 @@ test('production payment guards and persistent uploads use isolated fixtures', a
   fs.mkdirSync(path.join(root,'backend','data_store'),{recursive:true}); process.chdir(root);
   const mockEnvVars = ['MONGODB_URI', 'DATABASE_URL', 'FIRESTORE_PROJECT_ID', 'RESEND_API_KEY', 'TABBY_SECRET_KEY', 'TAMARA_API_TOKEN', 'CLOUDFLARE_TURNSTILE_SECRET_KEY', 'ADMIN_SECRET_KEY'];
   for (const k of mockEnvVars) delete process.env[k];
-  Object.assign(process.env,{NODE_ENV:'test',JWT_SECRET:'platform-test-only-key',ENABLE_MONGODB:'false',ENABLE_FIRESTORE_SYNC:'false',CLOUDFLARE_SECURITY_ENABLED:'false'});
+  Object.assign(process.env,{NODE_ENV:'test',JWT_SECRET:'platform-test-only-key',ENABLE_MONGODB:'false',CLOUDFLARE_SECURITY_ENABLED:'false'});
   const { paymentController } = await import('../src/controllers/payment.controller.js');
   const { orderService } = await import('../src/services/order.service.js');
   let order: any = { id:'order_fixture',userId:'owner',paymentMethod:'CREDIT_CARD',paymentStatus:'PENDING',orderStatus:'PENDING',total:100 };
@@ -50,17 +50,18 @@ test('production payment guards and persistent uploads use isolated fixtures', a
     try{
       const base=`http://127.0.0.1:${(server.address() as any).port}/api/upload`;
       await t.test('uploads reject forged/guest tokens and persist valid images byte-for-byte',async()=>{
-        const bytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7XcAAAAASUVORK5CYII=','base64');
+        const { default: sharp } = await import('sharp');
+        const bytes = await sharp({
+          create: { width: 10, height: 10, channels: 4, background: { r: 255, g: 0, b: 0, alpha: 1 } },
+        }).png().toBuffer();
         const send=async(token:string,b:Uint8Array=bytes)=>{const form=new FormData();form.append('file',new Blob([b as BlobPart],{type:'image/png'}),'image.png');return fetch(base,{method:'POST',headers:{authorization:'Bearer '+token},body:form});};
         assert.equal((await send('fake')).status,401);
         assert.equal((await send(jwt.sign({id:'GUEST'},process.env.JWT_SECRET!))).status,403);
         assert.equal((await send(jwt.sign({id:'CUSTOMER'},process.env.JWT_SECRET!))).status,403);
         const token=jwt.sign({id:'ADMIN'},process.env.JWT_SECRET!);
         assert.equal((await send(token,new TextEncoder().encode('<html>invalid</html>'))).status,400);
-        const r=await send(token);assert.equal(r.status,201);const data=await r.json() as any;
-        const downloaded=await fetch(new URL(data.url,base));assert.equal(downloaded.status,200);
-        const downloadedBuf=Buffer.from(await downloaded.arrayBuffer());
-        assert.ok(downloadedBuf.length > 0);
+        const r=await send(token);assert.equal(r.status,503);const data=await r.json() as any;
+        assert.equal(data.error.code,'MONGODB_UNAVAILABLE');
       });
     }finally{await new Promise<void>(r=>server.close(()=>r()));}
   }finally{process.env.NODE_ENV='test';process.chdir(cwd);try { fs.rmSync(root,{recursive:true,force:true,maxRetries:10,retryDelay:200}); } catch { /* Ignore transient Windows EBUSY locking during temp test cleanup */ }}

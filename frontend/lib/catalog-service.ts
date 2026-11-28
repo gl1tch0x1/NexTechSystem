@@ -19,30 +19,49 @@ function syncCatalogStoreFromDisk(): void {
       const fs = require('fs');
       const path = require('path');
       const candidatePaths = [
+        // Runtime catalog cache kept OUTSIDE the Next.js module graph so that
+        // reads/writes never trigger Turbopack rebuilds and dev page reloads.
+        path.resolve(process.cwd(), '.next', 'cache', 'catalog', 'products.json'),
         path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
         path.resolve(process.cwd(), 'data', 'products.json'),
         path.resolve(process.cwd(), 'backend', 'data_store', 'products.json'),
         path.resolve(process.cwd(), '..', 'backend', 'data_store', 'products.json'),
       ];
+      // Last-writer-wins: select the newest candidate so both backend store
+      // updates and local fallback edits are observed regardless of order.
+      let newestPath: string | null = null;
+      let newestMtime = lastCatalogMtime;
       for (const p of candidatePaths) {
         let fd: number | null = null;
         try {
           fd = fs.openSync(p, 'r');
           const stat = fs.fstatSync(fd);
-          if (stat.mtimeMs > lastCatalogMtime) {
-            const raw = fs.readFileSync(fd, 'utf8');
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              catalogProductsStore = parsed;
-              lastCatalogMtime = stat.mtimeMs;
-              break;
-            }
+          if (stat.mtimeMs > newestMtime) {
+            newestMtime = stat.mtimeMs;
+            newestPath = p;
           }
         } catch {
           // File does not exist or unreadable; continue to next path
         } finally {
           if (fd !== null) {
             try { fs.closeSync(fd); } catch {}
+          }
+        }
+      }
+      if (newestPath) {
+        let readFd: number | null = null;
+        try {
+          readFd = fs.openSync(newestPath, 'r');
+          const parsed = JSON.parse(fs.readFileSync(readFd, 'utf8'));
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            catalogProductsStore = parsed;
+            lastCatalogMtime = newestMtime;
+          }
+        } catch {
+          // Corrupt or unreadable file; keep the current in-memory store
+        } finally {
+          if (readFd !== null) {
+            try { fs.closeSync(readFd); } catch {}
           }
         }
       }
@@ -212,10 +231,12 @@ function persistCatalogToFile(): void {
     if (typeof window === 'undefined') {
       const fs = require('fs');
       const path = require('path');
+      // Persist ONLY outside the Next.js source tree. Files inside the project
+      // (notably frontend/data/products.json) are part of the Turbopack module
+      // graph — writing them at runtime rebuilds the app and reloads every open
+      // page in dev, producing a continuous "site is reloading" loop.
       const targetPaths = [
-        path.resolve(process.cwd(), 'data', 'products.json'),
-        path.resolve(process.cwd(), 'frontend', 'data', 'products.json'),
-        path.resolve(process.cwd(), '..', 'frontend', 'data', 'products.json'),
+        path.resolve(process.cwd(), '.next', 'cache', 'catalog', 'products.json'),
         path.resolve(process.cwd(), 'backend', 'data_store', 'products.json'),
         path.resolve(process.cwd(), '..', 'backend', 'data_store', 'products.json'),
         path.resolve(process.cwd(), 'data_store', 'products.json'),
@@ -225,9 +246,16 @@ function persistCatalogToFile(): void {
       for (const p of targetPaths) {
         let fd: number | null = null;
         try {
-          // Open with 'r+' which atomically requires the file to exist, avoiding TOCTOU race conditions (CWE-367 / js/file-system-race)
-          fd = fs.openSync(p, 'r+');
-          fs.ftruncateSync(fd, 0);
+          const isRuntimeCache = p.indexOf(`${path.sep}.next${path.sep}`) !== -1;
+          if (isRuntimeCache) {
+            // Runtime cache is created on first write; it is not a source file.
+            fs.mkdirSync(path.dirname(p), { recursive: true });
+            fd = fs.openSync(p, 'w');
+          } else {
+            // Open with 'r+' which atomically requires the file to exist, avoiding TOCTOU race conditions (CWE-367 / js/file-system-race)
+            fd = fs.openSync(p, 'r+');
+            fs.ftruncateSync(fd, 0);
+          }
           fs.writeSync(fd, dataBuf, 0, dataBuf.length, 0);
         } catch {
           // Path does not exist or is not accessible in current environment; proceed
@@ -248,7 +276,7 @@ function persistCatalogToFile(): void {
   }
 }
 
-export function deleteCatalogProduct(id: string): boolean {
+export function deleteCatalogProduct(id: string, options: { persist?: boolean } = {}): boolean {
   if (!id) return false;
   syncCatalogStoreFromDisk();
   const cleanId = id.trim().toLowerCase();
@@ -270,13 +298,17 @@ export function deleteCatalogProduct(id: string): boolean {
   });
 
   const deleted = catalogProductsStore.length < initialLength;
-  if (deleted) {
+  if (deleted && options.persist !== false) {
     persistCatalogToFile();
   }
   return deleted;
 }
 
-export function updateCatalogProduct(id: string, updates: Partial<Product> & { status?: string }): Product | null {
+export function updateCatalogProduct(
+  id: string,
+  updates: Partial<Product> & { status?: string },
+  options: { persist?: boolean } = {}
+): Product | null {
   if (!id && !updates.id && !updates.slug && !updates.name && !updates.title && !updates.sku) return null;
   syncCatalogStoreFromDisk();
   const cleanId = (id || '').trim().toLowerCase();
@@ -354,7 +386,7 @@ export function updateCatalogProduct(id: string, updates: Partial<Product> & { s
         updatedAt: new Date().toISOString(),
       } as Product;
       catalogProductsStore.unshift(newProd);
-      persistCatalogToFile();
+      if (options.persist !== false) persistCatalogToFile();
       return newProd;
     }
     return null;
@@ -389,7 +421,7 @@ export function updateCatalogProduct(id: string, updates: Partial<Product> & { s
   };
 
   catalogProductsStore[idx] = updated;
-  persistCatalogToFile();
+  if (options.persist !== false) persistCatalogToFile();
 
   return updated;
 }

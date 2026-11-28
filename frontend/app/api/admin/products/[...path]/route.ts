@@ -74,7 +74,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
       try {
         const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
-          updateCatalogProduct(productId, json.data);
+          updateCatalogProduct(productId, json.data, { persist: false });
           try {
             revalidatePath('/products');
             revalidatePath('/');
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
           isActive: (body.status || body.approvalStatus) === 'APPROVED',
         }
       : body;
-    updatedProduct = updateCatalogProduct(productId, updates);
+    updatedProduct = updateCatalogProduct(productId, updates, { persist: false });
   }
 
   try {
@@ -154,7 +154,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       try {
         const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
-          updateCatalogProduct(productId, json.data);
+          updateCatalogProduct(productId, json.data, { persist: false });
           try {
             revalidatePath('/products');
             revalidatePath('/');
@@ -177,9 +177,10 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
   } catch {}
 
   // Upstream unreachable: fall back to local catalog sync for resilience.
+  // Memory-only update; backend is the source of truth and will sync its own store.
   let updatedProduct: any = null;
   if (productId && body) {
-    updatedProduct = updateCatalogProduct(productId, body);
+    updatedProduct = updateCatalogProduct(productId, body, { persist: false });
   }
 
   try {
@@ -230,7 +231,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       try {
         const json = JSON.parse(new TextDecoder().decode(responseBody));
         if (json && json.success && json.data) {
-          updateCatalogProduct(json.data.id || json.data.slug || path[0] || '', json.data);
+          // Backend write will sync its own store; frontend mirror updates memory only.
+          updateCatalogProduct(json.data.id || json.data.slug || path[0] || '', json.data, { persist: false });
         }
       } catch {}
       try {
@@ -246,8 +248,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   } catch {}
 
   // Upstream unreachable: fall back to local catalog sync for resilience.
+  // Memory-only update; backend is the source of truth and will sync its own store.
   if (body) {
-    updateCatalogProduct(body.id || body.slug || path[0] || '', body);
+    updateCatalogProduct(body.id || body.slug || path[0] || '', body, { persist: false });
   }
   try {
     revalidatePath('/products');
@@ -267,7 +270,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
     const upstreamRes = await proxyToBackend(request, `/admin/products/${path.join('/')}`);
     if (upstreamRes.ok) {
-      if (productId) deleteCatalogProduct(productId);
+      if (productId) deleteCatalogProduct(productId, { persist: false });
       try {
         revalidatePath('/products');
         revalidatePath('/');
@@ -281,9 +284,10 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
   } catch {}
 
   // Upstream unreachable: fall back to local catalog delete for resilience.
+  // Memory-only update; backend is the source of truth and will sync its own store.
   let locallyDeleted = false;
   if (productId) {
-    locallyDeleted = deleteCatalogProduct(productId);
+    locallyDeleted = deleteCatalogProduct(productId, { persist: false });
   }
 
   try {

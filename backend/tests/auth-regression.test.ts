@@ -11,7 +11,7 @@ test('authentication and origin regressions (isolated store)', async t => {
   process.chdir(mkdtempSync(path.join(tmpdir(), 'nextech-auth-test-')));
   Object.assign(process.env, {
     NODE_ENV: 'test', JWT_SECRET: 'isolated-test-secret-not-a-deployment-key',
-    MONGODB_URI: '', ENABLE_MONGODB: 'false', ENABLE_FIRESTORE_SYNC: 'false',
+    MONGODB_URI: '', ENABLE_MONGODB: 'false',
     FIREBASE_PROJECT_ID: '', NEXT_PUBLIC_FIREBASE_PROJECT_ID: '', FIREBASE_CLIENT_EMAIL: '',
     FIREBASE_PRIVATE_KEY: '', CLOUDFLARE_SECURITY_ENABLED: 'false', ALLOWED_ORIGINS: '',
   });

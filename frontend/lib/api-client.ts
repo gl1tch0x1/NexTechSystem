@@ -81,10 +81,18 @@ export class ApiClient {
     }
 
     try {
-      const response = await fetch(url.toString(), {
-        ...options,
-        headers,
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15_000);
+      let response: Response;
+      try {
+        response = await fetch(url.toString(), {
+          ...options,
+          headers,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (response.status === 204) {
         return {} as T;
@@ -150,7 +158,12 @@ export class ApiClient {
 
       return json.data !== undefined ? json.data : json;
     } catch (err: any) {
-      // Re-throw formatted error for caller
+      if (err?.name === 'AbortError') {
+        const timeoutError = new Error('The request timed out. Please check your connection and try again.') as any;
+        timeoutError.code = 'REQUEST_TIMEOUT';
+        timeoutError.status = 504;
+        throw timeoutError;
+      }
       throw err;
     }
   }

@@ -32,11 +32,14 @@ export async function GET(request: NextRequest) {
     // Upstream unavailable, seamlessly serve from verified authoritative catalog
   }
 
-  // If upstream contained user-created items from remote production, synchronize them into memory store
+  // If upstream contained user-created items from remote production, synchronize them into memory store.
+  // This is a READ request: never persist to disk here. Writing the catalog file
+  // from a GET rebuilds the Turbopack module graph and reloads open pages on
+  // every filtered search (dev reload loop).
   if (upstreamItems.length > 0) {
     for (const item of upstreamItems) {
       if (item && item.id) {
-        updateCatalogProduct(item.id, item);
+        updateCatalogProduct(item.id, item, { persist: false });
       }
     }
   }

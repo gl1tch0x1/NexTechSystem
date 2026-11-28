@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { ApiClient } from '@/lib/api-client';
-import { productImageUrl, isPlaceholderImageUrl } from '@/lib/product-image-url';
+import { DEFAULT_PRODUCT_PLACEHOLDER, isPlaceholderImageUrl, productImageUrl } from '@/lib/product-image-url';
 import { formatPrice, getSecureRandomInt } from '@/lib/utils';
 import {
   Product,
@@ -65,7 +65,7 @@ const WAREHOUSE_LOCATIONS = [
   { id: 'loc_shj_depot', name: 'Sharjah Industrial Logistics Depot', city: 'Sharjah', code: 'SHJ-01' },
 ];
 
-const DEFAULT_FALLBACK_IMAGE = '';
+const DEFAULT_FALLBACK_IMAGE = DEFAULT_PRODUCT_PLACEHOLDER;
 
 /**
  * Validates and sanitizes image URLs to prevent DOM-based XSS (CWE-79 / js/xss-through-dom).
@@ -670,6 +670,8 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
   const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; fileName: string } | null>(null);
+  const [imageActionNotice, setImageActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const generateRandomSku = useCallback((catId?: string) => {
     const prefixMap: Record<string, string> = {
@@ -1304,60 +1306,99 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     });
   };
 
-  // Multi-Asset Gallery Handlers (Strictly Sanitized via getSafeImageUrl)
-  const handleFileUpload = async (file: File, _isCoverAsset: boolean = true) => {
-    if (!file) return;
-
+  // Multi-Asset Gallery Handlers
+  const uploadSingleFile = async (file: File, replaceAssetId?: string): Promise<string | null> => {
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type.toLowerCase())) {
       setImageUrlError('Please select a valid image file (PNG, JPG, WEBP, or GIF).');
-      return;
+      return null;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageUrlError(`"${file.name}" exceeds the 5 MB limit.`);
+      return null;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setImageUrlError('File size exceeds the 5 MB limit. Please choose a smaller image.');
-      return;
+    const optimizedFile = await convertImageFileToWebP(file);
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', optimizedFile);
+
+    const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
+    const targetId = canonicalId || productId;
+    const uploadUrl = targetId && mode === 'edit'
+      ? `/api/upload?productId=${encodeURIComponent(targetId)}${replaceAssetId ? `&replaceAssetId=${encodeURIComponent(replaceAssetId)}` : ''}`
+      : '/api/upload';
+    const res = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {},
+      body: uploadFormData,
+    });
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.url) {
+      const message = data?.error?.message || data?.message || 'Image upload failed. Please try again.';
+      throw new Error(message);
     }
+    return String(data.url);
+  };
+
+  const handleFileUpload = async (files: File[] | File, asCover: boolean = true) => {
+    const list = Array.isArray(files) ? files : [files];
+    if (list.length === 0) return;
 
     setIsUploading(true);
     setImageUrlError('');
+    setImageActionNotice(null);
 
+    const uploaded: string[] = [];
     try {
-      const optimizedFile = await convertImageFileToWebP(file);
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', optimizedFile);
-
-      const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {},
-        body: uploadFormData,
-      });
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.url) {
-        const message =
-          data?.error?.message ||
-          data?.message ||
-          'Image upload failed. Please try again.';
-        setImageUrlError(message);
-        return;
+      for (let i = 0; i < list.length; i += 1) {
+        const file = list[i];
+        setUploadProgress({ current: i + 1, total: list.length, fileName: file.name });
+        try {
+          const primaryGridFsMatch = asCover
+            ? String(formData.primaryImage || '').match(/^\/api\/upload\/([a-f0-9]{24})$/i)
+            : null;
+          const url = await uploadSingleFile(file, primaryGridFsMatch?.[1]);
+          if (url) uploaded.push(url);
+        } catch (err: any) {
+          setImageUrlError(err?.message || `Failed to upload "${file.name}".`);
+        }
       }
 
-      const finalUrl = String(data.url);
-      setFormData(prev => {
-        const cleanExisting = prev.images.filter(img => img !== finalUrl && !isPlaceholderImageUrl(img));
-        return {
+      if (uploaded.length > 0) {
+        const cleanExisting = formData.images.filter(img => !isPlaceholderImageUrl(img));
+        let merged = [...cleanExisting];
+        for (const url of uploaded) {
+          if (!merged.includes(url)) merged.push(url);
+        }
+        if (asCover) {
+          const oldPrimaryMatch = String(formData.primaryImage || '').match(/^\/api\/upload\/([a-f0-9]{24})$/i);
+          if (oldPrimaryMatch?.[1]) {
+            const oldPrimaryUrl = formData.primaryImage;
+            merged = merged.map(url => url === oldPrimaryUrl ? uploaded[0] : url);
+          }
+        }
+        const nextPrimary = asCover
+          ? uploaded[0]
+          : (formData.primaryImage && !isPlaceholderImageUrl(formData.primaryImage) ? formData.primaryImage : merged[0] || '');
+        const nextImages = nextPrimary
+          ? [nextPrimary, ...merged.filter(u => u !== nextPrimary)]
+          : merged;
+        setFormData(prev => ({
           ...prev,
-          primaryImage: finalUrl,
-          images: [finalUrl, ...cleanExisting],
-        };
-      });
-      setFailedPreviewUrl(null);
-    } catch {
-      setImageUrlError('Failed to upload image. Please check your connection and try again.');
+          primaryImage: nextPrimary,
+          image: nextPrimary || (prev as any).image,
+          images: nextImages,
+        }));
+        setFailedPreviewUrl(null);
+        if (nextPrimary || nextImages.length > 0) {
+          await persistImageFields(nextPrimary, nextImages);
+        }
+        setImageActionNotice({ type: 'success', message: `${uploaded.length} image${uploaded.length > 1 ? 's' : ''} uploaded${mode === 'edit' ? ' and saved' : ''}.` });
+      }
     } finally {
       setIsUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -1378,9 +1419,28 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files[0], isCoverAsset);
+      handleFileUpload(Array.from(e.dataTransfer.files), isCoverAsset);
     }
   };
+
+  async function persistImageFields(nextPrimary: string, nextImages: string[]) {
+    if (mode !== 'edit') return;
+    const targetId = canonicalId || productId;
+    if (!targetId) return;
+    const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
+    const payload = {
+      primaryImage: nextPrimary || '',
+      thumbnail: nextPrimary || '',
+      image: nextPrimary || '',
+      images: nextImages,
+    };
+    try {
+      await ApiClient.put(`/admin/products/${targetId}`, payload, effectiveToken ? { token: effectiveToken } : {});
+      setImageActionNotice({ type: 'success', message: 'Gallery changes saved.' });
+    } catch (err: any) {
+      setImageActionNotice({ type: 'error', message: err?.message || 'Failed to save gallery changes.' });
+    }
+  }
 
   const handleAddGalleryImage = (urlToAdd: string, _setAsCover: boolean = true) => {
     const safe = productImageUrl(urlToAdd);
@@ -1389,49 +1449,46 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       return;
     }
     setImageUrlError('');
-    setFormData(prev => {
-      const cleanExisting = prev.images.filter(img => img !== safe && !isPlaceholderImageUrl(img));
-      const newImages = [safe, ...cleanExisting];
-
-      return {
-        ...prev,
-        primaryImage: safe,
-        images: newImages,
-      };
-    });
+    const cleanExisting = formData.images.filter(img => img !== safe && !isPlaceholderImageUrl(img));
+    const newImages = [safe, ...cleanExisting];
+    const nextPrimary = safe;
+    setFormData(prev => ({ ...prev, primaryImage: nextPrimary, thumbnail: nextPrimary, image: nextPrimary, images: newImages }));
     setFailedPreviewUrl(null);
     setGalleryUrlInput('');
+    void persistImageFields(nextPrimary, newImages);
   };
 
-  const handleRemoveGalleryImage = (indexToRemove: number) => {
-    setFormData(prev => {
-      const targetUrl = prev.images[indexToRemove];
-      const newImages = prev.images.filter((_, i) => i !== indexToRemove);
-      let newPrimary = prev.primaryImage;
-      if (newPrimary === targetUrl || !newPrimary) {
-        newPrimary = newImages[0] || '';
-      }
-      return {
-        ...prev,
-        images: newImages,
-        primaryImage: newPrimary,
-      };
-    });
+  const handleRemoveGalleryImage = async (indexToRemove: number) => {
+    const targetUrl = formData.images[indexToRemove];
+    const newImages = formData.images.filter((_, i) => i !== indexToRemove);
+    let newPrimary = formData.primaryImage;
+    if (newPrimary === targetUrl || !newPrimary || isPlaceholderImageUrl(newPrimary)) {
+      newPrimary = newImages[0] || '';
+    }
+    setFormData(prev => ({ ...prev, images: newImages, primaryImage: newPrimary, thumbnail: newPrimary, image: newPrimary }));
     setFailedPreviewUrl(null);
+    if (mode === 'edit' && /^\/api\/upload\/[a-f0-9]{24}$/i.test(targetUrl)) {
+      const effectiveToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
+      await fetch('/api/upload', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {}),
+        },
+        body: JSON.stringify({ url: targetUrl, productId: canonicalId || productId }),
+      }).catch(() => undefined);
+    }
+    await persistImageFields(newPrimary, newImages);
   };
 
   const handleSetPrimaryImage = (index: number) => {
-    setFormData(prev => {
-      const selectedUrl = prev.images[index];
-      if (!selectedUrl) return prev;
-      const otherImages = prev.images.filter((_, i) => i !== index);
-      return {
-        ...prev,
-        primaryImage: selectedUrl,
-        images: [selectedUrl, ...otherImages],
-      };
-    });
+    const selectedUrl = formData.images[index];
+    if (!selectedUrl) return;
+    const otherImages = formData.images.filter((_, i) => i !== index);
+    const nextImages = [selectedUrl, ...otherImages];
+    setFormData(prev => ({ ...prev, primaryImage: selectedUrl, thumbnail: selectedUrl, image: selectedUrl, images: nextImages }));
     setFailedPreviewUrl(null);
+    void persistImageFields(selectedUrl, nextImages);
   };
 
   const handleMoveImage = (index: number, direction: 'left' | 'right') => {
@@ -1443,11 +1500,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       newImages[index] = newImages[targetIndex];
       newImages[targetIndex] = temp;
       const newPrimary = newImages[0] || prev.primaryImage;
-      return {
+      const next = {
         ...prev,
         images: newImages,
         primaryImage: newPrimary,
       };
+      void persistImageFields(next.primaryImage, next.images);
+      return next;
     });
   };
 
@@ -1666,6 +1725,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!imageActionNotice) return;
+    const timer = window.setTimeout(() => setImageActionNotice(null), 3500);
+    return () => window.clearTimeout(timer);
+  }, [imageActionNotice]);
 
   // Keyboard shortcut: Ctrl+S / ⌘S
   useEffect(() => {
@@ -1901,6 +1966,17 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
         </div>
       )}
 
+      {imageActionNotice && (
+        <div className={`p-4 rounded-2xl text-xs flex items-center gap-3 animate-fadeIn border ${
+          imageActionNotice.type === 'success'
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+            : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'
+        }`}>
+          {imageActionNotice.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
+          <span className="font-semibold">{imageActionNotice.message}</span>
+        </div>
+      )}
+
       {/* 2. TABBED STEP-BY-STEP WORKSPACE NAVIGATION */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex items-center gap-1 overflow-x-auto scrollbar-none relative">
         {TABS.map((tab, idx) => {
@@ -2119,7 +2195,11 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                         {formData.images.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, images: [], primaryImage: '' }))}
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, images: [], primaryImage: '', thumbnail: '', image: '' }));
+                              setFailedPreviewUrl(null);
+                              void persistImageFields('', []);
+                            }}
                             className="px-3 py-1.5 rounded-lg text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 transition-all cursor-pointer flex items-center gap-1.5"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -2137,7 +2217,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           ) : (
                             <UploadCloud className="w-3.5 h-3.5" />
                           )}
-                          <span>Upload Files</span>
+                          <span>{isUploading && uploadProgress ? `Uploading ${uploadProgress.current}/${uploadProgress.total}` : 'Upload Files'}</span>
                         </button>
                       </div>
                     </div>
@@ -2163,7 +2243,7 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                       accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
-                          Array.from(e.target.files).forEach(f => handleFileUpload(f, false));
+                          handleFileUpload(Array.from(e.target.files), false);
                         }
                         e.target.value = '';
                       }}
@@ -2205,6 +2285,12 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           {imageUrlError}
                         </p>
                       )}
+                      {isUploading && uploadProgress && (
+                        <div className="mt-2 flex items-center gap-2 text-[11px] text-blue-600 dark:text-cyan-400 font-medium">
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          <span>Uploading {uploadProgress.current}/{uploadProgress.total}: {uploadProgress.fileName}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Two-Column Canvas */}
@@ -2245,13 +2331,13 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                           className={`relative rounded-2xl overflow-hidden border-2 transition-all group ${
                             isDragging
                               ? 'border-blue-500 ring-4 ring-blue-500/15 bg-blue-50/40 dark:bg-blue-950/30'
-                              : formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage)
+                              : formData.primaryImage && !isPlaceholderImageUrl(formData.primaryImage) && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage)
                               ? 'border-blue-400/60 dark:border-blue-700/60 bg-white dark:bg-slate-950 shadow-sm'
                               : 'border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-950/40 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/20'
                           }`}
                           style={{ aspectRatio: '4/3' }}
                         >
-                          {formData.primaryImage && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
+                          {formData.primaryImage && !isPlaceholderImageUrl(formData.primaryImage) && productImageUrl(formData.primaryImage) && failedPreviewUrl !== getSafeImageUrl(formData.primaryImage) ? (
                             <>
                               <img
                                 src={getSafeImageUrl(formData.primaryImage)}
@@ -2317,10 +2403,16 @@ export function ProductEditorPage({ mode, productId, portal = 'admin', resellerC
                                 return {
                                   ...prev,
                                   primaryImage: val,
+                                  thumbnail: val,
+                                  image: val,
                                   images: val ? [val, ...cleanExisting] : cleanExisting,
                                 };
                               });
                               setFailedPreviewUrl(null);
+                            }}
+                            onBlur={() => {
+                              const primary = formData.primaryImage || '';
+                              void persistImageFields(primary, formData.images);
                             }}
                             className="w-full bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl text-[11px] font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
                           />
