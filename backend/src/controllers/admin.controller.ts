@@ -1268,7 +1268,8 @@ export class AdminController {
             }
           } catch (err) {
             const sanitizedProductId = String(item.productId || '').replace(/\n|\r/g, '');
-            console.error('Failed to update stock and WAC for product %s:', sanitizedProductId, err);
+            const sanitizedErr = (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, '');
+            console.error('Failed to update stock and WAC for product %s:', sanitizedProductId, sanitizedErr);
           }
         }
       }
