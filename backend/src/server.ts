@@ -38,7 +38,7 @@ async function startServer(): Promise<ReturnType<typeof app.listen>> {
     try {
       await orderService.releaseExpiredInStoreReservations();
     } catch (err: any) {
-      console.error('⚠️ [ReservationCleanup Error]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+      console.error('⚠️ [ReservationCleanup Error]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
     }
   }, 15 * 60 * 1000);
   reservationInterval.unref();
@@ -49,7 +49,7 @@ async function startServer(): Promise<ReturnType<typeof app.listen>> {
 void startServer().then(listeningServer => {
   server = listeningServer;
 }).catch((err: any) => {
-  console.error('[Startup Fatal]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+  console.error('[Startup Fatal]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
   process.exit(1);
 });
 
@@ -70,7 +70,7 @@ const handleShutdown = async (signal: string) => {
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 process.on('SIGINT', () => handleShutdown('SIGINT'));
 process.on('uncaughtException', (err) => {
-  console.error('[Uncaught Exception]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+  console.error('[Uncaught Exception]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
 });
 process.on('unhandledRejection', (reason) => {
   console.error('[Unhandled Rejection]:', reason);

@@ -47,9 +47,8 @@ export class NotificationService {
       };
       await dbStore.create('admin_notifications', notification);
     } catch (err) {
-      const sanitizedErr = err instanceof Error
-        ? err.message.replace(/[\r\n]/g, ' ')
-        : String(err).replace(/[\r\n]/g, ' ');
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
       console.error('[NotificationService] Failed to save in-app notification:', sanitizedErr);
     }
 
@@ -496,9 +495,8 @@ export class NotificationService {
       }
       return true;
     } catch (err) {
-      const sanitizedErr = err instanceof Error
-        ? err.message.replace(/[\r\n]/g, ' ')
-        : String(err).replace(/[\r\n]/g, ' ');
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
       console.error('[NotificationService] Failed to mark notification read:', sanitizedErr);
       return false;
     }
@@ -539,9 +537,8 @@ export class NotificationService {
 
       return true;
     } catch (err) {
-      const sanitizedErr = err instanceof Error
-        ? err.message.replace(/[\r\n]/g, ' ')
-        : String(err).replace(/[\r\n]/g, ' ');
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
       console.error('[NotificationService] Failed to mark all notifications read:', sanitizedErr);
       return false;
     }
@@ -609,9 +606,8 @@ export class NotificationService {
 
       return true;
     } catch (err) {
-      const sanitizedErr = err instanceof Error
-        ? err.message.replace(/[\r\n]/g, ' ')
-        : String(err).replace(/[\r\n]/g, ' ');
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
       console.error('[NotificationService] Failed to clear all notifications:', sanitizedErr);
       return false;
     }
