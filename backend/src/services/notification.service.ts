@@ -47,24 +47,23 @@ export class NotificationService {
       };
       await dbStore.create('admin_notifications', notification);
     } catch (err) {
-      const rawMessage = err instanceof Error ? err.message : String(err);
-      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
+      const sanitizedErr = (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, '');
       console.error('[NotificationService] Failed to save in-app notification:', sanitizedErr);
     }
 
     // 2. Transactional Email Notification (Admin Alert)
     this.sendAdminEmailAlert(order, dashboardUrl).catch(err =>
-      console.warn('[NotificationService] Email alert notice:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '))
+      console.warn('[NotificationService] Email alert notice:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''))
     );
 
     // 3. Discord Webhook ChatOps
     this.sendDiscordWebhook(order, dashboardUrl).catch(err =>
-      console.warn('[NotificationService] Discord webhook notice:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '))
+      console.warn('[NotificationService] Discord webhook notice:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''))
     );
 
     // 4. Telegram Bot ChatOps
     this.sendTelegramNotification(order, dashboardUrl).catch(err =>
-      console.warn('[NotificationService] Telegram notification notice:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '))
+      console.warn('[NotificationService] Telegram notification notice:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''))
     );
 
     // 5. Audit Log
@@ -307,7 +306,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying orders for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+      console.warn('[NotificationService] Error querying orders for notifications:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''));
     }
 
     // 3. Scan Inventory for Low Stock and Out of Stock
@@ -370,7 +369,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying products for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+      console.warn('[NotificationService] Error querying products for notifications:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''));
     }
 
     // 4. Scan Resellers for pending partner vetting
@@ -396,7 +395,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying resellers for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+      console.warn('[NotificationService] Error querying resellers for notifications:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''));
     }
 
     // 5. Scan B2B Quotes for pending quotation RFQs
@@ -422,7 +421,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying quotes for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+      console.warn('[NotificationService] Error querying quotes for notifications:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''));
     }
 
     // 6. Add persistent in-app notifications
@@ -449,7 +448,7 @@ export class NotificationService {
         });
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying persistent notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+      console.warn('[NotificationService] Error querying persistent notifications:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ''));
     }
 
     // Filter out cleared/dismissed notifications
@@ -495,8 +494,7 @@ export class NotificationService {
       }
       return true;
     } catch (err) {
-      const rawMessage = err instanceof Error ? err.message : String(err);
-      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
+      const sanitizedErr = (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, '');
       console.error('[NotificationService] Failed to mark notification read:', sanitizedErr);
       return false;
     }
@@ -537,8 +535,7 @@ export class NotificationService {
 
       return true;
     } catch (err) {
-      const rawMessage = err instanceof Error ? err.message : String(err);
-      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
+      const sanitizedErr = (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, '');
       console.error('[NotificationService] Failed to mark all notifications read:', sanitizedErr);
       return false;
     }
@@ -564,9 +561,8 @@ export class NotificationService {
       }
       return true;
     } catch (err) {
-      // Sanitize error to prevent log injection from user-controlled input
-      const rawMessage = err instanceof Error ? err.message : String(err);
-      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
+      // Sanitize user-controlled input to prevent log injection (CWE-117)
+      const sanitizedErr = (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, '');
       console.error('[NotificationService] Failed to clear notification:', sanitizedErr);
       return false;
     }
@@ -606,8 +602,7 @@ export class NotificationService {
 
       return true;
     } catch (err) {
-      const rawMessage = err instanceof Error ? err.message : String(err);
-      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
+      const sanitizedErr = (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, '');
       console.error('[NotificationService] Failed to clear all notifications:', sanitizedErr);
       return false;
     }

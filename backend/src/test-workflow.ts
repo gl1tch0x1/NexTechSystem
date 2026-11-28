@@ -485,6 +485,6 @@ async function runComprehensiveTest() {
 }
 
 runComprehensiveTest().catch((err) => {
-  console.error('\n❌ TEST RUN FAILED:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
+  console.error('\n❌ TEST RUN FAILED:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ""));
   process.exit(1);
 });

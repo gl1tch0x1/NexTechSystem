@@ -160,7 +160,7 @@ export class DbStore {
       }
       this.loaded = true;
     } catch (err) {
-      console.error('[DbStore] Error loading disk data:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
+      console.error('[DbStore] Error loading disk data:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ""));
     }
   }
 
@@ -189,7 +189,7 @@ export class DbStore {
       // frontend/ are part of the Next.js module graph, and runtime writes
       // trigger Turbopack rebuilds / page reloads in dev.
     } catch (err) {
-      console.error('[DbStore] Error persisting %s:', collectionName, (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
+      console.error('[DbStore] Error persisting %s:', collectionName, (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ""));
     } finally {
       // Ensure temp file is cleaned up if it was created
       try {
@@ -216,7 +216,7 @@ export class DbStore {
         try { fs.unlinkSync(tmpPath); } catch {}
       }
     } catch (err) {
-      console.error('[DbStore] Error clearing collection %s:', collectionName, (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
+      console.error('[DbStore] Error clearing collection %s:', collectionName, (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ""));
     } finally {
       try {
         fs.unlinkSync(tmpPath);
@@ -228,7 +228,7 @@ export class DbStore {
       const col = mongoDb.getCollection(collectionName);
       if (col) {
         col.deleteMany({}).catch((err: any) => {
-          console.warn('[MongoDB Clear error]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
+          console.warn('[MongoDB Clear error]:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ""));
         });
       }
     }
@@ -277,7 +277,7 @@ export class DbStore {
       }
     } catch (err: any) {
       if (ENV.NODE_ENV === 'production') throw err;
-      console.warn('[MongoDB Sync Notice]:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
+      console.warn('[MongoDB Sync Notice]:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, ""));
     }
   }
 

@@ -131,7 +131,7 @@ export function createApp(): Express {
   productRepository.find().then(products => {
     if (products.length === 0) {
       console.log('[Bootstrap] No products detected in repository. Running auto-seed...');
-      runSeed(false).catch(err => console.error('[Bootstrap] Auto-seed failed:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' ')));
+      runSeed(false).catch(err => console.error('[Bootstrap] Auto-seed failed:', (err instanceof Error ? err.message : String(err)).replace(/\n|\r/g, "")));
     }
   });
 
