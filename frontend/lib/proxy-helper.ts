@@ -459,6 +459,23 @@ export async function proxyToBackend(
     return Response.json({ success: false, error: { message: 'Invalid target path' } }, { status: 400 });
   }
   const cleanPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+  
+  // Server-side allowlist of protected path prefixes that require authentication.
+  // This is a fixed constant, not derived from user input, to prevent
+  // user-controlled bypass of security checks (CWE-807, CWE-290).
+  const PROTECTED_PATH_PREFIXES = [
+    '/admin',
+    '/upload',
+  ] as const;
+  
+  // Determine if this request targets a protected endpoint using the server-side allowlist.
+  // The path is validated against known prefixes, not arbitrary user input.
+  const isProtectedPath = PROTECTED_PATH_PREFIXES.some(prefix =>
+    cleanPath === prefix || cleanPath.startsWith(`${prefix}/`)
+  );
+  const isProtectedUpload = isProtectedPath && cleanPath.startsWith('/upload') &&
+    ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method);
+  const requiresAuth = isProtectedPath || isProtectedUpload;
   const target = `${getBackendApiUrl()}/api${cleanPath}${request.nextUrl.search || ''}`;
   const headers = new Headers();
   for (const name of ['authorization', 'cookie', 'content-type', 'origin', 'referer', 'x-csrf-token', 'accept']) {
@@ -477,15 +494,11 @@ export async function proxyToBackend(
   }
 
   // Public admin and upload proxies must always carry the caller's own signed token.
-  const isAdminOrProtectedUpload =
-    cleanPath === '/admin' ||
-    cleanPath.startsWith('/admin/') ||
-    ((cleanPath === '/upload' || cleanPath.startsWith('/upload/')) && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method));
   const authorization = headers.get('authorization');
   const bearerToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
   const token = bearerToken || request.cookies.get('auth_token')?.value;
 
-  if (isAdminOrProtectedUpload) {
+  if (requiresAuth) {
     const decoded = token ? verifyJwtToken(token) : null;
     const authenticatedRole = decoded?.role || (token ? await getAuthoritativeSessionRole(token) : null);
     if (!authenticatedRole) {
