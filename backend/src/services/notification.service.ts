@@ -47,22 +47,25 @@ export class NotificationService {
       };
       await dbStore.create('admin_notifications', notification);
     } catch (err) {
-      console.error('[NotificationService] Failed to save in-app notification:', err);
+      const sanitizedErr = err instanceof Error
+        ? err.message.replace(/[\r\n]/g, ' ')
+        : String(err).replace(/[\r\n]/g, ' ');
+      console.error('[NotificationService] Failed to save in-app notification:', sanitizedErr);
     }
 
     // 2. Transactional Email Notification (Admin Alert)
     this.sendAdminEmailAlert(order, dashboardUrl).catch(err =>
-      console.warn('[NotificationService] Email alert notice:', err?.message || err)
+      console.warn('[NotificationService] Email alert notice:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '))
     );
 
     // 3. Discord Webhook ChatOps
     this.sendDiscordWebhook(order, dashboardUrl).catch(err =>
-      console.warn('[NotificationService] Discord webhook notice:', err?.message || err)
+      console.warn('[NotificationService] Discord webhook notice:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '))
     );
 
     // 4. Telegram Bot ChatOps
     this.sendTelegramNotification(order, dashboardUrl).catch(err =>
-      console.warn('[NotificationService] Telegram notification notice:', err?.message || err)
+      console.warn('[NotificationService] Telegram notification notice:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '))
     );
 
     // 5. Audit Log
@@ -213,9 +216,10 @@ export class NotificationService {
     const adminEmail = ENV.ADMIN_NOTIFICATION_EMAIL || ENV.ADMIN_DEFAULT_EMAIL;
     const safeAdminEmail = String(adminEmail).replace(/\n|\r/g, '');
     const safeOrderNum = String(order.orderNumber).replace(/\n|\r/g, '');
+    const safeDashboardUrl = String(dashboardUrl).replace(/\n|\r/g, '');
     console.log(
       `[NotificationService: Email Dispatch] Dispatched to admin [${safeAdminEmail}] for Order #${safeOrderNum} ` +
-      `(Dashboard: ${dashboardUrl})`
+      `(Dashboard: ${safeDashboardUrl})`
     );
   }
 
@@ -304,7 +308,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying orders for notifications:', err);
+      console.warn('[NotificationService] Error querying orders for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
     }
 
     // 3. Scan Inventory for Low Stock and Out of Stock
@@ -367,7 +371,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying products for notifications:', err);
+      console.warn('[NotificationService] Error querying products for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
     }
 
     // 4. Scan Resellers for pending partner vetting
@@ -393,7 +397,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying resellers for notifications:', err);
+      console.warn('[NotificationService] Error querying resellers for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
     }
 
     // 5. Scan B2B Quotes for pending quotation RFQs
@@ -419,7 +423,7 @@ export class NotificationService {
         }
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying quotes for notifications:', err);
+      console.warn('[NotificationService] Error querying quotes for notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
     }
 
     // 6. Add persistent in-app notifications
@@ -446,7 +450,7 @@ export class NotificationService {
         });
       }
     } catch (err) {
-      console.warn('[NotificationService] Error querying persistent notifications:', err);
+      console.warn('[NotificationService] Error querying persistent notifications:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' '));
     }
 
     // Filter out cleared/dismissed notifications
@@ -492,7 +496,10 @@ export class NotificationService {
       }
       return true;
     } catch (err) {
-      console.error('[NotificationService] Failed to mark notification read:', err);
+      const sanitizedErr = err instanceof Error
+        ? err.message.replace(/[\r\n]/g, ' ')
+        : String(err).replace(/[\r\n]/g, ' ');
+      console.error('[NotificationService] Failed to mark notification read:', sanitizedErr);
       return false;
     }
   }
@@ -532,7 +539,10 @@ export class NotificationService {
 
       return true;
     } catch (err) {
-      console.error('[NotificationService] Failed to mark all notifications read:', err);
+      const sanitizedErr = err instanceof Error
+        ? err.message.replace(/[\r\n]/g, ' ')
+        : String(err).replace(/[\r\n]/g, ' ');
+      console.error('[NotificationService] Failed to mark all notifications read:', sanitizedErr);
       return false;
     }
   }
@@ -557,7 +567,11 @@ export class NotificationService {
       }
       return true;
     } catch (err) {
-      console.error('[NotificationService] Failed to clear notification:', err);
+      // Sanitize error to prevent log injection from user-controlled input
+      const sanitizedErr = err instanceof Error
+        ? err.message.replace(/[\r\n]/g, ' ')
+        : String(err).replace(/[\r\n]/g, ' ');
+      console.error('[NotificationService] Failed to clear notification:', sanitizedErr);
       return false;
     }
   }
@@ -596,7 +610,10 @@ export class NotificationService {
 
       return true;
     } catch (err) {
-      console.error('[NotificationService] Failed to clear all notifications:', err);
+      const sanitizedErr = err instanceof Error
+        ? err.message.replace(/[\r\n]/g, ' ')
+        : String(err).replace(/[\r\n]/g, ' ');
+      console.error('[NotificationService] Failed to clear all notifications:', sanitizedErr);
       return false;
     }
   }
