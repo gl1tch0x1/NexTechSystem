@@ -568,9 +568,8 @@ export class NotificationService {
       return true;
     } catch (err) {
       // Sanitize error to prevent log injection from user-controlled input
-      const sanitizedErr = err instanceof Error
-        ? err.message.replace(/[\r\n]/g, ' ')
-        : String(err).replace(/[\r\n]/g, ' ');
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const sanitizedErr = rawMessage.replace(/[\r\n\u2028\u2029]/g, ' ');
       console.error('[NotificationService] Failed to clear notification:', sanitizedErr);
       return false;
     }
