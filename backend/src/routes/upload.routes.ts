@@ -273,7 +273,9 @@ async function handleFileUpload(req: any, res: any) {
     if (storedAssetId) {
       await deleteGridFsAsset(storedAssetId).catch(() => undefined);
     }
-    console.error('[Upload] Failed to persist media asset:', (err instanceof Error ? err.message : String(err)).replace(/[\r\n\u2028\u2029]/g, ' '));
+    const uploadError = err instanceof Error ? err.message : String(err);
+    const sanitizedUploadError = uploadError.replace(/[\r\n\u2028\u2029]/g, ' ');
+    console.error('[Upload] Failed to persist media asset:', sanitizedUploadError);
     res.status(500).json({
       success: false,
       error: {
